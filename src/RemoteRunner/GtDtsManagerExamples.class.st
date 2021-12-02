@@ -1,7 +1,7 @@
 Class {
 	#name : #GtDtsManagerExamples,
 	#superclass : #Object,
-	#category : #'RemoteRunner-DistributedTesting'
+	#category : #'RemoteRunner-Model'
 }
 
 { #category : #'as yet unclassified' }

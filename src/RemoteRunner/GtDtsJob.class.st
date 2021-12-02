@@ -12,7 +12,7 @@ Class {
 		'results',
 		'announcer'
 	],
-	#category : #'RemoteRunner-DistributedTesting'
+	#category : #'RemoteRunner-Model'
 }
 
 { #category : #accessing }

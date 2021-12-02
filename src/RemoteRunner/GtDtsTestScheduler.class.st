@@ -5,7 +5,7 @@ Class {
 		'dtsManager',
 		'compoundPromise'
 	],
-	#category : #'RemoteRunner-DistributedTesting'
+	#category : #'RemoteRunner-Model'
 }
 
 { #category : #initialization }

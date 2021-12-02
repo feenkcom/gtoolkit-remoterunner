@@ -1,5 +1,5 @@
 Class {
 	#name : #GtDtsTeamManagerStartupAndShutdown,
 	#superclass : #GtDtsManagerStartupAndShutdown,
-	#category : #'RemoteRunner-DistributedTesting'
+	#category : #'RemoteRunner-Model'
 }

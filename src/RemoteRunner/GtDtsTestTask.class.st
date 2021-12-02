@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'tests'
 	],
-	#category : #'RemoteRunner-DistributedTesting'
+	#category : #'RemoteRunner-Model'
 }
 
 { #category : #accessing }

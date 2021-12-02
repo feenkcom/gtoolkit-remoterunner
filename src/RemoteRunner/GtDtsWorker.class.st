@@ -4,5 +4,5 @@ Class {
 	#instVars : [
 		'serverAddress'
 	],
-	#category : #'RemoteRunner-DistributedTesting'
+	#category : #'RemoteRunner-Model'
 }

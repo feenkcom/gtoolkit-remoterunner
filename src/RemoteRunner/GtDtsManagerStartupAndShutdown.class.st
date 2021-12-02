@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'manager'
 	],
-	#category : #'RemoteRunner-DistributedTesting'
+	#category : #'RemoteRunner-Model'
 }
 
 { #category : #'startup - shutdown' }

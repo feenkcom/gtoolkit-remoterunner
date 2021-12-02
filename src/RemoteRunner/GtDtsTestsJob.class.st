@@ -1,7 +1,7 @@
 Class {
 	#name : #GtDtsTestsJob,
 	#superclass : #GtDtsJob,
-	#category : #'RemoteRunner-DistributedTesting'
+	#category : #'RemoteRunner-Model'
 }
 
 { #category : #accessing }

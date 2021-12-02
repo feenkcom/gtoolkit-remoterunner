@@ -39,7 +39,7 @@ Class {
 		'jobStartupAndShutdown',
 		'managerStartupAndShutdown'
 	],
-	#category : #'RemoteRunner-DistributedTesting'
+	#category : #'RemoteRunner-Model'
 }
 
 { #category : #initialization }
