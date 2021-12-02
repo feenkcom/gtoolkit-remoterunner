@@ -30,7 +30,7 @@ The worker images are assumed to be up to date when the Job Execution phase is r
 The current architecture assumes that it is possible for the manager to contact all worker machines, update the images and start and stop them as required.  A WorkerManager is planned that will run on each worker machine and can contact the GtDtsManager to perform these tasks, removing the need for the GtDtsManager to know how many workers there are and be able to directly control them, e.g. via SSH.
 "
 Class {
-	#name : #GtDtsManager,
+	#name : #GtRemoteRunner,
 	#superclass : #Object,
 	#instVars : [
 		'port',
@@ -43,7 +43,7 @@ Class {
 }
 
 { #category : #initialization }
-GtDtsManager >> resetImagesFilesOnS3 [
+GtRemoteRunner >> resetImagesFilesOnS3 [
 	remoteHostCluster
 		runCommand: 'powershell.exe'
 		arguments: (Array
@@ -55,7 +55,7 @@ GtDtsManager >> resetImagesFilesOnS3 [
 ]
 
 { #category : #'as yet unclassified' }
-GtDtsManager >> restartRemoteCluster [
+GtRemoteRunner >> restartRemoteCluster [
 	"managerConfiguration startRemoteImages ifFalse: [^self].
 	remoteHostCluster isAwsHost ifFalse: [^self].
 	timestampsCollector registerNowAs: #beginRestartRemoteAwsCluster."
@@ -68,54 +68,54 @@ GtDtsManager >> restartRemoteCluster [
 ]
 
 { #category : #phases }
-GtDtsManager >> runJobExecution [
+GtRemoteRunner >> runJobExecution [
 	"Actually run all the tests"
 
 	jobExecutor run
 ]
 
 { #category : #phases }
-GtDtsManager >> runJobShutdown [
+GtRemoteRunner >> runJobShutdown [
 	"Perform any actions associated with finishing the current job"
 
 	jobStartupAndShutdown shutdown
 ]
 
 { #category : #phases }
-GtDtsManager >> runJobStartup [
+GtRemoteRunner >> runJobStartup [
 	"Perform any actions associated with starting a new job"
 
 	jobStartupAndShutdown startup
 ]
 
 { #category : #phases }
-GtDtsManager >> runManagerShutdown [
+GtRemoteRunner >> runManagerShutdown [
 	"Perform any actions associated with stopping the DTS cluster"
 
 	managerStartupAndShutdown shutdown
 ]
 
 { #category : #phases }
-GtDtsManager >> runManagerStartup [
+GtRemoteRunner >> runManagerStartup [
 	"Perform any actions associated with starting the DTS cluster"
 
 	managerStartupAndShutdown startup
 ]
 
 { #category : #accessing }
-GtDtsManager >> server [
+GtRemoteRunner >> server [
 
 	^ server
 ]
 
 { #category : #accessing }
-GtDtsManager >> server: anObject [
+GtRemoteRunner >> server: anObject [
 
 	server := anObject
 ]
 
 { #category : #'as yet unclassified' }
-GtDtsManager >> startRemoteAwsMachines [
+GtRemoteRunner >> startRemoteAwsMachines [
 	remoteHostCluster
 		runCommand: 'go.exe'
 		arguments: #('run'
@@ -130,7 +130,7 @@ GtDtsManager >> startRemoteAwsMachines [
 ]
 
 { #category : #snapshot }
-GtDtsManager >> stopRemoteAwsMachines [
+GtRemoteRunner >> stopRemoteAwsMachines [
 	remoteHostCluster
 		runCommand: 'go.exe'
 		arguments: (Array

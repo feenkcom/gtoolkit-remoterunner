@@ -1,5 +1,5 @@
 Class {
-	#name : #GtDtsWorker,
+	#name : #GtRrWorker,
 	#superclass : #Object,
 	#instVars : [
 		'serverAddress'
