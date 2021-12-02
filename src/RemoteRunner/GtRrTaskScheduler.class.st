@@ -15,10 +15,28 @@ Class {
 	#name : #GtRrTaskScheduler,
 	#superclass : #Object,
 	#instVars : [
-		'rrManager'
+		'remoteRunner'
 	],
 	#category : #'RemoteRunner-Model'
 }
+
+{ #category : #'as yet unclassified' }
+GtRrTaskScheduler class >> remoteRunner: aGtRemoteRunner [
+
+	^ self new remoteRunner: aGtRemoteRunner
+]
+
+{ #category : #accessing }
+GtRrTaskScheduler >> remoteRunner [
+
+	^ remoteRunner
+]
+
+{ #category : #accessing }
+GtRrTaskScheduler >> remoteRunner: anObject [
+
+	remoteRunner := anObject
+]
 
 { #category : #schedulling }
 GtRrTaskScheduler >> schedule: aGtRrJobContext [

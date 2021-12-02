@@ -5,6 +5,7 @@ Class {
 	#classTraits : 'TGtAnnouncer classTrait',
 	#instVars : [
 		'uid',
+		'platforms',
 		'packageNames',
 		'classNames',
 		'testNames',
@@ -24,8 +25,8 @@ GtRrJob >> addResults: aCollection [
 ]
 
 { #category : #accessing }
-GtRrJob >> allTests [
-	"Answer an array of all individual tests in the form #ClassName -> #Selector"
+GtRrJob >> allItems [
+	"Answer an array of all individual items to be run in the form #ClassName -> #Selector"
 
 	^ self subclassResponsibility
 ]
@@ -53,6 +54,7 @@ GtRrJob >> classNames: anObject [
 GtRrJob >> initialize [
 
 	super initialize.
+	uid := UUID new.
 	packageNames := #().
 	classNames := #().
 	testNames := #().
@@ -69,6 +71,18 @@ GtRrJob >> packageNames [
 GtRrJob >> packageNames: anObject [
 
 	packageNames := anObject
+]
+
+{ #category : #accessing }
+GtRrJob >> platforms [
+
+	^ platforms
+]
+
+{ #category : #accessing }
+GtRrJob >> platforms: anObject [
+
+	platforms := anObject
 ]
 
 { #category : #accessing }

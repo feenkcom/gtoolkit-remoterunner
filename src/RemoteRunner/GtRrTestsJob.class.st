@@ -5,7 +5,7 @@ Class {
 }
 
 { #category : #accessing }
-GtRrTestsJob >> allTests [
+GtRrTestsJob >> allItems [
 	| allTests |
 
 	allTests := OrderedCollection new.

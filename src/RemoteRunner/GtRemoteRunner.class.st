@@ -1,5 +1,5 @@
 "
-GtDtsManager manages the running of tests or examples in a distributed system across one or more machines.
+GtRemoteRunner manages the running of tests or examples in a distributed system across one or more machines.
 
 The original scenarios used to design the  system were:
 
@@ -7,13 +7,25 @@ The original scenarios used to design the  system were:
 - Internal team: A team of developers are working, and pool their worker images for common use.
 - CI: An automated system runs all tests / examples on all supported platforms, e.g. linux, mac, windows, on each commit.
 
+Features of the system (mostly still under development) include:
+
+- Handling of the scenarios described above.
+- Support for running tests / examples across multiple platforms.
+  - Initially a platform is an OS / hardware combination, but as it is just a name, it can be any set of desired attributes.
+- If the current job has any failures or errors the next job can be started prior to the current job completing, maximising resource (worker) usage.
+- Timeouts on:
+  - Tests
+  - Tasks
+  - Workers
+  - Jobs
+
 
 The main components of the system are:
 
-- GtDtsManager provides the primary interface to the system and the main control.
-- A {{gtClass:GtDtsWorker}} is created for each client image that will run tests or examples.
-- A {{gtClass:GtDtsJob}} is submitted by users for each collection or tests or examples to be executed.  The user will be notified of the progress of the job.
-- {{gtClass:GtDtsTestScheduler}} is responsible for taking all the tests / examples in a job and ordering and grouping them for equitable distribution amongst the workers.
+- GtRemoteRunner provides the primary interface to the system and the main control.
+- A {{gtClass:GtRrWorker}} is created for each client image that will run tests or examples.
+- A {{gtClass:GtRrJob}} is submitted by users for each collection or tests or examples to be executed.  The user will be notified of the progress of the job.
+- {{gtClass:GtRrTaskScheduler}} is responsible for taking all the tests / examples in a job and ordering and grouping them for equitable distribution amongst the workers.
 
 
 The following phases are defined as part of the system.  Each of these phases is pluggable, so can be customised for individual scenarios:
@@ -27,7 +39,11 @@ The following phases are defined as part of the system.  Each of these phases is
 
 The worker images are assumed to be up to date when the Job Execution phase is run.
 
-The current architecture assumes that it is possible for the manager to contact all worker machines, update the images and start and stop them as required.  A WorkerManager is planned that will run on each worker machine and can contact the GtDtsManager to perform these tasks, removing the need for the GtDtsManager to know how many workers there are and be able to directly control them, e.g. via SSH.
+Futures:
+
+- Retry tasks if the worker disappears.
+  - The retry is on the assumption that the worker crashed from an external cause, or the network was lost.
+  - Only 1 or 2 retries should be attempted in case it is the test that is causing the crash.
 "
 Class {
 	#name : #GtRemoteRunner,
@@ -35,6 +51,7 @@ Class {
 	#instVars : [
 		'port',
 		'server',
+		'taskScheduler',
 		'jobExecutor',
 		'jobStartupAndShutdown',
 		'managerStartupAndShutdown'
@@ -141,4 +158,17 @@ GtRemoteRunner >> stopRemoteAwsMachines [
 				with: '-action'
 				with: 'STOP')
 		named: 'AWS: STOP LEFTOVER WORKER MACHINES'
+]
+
+{ #category : #accessing }
+GtRemoteRunner >> taskScheduler [
+
+	^ taskScheduler
+]
+
+{ #category : #accessing }
+GtRemoteRunner >> taskScheduler: aGtRrTaskScheduler [
+
+	taskScheduler := aGtRrTaskScheduler.
+	taskScheduler remoteRunner: self.
 ]

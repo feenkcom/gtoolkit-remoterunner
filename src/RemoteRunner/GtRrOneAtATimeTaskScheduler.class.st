@@ -7,7 +7,7 @@ Class {
 { #category : #schedulling }
 GtRrOneAtATimeTaskScheduler >> schedule: aGtRrJobContext [
 
-	aGtRrJobContext allTests do: [ :test |
-		aGtRrJobContext pendingTasks nextPut:
-			(GtDtsTestTask tests: { test key -> { test value } } asDictionary) ].
+	aGtRrJobContext allItems do: [ :test |
+		aGtRrJobContext addTask:
+			(GtRrTestTask tests: { test key -> { test value } } asDictionary) ].
 ]

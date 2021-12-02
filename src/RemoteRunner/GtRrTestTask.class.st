@@ -1,5 +1,5 @@
 Class {
-	#name : #GtDtsTestTask,
+	#name : #GtRrTestTask,
 	#superclass : #PharoLinkWorkerTask,
 	#instVars : [
 		'tests',
@@ -9,13 +9,13 @@ Class {
 }
 
 { #category : #accessing }
-GtDtsTestTask class >> leJsonV4Name [
+GtRrTestTask class >> leJsonV4Name [
 
 	^ #gtDtsTestTask
 ]
 
 { #category : #accessing }
-GtDtsTestTask class >> tests: aDictionary [
+GtRrTestTask class >> tests: aDictionary [
 
 	^ self new
 		  tests: aDictionary;
@@ -23,7 +23,7 @@ GtDtsTestTask class >> tests: aDictionary [
 ]
 
 { #category : #accessing }
-GtDtsTestTask >> run [
+GtRrTestTask >> run [
 
 	| suite result events |
 	suite := TestSuite named: id.
@@ -41,13 +41,13 @@ GtDtsTestTask >> run [
 ]
 
 { #category : #accessing }
-GtDtsTestTask >> tests [
+GtRrTestTask >> tests [
 
 	^ tests
 ]
 
 { #category : #accessing }
-GtDtsTestTask >> tests: aDictionary [
+GtRrTestTask >> tests: aDictionary [
 
 	tests := aDictionary
 ]

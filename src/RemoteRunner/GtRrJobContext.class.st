@@ -5,35 +5,37 @@ Class {
 	#name : #GtRrJobContext,
 	#superclass : #Object,
 	#instVars : [
-		'manager',
 		'job',
-		'results',
-		'pendingTasks',
-		'currentTasks',
-		'completedTasks'
+		'tasks',
+		'remoteRunner',
+		'platformContexts'
 	],
 	#category : #'RemoteRunner-Model'
 }
 
-{ #category : #accessing }
-GtRrJobContext >> completedTasks [
+{ #category : #adding }
+GtRrJobContext >> addTask: aGtRrTask [
 
-	^ completedTasks
+	tasks add: aGtRrTask 
 ]
 
 { #category : #accessing }
-GtRrJobContext >> currentTasks [
+GtRrJobContext >> allItems [
 
-	^ currentTasks
+	^ job allItems
 ]
 
 { #category : #initialization }
-GtRrJobContext >> initialize [
+GtRrJobContext >> initialize [ 
 
 	super initialize.
-	pendingTasks := SharedQueue new.
-	currentTasks := Dictionary new.
-	completedTasks := OrderedCollection new.
+	tasks := OrderedCollection new
+]
+
+{ #category : #testing }
+GtRrJobContext >> isFinished [
+
+	^ platformContexts allSatisfy: #isFinished
 ]
 
 { #category : #accessing }
@@ -49,25 +51,25 @@ GtRrJobContext >> job: anObject [
 ]
 
 { #category : #accessing }
-GtRrJobContext >> manager [
+GtRrJobContext >> remoteRunner [
 
-	^ manager
+	^ remoteRunner
 ]
 
 { #category : #accessing }
-GtRrJobContext >> manager: anObject [
+GtRrJobContext >> remoteRunner: anObject [
 
-	manager := anObject
+	remoteRunner := anObject
 ]
 
 { #category : #accessing }
-GtRrJobContext >> pendingTasks [
+GtRrJobContext >> tasks [
 
-	^ pendingTasks
+	^ tasks
 ]
 
 { #category : #accessing }
-GtRrJobContext >> results [
+GtRrJobContext >> tasks: anObject [
 
-	^ results
+	tasks := anObject
 ]
