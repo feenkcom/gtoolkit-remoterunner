@@ -2,7 +2,8 @@ Class {
 	#name : #GtDtsTestTask,
 	#superclass : #PharoLinkWorkerTask,
 	#instVars : [
-		'tests'
+		'tests',
+		'jobUid'
 	],
 	#category : #'RemoteRunner-Model'
 }

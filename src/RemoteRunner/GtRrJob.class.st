@@ -1,5 +1,5 @@
 Class {
-	#name : #GtDtsJob,
+	#name : #GtRrJob,
 	#superclass : #Object,
 	#traits : 'TGtAnnouncer',
 	#classTraits : 'TGtAnnouncer classTrait',
@@ -16,7 +16,7 @@ Class {
 }
 
 { #category : #accessing }
-GtDtsJob >> addResults: aCollection [
+GtRrJob >> addResults: aCollection [
 	"Add the supplied results to the receiver and notify dependents"
 
 	self results addResults: aCollection.
@@ -24,74 +24,88 @@ GtDtsJob >> addResults: aCollection [
 ]
 
 { #category : #accessing }
-GtDtsJob >> allTests [
+GtRrJob >> allTests [
 	"Answer an array of all individual tests in the form #ClassName -> #Selector"
 
 	^ self subclassResponsibility
 ]
 
 { #category : #accessing }
-GtDtsJob >> announcer [
+GtRrJob >> announcer [
 
 	^ announcer ifNil: [ announcer := Announcer new ]
 ]
 
 { #category : #accessing }
-GtDtsJob >> classNames [
+GtRrJob >> classNames [
+	<return: #Array of: #Symbol>
 
 	^ classNames
 ]
 
 { #category : #accessing }
-GtDtsJob >> classNames: anObject [
+GtRrJob >> classNames: anObject [
 
 	classNames := anObject
 ]
 
+{ #category : #initialization }
+GtRrJob >> initialize [
+
+	super initialize.
+	packageNames := #().
+	classNames := #().
+	testNames := #().
+]
+
 { #category : #accessing }
-GtDtsJob >> packageNames [
+GtRrJob >> packageNames [
+	<return: #Array of: #String>
 
 	^ packageNames
 ]
 
 { #category : #accessing }
-GtDtsJob >> packageNames: anObject [
+GtRrJob >> packageNames: anObject [
 
 	packageNames := anObject
 ]
 
 { #category : #accessing }
-GtDtsJob >> results [
+GtRrJob >> results [
 
 	^ results ifNil: [ results := GtDtsJobResults new ]
 ]
 
 { #category : #accessing }
-GtDtsJob >> state [
+GtRrJob >> state [
 
 	^ state
 ]
 
 { #category : #accessing }
-GtDtsJob >> state: anObject [
+GtRrJob >> state: anObject [
 
 	state := anObject
 ]
 
 { #category : #accessing }
-GtDtsJob >> testNames [
-
+GtRrJob >> testNames [
+	"Answer the collection of test names.
+	Each test name is #ClassName -> #testSelector"
+	<return: #Array of: #Association>
+	
 	^ testNames
 ]
 
 { #category : #accessing }
-GtDtsJob >> testNames: anObject [
+GtRrJob >> testNames: anObject [
 
 	testNames := anObject
 ]
 
 { #category : #accessing }
-GtDtsJob >> uid [
+GtRrJob >> uid [
 
 	^ uid
 ]

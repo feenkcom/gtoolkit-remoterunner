@@ -1,11 +1,11 @@
 Class {
-	#name : #GtDtsTestsJob,
-	#superclass : #GtDtsJob,
+	#name : #GtRrTestsJob,
+	#superclass : #GtRrJob,
 	#category : #'RemoteRunner-Model'
 }
 
 { #category : #accessing }
-GtDtsTestsJob >> allTests [
+GtRrTestsJob >> allTests [
 	| allTests |
 
 	allTests := OrderedCollection new.

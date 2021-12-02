@@ -2,7 +2,7 @@ Class {
 	#name : #GtDtsManagerStartupAndShutdown,
 	#superclass : #Object,
 	#instVars : [
-		'manager'
+		'rrManager'
 	],
 	#category : #'RemoteRunner-Model'
 }
@@ -13,7 +13,7 @@ GtDtsManagerStartupAndShutdown >> shutdown [
 	- Stop the PharoLinkWorkerServer
 	Subclasses can perform additional actions"
 
-	manager server stop.
+	rrManager server stop.
 ]
 
 { #category : #'startup - shutdown' }
@@ -22,8 +22,8 @@ GtDtsManagerStartupAndShutdown >> startup [
 	- Start the PharoLinkWorkerServer
 	Subclasses can perform additional actions"
 
-	manager server: (PharoLinkWorkerServer new
-		listenPort: manager port;
+	rrManager server: (PharoLinkWorkerServer new
+		listenPort: rrManager port;
 		setDebugMode;
 		start;
 		yourself).

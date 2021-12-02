@@ -21,7 +21,7 @@ GtDtsLocalManagerStartupAndShutdown >> startup [
 	super startup.
 	pool := PharoLinkWorkerLocalPool new
 		size: 2;
-		server: manager server;
+		server: rrManager server;
 		start;
 		yourself
 ]
