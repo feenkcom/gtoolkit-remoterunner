@@ -2,10 +2,22 @@ Class {
 	#name : #GtDtsManagerStartupAndShutdown,
 	#superclass : #Object,
 	#instVars : [
-		'rrManager'
+		'remoteRunner'
 	],
 	#category : #'RemoteRunner-Model'
 }
+
+{ #category : #accessing }
+GtDtsManagerStartupAndShutdown >> remoteRunner [
+
+	^ remoteRunner
+]
+
+{ #category : #accessing }
+GtDtsManagerStartupAndShutdown >> remoteRunner: anObject [
+
+	remoteRunner := anObject
+]
 
 { #category : #'startup - shutdown' }
 GtDtsManagerStartupAndShutdown >> shutdown [ 
@@ -13,7 +25,7 @@ GtDtsManagerStartupAndShutdown >> shutdown [
 	- Stop the PharoLinkWorkerServer
 	Subclasses can perform additional actions"
 
-	rrManager server stop.
+	remoteRunner server stop.
 ]
 
 { #category : #'startup - shutdown' }
@@ -21,11 +33,13 @@ GtDtsManagerStartupAndShutdown >> startup [
 	"Perform any actions associated with starting the DTS cluster:
 	- Start the PharoLinkWorkerServer
 	Subclasses can perform additional actions"
+	| server |
 
-	rrManager server: (PharoLinkWorkerServer new
-		listenPort: rrManager port;
+	server := PharoLinkServer new
+		listenPort: remoteRunner port;
 		setDebugMode;
 		start;
-		yourself).
-	
+		yourself.
+	server globals at: #GtAssignedRemoteRunner put: remoteRunner.
+	remoteRunner server: server.
 ]
