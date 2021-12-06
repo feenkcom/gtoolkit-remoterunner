@@ -1,34 +1,29 @@
+"
+A GtRrJob is the object submitted to a remote runner for execution.  It answers a collection of tasks to be executed by the workers, and holds the results of the tasks.  Partial results are announced as each task is completed.
+"
 Class {
 	#name : #GtRrJob,
 	#superclass : #Object,
 	#traits : 'TGtAnnouncer',
 	#classTraits : 'TGtAnnouncer classTrait',
 	#instVars : [
-		'uid',
 		'platforms',
-		'packageNames',
-		'classNames',
-		'testNames',
 		'state',
 		'results',
-		'announcer'
+		'announcer',
+		'id'
 	],
-	#category : #'RemoteRunner-Model'
+	#category : #'RemoteRunner-Jobs'
 }
 
 { #category : #accessing }
-GtRrJob >> addResults: aCollection [
-	"Add the supplied results to the receiver and notify dependents"
+GtRrJob >> addResult: aGtRrTask [
+	"Add the completed task to the results"
 
-	self results addResults: aCollection.
-	self flag: #TODO "announce the addition"
-]
-
-{ #category : #accessing }
-GtRrJob >> allItems [
-	"Answer an array of all individual items to be run in the form #ClassName -> #Selector"
-
-	^ self subclassResponsibility
+	results add: aGtRrTask.
+	self announce: (aGtRrTask hasErrors
+		ifTrue: [ GtRrTaskFailedAnnouncement task: aGtRrTask ]
+		ifFalse: [ GtRrTaskCompletedAnnouncement task: aGtRrTask ])
 ]
 
 { #category : #accessing }
@@ -38,88 +33,74 @@ GtRrJob >> announcer [
 ]
 
 { #category : #accessing }
-GtRrJob >> classNames [
-	<return: #Array of: #Symbol>
+GtRrJob >> id [
 
-	^ classNames
-]
-
-{ #category : #accessing }
-GtRrJob >> classNames: anObject [
-
-	classNames := anObject
+	^ id
 ]
 
 { #category : #initialization }
 GtRrJob >> initialize [
 
 	super initialize.
-	uid := UUID new.
-	packageNames := #().
-	classNames := #().
-	testNames := #().
-]
-
-{ #category : #accessing }
-GtRrJob >> packageNames [
-	<return: #Array of: #String>
-
-	^ packageNames
-]
-
-{ #category : #accessing }
-GtRrJob >> packageNames: anObject [
-
-	packageNames := anObject
+	id := UUID new asString.
+	platforms := { OSPlatform current name }.
+	results := OrderedCollection new.
+	state := #notStarted
 ]
 
 { #category : #accessing }
 GtRrJob >> platforms [
+	<return: #Array>
 
 	^ platforms
 ]
 
 { #category : #accessing }
-GtRrJob >> platforms: anObject [
+GtRrJob >> platforms: anArray [
 
-	platforms := anObject
+	platforms := anArray
+]
+
+{ #category : #printing }
+GtRrJob >> printOn: aStream [
+
+	super printOn: aStream.
+	aStream
+		nextPut: $(;
+		print: self state;
+		nextPut: $).
 ]
 
 { #category : #accessing }
 GtRrJob >> results [
 
-	^ results ifNil: [ results := GtDtsJobResults new ]
+	^ results
 ]
 
 { #category : #accessing }
 GtRrJob >> state [
+	<return: #Symbol>
 
 	^ state
 ]
 
 { #category : #accessing }
-GtRrJob >> state: anObject [
+GtRrJob >> state: aSymbol [
+	"One of: #notStarted, #started, #inProgress, #completed"
 
-	state := anObject
+	state := aSymbol.
+
+	state = #started ifTrue:
+		[ self announce: (GtRrJobStartedAnnouncement job: self) ].
+	state = #completed ifTrue:
+		[ self announce: (GtRrJobCompletedAnnouncement job: self) ].
+
 ]
 
 { #category : #accessing }
-GtRrJob >> testNames [
-	"Answer the collection of test names.
-	Each test name is #ClassName -> #testSelector"
-	<return: #Array of: #Association>
-	
-	^ testNames
-]
+GtRrJob >> tasks [
+	"Answer the collection of tasks to be executed"
+	<return: #SequencableCollection>
 
-{ #category : #accessing }
-GtRrJob >> testNames: anObject [
-
-	testNames := anObject
-]
-
-{ #category : #accessing }
-GtRrJob >> uid [
-
-	^ uid
+	^ self subclassResponsibility 
 ]

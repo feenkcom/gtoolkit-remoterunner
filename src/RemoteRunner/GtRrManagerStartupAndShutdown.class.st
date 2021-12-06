@@ -1,26 +1,26 @@
 Class {
-	#name : #GtDtsManagerStartupAndShutdown,
+	#name : #GtRrManagerStartupAndShutdown,
 	#superclass : #Object,
 	#instVars : [
 		'remoteRunner'
 	],
-	#category : #'RemoteRunner-Model'
+	#category : #'RemoteRunner-Runner'
 }
 
 { #category : #accessing }
-GtDtsManagerStartupAndShutdown >> remoteRunner [
+GtRrManagerStartupAndShutdown >> remoteRunner [
 
 	^ remoteRunner
 ]
 
 { #category : #accessing }
-GtDtsManagerStartupAndShutdown >> remoteRunner: anObject [
+GtRrManagerStartupAndShutdown >> remoteRunner: anObject [
 
 	remoteRunner := anObject
 ]
 
 { #category : #'startup - shutdown' }
-GtDtsManagerStartupAndShutdown >> shutdown [ 
+GtRrManagerStartupAndShutdown >> shutdown [ 
 	"Perform any actions associated with stopping the DTS cluster:
 	- Stop the PharoLinkWorkerServer
 	Subclasses can perform additional actions"
@@ -29,7 +29,7 @@ GtDtsManagerStartupAndShutdown >> shutdown [
 ]
 
 { #category : #'startup - shutdown' }
-GtDtsManagerStartupAndShutdown >> startup [ 
+GtRrManagerStartupAndShutdown >> startup [ 
 	"Perform any actions associated with starting the DTS cluster:
 	- Start the PharoLinkWorkerServer
 	Subclasses can perform additional actions"

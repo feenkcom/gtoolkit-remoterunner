@@ -18,15 +18,15 @@ Features of the system (mostly not yet implemented) include:
   - Tasks
   - Workers
   - Jobs
-
+### Main Components
 
 The main components of the system are:
 
 - GtRemoteRunner provides the primary interface to the system and the main control.
 - A {{gtClass:GtRrWorker}} is created for each client image that will run tests or examples.
 - A {{gtClass:GtRrJob}} is submitted by users for each collection or tests or examples to be executed.  The user will be notified of the progress of the job.
-- {{gtClass:GtRrTaskScheduler}} is responsible for taking all the tests / examples in a job and ordering and grouping them for equitable distribution amongst the workers.
-
+- {{gtClass:GtRrTaskAllocator}} is responsible for taking all the tests / examples in a job and ordering and grouping them for equitable distribution amongst the workers.
+### Phases
 
 The following phases are defined as part of the system.  Each of these phases is pluggable, so can be customised for individual scenarios:
 
@@ -36,10 +36,13 @@ The following phases are defined as part of the system.  Each of these phases is
 - Job Shutdown: this may include stopping the worker images on the worker machines.
 - Manager shutdown: this is run once when the manager is stopped.  It may be used to shut down worker machines, etc.
 
-
 The worker images are assumed to be up to date when the Job Execution phase is run.
 
-Futures:
+### Implementation Points
+
+`sharedAccess` is a mutual exclusion semaphore used to control access to: `availableWorkers`, `jobQueue`, `currentlyExecutingJobs`, `taskPromises` and `registeredWorkers`.
+
+### Futures
 
 - Retry tasks if the worker disappears.
   - The retry is on the assumption that the worker crashed from an external cause, or the network was lost.
@@ -51,19 +54,165 @@ Class {
 	#instVars : [
 		'port',
 		'server',
-		'taskScheduler',
-		'jobExecutor',
 		'jobStartupAndShutdown',
 		'managerStartupAndShutdown',
 		'availableWorkers',
 		'jobQueue',
 		'currentlyExecutingJobs',
-		'taskPromises',
+		'currentlyExecutingTasks',
 		'sharedAccess',
 		'registeredWorkers'
 	],
-	#category : #'RemoteRunner-Model'
+	#category : #'RemoteRunner-Runner'
 }
+
+{ #category : #accessing }
+GtRemoteRunner >> addCurrentlyExecutingTask: aGtRrTaskContext [
+	"Add the supplied task to the collection of currently executing tasks.
+	Must be called within sharedAccess."
+
+	currentlyExecutingTasks at: aGtRrTaskContext taskContextId put: aGtRrTaskContext
+]
+
+{ #category : #private }
+GtRemoteRunner >> assignTasksToWorkers [
+	"Assign tasks to any available workers.
+	Must be called within sharedAccess."
+	| taskContext busyWorkers |
+
+	(availableWorkers isEmpty or: [ currentlyExecutingJobs isEmpty ]) ifTrue: [ ^ self ].
+
+	busyWorkers := OrderedCollection new.
+	"Loop around assigning tasks to workers until there either no more workers or no more tasks available"
+	availableWorkers do: [ :worker |
+		taskContext := self getNextTaskFor: worker platform.
+		taskContext ifNotNil:
+			[ taskContext 
+				workerIpAddress: worker remoteAddress;
+				markTaskStarted.
+			"Set the task in the worker, this will signal the worker's semaphore, waking up the worker's process"
+			worker taskContext: taskContext.
+			busyWorkers add: worker ] ].
+	availableWorkers removeAll: busyWorkers.
+]
+
+{ #category : #private }
+GtRemoteRunner >> checkJobFinished: aGtRrContext [
+	"After each task has been completed, check if the job has finished, and if so, signal it.
+	Must be called within sharedAccess."
+	| jobContext job |
+
+	jobContext := aGtRrContext jobContext.
+	jobContext isFinished ifFalse: [ ^ self ].
+
+	currentlyExecutingJobs removeKey: jobContext id.
+	job := jobContext job.
+	job state: #completed.
+]
+
+{ #category : #private }
+GtRemoteRunner >> currentlyExecutingJobs [
+	"Private: for testing internal state only"
+
+	^ currentlyExecutingJobs
+]
+
+{ #category : #private }
+GtRemoteRunner >> currentlyExecutingTasks [
+	"Private: for testing internal state only"
+
+	^ currentlyExecutingTasks
+]
+
+{ #category : #accessing }
+GtRemoteRunner >> debugMode [
+	"Answer a boolean indicating whether debug logging should be started.
+	Always true during development.  Settings TBD."
+
+	^ true.
+]
+
+{ #category : #private }
+GtRemoteRunner >> getNextTaskFor: aPlatform [
+	"Answer the next task for the given platform, or nil.
+	Must be called within sharedAccess."
+	<return: #GtRrTaskContext>
+	| platformContext taskContext |
+
+	currentlyExecutingJobs valuesDo: [ :jobContext |
+		platformContext := jobContext atPlatform: aPlatform.
+		taskContext := platformContext nextTaskOrNil.
+		taskContext ifNotNil: [ ^ taskContext ] ].
+	^ nil
+
+]
+
+{ #category : #ui }
+GtRemoteRunner >> gtExecutingJobsFor: aView [
+
+	<gtView>
+	^ aView list
+		  title: 'Executing Jobs';
+		  priority: 20;
+		  items: [ sharedAccess critical: [ currentlyExecutingJobs values ] ];
+		  send: [ :item | item job ];
+		  actionUpdateButton
+]
+
+{ #category : #ui }
+GtRemoteRunner >> gtExecutingTasksFor: aView [
+
+	<gtView>
+	^ aView list
+		  title: 'Executing Tasks';
+		  priority: 20;
+		  items: [ 
+			  sharedAccess critical: [ currentlyExecutingTasks values ] ];
+		  send: [ :item | item task ];
+		  actionUpdateButton
+]
+
+{ #category : #ui }
+GtRemoteRunner >> gtJobQueueFor: aView [
+	<gtView>
+
+	^ aView list
+		  title: 'Job Queue';
+		  priority: 20;
+		  items: [ jobQueue itemArray ];
+		  actionUpdateButton
+]
+
+{ #category : #ui }
+GtRemoteRunner >> gtSummaryFor: aView [
+
+	<gtView>
+	^ aView columnedList
+		  title: 'Summary';
+		  priority: 10;
+		  items: [ self summaryAttributes ];
+		  column: #Attribute text: [ :item | item first ];
+		  column: #Value text: [ :item | item second ];
+		  send: [ :item | item third ];
+		  actionUpdateButton
+]
+
+{ #category : #ui }
+GtRemoteRunner >> gtWorkersFor: aView [
+	<gtView>
+
+	^ aView columnedList
+		  title: 'Registered Workers';
+		  priority: 50;
+		  items: [ registeredWorkers associations ];
+		  column: 'IP Address' text: [ :item | 
+			String streamContents: [ :stream |
+				item key remoteAddress do: [ :byte |
+					stream print: byte ]
+				separatedBy: [ stream nextPut: $. ] ] ];
+		  column: 'Platform' text: [ :item | item value ];
+		  actionUpdateButton
+]
 
 { #category : #initialization }
 GtRemoteRunner >> initialize [
@@ -71,29 +220,19 @@ GtRemoteRunner >> initialize [
 	super initialize.
 	port := 7042.
 	jobQueue := SharedQueue new.
+	"currentlyExecutingJobs is a dictionary of GtRrJobContext keyed by job uid.
+	The keys are ordered to ensure that tasks are assigned to the job started first."
 	currentlyExecutingJobs := OrderedDictionary new.
-	sharedAccess := Semaphore forMutualExclusion.
+	currentlyExecutingTasks := Dictionary new.
+	sharedAccess := GtMutualExclusionSemaphore forMutualExclusion.
+	"availableWorkers is a Set of GtRrFutureWorkerTask.
+	The worker is represented by the connection and is waiting on the semaphore held by the GtRrFutureWorkerTask."
 	availableWorkers := Set new.
-	registeredWorkers := Set new.
-	taskPromises := Dictionary new.
+	registeredWorkers := Dictionary new.
 	self 
-		taskScheduler: GtRrOneAtATimeTaskScheduler new;
-		managerStartupAndShutdown: GtDtsLocalManagerStartupAndShutdown new;
-		jobStartupAndShutdown: GtDtsLocalJobStartupAndShutdown new;
-		jobExecutor: GtRrJobExecutor new.
+		managerStartupAndShutdown: GtRrLocalManagerStartupAndShutdown new;
+		jobStartupAndShutdown: GtRrLocalJobStartupAndShutdown new.
 
-]
-
-{ #category : #accessing }
-GtRemoteRunner >> jobExecutor [
-
-	^ jobExecutor
-]
-
-{ #category : #accessing }
-GtRemoteRunner >> jobExecutor: aGtRrJobExecutor [
-
-	jobExecutor := aGtRrJobExecutor
 ]
 
 { #category : #accessing }
@@ -126,35 +265,17 @@ GtRemoteRunner >> managerStartupAndShutdown: aGtRrManagerStartupAndShutdown [
 GtRemoteRunner >> nextTaskFor: aPlatform [
 	"Answer the next task allocated to the worker that is waiting on this method.
 	The task is assigned in a separate process."
-	| taskFuture task taskPromise |
-
-	taskFuture := GtRrFutureWorkerTask new platform: aPlatform.
-	taskFuture wait.
-	task := taskFuture task.
-	taskPromise := AsyncPendingPromise new.
-	sharedAccess critical:
-		[ taskPromises at: task id put: taskPromise ].
-	^ task
-]
-
-{ #category : #'api - worker' }
-GtRemoteRunner >> nextTaskFor: aWorkerId platform: aPlatform [
-	"Answer the next task allocated to the worker that is waiting on this method.
-	The task is assigned in a separate process."
-	| taskFuture task taskPromise |
+	| taskFuture |
 
 	taskFuture := GtRrFutureWorkerTask new 
-		workerId: aWorkerId;
+		connection: PharoLinkServerCurrentConnection value;
 		platform: aPlatform.
 	sharedAccess critical:
 		[ availableWorkers add: taskFuture.
 		self assignTasksToWorkers ].
 	taskFuture wait.
-	task := taskFuture task.
-	taskPromise := AsyncPendingPromise new.
-	sharedAccess critical:
-		[ taskPromises at: task id put: taskPromise ].
-	^ task
+	^ taskFuture taskContext.
+
 ]
 
 { #category : #'api - worker' }
@@ -179,38 +300,17 @@ GtRemoteRunner >> port: anObject [
 GtRemoteRunner >> registerWorkerWithPlatform: aPlatform [
 	"Register the supplied worker and connection details.
 	Register the connection for disconnection notification"
-]
+	| pharoLinkServerConnection |
 
-{ #category : #initialization }
-GtRemoteRunner >> resetImagesFilesOnS3 [
-	remoteHostCluster
-		runCommand: 'powershell.exe'
-		arguments: (Array
-				with: '-File'
-				with: 'C:\Users\Administrator\git\lifeware-source\Reset-LifewareWorkerImage.ps1'
-				with: '-region'
-				with: 'us-east-1')
-		named: 'AWS: RESET IMAGES FILES ON S3'
-]
-
-{ #category : #'as yet unclassified' }
-GtRemoteRunner >> restartRemoteCluster [
-	"managerConfiguration startRemoteImages ifFalse: [^self].
-	remoteHostCluster isAwsHost ifFalse: [^self].
-	timestampsCollector registerNowAs: #beginRestartRemoteAwsCluster."
-	self resetImagesFilesOnS3.
-	"timestampsCollector registerNowAs: #resetImagesFilesOnS3."
-	self stopRemoteAwsMachines.
-	"timestampsCollector registerNowAs: #stoppedRemoteAwsMachines."
-	self startRemoteAwsMachines.
-	"timestampsCollector registerNowAs: #startedRemoteAwsMachines"
-]
-
-{ #category : #phases }
-GtRemoteRunner >> runJobExecution [
-	"Actually run all the tests"
-
-	jobExecutor run
+	pharoLinkServerConnection := PharoLinkServerCurrentConnection value.
+	sharedAccess critical:
+		[ registeredWorkers at: pharoLinkServerConnection put: aPlatform ].
+	pharoLinkServerConnection
+		when: PharoLinkServerConnectionDisconnectedAnnouncement
+		send: #unregisterWorker:
+		to: self.
+	"Answer a PharoLink primitive so that a proxy isn't created for the runner (which is a global, anyway)"
+	^ nil
 ]
 
 { #category : #phases }
@@ -265,47 +365,39 @@ GtRemoteRunner >> startJob: aGtRrJob [
 	Must be called within sharedAccess"
 	| context |
 
-	context := GtRrJobContext new job: aGtRrJob.
+	context := GtRrJobContext new 
+		remoteRunner: self;
+		job: aGtRrJob.
 	currentlyExecutingJobs
-		at: aGtRrJob uid
+		at: aGtRrJob id
 		put: context.
 	jobStartupAndShutdown startupForJob: context.
+	aGtRrJob state: #started.
 	self assignTasksToWorkers.
 ]
 
-{ #category : #'as yet unclassified' }
-GtRemoteRunner >> startRemoteAwsMachines [
-	remoteHostCluster
-		runCommand: 'go.exe'
-		arguments: #('run'
-			'C:\Users\Administrator\git\lifeware-source\startstop.go'
-			'-region'
-			'us-east-1'
-			'-action'
-			'START'
-			'-instancescount'
-			'50')
-		named: 'AWS: START WORKER MACHINES'
+{ #category : #ui }
+GtRemoteRunner >> state [
+	"Answer a label that represents the overall state of the runner.
+	Must be called within sharedAccess"
+	| availableWorkerCount jobCount currentJobCount currentTaskCount registeredWorkerCount |
+
+	availableWorkerCount := availableWorkers size.
+	jobCount := jobQueue size.
+	currentJobCount := currentlyExecutingJobs size.
+	currentTaskCount := currentlyExecutingTasks size.
+	registeredWorkerCount := registeredWorkers size.
+	(registeredWorkerCount = 0 and:
+		[ jobCount > 0 or: [ currentJobCount > 0 ] ]) ifTrue: [ ^ #stuck ].
+	(jobCount = 0 and: [ currentJobCount = 0 ]) ifTrue: [ ^ #idle ].
+	(jobCount > 0 or: [ currentJobCount > 0 ]) ifTrue: [ ^ #busy ].
+	self error: 'Unknown state'.
 ]
 
 { #category : #'api - runner' }
 GtRemoteRunner >> stop [
 
 	self runManagerShutdown
-]
-
-{ #category : #snapshot }
-GtRemoteRunner >> stopRemoteAwsMachines [
-	remoteHostCluster
-		runCommand: 'go.exe'
-		arguments: (Array
-				with: 'run'
-				with: 'C:\Users\Administrator\git\lifeware-source\startstop.go'
-				with: '-region'
-				with: 'us-east-1'
-				with: '-action'
-				with: 'STOP')
-		named: 'AWS: STOP LEFTOVER WORKER MACHINES'
 ]
 
 { #category : #'api - jobs' }
@@ -323,15 +415,48 @@ GtRemoteRunner >> submitJob: aGtRrJob [
 				To be implemented" ] ]
 ]
 
-{ #category : #accessing }
-GtRemoteRunner >> taskScheduler [
+{ #category : #ui }
+GtRemoteRunner >> summaryAttributes [
+	"Answer a collection of key/value attributes that can simply be listed as a summary of the receiver"
 
-	^ taskScheduler
+	^ sharedAccess critical:
+		[ Array streamContents: [ :stream |
+			stream
+				nextPut: { #State. self state. self state. };
+				nextPut: {'Job Queue Size'. jobQueue size. jobQueue. };
+				nextPut: {'Registered Workers'. registeredWorkers size. registeredWorkers. };
+				nextPut: {'Available Workers'. availableWorkers size. availableWorkers. };
+				nextPut: {'Currently Executing Jobs'. currentlyExecutingJobs size. currentlyExecutingJobs. };
+				nextPut: {'Currently Executing Tasks'. currentlyExecutingTasks size. currentlyExecutingTasks. };
+				nextPut: {#Port. port. server. }
+				 ] ]
 ]
 
-{ #category : #accessing }
-GtRemoteRunner >> taskScheduler: aGtRrTaskScheduler [
+{ #category : #'api - worker' }
+GtRemoteRunner >> taskDone: aTaskContextId with: anObject [
+	| taskContext |
 
-	taskScheduler := aGtRrTaskScheduler.
-	taskScheduler remoteRunner: self.
+	sharedAccess critical: 
+		[ taskContext := currentlyExecutingTasks removeKey: aTaskContextId.
+		taskContext result: anObject.
+		taskContext markTaskCompleted.
+		self checkJobFinished: taskContext ].
+]
+
+{ #category : #'api - worker' }
+GtRemoteRunner >> taskFailed: aTaskContextId with: anGtRrTaskErrorDetails [
+	| taskContext |
+
+	sharedAccess critical: 
+		[ taskContext := currentlyExecutingTasks removeKey: aTaskContextId.
+		taskContext errorDetails: anGtRrTaskErrorDetails.
+		taskContext markTaskCompleted.
+		self checkJobFinished: taskContext ].
+]
+
+{ #category : #'api - worker' }
+GtRemoteRunner >> unregisterWorker: aPharoLinkServerConnectionDisconnectedAnnouncement [
+
+	sharedAccess critical:
+		[ registeredWorkers removeKey: aPharoLinkServerConnectionDisconnectedAnnouncement connection ].
 ]

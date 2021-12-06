@@ -1,5 +1,5 @@
 Class {
 	#name : #GtRrExamplesJob,
-	#superclass : #GtRrJob,
-	#category : #'RemoteRunner-Model'
+	#superclass : #GtRrAbstractTestsJob,
+	#category : #'RemoteRunner-Jobs'
 }

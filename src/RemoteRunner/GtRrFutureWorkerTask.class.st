@@ -8,12 +8,25 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'semaphore',
-		'task',
 		'platform',
-		'workerId'
+		'connection',
+		'taskContext'
 	],
-	#category : #'RemoteRunner-Model'
+	#category : #'RemoteRunner-Runner-State'
 }
+
+{ #category : #accessing }
+GtRrFutureWorkerTask >> connection [
+	<return: #PharoLinkServerConnection>
+
+	^ connection
+]
+
+{ #category : #accessing }
+GtRrFutureWorkerTask >> connection: aPharoLinkServerConnection [
+
+	connection := aPharoLinkServerConnection
+]
 
 { #category : #initialization }
 GtRrFutureWorkerTask >> initialize [
@@ -36,15 +49,24 @@ GtRrFutureWorkerTask >> platform: anObject [
 ]
 
 { #category : #accessing }
-GtRrFutureWorkerTask >> task [
+GtRrFutureWorkerTask >> remoteAddress [
 
-	^ task
+	^ connection 
+		ifNil: [ ByteArray new: 4 ]
+		ifNotNil: [ connection remoteAddress ]
 ]
 
 { #category : #accessing }
-GtRrFutureWorkerTask >> task: aGtRrTask [
+GtRrFutureWorkerTask >> taskContext [
+	<return: #GtRrTaskContext>
 
-	task := aGtRrTask.
+	^ taskContext
+]
+
+{ #category : #accessing }
+GtRrFutureWorkerTask >> taskContext: aGtRrTaskContext [
+
+	taskContext := aGtRrTaskContext.
 	semaphore signal.
 ]
 
@@ -52,16 +74,4 @@ GtRrFutureWorkerTask >> task: aGtRrTask [
 GtRrFutureWorkerTask >> wait [
 
 	semaphore wait
-]
-
-{ #category : #accessing }
-GtRrFutureWorkerTask >> workerId [
-
-	^ workerId
-]
-
-{ #category : #accessing }
-GtRrFutureWorkerTask >> workerId: anObject [
-
-	workerId := anObject
 ]

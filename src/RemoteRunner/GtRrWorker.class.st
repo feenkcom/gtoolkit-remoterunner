@@ -8,14 +8,14 @@ Class {
 		'uid',
 		'rrPlatform'
 	],
-	#category : #'RemoteRunner-Model'
+	#category : #'RemoteRunner-Worker'
 }
 
 { #category : #accessing }
 GtRrWorker class >> commandLine [
-
 	<commandline>
 	| application |
+
 	^ self commandLineCommand meaning: [ :args | 
 		  | logger serverSocketAddress |
 		  args
@@ -45,8 +45,8 @@ GtRrWorker class >> commandLine [
 { #category : #accessing }
 GtRrWorker class >> commandLineCommand [
 
-	^ (ClapCommand id: 'pharoLinkWorker')
-		  description: 'Run the PharoLink worker';
+	^ (ClapCommand id: 'remoteRunnerWorker')
+		  description: 'Run the RemoteRunner worker';
 		  add: ClapFlag forHelp;
 		  add: ((ClapFlag id: 'log') description: 'Enable logging to stdout');
 		  add: ((ClapFlag id: 'taskPollForever') description: 'Poll tasks forever');
@@ -76,17 +76,25 @@ GtRrWorker >> rrPlatform: anObject [
 ]
 
 { #category : #accessing }
+GtRrWorker >> start [
+
+	super start.
+	self newCommandFactory sendAndWait:
+		'GtAssignedRemoteRunner registerWorkerWithPlatform: ''', rrPlatform, ''''.
+]
+
+{ #category : #accessing }
 GtRrWorker >> taskDone: aTask with: anObject [
 
 	StringSignal emit: ('done {1} with {2}' format: { 
 				 aTask.
 				 anObject }).
 	^ self newCommandFactory
-		  bindingAt: #taskId put: aTask id;
+		  bindingAt: #taskContextId put: aTask taskContextId;
 		  bindingAt: #result
 		  put: (LeJsonV4 uniqueInstance serialize: anObject);
 		  sendAndWait:
-			  'GtAssignedRemoteRunner taskDone: taskId with: (LeJsonV4 uniqueInstance deserialize: result readStream). true'
+			  'GtAssignedRemoteRunner taskDone: taskContextId with: (LeJsonV4 uniqueInstance deserialize: result readStream). true'
 ]
 
 { #category : #accessing }
@@ -96,23 +104,23 @@ GtRrWorker >> taskFailed: aTask with: anError [
 				 aTask.
 				 anError }).
 	^ self newCommandFactory
-		  bindingAt: #taskId put: aTask id;
-		  bindingAt: #stackString put: anError stackString;
+		  bindingAt: #taskContextId put: aTask taskContextId;
+		  bindingAt: #errorDetails put: (GtRrTaskErrorDetails new
+				errorMessage: anError messageText;
+				trace: anError stackString);
 		  sendAndWait:
-			  'taskQueue taskFailed: taskId with: stackString. true'
+			  'GtAssignedRemoteRunner taskFailed: taskContextId with: errorDetails. true'
 ]
 
 { #category : #accessing }
 GtRrWorker >> taskPoll [
-
 	| promise |
+
 	promise := self newCommandFactory send: 
 		(String streamContents: [ :stream |
 			stream
 				<< 'GtAssignedRemoteRunner nextTaskSerializedFor: ';
-				<< uid;
-				<< ' platform: ';
-				<< rrPlatform ]).
+				print: rrPlatform ]).
 	^ LeJsonV4 uniqueInstance deserialize: promise waitForValue readStream
 ]
 

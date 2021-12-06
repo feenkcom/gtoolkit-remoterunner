@@ -1,26 +1,26 @@
 Class {
-	#name : #GtRrJobAnnouncement,
+	#name : #GtRrTaskAnnouncement,
 	#superclass : #GtRemoteRunnerAnnouncement,
 	#instVars : [
-		'job'
+		'task'
 	],
 	#category : #'RemoteRunner-Announcements'
 }
 
 { #category : #'instance creation' }
-GtRrJobAnnouncement class >> job: aGtRrJob [
+GtRrTaskAnnouncement class >> task: aGtRrTask [
 
-	^ self new job: aGtRrJob
+	^ self new task: aGtRrTask 
 ]
 
 { #category : #accessing }
-GtRrJobAnnouncement >> job [
+GtRrTaskAnnouncement >> task [
 
-	^ job
+	^ task
 ]
 
 { #category : #accessing }
-GtRrJobAnnouncement >> job: anObject [
+GtRrTaskAnnouncement >> task: anObject [
 
-	job := anObject
+	task := anObject
 ]

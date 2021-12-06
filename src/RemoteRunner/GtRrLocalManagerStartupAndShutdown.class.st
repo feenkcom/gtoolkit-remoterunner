@@ -1,16 +1,16 @@
 Class {
-	#name : #GtDtsLocalManagerStartupAndShutdown,
-	#superclass : #GtDtsManagerStartupAndShutdown,
+	#name : #GtRrLocalManagerStartupAndShutdown,
+	#superclass : #GtRrManagerStartupAndShutdown,
 	#instVars : [
 		'watchDog',
 		'processes',
 		'poolSize'
 	],
-	#category : #'RemoteRunner-Model'
+	#category : #'RemoteRunner-Runner'
 }
 
 { #category : #initialization }
-GtDtsLocalManagerStartupAndShutdown >> initialize [
+GtRrLocalManagerStartupAndShutdown >> initialize [
 
 	super initialize.
 	poolSize := 2.
@@ -19,13 +19,13 @@ GtDtsLocalManagerStartupAndShutdown >> initialize [
 ]
 
 { #category : #testing }
-GtDtsLocalManagerStartupAndShutdown >> isRunning [
+GtRrLocalManagerStartupAndShutdown >> isRunning [
 
 	^ watchDog isNotNil
 ]
 
 { #category : #private }
-GtDtsLocalManagerStartupAndShutdown >> newWorkerLocalProcess [
+GtRrLocalManagerStartupAndShutdown >> newWorkerLocalProcess [
 	| settings args |
 
 	self flag: 'TODO settings should come from outside'.
@@ -34,11 +34,11 @@ GtDtsLocalManagerStartupAndShutdown >> newWorkerLocalProcess [
 	args
 		add: settings serverImage fullName;
 		add: 'clap';
-		add: 'pharoLinkWorker'.
+		add: 'remoteRunnerWorker'.
 	remoteRunner debugMode ifTrue: [ args add: '--log' ].
 	args
 		add: '--taskPollForever';
-		add: remoteRunner listenPort asString;
+		add: remoteRunner port asString;
 		add: '--detachChangesFromFileSystem'.
 	^ GtSubprocessWithInMemoryOutput new
 		  command: settings serverExecutable fullName;
@@ -49,19 +49,19 @@ GtDtsLocalManagerStartupAndShutdown >> newWorkerLocalProcess [
 ]
 
 { #category : #accessing }
-GtDtsLocalManagerStartupAndShutdown >> poolSize [
+GtRrLocalManagerStartupAndShutdown >> poolSize [
 
 	^ poolSize
 ]
 
 { #category : #accessing }
-GtDtsLocalManagerStartupAndShutdown >> poolSize: anInteger [
+GtRrLocalManagerStartupAndShutdown >> poolSize: anInteger [
 
 	poolSize := anInteger
 ]
 
 { #category : #'startup - shutdown' }
-GtDtsLocalManagerStartupAndShutdown >> shutdown [ 
+GtRrLocalManagerStartupAndShutdown >> shutdown [ 
 
 	self isRunning ifFalse: [ ^ self ].
 	[ watchDog terminate ]
@@ -76,7 +76,7 @@ GtDtsLocalManagerStartupAndShutdown >> shutdown [
 ]
 
 { #category : #private }
-GtDtsLocalManagerStartupAndShutdown >> startWatchDog [
+GtRrLocalManagerStartupAndShutdown >> startWatchDog [
 
 	watchDog := [ 
 	            [ 
@@ -95,7 +95,7 @@ GtDtsLocalManagerStartupAndShutdown >> startWatchDog [
 ]
 
 { #category : #'startup - shutdown' }
-GtDtsLocalManagerStartupAndShutdown >> startup [ 
+GtRrLocalManagerStartupAndShutdown >> startup [ 
 
 	self assert: processes isEmpty.
 	self assert: self isRunning not.

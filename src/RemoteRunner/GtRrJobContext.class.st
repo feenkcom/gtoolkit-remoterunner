@@ -10,26 +10,74 @@ Class {
 		'remoteRunner',
 		'platformContexts'
 	],
-	#category : #'RemoteRunner-Model'
+	#category : #'RemoteRunner-Runner-State'
 }
 
-{ #category : #adding }
-GtRrJobContext >> addTask: aGtRrTask [
+{ #category : #accessing }
+GtRrJobContext >> atPlatform: aPlatform [
+	"Answer the platform specific context for the named platform"
 
-	tasks add: aGtRrTask 
+	^ platformContexts at: aPlatform
+]
+
+{ #category : #private }
+GtRrJobContext >> createMultiplePlatformContexts [
+	| platformContext |
+
+	self platforms do: [ :platform |
+		platformContext := GtRrPlatformContext new
+			jobContext: self;
+			platform: platform.
+		platformContext pendingTasks items: (tasks collect: [ :task | 
+			GtRrTaskContext new
+				task: task copy;
+				platformContext: platformContext ]).
+		platformContexts at: platform put: platformContext ].
+]
+
+{ #category : #'api - startup' }
+GtRrJobContext >> createPlatformContexts [
+	"Create the platform contexts for the receiver.
+	If the receiver has only one platform, the tasks can be directly allocated, otherwise copies of each task must be created for each platform."
+
+	self platforms size = 1 ifTrue: 
+		[ self createSinglePlatformContext ]
+	ifFalse: 
+		[ self createMultiplePlatformContexts ]
+]
+
+{ #category : #private }
+GtRrJobContext >> createSinglePlatformContext [
+	| platform platformContext |
+
+	platform := self platforms first.
+	platformContext := GtRrPlatformContext new
+			jobContext: self;
+			platform: platform.
+	platformContext pendingTasks items: (tasks collect: [ :task |
+		GtRrTaskContext new
+			task: task;
+			platformContext: platformContext ]).
+	platformContexts at: platform put: platformContext.
+]
+
+{ #category : #private }
+GtRrJobContext >> getTasks [
+
+	tasks := job tasks
 ]
 
 { #category : #accessing }
-GtRrJobContext >> allItems [
+GtRrJobContext >> id [
 
-	^ job allItems
+	^ job id
 ]
 
 { #category : #initialization }
 GtRrJobContext >> initialize [ 
 
 	super initialize.
-	tasks := OrderedCollection new
+	platformContexts := Dictionary new.
 ]
 
 { #category : #testing }
@@ -45,9 +93,42 @@ GtRrJobContext >> job [
 ]
 
 { #category : #accessing }
-GtRrJobContext >> job: anObject [
+GtRrJobContext >> job: aGtRrJob [
 
-	job := anObject
+	job := aGtRrJob
+]
+
+{ #category : #accessing }
+GtRrJobContext >> jobContext [
+
+	^ self
+]
+
+{ #category : #'api - running' }
+GtRrJobContext >> markTaskCompleted: aGtRrTaskContext [
+
+	job addResult: aGtRrTaskContext task.
+]
+
+{ #category : #private }
+GtRrJobContext >> platformContexts [
+	"Private: only for testing internal state"
+
+	^ platformContexts
+]
+
+{ #category : #accessing }
+GtRrJobContext >> platforms [
+
+	^ job platforms
+]
+
+{ #category : #printing }
+GtRrJobContext >> printOn: aStream [
+
+	job
+		ifNil: [ super printOn: aStream ]
+		ifNotNil: [ job printOn: aStream ]
 ]
 
 { #category : #accessing }
@@ -63,13 +144,13 @@ GtRrJobContext >> remoteRunner: anObject [
 ]
 
 { #category : #accessing }
-GtRrJobContext >> tasks [
+GtRrJobContext >> results [
 
-	^ tasks
+	^ platformContexts values flatCollect: #results
 ]
 
 { #category : #accessing }
-GtRrJobContext >> tasks: anObject [
+GtRrJobContext >> tasks [
 
-	tasks := anObject
+	^ tasks
 ]

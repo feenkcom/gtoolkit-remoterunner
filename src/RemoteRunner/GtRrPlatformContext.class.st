@@ -4,16 +4,16 @@ Class {
 	#instVars : [
 		'jobContext',
 		'platform',
-		'results',
 		'pendingTasks',
 		'currentTasks',
 		'completedTasks'
 	],
-	#category : #'RemoteRunner-Model'
+	#category : #'RemoteRunner-Runner-State'
 }
 
 { #category : #accessing }
 GtRrPlatformContext >> completedTasks [
+	<return: #Array of: #GtRrTaskContext>
 
 	^ completedTasks
 ]
@@ -29,7 +29,7 @@ GtRrPlatformContext >> initialize [
 
 	super initialize.
 	pendingTasks := SharedQueue new.
-	currentTasks := Dictionary new.
+	currentTasks := Set new.
 	completedTasks := OrderedCollection new.
 ]
 
@@ -52,10 +52,38 @@ GtRrPlatformContext >> jobContext: anObject [
 	jobContext := anObject
 ]
 
+{ #category : #'api - running' }
+GtRrPlatformContext >> markTaskCompleted: aGtRrTaskContext [
+
+	completedTasks add: aGtRrTaskContext.
+	jobContext markTaskCompleted: aGtRrTaskContext.
+	currentTasks remove: aGtRrTaskContext.
+]
+
+{ #category : #accessing }
+GtRrPlatformContext >> nextTaskOrNil [
+	"Answer the next task to be executed, moving it from the pendingTasks to currentTasks.
+	Or nil if there are no more pending tasks."
+	<return: #GtRrTaskContext>
+	| taskContext |
+
+	taskContext := pendingTasks nextOrNil.
+	taskContext ifNil: [ ^ nil ].
+	currentTasks add: taskContext.
+	self remoteRunner addCurrentlyExecutingTask: taskContext.
+	^ taskContext
+]
+
 { #category : #accessing }
 GtRrPlatformContext >> pendingTasks [
 
 	^ pendingTasks
+]
+
+{ #category : #accessing }
+GtRrPlatformContext >> pendingTasks: anObject [
+
+	pendingTasks := anObject
 ]
 
 { #category : #accessing }
@@ -71,7 +99,14 @@ GtRrPlatformContext >> platform: anObject [
 ]
 
 { #category : #accessing }
-GtRrPlatformContext >> results [
+GtRrPlatformContext >> remoteRunner [
 
-	^ results
+	^ jobContext remoteRunner
+]
+
+{ #category : #accessing }
+GtRrPlatformContext >> results [
+	<return: #Array of: #GtRrTask>
+
+	^ completedTasks collect: #task
 ]
