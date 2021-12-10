@@ -456,7 +456,12 @@ GtRemoteRunner >> taskFailed: aTaskContextId with: anGtRrTaskErrorDetails [
 
 { #category : #'api - worker' }
 GtRemoteRunner >> unregisterWorker: aPharoLinkServerConnectionDisconnectedAnnouncement [
+	| connection terminatedWorkers |
 
+	connection := aPharoLinkServerConnectionDisconnectedAnnouncement connection.
 	sharedAccess critical:
-		[ registeredWorkers removeKey: aPharoLinkServerConnectionDisconnectedAnnouncement connection ].
+		[ registeredWorkers removeKey: connection.
+		terminatedWorkers := availableWorkers select: [ :worker | worker connection = connection ].
+		terminatedWorkers	do: [ :worker | worker terminateProcess ].
+		availableWorkers removeAll: terminatedWorkers ].
 ]
