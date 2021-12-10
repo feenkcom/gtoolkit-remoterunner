@@ -100,7 +100,7 @@ GtRrJob >> state: aSymbol [
 { #category : #accessing }
 GtRrJob >> tasks [
 	"Answer the collection of tasks to be executed"
-	<return: #SequencableCollection>
+	<return: #SequenceableCollection>
 
 	^ self subclassResponsibility 
 ]

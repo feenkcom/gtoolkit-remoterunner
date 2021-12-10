@@ -1,5 +1,5 @@
 "
-GtRrWorker runs on the worker machines as a PharoLink client, requesting tasks from the runner ({{gtClass:GtRrRemoteRunner}}).
+GtRrWorker runs on the worker machines as a PharoLink client, requesting tasks from the runner ({{gtClass:GtRemoteRunner}}).
 "
 Class {
 	#name : #GtRrWorker,

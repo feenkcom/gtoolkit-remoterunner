@@ -71,6 +71,12 @@ GtRrFutureWorkerTask >> taskContext: aGtRrTaskContext [
 ]
 
 { #category : #'api - future' }
+GtRrFutureWorkerTask >> terminateProcess [
+
+	semaphore terminateProcess
+]
+
+{ #category : #'api - future' }
 GtRrFutureWorkerTask >> wait [
 
 	semaphore wait
