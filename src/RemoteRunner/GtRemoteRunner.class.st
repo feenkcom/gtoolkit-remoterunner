@@ -87,13 +87,19 @@ GtRemoteRunner >> assignTasksToWorkers [
 	availableWorkers do: [ :worker |
 		taskContext := self getNextTaskFor: worker platform.
 		taskContext ifNotNil:
-			[ taskContext 
-				workerIpAddress: worker remoteAddress;
+			[ taskContext
+				workerFuture: worker;
 				markTaskStarted.
 			"Set the task in the worker, this will signal the worker's semaphore, waking up the worker's process"
 			worker taskContext: taskContext.
 			busyWorkers add: worker ] ].
 	availableWorkers removeAll: busyWorkers.
+]
+
+{ #category : #accessing }
+GtRemoteRunner >> availableWorkerCount [
+
+	^ sharedAccess critical: [ availableWorkers size ]
 ]
 
 { #category : #private }
@@ -296,6 +302,28 @@ GtRemoteRunner >> port: anObject [
 	port := anObject
 ]
 
+{ #category : #printing }
+GtRemoteRunner >> printOn: aStream [
+
+	super printOn: aStream.
+	aStream
+		nextPut: $(;
+		<< self state;
+		nextPut: $).
+]
+
+{ #category : #'api - worker' }
+GtRemoteRunner >> privateTaskFailed: aTaskContextId with: anGtRrTaskErrorDetails [
+	"Mark the specified task as failed.
+	Must be called within sharedAccess"
+	| taskContext |
+
+	taskContext := currentlyExecutingTasks removeKey: aTaskContextId.
+	taskContext errorDetails: anGtRrTaskErrorDetails.
+	taskContext markTaskCompleted.
+	self checkJobFinished: taskContext.
+]
+
 { #category : #'api - worker' }
 GtRemoteRunner >> registerWorkerWithPlatform: aPlatform [
 	"Register the supplied worker and connection details.
@@ -311,6 +339,12 @@ GtRemoteRunner >> registerWorkerWithPlatform: aPlatform [
 		to: self.
 	"Answer a PharoLink primitive so that a proxy isn't created for the runner (which is a global, anyway)"
 	^ nil
+]
+
+{ #category : #accessing }
+GtRemoteRunner >> registeredWorkerCount [
+
+	^ sharedAccess critical: [ registeredWorkers size ]
 ]
 
 { #category : #phases }
@@ -445,23 +479,28 @@ GtRemoteRunner >> taskDone: aTaskContextId with: anObject [
 
 { #category : #'api - worker' }
 GtRemoteRunner >> taskFailed: aTaskContextId with: anGtRrTaskErrorDetails [
-	| taskContext |
+	"Mark the specified task as failed"
 
 	sharedAccess critical: 
-		[ taskContext := currentlyExecutingTasks removeKey: aTaskContextId.
-		taskContext errorDetails: anGtRrTaskErrorDetails.
-		taskContext markTaskCompleted.
-		self checkJobFinished: taskContext ].
+		[ self privateTaskFailed: aTaskContextId with: anGtRrTaskErrorDetails ].
 ]
 
 { #category : #'api - worker' }
 GtRemoteRunner >> unregisterWorker: aPharoLinkServerConnectionDisconnectedAnnouncement [
-	| connection terminatedWorkers |
+	| connection terminatedWorkers failedTasks errorDetails |
 
 	connection := aPharoLinkServerConnectionDisconnectedAnnouncement connection.
 	sharedAccess critical:
-		[ registeredWorkers removeKey: connection.
+		[ registeredWorkers removeKey: connection ifAbsent: [].
 		terminatedWorkers := availableWorkers select: [ :worker | worker connection = connection ].
 		terminatedWorkers	do: [ :worker | worker terminateProcess ].
-		availableWorkers removeAll: terminatedWorkers ].
+		availableWorkers removeAll: terminatedWorkers.
+		failedTasks := currentlyExecutingTasks select: [ :each |
+			each connection = connection ].
+		failedTasks valuesDo: [ :taskContext |
+			errorDetails := GtRrTaskErrorDetails new
+					errorMessage: 'Connection closed';
+					trace: (String streamContents: [ :stream |
+						thisContext debugStackOn: stream ]).
+			self privateTaskFailed: taskContext taskContextId with: errorDetails ]. ].
 ]
