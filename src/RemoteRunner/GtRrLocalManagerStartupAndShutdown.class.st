@@ -90,8 +90,7 @@ GtRrLocalManagerStartupAndShutdown >> startWatchDog [
 			            remove: e;
 			            add: process ].
 	            1 minute wait ] repeat ] forkNamed:
-		            'GtRemoteRunner local watch dog'.
-
+		            'GtRemoteRunner local watch dog'
 ]
 
 { #category : #'startup - shutdown' }

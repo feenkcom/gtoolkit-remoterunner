@@ -32,6 +32,24 @@ GtRrJob >> announcer [
 	^ announcer ifNil: [ announcer := Announcer new ]
 ]
 
+{ #category : #ui }
+GtRrJob >> gtResultsFor: aView [
+	<gtView>
+
+	^ aView list
+		title: 'Results';
+		priority: 10;
+		items: [ results ];
+		updateWhen: GtRrJobAnnouncement in: [ self announcer ]
+]
+
+{ #category : #testing }
+GtRrJob >> hasErrors [
+	"Answer a boolean indicating whether the receiver has tasks that failed"
+
+	^ results anySatisfy: [ :task | task hasErrors ]
+]
+
 { #category : #accessing }
 GtRrJob >> id [
 
@@ -67,7 +85,10 @@ GtRrJob >> printOn: aStream [
 	super printOn: aStream.
 	aStream
 		nextPut: $(;
-		print: self state;
+		print: self state.
+	self hasErrors ifTrue:
+		[ aStream << ' with errors' ].
+	aStream
 		nextPut: $).
 ]
 
@@ -86,7 +107,7 @@ GtRrJob >> state [
 
 { #category : #accessing }
 GtRrJob >> state: aSymbol [
-	"One of: #notStarted, #started, #inProgress, #completed"
+	"One of: #notStarted, #started, #completed"
 
 	state := aSymbol.
 

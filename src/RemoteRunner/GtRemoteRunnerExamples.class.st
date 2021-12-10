@@ -140,3 +140,58 @@ GtRemoteRunnerExamples >> getNextTaskFor [
 	self assert: (remoteRunner currentlyExecutingJobs anyOne atPlatform: #plat1) pendingTasks isEmpty.
 	self assert: (remoteRunner currentlyExecutingJobs anyOne atPlatform: #plat2) pendingTasks isEmpty.
 ]
+
+{ #category : #examples }
+GtRemoteRunnerExamples >> handleWorkerDisconnection [
+	"Demonstrate the runner handling worker disconnection"
+	<gtExample>
+	| runner worker workerProcess job startSemaphore endSemaphore retry |
+
+	runner := GtRemoteRunner new
+		port: 7084;
+		managerStartupAndShutdown: GtRrManualManagerStartupAndShutdown new;
+		start.
+	worker := GtRrWorker newWith: (LanguageLinkSettings pharoDefaultSettings
+			serverProcessClass: LanguageLinkManualProcess;
+			serverSocketAddress:
+				(LanguageLinkSocketAddress from: 'localhost:7084')).
+	worker start.
+	workerProcess := [ worker taskPollForever ] fork.
+	startSemaphore := Semaphore new.
+	endSemaphore := Semaphore new.
+	job := GtRrTasksJob new
+		tasks: { GtRrScriptTask script: 'Semaphore new wait' }.
+	job
+		when: GtRrJobStartedAnnouncement
+			do: [ startSemaphore signal ];
+		when: GtRrJobCompletedAnnouncement
+			do: [ endSemaphore signal ].
+
+	retry := 50.
+	[ retry > 0 and: [ runner availableWorkerCount = 0 ] ] whileTrue:
+		[ 500 milliSeconds wait ].
+	retry = 0 ifTrue:
+		[ self error: 'Worker didn''t connect' ].
+	self assert: runner state equals: #idle.
+	self assert: runner registeredWorkerCount equals: 1.
+	self assert: runner availableWorkerCount equals: 1.
+
+	runner submitJob: job.
+	startSemaphore wait.
+	self assert: runner state equals: #busy.
+	self assert: runner registeredWorkerCount equals: 1.
+	self assert: runner availableWorkerCount equals: 0.
+	self assert: job state equals: #started.
+
+	worker stop.
+	workerProcess terminate.
+	endSemaphore wait.
+	self assert: runner state equals: #idle.
+	self assert: runner registeredWorkerCount equals: 0.
+	self assert: runner availableWorkerCount equals: 0.
+	self assert: job state equals: #completed.
+	self assert: job hasErrors.
+
+	runner stop.
+
+]

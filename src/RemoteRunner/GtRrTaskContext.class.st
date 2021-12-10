@@ -4,7 +4,8 @@ Class {
 	#instVars : [
 		'platformContext',
 		'taskContextId',
-		'task'
+		'task',
+		'workerFuture'
 	],
 	#category : #'RemoteRunner-Runner-State'
 }
@@ -23,6 +24,12 @@ GtRrTaskContext class >> leJsonV4AttributeMapping [
 GtRrTaskContext class >> leJsonV4Name [
 
 	^ #taskContext
+]
+
+{ #category : #accessing }
+GtRrTaskContext >> connection [
+
+	^ workerFuture connection
 ]
 
 { #category : #accessing }
@@ -119,6 +126,20 @@ GtRrTaskContext >> taskContextId: anObject [
 GtRrTaskContext >> taskId [
 
 	^ task taskId
+]
+
+{ #category : #accessing }
+GtRrTaskContext >> workerFuture [
+	<return: #GtRrFutureWorkerTask>
+
+	^ workerFuture
+]
+
+{ #category : #accessing }
+GtRrTaskContext >> workerFuture: aGtRrFutureWorkerTask [
+
+	workerFuture := aGtRrFutureWorkerTask.
+	task workerIpAddress: workerFuture remoteAddress.
 ]
 
 { #category : #accessing }

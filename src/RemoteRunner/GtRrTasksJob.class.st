@@ -21,7 +21,10 @@ GtRrTasksJob >> printOn: aStream [
 		nextPut: $(;
 		print: self tasks size;
 		<< ' tasks, ';
-		print: self state;
+		print: self state.
+	self hasErrors ifTrue:
+		[ aStream << ' with errors' ].
+	aStream
 		nextPut: $).
 ]
 
