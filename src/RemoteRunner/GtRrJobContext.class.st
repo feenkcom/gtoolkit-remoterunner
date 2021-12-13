@@ -105,9 +105,33 @@ GtRrJobContext >> jobContext [
 ]
 
 { #category : #'api - running' }
+GtRrJobContext >> markJobCompleted [
+
+	job markJobCompleted
+]
+
+{ #category : #'api - running' }
+GtRrJobContext >> markJobStarted [
+
+	job markJobStarted
+]
+
+{ #category : #'api - running' }
+GtRrJobContext >> markTaskCancelled: aGtRrTaskContext [
+
+	job addResult: aGtRrTaskContext task.
+]
+
+{ #category : #'api - running' }
 GtRrJobContext >> markTaskCompleted: aGtRrTaskContext [
 
 	job addResult: aGtRrTaskContext task.
+]
+
+{ #category : #'api - running' }
+GtRrJobContext >> markTaskStarted: aGtRrTaskContext [
+
+	job announce: (GtRrTaskStartedAnnouncement task: aGtRrTaskContext task)
 ]
 
 { #category : #private }
@@ -153,4 +177,15 @@ GtRrJobContext >> results [
 GtRrJobContext >> tasks [
 
 	^ tasks
+]
+
+{ #category : #'api - running' }
+GtRrJobContext >> terminateJob [
+	"Start the process of terminating the receiver.
+	This may be completed at a later time, after all the workers have terminated their tasks.
+	Must be called within sharedAccess."
+
+	job markJobTerminating.
+	platformContexts do: #terminateJob.
+	remoteRunner checkJobFinished: self.
 ]

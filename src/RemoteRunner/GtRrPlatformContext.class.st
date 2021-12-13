@@ -53,11 +53,26 @@ GtRrPlatformContext >> jobContext: anObject [
 ]
 
 { #category : #'api - running' }
+GtRrPlatformContext >> markTaskCancelled: aGtRrTaskContext [
+
+	completedTasks add: aGtRrTaskContext.
+	jobContext markTaskCancelled: aGtRrTaskContext.
+
+]
+
+{ #category : #'api - running' }
 GtRrPlatformContext >> markTaskCompleted: aGtRrTaskContext [
 
 	completedTasks add: aGtRrTaskContext.
 	jobContext markTaskCompleted: aGtRrTaskContext.
 	currentTasks remove: aGtRrTaskContext.
+]
+
+{ #category : #'api - running' }
+GtRrPlatformContext >> markTaskStarted: aGtRrTaskContext [
+
+	jobContext markTaskStarted: aGtRrTaskContext.
+
 ]
 
 { #category : #accessing }
@@ -109,4 +124,18 @@ GtRrPlatformContext >> results [
 	<return: #Array of: #GtRrTask>
 
 	^ completedTasks collect: #task
+]
+
+{ #category : #'api - running' }
+GtRrPlatformContext >> terminateJob [
+	"Start the process of terminating the receiver.
+	This may be completed at a later time, after all the workers have terminated their tasks.
+	Must be called within sharedAccess."
+	| pendingTask |
+
+	[ pendingTask := pendingTasks nextOrNil ] whileNotNil:
+		[ pendingTask markTaskCancelled.
+		completedTasks add: pendingTask ].
+	currentTasks do: [ :taskContext |
+		self remoteRunner terminateTaskContextId: taskContext taskContextId ]
 ]

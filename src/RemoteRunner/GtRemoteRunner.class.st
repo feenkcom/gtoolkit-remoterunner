@@ -14,7 +14,6 @@ Features of the system (mostly not yet implemented) include:
   - Initially a platform is an OS / hardware combination, but as it is just a name, it can be any set of desired attributes.
 - If the current job has any failures or errors the next job can be started prior to the current job completing, maximising resource (worker) usage.
 - Timeouts on:
-  - Tests
   - Tasks
   - Workers
   - Jobs
@@ -61,7 +60,10 @@ Class {
 		'currentlyExecutingJobs',
 		'currentlyExecutingTasks',
 		'sharedAccess',
-		'registeredWorkers'
+		'registeredWorkers',
+		'taskTimeout',
+		'workerTimeout',
+		'jobTimeout'
 	],
 	#category : #'RemoteRunner-Runner'
 }
@@ -106,14 +108,13 @@ GtRemoteRunner >> availableWorkerCount [
 GtRemoteRunner >> checkJobFinished: aGtRrContext [
 	"After each task has been completed, check if the job has finished, and if so, signal it.
 	Must be called within sharedAccess."
-	| jobContext job |
+	| jobContext |
 
 	jobContext := aGtRrContext jobContext.
 	jobContext isFinished ifFalse: [ ^ self ].
 
-	currentlyExecutingJobs removeKey: jobContext id.
-	job := jobContext job.
-	job state: #completed.
+	jobStartupAndShutdown shutdownJob: jobContext.
+
 ]
 
 { #category : #private }
@@ -136,6 +137,24 @@ GtRemoteRunner >> debugMode [
 	Always true during development.  Settings TBD."
 
 	^ true.
+]
+
+{ #category : #accessing }
+GtRemoteRunner >> defaultJobTimeout [
+
+	^ 10 minutes
+]
+
+{ #category : #accessing }
+GtRemoteRunner >> defaultTaskTimeout [
+
+	^ 1 minute
+]
+
+{ #category : #accessing }
+GtRemoteRunner >> defaultWorkerTimeout [
+
+	^ 2 minutes
 ]
 
 { #category : #private }
@@ -230,6 +249,8 @@ GtRemoteRunner >> initialize [
 	The keys are ordered to ensure that tasks are assigned to the job started first."
 	currentlyExecutingJobs := OrderedDictionary new.
 	currentlyExecutingTasks := Dictionary new.
+	"Make sure you REALLY know what you're doing before changing sharedAccess to a Monitor.
+	PharoLinkServer requests are handled in individual processes, so any deadlock is unlikely to be resolved by converting sharedAccess to a Monitor."
 	sharedAccess := GtMutualExclusionSemaphore forMutualExclusion.
 	"availableWorkers is a Set of GtRrFutureWorkerTask.
 	The worker is represented by the connection and is waiting on the semaphore held by the GtRrFutureWorkerTask."
@@ -291,6 +312,12 @@ GtRemoteRunner >> nextTaskSerializedFor: aPlatform [
 ]
 
 { #category : #accessing }
+GtRemoteRunner >> pendingJobCount [
+
+	^ sharedAccess critical: [ jobQueue size ]
+]
+
+{ #category : #accessing }
 GtRemoteRunner >> port [
 
 	^ port
@@ -347,18 +374,12 @@ GtRemoteRunner >> registeredWorkerCount [
 	^ sharedAccess critical: [ registeredWorkers size ]
 ]
 
-{ #category : #phases }
-GtRemoteRunner >> runJobShutdown [
-	"Perform any actions associated with finishing the current job"
+{ #category : #'private - accessing' }
+GtRemoteRunner >> removeCurrentlyExecutingJob: aJobContextId [
+	"Remove the specified job from the collection of currently executing jobs.
+	It's possible that the job was cancelled on the server and a worker disappears at the same time, resulting in two attempts to remove the current job.  Do nothing if the job isn't found."
 
-	jobStartupAndShutdown shutdown
-]
-
-{ #category : #phases }
-GtRemoteRunner >> runJobStartup [
-	"Perform any actions associated with starting a new job"
-
-	jobStartupAndShutdown startup
+	currentlyExecutingJobs removeKey: aJobContextId ifAbsent: []
 ]
 
 { #category : #phases }
@@ -405,8 +426,7 @@ GtRemoteRunner >> startJob: aGtRrJob [
 	currentlyExecutingJobs
 		at: aGtRrJob id
 		put: context.
-	jobStartupAndShutdown startupForJob: context.
-	aGtRrJob state: #started.
+	jobStartupAndShutdown startupJob: context.
 	self assignTasksToWorkers.
 ]
 
@@ -443,10 +463,8 @@ GtRemoteRunner >> submitJob: aGtRrJob [
 		[ currentlyExecutingJobs ifEmpty:
 			[ self startJob: aGtRrJob ]
 		ifNotEmpty:
-			[ jobQueue nextPut: aGtRrJob.
-			"If the current job has an error, the next one can be started,
-				but maybe not always.
-				To be implemented" ] ]
+			[ "Multiple jobs may be allowed to run concurrently - functionality to be added"
+			jobQueue nextPut: aGtRrJob ] ]
 ]
 
 { #category : #ui }
@@ -483,6 +501,40 @@ GtRemoteRunner >> taskFailed: aTaskContextId with: anGtRrTaskErrorDetails [
 
 	sharedAccess critical: 
 		[ self privateTaskFailed: aTaskContextId with: anGtRrTaskErrorDetails ].
+]
+
+{ #category : #'api - jobs' }
+GtRemoteRunner >> terminateJobId: aJobId [
+	"Terminate the specified job.
+	If the job has not yet been started, it is marked cancelled.
+	If it has been started, it will be marked completed with errors."
+	<return: #GtRrJob>
+
+	sharedAccess critical:
+		[ currentlyExecutingJobs 
+			at: aJobId 
+			ifPresent: [ :aJobContext | 
+				currentlyExecutingJobs removeKey: aJobId.
+				aJobContext terminateJob.
+				aJobContext job ]
+			ifAbsent: 
+				[ (jobQueue nextOrNilSuchThat: [ :jobContext | jobContext id = aJobId ])
+				ifNotNil: [ :aJob |
+					aJob cancelJob.
+					aJob ] ] ].
+]
+
+{ #category : #private }
+GtRemoteRunner >> terminateTaskContextId: aTaskContextId [
+	"Terminate the specified currently executing task"
+	| taskContext  |
+
+	"This should send a terminate command through the control channel.
+	When the control channel is available...
+	For now, close the connection, which should cause the worker to exit, terminating any associated tasks.  It will be auto-restarted if appropriate.
+	The connection will announce it's closure, which will call back in to the remote runner, requiring sharedAccess.  A Monitor would handle this, but this is temporary.  Just fork for now."
+	taskContext := currentlyExecutingTasks at: aTaskContextId.
+	[ taskContext connection stop ] fork.
 ]
 
 { #category : #'api - worker' }

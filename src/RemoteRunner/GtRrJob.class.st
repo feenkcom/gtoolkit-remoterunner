@@ -8,10 +8,12 @@ Class {
 	#classTraits : 'TGtAnnouncer classTrait',
 	#instVars : [
 		'platforms',
-		'state',
 		'results',
 		'announcer',
-		'id'
+		'id',
+		'state',
+		'startTime',
+		'endTime'
 	],
 	#category : #'RemoteRunner-Jobs'
 }
@@ -30,6 +32,15 @@ GtRrJob >> addResult: aGtRrTask [
 GtRrJob >> announcer [
 
 	^ announcer ifNil: [ announcer := Announcer new ]
+]
+
+{ #category : #'private - running' }
+GtRrJob >> cancelJob [
+	"Mark the receiver as cancelled (before being started).
+	This not be called by the end user, but via {{gtMethod:GtRemoteRunner>>terminateJobId:}}"
+
+	self markJobCancelled.
+
 ]
 
 { #category : #ui }
@@ -63,7 +74,36 @@ GtRrJob >> initialize [
 	id := UUID new asString.
 	platforms := { OSPlatform current name }.
 	results := OrderedCollection new.
-	state := #notStarted
+	state := #notStarted.
+]
+
+{ #category : #'private - running' }
+GtRrJob >> markJobCancelled [
+
+	state := #cancelled.
+	self announce: (GtRrJobCancelledAnnouncement job: self)
+]
+
+{ #category : #'private - running' }
+GtRrJob >> markJobCompleted [
+
+	endTime := DateAndTime now.
+	state := #completed.
+	self announce: (GtRrJobCompletedAnnouncement job: self)
+]
+
+{ #category : #'private - running' }
+GtRrJob >> markJobStarted [
+
+	startTime := DateAndTime now.
+	state := #started.
+	self announce: (GtRrJobStartedAnnouncement job: self)
+]
+
+{ #category : #'private - running' }
+GtRrJob >> markJobTerminating [
+
+	state := #terminating.
 ]
 
 { #category : #accessing }
@@ -100,22 +140,10 @@ GtRrJob >> results [
 
 { #category : #accessing }
 GtRrJob >> state [
+	"One of: #notStarted, #started, #cancelled, #completed"
 	<return: #Symbol>
 
 	^ state
-]
-
-{ #category : #accessing }
-GtRrJob >> state: aSymbol [
-	"One of: #notStarted, #started, #completed"
-
-	state := aSymbol.
-
-	state = #started ifTrue:
-		[ self announce: (GtRrJobStartedAnnouncement job: self) ].
-	state = #completed ifTrue:
-		[ self announce: (GtRrJobCompletedAnnouncement job: self) ].
-
 ]
 
 { #category : #accessing }

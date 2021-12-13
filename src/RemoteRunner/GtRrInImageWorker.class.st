@@ -7,10 +7,24 @@ Class {
 	#instVars : [
 		'process',
 		'remoteRunner',
-		'rrPlatform'
+		'rrPlatform',
+		'connection'
 	],
 	#category : #'RemoteRunner-Examples'
 }
+
+{ #category : #accessing }
+GtRrInImageWorker >> connection [
+	<return: #PharoLinkServerConnection>
+
+	^ connection
+]
+
+{ #category : #accessing }
+GtRrInImageWorker >> connection: aPharoLinkServerConnection [
+
+	connection := aPharoLinkServerConnection
+]
 
 { #category : #accessing }
 GtRrInImageWorker >> process [
@@ -50,7 +64,9 @@ GtRrInImageWorker >> start [
 		description: 'The worker''s platform must be set before starting'.
 	self assert: remoteRunner isNotNil
 		description: 'The worker''s remote runner must be set before starting'.
-	remoteRunner registerWorkerWithPlatform: rrPlatform.
+	PharoLinkServerCurrentConnection 
+		value: connection
+		during: [ remoteRunner registerWorkerWithPlatform: rrPlatform ].
 	process := [ self taskPollForever ] fork.
 ]
 
@@ -82,7 +98,9 @@ GtRrInImageWorker >> taskFailed: aTaskContext with: anError [
 GtRrInImageWorker >> taskPoll [
 	| serialisedTask |
 
-	serialisedTask := remoteRunner nextTaskSerializedFor: rrPlatform.
+	PharoLinkServerCurrentConnection 
+		value: connection
+		during: [ serialisedTask := remoteRunner nextTaskSerializedFor: rrPlatform ].
 	^ LeJsonV4 uniqueInstance deserialize: serialisedTask readStream.
 ]
 
