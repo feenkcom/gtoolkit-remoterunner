@@ -52,6 +52,13 @@ GtRrTaskContext >> jobContext [
 ]
 
 { #category : #running }
+GtRrTaskContext >> markTaskCancelled [
+
+	task markTaskCancelled.
+	platformContext markTaskCancelled: self.
+]
+
+{ #category : #running }
 GtRrTaskContext >> markTaskCompleted [
 
 	task markTaskCompleted.
@@ -61,7 +68,8 @@ GtRrTaskContext >> markTaskCompleted [
 { #category : #running }
 GtRrTaskContext >> markTaskStarted [ 
 
-	task markTaskStarted
+	task markTaskStarted.
+	platformContext markTaskStarted: self.
 ]
 
 { #category : #accessing }

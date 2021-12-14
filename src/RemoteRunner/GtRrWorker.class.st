@@ -26,7 +26,7 @@ GtRrWorker class >> commandLine [
 				  SignalLogger resetAllInstances.
 				  logger := RestartingStreamLogger stdout.
 				  logger start ].
-		  serverSocketAddress := (args at: #serverSocketAddress) value.
+		  serverSocketAddress := ((args at: #serverSocketAddress) at: #address) value.
 		  StringSignal emit:
 			  'Connect server socket address: ' , serverSocketAddress.
 		  application := self newWith: (self defaultSettings
@@ -45,13 +45,15 @@ GtRrWorker class >> commandLine [
 { #category : #accessing }
 GtRrWorker class >> commandLineCommand [
 
-	^ (ClapCommand id: 'remoteRunnerWorker')
+	^ (ClapCommand id: #remoteRunnerWorker)
 		  description: 'Run the RemoteRunner worker';
 		  add: ClapFlag forHelp;
-		  add: ((ClapFlag id: 'log') description: 'Enable logging to stdout');
-		  add: ((ClapFlag id: 'taskPollForever') description: 'Poll tasks forever');
-		  add: ((ClapPositional id: 'serverSocketAddress') description:
-					   'The server socket address on which to connect for requests');
+		  add: ((ClapFlag id: #log) description: 'Enable logging to stdout');
+		  add: ((ClapFlag id: #taskPollForever) description: 'Poll tasks forever');
+		  add: ((ClapFlag id: #serverSocketAddress) 
+					description: 'The server socket address on which to connect for requests';
+					add: (ClapPositional id: #address);
+					yourself);
 		  yourself
 ]
 

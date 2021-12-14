@@ -19,12 +19,23 @@ GtRrJobStartupAndShutdown >> remoteRunner: anObject [
 	remoteRunner := anObject
 ]
 
+{ #category : #'api - shutdown' }
+GtRrJobStartupAndShutdown >> shutdownJob: aJobContext [
+	| job |
+
+	remoteRunner removeCurrentlyExecutingJob: aJobContext id.
+	job := aJobContext job.
+	job markJobCompleted.
+
+]
+
 { #category : #'api - startup' }
-GtRrJobStartupAndShutdown >> startupForJob: aGtRrJobContext [
+GtRrJobStartupAndShutdown >> startupJob: aGtRrJobContext [
 	"Perform actions to start the supplied job context.
 	- Use the scheduler to group all the tests in to tasks"
 
 	aGtRrJobContext 
 		getTasks;
-		createPlatformContexts.
+		createPlatformContexts;
+		markJobStarted.
 ]

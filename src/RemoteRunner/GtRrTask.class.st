@@ -7,7 +7,8 @@ Class {
 		'workerIpAddress',
 		'result',
 		'taskId',
-		'errorDetails'
+		'errorDetails',
+		'state'
 	],
 	#category : #'RemoteRunner-Tasks'
 }
@@ -79,19 +80,59 @@ GtRrTask >> hasErrors [
 GtRrTask >> initialize [
 
 	super initialize.
-	taskId := UUID new asString
+	taskId := UUID new asString.
+	state := #notStarted.
+]
+
+{ #category : #running }
+GtRrTask >> markTaskCancelled [
+	"Mark the receiver cancelled.
+	Cancellation is specifically terminating the task before it was started."
+
+	endTime := DateAndTime now.
+	errorDetails := (GtRrTaskErrorDetails new
+		errorMessage: 'Task cancelled before execution';
+		setTrace).
+	state := #cancelled.
 ]
 
 { #category : #running }
 GtRrTask >> markTaskCompleted [
 
 	endTime := DateAndTime now.
+	state := #completed.
 ]
 
 { #category : #running }
 GtRrTask >> markTaskStarted [
 
 	startTime := DateAndTime now.
+	state := #started.
+]
+
+{ #category : #running }
+GtRrTask >> markTaskTerminated [
+
+	endTime := DateAndTime now.
+	state := #terminated.
+]
+
+{ #category : #running }
+GtRrTask >> markTaskTerminating [
+
+	state := #terminating.
+]
+
+{ #category : #printing }
+GtRrTask >> printOn: aStream [
+
+	super printOn: aStream.
+	aStream
+		nextPut: $(;
+		<< self state.
+	self hasErrors ifTrue:
+		[ aStream << ' with errors' ].
+	aStream nextPut: $).
 ]
 
 { #category : #accessing }
@@ -126,11 +167,19 @@ GtRrTask >> startTime: anObject [
 
 { #category : #accessing }
 GtRrTask >> state [
-	"Answer a Symbol indicating the inferred state of the receiver"
+	"Answer a Symbol indicating the inferred state of the receiver.
+	One of: #notStarted, #started, #cancelled, #terminating, #terminated, #completed.
+	The errorDetails are used to determine if the task completed successfully, why and where it was terminated, etc."
 
-	startTime ifNil: [ ^ #notStarted ].
-	endTime ifNil: [ ^ #running ].
-	^ #completed
+	^ state
+]
+
+{ #category : #private }
+GtRrTask >> state: aSymbol [
+	"Set the state.
+	Only used by object serialisation"
+	
+	state := aSymbol
 ]
 
 { #category : #ui }
@@ -139,6 +188,8 @@ GtRrTask >> summaryAttributes [
 
 	^ Array streamContents: [ :stream |
 		stream nextPut: #State -> self state.
+		self hasErrors ifTrue:
+			[ stream nextPut: #Error -> errorDetails errorMessage ].
 		startTime ifNotNil:
 			[ stream nextPut: #Started -> startTime ].
 		endTime ifNotNil:
