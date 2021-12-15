@@ -13,7 +13,10 @@ Class {
 		'id',
 		'state',
 		'startTime',
-		'endTime'
+		'endTime',
+		'jobTimeout',
+		'taskTimeout',
+		'errorDetails'
 	],
 	#category : #'RemoteRunner-Jobs'
 }
@@ -41,6 +44,30 @@ GtRrJob >> cancelJob [
 
 	self markJobCancelled.
 
+]
+
+{ #category : #accessing }
+GtRrJob >> endTime [
+
+	^ endTime
+]
+
+{ #category : #accessing }
+GtRrJob >> errorDetails [
+	"If set, the error details will contain the overall reason for the failure of the job.
+	Some individual tasks may still successfully complete."
+	<return: #GtRrErrorDetails or: nil>
+
+	^ errorDetails
+]
+
+{ #category : #accessing }
+GtRrJob >> errorDetails: aGtErrorDetails [
+	"Set the error details of the receiver.
+	Asynchronous events may cause multiple attempts at setting the details, use the first one"
+
+	errorDetails ifNotNil: [ ^ self ].
+	errorDetails := aGtErrorDetails
 ]
 
 { #category : #ui }
@@ -75,6 +102,19 @@ GtRrJob >> initialize [
 	platforms := { OSPlatform current name }.
 	results := OrderedCollection new.
 	state := #notStarted.
+]
+
+{ #category : #accessing }
+GtRrJob >> jobTimeout [
+	<return: #Duration>
+
+	^ jobTimeout
+]
+
+{ #category : #accessing }
+GtRrJob >> jobTimeout: aDuration [
+
+	jobTimeout := aDuration
 ]
 
 { #category : #'private - running' }
@@ -139,11 +179,30 @@ GtRrJob >> results [
 ]
 
 { #category : #accessing }
+GtRrJob >> startTime [
+
+	^ startTime
+]
+
+{ #category : #accessing }
 GtRrJob >> state [
 	"One of: #notStarted, #started, #cancelled, #completed"
 	<return: #Symbol>
 
 	^ state
+]
+
+{ #category : #accessing }
+GtRrJob >> taskTimeout [
+	<return: #Duration>
+
+	^ taskTimeout
+]
+
+{ #category : #accessing }
+GtRrJob >> taskTimeout: aDuration [
+
+	taskTimeout := aDuration
 ]
 
 { #category : #accessing }

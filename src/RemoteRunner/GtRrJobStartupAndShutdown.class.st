@@ -32,10 +32,12 @@ GtRrJobStartupAndShutdown >> shutdownJob: aJobContext [
 { #category : #'api - startup' }
 GtRrJobStartupAndShutdown >> startupJob: aGtRrJobContext [
 	"Perform actions to start the supplied job context.
-	- Use the scheduler to group all the tests in to tasks"
+	- Use the scheduler to group all the tests in to tasks.
+	Must be called within sharedAccess."
 
 	aGtRrJobContext 
 		getTasks;
 		createPlatformContexts;
 		markJobStarted.
+	remoteRunner timeoutManager addContext: aGtRrJobContext
 ]

@@ -1,6 +1,6 @@
 Class {
 	#name : #GtRrPlatformContext,
-	#superclass : #Object,
+	#superclass : #GtRrContext,
 	#instVars : [
 		'jobContext',
 		'platform',
@@ -16,6 +16,14 @@ GtRrPlatformContext >> completedTasks [
 	<return: #Array of: #GtRrTaskContext>
 
 	^ completedTasks
+]
+
+{ #category : #accessing }
+GtRrPlatformContext >> contextTimeoutTime [
+	"Answer the absolute time this context will time out"
+	<return: #DateAndTime>
+
+	^ self shouldNotImplement
 ]
 
 { #category : #accessing }
@@ -40,6 +48,12 @@ GtRrPlatformContext >> isFinished [
 	^ pendingTasks isEmpty and: [ currentTasks isEmpty and: [ completedTasks isNotEmpty ]]
 ]
 
+{ #category : #testing }
+GtRrPlatformContext >> isPlatformContext [
+
+	^ true
+]
+
 { #category : #accessing }
 GtRrPlatformContext >> jobContext [
 
@@ -50,6 +64,12 @@ GtRrPlatformContext >> jobContext [
 GtRrPlatformContext >> jobContext: anObject [
 
 	jobContext := anObject
+]
+
+{ #category : #accessing }
+GtRrPlatformContext >> jobTimeout [
+
+	^ jobContext jobTimeout
 ]
 
 { #category : #'api - running' }
@@ -126,6 +146,12 @@ GtRrPlatformContext >> results [
 	^ completedTasks collect: #task
 ]
 
+{ #category : #accessing }
+GtRrPlatformContext >> taskTimeout [
+
+	^ jobContext taskTimeout
+]
+
 { #category : #'api - running' }
 GtRrPlatformContext >> terminateJob [
 	"Start the process of terminating the receiver.
@@ -138,4 +164,11 @@ GtRrPlatformContext >> terminateJob [
 		completedTasks add: pendingTask ].
 	currentTasks do: [ :taskContext |
 		self remoteRunner terminateTaskContextId: taskContext taskContextId ]
+]
+
+{ #category : #private }
+GtRrPlatformContext >> timeoutContext [
+	"Terminate the receiver without timeout as the reason"
+
+	self shouldNotImplement .
 ]

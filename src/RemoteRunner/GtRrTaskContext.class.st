@@ -1,11 +1,13 @@
 Class {
 	#name : #GtRrTaskContext,
-	#superclass : #Object,
+	#superclass : #GtRrContext,
 	#instVars : [
 		'platformContext',
 		'taskContextId',
 		'task',
-		'workerFuture'
+		'workerFuture',
+		'taskTimeoutTime',
+		'workerTimeoutTime'
 	],
 	#category : #'RemoteRunner-Runner-State'
 }
@@ -33,6 +35,15 @@ GtRrTaskContext >> connection [
 ]
 
 { #category : #accessing }
+GtRrTaskContext >> contextTimeoutTime [
+	"Answer the absolute time this context will time out.
+	Actual task timeout is handled by the worker.  On the runner we are checking the worker timeout."
+	<return: #DateAndTime>
+
+	^ self workerTimeoutTime
+]
+
+{ #category : #accessing }
 GtRrTaskContext >> errorDetails: anObject [
 
 	task errorDetails: anObject
@@ -45,10 +56,28 @@ GtRrTaskContext >> initialize [
 	taskContextId := UUID new asString.
 ]
 
+{ #category : #testing }
+GtRrTaskContext >> isFinished [
+
+	^ task hasCompleted
+]
+
+{ #category : #testing }
+GtRrTaskContext >> isTaskContext [
+
+	^ true
+]
+
 { #category : #accessing }
 GtRrTaskContext >> jobContext [
 
 	^ platformContext jobContext
+]
+
+{ #category : #accessing }
+GtRrTaskContext >> jobTimeout [
+
+	^ platformContext jobTimeout
 ]
 
 { #category : #running }
@@ -70,6 +99,8 @@ GtRrTaskContext >> markTaskStarted [
 
 	task markTaskStarted.
 	platformContext markTaskStarted: self.
+	taskTimeoutTime := task startTime + self taskTimeout.
+	workerTimeoutTime := task startTime + self workerTimeout.
 ]
 
 { #category : #accessing }
@@ -90,6 +121,12 @@ GtRrTaskContext >> printOn: aStream [
 	task
 		ifNil: [ super printOn: aStream ]
 		ifNotNil: [ task printOn: aStream ]
+]
+
+{ #category : #accessing }
+GtRrTaskContext >> remoteRunner [
+
+	^ platformContext remoteRunner
 ]
 
 { #category : #accessing }
@@ -137,6 +174,31 @@ GtRrTaskContext >> taskId [
 ]
 
 { #category : #accessing }
+GtRrTaskContext >> taskTimeout [
+
+	^ task taskTimeout ifNil:
+		[ platformContext taskTimeout ]
+]
+
+{ #category : #accessing }
+GtRrTaskContext >> taskTimeoutTime [
+	"Answer the absolute time at which the task is considered to have timed out."
+	<return: #DateAndTime>
+
+	^ taskTimeoutTime
+]
+
+{ #category : #private }
+GtRrTaskContext >> timeoutContext [
+	"Terminate the receiver without timeout as the reason"
+
+	task errorDetails: (GtRrErrorDetails new
+		errorMessage: 'Worker exceeded time limit';
+		setTrace).
+	self remoteRunner terminateTaskContextId: taskContextId.
+]
+
+{ #category : #accessing }
 GtRrTaskContext >> workerFuture [
 	<return: #GtRrFutureWorkerTask>
 
@@ -154,4 +216,18 @@ GtRrTaskContext >> workerFuture: aGtRrFutureWorkerTask [
 GtRrTaskContext >> workerIpAddress: anObject [
 
 	task workerIpAddress: anObject
+]
+
+{ #category : #accessing }
+GtRrTaskContext >> workerTimeout [
+
+	^ self remoteRunner workerTimeout
+]
+
+{ #category : #accessing }
+GtRrTaskContext >> workerTimeoutTime [
+	"Answer the absolute time at which the worker is considered to have timed out."
+	<return: #DateAndTime>
+
+	^ workerTimeoutTime
 ]

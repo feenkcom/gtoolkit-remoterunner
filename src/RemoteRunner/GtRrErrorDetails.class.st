@@ -1,5 +1,5 @@
 Class {
-	#name : #GtRrTaskErrorDetails,
+	#name : #GtRrErrorDetails,
 	#superclass : #Object,
 	#instVars : [
 		'errorMessage',
@@ -9,25 +9,25 @@ Class {
 }
 
 { #category : #accessing }
-GtRrTaskErrorDetails class >> leJsonV4Name [
+GtRrErrorDetails class >> leJsonV4Name [
 
 	^ #taskErrorDetails
 ]
 
 { #category : #accessing }
-GtRrTaskErrorDetails >> errorMessage [
+GtRrErrorDetails >> errorMessage [
 
 	^ errorMessage
 ]
 
 { #category : #accessing }
-GtRrTaskErrorDetails >> errorMessage: anObject [
+GtRrErrorDetails >> errorMessage: anObject [
 
 	errorMessage := anObject
 ]
 
 { #category : #initialization }
-GtRrTaskErrorDetails >> setTrace [
+GtRrErrorDetails >> setTrace [
 	"Set the receiver's trace to the current stack trace"
 
 	trace := (String streamContents: [ :stream |
@@ -35,13 +35,13 @@ GtRrTaskErrorDetails >> setTrace [
 ]
 
 { #category : #accessing }
-GtRrTaskErrorDetails >> trace [
+GtRrErrorDetails >> trace [
 
 	^ trace
 ]
 
 { #category : #accessing }
-GtRrTaskErrorDetails >> trace: aString [
+GtRrErrorDetails >> trace: aString [
 
 	trace := aString
 ]

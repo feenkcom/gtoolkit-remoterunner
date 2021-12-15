@@ -147,7 +147,7 @@ GtRemoteRunnerExamples >> handleWorkerDisconnection [
 		port: 7084;
 		managerStartupAndShutdown: GtRrManualManagerStartupAndShutdown new;
 		start.
-	worker := GtRrWorker newWith: (LanguageLinkSettings pharoDefaultSettings
+	[ worker := GtRrWorker newWith: (LanguageLinkSettings pharoDefaultSettings
 			serverProcessClass: LanguageLinkManualProcess;
 			serverSocketAddress:
 				(LanguageLinkSocketAddress from: 'localhost:7084')).
@@ -173,6 +173,7 @@ GtRemoteRunnerExamples >> handleWorkerDisconnection [
 	self assert: runner availableWorkerCount equals: 1.
 
 	runner submitJob: job.
+
 	startSemaphore wait.
 	self assert: runner state equals: #busy.
 	self assert: runner registeredWorkerCount equals: 1.
@@ -188,8 +189,10 @@ GtRemoteRunnerExamples >> handleWorkerDisconnection [
 	self assert: job state equals: #completed.
 	self assert: job hasErrors.
 
-	runner stop.
-
+	] ensure:
+		[ worker stop.
+		workerProcess terminate.
+		runner stop ].
 ]
 
 { #category : #examples }
@@ -287,6 +290,199 @@ GtRemoteRunnerExamples >> terminateStartedJob [
 	self assert: job hasErrors.
 	self assert: (job results allSatisfy: [ :task | task hasErrors ]).
 	self assert: (times collect: #key) asArray equals: #(0 1 2 2 2 4).
+	] ensure: [ remoteRunner stop ].
+
+	^ job
+]
+
+{ #category : #examples }
+GtRemoteRunnerExamples >> timeoutJob [
+	"Demonstrate terminating a job due to it timing out"
+	<gtExample>
+	| remoteRunner job tasks taskFailedCount taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount times |
+
+	jobStartedCount := jobCompletedCount := taskStartedCount := taskCompletedCount := taskFailedCount := 0.
+	jobSemaphore := GtMutualExclusionSemaphore new.
+	times := OrderedCollection new.
+	remoteRunner := GtRemoteRunner new port: 7084.
+	remoteRunner start.
+	[ 
+	"Create a set of tasks that never complete"
+	tasks := (1 to: 3) collect: [ :i |
+		GtRrScriptTask script: 'Semaphore new wait' ] as: OrderedCollection.
+	job := GtRrTasksJob new
+		tasks: tasks;
+		jobTimeout: 2 seconds.
+	job
+		when: GtRrJobStartedAnnouncement do: 
+			[ jobStartedCount := jobStartedCount + 1.
+			times add: 0 -> DateAndTime now. ];
+		when: GtRrJobCompletedAnnouncement do: 
+			[ jobCompletedCount := jobCompletedCount + 1.
+			times add: 4 -> DateAndTime now.
+			jobSemaphore signal ];
+		when: GtRrJobCancelledAnnouncement do: 
+			[ jobCompletedCount := jobCompletedCount + 1.
+			times add: 5 -> DateAndTime now ];
+		when: GtRrTaskStartedAnnouncement do: 
+			[ taskStartedCount := taskStartedCount + 1.
+			times add: 1 -> DateAndTime now ];
+		when: GtRrTaskCompletedAnnouncement do: 
+			[ taskCompletedCount := taskCompletedCount + 1.
+			times add: 3 -> DateAndTime now. ];
+		when: GtRrTaskFailedAnnouncement do: 
+			[ taskFailedCount := taskFailedCount + 1.
+			times add: 2 -> DateAndTime now ].
+	remoteRunner submitJob: job.
+	jobSemaphore wait.
+
+	self assert: remoteRunner currentlyExecutingJobs size equals: 0.
+	self assert: remoteRunner currentlyExecutingTasks size equals: 0.
+	self assert: remoteRunner pendingJobCount equals: 0.
+	self assert: jobCompletedCount equals: 1.
+	self assert: jobStartedCount equals: 1.
+	self assert: taskCompletedCount equals: 0.
+	self assert: taskFailedCount equals: 3.
+	self assert: taskStartedCount equals: 2.
+	self assert: job state equals: #completed.
+	self assert: job hasErrors.
+	self assert: job errorDetails errorMessage equals: 'Job exceeded time limit'.
+	self assert: (times collect: #key) asArray equals: #(0 1 1 2 2 2 4).
+	] ensure: [ remoteRunner stop ].
+
+	^ job
+]
+
+{ #category : #examples }
+GtRemoteRunnerExamples >> timeoutTask [
+	"Demonstrate terminating a task due to it timing out"
+	<gtExample>
+	<noTest>
+	"This is a copy of timeoutWorker, waiting on proper task termination to be integrated"
+	| remoteRunner job completingTask timeoutTask taskFailedCount taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount times taskFailedSemaphore |
+
+	jobStartedCount := jobCompletedCount := taskStartedCount := taskCompletedCount := taskFailedCount := 0.
+	jobSemaphore := GtMutualExclusionSemaphore new.
+	taskFailedSemaphore := Semaphore new.
+	times := OrderedCollection new.
+	remoteRunner := GtRemoteRunner new port: 7084.
+	remoteRunner managerStartupAndShutdown poolSize: 1.
+	remoteRunner workerTimeout: 3 seconds.
+	remoteRunner start.
+	[ 
+	"Create a set of tasks that never complete"
+	timeoutTask := GtRrScriptTask script: 'Semaphore new wait'.
+	timeoutTask taskTimeout: 1 minute "200 milliSeconds".
+	completingTask := GtRrScriptTask script: '#done'.
+	job := GtRrTasksJob new
+		tasks: { timeoutTask. completingTask }.
+	job
+		when: GtRrJobStartedAnnouncement do: 
+			[ jobStartedCount := jobStartedCount + 1.
+			times add: 0 -> DateAndTime now. ];
+		when: GtRrJobCompletedAnnouncement do: 
+			[ jobCompletedCount := jobCompletedCount + 1.
+			times add: 4 -> DateAndTime now.
+			jobSemaphore signal ];
+		when: GtRrJobCancelledAnnouncement do: 
+			[ jobCompletedCount := jobCompletedCount + 1.
+			times add: 5 -> DateAndTime now ];
+		when: GtRrTaskStartedAnnouncement do: 
+			[ taskStartedCount := taskStartedCount + 1.
+			times add: 1 -> DateAndTime now ];
+		when: GtRrTaskCompletedAnnouncement do: 
+			[ taskCompletedCount := taskCompletedCount + 1.
+			times add: 3 -> DateAndTime now. ];
+		when: GtRrTaskFailedAnnouncement do: 
+			[ taskFailedCount := taskFailedCount + 1.
+			times add: 2 -> DateAndTime now.
+			taskFailedSemaphore signal. ].
+	remoteRunner submitJob: job.
+	"When the task has failed, trigger the watchdog to start a new worker, which will run the second task"
+	taskFailedSemaphore wait.
+	[ "Give the process time to die and be registered by the subprocess.
+	If this isn't enough time, it will be caught on the next cycle (just take longer)."
+		2 seconds wait.
+		remoteRunner managerStartupAndShutdown signalWatchdog ] fork.
+	jobSemaphore wait.
+
+	self assert: remoteRunner currentlyExecutingJobs size equals: 0.
+	self assert: remoteRunner currentlyExecutingTasks size equals: 0.
+	self assert: remoteRunner pendingJobCount equals: 0.
+	self assert: jobCompletedCount equals: 1.
+	self assert: jobStartedCount equals: 1.
+	self assert: taskCompletedCount equals: 1.
+	self assert: taskFailedCount equals: 1.
+	self assert: taskStartedCount equals: 2.
+	self assert: job state equals: #completed.
+	self assert: job hasErrors.
+	self assert: (times collect: #key) asArray equals: #(0 1 2 1 3 4).
+	] ensure: [ remoteRunner stop ].
+
+	^ job
+]
+
+{ #category : #examples }
+GtRemoteRunnerExamples >> timeoutWorker [
+	"Demonstrate terminating a worker due to it timing out"
+	<gtExample>
+	| remoteRunner job completingTask timeoutTask taskFailedCount taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount times taskFailedSemaphore |
+
+	jobStartedCount := jobCompletedCount := taskStartedCount := taskCompletedCount := taskFailedCount := 0.
+	jobSemaphore := GtMutualExclusionSemaphore new.
+	taskFailedSemaphore := Semaphore new.
+	times := OrderedCollection new.
+	remoteRunner := GtRemoteRunner new port: 7084.
+	remoteRunner managerStartupAndShutdown poolSize: 1.
+	remoteRunner workerTimeout: 3 seconds.
+	remoteRunner start.
+	[ 
+	"Create a set of tasks that never complete"
+	timeoutTask := GtRrScriptTask script: 'Semaphore new wait'.
+	timeoutTask taskTimeout: 1 minute "200 milliSeconds".
+	completingTask := GtRrScriptTask script: '#done'.
+	job := GtRrTasksJob new
+		tasks: { timeoutTask. completingTask }.
+	job
+		when: GtRrJobStartedAnnouncement do: 
+			[ jobStartedCount := jobStartedCount + 1.
+			times add: 0 -> DateAndTime now. ];
+		when: GtRrJobCompletedAnnouncement do: 
+			[ jobCompletedCount := jobCompletedCount + 1.
+			times add: 4 -> DateAndTime now.
+			jobSemaphore signal ];
+		when: GtRrJobCancelledAnnouncement do: 
+			[ jobCompletedCount := jobCompletedCount + 1.
+			times add: 5 -> DateAndTime now ];
+		when: GtRrTaskStartedAnnouncement do: 
+			[ taskStartedCount := taskStartedCount + 1.
+			times add: 1 -> DateAndTime now ];
+		when: GtRrTaskCompletedAnnouncement do: 
+			[ taskCompletedCount := taskCompletedCount + 1.
+			times add: 3 -> DateAndTime now. ];
+		when: GtRrTaskFailedAnnouncement do: 
+			[ taskFailedCount := taskFailedCount + 1.
+			times add: 2 -> DateAndTime now.
+			taskFailedSemaphore signal. ].
+	remoteRunner submitJob: job.
+	"When the task has failed, trigger the watchdog to start a new worker, which will run the second task"
+	taskFailedSemaphore wait.
+	[ "Give the process time to die and be registered by the subprocess"
+		2 seconds wait.
+		remoteRunner managerStartupAndShutdown signalWatchdog ] fork.
+	jobSemaphore wait.
+
+	self assert: remoteRunner currentlyExecutingJobs size equals: 0.
+	self assert: remoteRunner currentlyExecutingTasks size equals: 0.
+	self assert: remoteRunner pendingJobCount equals: 0.
+	self assert: jobCompletedCount equals: 1.
+	self assert: jobStartedCount equals: 1.
+	self assert: taskCompletedCount equals: 1.
+	self assert: taskFailedCount equals: 1.
+	self assert: taskStartedCount equals: 2.
+	self assert: job state equals: #completed.
+	self assert: job hasErrors.
+	self assert: (times collect: #key) asArray equals: #(0 1 2 1 3 4).
 	] ensure: [ remoteRunner stop ].
 
 	^ job

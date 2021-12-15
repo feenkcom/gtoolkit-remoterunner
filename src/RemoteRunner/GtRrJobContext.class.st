@@ -3,12 +3,13 @@ GtRrJobContext holds the current state of a job during execution.
 "
 Class {
 	#name : #GtRrJobContext,
-	#superclass : #Object,
+	#superclass : #GtRrContext,
 	#instVars : [
 		'job',
 		'tasks',
 		'remoteRunner',
-		'platformContexts'
+		'platformContexts',
+		'jobTimeoutTime'
 	],
 	#category : #'RemoteRunner-Runner-State'
 }
@@ -18,6 +19,14 @@ GtRrJobContext >> atPlatform: aPlatform [
 	"Answer the platform specific context for the named platform"
 
 	^ platformContexts at: aPlatform
+]
+
+{ #category : #accessing }
+GtRrJobContext >> contextTimeoutTime [
+	"Answer the absolute time this context will time out"
+	<return: #DateAndTime>
+
+	^ self jobTimeoutTime
 ]
 
 { #category : #private }
@@ -86,6 +95,12 @@ GtRrJobContext >> isFinished [
 	^ platformContexts allSatisfy: #isFinished
 ]
 
+{ #category : #testing }
+GtRrJobContext >> isJobContext [
+
+	^ true
+]
+
 { #category : #accessing }
 GtRrJobContext >> job [
 
@@ -104,6 +119,20 @@ GtRrJobContext >> jobContext [
 	^ self
 ]
 
+{ #category : #accessing }
+GtRrJobContext >> jobTimeout [
+
+	^ job jobTimeout ifNil: [ remoteRunner jobTimeout ]
+]
+
+{ #category : #accessing }
+GtRrJobContext >> jobTimeoutTime [
+	"Answer the absolute time at which the job is considered to have timed out."
+	<return: #DateAndTime>
+
+	^ jobTimeoutTime
+]
+
 { #category : #'api - running' }
 GtRrJobContext >> markJobCompleted [
 
@@ -113,7 +142,8 @@ GtRrJobContext >> markJobCompleted [
 { #category : #'api - running' }
 GtRrJobContext >> markJobStarted [
 
-	job markJobStarted
+	job markJobStarted.
+	jobTimeoutTime := job startTime + self jobTimeout.
 ]
 
 { #category : #'api - running' }
@@ -174,6 +204,12 @@ GtRrJobContext >> results [
 ]
 
 { #category : #accessing }
+GtRrJobContext >> taskTimeout [
+
+	^ job taskTimeout ifNil: [ remoteRunner taskTimeout ]
+]
+
+{ #category : #accessing }
 GtRrJobContext >> tasks [
 
 	^ tasks
@@ -187,5 +223,15 @@ GtRrJobContext >> terminateJob [
 
 	job markJobTerminating.
 	platformContexts do: #terminateJob.
-	remoteRunner checkJobFinished: self.
+	remoteRunner checkJobCompleted: self.
+]
+
+{ #category : #private }
+GtRrJobContext >> timeoutContext [
+	"Terminate the receiver without timeout as the reason"
+
+	job errorDetails: (GtRrErrorDetails new
+		errorMessage: 'Job exceeded time limit';
+		setTrace).
+	remoteRunner terminateJobId: self id
 ]

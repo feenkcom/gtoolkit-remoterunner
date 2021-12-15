@@ -89,7 +89,7 @@ GtRrInImageWorker >> taskFailed: aTaskContext with: anError [
 
 	remoteRunner 
 		taskFailed: aTaskContext taskContextId 
-		with: (GtRrTaskErrorDetails new
+		with: (GtRrErrorDetails new
 			errorMessage: anError messageText;
 			trace: anError stackString).
 ]

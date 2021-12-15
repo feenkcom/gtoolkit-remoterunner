@@ -8,7 +8,8 @@ Class {
 		'result',
 		'taskId',
 		'errorDetails',
-		'state'
+		'state',
+		'taskTimeout'
 	],
 	#category : #'RemoteRunner-Tasks'
 }
@@ -38,9 +39,12 @@ GtRrTask >> errorDetails [
 ]
 
 { #category : #accessing }
-GtRrTask >> errorDetails: anObject [
+GtRrTask >> errorDetails: aGtErrorDetails [
+	"Set the error details of the receiver.
+	Asynchronous events may cause multiple attempts at setting the details, use the first one"
 
-	errorDetails := anObject
+	errorDetails ifNotNil: [ ^ self ].
+	errorDetails := aGtErrorDetails
 ]
 
 { #category : #ui }
@@ -70,6 +74,12 @@ GtRrTask >> gtSummaryFor: aView [
 ]
 
 { #category : #testing }
+GtRrTask >> hasCompleted [
+
+	^ state = #completed or: [ state = #terminated ]
+]
+
+{ #category : #testing }
 GtRrTask >> hasErrors [
 	"Answer a boolean indicating if the receiver failed to execute successfully"
 
@@ -90,7 +100,7 @@ GtRrTask >> markTaskCancelled [
 	Cancellation is specifically terminating the task before it was started."
 
 	endTime := DateAndTime now.
-	errorDetails := (GtRrTaskErrorDetails new
+	errorDetails := (GtRrErrorDetails new
 		errorMessage: 'Task cancelled before execution';
 		setTrace).
 	state := #cancelled.
@@ -208,6 +218,19 @@ GtRrTask >> taskId [
 GtRrTask >> taskId: anObject [
 
 	taskId := anObject
+]
+
+{ #category : #accessing }
+GtRrTask >> taskTimeout [
+	<return: #Duration>
+
+	^ taskTimeout
+]
+
+{ #category : #accessing }
+GtRrTask >> taskTimeout: aDuration [
+
+	taskTimeout := aDuration
 ]
 
 { #category : #accessing }
