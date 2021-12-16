@@ -592,6 +592,7 @@ GtRemoteRunner >> terminateTaskContextId: aTaskContextId [
 	For now, close the connection, which should cause the worker to exit, terminating any associated task.  It will be auto-restarted if appropriate.
 	The connection will announce it's closure, which will call back in to the remote runner, requiring sharedAccess.  A Monitor would handle this, but this is temporary.  Just fork for now."
 	taskContext := currentlyExecutingTasks at: aTaskContextId.
+	taskContext task state = #started ifFalse: [ ^ self ].
 	[ taskContext connection stop ] fork.
 ]
 
