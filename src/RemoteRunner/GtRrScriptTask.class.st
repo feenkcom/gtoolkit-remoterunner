@@ -19,6 +19,16 @@ GtRrScriptTask class >> script: aString [
 	^ self new script: aString
 ]
 
+{ #category : #printing }
+GtRrScriptTask >> printOn: aStream [
+
+	super printOn: aStream.
+	aStream 
+		nextPut: $(;
+		<< script;
+		nextPut: $)
+]
+
 { #category : #running }
 GtRrScriptTask >> run [
 

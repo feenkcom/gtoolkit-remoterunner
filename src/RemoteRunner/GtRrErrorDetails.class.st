@@ -5,7 +5,7 @@ Class {
 		'errorMessage',
 		'trace'
 	],
-	#category : #'RemoteRunner-Tasks'
+	#category : #'RemoteRunner-Runner'
 }
 
 { #category : #accessing }
@@ -24,6 +24,25 @@ GtRrErrorDetails >> errorMessage [
 GtRrErrorDetails >> errorMessage: anObject [
 
 	errorMessage := anObject
+]
+
+{ #category : #ui }
+GtRrErrorDetails >> gtTraceFor: aView [
+	<gtView>
+
+	trace ifNil: [ ^ aView empty ].
+	^ aView textEditor
+		title: 'Trace';
+		priority: 10;
+		text: [ trace ]
+]
+
+{ #category : #printing }
+GtRrErrorDetails >> printOn: aStream [
+
+	(errorMessage isNil or: [ errorMessage isEmpty ]) ifTrue:
+		[ ^ super printOn: aStream ].
+	aStream << errorMessage
 ]
 
 { #category : #initialization }

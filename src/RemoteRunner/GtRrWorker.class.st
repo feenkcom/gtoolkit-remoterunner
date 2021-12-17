@@ -25,7 +25,7 @@ GtRrWorker class >> commandLine [
 			  at: #log ifPresent: [ 
 				  SignalLogger resetAllInstances.
 				  logger := RestartingStreamLogger stdout.
-				  logger start ].
+				  logger startFor: GtRrBeaconSignal, PharoLinkSignal ].
 		  serverSocketAddress := ((args at: #serverSocketAddress) at: #address) value.
 		  StringSignal emit:
 			  'Connect server socket address: ' , serverSocketAddress.
@@ -107,11 +107,12 @@ GtRrWorker >> taskFailed: aTask with: anError [
 				 anError }).
 	^ self newCommandFactory
 		  bindingAt: #taskContextId put: aTask taskContextId;
-		  bindingAt: #errorDetails put: (GtRrErrorDetails new
-				errorMessage: anError messageText;
-				trace: anError stackString);
+		  bindingAt: #errorDetails put: (LeJsonV4 uniqueInstance serialize: 
+				(GtRrErrorDetails new
+					errorMessage: anError messageText;
+					trace: anError stackString));
 		  sendAndWait:
-			  'GtAssignedRemoteRunner taskFailed: taskContextId with: errorDetails. true'
+			  'GtAssignedRemoteRunner taskFailed: taskContextId with: (LeJsonV4 uniqueInstance deserialize: errorDetails readStream). true'
 ]
 
 { #category : #accessing }

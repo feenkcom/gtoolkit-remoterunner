@@ -26,7 +26,7 @@ GtRrJobStartupAndShutdown >> shutdownJob: aJobContext [
 	remoteRunner removeCurrentlyExecutingJob: aJobContext id.
 	job := aJobContext job.
 	job markJobCompleted.
-
+	job unsubscribe: remoteRunner.
 ]
 
 { #category : #'api - startup' }

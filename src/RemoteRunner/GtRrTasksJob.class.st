@@ -10,6 +10,12 @@ Class {
 	#category : #'RemoteRunner-Jobs'
 }
 
+{ #category : #'instance creation' }
+GtRrTasksJob class >> tasks: aCollection [
+
+	^ self new tasks: aCollection
+]
+
 { #category : #printing }
 GtRrTasksJob >> printOn: aStream [
 
