@@ -3,6 +3,7 @@ Class {
 	#superclass : #GtRrManagerStartupAndShutdown,
 	#instVars : [
 		'watchDog',
+		'watchdogSemaphore',
 		'processes',
 		'poolSize'
 	],
@@ -15,7 +16,7 @@ GtRrLocalManagerStartupAndShutdown >> initialize [
 	super initialize.
 	poolSize := 2.
 	processes := OrderedCollection new.
-
+	watchdogSemaphore := Semaphore new.
 ]
 
 { #category : #testing }
@@ -76,22 +77,32 @@ GtRrLocalManagerStartupAndShutdown >> shutdown [
 
 ]
 
+{ #category : #'running tests' }
+GtRrLocalManagerStartupAndShutdown >> signalWatchdog [
+	"Signal the watchdog to check immediately.
+	Used for testing."
+
+	watchdogSemaphore signal.
+]
+
 { #category : #private }
 GtRrLocalManagerStartupAndShutdown >> startWatchDog [
 
-	watchDog := [ 
-	            [ 
-	            | broken |
-	            broken := processes reject: #isRunning.
-	            broken do: [ :e | 
-		            | process |
-		            process := self newWorkerLocalProcess.
-		            process run.
-		            processes
-			            remove: e;
-			            add: process ].
-	            1 minute wait ] repeat ] forkNamed:
-		            'GtRemoteRunner local watch dog'
+	watchDog := [ [ | broken |
+		watchdogSemaphore waitTimeoutSeconds: 30.
+		broken := processes reject: #isRunning.
+		broken do: [ :e | | process |
+			process := self newWorkerLocalProcess.
+			process run.
+			processes
+				remove: e;
+				add: process.
+			GtRrWatchdogTrace new
+				failedProcess: e;
+				newProcess: process;
+				emit ].
+		 ] repeat ] forkNamed:
+			'GtRemoteRunner local watch dog'
 ]
 
 { #category : #'startup - shutdown' }

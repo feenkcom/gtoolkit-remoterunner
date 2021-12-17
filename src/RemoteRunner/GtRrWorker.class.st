@@ -107,7 +107,7 @@ GtRrWorker >> taskFailed: aTask with: anError [
 				 anError }).
 	^ self newCommandFactory
 		  bindingAt: #taskContextId put: aTask taskContextId;
-		  bindingAt: #errorDetails put: (GtRrTaskErrorDetails new
+		  bindingAt: #errorDetails put: (GtRrErrorDetails new
 				errorMessage: anError messageText;
 				trace: anError stackString);
 		  sendAndWait:

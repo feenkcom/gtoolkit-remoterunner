@@ -63,7 +63,8 @@ Class {
 		'registeredWorkers',
 		'taskTimeout',
 		'workerTimeout',
-		'jobTimeout'
+		'jobTimeout',
+		'timeoutManager'
 	],
 	#category : #'RemoteRunner-Runner'
 }
@@ -94,7 +95,12 @@ GtRemoteRunner >> assignTasksToWorkers [
 				markTaskStarted.
 			"Set the task in the worker, this will signal the worker's semaphore, waking up the worker's process"
 			worker taskContext: taskContext.
-			busyWorkers add: worker ] ].
+			busyWorkers add: worker.
+			timeoutManager addContext: taskContext.
+			GtRrContextTrace new
+				context: taskContext;
+				operation: #taskStarted;
+				emit ] ].
 	availableWorkers removeAll: busyWorkers.
 ]
 
@@ -105,7 +111,7 @@ GtRemoteRunner >> availableWorkerCount [
 ]
 
 { #category : #private }
-GtRemoteRunner >> checkJobFinished: aGtRrContext [
+GtRemoteRunner >> checkJobCompleted: aGtRrContext [
 	"After each task has been completed, check if the job has finished, and if so, signal it.
 	Must be called within sharedAccess."
 	| jobContext |
@@ -113,6 +119,10 @@ GtRemoteRunner >> checkJobFinished: aGtRrContext [
 	jobContext := aGtRrContext jobContext.
 	jobContext isFinished ifFalse: [ ^ self ].
 
+	GtRrContextTrace new
+		context: aGtRrContext;
+		operation: #jobCompleted;
+		emit.
 	jobStartupAndShutdown shutdownJob: jobContext.
 
 ]
@@ -142,19 +152,19 @@ GtRemoteRunner >> debugMode [
 { #category : #accessing }
 GtRemoteRunner >> defaultJobTimeout [
 
-	^ 10 minutes
+	^ (self taskTimeout asMilliSeconds * 3) milliSeconds
 ]
 
 { #category : #accessing }
 GtRemoteRunner >> defaultTaskTimeout [
 
-	^ 1 minute
+	^ 5 minutes
 ]
 
 { #category : #accessing }
 GtRemoteRunner >> defaultWorkerTimeout [
 
-	^ 2 minutes
+	^ self taskTimeout + 1 minute
 ]
 
 { #category : #private }
@@ -256,6 +266,7 @@ GtRemoteRunner >> initialize [
 	The worker is represented by the connection and is waiting on the semaphore held by the GtRrFutureWorkerTask."
 	availableWorkers := Set new.
 	registeredWorkers := Dictionary new.
+	timeoutManager := GtRrTimeoutManager remoteRunner: self.
 	self 
 		managerStartupAndShutdown: GtRrLocalManagerStartupAndShutdown new;
 		jobStartupAndShutdown: GtRrLocalJobStartupAndShutdown new.
@@ -273,6 +284,18 @@ GtRemoteRunner >> jobStartupAndShutdown: aGtDtsJobStartupAndShutdown [
 
 	jobStartupAndShutdown := aGtDtsJobStartupAndShutdown.
 	jobStartupAndShutdown remoteRunner: self
+]
+
+{ #category : #accessing }
+GtRemoteRunner >> jobTimeout [
+
+	^ jobTimeout ifNil: [ jobTimeout := self defaultJobTimeout ]
+]
+
+{ #category : #accessing }
+GtRemoteRunner >> jobTimeout: anObject [
+
+	jobTimeout := anObject
 ]
 
 { #category : #accessing }
@@ -348,7 +371,11 @@ GtRemoteRunner >> privateTaskFailed: aTaskContextId with: anGtRrTaskErrorDetails
 	taskContext := currentlyExecutingTasks removeKey: aTaskContextId.
 	taskContext errorDetails: anGtRrTaskErrorDetails.
 	taskContext markTaskCompleted.
-	self checkJobFinished: taskContext.
+		GtRrContextTrace new
+			context: taskContext;
+			operation: #taskCompleted;
+			emit.
+	self checkJobCompleted: taskContext.
 ]
 
 { #category : #'api - worker' }
@@ -408,6 +435,12 @@ GtRemoteRunner >> server: anObject [
 	server := anObject
 ]
 
+{ #category : #accessing }
+GtRemoteRunner >> sharedAccess [
+
+	^ sharedAccess
+]
+
 { #category : #'api - runner' }
 GtRemoteRunner >> start [
 
@@ -428,6 +461,10 @@ GtRemoteRunner >> startJob: aGtRrJob [
 		put: context.
 	jobStartupAndShutdown startupJob: context.
 	self assignTasksToWorkers.
+	GtRrJobTrace new
+		job: aGtRrJob;
+		operation: #started;
+		emit.
 ]
 
 { #category : #ui }
@@ -460,7 +497,11 @@ GtRemoteRunner >> submitJob: aGtRrJob [
 	Start execution as soon as possible"
 
 	sharedAccess critical:
-		[ currentlyExecutingJobs ifEmpty:
+		[ GtRrJobTrace new
+			job: aGtRrJob;
+			operation: #submitted;
+			emit.
+		currentlyExecutingJobs ifEmpty:
 			[ self startJob: aGtRrJob ]
 		ifNotEmpty:
 			[ "Multiple jobs may be allowed to run concurrently - functionality to be added"
@@ -471,9 +512,9 @@ GtRemoteRunner >> submitJob: aGtRrJob [
 GtRemoteRunner >> summaryAttributes [
 	"Answer a collection of key/value attributes that can simply be listed as a summary of the receiver"
 
-	^ sharedAccess critical:
-		[ Array streamContents: [ :stream |
-			stream
+	^ Array streamContents: [ :stream |
+		sharedAccess critical:
+			[ stream
 				nextPut: { #State. self state. self state. };
 				nextPut: {'Job Queue Size'. jobQueue size. jobQueue. };
 				nextPut: {'Registered Workers'. registeredWorkers size. registeredWorkers. };
@@ -481,7 +522,8 @@ GtRemoteRunner >> summaryAttributes [
 				nextPut: {'Currently Executing Jobs'. currentlyExecutingJobs size. currentlyExecutingJobs. };
 				nextPut: {'Currently Executing Tasks'. currentlyExecutingTasks size. currentlyExecutingTasks. };
 				nextPut: {#Port. port. server. }
-				 ] ]
+				 ].
+		stream nextPut: { 'Shared Access Waiting'. sharedAccess size. sharedAccess. } ]
 ]
 
 { #category : #'api - worker' }
@@ -492,7 +534,11 @@ GtRemoteRunner >> taskDone: aTaskContextId with: anObject [
 		[ taskContext := currentlyExecutingTasks removeKey: aTaskContextId.
 		taskContext result: anObject.
 		taskContext markTaskCompleted.
-		self checkJobFinished: taskContext ].
+		GtRrContextTrace new
+			context: taskContext;
+			operation: #taskCompleted;
+			emit.
+		self checkJobCompleted: taskContext ].
 ]
 
 { #category : #'api - worker' }
@@ -501,6 +547,18 @@ GtRemoteRunner >> taskFailed: aTaskContextId with: anGtRrTaskErrorDetails [
 
 	sharedAccess critical: 
 		[ self privateTaskFailed: aTaskContextId with: anGtRrTaskErrorDetails ].
+]
+
+{ #category : #accessing }
+GtRemoteRunner >> taskTimeout [
+
+	^ taskTimeout ifNil: [ taskTimeout := self defaultTaskTimeout ]
+]
+
+{ #category : #accessing }
+GtRemoteRunner >> taskTimeout: anObject [
+
+	taskTimeout := anObject
 ]
 
 { #category : #'api - jobs' }
@@ -531,10 +589,17 @@ GtRemoteRunner >> terminateTaskContextId: aTaskContextId [
 
 	"This should send a terminate command through the control channel.
 	When the control channel is available...
-	For now, close the connection, which should cause the worker to exit, terminating any associated tasks.  It will be auto-restarted if appropriate.
+	For now, close the connection, which should cause the worker to exit, terminating any associated task.  It will be auto-restarted if appropriate.
 	The connection will announce it's closure, which will call back in to the remote runner, requiring sharedAccess.  A Monitor would handle this, but this is temporary.  Just fork for now."
 	taskContext := currentlyExecutingTasks at: aTaskContextId.
+	taskContext task state = #started ifFalse: [ ^ self ].
 	[ taskContext connection stop ] fork.
+]
+
+{ #category : #accessing }
+GtRemoteRunner >> timeoutManager [
+
+	^ timeoutManager
 ]
 
 { #category : #'api - worker' }
@@ -550,9 +615,20 @@ GtRemoteRunner >> unregisterWorker: aPharoLinkServerConnectionDisconnectedAnnoun
 		failedTasks := currentlyExecutingTasks select: [ :each |
 			each connection = connection ].
 		failedTasks valuesDo: [ :taskContext |
-			errorDetails := GtRrTaskErrorDetails new
+			errorDetails := GtRrErrorDetails new
 					errorMessage: 'Connection closed';
-					trace: (String streamContents: [ :stream |
-						thisContext debugStackOn: stream ]).
+					setTrace.
 			self privateTaskFailed: taskContext taskContextId with: errorDetails ]. ].
+]
+
+{ #category : #accessing }
+GtRemoteRunner >> workerTimeout [
+
+	^ workerTimeout ifNil: [ workerTimeout := self defaultWorkerTimeout ]
+]
+
+{ #category : #accessing }
+GtRemoteRunner >> workerTimeout: anObject [
+
+	workerTimeout := anObject
 ]
