@@ -56,7 +56,7 @@ GtRrTask >> gtResultFor: aView [
 	^ aView forward
 		  title: 'Result';
 		  priority: 20;
-		  object: [ result ];
+		  object: [ result ifNil: [ errorDetails ] ];
 		  actionUpdateButton
 ]
 
@@ -70,6 +70,7 @@ GtRrTask >> gtSummaryFor: aView [
 		  items: [ self summaryAttributes ];
 		  column: #Attribute text: [ :item | item key ];
 		  column: #Value text: [ :item | item value ];
+		send: [ :item | item value ];
 		  actionUpdateButton
 ]
 
@@ -199,7 +200,7 @@ GtRrTask >> summaryAttributes [
 	^ Array streamContents: [ :stream |
 		stream nextPut: #State -> self state.
 		self hasErrors ifTrue:
-			[ stream nextPut: #Error -> errorDetails errorMessage ].
+			[ stream nextPut: #Error -> errorDetails ].
 		startTime ifNotNil:
 			[ stream nextPut: #Started -> startTime ].
 		endTime ifNotNil:

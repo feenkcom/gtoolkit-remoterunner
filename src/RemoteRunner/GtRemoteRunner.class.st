@@ -50,6 +50,8 @@ The worker images are assumed to be up to date when the Job Execution phase is r
 Class {
 	#name : #GtRemoteRunner,
 	#superclass : #Object,
+	#traits : 'TGtAnnouncer',
+	#classTraits : 'TGtAnnouncer classTrait',
 	#instVars : [
 		'port',
 		'server',
@@ -64,7 +66,9 @@ Class {
 		'taskTimeout',
 		'workerTimeout',
 		'jobTimeout',
-		'timeoutManager'
+		'timeoutManager',
+		'announcer',
+		'runnerStats'
 	],
 	#category : #'RemoteRunner-Runner'
 }
@@ -75,6 +79,12 @@ GtRemoteRunner >> addCurrentlyExecutingTask: aGtRrTaskContext [
 	Must be called within sharedAccess."
 
 	currentlyExecutingTasks at: aGtRrTaskContext taskContextId put: aGtRrTaskContext
+]
+
+{ #category : #announcer }
+GtRemoteRunner >> announcer [
+
+	^ announcer
 ]
 
 { #category : #private }
@@ -90,7 +100,8 @@ GtRemoteRunner >> assignTasksToWorkers [
 	availableWorkers do: [ :worker |
 		taskContext := self getNextTaskFor: worker platform.
 		taskContext ifNotNil:
-			[ taskContext
+			[ runnerStats incrementTaskCount.
+			taskContext
 				workerFuture: worker;
 				markTaskStarted.
 			"Set the task in the worker, this will signal the worker's semaphore, waking up the worker's process"
@@ -191,6 +202,7 @@ GtRemoteRunner >> gtExecutingJobsFor: aView [
 		  priority: 20;
 		  items: [ sharedAccess critical: [ currentlyExecutingJobs values ] ];
 		  send: [ :item | item job ];
+		  updateWhen: GtRemoteRunnerAnnouncement in: [ self announcer ];
 		  actionUpdateButton
 ]
 
@@ -204,6 +216,7 @@ GtRemoteRunner >> gtExecutingTasksFor: aView [
 		  items: [ 
 			  sharedAccess critical: [ currentlyExecutingTasks values ] ];
 		  send: [ :item | item task ];
+		  updateWhen: GtRemoteRunnerAnnouncement in: [ self announcer ];
 		  actionUpdateButton
 ]
 
@@ -215,6 +228,7 @@ GtRemoteRunner >> gtJobQueueFor: aView [
 		  title: 'Job Queue';
 		  priority: 20;
 		  items: [ jobQueue itemArray ];
+		  updateWhen: GtRemoteRunnerAnnouncement in: [ self announcer ];
 		  actionUpdateButton
 ]
 
@@ -229,7 +243,8 @@ GtRemoteRunner >> gtSummaryFor: aView [
 		  column: #Attribute text: [ :item | item first ];
 		  column: #Value text: [ :item | item second ];
 		  send: [ :item | item third ];
-		  actionUpdateButton
+		  updateWhen: GtRemoteRunnerAnnouncement in: [ self announcer ];
+			actionUpdateButton 
 ]
 
 { #category : #ui }
@@ -253,8 +268,10 @@ GtRemoteRunner >> gtWorkersFor: aView [
 GtRemoteRunner >> initialize [
 
 	super initialize.
+	announcer := Announcer new.
 	port := 7042.
 	jobQueue := SharedQueue new.
+	runnerStats := GtRemoteRunnerStats new.
 	"currentlyExecutingJobs is a dictionary of GtRrJobContext keyed by job uid.
 	The keys are ordered to ensure that tasks are assigned to the job started first."
 	currentlyExecutingJobs := OrderedDictionary new.
@@ -453,6 +470,7 @@ GtRemoteRunner >> startJob: aGtRrJob [
 	Must be called within sharedAccess"
 	| context |
 
+	runnerStats incrementJobCount.
 	context := GtRrJobContext new 
 		remoteRunner: self;
 		job: aGtRrJob.
@@ -496,6 +514,10 @@ GtRemoteRunner >> submitJob: aGtRrJob [
 	"Add the supplied job to the queue.
 	Start execution as soon as possible"
 
+	aGtRrJob
+		when: GtRemoteRunnerAnnouncement 
+		do: [ :announcement | self announce: announcement ]
+		for: self.
 	sharedAccess critical:
 		[ GtRrJobTrace new
 			job: aGtRrJob;
@@ -516,11 +538,16 @@ GtRemoteRunner >> summaryAttributes [
 		sharedAccess critical:
 			[ stream
 				nextPut: { #State. self state. self state. };
+				nextPut: { 'Total Job Count'. runnerStats totalJobCount. self. };
+				nextPut: { 'Total Task Count'. runnerStats totalTaskCount. self. };
 				nextPut: {'Job Queue Size'. jobQueue size. jobQueue. };
 				nextPut: {'Registered Workers'. registeredWorkers size. registeredWorkers. };
 				nextPut: {'Available Workers'. availableWorkers size. availableWorkers. };
 				nextPut: {'Currently Executing Jobs'. currentlyExecutingJobs size. currentlyExecutingJobs. };
 				nextPut: {'Currently Executing Tasks'. currentlyExecutingTasks size. currentlyExecutingTasks. };
+				nextPut: { 'Default Worker Timeout'. self workerTimeout. self. };
+				nextPut: { 'Default Job Timeout'. self jobTimeout. self. };
+				nextPut: { 'Default Task Timeout'. self taskTimeout. self. };
 				nextPut: {#Port. port. server. }
 				 ].
 		stream nextPut: { 'Shared Access Waiting'. sharedAccess size. sharedAccess. } ]
@@ -568,7 +595,7 @@ GtRemoteRunner >> terminateJobId: aJobId [
 	If it has been started, it will be marked completed with errors."
 	<return: #GtRrJob>
 
-	sharedAccess critical:
+	^ sharedAccess critical:
 		[ currentlyExecutingJobs 
 			at: aJobId 
 			ifPresent: [ :aJobContext | 

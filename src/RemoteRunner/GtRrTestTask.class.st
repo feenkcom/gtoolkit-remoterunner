@@ -29,9 +29,10 @@ GtRrTestTask >> printOn: aStream [
 	aStream
 		nextPut: $(;
 		print: self testCount;
-		<< ' tests, '.
+		<< ' tests'.
 	result ifNotNil:
-		[ grouped := result groupedBy: #shortName.
+		[ aStream << ', '.
+		grouped := result groupedBy: #shortName.
 		grouped associations do: [ :assoc |
 			aStream
 				print: assoc value size;
@@ -44,19 +45,19 @@ GtRrTestTask >> printOn: aStream [
 
 { #category : #accessing }
 GtRrTestTask >> run [
+	| suite testResult events |
 
-	| suite result events |
 	suite := TestSuite named: taskId.
 	tests keysAndValuesDo: [ :className :selectors | 
 		| class |
 		class := className asClass.
 		suite addTests: (class buildSuiteFromMethods: (selectors collect: #asSymbol)) tests ].
 	events := OrderedCollection new.
-	result := PharoLinkTestResult new.
-	result announcer
+	testResult := PharoLinkTestResult new.
+	testResult announcer
 		when: PharoLinkTestCaseEndAnnouncement
 		do: [ :e | events add: e ].
-	suite run: result.
+	suite run: testResult.
 	^ events asArray
 ]
 

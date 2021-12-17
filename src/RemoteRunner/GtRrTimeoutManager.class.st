@@ -62,6 +62,19 @@ GtRrTimeoutManager >> checkTimeouts [
 		self updateScheduledTask ].
 ]
 
+{ #category : #ui }
+GtRrTimeoutManager >> gtContextsFor: aView [
+	<gtView>
+
+	^ aView columnedList
+		title: 'Contexts';
+		priority: 10;
+		items: [ contexts ];
+		column: 'Context' text: [ :item | item ];
+		column: 'Expires' text: [ :item | item contextTimeoutTime ];
+		actionUpdateButton
+]
+
 { #category : #initialization }
 GtRrTimeoutManager >> initialize [
 
@@ -103,11 +116,10 @@ GtRrTimeoutManager >> updateScheduledTask [
 
 	contexts ifEmpty: [ ^ self ].
 	nextTimeout := contexts first contextTimeoutTime.
-	nextTimeout < scheduleTask scheduledTime ifTrue:
-		[ scheduleTask scheduledTime: nextTimeout.
-		BlTaskAtQueue schedule: scheduleTask.
-		GtRrTimeoutManagerTrace new
-			operation: #schedule;
-			message: nextTimeout printString;
-			emit ].
+	scheduleTask scheduledTime: nextTimeout.
+	BlTaskAtQueue schedule: scheduleTask.
+	GtRrTimeoutManagerTrace new
+		operation: #schedule;
+		message: nextTimeout printString;
+		emit .
 ]

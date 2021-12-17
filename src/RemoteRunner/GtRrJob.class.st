@@ -71,14 +71,50 @@ GtRrJob >> errorDetails: aGtErrorDetails [
 ]
 
 { #category : #ui }
+GtRrJob >> gtErrorsFor: aView [
+	<gtView>
+
+	^ aView list
+		title: 'Errors';
+		priority: 16;
+		items: [ self resultsWithErrors ];
+		updateWhen: GtRemoteRunnerAnnouncement in: [ self announcer ]
+]
+
+{ #category : #ui }
 GtRrJob >> gtResultsFor: aView [
 	<gtView>
 
 	^ aView list
 		title: 'Results';
-		priority: 10;
+		priority: 15;
 		items: [ results ];
+		itemText: [ :item | item result ifNil: [ item errorDetails ] ];
 		updateWhen: GtRrJobAnnouncement in: [ self announcer ]
+]
+
+{ #category : #ui }
+GtRrJob >> gtSummaryFor: aView [
+
+	<gtView>
+	^ aView columnedList
+		  title: 'Summary';
+		  priority: 10;
+		  items: [ self summaryAttributes ];
+		  column: #Attribute text: [ :item | item key ];
+		  column: #Value text: [ :item | item value ];
+		  updateWhen: GtRrJobAnnouncement in: [ self announcer ];
+		  actionUpdateButton
+]
+
+{ #category : #ui }
+GtRrJob >> gtTasksFor: aView [
+	<gtView>
+
+	^ aView list
+		title: 'Tasks';
+		priority: 50;
+		items: [ self tasks ]
 ]
 
 { #category : #testing }
@@ -159,6 +195,15 @@ GtRrJob >> platforms: anArray [
 	platforms := anArray
 ]
 
+{ #category : #ui }
+GtRrJob >> platformsDisplayList [
+
+	^ String streamContents: [ :stream |
+		platforms
+			do: [ :platform | stream << platform ]
+			separatedBy: [ stream << ', ' ] ]
+]
+
 { #category : #printing }
 GtRrJob >> printOn: aStream [
 
@@ -179,6 +224,13 @@ GtRrJob >> results [
 ]
 
 { #category : #accessing }
+GtRrJob >> resultsWithErrors [
+	"Answer the subset of results that have errors"
+
+	^ results select: #hasErrors
+]
+
+{ #category : #accessing }
 GtRrJob >> startTime [
 
 	^ startTime
@@ -190,6 +242,24 @@ GtRrJob >> state [
 	<return: #Symbol>
 
 	^ state
+]
+
+{ #category : #ui }
+GtRrJob >> summaryAttributes [
+	"Answer a collection of key/value attributes that can simply be listed as a summary of the receiver"
+	| attributes |
+
+	attributes := OrderedCollection new.
+	attributes 
+		add: #State -> self state;
+		add: #Tasks -> self tasks size;
+		add: #Platforms -> self platformsDisplayList;
+		add: #Results -> results size;
+		add: 'Start Time' -> startTime;
+		add: 'End Time' -> endTime;
+		add: 'Job Timeout' -> jobTimeout;
+		add: 'Task Timeout' -> taskTimeout.
+	^ attributes
 ]
 
 { #category : #accessing }
