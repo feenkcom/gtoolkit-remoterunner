@@ -304,10 +304,8 @@ GtRemoteRunnerExamples >> terminateStartedJob [
 GtRemoteRunnerExamples >> timeoutJob [
 	"Demonstrate terminating a job due to it timing out"
 	<gtExample>
-	<noTest>
 	| remoteRunner job tasks taskFailedCount taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount times |
 
-	StringSignal emit: '#timeoutJob started'.
 	jobStartedCount := jobCompletedCount := taskStartedCount := taskCompletedCount := taskFailedCount := 0.
 	jobSemaphore := GtMutualExclusionSemaphore new.
 	times := OrderedCollection new.
@@ -356,7 +354,6 @@ GtRemoteRunnerExamples >> timeoutJob [
 	self assert: job errorDetails errorMessage equals: 'Job exceeded time limit'.
 	self assert: (times collect: #key) asArray equals: #(0 1 1 2 2 2 4).
 	] ensure: [ remoteRunner stop ].
-	StringSignal emit: '#timeoutJob done'.
 
 	^ job
 ]
@@ -365,11 +362,9 @@ GtRemoteRunnerExamples >> timeoutJob [
 GtRemoteRunnerExamples >> timeoutTask [
 	"Demonstrate terminating a task due to it timing out"
 	<gtExample>
-	<noTest>
 	"This is a copy of timeoutWorker, waiting on proper task termination to be integrated"
 	| remoteRunner job completingTask timeoutTask taskFailedCount taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount times taskFailedSemaphore |
 
-	StringSignal emit: '#timeoutTask started'.
 	jobStartedCount := jobCompletedCount := taskStartedCount := taskCompletedCount := taskFailedCount := 0.
 	jobSemaphore := GtMutualExclusionSemaphore new.
 	taskFailedSemaphore := Semaphore new.
@@ -427,7 +422,6 @@ GtRemoteRunnerExamples >> timeoutTask [
 	self assert: job hasErrors.
 	self assert: (times collect: #key) asArray equals: #(0 1 2 1 3 4).
 	] ensure: [ remoteRunner stop ].
-	StringSignal emit: '#timeoutTask done'.
 
 	^ job
 ]
@@ -436,10 +430,8 @@ GtRemoteRunnerExamples >> timeoutTask [
 GtRemoteRunnerExamples >> timeoutWorker [
 	"Demonstrate terminating a worker due to it timing out"
 	<gtExample>
-	<noTest>
 	| remoteRunner job completingTask timeoutTask taskFailedCount taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount times taskFailedSemaphore |
 
-	StringSignal emit: '#timeoutWorker started'.
 	jobStartedCount := jobCompletedCount := taskStartedCount := taskCompletedCount := taskFailedCount := 0.
 	jobSemaphore := GtMutualExclusionSemaphore new.
 	taskFailedSemaphore := Semaphore new.
@@ -496,7 +488,6 @@ GtRemoteRunnerExamples >> timeoutWorker [
 	self assert: job hasErrors.
 	self assert: (times collect: #key) asArray equals: #(0 1 2 1 3 4).
 	] ensure: [ remoteRunner stop ].
-	StringSignal emit: '#timeoutWorker done'.
 
 	^ job
 ]
