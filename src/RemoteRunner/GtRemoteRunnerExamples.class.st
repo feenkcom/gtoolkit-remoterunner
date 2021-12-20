@@ -1,3 +1,8 @@
+"
+GtRemoteRunnerExamples demonstrates the use of GtRemoteRunner in various scenarios.
+
+Note: Pharo appears to have problems when listening on a socket for connections, and then quickly closing and opening the socket again.  To avoid these, a different port is used in each example.
+"
 Class {
 	#name : #GtRemoteRunnerExamples,
 	#superclass : #Object,
@@ -144,13 +149,13 @@ GtRemoteRunnerExamples >> handleWorkerDisconnection [
 	| runner worker workerProcess job startSemaphore endSemaphore retry |
 
 	runner := GtRemoteRunner new
-		port: 7084;
+		port: 7086;
 		managerStartupAndShutdown: GtRrManualManagerStartupAndShutdown new;
 		start.
 	[ worker := GtRrWorker newWith: (LanguageLinkSettings pharoDefaultSettings
 			serverProcessClass: LanguageLinkManualProcess;
 			serverSocketAddress:
-				(LanguageLinkSocketAddress from: 'localhost:7084')).
+				(LanguageLinkSocketAddress from: 'localhost:7086')).
 	worker start.
 	workerProcess := [ worker taskPollForever ] fork.
 	startSemaphore := Semaphore new.
@@ -302,10 +307,11 @@ GtRemoteRunnerExamples >> timeoutJob [
 	<noTest>
 	| remoteRunner job tasks taskFailedCount taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount times |
 
+	StringSignal emit: '#timeoutJob started'.
 	jobStartedCount := jobCompletedCount := taskStartedCount := taskCompletedCount := taskFailedCount := 0.
 	jobSemaphore := GtMutualExclusionSemaphore new.
 	times := OrderedCollection new.
-	remoteRunner := GtRemoteRunner new port: 7084.
+	remoteRunner := GtRemoteRunner new port: 7087.
 	remoteRunner start.
 	[ 
 	"Create a set of tasks that never complete"
@@ -350,6 +356,7 @@ GtRemoteRunnerExamples >> timeoutJob [
 	self assert: job errorDetails errorMessage equals: 'Job exceeded time limit'.
 	self assert: (times collect: #key) asArray equals: #(0 1 1 2 2 2 4).
 	] ensure: [ remoteRunner stop ].
+	StringSignal emit: '#timeoutJob done'.
 
 	^ job
 ]
@@ -362,11 +369,12 @@ GtRemoteRunnerExamples >> timeoutTask [
 	"This is a copy of timeoutWorker, waiting on proper task termination to be integrated"
 	| remoteRunner job completingTask timeoutTask taskFailedCount taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount times taskFailedSemaphore |
 
+	StringSignal emit: '#timeoutTask started'.
 	jobStartedCount := jobCompletedCount := taskStartedCount := taskCompletedCount := taskFailedCount := 0.
 	jobSemaphore := GtMutualExclusionSemaphore new.
 	taskFailedSemaphore := Semaphore new.
 	times := OrderedCollection new.
-	remoteRunner := GtRemoteRunner new port: 7084.
+	remoteRunner := GtRemoteRunner new port: 7088.
 	remoteRunner managerStartupAndShutdown poolSize: 1.
 	remoteRunner workerTimeout: 3 seconds.
 	remoteRunner start.
@@ -419,6 +427,7 @@ GtRemoteRunnerExamples >> timeoutTask [
 	self assert: job hasErrors.
 	self assert: (times collect: #key) asArray equals: #(0 1 2 1 3 4).
 	] ensure: [ remoteRunner stop ].
+	StringSignal emit: '#timeoutTask done'.
 
 	^ job
 ]
@@ -430,11 +439,12 @@ GtRemoteRunnerExamples >> timeoutWorker [
 	<noTest>
 	| remoteRunner job completingTask timeoutTask taskFailedCount taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount times taskFailedSemaphore |
 
+	StringSignal emit: '#timeoutWorker started'.
 	jobStartedCount := jobCompletedCount := taskStartedCount := taskCompletedCount := taskFailedCount := 0.
 	jobSemaphore := GtMutualExclusionSemaphore new.
 	taskFailedSemaphore := Semaphore new.
 	times := OrderedCollection new.
-	remoteRunner := GtRemoteRunner new port: 7084.
+	remoteRunner := GtRemoteRunner new port: 7085.
 	remoteRunner managerStartupAndShutdown poolSize: 1.
 	remoteRunner workerTimeout: 3 seconds.
 	remoteRunner start.
@@ -486,6 +496,7 @@ GtRemoteRunnerExamples >> timeoutWorker [
 	self assert: job hasErrors.
 	self assert: (times collect: #key) asArray equals: #(0 1 2 1 3 4).
 	] ensure: [ remoteRunner stop ].
+	StringSignal emit: '#timeoutWorker done'.
 
 	^ job
 ]
