@@ -304,7 +304,6 @@ GtRemoteRunnerExamples >> terminateStartedJob [
 GtRemoteRunnerExamples >> timeoutJob [
 	"Demonstrate terminating a job due to it timing out"
 	<gtExample>
-	<noTest>
 	| remoteRunner job tasks taskFailedCount taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount times |
 
 	jobStartedCount := jobCompletedCount := taskStartedCount := taskCompletedCount := taskFailedCount := 0.
@@ -318,7 +317,7 @@ GtRemoteRunnerExamples >> timeoutJob [
 		GtRrScriptTask script: 'Semaphore new wait' ] as: OrderedCollection.
 	job := GtRrTasksJob new
 		tasks: tasks;
-		jobTimeout: 2 seconds.
+		jobTimeout: 5 seconds.
 	job
 		when: GtRrJobStartedAnnouncement do: 
 			[ jobStartedCount := jobStartedCount + 1.
