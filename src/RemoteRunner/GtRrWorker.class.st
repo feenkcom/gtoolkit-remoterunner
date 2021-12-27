@@ -25,7 +25,7 @@ GtRrWorker class >> commandLine [
 			  at: #log ifPresent: [ 
 				  SignalLogger resetAllInstances.
 				  logger := RestartingStreamLogger stdout.
-				  logger startFor: GtRrBeaconSignal, PharoLinkSignal ].
+				  logger startFor: GtRemoteRunnerAnnouncement, PharoLinkSignal ].
 		  serverSocketAddress := ((args at: #serverSocketAddress) at: #address) value.
 		  StringSignal emit:
 			  'Connect server socket address: ' , serverSocketAddress.

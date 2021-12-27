@@ -97,10 +97,9 @@ GtRrLocalManagerStartupAndShutdown >> startWatchDog [
 			processes
 				remove: e;
 				add: process.
-			GtRrWatchdogTrace new
-				failedProcess: e;
-				newProcess: process;
-				emit ].
+			remoteRunner announceAndLog: (GtRrWorkerReplacedAnnouncement new
+				worker: e;
+				newWorker: process) ].
 		 ] repeat ] forkNamed:
 			'GtRemoteRunner local watch dog'
 ]

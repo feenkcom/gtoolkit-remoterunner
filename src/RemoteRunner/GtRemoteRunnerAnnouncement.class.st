@@ -1,5 +1,5 @@
 Class {
 	#name : #GtRemoteRunnerAnnouncement,
-	#superclass : #Announcement,
+	#superclass : #BeaconSignal,
 	#category : #'RemoteRunner-Announcements'
 }

@@ -29,10 +29,6 @@ GtRrTimeoutManager >> addContext: aGtRrContext [
 	Must be called within the remoteRunner's sharedAccess"
 
 	contexts add: aGtRrContext.
-	GtRrTimeoutManagerTrace new
-		operation: #addContext;
-		context: aGtRrContext;
-		emit.
 	self updateScheduledTask.
 ]
 
@@ -41,10 +37,6 @@ GtRrTimeoutManager >> checkTimeouts [
 	"Check the queue and timeout contexts as required"
 	| now context |
 
-	GtRrObjectTrace new
-		object: contexts size;
-		operation: #timeoutCheck;
-		emit.
 	contexts ifEmpty: [ ^ self ].
 	remoteRunner sharedAccess critical:
 		[ now := DateAndTime now.
@@ -52,12 +44,7 @@ GtRrTimeoutManager >> checkTimeouts [
 			[ (context := contexts first) contextTimeoutTime <= now ] ] whileTrue:
 				[ contexts removeFirst.
 				context isFinished ifFalse:
-					[ GtRrContextTrace new
-						context: context ;
-						operation: #timeout;
-						message: 'Initiating timeout termination';
-						emit.
-					context scheduleTimeoutContext.
+					[ context scheduleTimeoutContext.
 					 ] ].
 		self updateScheduledTask ].
 ]
@@ -118,8 +105,5 @@ GtRrTimeoutManager >> updateScheduledTask [
 	nextTimeout := contexts first contextTimeoutTime.
 	scheduleTask scheduledTime: nextTimeout.
 	BlTaskAtQueue schedule: scheduleTask.
-	GtRrTimeoutManagerTrace new
-		operation: #schedule;
-		message: nextTimeout printString;
-		emit .
+
 ]

@@ -68,7 +68,8 @@ Class {
 		'jobTimeout',
 		'timeoutManager',
 		'announcer',
-		'runnerStats'
+		'runnerStats',
+		'log'
 	],
 	#category : #'RemoteRunner-Runner'
 }
@@ -79,6 +80,14 @@ GtRemoteRunner >> addCurrentlyExecutingTask: aGtRrTaskContext [
 	Must be called within sharedAccess."
 
 	currentlyExecutingTasks at: aGtRrTaskContext taskContextId put: aGtRrTaskContext
+]
+
+{ #category : #announcer }
+GtRemoteRunner >> announceAndLog: aBeaconSignal [
+	"Announce the supplied signal to the receiver's announcer and then emit the signal for logging"
+
+	self announce: aBeaconSignal.
+	aBeaconSignal emit.
 ]
 
 { #category : #announcer }
@@ -107,11 +116,7 @@ GtRemoteRunner >> assignTasksToWorkers [
 			"Set the task in the worker, this will signal the worker's semaphore, waking up the worker's process"
 			worker taskContext: taskContext.
 			busyWorkers add: worker.
-			timeoutManager addContext: taskContext.
-			GtRrContextTrace new
-				context: taskContext;
-				operation: #taskStarted;
-				emit ] ].
+			timeoutManager addContext: taskContext ] ].
 	availableWorkers removeAll: busyWorkers.
 ]
 
@@ -130,10 +135,6 @@ GtRemoteRunner >> checkJobCompleted: aGtRrContext [
 	jobContext := aGtRrContext jobContext.
 	jobContext isFinished ifFalse: [ ^ self ].
 
-	GtRrContextTrace new
-		context: aGtRrContext;
-		operation: #jobCompleted;
-		emit.
 	jobStartupAndShutdown shutdownJob: jobContext.
 
 ]
@@ -264,6 +265,13 @@ GtRemoteRunner >> gtWorkersFor: aView [
 		  actionUpdateButton
 ]
 
+{ #category : #'api - logger' }
+GtRemoteRunner >> hasLog [
+	"Answer a boolean indicating if the receiver has an active log available"
+
+	^ log isNotNil
+]
+
 { #category : #initialization }
 GtRemoteRunner >> initialize [
 
@@ -313,6 +321,13 @@ GtRemoteRunner >> jobTimeout [
 GtRemoteRunner >> jobTimeout: anObject [
 
 	jobTimeout := anObject
+]
+
+{ #category : #'api - logger' }
+GtRemoteRunner >> log [
+	"Answer the in-memory log"
+
+	^ log
 ]
 
 { #category : #accessing }
@@ -388,10 +403,6 @@ GtRemoteRunner >> privateTaskFailed: aTaskContextId with: anGtRrTaskErrorDetails
 	taskContext := currentlyExecutingTasks removeKey: aTaskContextId.
 	taskContext errorDetails: anGtRrTaskErrorDetails.
 	taskContext markTaskCompleted.
-		GtRrContextTrace new
-			context: taskContext;
-			operation: #taskCompleted;
-			emit.
 	self checkJobCompleted: taskContext.
 ]
 
@@ -408,6 +419,8 @@ GtRemoteRunner >> registerWorkerWithPlatform: aPlatform [
 		when: PharoLinkServerConnectionDisconnectedAnnouncement
 		send: #unregisterWorker:
 		to: self.
+	self announceAndLog: (GtRrWorkerRegisteredAnnouncement new
+			worker: pharoLinkServerConnection).
 	"Answer a PharoLink primitive so that a proxy isn't created for the runner (which is a global, anyway)"
 	^ nil
 ]
@@ -479,10 +492,15 @@ GtRemoteRunner >> startJob: aGtRrJob [
 		put: context.
 	jobStartupAndShutdown startupJob: context.
 	self assignTasksToWorkers.
-	GtRrJobTrace new
-		job: aGtRrJob;
-		operation: #started;
-		emit.
+
+]
+
+{ #category : #'api - logger' }
+GtRemoteRunner >> startLogging [
+	"Start the receiver's in-memory log"
+
+	log ifNotNil: [ self error: 'Logging already started' ].
+	log := CircularMemoryLogger new startFor: GtRemoteRunnerAnnouncement.
 ]
 
 { #category : #ui }
@@ -519,15 +537,14 @@ GtRemoteRunner >> submitJob: aGtRrJob [
 		do: [ :announcement | self announce: announcement ]
 		for: self.
 	sharedAccess critical:
-		[ GtRrJobTrace new
-			job: aGtRrJob;
-			operation: #submitted;
-			emit.
-		currentlyExecutingJobs ifEmpty:
-			[ self startJob: aGtRrJob ]
+		[ currentlyExecutingJobs ifEmpty:
+			[ self announceAndLog: (GtRrJobSubmittedAnnouncement job: aGtRrJob).
+			self startJob: aGtRrJob ]
 		ifNotEmpty:
 			[ "Multiple jobs may be allowed to run concurrently - functionality to be added"
-			jobQueue nextPut: aGtRrJob ] ]
+			jobQueue nextPut: aGtRrJob.
+			self announceAndLog: (GtRrJobSubmittedAnnouncement job: aGtRrJob). ] ].
+
 ]
 
 { #category : #ui }
@@ -561,10 +578,6 @@ GtRemoteRunner >> taskDone: aTaskContextId with: anObject [
 		[ taskContext := currentlyExecutingTasks removeKey: aTaskContextId.
 		taskContext result: anObject.
 		taskContext markTaskCompleted.
-		GtRrContextTrace new
-			context: taskContext;
-			operation: #taskCompleted;
-			emit.
 		self checkJobCompleted: taskContext ].
 ]
 
@@ -601,11 +614,13 @@ GtRemoteRunner >> terminateJobId: aJobId [
 			ifPresent: [ :aJobContext | 
 				currentlyExecutingJobs removeKey: aJobId.
 				aJobContext terminateJob.
+				self announceAndLog: (GtRrJobTerminatedAnnouncement job: aJobContext job).
 				aJobContext job ]
 			ifAbsent: 
 				[ (jobQueue nextOrNilSuchThat: [ :jobContext | jobContext id = aJobId ])
 				ifNotNil: [ :aJob |
 					aJob cancelJob.
+					self announceAndLog: (GtRrJobCancelledAnnouncement job: aJob).
 					aJob ] ] ].
 ]
 
@@ -631,6 +646,14 @@ GtRemoteRunner >> timeoutManager [
 
 { #category : #'api - worker' }
 GtRemoteRunner >> unregisterWorker: aPharoLinkServerConnectionDisconnectedAnnouncement [
+
+	^ self 
+		unregisterWorker: aPharoLinkServerConnectionDisconnectedAnnouncement 
+		reason: 'Worker connection lost'
+]
+
+{ #category : #'api - worker' }
+GtRemoteRunner >> unregisterWorker: aPharoLinkServerConnectionDisconnectedAnnouncement reason: aString [
 	| connection terminatedWorkers failedTasks errorDetails |
 
 	connection := aPharoLinkServerConnectionDisconnectedAnnouncement connection.
@@ -646,6 +669,9 @@ GtRemoteRunner >> unregisterWorker: aPharoLinkServerConnectionDisconnectedAnnoun
 					errorMessage: 'Connection closed';
 					setTrace.
 			self privateTaskFailed: taskContext taskContextId with: errorDetails ]. ].
+	self announceAndLog: (GtRrWorkerUnregisteredAnnouncement new
+		worker: connection;
+		reason: aString).
 ]
 
 { #category : #accessing }
