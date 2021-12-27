@@ -151,6 +151,7 @@ GtRemoteRunnerExamples >> handleWorkerDisconnection [
 	runner := GtRemoteRunner new
 		port: 7086;
 		managerStartupAndShutdown: GtRrManualManagerStartupAndShutdown new;
+		startLogging;
 		start.
 	[ worker := GtRrWorker newWith: (LanguageLinkSettings pharoDefaultSettings
 			serverProcessClass: LanguageLinkManualProcess;
@@ -184,7 +185,6 @@ GtRemoteRunnerExamples >> handleWorkerDisconnection [
 	self assert: runner registeredWorkerCount equals: 1.
 	self assert: runner availableWorkerCount equals: 0.
 	self assert: job state equals: #started.
-
 	worker stop.
 	workerProcess terminate.
 	endSemaphore wait.

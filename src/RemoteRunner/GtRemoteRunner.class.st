@@ -106,16 +106,16 @@ GtRemoteRunner >> assignTasksToWorkers [
 
 	busyWorkers := OrderedCollection new.
 	"Loop around assigning tasks to workers until there either no more workers or no more tasks available"
-	availableWorkers do: [ :worker |
-		taskContext := self getNextTaskFor: worker platform.
+	availableWorkers do: [ :workerFuture |
+		taskContext := self getNextTaskFor: workerFuture platform.
 		taskContext ifNotNil:
 			[ runnerStats incrementTaskCount.
 			taskContext
-				workerFuture: worker;
+				workerFuture: workerFuture;
 				markTaskStarted.
-			"Set the task in the worker, this will signal the worker's semaphore, waking up the worker's process"
-			worker taskContext: taskContext.
-			busyWorkers add: worker.
+			"Set the task in the workerFuture, this will signal the workerFuture's semaphore, waking up the workerFuture's process"
+			workerFuture taskContext: taskContext.
+			busyWorkers add: workerFuture.
 			timeoutManager addContext: taskContext ] ].
 	availableWorkers removeAll: busyWorkers.
 ]
@@ -255,13 +255,13 @@ GtRemoteRunner >> gtWorkersFor: aView [
 	^ aView columnedList
 		  title: 'Registered Workers';
 		  priority: 50;
-		  items: [ registeredWorkers associations ];
+		  items: [ registeredWorkers values ];
 		  column: 'IP Address' text: [ :item | 
 			String streamContents: [ :stream |
-				item key remoteAddress do: [ :byte |
+				item remoteAddress do: [ :byte |
 					stream print: byte ]
 				separatedBy: [ stream nextPut: $. ] ] ];
-		  column: 'Platform' text: [ :item | item value ];
+		  column: 'Platform' text: [ :item | item platform ];
 		  actionUpdateButton
 ]
 
@@ -350,7 +350,7 @@ GtRemoteRunner >> nextTaskFor: aPlatform [
 	| taskFuture |
 
 	taskFuture := GtRrFutureWorkerTask new 
-		connection: PharoLinkServerCurrentConnection value;
+		connection: (registeredWorkers at: PharoLinkServerCurrentConnection value);
 		platform: aPlatform.
 	sharedAccess critical:
 		[ availableWorkers add: taskFuture.
@@ -410,17 +410,19 @@ GtRemoteRunner >> privateTaskFailed: aTaskContextId with: anGtRrTaskErrorDetails
 GtRemoteRunner >> registerWorkerWithPlatform: aPlatform [
 	"Register the supplied worker and connection details.
 	Register the connection for disconnection notification"
-	| pharoLinkServerConnection |
+	| pharoLinkServerConnection workerConnection |
 
 	pharoLinkServerConnection := PharoLinkServerCurrentConnection value.
+	workerConnection := GtRrWorkerConnection connection: pharoLinkServerConnection.
+	workerConnection platform: aPlatform.
 	sharedAccess critical:
-		[ registeredWorkers at: pharoLinkServerConnection put: aPlatform ].
+		[ registeredWorkers at: pharoLinkServerConnection put: workerConnection ].
 	pharoLinkServerConnection
 		when: PharoLinkServerConnectionDisconnectedAnnouncement
 		send: #unregisterWorker:
 		to: self.
 	self announceAndLog: (GtRrWorkerRegisteredAnnouncement new
-			worker: pharoLinkServerConnection).
+			worker: workerConnection).
 	"Answer a PharoLink primitive so that a proxy isn't created for the runner (which is a global, anyway)"
 	^ nil
 ]
@@ -532,10 +534,6 @@ GtRemoteRunner >> submitJob: aGtRrJob [
 	"Add the supplied job to the queue.
 	Start execution as soon as possible"
 
-	aGtRrJob
-		when: GtRemoteRunnerAnnouncement 
-		do: [ :announcement | self announce: announcement ]
-		for: self.
 	sharedAccess critical:
 		[ currentlyExecutingJobs ifEmpty:
 			[ self announceAndLog: (GtRrJobSubmittedAnnouncement job: aGtRrJob).
@@ -647,23 +645,24 @@ GtRemoteRunner >> timeoutManager [
 { #category : #'api - worker' }
 GtRemoteRunner >> unregisterWorker: aPharoLinkServerConnectionDisconnectedAnnouncement [
 
-	^ self 
+	^ self
 		unregisterWorker: aPharoLinkServerConnectionDisconnectedAnnouncement 
 		reason: 'Worker connection lost'
 ]
 
 { #category : #'api - worker' }
 GtRemoteRunner >> unregisterWorker: aPharoLinkServerConnectionDisconnectedAnnouncement reason: aString [
-	| connection terminatedWorkers failedTasks errorDetails |
+	| connection terminatedWorkers failedTasks errorDetails workerConnection |
 
 	connection := aPharoLinkServerConnectionDisconnectedAnnouncement connection.
 	sharedAccess critical:
-		[ registeredWorkers removeKey: connection ifAbsent: [].
-		terminatedWorkers := availableWorkers select: [ :worker | worker connection = connection ].
-		terminatedWorkers	do: [ :worker | worker terminateProcess ].
+		[ workerConnection := registeredWorkers removeKey: connection ifAbsent: [].
+		terminatedWorkers := availableWorkers select: [ :workerFuture | 
+			workerFuture connection = workerConnection ].
+		terminatedWorkers	do: [ :workerFuture | workerFuture terminateProcess ].
 		availableWorkers removeAll: terminatedWorkers.
 		failedTasks := currentlyExecutingTasks select: [ :each |
-			each connection = connection ].
+			each connection = workerConnection ].
 		failedTasks valuesDo: [ :taskContext |
 			errorDetails := GtRrErrorDetails new
 					errorMessage: 'Connection closed';

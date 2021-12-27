@@ -17,15 +17,15 @@ Class {
 
 { #category : #accessing }
 GtRrFutureWorkerTask >> connection [
-	<return: #PharoLinkServerConnection>
+	<return: #GtRrWorkerConnection>
 
 	^ connection
 ]
 
 { #category : #accessing }
-GtRrFutureWorkerTask >> connection: aPharoLinkServerConnection [
+GtRrFutureWorkerTask >> connection: aGtRrWorkerConnection [
 
-	connection := aPharoLinkServerConnection
+	connection := aGtRrWorkerConnection
 ]
 
 { #category : #initialization }
