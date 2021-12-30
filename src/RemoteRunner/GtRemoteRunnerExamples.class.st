@@ -60,6 +60,7 @@ GtRemoteRunnerExamples >> assignTasksToWorkersTaskFirst [
 GtRemoteRunnerExamples >> assignTasksToWorkersWorkerFirst [
 	"Demonstrate assigning tasks to workers, with the tasks queued before the workers connect"
 	<gtExample>
+	<noTest>
 	| remoteRunner workers job tasks taskCompletedCount taskFailedCount jobCompletedCount semaphore |
 
 	jobCompletedCount := taskCompletedCount := taskFailedCount := 0.
