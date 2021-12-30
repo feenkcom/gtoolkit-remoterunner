@@ -205,6 +205,8 @@ GtRrTask >> summaryAttributes [
 			[ stream nextPut: #Started -> startTime ].
 		endTime ifNotNil:
 			[ stream nextPut: #Ended -> endTime ].
+		taskTimeout ifNotNil:
+			[ stream nextPut: #Timeout -> taskTimeout ].
 		stream nextPut: #ID -> taskId.
 		stream nextPut: 'Worker IP Address' -> workerIpAddress ]
 ]

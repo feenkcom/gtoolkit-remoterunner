@@ -76,6 +76,12 @@ GtRrFutureWorkerTask >> terminateProcess [
 	semaphore terminateProcess
 ]
 
+{ #category : #running }
+GtRrFutureWorkerTask >> terminateTaskContextId: taskContextId [
+
+	^ connection commandTerminateTaskContextId: taskContextId
+]
+
 { #category : #'api - future' }
 GtRrFutureWorkerTask >> wait [
 

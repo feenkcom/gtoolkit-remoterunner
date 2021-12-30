@@ -259,10 +259,12 @@ GtRrJob >> summaryAttributes [
 		add: #Tasks -> self tasks size;
 		add: #Platforms -> self platformsDisplayList;
 		add: #Results -> results size;
+		add: #Errors -> self resultsWithErrors size;
 		add: 'Start Time' -> startTime;
 		add: 'End Time' -> endTime;
 		add: 'Job Timeout' -> jobTimeout;
-		add: 'Task Timeout' -> taskTimeout.
+		add: 'Task Timeout' -> taskTimeout;
+		add: 'Id' -> self id.
 	^ attributes
 ]
 

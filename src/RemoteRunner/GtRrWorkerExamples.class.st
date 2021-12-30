@@ -13,10 +13,9 @@ GtRrWorkerExamples >> commandLine [
 	| commandLine |
 
 	commandLine := GtRrWorker commandLineCommand match:
-		#('remoteRunnerWorker' '--log' '--taskPollForever' '--serverSocketAddress' '7084').
+		#('remoteRunnerWorker' '--log' '--serverSocketAddress' '7084').
 
 	self assert: (commandLine at: #log) value equals: true.
-	self assert: (commandLine at: #taskPollForever) value equals: true.
 	self assert: ((commandLine at: #serverSocketAddress) at: #address) value equals: '7084'.
 
 	^ commandLine

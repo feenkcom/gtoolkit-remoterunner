@@ -38,7 +38,6 @@ GtRrLocalManagerStartupAndShutdown >> newWorkerLocalProcess [
 		add: 'remoteRunnerWorker'.
 	remoteRunner debugMode ifTrue: [ args add: '--log' ].
 	args
-		add: '--taskPollForever';
 		add: '--serverSocketAddress';
 		add: remoteRunner port asString;
 		add: '--detachChangesFromFileSystem'.

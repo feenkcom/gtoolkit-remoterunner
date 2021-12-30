@@ -8,7 +8,10 @@ Class {
 		'connection',
 		'platform',
 		'remoteAddress',
-		'details'
+		'details',
+		'observer',
+		'observerProcess',
+		'observerSemaphore'
 	],
 	#category : #'RemoteRunner-Runner'
 }
@@ -17,6 +20,43 @@ Class {
 GtRrWorkerConnection class >> connection: aConnection [
 
 	^ self new connection: aConnection
+]
+
+{ #category : #accessing }
+GtRrWorkerConnection >> addObserver: aBlock [
+
+	"Waits until semaphore of observer is signalled to keep request alive, as observers live in the request-response life-cycle."
+
+	self assert: [ observer isNil ].
+	self assert: [ observerProcess isNil ].
+	observer := aBlock.
+	observerProcess := Processor activeProcess.
+	observerSemaphore := Semaphore new.
+	^ true
+]
+
+{ #category : #commands }
+GtRrWorkerConnection >> commandPing [
+
+	"If the worker service responds, it is is there. If something fails, you get an error."
+
+	^ self sendControlMessage: (Message selector: #commandPing)
+]
+
+{ #category : #commands }
+GtRrWorkerConnection >> commandQuitSmalltalk [
+
+	"Except the connection to close on the worker service end."
+
+	^ self sendControlMessage: (Message selector: #commandQuitSmalltalk)
+]
+
+{ #category : #commands }
+GtRrWorkerConnection >> commandTerminateTaskContextId: taskContextId [
+
+	^ self sendControlMessage: (Message
+		selector: #commandTerminateTaskContextId:
+		argument: taskContextId)
 ]
 
 { #category : #accessing }
@@ -32,11 +72,38 @@ GtRrWorkerConnection >> connection: aPharoLinkServerConnection [
 	remoteAddress := connection remoteAddress.
 ]
 
+{ #category : #accessing }
+GtRrWorkerConnection >> details [
+
+	^ details
+]
+
+{ #category : #accessing }
+GtRrWorkerConnection >> details: anObject [
+
+	details := anObject.
+	platform := details at: #platform.
+]
+
+{ #category : #testing }
+GtRrWorkerConnection >> hasObserver [
+
+	^ observer isNotNil
+]
+
 { #category : #initialization }
 GtRrWorkerConnection >> initialize [
 
 	super initialize.
 	details := Dictionary new.
+]
+
+{ #category : #private }
+GtRrWorkerConnection >> observerWait [
+	"Wait on the observer semaphore.
+	This is called by the worker to keep the observer valid."
+
+	observerSemaphore wait.
 ]
 
 { #category : #accessing }
@@ -46,19 +113,30 @@ GtRrWorkerConnection >> platform [
 ]
 
 { #category : #accessing }
-GtRrWorkerConnection >> platform: anObject [
-
-	platform := anObject
-]
-
-{ #category : #accessing }
 GtRrWorkerConnection >> remoteAddress [
 
 	^ remoteAddress
 ]
 
+{ #category : #accessing }
+GtRrWorkerConnection >> removeObserver [
+
+	observerProcess ifNotNil: #terminate.
+	observerProcess := nil.
+	observer := nil.
+	^ true
+]
+
+{ #category : #private }
+GtRrWorkerConnection >> sendControlMessage: aMessage [
+
+	^ observer value: { aMessage selector. aMessage arguments. aMessage lookupClass }
+]
+
 { #category : #'start-stop' }
 GtRrWorkerConnection >> stop [
 
-	connection stop
+	self hasObserver ifTrue: [ self removeObserver ].
+	connection stop.
+
 ]
