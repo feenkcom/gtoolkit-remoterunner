@@ -26,7 +26,7 @@ GtRrJobStartupAndShutdown >> shutdownJob: aJobContext [
 	remoteRunner removeCurrentlyExecutingJob: aJobContext id.
 	job := aJobContext job.
 	job markJobCompleted.
-	job unsubscribe: remoteRunner.
+	remoteRunner announceAndLog: (GtRrJobCompletedAnnouncement job: job).
 ]
 
 { #category : #'api - startup' }
@@ -39,5 +39,7 @@ GtRrJobStartupAndShutdown >> startupJob: aGtRrJobContext [
 		getTasks;
 		createPlatformContexts;
 		markJobStarted.
-	remoteRunner timeoutManager addContext: aGtRrJobContext
+	remoteRunner timeoutManager addContext: aGtRrJobContext.
+	remoteRunner announceAndLog: (GtRrJobStartedAnnouncement job: self).
+
 ]

@@ -38,7 +38,6 @@ GtRrLocalManagerStartupAndShutdown >> newWorkerLocalProcess [
 		add: 'remoteRunnerWorker'.
 	remoteRunner debugMode ifTrue: [ args add: '--log' ].
 	args
-		add: '--taskPollForever';
 		add: '--serverSocketAddress';
 		add: remoteRunner port asString;
 		add: '--detachChangesFromFileSystem'.
@@ -97,10 +96,9 @@ GtRrLocalManagerStartupAndShutdown >> startWatchDog [
 			processes
 				remove: e;
 				add: process.
-			GtRrWatchdogTrace new
-				failedProcess: e;
-				newProcess: process;
-				emit ].
+			remoteRunner announceAndLog: (GtRrWorkerReplacedAnnouncement new
+				worker: e;
+				newWorker: process) ].
 		 ] repeat ] forkNamed:
 			'GtRemoteRunner local watch dog'
 ]

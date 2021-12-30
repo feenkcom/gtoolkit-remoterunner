@@ -157,7 +157,8 @@ GtRrJob >> jobTimeout: aDuration [
 GtRrJob >> markJobCancelled [
 
 	state := #cancelled.
-	self announce: (GtRrJobCancelledAnnouncement job: self)
+	self announce: (GtRrJobCancelledAnnouncement job: self).
+
 ]
 
 { #category : #'private - running' }
@@ -165,7 +166,8 @@ GtRrJob >> markJobCompleted [
 
 	endTime := DateAndTime now.
 	state := #completed.
-	self announce: (GtRrJobCompletedAnnouncement job: self)
+	self announce: (GtRrJobCompletedAnnouncement job: self).
+
 ]
 
 { #category : #'private - running' }
@@ -173,13 +175,15 @@ GtRrJob >> markJobStarted [
 
 	startTime := DateAndTime now.
 	state := #started.
-	self announce: (GtRrJobStartedAnnouncement job: self)
+	self announce: (GtRrJobStartedAnnouncement job: self).
+
 ]
 
 { #category : #'private - running' }
 GtRrJob >> markJobTerminating [
 
 	state := #terminating.
+
 ]
 
 { #category : #accessing }
@@ -255,10 +259,12 @@ GtRrJob >> summaryAttributes [
 		add: #Tasks -> self tasks size;
 		add: #Platforms -> self platformsDisplayList;
 		add: #Results -> results size;
+		add: #Errors -> self resultsWithErrors size;
 		add: 'Start Time' -> startTime;
 		add: 'End Time' -> endTime;
 		add: 'Job Timeout' -> jobTimeout;
-		add: 'Task Timeout' -> taskTimeout.
+		add: 'Task Timeout' -> taskTimeout;
+		add: 'Id' -> self id.
 	^ attributes
 ]
 

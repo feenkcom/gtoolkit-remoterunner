@@ -24,3 +24,9 @@ GtRrTaskAnnouncement >> task: anObject [
 
 	task := anObject
 ]
+
+{ #category : #accessing }
+GtRrTaskAnnouncement >> taskId [
+
+	^ task taskId
+]

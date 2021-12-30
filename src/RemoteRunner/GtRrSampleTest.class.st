@@ -22,7 +22,7 @@ GtRrSampleTest >> testFail [
 GtRrSampleTest >> testLong [
 	"A test that is CPU bound for 60 seconds.
 	Normally it will fail due to exceeding the time limit.
-	It isn't marked as an expectedFailure as the purpose is to test the test framework."
+	It is marked as an expectedFailure as the purpose is to test the test framework."
 	<expectedFailure>
 	| startTime |
 

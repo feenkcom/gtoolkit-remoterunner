@@ -66,7 +66,8 @@ GtRrInImageWorker >> start [
 		description: 'The worker''s remote runner must be set before starting'.
 	PharoLinkServerCurrentConnection 
 		value: connection
-		during: [ remoteRunner registerWorkerWithPlatform: rrPlatform ].
+		during: [ remoteRunner registerWorkerWithDetails: 
+			{ #platform -> rrPlatform } asDictionary ].
 	process := [ self taskPollForever ] fork.
 ]
 
@@ -114,7 +115,7 @@ GtRrInImageWorker >> taskPollForever [
 GtRrInImageWorker >> taskRun: aTaskContext [
 	| result error |
 
-	[ result := aTaskContext run ]
+	[ result := aTaskContext value ]
 		on: Error 
 		do: [ :ex |
 			ex freeze.

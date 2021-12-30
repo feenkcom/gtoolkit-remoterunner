@@ -50,8 +50,8 @@ The worker images are assumed to be up to date when the Job Execution phase is r
 Class {
 	#name : #GtRemoteRunner,
 	#superclass : #Object,
-	#traits : 'TGtAnnouncer',
-	#classTraits : 'TGtAnnouncer classTrait',
+	#traits : 'TGtAnnouncer + TGtUniqueInstance',
+	#classTraits : 'TGtAnnouncer classTrait + TGtUniqueInstance classTrait',
 	#instVars : [
 		'port',
 		'server',
@@ -68,10 +68,23 @@ Class {
 		'jobTimeout',
 		'timeoutManager',
 		'announcer',
-		'runnerStats'
+		'runnerStats',
+		'log'
 	],
 	#category : #'RemoteRunner-Runner'
 }
+
+{ #category : #'private - hooks' }
+GtRemoteRunner class >> onRemoveUniqueInstance: anInstance [
+	"Classes may perform some activities on a singleton that is about to be released"
+
+	uniqueInstance stop.
+]
+
+{ #category : #accessing }
+GtRemoteRunner class >> uniqueInstance [
+	^ uniqueInstance ifNil: [ uniqueInstance := self new start ]
+]
 
 { #category : #accessing }
 GtRemoteRunner >> addCurrentlyExecutingTask: aGtRrTaskContext [
@@ -79,6 +92,24 @@ GtRemoteRunner >> addCurrentlyExecutingTask: aGtRrTaskContext [
 	Must be called within sharedAccess."
 
 	currentlyExecutingTasks at: aGtRrTaskContext taskContextId put: aGtRrTaskContext
+]
+
+{ #category : #'api - worker' }
+GtRemoteRunner >> addObserver: aBlock [
+	| worker |
+
+	worker := registeredWorkers at: PharoLinkServerCurrentConnection value.
+	worker addObserver: aBlock.
+	self announceAndLog: (GtRrWorkerControlChannelRegisteredAnnouncement worker: worker).
+	worker observerWait.
+]
+
+{ #category : #announcer }
+GtRemoteRunner >> announceAndLog: aBeaconSignal [
+	"Announce the supplied signal to the receiver's announcer and then emit the signal for logging"
+
+	self announce: aBeaconSignal.
+	aBeaconSignal emit.
 ]
 
 { #category : #announcer }
@@ -97,21 +128,18 @@ GtRemoteRunner >> assignTasksToWorkers [
 
 	busyWorkers := OrderedCollection new.
 	"Loop around assigning tasks to workers until there either no more workers or no more tasks available"
-	availableWorkers do: [ :worker |
-		taskContext := self getNextTaskFor: worker platform.
+	availableWorkers do: [ :workerFuture |
+		taskContext := self getNextTaskFor: workerFuture platform.
 		taskContext ifNotNil:
 			[ runnerStats incrementTaskCount.
 			taskContext
-				workerFuture: worker;
+				workerFuture: workerFuture;
 				markTaskStarted.
-			"Set the task in the worker, this will signal the worker's semaphore, waking up the worker's process"
-			worker taskContext: taskContext.
-			busyWorkers add: worker.
+			"Set the task in the workerFuture, this will signal the workerFuture's semaphore, waking up the workerFuture's process"
+			workerFuture taskContext: taskContext.
+			busyWorkers add: workerFuture.
 			timeoutManager addContext: taskContext.
-			GtRrContextTrace new
-				context: taskContext;
-				operation: #taskStarted;
-				emit ] ].
+			self announceAndLog: (GtRrTaskStartedAnnouncement task: taskContext) ] ].
 	availableWorkers removeAll: busyWorkers.
 ]
 
@@ -130,10 +158,6 @@ GtRemoteRunner >> checkJobCompleted: aGtRrContext [
 	jobContext := aGtRrContext jobContext.
 	jobContext isFinished ifFalse: [ ^ self ].
 
-	GtRrContextTrace new
-		context: aGtRrContext;
-		operation: #jobCompleted;
-		emit.
 	jobStartupAndShutdown shutdownJob: jobContext.
 
 ]
@@ -215,7 +239,7 @@ GtRemoteRunner >> gtExecutingTasksFor: aView [
 		  priority: 20;
 		  items: [ 
 			  sharedAccess critical: [ currentlyExecutingTasks values ] ];
-		  send: [ :item | item task ];
+		  send: [ :item | item ];
 		  updateWhen: GtRemoteRunnerAnnouncement in: [ self announcer ];
 		  actionUpdateButton
 ]
@@ -254,14 +278,21 @@ GtRemoteRunner >> gtWorkersFor: aView [
 	^ aView columnedList
 		  title: 'Registered Workers';
 		  priority: 50;
-		  items: [ registeredWorkers associations ];
+		  items: [ registeredWorkers values ];
 		  column: 'IP Address' text: [ :item | 
 			String streamContents: [ :stream |
-				item key remoteAddress do: [ :byte |
+				item remoteAddress do: [ :byte |
 					stream print: byte ]
 				separatedBy: [ stream nextPut: $. ] ] ];
-		  column: 'Platform' text: [ :item | item value ];
+		  column: 'Platform' text: [ :item | item platform ];
 		  actionUpdateButton
+]
+
+{ #category : #'api - logger' }
+GtRemoteRunner >> hasLog [
+	"Answer a boolean indicating if the receiver has an active log available"
+
+	^ log isNotNil
 ]
 
 { #category : #initialization }
@@ -315,6 +346,13 @@ GtRemoteRunner >> jobTimeout: anObject [
 	jobTimeout := anObject
 ]
 
+{ #category : #'api - logger' }
+GtRemoteRunner >> log [
+	"Answer the in-memory log"
+
+	^ log
+]
+
 { #category : #accessing }
 GtRemoteRunner >> managerStartupAndShutdown [
 
@@ -335,13 +373,13 @@ GtRemoteRunner >> nextTaskFor: aPlatform [
 	| taskFuture |
 
 	taskFuture := GtRrFutureWorkerTask new 
-		connection: PharoLinkServerCurrentConnection value;
+		connection: (registeredWorkers at: PharoLinkServerCurrentConnection value);
 		platform: aPlatform.
 	sharedAccess critical:
 		[ availableWorkers add: taskFuture.
 		self assignTasksToWorkers ].
 	taskFuture wait.
-	^ taskFuture taskContext.
+	^ taskFuture taskContext asWorkerTaskContext.
 
 ]
 
@@ -388,26 +426,27 @@ GtRemoteRunner >> privateTaskFailed: aTaskContextId with: anGtRrTaskErrorDetails
 	taskContext := currentlyExecutingTasks removeKey: aTaskContextId.
 	taskContext errorDetails: anGtRrTaskErrorDetails.
 	taskContext markTaskCompleted.
-		GtRrContextTrace new
-			context: taskContext;
-			operation: #taskCompleted;
-			emit.
+	self announceAndLog: (GtRrTaskCompletedAnnouncement task: taskContext).
 	self checkJobCompleted: taskContext.
 ]
 
 { #category : #'api - worker' }
-GtRemoteRunner >> registerWorkerWithPlatform: aPlatform [
+GtRemoteRunner >> registerWorkerWithDetails: aDictionary [
 	"Register the supplied worker and connection details.
 	Register the connection for disconnection notification"
-	| pharoLinkServerConnection |
+	| pharoLinkServerConnection workerConnection |
 
 	pharoLinkServerConnection := PharoLinkServerCurrentConnection value.
+	workerConnection := GtRrWorkerConnection connection: pharoLinkServerConnection.
+	workerConnection details: aDictionary.
 	sharedAccess critical:
-		[ registeredWorkers at: pharoLinkServerConnection put: aPlatform ].
+		[ registeredWorkers at: pharoLinkServerConnection put: workerConnection ].
 	pharoLinkServerConnection
 		when: PharoLinkServerConnectionDisconnectedAnnouncement
 		send: #unregisterWorker:
 		to: self.
+	self announceAndLog: (GtRrWorkerRegisteredAnnouncement new
+			worker: workerConnection).
 	"Answer a PharoLink primitive so that a proxy isn't created for the runner (which is a global, anyway)"
 	^ nil
 ]
@@ -479,10 +518,15 @@ GtRemoteRunner >> startJob: aGtRrJob [
 		put: context.
 	jobStartupAndShutdown startupJob: context.
 	self assignTasksToWorkers.
-	GtRrJobTrace new
-		job: aGtRrJob;
-		operation: #started;
-		emit.
+
+]
+
+{ #category : #'api - logger' }
+GtRemoteRunner >> startLogging [
+	"Start the receiver's in-memory log"
+
+	log ifNotNil: [ ^ self ].
+	log := CircularMemoryLogger new startFor: GtRemoteRunnerAnnouncement.
 ]
 
 { #category : #ui }
@@ -491,6 +535,7 @@ GtRemoteRunner >> state [
 	Must be called within sharedAccess"
 	| availableWorkerCount jobCount currentJobCount currentTaskCount registeredWorkerCount |
 
+	(server isNil or: [ server isRunning not ]) ifTrue: [ ^ #stopped ].
 	availableWorkerCount := availableWorkers size.
 	jobCount := jobQueue size.
 	currentJobCount := currentlyExecutingJobs size.
@@ -514,20 +559,15 @@ GtRemoteRunner >> submitJob: aGtRrJob [
 	"Add the supplied job to the queue.
 	Start execution as soon as possible"
 
-	aGtRrJob
-		when: GtRemoteRunnerAnnouncement 
-		do: [ :announcement | self announce: announcement ]
-		for: self.
 	sharedAccess critical:
-		[ GtRrJobTrace new
-			job: aGtRrJob;
-			operation: #submitted;
-			emit.
-		currentlyExecutingJobs ifEmpty:
-			[ self startJob: aGtRrJob ]
+		[ currentlyExecutingJobs ifEmpty:
+			[ self announceAndLog: (GtRrJobSubmittedAnnouncement job: aGtRrJob).
+			self startJob: aGtRrJob ]
 		ifNotEmpty:
 			[ "Multiple jobs may be allowed to run concurrently - functionality to be added"
-			jobQueue nextPut: aGtRrJob ] ]
+			jobQueue nextPut: aGtRrJob.
+			self announceAndLog: (GtRrJobSubmittedAnnouncement job: aGtRrJob). ] ].
+
 ]
 
 { #category : #ui }
@@ -561,10 +601,7 @@ GtRemoteRunner >> taskDone: aTaskContextId with: anObject [
 		[ taskContext := currentlyExecutingTasks removeKey: aTaskContextId.
 		taskContext result: anObject.
 		taskContext markTaskCompleted.
-		GtRrContextTrace new
-			context: taskContext;
-			operation: #taskCompleted;
-			emit.
+		self announceAndLog: (GtRrTaskCompletedAnnouncement task: taskContext).
 		self checkJobCompleted: taskContext ].
 ]
 
@@ -601,26 +638,21 @@ GtRemoteRunner >> terminateJobId: aJobId [
 			ifPresent: [ :aJobContext | 
 				currentlyExecutingJobs removeKey: aJobId.
 				aJobContext terminateJob.
+				self announceAndLog: (GtRrJobTerminatedAnnouncement job: aJobContext job).
 				aJobContext job ]
 			ifAbsent: 
 				[ (jobQueue nextOrNilSuchThat: [ :jobContext | jobContext id = aJobId ])
 				ifNotNil: [ :aJob |
 					aJob cancelJob.
+					self announceAndLog: (GtRrJobCancelledAnnouncement job: aJob).
 					aJob ] ] ].
 ]
 
 { #category : #private }
 GtRemoteRunner >> terminateTaskContextId: aTaskContextId [
 	"Terminate the specified currently executing task"
-	| taskContext  |
 
-	"This should send a terminate command through the control channel.
-	When the control channel is available...
-	For now, close the connection, which should cause the worker to exit, terminating any associated task.  It will be auto-restarted if appropriate.
-	The connection will announce it's closure, which will call back in to the remote runner, requiring sharedAccess.  A Monitor would handle this, but this is temporary.  Just fork for now."
-	taskContext := currentlyExecutingTasks at: aTaskContextId.
-	taskContext task state = #started ifFalse: [ ^ self ].
-	[ taskContext connection stop ] fork.
+	^ (currentlyExecutingTasks at: aTaskContextId) terminateTask.
 ]
 
 { #category : #accessing }
@@ -631,21 +663,33 @@ GtRemoteRunner >> timeoutManager [
 
 { #category : #'api - worker' }
 GtRemoteRunner >> unregisterWorker: aPharoLinkServerConnectionDisconnectedAnnouncement [
-	| connection terminatedWorkers failedTasks errorDetails |
+
+	^ self
+		unregisterWorker: aPharoLinkServerConnectionDisconnectedAnnouncement 
+		reason: 'Worker connection lost'
+]
+
+{ #category : #'api - worker' }
+GtRemoteRunner >> unregisterWorker: aPharoLinkServerConnectionDisconnectedAnnouncement reason: aString [
+	| connection terminatedWorkers failedTasks errorDetails workerConnection |
 
 	connection := aPharoLinkServerConnectionDisconnectedAnnouncement connection.
 	sharedAccess critical:
-		[ registeredWorkers removeKey: connection ifAbsent: [].
-		terminatedWorkers := availableWorkers select: [ :worker | worker connection = connection ].
-		terminatedWorkers	do: [ :worker | worker terminateProcess ].
+		[ workerConnection := registeredWorkers removeKey: connection ifAbsent: [].
+		terminatedWorkers := availableWorkers select: [ :workerFuture | 
+			workerFuture connection = workerConnection ].
+		terminatedWorkers	do: [ :workerFuture | workerFuture terminateProcess ].
 		availableWorkers removeAll: terminatedWorkers.
 		failedTasks := currentlyExecutingTasks select: [ :each |
-			each connection = connection ].
+			each connection = workerConnection ].
 		failedTasks valuesDo: [ :taskContext |
 			errorDetails := GtRrErrorDetails new
 					errorMessage: 'Connection closed';
 					setTrace.
 			self privateTaskFailed: taskContext taskContextId with: errorDetails ]. ].
+	self announceAndLog: (GtRrWorkerUnregisteredAnnouncement new
+		worker: connection;
+		reason: aString).
 ]
 
 { #category : #accessing }

@@ -12,20 +12,14 @@ Class {
 	#category : #'RemoteRunner-Runner-State'
 }
 
-{ #category : #jsonV3 }
-GtRrTaskContext class >> leJsonV4AttributeMapping [
-	"Answer the collection of attribute to store keys."
+{ #category : #converting }
+GtRrTaskContext >> asWorkerTaskContext [
+	"Answer a GtRrWorkerTaskContext ready for transfer to the worker"
 
-	^ OrderedCollection new
-		add: #taskContextId -> #taskContextId;
-		add: #task -> #task;
-		yourself.
-]
-
-{ #category : #accessing }
-GtRrTaskContext class >> leJsonV4Name [
-
-	^ #taskContext
+	^ GtRrWorkerTaskContext new
+		taskContextId: taskContextId;
+		task: task;
+		taskTimeout: self taskTimeout.
 ]
 
 { #category : #accessing }
@@ -47,6 +41,34 @@ GtRrTaskContext >> contextTimeoutTime [
 GtRrTaskContext >> errorDetails: anObject [
 
 	task errorDetails: anObject
+]
+
+{ #category : #ui }
+GtRrTaskContext >> gtSummaryFor: aView [
+
+	<gtView>
+	^ aView columnedList
+		  title: 'Summary';
+		  priority: 10;
+		  items: [ self summaryAttributes ];
+		  column: #Attribute text: [ :item | item key ];
+		  column: #Value text: [ :item | item value ];
+		send: [ :item | item value ];
+		updateWhen: GtRrTaskAnnouncement 
+			if: [ :announcement | announcement taskId = self taskId ] 
+			in: self remoteRunner announcer;
+		actionUpdateButton
+]
+
+{ #category : #ui }
+GtRrTaskContext >> gtTerminateActionFor: anAction [
+	<gtAction>
+
+	task state = #started ifFalse: [ ^ anAction noAction ].
+	^ anAction button
+		icon: BrGlamorousVectorIcons close;
+		tooltip: 'Terminate task';
+		action: [ :aButton | self terminateTask ]
 ]
 
 { #category : #initialization }
@@ -142,6 +164,16 @@ GtRrTaskContext >> run [
 	^ task run
 ]
 
+{ #category : #ui }
+GtRrTaskContext >> summaryAttributes [
+	"Answer a collection of key/value attributes that can simply be listed as a summary of the receiver"
+
+	^ Array streamContents: [ :stream |
+		task ifNotNil: [ stream nextPutAll: task summaryAttributes ].
+		stream nextPut: #TaskContextId -> taskContextId.
+		stream nextPut: #TimeoutTime -> self taskTimeoutTime ].
+]
+
 { #category : #accessing }
 GtRrTaskContext >> task [
 
@@ -186,6 +218,15 @@ GtRrTaskContext >> taskTimeoutTime [
 	<return: #DateAndTime>
 
 	^ taskTimeoutTime
+]
+
+{ #category : #running }
+GtRrTaskContext >> terminateTask [
+	"Terminate the receiver"
+
+	task state = #started ifFalse: [ ^ self ].
+	(workerFuture terminateTaskContextId: taskContextId) ifFalse:
+		[ self error: 'Unable to terminate task' ].
 ]
 
 { #category : #private }
