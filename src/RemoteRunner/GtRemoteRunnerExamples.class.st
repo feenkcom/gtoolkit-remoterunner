@@ -15,6 +15,7 @@ Class {
 GtRemoteRunnerExamples >> assignTasksToWorkersTaskFirst [
 	"Demonstrate assigning tasks to workers, with the tasks queued before the workers connect"
 	<gtExample>
+	<noTest>
 	| remoteRunner workers job tasks taskCompletedCount taskFailedCount jobCompletedCount semaphore |
 
 	jobCompletedCount := taskCompletedCount := taskFailedCount := 0.
@@ -107,6 +108,7 @@ GtRemoteRunnerExamples >> assignTasksToWorkersWorkerFirst [
 GtRemoteRunnerExamples >> controlChannelPing [
 	"Demonstrate the ping operation using the worker's control channel"
 	<gtExample>
+	<noTest>
 	| remoteRunner controlChannelSemaphore worker |
 
 	controlChannelSemaphore := GtMutualExclusionSemaphore new.
@@ -157,6 +159,7 @@ GtRemoteRunnerExamples >> controlChannelQuitSmalltalk [
 GtRemoteRunnerExamples >> getNextTaskFor [
 	"Demonstrate getting the next task for a given platform from a Remote Runner"
 	<gtExample>
+	<noTest>
 	| job tasks taskIds remoteRunner firstTask plat1Tasks plat2Tasks |
 
 	tasks := (1 to: 5) collect: [ :i |
@@ -197,6 +200,7 @@ GtRemoteRunnerExamples >> getNextTaskFor [
 GtRemoteRunnerExamples >> handleWorkerDisconnection [
 	"Demonstrate the runner handling worker disconnection"
 	<gtExample>
+	<noTest>
 	| runner worker job startSemaphore endSemaphore retry |
 
 	runner := GtRemoteRunner new
@@ -249,6 +253,7 @@ GtRemoteRunnerExamples >> handleWorkerDisconnection [
 GtRemoteRunnerExamples >> simpleTask [
 	"Demonstrate executing a simple task"
 	<gtExample>
+	<noTest>
 	| remoteRunner job completingTask taskFailedCount taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount times |
 
 	jobStartedCount := jobCompletedCount := taskStartedCount := taskCompletedCount := taskFailedCount := 0.
@@ -304,6 +309,7 @@ GtRemoteRunnerExamples >> simpleTask [
 GtRemoteRunnerExamples >> terminateNotStartedJob [
 	"Terminate a job that hasn't been started, ensuring that job is marked cancelled and has no results"
 	<gtExample>
+	<noTest>
 	| remoteRunner job tasks |
 
 	remoteRunner := GtRemoteRunner new.
@@ -337,6 +343,7 @@ GtRemoteRunnerExamples >> terminateNotStartedJob [
 GtRemoteRunnerExamples >> terminateStartedJob [
 	"Terminate a job that has been started, ensuring that all tasks have been marked as terminated (not yet started)"
 	<gtExample>
+	<noTest>
 	| remoteRunner job tasks taskFailedCount taskCompletedCount jobCompletedCount semaphore jobStartedCount taskStartedCount times |
 
 	jobStartedCount := jobCompletedCount := taskStartedCount := taskCompletedCount := taskFailedCount := 0.
@@ -404,6 +411,7 @@ GtRemoteRunnerExamples >> terminateStartedJob [
 GtRemoteRunnerExamples >> timeoutJob [
 	"Demonstrate terminating a job due to it timing out"
 	<gtExample>
+	<noTest>
 	| remoteRunner job tasks taskFailedCount taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount times |
 
 	jobStartedCount := jobCompletedCount := taskStartedCount := taskCompletedCount := taskFailedCount := 0.
@@ -462,6 +470,7 @@ GtRemoteRunnerExamples >> timeoutJob [
 GtRemoteRunnerExamples >> timeoutTask [
 	"Demonstrate terminating a task due to it timing out"
 	<gtExample>
+	<noTest>
 	"This is a copy of timeoutWorker, waiting on proper task termination to be integrated"
 	| remoteRunner job completingTask timeoutTask taskFailedCount taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount times taskFailedSemaphore |
 
@@ -531,6 +540,7 @@ GtRemoteRunnerExamples >> timeoutTask [
 GtRemoteRunnerExamples >> timeoutWorker [
 	"Demonstrate terminating a worker due to it timing out"
 	<gtExample>
+	<noTest>
 	| remoteRunner job completingTask timeoutTask taskFailedCount taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount times taskFailedSemaphore |
 
 	jobStartedCount := jobCompletedCount := taskStartedCount := taskCompletedCount := taskFailedCount := 0.
@@ -598,6 +608,7 @@ GtRemoteRunnerExamples >> timeoutWorker [
 GtRemoteRunnerExamples >> workerDetails [
 	"Demonstrate retrieving the remote worker's details"
 	<gtExample>
+	<noTest>
 	| remoteRunner registeredSemaphore worker |
 
 	registeredSemaphore := GtMutualExclusionSemaphore new.
