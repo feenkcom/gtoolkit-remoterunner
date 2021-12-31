@@ -250,6 +250,52 @@ GtRemoteRunnerExamples >> handleWorkerDisconnection [
 ]
 
 { #category : #examples }
+GtRemoteRunnerExamples >> multipleJobs [
+	"Demonstrate executing a multiple jobs"
+	<gtExample>
+	<noTest>
+	| remoteRunner job jobs completingTask taskFailedCount taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount |
+
+	jobStartedCount := jobCompletedCount := taskStartedCount := taskCompletedCount := taskFailedCount := 0.
+	jobSemaphore := GtMutualExclusionSemaphore new.
+	remoteRunner := GtRemoteRunner new port: 7092.
+	remoteRunner start.
+	[ 
+	jobs := (1 to: 2) collect: [  :i |
+		completingTask := GtRrScriptTask script: '#done'.
+		job := GtRrTasksJob new tasks: { completingTask }.
+		job
+			when: GtRrJobStartedAnnouncement do: 
+				[ jobStartedCount := jobStartedCount + 1 ];
+			when: GtRrJobCompletedAnnouncement do: 
+				[ jobCompletedCount := jobCompletedCount + 1.
+				jobSemaphore signal ];
+			when: GtRrJobCancelledAnnouncement do: 
+				[ jobCompletedCount := jobCompletedCount + 1 ];
+			when: GtRrTaskStartedAnnouncement do: 
+				[ taskStartedCount := taskStartedCount + 1 ];
+			when: GtRrTaskCompletedAnnouncement do: 
+				[ taskCompletedCount := taskCompletedCount + 1 ];
+			when: GtRrTaskFailedAnnouncement do: 
+				[ taskFailedCount := taskFailedCount + 1 ].
+		job ].
+	jobs do: [ :aJob | remoteRunner submitJob: aJob ].
+	2 timesRepeat: [ jobSemaphore wait ].
+
+	self assert: remoteRunner currentlyExecutingJobs size equals: 0.
+	self assert: remoteRunner currentlyExecutingTasks size equals: 0.
+	self assert: remoteRunner pendingJobCount equals: 0.
+	self assert: jobCompletedCount equals: 2.
+	self assert: jobStartedCount equals: 2.
+	self assert: taskCompletedCount equals: 2.
+	self assert: taskFailedCount equals: 0.
+	self assert: taskStartedCount equals: 2.
+	] ensure: [ remoteRunner stop ].
+
+	^ job
+]
+
+{ #category : #examples }
 GtRemoteRunnerExamples >> simpleTask [
 	"Demonstrate executing a simple task"
 	<gtExample>
