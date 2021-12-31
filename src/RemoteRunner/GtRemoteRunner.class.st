@@ -81,6 +81,16 @@ GtRemoteRunner class >> onRemoveUniqueInstance: anInstance [
 	uniqueInstance stop.
 ]
 
+{ #category : #printing }
+GtRemoteRunner class >> printIpAddress: aByteArray [
+	"Answer the usual dot notation of the supplied IPv4 address"
+
+	self assert: aByteArray size equals: 4.
+
+	^ String streamContents: [ :stream |
+		aByteArray printOn: stream delimiter: '.' ]
+]
+
 { #category : #accessing }
 GtRemoteRunner class >> uniqueInstance [
 	^ uniqueInstance ifNil: [ uniqueInstance := self new start ]

@@ -85,6 +85,20 @@ GtRrWorkerConnection >> details: anObject [
 	platform := details at: #platform.
 ]
 
+{ #category : #ui }
+GtRrWorkerConnection >> gtSummaryFor: aView [
+	<gtView>
+
+	^ aView columnedList
+		  title: 'Summary';
+		  priority: 10;
+		  items: [ self summaryAttributes ];
+		  column: #Attribute text: [ :item | item first ];
+		  column: #Value text: [ :item | item second ];
+		  send: [ :item | item third ];
+			actionUpdateButton 
+]
+
 { #category : #testing }
 GtRrWorkerConnection >> hasObserver [
 
@@ -96,6 +110,12 @@ GtRrWorkerConnection >> initialize [
 
 	super initialize.
 	details := Dictionary new.
+]
+
+{ #category : #testing }
+GtRrWorkerConnection >> isConnected [
+
+	^ connection isConnected
 ]
 
 { #category : #private }
@@ -139,4 +159,17 @@ GtRrWorkerConnection >> stop [
 	self hasObserver ifTrue: [ self removeObserver ].
 	connection stop.
 
+]
+
+{ #category : #ui }
+GtRrWorkerConnection >> summaryAttributes [
+	"Answer a collection of key/value attributes that can simply be listed as a summary of the receiver"
+
+	^ Array streamContents: [ :stream |
+		stream
+			nextPut: { #Connected. self isConnected. connection. };
+			nextPut: { 'Remote Address'. GtRemoteRunner printIpAddress:  remoteAddress. self. }.
+		details ifNotNil:
+			[ details associationsDo: [ :assoc |
+				stream nextPut: { assoc key. assoc value. self. } ] ] ].
 ]
