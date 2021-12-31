@@ -133,6 +133,15 @@ GtRrWorker >> commandTerminateTaskContextId: taskContextId [
 	^ result.
 ]
 
+{ #category : #private }
+GtRrWorker >> currentProcessId [
+	"Answer the PID of this OS process"
+
+	^ OSPlatform current name = #Win32
+		  ifTrue: [ 0 ]
+		  ifFalse: [ LibC uniqueInstance currentProcessId ]
+]
+
 { #category : #initialization }
 GtRrWorker >> initialize [
 
@@ -178,7 +187,7 @@ GtRrWorker >> registerWithRunner [
 	Apart from the platform, this is mostly useful for debugging."
 	details := Dictionary new
 		at: #workingDirectory put: FileLocator workingDirectory resolve fullName;
-		at: #pid put: LibC uniqueInstance currentProcessId;
+		at: #pid put: self currentProcessId;
 		at: #platform put: rrPlatform;
 		yourself.
 	application newCommandFactory 
