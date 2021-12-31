@@ -170,6 +170,7 @@ GtRemoteRunner >> checkJobCompleted: aGtRrContext [
 
 	jobStartupAndShutdown shutdownJob: jobContext.
 
+	self startNextJob.
 ]
 
 { #category : #private }
@@ -537,6 +538,15 @@ GtRemoteRunner >> startLogging [
 
 	log ifNotNil: [ ^ self ].
 	log := CircularMemoryLogger new startFor: GtRemoteRunnerAnnouncement.
+]
+
+{ #category : #private }
+GtRemoteRunner >> startNextJob [
+	"Start the next job, if the queue isn't empty.
+	Must be called within sharedAccess."
+
+	jobQueue nextOrNil ifNotNil: [ :job |
+		self startJob: job ]
 ]
 
 { #category : #ui }
