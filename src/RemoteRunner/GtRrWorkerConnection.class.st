@@ -73,6 +73,12 @@ GtRrWorkerConnection >> connection: aPharoLinkServerConnection [
 ]
 
 { #category : #accessing }
+GtRrWorkerConnection >> detailAt: aString ifAbsent: absentBlock [
+
+	^ details at: aString ifAbsent: absentBlock
+]
+
+{ #category : #accessing }
 GtRrWorkerConnection >> details [
 
 	^ details
@@ -130,6 +136,18 @@ GtRrWorkerConnection >> observerWait [
 GtRrWorkerConnection >> platform [
 
 	^ platform
+]
+
+{ #category : #printing }
+GtRrWorkerConnection >> printOn: aStream [
+
+	(remoteAddress isNil and: [ (details includesKey: #workingDirectory) not ]) ifTrue: 
+		[ ^ super printOn: aStream ].
+
+	aStream
+		<< (GtRemoteRunner printIpAddress: remoteAddress);
+		<< ':';
+		<< (details at: #workingDirectory ifAbsent: [ '' ]).
 ]
 
 { #category : #accessing }
