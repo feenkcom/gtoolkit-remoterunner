@@ -85,6 +85,8 @@ GtRemoteRunner class >> onRemoveUniqueInstance: anInstance [
 GtRemoteRunner class >> printIpAddress: aByteArray [
 	"Answer the usual dot notation of the supplied IPv4 address"
 
+	aByteArray ifNil: [ ^ '<none>' ].
+
 	self assert: aByteArray size equals: 4.
 
 	^ String streamContents: [ :stream |
@@ -268,6 +270,16 @@ GtRemoteRunner >> gtJobQueueFor: aView [
 ]
 
 { #category : #ui }
+GtRemoteRunner >> gtPingActionFor: anAction [
+	<gtAction>
+
+	^ anAction button
+		icon: BrGlamorousVectorIcons largeSignal;
+		tooltip: 'Ping all workers';
+		action: [ :button | button phlow spawnObject: self pingAllWorkers ]
+]
+
+{ #category : #ui }
 GtRemoteRunner >> gtSummaryFor: aView [
 
 	<gtView>
@@ -290,11 +302,8 @@ GtRemoteRunner >> gtWorkersFor: aView [
 		  title: 'Registered Workers';
 		  priority: 50;
 		  items: [ registeredWorkers values ];
-		  column: 'IP Address' text: [ :item | 
-			String streamContents: [ :stream |
-				item remoteAddress do: [ :byte |
-					stream print: byte ]
-				separatedBy: [ stream nextPut: $. ] ] ];
+		  column: 'IP Address' text: [ :item | GtRemoteRunner printIpAddress: item remoteAddress ];
+			column: 'Working Directory' text: [ :item | item detailAt: #workingDirectory ifAbsent: [ '' ] ];
 		  column: 'Platform' text: [ :item | item platform ];
 		  actionUpdateButton
 ]
@@ -404,6 +413,21 @@ GtRemoteRunner >> nextTaskSerializedFor: aPlatform [
 GtRemoteRunner >> pendingJobCount [
 
 	^ sharedAccess critical: [ jobQueue size ]
+]
+
+{ #category : #'api - worker' }
+GtRemoteRunner >> pingAllWorkers [
+	"Ping each of the registered workers.
+	Answer a collection of those that failed"
+	| errors |
+
+	errors := OrderedCollection new.
+	registeredWorkers do: [ :worker |
+		sharedAccess critical:
+			[ [ worker commandPing ]
+				on: Error
+				do: [ :ex | errors add: worker -> ex freeze ] ] ].
+	^ errors
 ]
 
 { #category : #accessing }

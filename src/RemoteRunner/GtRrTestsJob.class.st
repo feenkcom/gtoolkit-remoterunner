@@ -4,6 +4,18 @@ Class {
 	#category : #'RemoteRunner-Tests'
 }
 
+{ #category : #private }
+GtRrTestsJob >> allFailedTests [
+	"Answer all tests that failed (Fail or Error)"
+
+	results ifNil: [ ^ #() ].
+	^ Array streamContents: [ :stream |
+		results do: [ :task |
+			task result do: [ :test |
+				test shortName = #pass ifFalse:
+					[ stream nextPut: test ] ] ] ]
+]
+
 { #category : #accessing }
 GtRrTestsJob >> allItems [
 	| allTests |
@@ -20,6 +32,19 @@ GtRrTestsJob >> allItems [
 				allTests add: cls name -> selector ] ] ].
 
 	^ allTests
+]
+
+{ #category : #ui }
+GtRrTestsJob >> gtTestErrorsFor: aView [
+	"List all the tests that failed (as opposed to the tasks that failed)"
+	<gtView>
+
+	^ aView list
+		title: 'Failed Tests';
+		priority: 17;
+		items: [ self allFailedTests ];
+		updateWhen: GtRemoteRunnerAnnouncement in: [ self announcer ];
+		actionUpdateButton
 ]
 
 { #category : #private }
