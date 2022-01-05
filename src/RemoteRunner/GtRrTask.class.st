@@ -196,19 +196,22 @@ GtRrTask >> state: aSymbol [
 { #category : #ui }
 GtRrTask >> summaryAttributes [
 	"Answer a collection of key/value attributes that can simply be listed as a summary of the receiver"
+	| attributes |
 
-	^ Array streamContents: [ :stream |
-		stream nextPut: #State -> self state.
-		self hasErrors ifTrue:
-			[ stream nextPut: #Error -> errorDetails ].
-		startTime ifNotNil:
-			[ stream nextPut: #Started -> startTime ].
-		endTime ifNotNil:
-			[ stream nextPut: #Ended -> endTime ].
-		taskTimeout ifNotNil:
-			[ stream nextPut: #Timeout -> taskTimeout ].
-		stream nextPut: #ID -> taskId.
-		stream nextPut: 'Worker IP Address' -> workerIpAddress ]
+	attributes := OrderedCollection new.
+	attributes add: #State -> self state.
+	self hasErrors ifTrue:
+		[ attributes add: #Error -> errorDetails ].
+	startTime ifNotNil:
+		[ attributes add: #Started -> startTime ].
+	endTime ifNotNil:
+		[ attributes add: #Ended -> endTime ].
+	taskTimeout ifNotNil:
+		[ attributes add: #Timeout -> taskTimeout ].
+	attributes
+		add: #ID -> taskId;
+		add: 'Worker IP Address' -> workerIpAddress.
+	^ attributes
 ]
 
 { #category : #accessing }
