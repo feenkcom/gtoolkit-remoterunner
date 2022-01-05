@@ -34,6 +34,13 @@ GtRrTestsJob >> allItems [
 	^ allTests
 ]
 
+{ #category : #private }
+GtRrTestsJob >> defaultTaskAllocator [
+	"Answer the object that will allocate job items to job tasks"
+
+	^ GtRrOneAtATimeTestsTaskAllocator new
+]
+
 { #category : #ui }
 GtRrTestsJob >> gtTestErrorsFor: aView [
 	"List all the tests that failed (as opposed to the tasks that failed)"
@@ -45,11 +52,4 @@ GtRrTestsJob >> gtTestErrorsFor: aView [
 		items: [ self allFailedTests ];
 		updateWhen: GtRemoteRunnerAnnouncement in: [ self announcer ];
 		actionUpdateButton
-]
-
-{ #category : #private }
-GtRrTestsJob >> taskAllocator [
-	"Answer the object that will allocate job items to job tasks"
-
-	^ GtRrOneAtATimeTestsTaskAllocator new
 ]
