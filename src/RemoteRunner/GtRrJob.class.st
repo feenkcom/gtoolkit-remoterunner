@@ -261,7 +261,10 @@ GtRrJob >> summaryAttributes [
 		add: #Results -> results size;
 		add: #Errors -> self resultsWithErrors size;
 		add: 'Start Time' -> startTime;
-		add: 'End Time' -> endTime;
+		add: 'End Time' -> endTime.
+	(startTime isNotNil and: [ endTime isNotNil ]) ifTrue:
+		[ attributes add: 'Duration' -> (endTime - startTime) humanReadablePrintString ].
+	attributes
 		add: 'Job Timeout' -> jobTimeout;
 		add: 'Task Timeout' -> taskTimeout;
 		add: 'Id' -> self id.

@@ -41,6 +41,19 @@ GtRrTestsJob >> defaultTaskAllocator [
 	^ GtRrOneAtATimeTestsTaskAllocator new
 ]
 
+{ #category : #accessing }
+GtRrTestsJob >> failedTestCount [
+	"Answer a count of the tests that failed (Fail or Error)"
+	| count |
+
+	count := 0.
+	results ifNil: [ ^ count ].
+	results do: [ :task | 
+		(task result ifNil: [ #(  ) ]) do: [ :test | 
+			test shortName = #pass ifFalse: [ count := count + 1 ] ] ].
+	^ count
+]
+
 { #category : #ui }
 GtRrTestsJob >> gtTestErrorsFor: aView [
 	"List all the tests that failed (as opposed to the tasks that failed)"
@@ -52,4 +65,21 @@ GtRrTestsJob >> gtTestErrorsFor: aView [
 		items: [ self allFailedTests ];
 		updateWhen: GtRemoteRunnerAnnouncement in: [ self announcer ];
 		actionUpdateButton
+]
+
+{ #category : #ui }
+GtRrTestsJob >> summaryAttributes [
+	"Answer a collection of key/value attributes that can simply be listed as a summary of the receiver"
+
+	^ super summaryAttributes
+		add: 'Test Count:' -> self testCount;
+		add: 'Failed Test Count:' -> self failedTestCount;
+		yourself.
+]
+
+{ #category : #accessing }
+GtRrTestsJob >> testCount [
+	"Answer number of tests in the receiver"
+
+	^ self tasks inject: 0 into: [ :sum :task | sum + task testCount ]
 ]

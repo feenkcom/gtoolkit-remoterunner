@@ -61,6 +61,15 @@ GtRrTestTask >> run [
 	^ events asArray
 ]
 
+{ #category : #ui }
+GtRrTestTask >> summaryAttributes [
+	"Answer a collection of key/value attributes that can simply be listed as a summary of the receiver"
+
+	^ super summaryAttributes
+		add: 'Test Count:' -> self testCount;
+		yourself.
+]
+
 { #category : #accessing }
 GtRrTestTask >> testCount [
 	"Answer the number of tests"

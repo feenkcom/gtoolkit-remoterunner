@@ -238,7 +238,7 @@ GtRemoteRunner >> gtExecutingJobsFor: aView [
 		  title: 'Executing Jobs';
 		  priority: 20;
 		  items: [ sharedAccess critical: [ currentlyExecutingJobs values ] ];
-		  send: [ :item | item job ];
+		  send: [ :item | item ];
 		  updateWhen: GtRemoteRunnerAnnouncement in: [ self announcer ];
 		  actionUpdateButton
 ]
@@ -274,7 +274,7 @@ GtRemoteRunner >> gtPingActionFor: anAction [
 	<gtAction>
 
 	^ anAction button
-		icon: BrGlamorousVectorIcons largeSignal;
+		icon: BrGlamorousVectorIcons signal;
 		tooltip: 'Ping all workers';
 		action: [ :button | button phlow spawnObject: self pingAllWorkers ]
 ]

@@ -59,8 +59,10 @@ GtRrWorkerTaskContext >> taskTimeout: anObject [
 	taskTimeout := anObject
 ]
 
-{ #category : #accessing }
+{ #category : #executing }
 GtRrWorkerTaskContext >> value [
 
+	"Lower the priority of the receiver so that commands get priority."
+	Processor activeProcess priority: Processor userBackgroundPriority.
 	^ task run
 ]
