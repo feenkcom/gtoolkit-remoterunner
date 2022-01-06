@@ -11,7 +11,7 @@ GtRrTestsJob >> allFailedTests [
 	results ifNil: [ ^ #() ].
 	^ Array streamContents: [ :stream |
 		results do: [ :task |
-			task result do: [ :test |
+			(task result ifNil: [ #() ]) do: [ :test |
 				test shortName = #pass ifFalse:
 					[ stream nextPut: test ] ] ] ]
 ]

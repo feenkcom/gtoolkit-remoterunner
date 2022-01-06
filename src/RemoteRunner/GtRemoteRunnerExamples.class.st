@@ -352,6 +352,60 @@ GtRemoteRunnerExamples >> simpleTask [
 ]
 
 { #category : #examples }
+GtRemoteRunnerExamples >> simpleTestTask [
+	"Demonstrate executing a simple test task"
+	<gtExample>
+	<noTest>
+	| remoteRunner job taskFailedCount taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount times |
+
+	jobStartedCount := jobCompletedCount := taskStartedCount := taskCompletedCount := taskFailedCount := 0.
+	jobSemaphore := GtMutualExclusionSemaphore new.
+	times := OrderedCollection new.
+	remoteRunner := GtRemoteRunner new port: 7093.
+	remoteRunner managerStartupAndShutdown poolSize: 1.
+	remoteRunner start.
+	[ 
+	job := GtRrTestsJob new testNames: { #GtRrSampleTest -> #testPass }.
+	job
+		when: GtRrJobStartedAnnouncement do: 
+			[ jobStartedCount := jobStartedCount + 1.
+			times add: 0 -> DateAndTime now. ];
+		when: GtRrJobCompletedAnnouncement do: 
+			[ jobCompletedCount := jobCompletedCount + 1.
+			times add: 4 -> DateAndTime now.
+			jobSemaphore signal ];
+		when: GtRrJobCancelledAnnouncement do: 
+			[ jobCompletedCount := jobCompletedCount + 1.
+			times add: 5 -> DateAndTime now ];
+		when: GtRrTaskStartedAnnouncement do: 
+			[ taskStartedCount := taskStartedCount + 1.
+			times add: 1 -> DateAndTime now ];
+		when: GtRrTaskCompletedAnnouncement do: 
+			[ taskCompletedCount := taskCompletedCount + 1.
+			times add: 3 -> DateAndTime now. ];
+		when: GtRrTaskFailedAnnouncement do: 
+			[ taskFailedCount := taskFailedCount + 1.
+			times add: 2 -> DateAndTime now. ].
+	remoteRunner submitJob: job.
+	jobSemaphore wait.
+
+	self assert: remoteRunner currentlyExecutingJobs size equals: 0.
+	self assert: remoteRunner currentlyExecutingTasks size equals: 0.
+	self assert: remoteRunner pendingJobCount equals: 0.
+	self assert: jobStartedCount equals: 1.
+	self assert: jobCompletedCount equals: 1.
+	self assert: taskStartedCount equals: 1.
+	self assert: taskCompletedCount equals: 1.
+	self assert: taskFailedCount equals: 0.
+	self assert: job state equals: #completed.
+	self deny: job hasErrors.
+	self assert: (times collect: #key) asArray equals: #(0 1 3 4).
+	] ensure: [ remoteRunner stop ].
+
+	^ job
+]
+
+{ #category : #examples }
 GtRemoteRunnerExamples >> terminateNotStartedJob [
 	"Terminate a job that hasn't been started, ensuring that job is marked cancelled and has no results"
 	<gtExample>
