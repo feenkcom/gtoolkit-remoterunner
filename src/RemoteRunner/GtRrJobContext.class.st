@@ -76,6 +76,63 @@ GtRrJobContext >> getTasks [
 	tasks := job tasks
 ]
 
+{ #category : #ui }
+GtRrJobContext >> gtErrorsFor: aView [
+	<gtView>
+
+	job ifNil: [ ^ aView empty ].
+	^ aView list
+		title: 'Errors';
+		priority: 16;
+		items: [ job resultsWithErrors ];
+		updateWhen: GtRrJobAnnouncement 
+			if: [ :announcement | announcement job = job ]
+			in: [ remoteRunner announcer ]
+]
+
+{ #category : #ui }
+GtRrJobContext >> gtResultsFor: aView [
+	<gtView>
+
+	job ifNil: [ ^ aView empty ].
+	^ aView list
+		title: 'Results';
+		priority: 15;
+		items: [ self results ];
+		itemText: [ :item | item result ifNil: [ item errorDetails ] ];
+		updateWhen: GtRrJobAnnouncement 
+			if: [ :announcement | announcement job = job ]
+			in: [ remoteRunner announcer ];
+		actionUpdateButton
+]
+
+{ #category : #ui }
+GtRrJobContext >> gtSummaryFor: aView [
+
+	<gtView>
+	^ aView columnedList
+		  title: 'Summary';
+		  priority: 10;
+		  items: [ self summaryAttributes ];
+		  column: #Attribute text: [ :item | item key ];
+		  column: #Value text: [ :item | item value ];
+		  updateWhen: GtRrJobAnnouncement
+		  	if: [ :announcement | announcement job = job ]
+		  	in: [ remoteRunner announcer ];
+		  actionUpdateButton
+]
+
+{ #category : #ui }
+GtRrJobContext >> gtTasksFor: aView [
+	<gtView>
+
+	^ aView list
+		title: 'Tasks';
+		priority: 50;
+		items: [ tasks ];
+		actionUpdateButton
+]
+
 { #category : #accessing }
 GtRrJobContext >> id [
 
@@ -201,6 +258,19 @@ GtRrJobContext >> remoteRunner: anObject [
 GtRrJobContext >> results [
 
 	^ platformContexts values flatCollect: #results
+]
+
+{ #category : #ui }
+GtRrJobContext >> summaryAttributes [
+	| attributes |
+
+	attributes := job 
+		ifNil: [ OrderedCollection new ]
+		ifNotNil: [ job summaryAttributes ].
+	attributes
+		add: 'Job Context Timeout' -> self jobTimeout;
+		add: 'Task Context Timeout' -> self taskTimeout.
+	^ attributes
 ]
 
 { #category : #accessing }
