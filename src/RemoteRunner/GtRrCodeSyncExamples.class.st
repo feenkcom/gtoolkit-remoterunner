@@ -11,6 +11,7 @@ GtRrCodeSyncExamples >> addRemoveMethod [
 	| runner codeSync |
 	runner := GtRemoteRunner new
 		          port: 8042;
+		          startLogging;
 		          yourself.
 	codeSync := runner managerStartupAndShutdown codeSync.
 	[ 

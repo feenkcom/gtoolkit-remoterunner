@@ -13,39 +13,41 @@ Class {
 
 { #category : #examples }
 GtRemoteRunnerExamples >> assignTasksToWorkersTaskFirst [
+
 	"Demonstrate assigning tasks to workers, with the tasks queued before the workers connect"
+
 	<gtExample>
 	<noTest>
 	| remoteRunner workers job tasks taskCompletedCount taskFailedCount jobCompletedCount semaphore |
-
 	jobCompletedCount := taskCompletedCount := taskFailedCount := 0.
 	semaphore := GtMutualExclusionSemaphore new.
 	remoteRunner := GtRemoteRunner new.
-	tasks := (1 to: 5) collect: [ :i |
-		GtRrExampleValueTask new
-			value: i ] as: OrderedCollection.
+	tasks := (1 to: 5)
+		         collect: [ :i | GtRrExampleValueTask new value: i ]
+		         as: OrderedCollection.
 	tasks add: (GtRrExampleValueTask new
-			value: 'error1';
-			setError).
+			 value: 'error1';
+			 setError).
 	job := GtRrTasksJob new
-		platforms: #(plat1 plat2);
-		tasks: tasks.
+		       platforms: #( plat1 plat2 );
+		       tasks: tasks.
 	job
-		when: GtRrJobCompletedAnnouncement do: 
-			[ jobCompletedCount := jobCompletedCount + 1.
+		when: GtRrJobCompletedAnnouncement do: [ 
+			jobCompletedCount := jobCompletedCount + 1.
 			semaphore signal ];
-		when: GtRrTaskCompletedAnnouncement 
-			do: [ taskCompletedCount := taskCompletedCount + 1 ];
-		when: GtRrTaskFailedAnnouncement 
-			do: [ taskFailedCount := taskFailedCount + 1 ].
+		when: GtRrTaskCompletedAnnouncement
+		do: [ taskCompletedCount := taskCompletedCount + 1 ];
+		when: GtRrTaskFailedAnnouncement
+		do: [ taskFailedCount := taskFailedCount + 1 ].
 	remoteRunner submitJob: job.
 
-	workers := (1 to: 2) collect: [ :i |
-		GtRrInImageWorker new
-			rrPlatform: 'plat', i asString;
-			remoteRunner: remoteRunner;
-			connection: PharoLinkServerConnection new;
-			start ].
+	workers := (1 to: 2) collect: [ :i | 
+		           GtRrInImageWorker new
+			           attributes:
+				           { (#platform -> ('plat' , i asString)) } asDictionary;
+			           remoteRunner: remoteRunner;
+			           connection: PharoLinkServerConnection new;
+			           start ].
 
 	semaphore wait.
 	self assert: job results size equals: 12.
@@ -59,39 +61,41 @@ GtRemoteRunnerExamples >> assignTasksToWorkersTaskFirst [
 
 { #category : #examples }
 GtRemoteRunnerExamples >> assignTasksToWorkersWorkerFirst [
+
 	"Demonstrate assigning tasks to workers, with the tasks queued before the workers connect"
+
 	<gtExample>
 	<noTest>
 	| remoteRunner workers job tasks taskCompletedCount taskFailedCount jobCompletedCount semaphore |
-
 	jobCompletedCount := taskCompletedCount := taskFailedCount := 0.
 	semaphore := GtMutualExclusionSemaphore new.
 	remoteRunner := GtRemoteRunner new.
 
-	workers := (1 to: 2) collect: [ :i |
-		GtRrInImageWorker new
-			rrPlatform: 'plat', i asString;
-			remoteRunner: remoteRunner;
-			connection: PharoLinkServerConnection new;
-			start ].
+	workers := (1 to: 2) collect: [ :i | 
+		           GtRrInImageWorker new
+			           attributes:
+				           { (#platform -> ('plat' , i asString)) } asDictionary;
+			           remoteRunner: remoteRunner;
+			           connection: PharoLinkServerConnection new;
+			           start ].
 
-	tasks := (1 to: 5) collect: [ :i |
-		GtRrExampleValueTask new
-			value: i ] as: OrderedCollection.
+	tasks := (1 to: 5)
+		         collect: [ :i | GtRrExampleValueTask new value: i ]
+		         as: OrderedCollection.
 	tasks add: (GtRrExampleValueTask new
-			value: 'error1';
-			setError).
+			 value: 'error1';
+			 setError).
 	job := GtRrTasksJob new
-		platforms: #(plat1 plat2);
-		tasks: tasks.
+		       platforms: #( plat1 plat2 );
+		       tasks: tasks.
 	job
-		when: GtRrJobCompletedAnnouncement do: 
-			[ jobCompletedCount := jobCompletedCount + 1.
+		when: GtRrJobCompletedAnnouncement do: [ 
+			jobCompletedCount := jobCompletedCount + 1.
 			semaphore signal ];
-		when: GtRrTaskCompletedAnnouncement 
-			do: [ taskCompletedCount := taskCompletedCount + 1 ];
-		when: GtRrTaskFailedAnnouncement 
-			do: [ taskFailedCount := taskFailedCount + 1 ].
+		when: GtRrTaskCompletedAnnouncement
+		do: [ taskCompletedCount := taskCompletedCount + 1 ];
+		when: GtRrTaskFailedAnnouncement
+		do: [ taskFailedCount := taskFailedCount + 1 ].
 	remoteRunner submitJob: job.
 
 	semaphore wait.
@@ -705,8 +709,8 @@ GtRemoteRunnerExamples >> timeoutWorker [
 ]
 
 { #category : #examples }
-GtRemoteRunnerExamples >> workerDetails [
-	"Demonstrate retrieving the remote worker's details"
+GtRemoteRunnerExamples >> workerAttributes [
+	"Demonstrate retrieving the remote worker's attributes"
 	<gtExample>
 	<noTest>
 	| remoteRunner registeredSemaphore worker |
@@ -721,10 +725,10 @@ GtRemoteRunnerExamples >> workerDetails [
 	[ registeredSemaphore wait.
 	self assert: remoteRunner registeredWorkerCount equals: 1.
 	self
-		assert: (worker details at: #workingDirectory)
+		assert: (worker attributeAt: #workingDirectory)
 		equals: FileLocator workingDirectory resolve fullName.
 	self 
-		assert: (worker details at: #platform)
+		assert: (worker attributeAt: #platform)
 		equals: OSPlatform current name.
 	] ensure: [ remoteRunner stop ].
 

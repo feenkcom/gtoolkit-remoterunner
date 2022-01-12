@@ -6,11 +6,10 @@ Class {
 	#superclass : #TKTService,
 	#instVars : [
 		'uid',
-		'rrPlatform',
 		'application',
 		'taskRunner',
 		'currentTaskExecution',
-		'codeSync'
+		'attributes'
 	],
 	#category : #'RemoteRunner-Worker'
 }
@@ -19,25 +18,32 @@ Class {
 GtRrWorker class >> commandLine [
 
 	<commandline>
-	| service |
 	^ self commandLineCommand meaning: [ :args | 
-		  | logger serverSocketAddress |
+		  | worker serverSocketAddress |
 		  args
 			  at: #help ifPresent: [ :help | 
 				  help value.
 				  help context exitSuccess ];
 			  at: #log ifPresent: [ 
+				  | logger |
 				  SignalLogger resetAllInstances.
 				  logger := RestartingStreamLogger stdout.
 				  logger startFor: GtRemoteRunnerAnnouncement , PharoLinkSignal ].
-		  serverSocketAddress := ((args at: #serverSocketAddress) at:
-			                          #address) value.
-		  StringSignal emit:
-			  'Connect server socket address: ' , serverSocketAddress.
-		  service := self serverSocketAddress: serverSocketAddress.
-		  args at: #codeSync ifPresent: [ service codeSync: true ].
-		  StringSignal emit: 'Running'.
-		  service start.
+		  args
+			  at: #serverSocketAddress
+			  ifPresent: [ :arg | 
+			  serverSocketAddress := (arg at: #address) value ]
+			  ifAbsent: [ 
+				  self flag: 'TODO maenu figure out how to make commands required'.
+				  args context exitFailure: '--serverSocketAddress is required' ].
+		  worker := self serverSocketAddress: serverSocketAddress.
+		  args occurrencesOf: #attribute do: [ :arg | 
+			  worker
+				  attributeAt: (arg at: #key) value
+				  put: (arg at: #value) value ].
+		  StringSignal emit: 'Connecting to : ' , serverSocketAddress.
+		  worker start.
+		  StringSignal emit: 'Connected'.
 		  "Hibernate until the process exits"
 		  Semaphore new wait ]
 ]
@@ -49,11 +55,16 @@ GtRrWorker class >> commandLineCommand [
 		  description: 'Run the RemoteRunner worker';
 		  add: ClapFlag forHelp;
 		  add: ((ClapFlag id: #log) description: 'Enable logging to stdout');
-		  add: ((ClapFlag id: #codeSync) description: 'Enable code-sync');
 		  add: ((ClapFlag id: #serverSocketAddress)
 				   description:
 					   'The server socket address on which to connect for requests';
 				   add: (ClapPositional id: #address);
+				   yourself);
+		  add: ((ClapFlag id: #attribute)
+				   description: 'add key/value pairs to attributes';
+				   multiple: true;
+				   add: (ClapPositional id: #key);
+				   add: (ClapPositional id: #value);
 				   yourself);
 		  yourself
 ]
@@ -95,15 +106,33 @@ GtRrWorker >> application: aPharoLinkApplication [
 ]
 
 { #category : #accessing }
-GtRrWorker >> codeSync [
+GtRrWorker >> attributeAt: aString [
 
-	^ codeSync
+	^ attributes at: aString
 ]
 
 { #category : #accessing }
-GtRrWorker >> codeSync: anObject [
+GtRrWorker >> attributeAt: aString ifAbsent: absentBlock [
 
-	codeSync := anObject
+	^ attributes at: aString ifAbsent: absentBlock
+]
+
+{ #category : #accessing }
+GtRrWorker >> attributeAt: aString ifPresent: aBlock [
+
+	^ attributes at: aString ifPresent: aBlock
+]
+
+{ #category : #accessing }
+GtRrWorker >> attributeAt: aString ifPresent: aBlock ifAbsent: anotherBlock [
+
+	^ attributes at: aString ifPresent: aBlock ifAbsent: anotherBlock
+]
+
+{ #category : #accessing }
+GtRrWorker >> attributeAt: aSimpleObject put: anotherSimpleObject [
+
+	attributes at: aSimpleObject put: anotherSimpleObject
 ]
 
 { #category : #observer }
@@ -173,9 +202,15 @@ GtRrWorker >> initialize [
 
 	super initialize.
 	uid := UUID new asString.
-	rrPlatform := OSPlatform current name.
 	taskRunner := TKTNewProcessTaskRunner new.
-	codeSync := false
+	"Details is a dictionary of information can be json encoded.
+	Apart from the platform, this is mostly useful for debugging."
+	attributes := Dictionary new
+		              at: #workingDirectory
+		              put: FileLocator workingDirectory resolve fullName;
+		              at: #pid put: self currentProcessId;
+		              at: #platform put: OSPlatform current name;
+		              yourself
 ]
 
 { #category : #private }
@@ -194,52 +229,31 @@ GtRrWorker >> name [
 
 { #category : #private }
 GtRrWorker >> nextTask [
-	| promise |
-	
-	promise := application newCommandFactory send:
-		(String streamContents: [ :stream |
-			stream
-				<< 'GtAssignedRemoteRunner nextTaskSerializedFor: ';
-				print: rrPlatform ]).
-	^ LeJsonV4 uniqueInstance deserialize: promise waitForValue readStream
 
+	| promise |
+	promise := application newCommandFactory
+		           bindingAt: #attributes put: attributes;
+		           send:
+			           'GtAssignedRemoteRunner nextTaskSerializedFor: attributes'.
+	^ LeJsonV4 uniqueInstance deserialize:
+		  promise waitForValue readStream
 ]
 
 { #category : #private }
 GtRrWorker >> registerWithRunner [
+
 	"Register the receiver with the remote runner"
-	| details |
 
-	"Details is a dictionary of information can be json encoded.
-	Apart from the platform, this is mostly useful for debugging."
-	details := Dictionary new
-		at: #workingDirectory put: FileLocator workingDirectory resolve fullName;
-		at: #pid put: self currentProcessId;
-		at: #platform put: rrPlatform;
-		at: #codeSync put: codeSync;
-		yourself.
-	application newCommandFactory 
-		bindingAt: #details put: details;
-		sendAndWait: 'GtAssignedRemoteRunner registerWorkerWithDetails: details'.
-
+	application newCommandFactory
+		bindingAt: #attributes put: attributes;
+		sendAndWait:
+			'GtAssignedRemoteRunner registerWorkerWithAttributes: attributes'
 ]
 
 { #category : #observer }
 GtRrWorker >> removeObserver [
 
 	^ application newCommandFactory send: 'GtAssignedRemoteRunner removeObserver'
-]
-
-{ #category : #accessing }
-GtRrWorker >> rrPlatform [
-
-	^ rrPlatform
-]
-
-{ #category : #accessing }
-GtRrWorker >> rrPlatform: anObject [
-
-	rrPlatform := anObject
 ]
 
 { #category : #starting }
@@ -253,11 +267,11 @@ GtRrWorker >> start [
 
 { #category : #stepping }
 GtRrWorker >> stepService [
+
 	| task |
-
 	task := self nextTask.
-
-	currentTaskExecution := task asTask futureTaskExecutionFor: taskRunner.
+	currentTaskExecution := task asTask futureTaskExecutionFor:
+		                        taskRunner.
 	currentTaskExecution timeout: task taskTimeout.
 	taskRunner scheduleTaskExecution: currentTaskExecution.
 	currentTaskExecution future

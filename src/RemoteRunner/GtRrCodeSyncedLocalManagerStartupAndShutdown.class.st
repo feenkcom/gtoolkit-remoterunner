@@ -24,7 +24,9 @@ GtRrCodeSyncedLocalManagerStartupAndShutdown >> initialize [
 GtRrCodeSyncedLocalManagerStartupAndShutdown >> newWorkerLocalProcessArgumentsFor: someSettings [
 
 	^ (super newWorkerLocalProcessArgumentsFor: someSettings)
-		  add: '--codeSync' before: '--serverSocketAddress';
+		  add: '--attribute' before: '--detachChangesFromFileSystem';
+		  add: 'codeSynced' before: '--detachChangesFromFileSystem';
+		  add: 'true' before: '--detachChangesFromFileSystem';
 		  yourself
 ]
 

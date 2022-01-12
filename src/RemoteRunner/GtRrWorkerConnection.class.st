@@ -6,20 +6,20 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'connection',
-		'platform',
-		'remoteAddress',
-		'details',
 		'observer',
 		'observerProcess',
-		'observerSemaphore'
+		'observerSemaphore',
+		'attributes'
 	],
 	#category : #'RemoteRunner-Runner'
 }
 
 { #category : #'instance creation' }
-GtRrWorkerConnection class >> connection: aConnection [
+GtRrWorkerConnection class >> connection: aConnection attributes: aDictionary [
 
-	^ self new connection: aConnection
+	^ self new
+		  initializeConnection: aConnection attributes: aDictionary;
+		  yourself
 ]
 
 { #category : #accessing }
@@ -36,9 +36,27 @@ GtRrWorkerConnection >> addObserver: aBlock [
 ]
 
 { #category : #accessing }
-GtRrWorkerConnection >> codeSync [
+GtRrWorkerConnection >> attributeAt: aString [
 
-	^ details at: #codeSync
+	^ attributes at: aString
+]
+
+{ #category : #accessing }
+GtRrWorkerConnection >> attributeAt: aString ifAbsent: absentBlock [
+
+	^ attributes at: aString ifAbsent: absentBlock
+]
+
+{ #category : #accessing }
+GtRrWorkerConnection >> attributeAt: aString ifPresent: aBlock [
+
+	^ attributes at: aString ifPresent: aBlock
+]
+
+{ #category : #accessing }
+GtRrWorkerConnection >> attributeAt: aString ifPresent: aBlock ifAbsent: anotherBlock [
+
+	^ attributes at: aString ifPresent: aBlock ifAbsent: anotherBlock
 ]
 
 { #category : #commands }
@@ -73,38 +91,6 @@ GtRrWorkerConnection >> commandTerminateTaskContextId: taskContextId [
 		argument: taskContextId)
 ]
 
-{ #category : #accessing }
-GtRrWorkerConnection >> connection [
-
-	^ connection
-]
-
-{ #category : #accessing }
-GtRrWorkerConnection >> connection: aPharoLinkServerConnection [
-
-	connection := aPharoLinkServerConnection.
-	remoteAddress := connection remoteAddress.
-]
-
-{ #category : #accessing }
-GtRrWorkerConnection >> detailAt: aString ifAbsent: absentBlock [
-
-	^ details at: aString ifAbsent: absentBlock
-]
-
-{ #category : #accessing }
-GtRrWorkerConnection >> details [
-
-	^ details
-]
-
-{ #category : #accessing }
-GtRrWorkerConnection >> details: anObject [
-
-	details := anObject.
-	platform := details at: #platform.
-]
-
 { #category : #ui }
 GtRrWorkerConnection >> gtSummaryFor: aView [
 	<gtView>
@@ -129,7 +115,14 @@ GtRrWorkerConnection >> hasObserver [
 GtRrWorkerConnection >> initialize [
 
 	super initialize.
-	details := Dictionary new.
+	attributes := Dictionary new.
+]
+
+{ #category : #initialization }
+GtRrWorkerConnection >> initializeConnection: aConnection attributes: aDictionary [
+
+	connection := aConnection.
+	attributes := aDictionary
 ]
 
 { #category : #testing }
@@ -146,28 +139,23 @@ GtRrWorkerConnection >> observerWait [
 	observerSemaphore wait.
 ]
 
-{ #category : #accessing }
-GtRrWorkerConnection >> platform [
-
-	^ platform
-]
-
 { #category : #printing }
 GtRrWorkerConnection >> printOn: aStream [
 
-	(remoteAddress isNil and: [ (details includesKey: #workingDirectory) not ]) ifTrue: 
-		[ ^ super printOn: aStream ].
+	(self remoteAddress isNil and: [ 
+		 (attributes includesKey: #workingDirectory) not ]) ifTrue: [ 
+		^ super printOn: aStream ].
 
 	aStream
-		<< (GtRemoteRunner printIpAddress: remoteAddress);
+		<< (GtRemoteRunner printIpAddress: self remoteAddress);
 		<< ':';
-		<< (details at: #workingDirectory ifAbsent: [ '' ]).
+		<< (attributes at: #workingDirectory ifAbsent: [ '' ])
 ]
 
 { #category : #accessing }
 GtRrWorkerConnection >> remoteAddress [
 
-	^ remoteAddress
+	^ connection remoteAddress
 ]
 
 { #category : #accessing }
@@ -200,8 +188,8 @@ GtRrWorkerConnection >> summaryAttributes [
 	^ Array streamContents: [ :stream |
 		stream
 			nextPut: { #Connected. self isConnected. connection. };
-			nextPut: { 'Remote Address'. GtRemoteRunner printIpAddress:  remoteAddress. self. }.
-		details ifNotNil:
-			[ details associationsDo: [ :assoc |
+			nextPut: { 'Remote Address'. GtRemoteRunner printIpAddress:  self remoteAddress. self. }.
+		attributes ifNotNil:
+			[ attributes associationsDo: [ :assoc |
 				stream nextPut: { assoc key. assoc value. self. } ] ] ].
 ]

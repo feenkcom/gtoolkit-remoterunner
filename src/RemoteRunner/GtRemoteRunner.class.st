@@ -182,7 +182,11 @@ GtRemoteRunner >> applyCodeChanges: aCollection [
 		           yourself.
 	errors := OrderedCollection new.
 	futures := registeredWorkers
-		           select: #codeSync
+		           select: [ :worker | 
+			           worker
+				           attributeAt: #codeSynced
+				           ifPresent: [ true ]
+				           ifAbsent: [ false ] ]
 		           thenCollect: [ :worker | 
 			           drainer
 				           future: [ 
@@ -368,8 +372,8 @@ GtRemoteRunner >> gtWorkersFor: aView [
 		  priority: 50;
 		  items: [ registeredWorkers values ];
 		  column: 'IP Address' text: [ :item | GtRemoteRunner printIpAddress: item remoteAddress ];
-			column: 'Working Directory' text: [ :item | item detailAt: #workingDirectory ifAbsent: [ '' ] ];
-		  column: 'Platform' text: [ :item | item platform ];
+			column: 'Working Directory' text: [ :item | item attributeAt: #workingDirectory ifAbsent: [ '' ] ];
+		  column: 'Platform' text: [ :item | item attributeAt: #platform ];
 		  actionUpdateButton
 ]
 
@@ -458,20 +462,22 @@ GtRemoteRunner >> managerStartupAndShutdown: aGtRrManagerStartupAndShutdown [
 ]
 
 { #category : #'api - worker' }
-GtRemoteRunner >> nextTaskFor: aPlatform [
+GtRemoteRunner >> nextTaskFor: aDictionary [
+
 	"Answer the next task allocated to the worker that is waiting on this method.
 	The task is assigned in a separate process."
-	| taskFuture |
 
-	taskFuture := GtRrFutureWorkerTask new 
-		connection: (registeredWorkers at: PharoLinkServerCurrentConnection value);
-		platform: aPlatform.
-	sharedAccess critical:
-		[ availableWorkers add: taskFuture.
+	| taskFuture |
+	taskFuture := GtRrFutureWorkerTask new
+		              connection:
+			              (registeredWorkers at:
+					               PharoLinkServerCurrentConnection value);
+		              platform: (aDictionary at: #platform).
+	sharedAccess critical: [ 
+		availableWorkers add: taskFuture.
 		self assignTasksToWorkers ].
 	taskFuture wait.
-	^ taskFuture taskContext asWorkerTaskContext.
-
+	^ taskFuture taskContext asWorkerTaskContext
 ]
 
 { #category : #'api - worker' }
@@ -537,22 +543,26 @@ GtRemoteRunner >> privateTaskFailed: aTaskContextId with: anGtRrTaskErrorDetails
 ]
 
 { #category : #'api - worker' }
-GtRemoteRunner >> registerWorkerWithDetails: aDictionary [
+GtRemoteRunner >> registerWorkerWithAttributes: aDictionary [
+
 	"Register the supplied worker and connection details.
 	Register the connection for disconnection notification"
-	| pharoLinkServerConnection workerConnection |
 
+	| pharoLinkServerConnection workerConnection |
 	pharoLinkServerConnection := PharoLinkServerCurrentConnection value.
-	workerConnection := GtRrWorkerConnection connection: pharoLinkServerConnection.
-	workerConnection details: aDictionary.
-	sharedAccess critical:
-		[ registeredWorkers at: pharoLinkServerConnection put: workerConnection ].
+	workerConnection := GtRrWorkerConnection
+		                    connection: pharoLinkServerConnection
+		                    attributes: aDictionary.
+	sharedAccess critical: [ 
+		registeredWorkers
+			at: pharoLinkServerConnection
+			put: workerConnection ].
 	pharoLinkServerConnection
 		when: PharoLinkServerConnectionDisconnectedAnnouncement
 		send: #unregisterWorker:
 		to: self.
-	self announceAndLog: (GtRrWorkerRegisteredAnnouncement new
-			worker: workerConnection).
+	self announceAndLog:
+		(GtRrWorkerRegisteredAnnouncement new worker: workerConnection).
 	"Answer a PharoLink primitive so that a proxy isn't created for the runner (which is a global, anyway)"
 	^ nil
 ]

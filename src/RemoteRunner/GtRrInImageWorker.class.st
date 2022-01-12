@@ -7,11 +7,23 @@ Class {
 	#instVars : [
 		'process',
 		'remoteRunner',
-		'rrPlatform',
-		'connection'
+		'connection',
+		'attributes'
 	],
 	#category : #'RemoteRunner-Examples'
 }
+
+{ #category : #accessing }
+GtRrInImageWorker >> attributes [
+
+	^ attributes
+]
+
+{ #category : #accessing }
+GtRrInImageWorker >> attributes: anObject [
+
+	attributes := anObject
+]
 
 { #category : #accessing }
 GtRrInImageWorker >> connection [
@@ -44,31 +56,21 @@ GtRrInImageWorker >> remoteRunner: anObject [
 	remoteRunner := anObject
 ]
 
-{ #category : #accessing }
-GtRrInImageWorker >> rrPlatform [
-
-	^ rrPlatform
-]
-
-{ #category : #accessing }
-GtRrInImageWorker >> rrPlatform: anObject [
-
-	rrPlatform := anObject
-]
-
 { #category : #running }
 GtRrInImageWorker >> start [
 
 	process ifNotNil: [ ^ self error: 'Worker already started' ].
-	self assert: rrPlatform isNotNil
-		description: 'The worker''s platform must be set before starting'.
-	self assert: remoteRunner isNotNil
-		description: 'The worker''s remote runner must be set before starting'.
-	PharoLinkServerCurrentConnection 
+	self
+		assert: attributes isNotNil
+		description: 'The worker''s details must be set before starting'.
+	self
+		assert: remoteRunner isNotNil
+		description:
+		'The worker''s remote runner must be set before starting'.
+	PharoLinkServerCurrentConnection
 		value: connection
-		during: [ remoteRunner registerWorkerWithDetails: 
-			{ #platform -> rrPlatform } asDictionary ].
-	process := [ self taskPollForever ] fork.
+		during: [ remoteRunner registerWorkerWithAttributes: attributes ].
+	process := [ self taskPollForever ] fork
 ]
 
 { #category : #accessing }
@@ -101,7 +103,7 @@ GtRrInImageWorker >> taskPoll [
 
 	PharoLinkServerCurrentConnection 
 		value: connection
-		during: [ serialisedTask := remoteRunner nextTaskSerializedFor: rrPlatform ].
+		during: [ serialisedTask := remoteRunner nextTaskSerializedFor: attributes ].
 	^ LeJsonV4 uniqueInstance deserialize: serialisedTask readStream.
 ]
 
