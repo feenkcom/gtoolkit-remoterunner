@@ -35,6 +35,20 @@ GtRrWorkerConnection >> addObserver: aBlock [
 	^ true
 ]
 
+{ #category : #accessing }
+GtRrWorkerConnection >> codeSync [
+
+	^ details at: #codeSync
+]
+
+{ #category : #commands }
+GtRrWorkerConnection >> commandApplyCodeChanges: aFuelStringOfCollection [
+
+	^ self sendControlMessage: (Message
+			   selector: #commandApplyCodeChanges:
+			   argument: aFuelStringOfCollection)
+]
+
 { #category : #commands }
 GtRrWorkerConnection >> commandPing [
 

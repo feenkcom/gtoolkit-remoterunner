@@ -9,7 +9,8 @@ Class {
 		'rrPlatform',
 		'application',
 		'taskRunner',
-		'currentTaskExecution'
+		'currentTaskExecution',
+		'codeSync'
 	],
 	#category : #'RemoteRunner-Worker'
 }
@@ -34,6 +35,7 @@ GtRrWorker class >> commandLine [
 		  StringSignal emit:
 			  'Connect server socket address: ' , serverSocketAddress.
 		  service := self serverSocketAddress: serverSocketAddress.
+		  args at: #codeSync ifPresent: [ service codeSync: true ].
 		  StringSignal emit: 'Running'.
 		  service start.
 		  "Hibernate until the process exits"
@@ -47,10 +49,12 @@ GtRrWorker class >> commandLineCommand [
 		  description: 'Run the RemoteRunner worker';
 		  add: ClapFlag forHelp;
 		  add: ((ClapFlag id: #log) description: 'Enable logging to stdout');
-		  add: ((ClapFlag id: #serverSocketAddress) 
-					description: 'The server socket address on which to connect for requests';
-					add: (ClapPositional id: #address);
-					yourself);
+		  add: ((ClapFlag id: #codeSync) description: 'Enable code-sync');
+		  add: ((ClapFlag id: #serverSocketAddress)
+				   description:
+					   'The server socket address on which to connect for requests';
+				   add: (ClapPositional id: #address);
+				   yourself);
 		  yourself
 ]
 
@@ -90,6 +94,18 @@ GtRrWorker >> application: aPharoLinkApplication [
 	application := aPharoLinkApplication
 ]
 
+{ #category : #accessing }
+GtRrWorker >> codeSync [
+
+	^ codeSync
+]
+
+{ #category : #accessing }
+GtRrWorker >> codeSync: anObject [
+
+	codeSync := anObject
+]
+
 { #category : #observer }
 GtRrWorker >> command: anArray [
 	"Execute the command sent from the remote runner.
@@ -101,6 +117,16 @@ GtRrWorker >> command: anArray [
 		arguments: anArray second.
 	message lookupClass: anArray third.
 	^ message sendTo: self
+]
+
+{ #category : #accessing }
+GtRrWorker >> commandApplyCodeChanges: aFuelStringOfCollection [
+
+	| changes |
+	changes := LanguageLinkUtils base64Decode:
+		           aFuelStringOfCollection readStream.
+	changes do: #applyCodeChange.
+	^ true
 ]
 
 { #category : #commands }
@@ -142,13 +168,14 @@ GtRrWorker >> currentProcessId [
 		  ifFalse: [ LibC uniqueInstance currentProcessId ]
 ]
 
-{ #category : #initialization }
+{ #category : #accessing }
 GtRrWorker >> initialize [
 
 	super initialize.
 	uid := UUID new asString.
 	rrPlatform := OSPlatform current name.
 	taskRunner := TKTNewProcessTaskRunner new.
+	codeSync := false
 ]
 
 { #category : #private }
@@ -189,6 +216,7 @@ GtRrWorker >> registerWithRunner [
 		at: #workingDirectory put: FileLocator workingDirectory resolve fullName;
 		at: #pid put: self currentProcessId;
 		at: #platform put: rrPlatform;
+		at: #codeSync put: codeSync;
 		yourself.
 	application newCommandFactory 
 		bindingAt: #details put: details;

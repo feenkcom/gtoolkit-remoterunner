@@ -27,13 +27,24 @@ GtRrLocalManagerStartupAndShutdown >> isRunning [
 
 { #category : #private }
 GtRrLocalManagerStartupAndShutdown >> newWorkerLocalProcess [
-	| settings args |
 
-	self flag: 'TODO settings should come from outside'.
+	| settings |
 	settings := LanguageLinkSettings pharoDefaultSettings.
+	^ GtSubprocessWithInMemoryOutput new
+		  command: settings serverExecutable fullName;
+		  arguments: (self newWorkerLocalProcessArgumentsFor: settings);
+		  workingDirectory: settings workingDirectory resolve fullName;
+		  terminateOnShutdown;
+		  yourself
+]
+
+{ #category : #'instance creation' }
+GtRrLocalManagerStartupAndShutdown >> newWorkerLocalProcessArgumentsFor: someSettings [
+
+	| args |
 	args := OrderedCollection new.
 	args
-		add: settings serverImage fullName;
+		add: someSettings serverImage fullName;
 		add: 'clap';
 		add: 'remoteRunnerWorker'.
 	remoteRunner debugMode ifTrue: [ args add: '--log' ].
@@ -41,12 +52,7 @@ GtRrLocalManagerStartupAndShutdown >> newWorkerLocalProcess [
 		add: '--serverSocketAddress';
 		add: remoteRunner port asString;
 		add: '--detachChangesFromFileSystem'.
-	^ GtSubprocessWithInMemoryOutput new
-		  command: settings serverExecutable fullName;
-		  arguments: args;
-		  workingDirectory: settings workingDirectory resolve fullName;
-		  terminateOnShutdown;
-		  yourself
+	^ args
 ]
 
 { #category : #accessing }
