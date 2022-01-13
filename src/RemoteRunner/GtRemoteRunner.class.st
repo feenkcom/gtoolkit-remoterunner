@@ -50,8 +50,6 @@ The worker images are assumed to be up to date when the Job Execution phase is r
 Class {
 	#name : #GtRemoteRunner,
 	#superclass : #Object,
-	#traits : 'TGtAnnouncer + TGtUniqueInstance',
-	#classTraits : 'TGtAnnouncer classTrait + TGtUniqueInstance classTrait',
 	#instVars : [
 		'port',
 		'server',
@@ -71,8 +69,44 @@ Class {
 		'runnerStats',
 		'log'
 	],
+	#classInstVars : [
+		'uniqueInstance'
+	],
 	#category : #'RemoteRunner-Runner'
 }
+
+{ #category : #cleanup }
+GtRemoteRunner class >> cleanUniqueInstance [
+
+	uniqueInstance ifNotNil: [ :anInstance | 
+		self onRemoveUniqueInstance: anInstance ].
+	uniqueInstance := nil.
+]
+
+{ #category : #cleanup }
+GtRemoteRunner class >> cleanUp [
+
+	self cleanUniqueInstance
+]
+
+{ #category : #accessing }
+GtRemoteRunner class >> default [
+
+	^ self uniqueInstance
+]
+
+{ #category : #testing }
+GtRemoteRunner class >> hasUniqueInstance [
+
+	^ uniqueInstance isNotNil.
+]
+
+{ #category : #accessing }
+GtRemoteRunner class >> instance [
+	<gtExample>
+
+	^ self uniqueInstance
+]
 
 { #category : #'private - hooks' }
 GtRemoteRunner class >> onRemoveUniqueInstance: anInstance [
@@ -117,6 +151,12 @@ GtRemoteRunner >> addObserver: aBlock [
 ]
 
 { #category : #announcer }
+GtRemoteRunner >> announce: anAnnouncement [
+
+	^ self announcer announce: anAnnouncement
+]
+
+{ #category : #announcer }
 GtRemoteRunner >> announceAndLog: aBeaconSignal [
 	"Announce the supplied signal to the receiver's announcer and then emit the signal for logging"
 
@@ -128,6 +168,31 @@ GtRemoteRunner >> announceAndLog: aBeaconSignal [
 GtRemoteRunner >> announcer [
 
 	^ announcer
+]
+
+{ #category : #'api - worker' }
+GtRemoteRunner >> applyCodeChanges: aCollection [
+
+	| errors serialized drainer futures |
+	serialized := LanguageLinkUtils base64Encode: aCollection.
+	drainer := TKTWorkerPool new
+		           name: 'CodeSync parallel';
+		           poolMaxSize: 32;
+		           start;
+		           yourself.
+	errors := OrderedCollection new.
+	futures := registeredWorkers
+		           select: #codeSync
+		           thenCollect: [ :worker | 
+			           drainer
+				           future: [ 
+					           [ worker commandApplyCodeChanges: serialized ]
+						           on: Error
+						           do: [ :ex | errors add: worker -> ex freeze ] ]
+				           timeout: 1 minute ].
+	futures do: [ :e | e waitForCompletion: 1 minute ].
+	drainer stop.
+	^ errors
 ]
 
 { #category : #private }
@@ -315,6 +380,12 @@ GtRemoteRunner >> hasLog [
 	^ log isNotNil
 ]
 
+{ #category : #announcer }
+GtRemoteRunner >> hasSubscriber: anObject [
+
+	^ self announcer hasSubscriber: anObject
+]
+
 { #category : #initialization }
 GtRemoteRunner >> initialize [
 
@@ -335,10 +406,10 @@ GtRemoteRunner >> initialize [
 	availableWorkers := Set new.
 	registeredWorkers := Dictionary new.
 	timeoutManager := GtRrTimeoutManager remoteRunner: self.
-	self 
-		managerStartupAndShutdown: GtRrLocalManagerStartupAndShutdown new;
-		jobStartupAndShutdown: GtRrLocalJobStartupAndShutdown new.
-
+	self
+		managerStartupAndShutdown:
+			GtRrCodeSyncedLocalManagerStartupAndShutdown new;
+		jobStartupAndShutdown: GtRrLocalJobStartupAndShutdown new
 ]
 
 { #category : #accessing }
@@ -498,6 +569,13 @@ GtRemoteRunner >> removeCurrentlyExecutingJob: aJobContextId [
 	It's possible that the job was cancelled on the server and a worker disappears at the same time, resulting in two attempts to remove the current job.  Do nothing if the job isn't found."
 
 	currentlyExecutingJobs removeKey: aJobContextId ifAbsent: []
+]
+
+{ #category : #'announcer - subscription' }
+GtRemoteRunner >> removeSubscription: subscription [
+	"Remove the given subscription from the receiver"
+
+	^ self announcer removeSubscription: subscription
 ]
 
 { #category : #phases }
@@ -734,6 +812,64 @@ GtRemoteRunner >> unregisterWorker: aPharoLinkServerConnectionDisconnectedAnnoun
 	self announceAndLog: (GtRrWorkerUnregisteredAnnouncement new
 		worker: connection;
 		reason: aString).
+]
+
+{ #category : #'announcer - subscription' }
+GtRemoteRunner >> unsubscribe: anObject [
+	"Unsubscribe all subscriptions of anObject from the receiver"
+
+	^ self announcer unsubscribe: anObject
+]
+
+{ #category : #'announcer - subscription' }
+GtRemoteRunner >> weak [
+	"announcer weak subscribe: foo"
+
+	^ self announcer weak
+]
+
+{ #category : #'announcer - subscription' }
+GtRemoteRunner >> when: anAnnouncementClass do: aValuable [
+	"Declare that when anAnnouncementClass is raised, aValuable is executed.  Pay attention that ushc method as well as when:do: should not be used on weak announcer since the block holds the receiver and more strongly."
+
+	^ self announcer when: anAnnouncementClass do: aValuable
+]
+
+{ #category : #'announcer - subscription' }
+GtRemoteRunner >> when: anAnnouncementClass do: aValuable for: aSubscriber [
+	"Declare that when anAnnouncementClass is raised, aValuable is executed and define the subscriber."
+
+	^ (self when: anAnnouncementClass do: aValuable) subscriber: aSubscriber; yourself.
+]
+
+{ #category : #'announcer - subscription' }
+GtRemoteRunner >> when: anAnnouncementClass doOnce: aValuable for: aSubscriber [
+	"Declare that when anAnnouncementClass is raised, aValuable is executed and define the subscriber.
+	A valuable is executed ONCE, and then a subscriber gets unsubscribed"
+
+	^ self
+		when: anAnnouncementClass
+		do: [ :anAnnouncement |
+			self unsubscribe: aSubscriber.
+			aValuable cull: anAnnouncement ]
+		for: aSubscriber
+]
+
+{ #category : #'announcer - subscription' }
+GtRemoteRunner >> when: anAnnouncementClass send: aSelector to: anObject [
+	"Declare that when anAnnouncementClass is raised, anObject should receive the message aSelector.
+    When the message expects one argument (eg #fooAnnouncement:) the announcement is passed as argument.
+    When the message expects two arguments (eg #fooAnnouncement:announcer:) both the announcement and the announcer 
+    are passed as argument"
+
+		^ self announcer when: anAnnouncementClass send: aSelector to: anObject
+]
+
+{ #category : #'announcer - subscription' }
+GtRemoteRunner >> when: anAnnouncementClass send: aSelector to: anObject for: aSubscriber [
+	"Declare that when anAnnouncementClass is raised, anObject should receive the message aSelector."
+
+	^ (self when: anAnnouncementClass send: aSelector to: anObject) subscriber: aSubscriber.
 ]
 
 { #category : #accessing }

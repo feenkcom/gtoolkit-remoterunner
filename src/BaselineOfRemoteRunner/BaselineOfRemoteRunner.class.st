@@ -4,15 +4,14 @@ Class {
 	#category : #BaselineOfRemoteRunner
 }
 
-{ #category : #baseline }
+{ #category : #baselines }
 BaselineOfRemoteRunner >> baseline: spec [
 	<baseline>
-	spec for: #'common' do: [
-		spec
-			baseline: 'Gt4PharoLink' with: [
-				spec repository: 'github://feenkcom/gtoolkit-remote:v0.8.672/src' ].
-
-		spec package: 'RemoteRunner' with: [
-			spec requires: #('Gt4PharoLink') ].
-	]
+	spec
+		for: #common do: [
+			spec
+				baseline: 'PharoLink' with: [
+					spec repository: 'github://feenkcom/PharoLink:main/src' ];
+				package: 'RemoteRunner'
+					with: [ spec requires: #('PharoLink' ) ] ]
 ]
