@@ -170,6 +170,31 @@ GtRemoteRunner >> announcer [
 	^ announcer
 ]
 
+{ #category : #'api - worker' }
+GtRemoteRunner >> applyCodeChanges: aCollection [
+
+	| errors serialized drainer futures |
+	serialized := LanguageLinkUtils base64Encode: aCollection.
+	drainer := TKTWorkerPool new
+		           name: 'CodeSync parallel';
+		           poolMaxSize: 32;
+		           start;
+		           yourself.
+	errors := OrderedCollection new.
+	futures := registeredWorkers
+		           select: #codeSync
+		           thenCollect: [ :worker | 
+			           drainer
+				           future: [ 
+					           [ worker commandApplyCodeChanges: serialized ]
+						           on: Error
+						           do: [ :ex | errors add: worker -> ex freeze ] ]
+				           timeout: 1 minute ].
+	futures do: [ :e | e waitForCompletion: 1 minute ].
+	drainer stop.
+	^ errors
+]
+
 { #category : #private }
 GtRemoteRunner >> assignTasksToWorkers [
 	"Assign tasks to any available workers.
@@ -381,10 +406,10 @@ GtRemoteRunner >> initialize [
 	availableWorkers := Set new.
 	registeredWorkers := Dictionary new.
 	timeoutManager := GtRrTimeoutManager remoteRunner: self.
-	self 
-		managerStartupAndShutdown: GtRrLocalManagerStartupAndShutdown new;
-		jobStartupAndShutdown: GtRrLocalJobStartupAndShutdown new.
-
+	self
+		managerStartupAndShutdown:
+			GtRrCodeSyncedLocalManagerStartupAndShutdown new;
+		jobStartupAndShutdown: GtRrLocalJobStartupAndShutdown new
 ]
 
 { #category : #accessing }
