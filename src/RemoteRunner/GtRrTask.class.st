@@ -20,6 +20,13 @@ GtRrTask class >> leJsonV4Name [
 	^ #remoteRunnerWorkerTask
 ]
 
+{ #category : #converting }
+GtRrTask >> asJob [
+	"Answer a GtRrTasksJob with the receiver as its single task"
+
+	^ GtRrTasksJob tasks: { self }
+]
+
 { #category : #accessing }
 GtRrTask >> endTime [
 
@@ -49,14 +56,12 @@ GtRrTask >> errorDetails: aGtErrorDetails [
 
 { #category : #ui }
 GtRrTask >> gtResultFor: aView [
-
 	<gtView>
-	result ifNil: [ ^ aView empty ].
 
 	^ aView forward
 		  title: 'Result';
 		  priority: 20;
-		  object: [ result ifNil: [ errorDetails ] ];
+		  object: [ result ifNil: [ errorDetails ifNil: [ '<No Result>' ] ] ];
 		  actionUpdateButton
 ]
 

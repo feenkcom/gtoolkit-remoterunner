@@ -19,6 +19,13 @@ Class {
 	#category : #'RemoteRunner-Jobs'
 }
 
+{ #category : #'job submission' }
+GtRrJob class >> script: aString [
+	"Answer a job with a single script task"
+
+	^ GtRrTasksJob tasks: { (GtRrScriptTask script: aString) }
+]
+
 { #category : #accessing }
 GtRrJob >> addResult: aGtRrTask [
 	"Add the completed task to the results"
