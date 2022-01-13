@@ -6,8 +6,8 @@ Class {
 
 { #category : #accessing }
 GtRrCodeSyncExamples >> addRemoveMethod [
-
 	<gtExample>
+	<noTest>
 	| runner codeSync |
 	runner := GtRemoteRunner new
 		          port: 8042;
