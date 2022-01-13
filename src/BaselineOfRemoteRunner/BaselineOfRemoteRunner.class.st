@@ -4,14 +4,15 @@ Class {
 	#category : #BaselineOfRemoteRunner
 }
 
-{ #category : #baselines }
+{ #category : #baseline }
 BaselineOfRemoteRunner >> baseline: spec [
 	<baseline>
-	spec
-		for: #common do: [
-			spec
-				baseline: 'PharoLink' with: [
-					spec repository: 'github://feenkcom/PharoLink:main/src' ];
-				package: 'RemoteRunner'
-					with: [ spec requires: #('PharoLink' ) ] ]
+	spec for: #'common' do: [
+		spec
+			baseline: 'PharoLink' with: [
+				spec repository: 'github://feenkcom/PharoLink:v0.8.149/src' ].
+
+		spec package: 'RemoteRunner' with: [
+			spec requires: #('PharoLink') ].
+	]
 ]
