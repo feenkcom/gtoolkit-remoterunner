@@ -171,6 +171,12 @@ GtRrWorkerConnection >> remoteAddress [
 ]
 
 { #category : #accessing }
+GtRrWorkerConnection >> remoteAddressString [
+
+	^ GtRemoteRunner printIpAddress: remoteAddress
+]
+
+{ #category : #accessing }
 GtRrWorkerConnection >> removeObserver [
 
 	observerProcess ifNotNil: #terminate.

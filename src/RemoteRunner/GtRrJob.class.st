@@ -26,6 +26,27 @@ GtRrJob class >> script: aString [
 	^ GtRrTasksJob tasks: { (GtRrScriptTask script: aString) }
 ]
 
+{ #category : #'job submission' }
+GtRrJob class >> testClassNames: aCollectionOfSymbols [
+	"Answer a job that runs the supplied TestCases"
+
+	^ GtRrTestsJob new classNames: aCollectionOfSymbols
+]
+
+{ #category : #'job submission' }
+GtRrJob class >> testPackageNames: aCollectionOfSymbols [
+	"Answer a job that runs the supplied TestCases"
+
+	^ GtRrTestsJob new packageNames: aCollectionOfSymbols
+]
+
+{ #category : #'job submission' }
+GtRrJob class >> testTestNames: aCollectionOfAssociations [
+	"Answer a job that runs the supplied TestCases"
+
+	^ GtRrTestsJob new testNames: aCollectionOfAssociations
+]
+
 { #category : #accessing }
 GtRrJob >> addResult: aGtRrTask [
 	"Add the completed task to the results"

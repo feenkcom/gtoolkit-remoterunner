@@ -217,6 +217,9 @@ GtRrWorker >> registerWithRunner [
 		at: #pid put: self currentProcessId;
 		at: #platform put: rrPlatform;
 		at: #codeSync put: codeSync;
+		at: #vmBuildDate put: Smalltalk vm buildDate;
+		at: #gtVersion put: GtImage instance version versionString;
+		at: #imageVersion put: SystemVersion current asString;
 		yourself.
 	application newCommandFactory 
 		bindingAt: #details put: details;

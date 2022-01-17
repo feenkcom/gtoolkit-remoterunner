@@ -13,6 +13,16 @@ GtRrWorkerAnnouncement class >> worker: aGtRrWorkerRemote [
 	^ self new worker: aGtRrWorkerRemote
 ]
 
+{ #category : #printing }
+GtRrWorkerAnnouncement >> printOneLineContentsOn: stream [
+
+	worker ifNil: [ ^ self ].
+	stream 
+		<< (worker remoteAddressString);
+		space;
+		<< (worker details at: #workingDirectory ifAbsent: [ '<unknown directory>' ])
+]
+
 { #category : #accessing }
 GtRrWorkerAnnouncement >> worker [
 
