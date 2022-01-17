@@ -810,7 +810,7 @@ GtRemoteRunner >> unregisterWorker: aPharoLinkServerConnectionDisconnectedAnnoun
 					setTrace.
 			self privateTaskFailed: taskContext taskContextId with: errorDetails ]. ].
 	self announceAndLog: (GtRrWorkerUnregisteredAnnouncement new
-		worker: connection;
+		worker: workerConnection;
 		reason: aString).
 ]
 

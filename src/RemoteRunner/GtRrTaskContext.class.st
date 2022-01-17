@@ -44,6 +44,18 @@ GtRrTaskContext >> errorDetails: anObject [
 ]
 
 { #category : #ui }
+GtRrTaskContext >> gtResultFor: aView [
+	<gtView>
+
+	task ifNil: [ ^ aView empty ].
+	^ aView forward
+		  title: 'Result';
+		  priority: 20;
+		  object: [ task result ifNil: [ task errorDetails ifNil: [ '<No Result>' ] ] ];
+		  actionUpdateButton
+]
+
+{ #category : #ui }
 GtRrTaskContext >> gtSummaryFor: aView [
 
 	<gtView>
