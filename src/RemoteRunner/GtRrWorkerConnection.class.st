@@ -50,6 +50,14 @@ GtRrWorkerConnection >> commandApplyCodeChanges: aFuelStringOfCollection [
 ]
 
 { #category : #commands }
+GtRrWorkerConnection >> commandEvaluate: aString [
+
+	^ self sendControlMessage: (Message
+			   selector: #commandEvaluate:
+			   argument: aString)
+]
+
+{ #category : #commands }
 GtRrWorkerConnection >> commandPing [
 
 	"If the worker service responds, it is is there. If something fails, you get an error."
@@ -144,6 +152,32 @@ GtRrWorkerConnection >> observerWait [
 	This is called by the worker to keep the observer valid."
 
 	observerSemaphore wait.
+]
+
+{ #category : #debugging }
+GtRrWorkerConnection >> pharoLinkServerOnPort: aNumber [
+	"Start a PharoLink server on the worker and connect"
+	| serverResponse settings application |
+
+	serverResponse := self commandEvaluate: (String streamContents: [ :stream |
+		stream
+			<< 'PharoLinkServer new listenPort: ';
+			<< aNumber asString;
+			<< '; start' ]).
+	self assert: serverResponse equals: 'a PharoLinkServer'.
+
+	"Give the server a chance to fire up"
+	1 second wait.
+
+	settings := LanguageLinkSettings pharoDefaultSettings.
+	settings
+		serverProcessClass: LanguageLinkManualProcess;
+		serverSocketAddress: (LanguageLinkSocketAddress
+				ipOrName: (GtRemoteRunner printIpAddress: remoteAddress)
+				port: aNumber).
+	application := PharoLinkApplication newWith: settings.
+	application start.
+	^ application.
 ]
 
 { #category : #accessing }
