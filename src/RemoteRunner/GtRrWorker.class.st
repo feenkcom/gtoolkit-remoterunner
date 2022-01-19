@@ -130,6 +130,22 @@ GtRrWorker >> commandApplyCodeChanges: aFuelStringOfCollection [
 ]
 
 { #category : #commands }
+GtRrWorker >> commandEvaluate: aString [
+	"Evaluate the supplied string."
+	| result |
+
+	result := [ self class compiler
+		source: aString;
+		receiver: self;
+		evaluate ]
+			on: Error 
+			do: [ :ex | ex return: ex messageText ].
+	^ (PharoLinkRegistry isPrimitive: result)
+		ifTrue: [ result ]
+		ifFalse: [ result asString ]
+]
+
+{ #category : #commands }
 GtRrWorker >> commandPing [
 	"Note that we must not wait for a response, as this leads to a deadlock"
 
