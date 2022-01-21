@@ -21,7 +21,7 @@ GtRemoteRunnerExamples >> assignTasksToWorkersTaskFirst [
 	| remoteRunner workers job tasks taskCompletedCount taskFailedCount jobCompletedCount semaphore |
 	jobCompletedCount := taskCompletedCount := taskFailedCount := 0.
 	semaphore := GtMutualExclusionSemaphore new.
-	remoteRunner := GtRemoteRunner new.
+	remoteRunner := GtRrScheduler new.
 	tasks := (1 to: 5)
 		         collect: [ :i | GtRrExampleValueTask new value: i ]
 		         as: OrderedCollection.
@@ -29,13 +29,13 @@ GtRemoteRunnerExamples >> assignTasksToWorkersTaskFirst [
 			 value: 'error1';
 			 setError).
 	job := GtRrTasksJob new
-		       platforms: #( plat1 plat2 );
+		       constraint: #( plat1 plat2 );
 		       tasks: tasks.
 	job
 		when: GtRrJobCompletedAnnouncement do: [ 
 			jobCompletedCount := jobCompletedCount + 1.
 			semaphore signal ];
-		when: GtRrTaskCompletedAnnouncement
+		when: GtRrTaskFinishedAnnouncement
 		do: [ taskCompletedCount := taskCompletedCount + 1 ];
 		when: GtRrTaskFailedAnnouncement
 		do: [ taskFailedCount := taskFailedCount + 1 ].
@@ -69,7 +69,7 @@ GtRemoteRunnerExamples >> assignTasksToWorkersWorkerFirst [
 	| remoteRunner workers job tasks taskCompletedCount taskFailedCount jobCompletedCount semaphore |
 	jobCompletedCount := taskCompletedCount := taskFailedCount := 0.
 	semaphore := GtMutualExclusionSemaphore new.
-	remoteRunner := GtRemoteRunner new.
+	remoteRunner := GtRrScheduler new.
 
 	workers := (1 to: 2) collect: [ :i | 
 		           GtRrInImageWorker new
@@ -86,13 +86,13 @@ GtRemoteRunnerExamples >> assignTasksToWorkersWorkerFirst [
 			 value: 'error1';
 			 setError).
 	job := GtRrTasksJob new
-		       platforms: #( plat1 plat2 );
+		       constraint: #( plat1 plat2 );
 		       tasks: tasks.
 	job
 		when: GtRrJobCompletedAnnouncement do: [ 
 			jobCompletedCount := jobCompletedCount + 1.
 			semaphore signal ];
-		when: GtRrTaskCompletedAnnouncement
+		when: GtRrTaskFinishedAnnouncement
 		do: [ taskCompletedCount := taskCompletedCount + 1 ];
 		when: GtRrTaskFailedAnnouncement
 		do: [ taskFailedCount := taskFailedCount + 1 ].
@@ -116,18 +116,18 @@ GtRemoteRunnerExamples >> controlChannelPing [
 	| remoteRunner controlChannelSemaphore worker |
 
 	controlChannelSemaphore := GtMutualExclusionSemaphore new.
-	remoteRunner := GtRemoteRunner new port: 7089.
-	remoteRunner managerStartupAndShutdown poolSize: 1.
-	remoteRunner when: GtRrWorkerControlChannelRegisteredAnnouncement do: [ :ann | 
+	remoteRunner := GtRrScheduler new port: 7089.
+	remoteRunner environment poolSize: 1.
+	remoteRunner when: GtRrWorkerConnectedAnnouncement do: [ :ann | 
 		worker := ann worker.
 		controlChannelSemaphore signal ].
 	remoteRunner start.
 	[ controlChannelSemaphore wait.
-	self assert: remoteRunner registeredWorkerCount equals: 1.
+	self assert: remoteRunner executorsSize equals: 1.
 	self
 		assert: worker commandPing
 		equals: #ping.
-	self assert: remoteRunner registeredWorkerCount equals: 1.
+	self assert: remoteRunner executorsSize equals: 1.
 	] ensure: [ remoteRunner stop ].
 
 	^ worker
@@ -141,19 +141,19 @@ GtRemoteRunnerExamples >> controlChannelQuitSmalltalk [
 	| remoteRunner controlChannelSemaphore worker |
 
 	controlChannelSemaphore := GtMutualExclusionSemaphore new.
-	remoteRunner := GtRemoteRunner new port: 7090.
-	remoteRunner managerStartupAndShutdown poolSize: 1.
-	remoteRunner when: GtRrWorkerControlChannelRegisteredAnnouncement do: [ :ann | 
+	remoteRunner := GtRrScheduler new port: 7090.
+	remoteRunner environment poolSize: 1.
+	remoteRunner when: GtRrWorkerConnectedAnnouncement do: [ :ann | 
 		worker := ann worker.
 		controlChannelSemaphore signal ].
-	remoteRunner when: GtRrWorkerUnregisteredAnnouncement do: [ :ann | 
+	remoteRunner when: GtRrWorkerDisconnectedAnnouncement do: [ :ann | 
 		controlChannelSemaphore signal ].
 	remoteRunner start.
 	[ controlChannelSemaphore wait.
-	self assert: remoteRunner registeredWorkerCount equals: 1.
+	self assert: remoteRunner executorsSize equals: 1.
 	worker commandQuitSmalltalk.
 	controlChannelSemaphore wait.
-	self assert: remoteRunner registeredWorkerCount equals: 0.
+	self assert: remoteRunner executorsSize equals: 0.
 	] ensure: [ remoteRunner stop ].
 
 	^ worker
@@ -169,11 +169,11 @@ GtRemoteRunnerExamples >> getNextTaskFor [
 	tasks := (1 to: 5) collect: [ :i |
 		GtRrExampleValueTask new
 			value: i ] as: OrderedCollection.
-	taskIds := tasks collect: #taskId as: Set.
+	taskIds := tasks collect: #id as: Set.
 	job := GtRrTasksJob new
-		platforms: #(plat1 plat2);
+		constraint: #(plat1 plat2);
 		tasks: tasks.
-	remoteRunner := GtRemoteRunner new.
+	remoteRunner := GtRrScheduler new.
 	"The remote runner has enough state to run this example without being started"
 	remoteRunner startJob: job.
 	self assert: remoteRunner currentlyExecutingJobs size equals: 1.
@@ -194,8 +194,8 @@ GtRemoteRunnerExamples >> getNextTaskFor [
 	plat2Tasks add: (remoteRunner getNextTaskFor: #plat2).
 
 	self assert: plat1Tasks first task class equals: GtRrExampleValueTask.
-	self assert: (plat1Tasks collect: #taskId as: Set) equals: taskIds.
-	self assert: (plat2Tasks collect: #taskId as: Set) equals: taskIds.
+	self assert: (plat1Tasks collect: #id as: Set) equals: taskIds.
+	self assert: (plat2Tasks collect: #id as: Set) equals: taskIds.
 	self assert: (remoteRunner currentlyExecutingJobs anyOne atPlatform: #plat1) pendingTasks isEmpty.
 	self assert: (remoteRunner currentlyExecutingJobs anyOne atPlatform: #plat2) pendingTasks isEmpty.
 ]
@@ -207,9 +207,9 @@ GtRemoteRunnerExamples >> handleWorkerDisconnection [
 	<noTest>
 	| runner worker job startSemaphore endSemaphore retry |
 
-	runner := GtRemoteRunner new
+	runner := GtRrScheduler new
 		port: 7086;
-		managerStartupAndShutdown: GtRrManualManagerStartupAndShutdown new;
+		environment: GtRrManualEnvironment new;
 		startLogging;
 		start.
 	[ worker := GtRrWorker serverSocketAddress: 'localhost:7086'.
@@ -230,20 +230,20 @@ GtRemoteRunnerExamples >> handleWorkerDisconnection [
 	retry = 0 ifTrue:
 		[ self error: 'Worker didn''t connect' ].
 	self assert: runner state equals: #idle.
-	self assert: runner registeredWorkerCount equals: 1.
+	self assert: runner executorsSize equals: 1.
 	self assert: runner availableWorkerCount equals: 1.
 
 	runner submitJob: job.
 
 	startSemaphore wait.
 	self assert: runner state equals: #busy.
-	self assert: runner registeredWorkerCount equals: 1.
+	self assert: runner executorsSize equals: 1.
 	self assert: runner availableWorkerCount equals: 0.
 	self assert: job state equals: #started.
 	worker stop.
 	endSemaphore wait.
 	self assert: runner state equals: #idle.
-	self assert: runner registeredWorkerCount equals: 0.
+	self assert: runner executorsSize equals: 0.
 	self assert: runner availableWorkerCount equals: 0.
 	self assert: job state equals: #completed.
 	self assert: job hasErrors.
@@ -262,7 +262,7 @@ GtRemoteRunnerExamples >> multipleJobs [
 
 	jobStartedCount := jobCompletedCount := taskStartedCount := taskCompletedCount := taskFailedCount := 0.
 	jobSemaphore := GtMutualExclusionSemaphore new.
-	remoteRunner := GtRemoteRunner new port: 7092.
+	remoteRunner := GtRrScheduler new port: 7092.
 	remoteRunner start.
 	[ 
 	jobs := (1 to: 2) collect: [  :i |
@@ -276,9 +276,9 @@ GtRemoteRunnerExamples >> multipleJobs [
 				jobSemaphore signal ];
 			when: GtRrJobCancelledAnnouncement do: 
 				[ jobCompletedCount := jobCompletedCount + 1 ];
-			when: GtRrTaskStartedAnnouncement do: 
+			when: GtRrTaskRunningAnnouncement do: 
 				[ taskStartedCount := taskStartedCount + 1 ];
-			when: GtRrTaskCompletedAnnouncement do: 
+			when: GtRrTaskFinishedAnnouncement do: 
 				[ taskCompletedCount := taskCompletedCount + 1 ];
 			when: GtRrTaskFailedAnnouncement do: 
 				[ taskFailedCount := taskFailedCount + 1 ].
@@ -309,8 +309,8 @@ GtRemoteRunnerExamples >> simpleTask [
 	jobStartedCount := jobCompletedCount := taskStartedCount := taskCompletedCount := taskFailedCount := 0.
 	jobSemaphore := GtMutualExclusionSemaphore new.
 	times := OrderedCollection new.
-	remoteRunner := GtRemoteRunner new port: 7091.
-	remoteRunner managerStartupAndShutdown poolSize: 1.
+	remoteRunner := GtRrScheduler new port: 7091.
+	remoteRunner environment poolSize: 1.
 	remoteRunner start.
 	[ 
 	completingTask := GtRrScriptTask script: '#done'.
@@ -326,10 +326,10 @@ GtRemoteRunnerExamples >> simpleTask [
 		when: GtRrJobCancelledAnnouncement do: 
 			[ jobCompletedCount := jobCompletedCount + 1.
 			times add: 5 -> DateAndTime now ];
-		when: GtRrTaskStartedAnnouncement do: 
+		when: GtRrTaskRunningAnnouncement do: 
 			[ taskStartedCount := taskStartedCount + 1.
 			times add: 1 -> DateAndTime now ];
-		when: GtRrTaskCompletedAnnouncement do: 
+		when: GtRrTaskFinishedAnnouncement do: 
 			[ taskCompletedCount := taskCompletedCount + 1.
 			times add: 3 -> DateAndTime now. ];
 		when: GtRrTaskFailedAnnouncement do: 
@@ -365,8 +365,8 @@ GtRemoteRunnerExamples >> simpleTestTask [
 	jobStartedCount := jobCompletedCount := taskStartedCount := taskCompletedCount := taskFailedCount := 0.
 	jobSemaphore := GtMutualExclusionSemaphore new.
 	times := OrderedCollection new.
-	remoteRunner := GtRemoteRunner new port: 7093.
-	remoteRunner managerStartupAndShutdown poolSize: 1.
+	remoteRunner := GtRrScheduler new port: 7093.
+	remoteRunner environment poolSize: 1.
 	remoteRunner start.
 	[ 
 	job := GtRrTestsJob new testNames: { #GtRrSampleTest -> #testPass }.
@@ -381,10 +381,10 @@ GtRemoteRunnerExamples >> simpleTestTask [
 		when: GtRrJobCancelledAnnouncement do: 
 			[ jobCompletedCount := jobCompletedCount + 1.
 			times add: 5 -> DateAndTime now ];
-		when: GtRrTaskStartedAnnouncement do: 
+		when: GtRrTaskRunningAnnouncement do: 
 			[ taskStartedCount := taskStartedCount + 1.
 			times add: 1 -> DateAndTime now ];
-		when: GtRrTaskCompletedAnnouncement do: 
+		when: GtRrTaskFinishedAnnouncement do: 
 			[ taskCompletedCount := taskCompletedCount + 1.
 			times add: 3 -> DateAndTime now. ];
 		when: GtRrTaskFailedAnnouncement do: 
@@ -416,7 +416,7 @@ GtRemoteRunnerExamples >> terminateNotStartedJob [
 	<noTest>
 	| remoteRunner job tasks |
 
-	remoteRunner := GtRemoteRunner new.
+	remoteRunner := GtRrScheduler new.
 	"Submit an empty job.  Since there are no workers, it will become the currently executing job, leaving the next not started"
 	remoteRunner submitJob: (GtRrTasksJob new tasks: #()).
 
@@ -453,8 +453,8 @@ GtRemoteRunnerExamples >> terminateStartedJob [
 	jobStartedCount := jobCompletedCount := taskStartedCount := taskCompletedCount := taskFailedCount := 0.
 	semaphore := GtMutualExclusionSemaphore new.
 	times := OrderedCollection new.
-	remoteRunner := GtRemoteRunner new port: 7084.
-	remoteRunner managerStartupAndShutdown poolSize: 1.
+	remoteRunner := GtRrScheduler new port: 7084.
+	remoteRunner environment poolSize: 1.
 	remoteRunner start.
 	[ 
 	"Create a set of tasks that never complete"
@@ -474,11 +474,11 @@ GtRemoteRunnerExamples >> terminateStartedJob [
 			[ jobCompletedCount := jobCompletedCount + 1.
 			times add: 5 -> DateAndTime now.
 			semaphore signal ];
-		when: GtRrTaskStartedAnnouncement do: 
+		when: GtRrTaskRunningAnnouncement do: 
 			[ taskStartedCount := taskStartedCount + 1.
 			times add: 1 -> DateAndTime now.
 			semaphore signal ];
-		when: GtRrTaskCompletedAnnouncement do: 
+		when: GtRrTaskFinishedAnnouncement do: 
 			[ taskCompletedCount := taskCompletedCount + 1.
 			times add: 3 -> DateAndTime now. ];
 		when: GtRrTaskFailedAnnouncement do: 
@@ -521,7 +521,7 @@ GtRemoteRunnerExamples >> timeoutJob [
 	jobStartedCount := jobCompletedCount := taskStartedCount := taskCompletedCount := taskFailedCount := 0.
 	jobSemaphore := GtMutualExclusionSemaphore new.
 	times := OrderedCollection new.
-	remoteRunner := GtRemoteRunner new port: 7087.
+	remoteRunner := GtRrScheduler new port: 7087.
 	remoteRunner start.
 	[ 
 	"Create a set of tasks that never complete"
@@ -529,7 +529,7 @@ GtRemoteRunnerExamples >> timeoutJob [
 		GtRrScriptTask script: 'Semaphore new wait' ] as: OrderedCollection.
 	job := GtRrTasksJob new
 		tasks: tasks;
-		jobTimeout: 5 seconds.
+		timeout: 5 seconds.
 	job
 		when: GtRrJobStartedAnnouncement do: 
 			[ jobStartedCount := jobStartedCount + 1.
@@ -541,10 +541,10 @@ GtRemoteRunnerExamples >> timeoutJob [
 		when: GtRrJobCancelledAnnouncement do: 
 			[ jobCompletedCount := jobCompletedCount + 1.
 			times add: 5 -> DateAndTime now ];
-		when: GtRrTaskStartedAnnouncement do: 
+		when: GtRrTaskRunningAnnouncement do: 
 			[ taskStartedCount := taskStartedCount + 1.
 			times add: 1 -> DateAndTime now ];
-		when: GtRrTaskCompletedAnnouncement do: 
+		when: GtRrTaskFinishedAnnouncement do: 
 			[ taskCompletedCount := taskCompletedCount + 1.
 			times add: 3 -> DateAndTime now. ];
 		when: GtRrTaskFailedAnnouncement do: 
@@ -563,7 +563,7 @@ GtRemoteRunnerExamples >> timeoutJob [
 	self assert: taskStartedCount equals: 2.
 	self assert: job state equals: #completed.
 	self assert: job hasErrors.
-	self assert: job errorDetails errorMessage equals: 'Job exceeded time limit'.
+	self assert: job errorDetails message equals: 'Job exceeded time limit'.
 	self assert: (times collect: #key) asArray equals: #(0 1 1 2 2 2 4).
 	] ensure: [ remoteRunner stop ].
 
@@ -582,15 +582,14 @@ GtRemoteRunnerExamples >> timeoutTask [
 	jobSemaphore := GtMutualExclusionSemaphore new.
 	taskFailedSemaphore := Semaphore new.
 	times := OrderedCollection new.
-	remoteRunner := GtRemoteRunner new port: 7088.
-	remoteRunner managerStartupAndShutdown poolSize: 1.
-	self assert: remoteRunner jobTimeout > 1 minute.
-	self assert: remoteRunner workerTimeout > 1 minute.
+	remoteRunner := GtRrScheduler new port: 7088.
+	remoteRunner environment poolSize: 1.
+	self assert: remoteRunner timeout > 1 minute.
 	remoteRunner start.
 	[ 
 	"Create a task that never completes"
 	timeoutTask := GtRrScriptTask script: 'Semaphore new wait'.
-	timeoutTask taskTimeout: 200 milliSeconds.
+	timeoutTask timeout: 200 milliSeconds.
 	completingTask := GtRrScriptTask script: '#done'.
 	job := GtRrTasksJob new
 		tasks: { timeoutTask. completingTask }.
@@ -605,10 +604,10 @@ GtRemoteRunnerExamples >> timeoutTask [
 		when: GtRrJobCancelledAnnouncement do: 
 			[ jobCompletedCount := jobCompletedCount + 1.
 			times add: 5 -> DateAndTime now ];
-		when: GtRrTaskStartedAnnouncement do: 
+		when: GtRrTaskRunningAnnouncement do: 
 			[ taskStartedCount := taskStartedCount + 1.
 			times add: 1 -> DateAndTime now ];
-		when: GtRrTaskCompletedAnnouncement do: 
+		when: GtRrTaskFinishedAnnouncement do: 
 			[ taskCompletedCount := taskCompletedCount + 1.
 			times add: 3 -> DateAndTime now. ];
 		when: GtRrTaskFailedAnnouncement do: 
@@ -621,7 +620,7 @@ GtRemoteRunnerExamples >> timeoutTask [
 	[ "Give the process time to die and be registered by the subprocess.
 	If this isn't enough time, it will be caught on the next cycle (just take longer)."
 		2 seconds wait.
-		remoteRunner managerStartupAndShutdown signalWatchdog ] fork.
+		remoteRunner environment signalWatchDog ] fork.
 	jobSemaphore wait.
 
 	self assert: remoteRunner currentlyExecutingJobs size equals: 0.
@@ -651,15 +650,15 @@ GtRemoteRunnerExamples >> timeoutWorker [
 	jobSemaphore := GtMutualExclusionSemaphore new.
 	taskFailedSemaphore := Semaphore new.
 	times := OrderedCollection new.
-	remoteRunner := GtRemoteRunner new port: 7085.
-	remoteRunner managerStartupAndShutdown poolSize: 1.
-	remoteRunner workerTimeout: 3 seconds.
-	self assert: remoteRunner jobTimeout > 1 minute.
+	remoteRunner := GtRrScheduler new port: 7085.
+	remoteRunner environment poolSize: 1.
+	remoteRunner timeout: 3 seconds.
+	self assert: remoteRunner timeout > 1 minute.
 	remoteRunner start.
 	[ 
 	"Create a set of tasks that never complete"
 	timeoutTask := GtRrScriptTask script: 'Semaphore new wait'.
-	timeoutTask taskTimeout: 1 minute.
+	timeoutTask timeout: 1 minute.
 	completingTask := GtRrScriptTask script: '#done'.
 	job := GtRrTasksJob new
 		tasks: { timeoutTask. completingTask }.
@@ -674,10 +673,10 @@ GtRemoteRunnerExamples >> timeoutWorker [
 		when: GtRrJobCancelledAnnouncement do: 
 			[ jobCompletedCount := jobCompletedCount + 1.
 			times add: 5 -> DateAndTime now ];
-		when: GtRrTaskStartedAnnouncement do: 
+		when: GtRrTaskRunningAnnouncement do: 
 			[ taskStartedCount := taskStartedCount + 1.
 			times add: 1 -> DateAndTime now ];
-		when: GtRrTaskCompletedAnnouncement do: 
+		when: GtRrTaskFinishedAnnouncement do: 
 			[ taskCompletedCount := taskCompletedCount + 1.
 			times add: 3 -> DateAndTime now. ];
 		when: GtRrTaskFailedAnnouncement do: 
@@ -689,7 +688,7 @@ GtRemoteRunnerExamples >> timeoutWorker [
 	taskFailedSemaphore wait.
 	[ "Give the process time to die and be registered by the subprocess"
 		2 seconds wait.
-		remoteRunner managerStartupAndShutdown signalWatchdog ] fork.
+		remoteRunner environment signalWatchDog ] fork.
 	jobSemaphore wait.
 
 	self assert: remoteRunner currentlyExecutingJobs size equals: 0.
@@ -716,19 +715,19 @@ GtRemoteRunnerExamples >> workerAttributes [
 	| remoteRunner registeredSemaphore worker |
 
 	registeredSemaphore := GtMutualExclusionSemaphore new.
-	remoteRunner := GtRemoteRunner new port: 7091.
-	remoteRunner managerStartupAndShutdown poolSize: 1.
-	remoteRunner when: GtRrWorkerRegisteredAnnouncement do: [ :ann | 
+	remoteRunner := GtRrScheduler new port: 7091.
+	remoteRunner environment poolSize: 1.
+	remoteRunner when: GtRrWorkerConnectedAnnouncement do: [ :ann | 
 		worker := ann worker.
 		registeredSemaphore signal ].
 	remoteRunner start.
 	[ registeredSemaphore wait.
-	self assert: remoteRunner registeredWorkerCount equals: 1.
+	self assert: remoteRunner executorsSize equals: 1.
 	self
-		assert: (worker attributeAt: #workingDirectory)
+		assert: (worker attributes at: #workingDirectory)
 		equals: FileLocator workingDirectory resolve fullName.
 	self 
-		assert: (worker attributeAt: #platform)
+		assert: (worker attributes at: #platform)
 		equals: OSPlatform current name.
 	] ensure: [ remoteRunner stop ].
 

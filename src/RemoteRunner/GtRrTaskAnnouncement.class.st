@@ -10,7 +10,15 @@ Class {
 { #category : #'instance creation' }
 GtRrTaskAnnouncement class >> task: aGtRrTask [
 
-	^ self new task: aGtRrTask 
+	^ self new
+		  task: aGtRrTask;
+		  yourself
+]
+
+{ #category : #accessing }
+GtRrTaskAnnouncement >> id [
+
+	^ task id 
 ]
 
 { #category : #accessing }
@@ -23,10 +31,4 @@ GtRrTaskAnnouncement >> task [
 GtRrTaskAnnouncement >> task: anObject [
 
 	task := anObject
-]
-
-{ #category : #accessing }
-GtRrTaskAnnouncement >> taskId [
-
-	^ task taskId
 ]

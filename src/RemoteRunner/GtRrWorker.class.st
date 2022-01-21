@@ -7,11 +7,11 @@ Class {
 	#instVars : [
 		'uid',
 		'application',
-		'taskRunner',
-		'currentTaskExecution',
-		'attributes'
+		'attributes',
+		'taskWorker',
+		'connected'
 	],
-	#category : #'RemoteRunner-Worker'
+	#category : #'RemoteRunner-Runner'
 }
 
 { #category : #accessing }
@@ -38,11 +38,11 @@ GtRrWorker class >> commandLine [
 				  args context exitFailure: '--serverSocketAddress is required' ].
 		  worker := self serverSocketAddress: serverSocketAddress.
 		  args occurrencesOf: #attribute do: [ :arg | 
-			  worker
-				  attributeAt: (arg at: #key) value
+			  worker attributes
+				  at: (arg at: #key) value
 				  put: (arg at: #value) value ].
 		  StringSignal emit: 'Connecting to : ' , serverSocketAddress.
-		  worker start.
+		  worker launch.
 		  StringSignal emit: 'Connected'.
 		  "Hibernate until the process exits"
 		  Semaphore new wait ]
@@ -87,18 +87,6 @@ GtRrWorker class >> serverSocketAddress: aString [
 		application: (self newPharoApplication: aString)
 ]
 
-{ #category : #observer }
-GtRrWorker >> addObserver [
-
-	| commandFactory observer |
-	commandFactory := application newCommandFactory.
-	observer := commandFactory observerFromCallback: [ :message | 
-		            self command: message ].
-	"register needs to keep request alive to keep observer alive"
-	^ commandFactory send: ('GtAssignedRemoteRunner addObserver: {1}' format:
-			   { observer pharoLinkFormattedCode })
-]
-
 { #category : #accessing }
 GtRrWorker >> application: aPharoLinkApplication [
 
@@ -106,46 +94,28 @@ GtRrWorker >> application: aPharoLinkApplication [
 ]
 
 { #category : #accessing }
-GtRrWorker >> attributeAt: aString [
+GtRrWorker >> attributes [
 
-	^ attributes at: aString
+	^ attributes
 ]
 
-{ #category : #accessing }
-GtRrWorker >> attributeAt: aString ifAbsent: absentBlock [
-
-	^ attributes at: aString ifAbsent: absentBlock
-]
-
-{ #category : #accessing }
-GtRrWorker >> attributeAt: aString ifPresent: aBlock [
-
-	^ attributes at: aString ifPresent: aBlock
-]
-
-{ #category : #accessing }
-GtRrWorker >> attributeAt: aString ifPresent: aBlock ifAbsent: anotherBlock [
-
-	^ attributes at: aString ifPresent: aBlock ifAbsent: anotherBlock
-]
-
-{ #category : #accessing }
-GtRrWorker >> attributeAt: aSimpleObject put: anotherSimpleObject [
-
-	attributes at: aSimpleObject put: anotherSimpleObject
-]
-
-{ #category : #observer }
+{ #category : #commands }
 GtRrWorker >> command: anArray [
-	"Execute the command sent from the remote runner.
-	The message is encoded as { selector. arguments. lookupClass. }"
-	| message |
 
+	"Execute the command sent from the remote runner.
+	The message is encoded as { selector. arguments. lookupClass }"
+
+	| message priority |
 	message := Message
-		selector: anArray first asSymbol
-		arguments: anArray second.
+		           selector: anArray first asSymbol
+		           arguments: anArray second.
 	message lookupClass: anArray third.
-	^ message sendTo: self
+	"commands take priority over workers"
+	priority := Processor activeProcess priority.
+	^ [ 
+	  Processor activeProcess priority: worker processPriority + 1.
+	  message sendTo: self ] ensure: [ 
+		  Processor activeProcess priority: priority ]
 ]
 
 { #category : #accessing }
@@ -155,6 +125,15 @@ GtRrWorker >> commandApplyCodeChanges: aFuelStringOfCollection [
 	changes := LanguageLinkUtils base64Decode:
 		           aFuelStringOfCollection readStream.
 	changes do: #applyCodeChange.
+	^ true
+]
+
+{ #category : #commands }
+GtRrWorker >> commandConnected [
+
+	"Signals the end of the initial connection, can now pull tasks"
+
+	connected signal.
 	^ true
 ]
 
@@ -173,19 +152,34 @@ GtRrWorker >> commandQuitSmalltalk [
 ]
 
 { #category : #commands }
-GtRrWorker >> commandTerminateTaskContextId: taskContextId [
-	"Terminate the current task, confirming the context id"
-	| result priority |
+GtRrWorker >> commandTerminateTaskId: aTaskId [
 
-	result := false.
-	"Once we start we don't want to be interrupted by the task, since it may change"
-	priority := Processor activeProcess priority.
-	[ Processor activeProcess priority: priority + 1.
-	(currentTaskExecution isNotNil and: [ currentTaskExecution task taskContextId = taskContextId ]) ifTrue: 
-		[ currentTaskExecution terminateWithReason: 'received TerminateCurrentTask from RemoteRunner'.
-		result := true ] ]
-			ensure: [ Processor activeProcess priority: priority ].
-	^ result.
+	"Terminate the current task, confirming the context id"
+
+	| currentTaskExecution |
+	currentTaskExecution := taskWorker currentTaskExecution.
+	currentTaskExecution ifNil: [ ^ false ].
+	currentTaskExecution task id = aTaskId ifFalse: [ ^ false ].
+	currentTaskExecution terminateWithReason:
+		'received TerminateTaskId: from RemoteRunner'.
+	^ true
+]
+
+{ #category : #private }
+GtRrWorker >> connect [
+
+	"Register the receiver with the remote runner.
+	Register needs to keep request alive to keep observer alive"
+
+	| commandFactory observer |
+	commandFactory := application newCommandFactory.
+	observer := commandFactory observerFromCallback: [ :message | 
+		            self command: message ].
+	^ commandFactory
+		  bindingAt: #attributes put: attributes;
+		  send:
+			  ('GtAssignedRemoteRunner connectWithAttributes: attributes observer: {1}. true' 
+				   format: { observer pharoLinkFormattedCode })
 ]
 
 { #category : #private }
@@ -202,7 +196,13 @@ GtRrWorker >> initialize [
 
 	super initialize.
 	uid := UUID new asString.
-	taskRunner := TKTNewProcessTaskRunner new.
+	connected := Semaphore new.
+	"put this at lower priority, but to what? taskWorker runs tasks, worker runs service steps"
+	taskWorker := TKTWorker new
+		              name: 'GtRrWorker task worker';
+		              processPriority: Processor activeProcess priority;
+		              yourself.
+	worker processPriority: Processor activeProcess priority.
 	"Details is a dictionary of information can be json encoded.
 	Apart from the platform, this is mostly useful for debugging."
 	attributes := Dictionary new
@@ -213,109 +213,78 @@ GtRrWorker >> initialize [
 		              yourself
 ]
 
-{ #category : #private }
-GtRrWorker >> kill [
-
-	super kill.
-	application stop.
-	taskRunner stop
-]
-
 { #category : #accessing }
 GtRrWorker >> name [
 
 	^ 'GtRrWorker poll service'
 ]
 
-{ #category : #private }
-GtRrWorker >> nextTask [
-
-	| promise |
-	promise := application newCommandFactory
-		           bindingAt: #attributes put: attributes;
-		           send:
-			           'GtAssignedRemoteRunner nextTaskSerializedFor: attributes'.
-	^ LeJsonV4 uniqueInstance deserialize:
-		  promise waitForValue readStream
-]
-
-{ #category : #private }
-GtRrWorker >> registerWithRunner [
-
-	"Register the receiver with the remote runner"
-
-	application newCommandFactory
-		bindingAt: #attributes put: attributes;
-		sendAndWait:
-			'GtAssignedRemoteRunner registerWorkerWithAttributes: attributes'
-]
-
-{ #category : #observer }
-GtRrWorker >> removeObserver [
-
-	^ application newCommandFactory send: 'GtAssignedRemoteRunner removeObserver'
-]
-
 { #category : #starting }
-GtRrWorker >> start [
+GtRrWorker >> setUp [
 
+	super setUp.
 	application start.
-	self registerWithRunner.
-	self addObserver.
-	super start
+	taskWorker start.
+	self connect.
+	connected wait
 ]
 
 { #category : #stepping }
 GtRrWorker >> stepService [
 
 	| task |
-	task := self nextTask.
-	currentTaskExecution := task asTask futureTaskExecutionFor:
-		                        taskRunner.
-	currentTaskExecution timeout: task taskTimeout.
-	taskRunner scheduleTaskExecution: currentTaskExecution.
-	currentTaskExecution future
-		onSuccessDo: [ :result | self taskDone: task with: result ];
-		onFailureDo: [ :error | self taskFailed: task with: error ];
+	"#taskNext and #waitForCompletion: wait"
+	task := self taskNext.
+	(taskWorker future: task timeout: task timeout)
+		onSuccessDo: [ :result | self task: task success: result ];
+		onFailureDo: [ :error | self task: task failure: error ];
 		waitForCompletion: 1 day
 ]
 
-{ #category : #stopping }
-GtRrWorker >> stop [
-
-	super stop.
-	application stop.
-
-]
-
 { #category : #accessing }
-GtRrWorker >> taskDone: aTask with: anObject [
-
-	StringSignal emit: ('done {1} with {2}' format: { 
-				 aTask.
-				 anObject }).
-	^ application newCommandFactory
-		  bindingAt: #taskContextId put: aTask taskContextId;
-		  bindingAt: #result
-		  put: (LeJsonV4 uniqueInstance serialize: anObject);
-		  sendAndWait:
-			  'GtAssignedRemoteRunner taskDone: taskContextId with: (LeJsonV4 uniqueInstance deserialize: result readStream). true'
-]
-
-{ #category : #accessing }
-GtRrWorker >> taskFailed: aTask with: anError [
+GtRrWorker >> task: aTask failure: anError [
 
 	StringSignal emit: ('failed {1} with {2}' format: { 
 				 aTask.
 				 anError }).
 	^ application newCommandFactory
-		  bindingAt: #taskContextId put: aTask taskContextId;
-		  bindingAt: #errorDetails put: (LeJsonV4 uniqueInstance serialize: 
-				(GtRrErrorDetails new
-					errorMessage: anError messageText;
-					trace: anError stackString));
+		  bindingAt: #id put: aTask id;
+		  bindingAt: #error
+		  put: (LeJsonV4 uniqueInstance serialize: anError gtRrAsError);
 		  sendAndWait:
-			  'GtAssignedRemoteRunner taskFailed: taskContextId with: (LeJsonV4 uniqueInstance deserialize: errorDetails readStream). true'
+			  'GtAssignedRemoteRunner task: id failure: (LeJsonV4 uniqueInstance deserialize: error readStream). true'
+]
+
+{ #category : #accessing }
+GtRrWorker >> task: aTask success: anObject [
+
+	StringSignal emit: ('done {1} with {2}' format: { 
+				 aTask.
+				 anObject }).
+	^ application newCommandFactory
+		  bindingAt: #id put: aTask id;
+		  bindingAt: #result
+		  put: (LeJsonV4 uniqueInstance serialize: anObject);
+		  sendAndWait:
+			  'GtAssignedRemoteRunner task: id success: (LeJsonV4 uniqueInstance deserialize: result readStream). true'
+]
+
+{ #category : #private }
+GtRrWorker >> taskNext [
+
+	| promise |
+	promise := application newCommandFactory send:
+		           'LeJsonV4 uniqueInstance serialize: GtAssignedRemoteRunner taskNext'.
+	^ LeJsonV4 uniqueInstance deserialize:
+		  promise waitForValue readStream
+]
+
+{ #category : #stopping }
+GtRrWorker >> tearDown [
+
+	taskWorker stop.
+	application stop.
+	super tearDown
 ]
 
 { #category : #accessing }

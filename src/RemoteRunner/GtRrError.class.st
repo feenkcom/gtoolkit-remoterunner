@@ -1,33 +1,21 @@
 Class {
-	#name : #GtRrErrorDetails,
+	#name : #GtRrError,
 	#superclass : #Object,
 	#instVars : [
-		'errorMessage',
-		'trace'
+		'trace',
+		'message'
 	],
 	#category : #'RemoteRunner-Runner'
 }
 
 { #category : #accessing }
-GtRrErrorDetails class >> leJsonV4Name [
+GtRrError class >> leJsonV4Name [
 
 	^ #taskErrorDetails
 ]
 
-{ #category : #accessing }
-GtRrErrorDetails >> errorMessage [
-
-	^ errorMessage
-]
-
-{ #category : #accessing }
-GtRrErrorDetails >> errorMessage: anObject [
-
-	errorMessage := anObject
-]
-
 { #category : #ui }
-GtRrErrorDetails >> gtTraceFor: aView [
+GtRrError >> gtTraceFor: aView [
 	<gtView>
 
 	trace ifNil: [ ^ aView empty ].
@@ -37,16 +25,28 @@ GtRrErrorDetails >> gtTraceFor: aView [
 		text: [ trace ]
 ]
 
-{ #category : #printing }
-GtRrErrorDetails >> printOn: aStream [
+{ #category : #accessing }
+GtRrError >> message [
 
-	(errorMessage isNil or: [ errorMessage isEmpty ]) ifTrue:
+	^ message
+]
+
+{ #category : #accessing }
+GtRrError >> message: anObject [
+
+	message := anObject
+]
+
+{ #category : #printing }
+GtRrError >> printOn: aStream [
+
+	(message isNil or: [ message isEmpty ]) ifTrue:
 		[ ^ super printOn: aStream ].
-	aStream << errorMessage
+	aStream << message
 ]
 
 { #category : #initialization }
-GtRrErrorDetails >> setTrace [
+GtRrError >> setTrace [
 	"Set the receiver's trace to the current stack trace"
 
 	trace := (String streamContents: [ :stream |
@@ -54,13 +54,13 @@ GtRrErrorDetails >> setTrace [
 ]
 
 { #category : #accessing }
-GtRrErrorDetails >> trace [
+GtRrError >> trace [
 
 	^ trace
 ]
 
 { #category : #accessing }
-GtRrErrorDetails >> trace: aString [
+GtRrError >> trace: aString [
 
 	trace := aString
 ]

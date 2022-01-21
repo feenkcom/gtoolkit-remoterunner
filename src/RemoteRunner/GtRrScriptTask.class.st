@@ -4,8 +4,16 @@ Class {
 	#instVars : [
 		'script'
 	],
-	#category : #'RemoteRunner-Tasks'
+	#category : #'RemoteRunner-Tests'
 }
+
+{ #category : #jsonV3 }
+GtRrScriptTask class >> leJsonV4AttributeMapping [
+
+	^ super leJsonV4AttributeMapping
+		  add: #script -> #script;
+		  yourself
+]
 
 { #category : #accessing }
 GtRrScriptTask class >> leJsonV4Name [
@@ -16,7 +24,9 @@ GtRrScriptTask class >> leJsonV4Name [
 { #category : #'instance creation' }
 GtRrScriptTask class >> script: aString [
 
-	^ self new script: aString
+	^ self new
+		  script: aString;
+		  yourself
 ]
 
 { #category : #printing }
@@ -29,15 +39,6 @@ GtRrScriptTask >> printOn: aStream [
 		nextPut: $)
 ]
 
-{ #category : #running }
-GtRrScriptTask >> run [
-
-	^ self class compiler
-		source: script;
-		receiver: nil;
-		evaluate
-]
-
 { #category : #accessing }
 GtRrScriptTask >> script [
 
@@ -48,4 +49,13 @@ GtRrScriptTask >> script [
 GtRrScriptTask >> script: anObject [
 
 	script := anObject
+]
+
+{ #category : #running }
+GtRrScriptTask >> value [
+
+	^ self class compiler
+		source: script;
+		receiver: nil;
+		evaluate
 ]

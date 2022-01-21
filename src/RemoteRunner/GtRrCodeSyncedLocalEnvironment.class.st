@@ -1,27 +1,27 @@
 Class {
-	#name : #GtRrCodeSyncedLocalManagerStartupAndShutdown,
-	#superclass : #GtRrLocalManagerStartupAndShutdown,
+	#name : #GtRrCodeSyncedLocalEnvironment,
+	#superclass : #GtRrLocalEnvironment,
 	#instVars : [
 		'codeSync'
 	],
-	#category : #'RemoteRunner-Runner'
+	#category : #'RemoteRunner-Runner-CodeSync'
 }
 
 { #category : #accessing }
-GtRrCodeSyncedLocalManagerStartupAndShutdown >> codeSync [
+GtRrCodeSyncedLocalEnvironment >> codeSync [
 
 	^ codeSync
 ]
 
 { #category : #initialization }
-GtRrCodeSyncedLocalManagerStartupAndShutdown >> initialize [
+GtRrCodeSyncedLocalEnvironment >> initialize [
 
 	super initialize.
 	codeSync := GtRrCodeSync new
 ]
 
 { #category : #'instance creation' }
-GtRrCodeSyncedLocalManagerStartupAndShutdown >> newWorkerLocalProcessArgumentsFor: someSettings [
+GtRrCodeSyncedLocalEnvironment >> newWorkerLocalProcessArgumentsFor: someSettings [
 
 	^ (super newWorkerLocalProcessArgumentsFor: someSettings)
 		  add: '--attribute' before: '--detachChangesFromFileSystem';
@@ -31,22 +31,22 @@ GtRrCodeSyncedLocalManagerStartupAndShutdown >> newWorkerLocalProcessArgumentsFo
 ]
 
 { #category : #accessing }
-GtRrCodeSyncedLocalManagerStartupAndShutdown >> remoteRunner: aRemoteRunner [
+GtRrCodeSyncedLocalEnvironment >> remoteRunner: aRemoteRunner [
 
 	super remoteRunner: aRemoteRunner.
 	codeSync remoteRunner: aRemoteRunner
 ]
 
 { #category : #'startup - shutdown' }
-GtRrCodeSyncedLocalManagerStartupAndShutdown >> shutdown [
+GtRrCodeSyncedLocalEnvironment >> start [
 
-	codeSync stop.
-	super shutdown
+	super start.
+	codeSync start
 ]
 
 { #category : #'startup - shutdown' }
-GtRrCodeSyncedLocalManagerStartupAndShutdown >> startup [
+GtRrCodeSyncedLocalEnvironment >> stop [
 
-	super startup.
-	codeSync start
+	codeSync stop.
+	super stop
 ]

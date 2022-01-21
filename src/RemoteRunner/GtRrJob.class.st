@@ -3,20 +3,12 @@ A GtRrJob is the object submitted to a remote runner for execution.  It answers 
 "
 Class {
 	#name : #GtRrJob,
-	#superclass : #Object,
+	#superclass : #GtRrTask,
 	#instVars : [
-		'platforms',
-		'results',
-		'announcer',
-		'id',
-		'state',
-		'startTime',
-		'endTime',
-		'jobTimeout',
-		'taskTimeout',
-		'errorDetails'
+		'tasks',
+		'announcer'
 	],
-	#category : #'RemoteRunner-Jobs'
+	#category : #'RemoteRunner-Runner'
 }
 
 { #category : #accessing }
@@ -26,7 +18,7 @@ GtRrJob >> addResult: aGtRrTask [
 	results add: aGtRrTask.
 	self announce: (aGtRrTask hasErrors
 		ifTrue: [ GtRrTaskFailedAnnouncement task: aGtRrTask ]
-		ifFalse: [ GtRrTaskCompletedAnnouncement task: aGtRrTask ])
+		ifFalse: [ GtRrTaskFinishedAnnouncement task: aGtRrTask ])
 ]
 
 { #category : #announcer }
@@ -42,11 +34,21 @@ GtRrJob >> announcer [
 ]
 
 { #category : #'private - running' }
-GtRrJob >> cancelJob [
+GtRrJob >> cancel [
+
 	"Mark the receiver as cancelled (before being started).
 	This not be called by the end user, but via {{gtMethod:GtRemoteRunner>>terminateJobId:}}"
 
-	self markJobCancelled.
+	state := #cancelled.
+	self announce: (GtRrJobCancelledAnnouncement job: self)
+]
+
+{ #category : #'private - running' }
+GtRrJob >> complete [
+
+	endTime := DateAndTime now.
+	state := #completed.
+	self announce: (GtRrJobCompletedAnnouncement job: self).
 
 ]
 
@@ -60,7 +62,7 @@ GtRrJob >> endTime [
 GtRrJob >> errorDetails [
 	"If set, the error details will contain the overall reason for the failure of the job.
 	Some individual tasks may still successfully complete."
-	<return: #GtRrErrorDetails or: nil>
+	<return: #GtRrError or: nil>
 
 	^ errorDetails
 ]
@@ -134,90 +136,6 @@ GtRrJob >> hasSubscriber: anObject [
 	^ self announcer hasSubscriber: anObject
 ]
 
-{ #category : #accessing }
-GtRrJob >> id [
-
-	^ id
-]
-
-{ #category : #initialization }
-GtRrJob >> initialize [
-
-	super initialize.
-	id := UUID new asString.
-	platforms := { OSPlatform current name }.
-	results := OrderedCollection new.
-	state := #notStarted.
-]
-
-{ #category : #accessing }
-GtRrJob >> jobTimeout [
-	<return: #Duration>
-
-	^ jobTimeout
-]
-
-{ #category : #accessing }
-GtRrJob >> jobTimeout: aDuration [
-
-	jobTimeout := aDuration
-]
-
-{ #category : #'private - running' }
-GtRrJob >> markJobCancelled [
-
-	state := #cancelled.
-	self announce: (GtRrJobCancelledAnnouncement job: self).
-
-]
-
-{ #category : #'private - running' }
-GtRrJob >> markJobCompleted [
-
-	endTime := DateAndTime now.
-	state := #completed.
-	self announce: (GtRrJobCompletedAnnouncement job: self).
-
-]
-
-{ #category : #'private - running' }
-GtRrJob >> markJobStarted [
-
-	startTime := DateAndTime now.
-	state := #started.
-	self announce: (GtRrJobStartedAnnouncement job: self).
-
-]
-
-{ #category : #'private - running' }
-GtRrJob >> markJobTerminating [
-
-	state := #terminating.
-
-]
-
-{ #category : #accessing }
-GtRrJob >> platforms [
-	<return: #Array>
-
-	^ platforms
-]
-
-{ #category : #accessing }
-GtRrJob >> platforms: anArray [
-
-	platforms := anArray
-]
-
-{ #category : #ui }
-GtRrJob >> platformsDisplayList [
-
-	^ String streamContents: [ :stream |
-		platforms
-			do: [ :platform | stream << platform ]
-			separatedBy: [ stream << ', ' ] ]
-]
-
 { #category : #printing }
 GtRrJob >> printOn: aStream [
 
@@ -251,6 +169,15 @@ GtRrJob >> resultsWithErrors [
 	^ results select: #hasErrors
 ]
 
+{ #category : #'private - running' }
+GtRrJob >> start [
+
+	startTime := DateAndTime now.
+	state := #started.
+	self announce: (GtRrJobStartedAnnouncement job: self).
+
+]
+
 { #category : #accessing }
 GtRrJob >> startTime [
 
@@ -267,38 +194,22 @@ GtRrJob >> state [
 
 { #category : #ui }
 GtRrJob >> summaryAttributes [
+
 	"Answer a collection of key/value attributes that can simply be listed as a summary of the receiver"
-	| attributes |
 
-	attributes := OrderedCollection new.
-	attributes 
-		add: #State -> self state;
-		add: #Tasks -> self tasks size;
-		add: #Platforms -> self platformsDisplayList;
-		add: #Results -> results size;
-		add: #Errors -> self resultsWithErrors size;
-		add: 'Start Time' -> startTime;
-		add: 'End Time' -> endTime.
-	(startTime isNotNil and: [ endTime isNotNil ]) ifTrue:
-		[ attributes add: 'Duration' -> (endTime - startTime) humanReadablePrintString ].
-	attributes
-		add: 'Job Timeout' -> jobTimeout;
-		add: 'Task Timeout' -> taskTimeout;
-		add: 'Id' -> self id.
-	^ attributes
-]
-
-{ #category : #accessing }
-GtRrJob >> taskTimeout [
-	<return: #Duration>
-
-	^ taskTimeout
-]
-
-{ #category : #accessing }
-GtRrJob >> taskTimeout: aDuration [
-
-	taskTimeout := aDuration
+	^ OrderedCollection new
+		  add: #State -> self state;
+		  add: #Tasks -> self tasks size;
+		  add: #Results -> results size;
+		  add: #Errors -> self resultsWithErrors size;
+		  add: #Start -> startTime;
+		  add: #End -> endTime;
+		  add: #Duration -> ((startTime isNotNil and: [ endTime isNotNil ])
+					   ifTrue: [ (endTime - startTime) humanReadablePrintString ]
+					   ifFalse: [ nil ]);
+		  add: #Timeout -> timeout;
+		  add: #Id -> self id;
+		  yourself
 ]
 
 { #category : #accessing }
@@ -307,6 +218,19 @@ GtRrJob >> tasks [
 	<return: #SequenceableCollection>
 
 	^ self subclassResponsibility 
+]
+
+{ #category : #'as yet unclassified' }
+GtRrJob >> tasksFor: someExecutors [
+
+	^ self tasks
+]
+
+{ #category : #'private - running' }
+GtRrJob >> terminate [
+
+	state := #terminating.
+
 ]
 
 { #category : #'announcer - subscription' }

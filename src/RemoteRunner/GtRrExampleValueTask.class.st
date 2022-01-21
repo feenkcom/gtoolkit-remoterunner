@@ -46,13 +46,6 @@ GtRrExampleValueTask >> printOn: aStream [
 	aStream nextPut: $).
 ]
 
-{ #category : #accessing }
-GtRrExampleValueTask >> run [
-
-	errorFlag ifTrue: [ self error: value ].
-	^ value
-]
-
 { #category : #initialization }
 GtRrExampleValueTask >> setError [
 	"Set the flag indicating that the receiver should raise an error when run"
@@ -63,6 +56,7 @@ GtRrExampleValueTask >> setError [
 { #category : #accessing }
 GtRrExampleValueTask >> value [
 
+	errorFlag ifTrue: [ self error: value ].
 	^ value
 ]
 

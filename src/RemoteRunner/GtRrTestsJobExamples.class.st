@@ -6,20 +6,19 @@ Class {
 
 { #category : #examples }
 GtRrTestsJobExamples >> scheduleTestsOneAtATime [
+
 	"Demonstrate scheduling tests one at a time"
+
 	<gtExample>
-	| remoteRunner job context |
-
-	remoteRunner := GtRemoteRunner new.
-
-	job := GtRrTestsJob new 
-		classNames: #(GtRrSampleTest);
-		platforms: #(linux).
-	context := GtRrJobContext new
-		remoteRunner: remoteRunner;
-		job: job.
-	self assert: job taskAllocator class equals: GtRrOneAtATimeTestsTaskAllocator.
-
-	context getTasks.
-	self assert: context tasks size equals: 4.
+	| remoteRunner job |
+	remoteRunner := GtRrScheduler new.
+	job := GtRrTestsJob new
+		       classNames: #( GtRrSampleTest );
+		       constraint: #( linux );
+		       remoteRunner: remoteRunner.
+	self
+		assert: job taskAllocator class
+		equals: GtRrOneAtATimeTestsTaskAllocator.
+	job getTasks.
+	self assert: job tasks size equals: 4
 ]

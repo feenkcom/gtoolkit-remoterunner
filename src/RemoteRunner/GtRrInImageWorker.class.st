@@ -69,7 +69,8 @@ GtRrInImageWorker >> start [
 		'The worker''s remote runner must be set before starting'.
 	PharoLinkServerCurrentConnection
 		value: connection
-		during: [ remoteRunner registerWorkerWithAttributes: attributes ].
+		during: [ 
+		remoteRunner connectWithAttributes: attributes observer: #yourself ].
 	process := [ self taskPollForever ] fork
 ]
 
@@ -82,29 +83,25 @@ GtRrInImageWorker >> stop [
 ]
 
 { #category : #running }
-GtRrInImageWorker >> taskDone: aTaskContext with: anObject [
+GtRrInImageWorker >> task: aTask failure: anError [
 
-	remoteRunner taskDone: aTaskContext taskContextId with: anObject.
+	remoteRunner task: aTask id failure: anError gtRrAsError
 ]
 
 { #category : #running }
-GtRrInImageWorker >> taskFailed: aTaskContext with: anError [
+GtRrInImageWorker >> task: aTask success: anObject [
 
-	remoteRunner 
-		taskFailed: aTaskContext taskContextId 
-		with: (GtRrErrorDetails new
-			errorMessage: anError messageText;
-			trace: anError stackString).
+	remoteRunner task: aTask id success: anObject.
 ]
 
 { #category : #running }
 GtRrInImageWorker >> taskPoll [
-	| serialisedTask |
 
-	PharoLinkServerCurrentConnection 
-		value: connection
-		during: [ serialisedTask := remoteRunner nextTaskSerializedFor: attributes ].
-	^ LeJsonV4 uniqueInstance deserialize: serialisedTask readStream.
+	| serialisedTask |
+	PharoLinkServerCurrentConnection value: connection during: [ 
+		serialisedTask := LeJsonV4 uniqueInstance serialize:
+			                  remoteRunner taskNext ].
+	^ LeJsonV4 uniqueInstance deserialize: serialisedTask readStream
 ]
 
 { #category : #running }
@@ -114,15 +111,15 @@ GtRrInImageWorker >> taskPollForever [
 ]
 
 { #category : #running }
-GtRrInImageWorker >> taskRun: aTaskContext [
-	| result error |
+GtRrInImageWorker >> taskRun: aTask [
 
-	[ result := aTaskContext value ]
-		on: Error 
-		do: [ :ex |
+	| result error |
+	[ result := aTask value ]
+		on: Error
+		do: [ :ex | 
 			ex freeze.
 			error := ex ].
 	error
-		ifNil: [ self taskDone: aTaskContext with: result ]
-		ifNotNil: [ self taskFailed: aTaskContext with: error ]
+		ifNil: [ self task: aTask success: result ]
+		ifNotNil: [ self task: aTask failure: error ]
 ]

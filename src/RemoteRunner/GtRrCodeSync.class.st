@@ -8,7 +8,7 @@ Class {
 		'remoteRunner',
 		'errors'
 	],
-	#category : #'RemoteRunner-Runner'
+	#category : #'RemoteRunner-Runner-CodeSync'
 }
 
 { #category : #accessing }

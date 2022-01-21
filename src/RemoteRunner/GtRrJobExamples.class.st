@@ -18,85 +18,56 @@ GtRrJobExamples >> confirmAllTests: allTests [
 ]
 
 { #category : #examples }
-GtRrJobExamples >> createMultiplePlatformContexts [ 
+GtRrJobExamples >> createMultiplePlatformContexts [
+
 	"Demonstrate the creation of multiple platformContexts from a job"
+
 	<gtExample>
-	| job remoteRunner jobContext platformContexts platform1 platform2 p1t1 p2t1 |
-
+	| job remoteRunner platformContexts platform1 platform2 p1t1 p2t1 |
+	remoteRunner := GtRrScheduler new.
 	job := GtRrTestsJob new
-		classNames: #(GtRrSampleTest);
-		platforms: #(plat1 plat2).
-	remoteRunner := GtRemoteRunner new.
-	jobContext := GtRrJobContext new
-		remoteRunner: remoteRunner;
-		job: job.
+		       classNames: #( GtRrSampleTest );
+		       constraint: #( plat1 plat2 );
+		       remoteRunner: remoteRunner;
+		       yourself.
 
-	jobContext getTasks.
-	jobContext createPlatformContexts.
-	platformContexts := jobContext platformContexts.
+	job getTasks.
+	job createPlatformContexts.
+	platformContexts := job platformContexts.
 	self assert: platformContexts size equals: 2.
-	platform1 := jobContext atPlatform: #plat1.
+	platform1 := job atPlatform: #plat1.
 	self assert: platform1 pendingTasks size equals: 4.
-	platform2 := jobContext atPlatform: #plat2.
+	platform2 := job atPlatform: #plat2.
 	self assert: platform2 pendingTasks size equals: 4.
 	p1t1 := platform1 nextTaskOrNil.
 	p2t1 := platform2 nextTaskOrNil.
 	self assert: p1t1 ~~ p2t1.
-	self assert: p1t1 taskId equals: p2t1 taskId.
+	self assert: p1t1 id equals: p2t1 id.
 	self assert: p1t1 task tests equals: p2t1 task tests.
 
-	^ jobContext
+	^ job
 ]
 
 { #category : #examples }
-GtRrJobExamples >> createSinglePlatformContexts [ 
+GtRrJobExamples >> createSinglePlatformContexts [
+
 	"Demonstrate the creation of platformContexts from a job"
-	<gtExample>
-	| job remoteRunner jobContext platformContexts currentPlatform |
 
+	<gtExample>
+	| job remoteRunner platformContexts currentPlatform |
+	remoteRunner := GtRrScheduler new.
 	job := GtRrTestsJob new
-		classNames: #(GtRrSampleTest).
-	remoteRunner := GtRemoteRunner new.
-	jobContext := GtRrJobContext new
-		remoteRunner: remoteRunner;
-		job: job.
+		       classNames: #( GtRrSampleTest );
+		       remoteRunner: remoteRunner;
+		       yourself.
 
-	jobContext getTasks.
-	jobContext createPlatformContexts.
-	platformContexts := jobContext platformContexts.
+	job getTasks.
+	job createPlatformContexts.
+	platformContexts := job platformContexts.
 	self assert: platformContexts size equals: 1.
-	currentPlatform := jobContext atPlatform: OSPlatform current name.
+	currentPlatform := job atPlatform: OSPlatform current name.
 	self assert: currentPlatform pendingTasks size equals: 4.
-	^ jobContext
-]
-
-{ #category : #examples }
-GtRrJobExamples >> jobTimeout [
-	"Demonstrate setting job timeouts"
-	<gtExample>
-	| runner job task jobContext taskContext |
-
-	runner := GtRemoteRunner new.
-	task := GtRrExampleValueTask new.
-	job := GtRrTasksJob new tasks: { task }.
-	jobContext := GtRrJobContext new 
-		job: job;
-		remoteRunner: runner.
-	taskContext := GtRrTaskContext new
-		platformContext: jobContext;
-		task: task.
-
-	self assert: taskContext jobTimeout equals: runner defaultJobTimeout.
-	self assert: jobContext jobTimeout equals: runner defaultJobTimeout.
-
-	runner jobTimeout: runner defaultJobTimeout + 1 minute.
-	self assert: taskContext jobTimeout equals: runner jobTimeout.
-	self assert: jobContext jobTimeout equals: runner jobTimeout.
-
-	job jobTimeout: runner jobTimeout + 1 minute.
-	self assert: taskContext jobTimeout equals: job jobTimeout.
-	self assert: jobContext jobTimeout equals: job jobTimeout.
-
+	^ job
 ]
 
 { #category : #examples }
@@ -141,4 +112,30 @@ GtRrJobExamples >> testJobTestNames [
 
 	self confirmAllTests: job allItems.
 
+]
+
+{ #category : #examples }
+GtRrJobExamples >> timeout [
+
+	"Demonstrate setting job timeouts"
+
+	<gtExample>
+	| runner job task |
+	runner := GtRrScheduler new.
+	task := GtRrExampleValueTask new.
+	job := GtRrTasksJob new
+		       tasks: { task };
+		       remoteRunner: runner;
+		       yourself.
+
+	self assert: task timeout equals: 3 minutes.
+	self assert: job timeout equals: 1 hour.
+
+	runner timeout: runner timeout + 1 minute.
+	self assert: task timeout equals: runner timeout.
+	self assert: job timeout equals: runner timeout.
+
+	job timeout: runner timeout + 1 minute.
+	self assert: task timeout equals: job timeout.
+	self assert: job timeout equals: job timeout
 ]

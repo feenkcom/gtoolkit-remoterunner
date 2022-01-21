@@ -30,9 +30,9 @@ GtRrTestTask >> printOn: aStream [
 		nextPut: $(;
 		print: self testCount;
 		<< ' tests'.
-	result ifNotNil:
+	nil "result" ifNotNil:
 		[ aStream << ', '.
-		grouped := result groupedBy: #shortName.
+		grouped := nil "result" groupedBy: #shortName.
 		grouped associations do: [ :assoc |
 			aStream
 				print: assoc value size;
@@ -41,24 +41,6 @@ GtRrTestTask >> printOn: aStream [
 		separatedBy:
 			[ aStream << ', ' ] ].
 	aStream nextPut: $)
-]
-
-{ #category : #accessing }
-GtRrTestTask >> run [
-	| suite testResult events |
-
-	suite := TestSuite named: taskId.
-	tests keysAndValuesDo: [ :className :selectors | 
-		| class |
-		class := className asClass.
-		suite addTests: (class buildSuiteFromMethods: (selectors collect: #asSymbol)) tests ].
-	events := OrderedCollection new.
-	testResult := PharoLinkTestResult new.
-	testResult announcer
-		when: PharoLinkTestCaseEndAnnouncement
-		do: [ :e | events add: e ].
-	suite run: testResult.
-	^ events asArray
 ]
 
 { #category : #ui }
@@ -89,4 +71,22 @@ GtRrTestTask >> tests [
 GtRrTestTask >> tests: aDictionary [
 
 	tests := aDictionary
+]
+
+{ #category : #accessing }
+GtRrTestTask >> value [
+	| suite testResult events |
+
+	suite := TestSuite named: id.
+	tests keysAndValuesDo: [ :className :selectors | 
+		| class |
+		class := className asClass.
+		suite addTests: (class buildSuiteFromMethods: (selectors collect: #asSymbol)) tests ].
+	events := OrderedCollection new.
+	testResult := PharoLinkTestResult new.
+	testResult announcer
+		when: PharoLinkTestCaseEndAnnouncement
+		do: [ :e | events add: e ].
+	suite run: testResult.
+	^ events asArray
 ]

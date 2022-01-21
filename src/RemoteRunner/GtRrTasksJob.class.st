@@ -4,10 +4,7 @@ GtRrTasksJob is a simple job that is given a list of tasks to execute.
 Class {
 	#name : #GtRrTasksJob,
 	#superclass : #GtRrJob,
-	#instVars : [
-		'tasks'
-	],
-	#category : #'RemoteRunner-Jobs'
+	#category : #'RemoteRunner-Tasks'
 }
 
 { #category : #'instance creation' }

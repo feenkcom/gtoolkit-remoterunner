@@ -6,7 +6,7 @@ Class {
 		'classNames',
 		'testNames'
 	],
-	#category : #'RemoteRunner-Jobs'
+	#category : #'RemoteRunner-Tasks'
 }
 
 { #category : #accessing }

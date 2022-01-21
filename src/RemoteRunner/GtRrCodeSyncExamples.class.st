@@ -9,16 +9,16 @@ GtRrCodeSyncExamples >> addRemoveMethod [
 
 	<gtExample>
 	| runner codeSync |
-	runner := GtRemoteRunner new
+	runner := GtRrScheduler new
 		          port: 8042;
 		          startLogging;
 		          yourself.
-	codeSync := runner managerStartupAndShutdown codeSync.
+	codeSync := runner environment codeSync.
 	[ 
 	runner start.
 	self
 		wait: 10 seconds
-		for: GtRrWorkerRegisteredAnnouncement
+		for: GtRrWorkerConnectedAnnouncement
 		in: runner.
 	"add/remove method changes should be propagated to workers"
 	self assert: (self hasMethodIn: runner) not.

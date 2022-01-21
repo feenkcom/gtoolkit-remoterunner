@@ -5,10 +5,9 @@ Class {
 	#name : #GtRrAllocatedItemsJob,
 	#superclass : #GtRrJob,
 	#instVars : [
-		'taskAllocator',
-		'tasks'
+		'taskAllocator'
 	],
-	#category : #'RemoteRunner-Jobs'
+	#category : #'RemoteRunner-Tasks'
 }
 
 { #category : #accessing }

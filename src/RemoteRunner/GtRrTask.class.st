@@ -1,252 +1,132 @@
 Class {
 	#name : #GtRrTask,
-	#superclass : #Object,
+	#superclass : #TKTTask,
 	#instVars : [
-		'startTime',
-		'endTime',
-		'workerIpAddress',
-		'result',
-		'taskId',
-		'errorDetails',
-		'state',
-		'taskTimeout'
+		'id',
+		'constraint',
+		'timeout',
+		'execution'
 	],
-	#category : #'RemoteRunner-Tasks'
+	#category : #'RemoteRunner-Runner'
 }
+
+{ #category : #jsonV3 }
+GtRrTask class >> leJsonV4AttributeMapping [
+
+	^ OrderedCollection new
+		  add: #id -> #id;
+		  add: #constraint -> #constraint;
+		  add: #timeout -> #timeout;
+		  yourself
+]
 
 { #category : #accessing }
 GtRrTask class >> leJsonV4Name [
 
-	^ #remoteRunnerWorkerTask
+	^ #gtRrTask
 ]
 
 { #category : #accessing }
-GtRrTask >> endTime [
+GtRrTask >> constraint [
 
-	^ endTime
+	^ constraint
 ]
 
 { #category : #accessing }
-GtRrTask >> endTime: anObject [
+GtRrTask >> constraint: anObject [
 
-	endTime := anObject
+	constraint := anObject
 ]
 
 { #category : #accessing }
-GtRrTask >> errorDetails [
+GtRrTask >> execution [
 
-	^ errorDetails
+	^ execution
 ]
 
 { #category : #accessing }
-GtRrTask >> errorDetails: aGtErrorDetails [
-	"Set the error details of the receiver.
-	Asynchronous events may cause multiple attempts at setting the details, use the first one"
+GtRrTask >> execution: anObject [
 
-	errorDetails ifNotNil: [ ^ self ].
-	errorDetails := aGtErrorDetails
+	execution := anObject
 ]
 
-{ #category : #ui }
-GtRrTask >> gtResultFor: aView [
+{ #category : #schedulling }
+GtRrTask >> futureExecutionFor: aRunner [
 
-	<gtView>
-	result ifNil: [ ^ aView empty ].
+	"Makes it terminateable"
 
-	^ aView forward
-		  title: 'Result';
-		  priority: 20;
-		  object: [ result ifNil: [ errorDetails ] ];
-		  actionUpdateButton
+	^ execution := BlTktFutureExecution new
+		               runner: aRunner;
+		               task: self;
+		               yourself
 ]
 
 { #category : #ui }
 GtRrTask >> gtSummaryFor: aView [
 
 	<gtView>
+	self flag: 'FIXME remove'.
 	^ aView columnedList
 		  title: 'Summary';
 		  priority: 10;
 		  items: [ self summaryAttributes ];
 		  column: #Attribute text: [ :item | item key ];
 		  column: #Value text: [ :item | item value ];
-		send: [ :item | item value ];
+		  send: [ :item | item value ];
 		  actionUpdateButton
 ]
 
-{ #category : #testing }
-GtRrTask >> hasCompleted [
+{ #category : #accessing }
+GtRrTask >> id [
 
-	^ state = #completed or: [ state = #terminated ]
+	^ id
 ]
 
-{ #category : #testing }
-GtRrTask >> hasErrors [
-	"Answer a boolean indicating if the receiver failed to execute successfully"
+{ #category : #accessing }
+GtRrTask >> id: aString [
 
-	^ errorDetails isNotNil
+	"needed for deserialization"
+
+	id := aString
 ]
 
 { #category : #accessing }
 GtRrTask >> initialize [
 
 	super initialize.
-	taskId := UUID new asString.
-	state := #notStarted.
-]
-
-{ #category : #running }
-GtRrTask >> markTaskCancelled [
-	"Mark the receiver cancelled.
-	Cancellation is specifically terminating the task before it was started."
-
-	endTime := DateAndTime now.
-	errorDetails := (GtRrErrorDetails new
-		errorMessage: 'Task cancelled before execution';
-		setTrace).
-	state := #cancelled.
-]
-
-{ #category : #running }
-GtRrTask >> markTaskCompleted [
-
-	endTime := DateAndTime now.
-	state := #completed.
-]
-
-{ #category : #running }
-GtRrTask >> markTaskStarted [
-
-	startTime := DateAndTime now.
-	state := #started.
-]
-
-{ #category : #running }
-GtRrTask >> markTaskTerminated [
-
-	endTime := DateAndTime now.
-	state := #terminated.
-]
-
-{ #category : #running }
-GtRrTask >> markTaskTerminating [
-
-	state := #terminating.
+	id := UUID new asString.
+	constraint := GtRrTrueConstraint instance
 ]
 
 { #category : #printing }
 GtRrTask >> printOn: aStream [
 
 	super printOn: aStream.
-	aStream
-		nextPut: $(;
-		<< self state.
-	self hasErrors ifTrue:
-		[ aStream << ' with errors' ].
-	aStream nextPut: $).
+	aStream nextPutAll: ' '.
+	timeout printOn: aStream.
+	aStream nextPutAll: ' '.
+	constraint printOn: aStream
+]
+
+{ #category : #schedulling }
+GtRrTask >> taskExecutionFor: aRunner [
+
+	"Makes it terminateable"
+
+	^ execution := BlTktCommandTaskExecution new
+		               runner: aRunner;
+		               task: self;
+		               yourself
 ]
 
 { #category : #accessing }
-GtRrTask >> result [
+GtRrTask >> timeout [
 
-	^ result
+	^ timeout
 ]
 
 { #category : #accessing }
-GtRrTask >> result: anObject [
+GtRrTask >> timeout: aDuration [
 
-	result := anObject
-]
-
-{ #category : #accessing }
-GtRrTask >> run [
-
-	self subclassResponsibility
-]
-
-{ #category : #accessing }
-GtRrTask >> startTime [
-
-	^ startTime
-]
-
-{ #category : #accessing }
-GtRrTask >> startTime: anObject [
-
-	startTime := anObject
-]
-
-{ #category : #accessing }
-GtRrTask >> state [
-	"Answer a Symbol indicating the inferred state of the receiver.
-	One of: #notStarted, #started, #cancelled, #terminating, #terminated, #completed.
-	The errorDetails are used to determine if the task completed successfully, why and where it was terminated, etc."
-
-	^ state
-]
-
-{ #category : #private }
-GtRrTask >> state: aSymbol [
-	"Set the state.
-	Only used by object serialisation"
-	
-	state := aSymbol
-]
-
-{ #category : #ui }
-GtRrTask >> summaryAttributes [
-	"Answer a collection of key/value attributes that can simply be listed as a summary of the receiver"
-	| attributes |
-
-	attributes := OrderedCollection new.
-	attributes add: #State -> self state.
-	self hasErrors ifTrue:
-		[ attributes add: #Error -> errorDetails ].
-	startTime ifNotNil:
-		[ attributes add: #Started -> startTime ].
-	endTime ifNotNil:
-		[ attributes add: #Ended -> endTime ].
-	taskTimeout ifNotNil:
-		[ attributes add: #Timeout -> taskTimeout ].
-	attributes
-		add: #ID -> taskId;
-		add: 'Worker IP Address' -> workerIpAddress.
-	^ attributes
-]
-
-{ #category : #accessing }
-GtRrTask >> taskId [
-
-	^ taskId
-]
-
-{ #category : #accessing }
-GtRrTask >> taskId: anObject [
-
-	taskId := anObject
-]
-
-{ #category : #accessing }
-GtRrTask >> taskTimeout [
-	<return: #Duration>
-
-	^ taskTimeout
-]
-
-{ #category : #accessing }
-GtRrTask >> taskTimeout: aDuration [
-
-	taskTimeout := aDuration
-]
-
-{ #category : #accessing }
-GtRrTask >> workerIpAddress [
-
-	^ workerIpAddress
-]
-
-{ #category : #accessing }
-GtRrTask >> workerIpAddress: anObject [
-
-	workerIpAddress := anObject
+	timeout := aDuration
 ]

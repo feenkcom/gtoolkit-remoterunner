@@ -7,29 +7,26 @@ Class {
 }
 
 { #category : #examples }
-GtRrTaskExamples >> taskTimeout [
+GtRrTaskExamples >> timeout [
+
 	"Demonstrate the use of task timeouts"
+
 	<gtExample>
-	| runner job task jobContext taskContext |
-
-	runner := GtRemoteRunner new.
+	| runner job task |
+	runner := GtRrScheduler new.
 	task := GtRrExampleValueTask new.
-	job := GtRrTasksJob new tasks: { task }.
-	jobContext := GtRrJobContext new 
-		job: job;
-		remoteRunner: runner.
-	taskContext := GtRrTaskContext new
-		platformContext: jobContext;
-		task: task.
+	job := GtRrTasksJob new
+		       tasks: { task };
+		       remoteRunner: runner;
+		       yourself.
+	self assert: task timeout equals: 1 minute.
 
-	self assert: taskContext taskTimeout equals: runner defaultTaskTimeout.
+	runner timeout: runner timeout + 1 minute.
+	self assert: task timeout equals: runner timeout.
 
-	runner taskTimeout: runner defaultTaskTimeout + 1 minute.
-	self assert: taskContext taskTimeout equals: runner taskTimeout.
+	job timeout: runner timeout + 1 minute.
+	self assert: task timeout equals: job timeout.
 
-	job taskTimeout: runner taskTimeout + 1 minute.
-	self assert: taskContext taskTimeout equals: job taskTimeout.
-
-	task taskTimeout: job taskTimeout + 1 minute.
-	self assert: taskContext taskTimeout equals: task taskTimeout.
+	task timeout: job timeout + 1 minute.
+	self assert: task timeout equals: task timeout
 ]

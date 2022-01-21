@@ -1,5 +1,5 @@
 Class {
-	#name : #GtRrWorkerRegisteredAnnouncement,
+	#name : #GtRrWorkerConnectedAnnouncement,
 	#superclass : #GtRrWorkerAnnouncement,
 	#category : #'RemoteRunner-Announcements'
 }

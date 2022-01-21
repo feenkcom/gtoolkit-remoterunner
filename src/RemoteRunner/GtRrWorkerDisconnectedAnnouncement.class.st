@@ -1,5 +1,5 @@
 Class {
-	#name : #GtRrWorkerUnregisteredAnnouncement,
+	#name : #GtRrWorkerDisconnectedAnnouncement,
 	#superclass : #GtRrWorkerAnnouncement,
 	#instVars : [
 		'reason'
@@ -8,13 +8,13 @@ Class {
 }
 
 { #category : #accessing }
-GtRrWorkerUnregisteredAnnouncement >> reason [
+GtRrWorkerDisconnectedAnnouncement >> reason [
 
 	^ reason
 ]
 
 { #category : #accessing }
-GtRrWorkerUnregisteredAnnouncement >> reason: anObject [
+GtRrWorkerDisconnectedAnnouncement >> reason: anObject [
 
 	reason := anObject
 ]
