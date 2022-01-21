@@ -563,6 +563,14 @@ GtRemoteRunner >> registeredWorkerCount [
 	^ sharedAccess critical: [ registeredWorkers size ]
 ]
 
+{ #category : #'private - debugging' }
+GtRemoteRunner >> registeredWorkers [
+	"Answer the registeredWorkers.
+	WARNING: This is outside sharedAccess and is for debugging purposes only."
+
+	^ registeredWorkers
+]
+
 { #category : #'private - accessing' }
 GtRemoteRunner >> removeCurrentlyExecutingJob: aJobContextId [
 	"Remove the specified job from the collection of currently executing jobs.
