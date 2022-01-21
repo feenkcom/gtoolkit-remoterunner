@@ -58,6 +58,18 @@ GtRrWorkerConnection >> commandEvaluate: aString [
 ]
 
 { #category : #commands }
+GtRrWorkerConnection >> commandPharoLinkServer: anInteger [
+	"Start a PharoLinkServer on the worker with the supplied port number"
+	| response |
+
+	response := self sendControlMessage: (Message
+			   selector: #commandPharoLinkServer:
+			   argument: anInteger).
+	(response at: #succeeded) ifFalse:
+		[ self error: (response at: #messageText) ].
+]
+
+{ #category : #commands }
 GtRrWorkerConnection >> commandPing [
 
 	"If the worker service responds, it is is there. If something fails, you get an error."
@@ -155,26 +167,23 @@ GtRrWorkerConnection >> observerWait [
 ]
 
 { #category : #debugging }
-GtRrWorkerConnection >> pharoLinkServerOnPort: aNumber [
+GtRrWorkerConnection >> pharoLinkServerOnPort: anInteger [
 	"Start a PharoLink server on the worker and connect"
-	| serverResponse settings application |
+	| settings application |
 
-	serverResponse := self commandEvaluate: (String streamContents: [ :stream |
-		stream
-			<< 'PharoLinkServer new listenPort: ';
-			<< aNumber asString;
-			<< '; start' ]).
-	self assert: serverResponse equals: 'a PharoLinkServer'.
+	"Start the server on the worker"
+	self commandPharoLinkServer: anInteger.
 
 	"Give the server a chance to fire up"
 	1 second wait.
 
+	"Start the client"
 	settings := LanguageLinkSettings pharoDefaultSettings.
 	settings
 		serverProcessClass: LanguageLinkManualProcess;
 		serverSocketAddress: (LanguageLinkSocketAddress
 				ipOrName: (GtRemoteRunner printIpAddress: remoteAddress)
-				port: aNumber).
+				port: anInteger).
 	application := PharoLinkApplication newWith: settings.
 	application start.
 	^ application.

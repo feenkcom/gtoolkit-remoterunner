@@ -78,11 +78,12 @@ GtRrWorker class >> serverSocketAddress: aString [
 
 { #category : #observer }
 GtRrWorker >> addObserver [
-
 	| commandFactory observer |
+
 	commandFactory := application newCommandFactory.
 	observer := commandFactory observerFromCallback: [ :message | 
 		            self command: message ].
+	observer setByValue.
 	"register needs to keep request alive to keep observer alive"
 	^ commandFactory send: ('GtAssignedRemoteRunner addObserver: {1}' format:
 			   { observer pharoLinkFormattedCode })
@@ -140,9 +141,29 @@ GtRrWorker >> commandEvaluate: aString [
 		evaluate ]
 			on: Error 
 			do: [ :ex | ex return: ex messageText ].
-	^ (PharoLinkRegistry isPrimitive: result)
+	^ result isPharoLinkPrimitive
 		ifTrue: [ result ]
 		ifFalse: [ result asString ]
+]
+
+{ #category : #commands }
+GtRrWorker >> commandPharoLinkServer: anInteger [
+	"Start a PharoLinkServer on the supplied port number.
+	Answer true if successful, or the error."
+	| result |
+
+	result := Dictionary new
+		at: #succeeded put: true;
+		yourself.
+	[ PharoLinkServer new
+		listenPort: anInteger;
+		start ]
+			on: Error 
+			do: [ :ex | result
+				at: #succeeded put: false;
+				at: #messageText put: ex messageText;
+				at: #trace put: self stackString ].
+	^ result
 ]
 
 { #category : #commands }
@@ -259,6 +280,14 @@ GtRrWorker >> rrPlatform [
 GtRrWorker >> rrPlatform: anObject [
 
 	rrPlatform := anObject
+]
+
+{ #category : #private }
+GtRrWorker >> stackString [
+
+	^ String streamContents: [ :stream |
+		thisContext stack do: [ :stackItem |
+			stream print: stackItem; cr ] ]
 ]
 
 { #category : #starting }
