@@ -25,3 +25,10 @@ GtRrWorkerFutureExecution >> runner [
 
 	^ runner
 ]
+
+{ #category : #'as yet unclassified' }
+GtRrWorkerFutureExecution >> terminateWithReason: aReason [
+
+	self setExplicitlyTerminatedStateWithReason: aReason.
+	runner deployFailure: aReason
+]
