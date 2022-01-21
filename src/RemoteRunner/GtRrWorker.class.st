@@ -28,7 +28,7 @@ GtRrWorker class >> commandLine [
 				  | logger |
 				  SignalLogger resetAllInstances.
 				  logger := RestartingStreamLogger stdout.
-				  logger startFor: GtRemoteRunnerAnnouncement , PharoLinkSignal ].
+				  logger startFor: GtRrAnnouncement , PharoLinkSignal ].
 		  args
 			  at: #serverSocketAddress
 			  ifPresent: [ :arg | 

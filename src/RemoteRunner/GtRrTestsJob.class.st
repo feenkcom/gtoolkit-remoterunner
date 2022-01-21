@@ -63,7 +63,7 @@ GtRrTestsJob >> gtTestErrorsFor: aView [
 		title: 'Failed Tests';
 		priority: 17;
 		items: [ self allFailedTests ];
-		updateWhen: GtRemoteRunnerAnnouncement in: [ self announcer ];
+		updateWhen: GtRrAnnouncement in: [ self announcer ];
 		actionUpdateButton
 ]
 

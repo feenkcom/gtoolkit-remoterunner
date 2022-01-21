@@ -286,7 +286,7 @@ GtRrScheduler >> gtExecutingTasksFor: aView [
 			  sharedAccess critical: [ 
 					  executors select: #isBusy thenCollect: #currentTask ] ];
 		  send: [ :item | item ];
-		  updateWhen: GtRemoteRunnerAnnouncement in: [ self announcer ];
+		  updateWhen: GtRrAnnouncement in: [ self announcer ];
 		  actionUpdateButton
 ]
 
@@ -337,7 +337,7 @@ GtRrScheduler >> gtSummaryFor: aView [
 		  column: #Attribute text: [ :item | item first ];
 		  column: #Value text: [ :item | item second ];
 		  send: [ :item | item third ];
-		  updateWhen: GtRemoteRunnerAnnouncement in: [ self announcer ];
+		  updateWhen: GtRrAnnouncement in: [ self announcer ];
 			actionUpdateButton 
 ]
 
@@ -433,7 +433,7 @@ GtRrScheduler >> startLogging [
 	"Start the receiver's in-memory log"
 
 	log ifNotNil: [ ^ self ].
-	log := CircularMemoryLogger new startFor: GtRemoteRunnerAnnouncement.
+	log := CircularMemoryLogger new startFor: GtRrAnnouncement.
 ]
 
 { #category : #ui }
@@ -505,8 +505,7 @@ GtRrScheduler >> task: aTaskId failure: anObject [
 	sharedAccess critical: [ 
 		executor := executors at: PharoLinkServerCurrentConnection value.
 		task := executor currentTask ].
-	executor task: aTaskId failure: anObject.
-	self announceAndLog: (GtRrTaskFinishedAnnouncement task: task)
+	executor task: aTaskId failure: anObject
 ]
 
 { #category : #'api - worker' }
@@ -516,8 +515,7 @@ GtRrScheduler >> task: aTaskId success: anObject [
 	sharedAccess critical: [ 
 		executor := executors at: PharoLinkServerCurrentConnection value.
 		task := executor currentTask ].
-	executor task: aTaskId success: anObject.
-	self announceAndLog: (GtRrTaskFinishedAnnouncement task: task)
+	executor task: aTaskId success: anObject
 ]
 
 { #category : #schedulling }
@@ -544,12 +542,11 @@ GtRrScheduler >> taskNext [
 
 	| executor taskExecution task |
 	executor := sharedAccess critical: [ 
-		          executors at: PharoLinkServerCurrentConnection value ].
+		            executors at: PharoLinkServerCurrentConnection value ].
 	taskExecution := taskQueue gtRrNextSuchThat: [ :e | 
 		                 e task constraint matches: executor attributes ].
 	task := taskExecution task.
 	executor scheduleTaskExecution: taskExecution.
-	self announceAndLog: (GtRrTaskRunningAnnouncement task: task).
 	^ task
 ]
 

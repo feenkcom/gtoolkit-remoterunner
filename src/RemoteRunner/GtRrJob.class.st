@@ -84,7 +84,7 @@ GtRrJob >> gtErrorsFor: aView [
 		title: 'Errors';
 		priority: 16;
 		items: [ self resultsWithErrors ];
-		updateWhen: GtRemoteRunnerAnnouncement in: [ self announcer ]
+		updateWhen: GtRrAnnouncement in: [ self announcer ]
 ]
 
 { #category : #ui }

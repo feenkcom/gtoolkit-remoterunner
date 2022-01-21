@@ -1,6 +1,6 @@
 Class {
 	#name : #GtRrJobAnnouncement,
-	#superclass : #GtRemoteRunnerAnnouncement,
+	#superclass : #GtRrAnnouncement,
 	#instVars : [
 		'job'
 	],
