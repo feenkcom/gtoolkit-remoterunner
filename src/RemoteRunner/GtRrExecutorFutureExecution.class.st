@@ -1,8 +1,8 @@
 Class {
 	#name : #GtRrExecutorFutureExecution,
 	#superclass : #TKTFutureExecution,
-	#traits : 'TGtRrWorkerExecution',
-	#classTraits : 'TGtRrWorkerExecution classTrait',
+	#traits : 'TGtRrExecutorExecution',
+	#classTraits : 'TGtRrExecutorExecution classTrait',
 	#category : #'RemoteRunner-Runner'
 }
 
@@ -31,10 +31,4 @@ GtRrExecutorFutureExecution >> initialize [
 
 	super initialize.
 	state := GtRrExecutorReadyTaskState new
-]
-
-{ #category : #accessing }
-GtRrExecutorFutureExecution >> runner [
-
-	^ runner
 ]

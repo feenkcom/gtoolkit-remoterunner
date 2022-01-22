@@ -35,12 +35,6 @@ GtRrExecutorTaskExecution >> initialize [
 ]
 
 { #category : #accessing }
-GtRrExecutorTaskExecution >> runner [
-
-	^ runner
-]
-
-{ #category : #accessing }
 GtRrExecutorTaskExecution >> timeout [
 
 	^ timeout
