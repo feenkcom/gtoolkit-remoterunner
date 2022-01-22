@@ -5,25 +5,110 @@ Class {
 	#name : #GtRrExecutor,
 	#superclass : #TKTAbstractExecutor,
 	#instVars : [
+		'announcer',
 		'connection',
+		'timeoutQueue',
+		'attributes',
 		'observer',
 		'observerProcess',
 		'observerSemaphore',
-		'attributes',
-		'currentTaskExecution',
-		'timeoutQueue'
+		'currentTaskExecution'
 	],
 	#category : #'RemoteRunner-Runner'
 }
 
 { #category : #'instance creation' }
-GtRrExecutor class >> connection: aConnection attributes: aDictionary observer: aBlock timeoutQueue: aTimeoutQueue [
+GtRrExecutor class >> connection: aConnection attributes: aDictionary observer: aBlock timeoutQueue: aQueue [
 
 	^ self new
 		  initializeConnection: aConnection
 		  attributes: aDictionary
 		  observer: aBlock
-		  timeoutQueue: aTimeoutQueue;
+		  timeoutQueue: aQueue;
+		  yourself
+]
+
+{ #category : #accessing }
+GtRrExecutor >> announcer [
+
+	^ announcer
+]
+
+{ #category : #accessing }
+GtRrExecutor >> asBusyElement [
+
+	^ BrButton new
+		  icon: self asBusyIcon;
+		  aptitude: BrGlamorousButtonWithIconAndLabelAptitude
+			  - BrGlamorousButtonExteriorAptitude;
+		  label: 'busy';
+		  in: [ :e | 
+			  announcer
+				  when: GtRrTaskAnnouncement
+				  do: [ e icon: self asBusyIcon ] ];
+		  yourself
+]
+
+{ #category : #converting }
+GtRrExecutor >> asBusyIcon [
+
+	^ busy
+		  ifTrue: [ BrGlamorousIcons yellowcircle ]
+		  ifFalse: [ BrGlamorousIcons graycircle ]
+]
+
+{ #category : #converting }
+GtRrExecutor >> asConnectedElement [
+
+	^ BrButton new
+		  icon: self asConnectedIcon;
+		  aptitude: BrGlamorousButtonWithIconAndLabelAptitude
+			  - BrGlamorousButtonExteriorAptitude;
+		  label: 'connected';
+		  in: [ :e | 
+			  announcer
+				  when: GtRrTaskAnnouncement
+				  do: [ e icon: self asConnectedIcon ] ];
+		  yourself
+]
+
+{ #category : #converting }
+GtRrExecutor >> asConnectedIcon [
+
+	^ self isConnected 
+		  ifTrue: [ BrGlamorousIcons greencircle ]
+		  ifFalse: [ BrGlamorousIcons redcircle ]
+]
+
+{ #category : #accessing }
+GtRrExecutor >> asElement [
+
+	^ BlElement new
+		  layout: BlLinearLayout vertical;
+		  constraintsDo: [ :c | 
+			  c horizontal fitContent.
+			  c vertical fitContent ];
+		  addChild: self asBusyElement as: #busy;
+		  addChild: self asConnectedElement as: #connected;
+		  addChild: self asLastTaskElement as: #lastTask;
+		  yourself
+]
+
+{ #category : #converting }
+GtRrExecutor >> asLastTaskElement [
+
+	^ BlElement new
+		  layout: BlLinearLayout horizontal;
+		  constraintsDo: [ :c | 
+			  c horizontal fitContent.
+			  c vertical fitContent ];
+		  in: [ :e | 
+			  currentTaskExecution ifNotNil: [ :t | 
+					  e addChild: t asElement as: #content ].
+			  announcer when: GtRrTaskAnnouncement do: [ :a | 
+					  e removeChildNamed: #content.
+					  currentTaskExecution ifNotNil: [ :t | 
+							  e addChild: t asElement as: #content ] ] ];
 		  yourself
 ]
 
@@ -82,6 +167,16 @@ GtRrExecutor >> currentTaskExecution [
 	^ currentTaskExecution
 ]
 
+{ #category : #accessing }
+GtRrExecutor >> gtLiveFor: aView [
+
+	<gtView>
+	^ aView explicit
+		  title: 'Live';
+		  priority: 9;
+		  stencil: [ self asElement ]
+]
+
 { #category : #ui }
 GtRrExecutor >> gtSummaryFor: aView [
 	<gtView>
@@ -97,13 +192,14 @@ GtRrExecutor >> gtSummaryFor: aView [
 ]
 
 { #category : #initialization }
-GtRrExecutor >> initializeConnection: aConnection attributes: aDictionary observer: aBlock timeoutQueue: aTimeoutQueue [
+GtRrExecutor >> initializeConnection: aConnection attributes: aDictionary observer: aBlock timeoutQueue: aQueue [
 
 	connection := aConnection.
 	attributes := aDictionary.
 	observer := aBlock.
-	timeoutQueue := aTimeoutQueue.
-	observerSemaphore := Semaphore new
+	observerSemaphore := Semaphore new.
+	timeoutQueue := aQueue.
+	announcer := Announcer new
 ]
 
 { #category : #testing }
@@ -134,7 +230,7 @@ GtRrExecutor >> remoteAddress [
 { #category : #schedulling }
 GtRrExecutor >> schedule: aTask [
 
-	"needed for future callbacks, runner should use #scheduleTaskExecution:"
+	"needed for future callbacks, scheduler should use #scheduleTaskExecution:"
 
 	[ aTask value ]
 		on: Error
@@ -147,10 +243,11 @@ GtRrExecutor >> scheduleTaskExecution: aTaskExecution [
 	self assert: [ busy not ].
 	self assert: [ currentTaskExecution isNil ].
 	self noteBusy.
-	currentTaskExecution := aTaskExecution
-		                        runner: self;
-		                        schedule;
-		                        yourself
+	currentTaskExecution := aTaskExecution.
+	currentTaskExecution runner: self.
+	currentTaskExecution executeTask.
+	announcer announce:
+		(GtRrTaskRunningAnnouncement task: currentTaskExecution task)
 ]
 
 { #category : #schedulling }
@@ -164,13 +261,8 @@ GtRrExecutor >> scheduleTimeout: aTimeout on: aTaskExecution [
 		schedule: [ 
 			weak first ifNotNil: [ :taskExecution | 
 				taskExecution isFinished ifFalse: [ 
-					self isConnected
-						ifTrue: [ 
-							(self commandTerminateTaskId: taskExecution task id) ifFalse: [ 
-								self flag: 'TODO should not happen' ] ]
-						ifFalse: [ 
-							taskExecution terminateWithReason:
-								'Timeout after: ' , aTimeout asString ] ] ] ]
+					taskExecution terminateWithReason:
+						'Timeout after: ' , aTimeout asString ] ] ]
 		at: DateAndTime now + aTimeout
 ]
 
@@ -210,11 +302,16 @@ GtRrExecutor >> summaryAttributes [
 { #category : #running }
 GtRrExecutor >> task: aTaskId failure: aGtRrError [
 
+	| task |
 	self assert: [ busy ].
 	self assert: [ currentTaskExecution task id = aTaskId ].
+	task := currentTaskExecution task.
+	currentTaskExecution setFinishedState.
 	currentTaskExecution finishWithFailure: aGtRrError.
 	currentTaskExecution := nil.
-	self noteFree
+	self noteFree.
+	announcer announce:
+		(GtRrTaskFailedAnnouncement task: task reason: aGtRrError)
 ]
 
 { #category : #running }
@@ -223,6 +320,8 @@ GtRrExecutor >> task: aTaskId success: anObject [
 	self assert: [ busy ].
 	self assert: [ currentTaskExecution task id = aTaskId ].
 	currentTaskExecution finishWithSuccess: anObject.
+	announcer announce:
+		(GtRrTaskFinishedAnnouncement task: currentTaskExecution task).
 	currentTaskExecution := nil.
 	self noteFree
 ]

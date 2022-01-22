@@ -190,19 +190,27 @@ GtRrScheduler >> connectWithAttributes: aDictionary observer: aBlock [
 	| connection executor |
 	connection := PharoLinkServerCurrentConnection value.
 	executor := GtRrExecutor
-		          connection: connection
-		          attributes: aDictionary
-		          observer: aBlock
-		          timeoutQueue: timeoutQueue.
+		            connection: connection
+		            attributes: aDictionary
+		            observer: aBlock
+		            timeoutQueue: timeoutQueue.
 	sharedAccess critical: [ executors at: connection put: executor ].
 	connection
 		when: PharoLinkServerConnectionDisconnectedAnnouncement
 		send: #disconnect:
 		to: self.
-	self announceAndLog: (GtRrWorkerConnectedAnnouncement worker: executor).
+	self announceAndLog:
+		(GtRrWorkerConnectedAnnouncement worker: executor).
 	executor
 		commandConnected;
 		waitOnObserver
+]
+
+{ #category : #'api - worker' }
+GtRrScheduler >> currentExecutor [
+
+	^ sharedAccess critical: [ 
+		  executors at: PharoLinkServerCurrentConnection value ]
 ]
 
 { #category : #accessing }
@@ -223,7 +231,7 @@ GtRrScheduler >> disconnect: aPharoLinkServerConnectionDisconnectedAnnouncement 
 		            executors removeKey: connection ifAbsent: [ nil ] ].
 	executor ifNotNil: #stop.
 	self announceAndLog: (GtRrWorkerDisconnectedAnnouncement new
-			 worker: connection;
+			 worker: executor;
 			 reason: 'Worker connection lost')
 ]
 
@@ -247,6 +255,12 @@ GtRrScheduler >> executorsSize [
 ]
 
 { #category : #schedulling }
+GtRrScheduler >> future: aTask [
+
+	^ self future: aTask timeout: aTask timeout
+]
+
+{ #category : #schedulling }
 GtRrScheduler >> futureExecutionFor: aTask [
 
 	^ self futureExecutionFor: aTask timeout: aTask timeout
@@ -255,9 +269,8 @@ GtRrScheduler >> futureExecutionFor: aTask [
 { #category : #schedulling }
 GtRrScheduler >> futureExecutionFor: aTask timeout: aTimeout [
 
-	^ GtRrWorkerFutureExecution new
+	^ GtRrExecutorFutureExecution new
 		  runner: self;
-		  scheduler: self;
 		  task: aTask;
 		  timeout: aTimeout;
 		  yourself
@@ -413,10 +426,32 @@ GtRrScheduler >> removeSubscription: subscription [
 ]
 
 { #category : #schedulling }
+GtRrScheduler >> schedule: aTask [
+
+	^ self schedule: aTask timeout: aTask timeout
+]
+
+{ #category : #schedulling }
 GtRrScheduler >> scheduleTaskExecution: aTaskExecution [
 
 	aTaskExecution task execution: aTaskExecution.
 	taskQueue nextPut: aTaskExecution
+]
+
+{ #category : #schedulling }
+GtRrScheduler >> scheduleTimeout: aTimeout on: aTaskExecution [
+
+	"release the task execution, check later"
+
+	| weak |
+	weak := aTaskExecution asWeakReference.
+	timeoutQueue
+		schedule: [ 
+			weak first ifNotNil: [ :taskExecution | 
+				taskExecution isFinished ifFalse: [ 
+					taskExecution terminateWithReason:
+						'Timeout after: ' , aTimeout asString ] ] ]
+		at: DateAndTime now + aTimeout
 ]
 
 { #category : #'api - runner' }
@@ -501,21 +536,13 @@ GtRrScheduler >> summaryAttributes [
 { #category : #'api - worker' }
 GtRrScheduler >> task: aTaskId failure: anObject [
 
-	| executor task |
-	sharedAccess critical: [ 
-		executor := executors at: PharoLinkServerCurrentConnection value.
-		task := executor currentTask ].
-	executor task: aTaskId failure: anObject
+	^ self currentExecutor task: aTaskId failure: anObject
 ]
 
 { #category : #'api - worker' }
 GtRrScheduler >> task: aTaskId success: anObject [
 
-	| executor task |
-	sharedAccess critical: [ 
-		executor := executors at: PharoLinkServerCurrentConnection value.
-		task := executor currentTask ].
-	executor task: aTaskId success: anObject
+	^ self currentExecutor task: aTaskId success: anObject
 ]
 
 { #category : #schedulling }
@@ -527,9 +554,8 @@ GtRrScheduler >> taskExecutionFor: aTask [
 { #category : #schedulling }
 GtRrScheduler >> taskExecutionFor: aTask timeout: aTimeout [
 
-	^ GtRrWorkerTaskExecution new
+	^ GtRrExecutorTaskExecution new
 		  runner: self;
-		  scheduler: self;
 		  task: aTask;
 		  timeout: aTimeout;
 		  yourself
@@ -541,8 +567,7 @@ GtRrScheduler >> taskNext [
 	"Answer the next task allocated to the worker that is waiting on this method."
 
 	| executor taskExecution task |
-	executor := sharedAccess critical: [ 
-		            executors at: PharoLinkServerCurrentConnection value ].
+	executor := self currentExecutor.
 	taskExecution := taskQueue gtRrNextSuchThat: [ :e | 
 		                 e task constraint matches: executor attributes ].
 	task := taskExecution task.

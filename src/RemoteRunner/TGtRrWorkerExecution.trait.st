@@ -7,19 +7,11 @@ Trait {
 }
 
 { #category : #evaluating }
-TGtRrWorkerExecution >> cancelWithReason: aReason [
-
-	self setCancelStateWithReason: aReason.
-	self runner task: self task id failure: aReason
-]
-
-{ #category : #evaluating }
 TGtRrWorkerExecution >> doExecuteTask [
 
 	"deploy on future is async"
 
-	self timeout ifNotNil: [ :d | 
-		self runner scheduleTimeout: d on: self ]
+	self timeout ifNotNil: [ :d | scheduler scheduleTimeout: d on: self ]
 ]
 
 { #category : #accessing }
@@ -63,6 +55,7 @@ TGtRrWorkerExecution >> scheduler: anObject [
 TGtRrWorkerExecution >> setCancelStateWithReason: aReason [
 
 	super setCancelStateWithReason: aReason.
+	self runner task: self task id failure: aReason.
 	scheduler announceAndLog:
 		(GtRrTaskFailedAnnouncement task: self task reason: aReason)
 ]
@@ -71,6 +64,13 @@ TGtRrWorkerExecution >> setCancelStateWithReason: aReason [
 TGtRrWorkerExecution >> setExplicitlyTerminatedStateWithReason: aReason [
 
 	super setExplicitlyTerminatedStateWithReason: aReason.
+	self runner isConnected
+		ifTrue: [ self runner commandTerminateTaskId: self task id ]
+		ifFalse: [ 
+			self setExplicitlyTerminatedStateWithReason: aReason.
+			self runner task: self task id failure: aReason ].
+	(self runner commandTerminateTaskId: self task id) ifFalse: [ 
+		self runner task: self task id failure: aReason ].
 	scheduler announceAndLog:
 		(GtRrTaskFailedAnnouncement task: self task reason: aReason)
 ]
@@ -96,13 +96,6 @@ TGtRrWorkerExecution >> stop [
 
 	self isFinished ifFalse: [ 
 		self terminateWithReason: 'worker runner stopped' gtRrAsError ]
-]
-
-{ #category : #actions }
-TGtRrWorkerExecution >> terminateWithReason: aReason [
-
-	self setExplicitlyTerminatedStateWithReason: aReason.
-	self runner task: self task id failure: aReason
 ]
 
 { #category : #accessing }

@@ -1,34 +1,40 @@
 Class {
-	#name : #GtRrWorkerFutureExecution,
+	#name : #GtRrExecutorFutureExecution,
 	#superclass : #TKTFutureExecution,
 	#traits : 'TGtRrWorkerExecution',
 	#classTraits : 'TGtRrWorkerExecution classTrait',
 	#category : #'RemoteRunner-Runner'
 }
 
+{ #category : #converting }
+GtRrExecutorFutureExecution >> asElement [
+
+	^ state gtRrAsElement
+]
+
 { #category : #'as yet unclassified' }
-GtRrWorkerFutureExecution >> finishWithFailure: aGtRrError [
+GtRrExecutorFutureExecution >> finishWithFailure: aGtRrError [
 
 	self isFinished ifFalse: [ self setFinishedState ].
 	future isFinished ifFalse: [ future deployFailure: aGtRrError ]
 ]
 
 { #category : #'as yet unclassified' }
-GtRrWorkerFutureExecution >> finishWithSuccess: anObject [
+GtRrExecutorFutureExecution >> finishWithSuccess: anObject [
 
 	self isFinished ifFalse: [ self setFinishedState ].
 	future isFinished ifFalse: [ future deploySuccess: anObject ]
 ]
 
-{ #category : #accessing }
-GtRrWorkerFutureExecution >> runner [
+{ #category : #initialization }
+GtRrExecutorFutureExecution >> initialize [
 
-	^ runner
+	super initialize.
+	state := GtRrExecutorReadyTaskState new
 ]
 
-{ #category : #'as yet unclassified' }
-GtRrWorkerFutureExecution >> terminateWithReason: aReason [
+{ #category : #accessing }
+GtRrExecutorFutureExecution >> runner [
 
-	self setExplicitlyTerminatedStateWithReason: aReason.
-	runner deployFailure: aReason
+	^ runner
 ]

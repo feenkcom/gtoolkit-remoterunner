@@ -26,6 +26,12 @@ GtRrTask class >> leJsonV4Name [
 	^ #gtRrTask
 ]
 
+{ #category : #converting }
+GtRrTask >> asElement [
+
+	^ execution asElement
+]
+
 { #category : #accessing }
 GtRrTask >> constraint [
 
