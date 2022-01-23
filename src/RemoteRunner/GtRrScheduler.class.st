@@ -61,7 +61,8 @@ Class {
 		'executors',
 		'jobWorker',
 		'taskQueue',
-		'timeoutQueue'
+		'timeoutQueue',
+		'announcerWorker'
 	],
 	#classInstVars : [
 		'uniqueInstance'
@@ -198,14 +199,18 @@ GtRrScheduler >> asElement [
 { #category : #converting }
 GtRrScheduler >> asExecutorsElement [
 
-	^ BrSimpleList new 
+	^ BrSimpleList new
 		  items: (sharedAccess critical: [ executors values copy ]);
 		  stencil: #asElement;
 		  in: [ :e | 
 			  announcer
 				  when: GtRrWorkerAnnouncement
-				  do: [ 
-					  e items: (sharedAccess critical: [ executors values copy ]) ] ];
+				  send: #requestUpdate
+				  to: (BrElementUpdater new
+						   element: e;
+						   action: [ 
+							   e items: (sharedAccess critical: [ executors values copy ]) ];
+						   yourself) ];
 		  yourself
 ]
 
@@ -216,13 +221,17 @@ GtRrScheduler >> asFinishedTasksElement [
 		  items: #(  );
 		  stencil: #asElement;
 		  in: [ :e | 
-			  | buffer |
+			  | buffer updater |
 			  buffer := OrderedCollection new.
+			  updater := BrElementUpdater new
+				             element: e;
+				             action: [ e items: buffer ];
+				             yourself.
 			  announcer
 				  when: GtRrTaskSucceededAnnouncement , GtRrTaskFailedAnnouncement
 				  do: [ :a | 
 					  buffer addFirst: a task.
-					  e items: buffer ] ];
+					  updater requestUpdate ] ];
 		  yourself
 ]
 
@@ -232,8 +241,13 @@ GtRrScheduler >> asTaskQueueElement [
 	^ taskQueue gtRrAsElement
 		  in: [ :e | 
 			  announcer
-				  when: GtRrTaskScheduledAnnouncement, GtRrTaskRunningAnnouncement
-				  do: [ e items: taskQueue contents ] ];
+				  when:
+					  GtRrTaskScheduledAnnouncement , GtRrTaskRunningAnnouncement
+				  send: #requestUpdate
+				  to: (BrElementUpdater new
+						   element: e;
+						   action: [ e items: taskQueue contents ];
+						   yourself) ];
 		  yourself
 ]
 
@@ -243,9 +257,14 @@ GtRrScheduler >> asTimeoutQueueElement [
 	^ timeoutQueue gtRrAsElement
 		  stencil: #gtRrAsElement;
 		  in: [ :e | 
-			  announcer when: GtRrTaskAnnouncement do: [ 
-					  self flag: 'TODO find better way to update'.
-					  e items: (timeoutQueue instVarNamed: #queue) contents ] ];
+			  announcer
+				  when: GtRrTaskAnnouncement
+				  send: #requestUpdate
+				  to: (BrElementUpdater new
+						   element: e;
+						   action: [ 
+							   e items: (timeoutQueue instVarNamed: #queue) contents ];
+						   yourself) ];
 		  yourself
 ]
 
@@ -261,7 +280,8 @@ GtRrScheduler >> connectWithAttributes: aDictionary observer: aBlock [
 		            connection: connection
 		            attributes: aDictionary
 		            observer: aBlock
-		            timeoutQueue: timeoutQueue.
+		            timeoutQueue: timeoutQueue
+		            announcerScheduler: announcerWorker.
 	executor announcer
 		when: GtRrWorkerDisconnectedAnnouncement
 		send: #disconnect:
@@ -437,15 +457,16 @@ GtRrScheduler >> hasSubscriber: anObject [
 GtRrScheduler >> initialize [
 
 	super initialize.
-	announcer := Announcer new.
 	server := PharoLinkServer new
 		          listenPort: 7042;
 		          setDebugMode;
 		          yourself.
 	server globals at: #GtAssignedRemoteRunner put: self.
+	announcerWorker := TKTWorker new.
 	jobWorker := TKTWorker new.
 	taskQueue := SharedQueue new.
 	timeoutQueue := BlTaskAtQueue new.
+	announcer := GtRrAsyncAnnouncer scheduler: announcerWorker.
 	"Make sure you REALLY know what you're doing before changing sharedAccess to a Monitor.
 	PharoLinkServer requests are handled in individual processes, so any deadlock is unlikely to be resolved by converting sharedAccess to a Monitor."
 	sharedAccess := GtMutualExclusionSemaphore forMutualExclusion.
@@ -516,6 +537,7 @@ GtRrScheduler >> scheduleTaskExecution: aTaskExecution [
 { #category : #'api - runner' }
 GtRrScheduler >> start [
 
+	announcerWorker start.
 	server start.
 	timeoutQueue start.
 	jobWorker start.
@@ -555,7 +577,8 @@ GtRrScheduler >> stop [
 	environment stop.
 	jobWorker stop.
 	timeoutQueue stop.
-	server stop
+	server stop.
+	announcerWorker stop
 ]
 
 { #category : #ui }

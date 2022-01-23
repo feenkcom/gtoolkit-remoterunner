@@ -17,13 +17,14 @@ Class {
 }
 
 { #category : #'instance creation' }
-GtRrExecutor class >> connection: aConnection attributes: aDictionary observer: aBlock timeoutQueue: aQueue [
+GtRrExecutor class >> connection: aConnection attributes: aDictionary observer: aBlock timeoutQueue: aQueue announcerScheduler: aScheduler [
 
 	^ self new
 		  initializeConnection: aConnection
 		  attributes: aDictionary
 		  observer: aBlock
-		  timeoutQueue: aQueue;
+		  timeoutQueue: aQueue
+		  announcerScheduler: aScheduler;
 		  yourself
 ]
 
@@ -44,10 +45,14 @@ GtRrExecutor >> asBusyElement [
 		  in: [ :e | 
 			  announcer
 				  when: GtRrTaskAnnouncement , GtRrWorkerAnnouncement
-				  do: [ 
-					  e
-						  icon: self asBusyIcon;
-						  label: self asBusyText ] ];
+				  send: #requestUpdate
+				  to: (BrElementUpdater new
+						   element: e;
+						   action: [ 
+							   e
+								   icon: self asBusyIcon;
+								   label: self asBusyText ];
+						   yourself) ];
 		  yourself
 ]
 
@@ -76,10 +81,16 @@ GtRrExecutor >> asConnectedElement [
 		  icon: self asConnectedIcon;
 		  label: self asConnectedText;
 		  in: [ :e | 
-			  announcer when: GtRrWorkerAnnouncement do: [ 
-					  e
-						  icon: self asConnectedIcon;
-						  label: self asConnectedText ] ];
+			  announcer
+				  when: GtRrWorkerAnnouncement
+				  send: #requestUpdate
+				  to: (BrElementUpdater new
+						   element: e;
+						   action: [ 
+							   e
+								   icon: self asConnectedIcon;
+								   label: self asConnectedText ];
+						   yourself) ];
 		  yourself
 ]
 
@@ -99,6 +110,29 @@ GtRrExecutor >> asConnectedText [
 		  ifFalse: [ 'disconnected' ]
 ]
 
+{ #category : #converting }
+GtRrExecutor >> asCurrentTaskElement [
+
+	^ BlElement new
+		  layout: BlLinearLayout horizontal;
+		  constraintsDo: [ :c | 
+			  c horizontal fitContent.
+			  c vertical fitContent ];
+		  in: [ :e | 
+			  currentTaskExecution ifNotNil: [ :t | e addChild: t asElement ].
+			  announcer
+				  when: GtRrTaskAnnouncement , GtRrWorkerAnnouncement
+				  send: #requestUpdate
+				  to: (BrElementUpdater new
+						   element: e;
+						   action: [ 
+							   e removeChildren.
+							   currentTaskExecution ifNotNil: [ :t | 
+									   e addChild: t asElement ] ];
+						   yourself) ];
+		  yourself
+]
+
 { #category : #accessing }
 GtRrExecutor >> asElement [
 
@@ -109,27 +143,7 @@ GtRrExecutor >> asElement [
 			  c vertical fitContent ];
 		  addChild: self asConnectedElement as: #connected;
 		  addChild: self asBusyElement as: #busy;
-		  addChild: self asLastTaskElement as: #lastTask;
-		  yourself
-]
-
-{ #category : #converting }
-GtRrExecutor >> asLastTaskElement [
-
-	^ BlElement new
-		  layout: BlLinearLayout horizontal;
-		  constraintsDo: [ :c | 
-			  c horizontal fitContent.
-			  c vertical fitContent ];
-		  in: [ :e | 
-			  currentTaskExecution ifNotNil: [ :t | 
-					  e addChild: t asElement as: #content ].
-			  announcer
-				  when: GtRrTaskAnnouncement , GtRrWorkerAnnouncement
-				  do: [ :a | 
-					  e removeChildNamed: #content.
-					  currentTaskExecution ifNotNil: [ :t | 
-							  e addChild: t asElement as: #content ] ] ];
+		  addChild: self asCurrentTaskElement as: #currentTask;
 		  yourself
 ]
 
@@ -250,13 +264,13 @@ GtRrExecutor >> gtSummaryFor: aView [
 ]
 
 { #category : #initialization }
-GtRrExecutor >> initializeConnection: aConnection attributes: aDictionary observer: aBlock timeoutQueue: aQueue [
+GtRrExecutor >> initializeConnection: aConnection attributes: aDictionary observer: aBlock timeoutQueue: aQueue announcerScheduler: aScheduler [
 
 	connection := aConnection.
 	attributes := aDictionary.
 	observer := aBlock.
 	timeoutQueue := aQueue.
-	announcer := Announcer new
+	announcer := GtRrAsyncAnnouncer scheduler: aScheduler
 ]
 
 { #category : #testing }
@@ -360,11 +374,12 @@ GtRrExecutor >> task: aTaskId failure: aGtRrError [
 GtRrExecutor >> task: aTaskId success: anObject [
 
 	| oldTaskExecution |
-	self assert: [ busy ].
-	self assert: [ currentTaskExecution task id = aTaskId ].
+	currentTaskExecution ifNil: [ ^ self ].
+	currentTaskExecution task id = aTaskId ifFalse: [ ^ self ].
 	currentTaskExecution finishWithSuccess: anObject.
 	oldTaskExecution := currentTaskExecution.
 	currentTaskExecution := nil.
-	self noteFree announcer announce:
+	self noteFree.
+	announcer announce:
 		(GtRrTaskSucceededAnnouncement task: oldTaskExecution task)
 ]

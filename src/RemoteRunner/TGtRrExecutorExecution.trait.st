@@ -18,12 +18,10 @@ TGtRrExecutorExecution >> asElement [
 			  c horizontal fitContent.
 			  c vertical fitContent ];
 		  in: [ :e | 
-			  e addChild: state gtRrAsElement as: #state.
+			  e addChild: state gtRrAsElement.
 			  runner announcer when: GtRrTaskAnnouncement do: [ :a | 
-					  e
-						  replaceChild: (self childNamed: #state)
-						  with: state gtRrAsElement
-						  as: #state ] ];
+					  e removeChildren.
+					  e addChild: state gtRrAsElement ] ];
 		  yourself
 ]
 
