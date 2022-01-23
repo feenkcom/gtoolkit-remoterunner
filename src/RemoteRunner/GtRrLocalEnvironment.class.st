@@ -25,7 +25,7 @@ GtRrLocalEnvironment >> gtProcessesFor: aView [
 GtRrLocalEnvironment >> initialize [
 
 	super initialize.
-	poolSize := 2.
+	poolSize := 8.
 	processes := OrderedCollection new.
 	watchDogSemaphore := Semaphore new.
 ]

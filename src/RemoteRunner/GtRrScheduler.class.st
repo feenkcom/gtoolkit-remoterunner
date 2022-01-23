@@ -462,7 +462,9 @@ GtRrScheduler >> initialize [
 		          setDebugMode;
 		          yourself.
 	server globals at: #GtAssignedRemoteRunner put: self.
-	announcerWorker := TKTWorker new.
+	announcerWorker := TKTWorkerPool new
+		                   poolMaxSize: 8;
+		                   yourself.
 	jobWorker := TKTWorker new.
 	taskQueue := SharedQueue new.
 	timeoutQueue := BlTaskAtQueue new.

@@ -17,11 +17,19 @@ TGtRrExecutorExecution >> asElement [
 		  constraintsDo: [ :c | 
 			  c horizontal fitContent.
 			  c vertical fitContent ];
+		  when: BlClickEvent do: [ :e | e target phlow spawnObject: self ];
 		  in: [ :e | 
 			  e addChild: state gtRrAsElement.
-			  runner announcer when: GtRrTaskAnnouncement do: [ :a | 
-					  e removeChildren.
-					  e addChild: state gtRrAsElement ] ];
+			  runner announcer
+				  when: GtRrTaskAnnouncement
+				  send: #requestUpdate
+				  to: (BrElementUpdater new
+						   element: e;
+						   action: [ 
+							   e
+								   removeChildren;
+								   addChild: state gtRrAsElement ];
+						   yourself) ];
 		  yourself
 ]
 

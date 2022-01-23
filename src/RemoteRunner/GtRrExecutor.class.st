@@ -141,6 +141,7 @@ GtRrExecutor >> asElement [
 		  constraintsDo: [ :c | 
 			  c horizontal fitContent.
 			  c vertical fitContent ];
+		  when: BlClickEvent do: [ :e | e target phlow spawnObject: self ];
 		  addChild: self asConnectedElement as: #connected;
 		  addChild: self asBusyElement as: #busy;
 		  addChild: self asCurrentTaskElement as: #currentTask;
