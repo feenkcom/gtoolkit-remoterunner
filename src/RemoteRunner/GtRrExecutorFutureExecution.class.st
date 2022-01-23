@@ -6,12 +6,6 @@ Class {
 	#category : #'RemoteRunner-Runner'
 }
 
-{ #category : #converting }
-GtRrExecutorFutureExecution >> asElement [
-
-	^ state gtRrAsElement
-]
-
 { #category : #'as yet unclassified' }
 GtRrExecutorFutureExecution >> finishWithFailure: aGtRrError [
 
@@ -24,6 +18,16 @@ GtRrExecutorFutureExecution >> finishWithSuccess: anObject [
 
 	self isFinished ifFalse: [ self setFinishedState ].
 	future isFinished ifFalse: [ future deploySuccess: anObject ]
+]
+
+{ #category : #'gt-extension' }
+GtRrExecutorFutureExecution >> gtLiveFor: aView [
+
+	<gtView>
+	^ aView explicit
+		  title: 'Live';
+		  priority: 9;
+		  stencil: [ self asElement ]
 ]
 
 { #category : #initialization }

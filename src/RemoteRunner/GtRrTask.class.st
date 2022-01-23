@@ -67,6 +67,16 @@ GtRrTask >> futureExecutionFor: aRunner [
 		               yourself
 ]
 
+{ #category : #'gt-extension' }
+GtRrTask >> gtLiveFor: aView [
+
+	<gtView>
+	^ aView explicit
+		  title: 'Live';
+		  priority: 9;
+		  stencil: [ self asElement ]
+]
+
 { #category : #ui }
 GtRrTask >> gtSummaryFor: aView [
 

@@ -2,25 +2,27 @@ Class {
 	#name : #GtRrWorkerAnnouncement,
 	#superclass : #GtRrAnnouncement,
 	#instVars : [
-		'worker'
+		'executor'
 	],
 	#category : #'RemoteRunner-Announcements'
 }
 
 { #category : #accessing }
-GtRrWorkerAnnouncement class >> worker: aGtRrWorkerRemote [
+GtRrWorkerAnnouncement class >> executor: anExecutor [
 
-	^ self new worker: aGtRrWorkerRemote
+	^ self new
+		  executor: anExecutor;
+		  yourself
 ]
 
 { #category : #accessing }
-GtRrWorkerAnnouncement >> worker [
+GtRrWorkerAnnouncement >> executor [
 
-	^ worker
+	^ executor
 ]
 
 { #category : #accessing }
-GtRrWorkerAnnouncement >> worker: anObject [
+GtRrWorkerAnnouncement >> executor: anObject [
 
-	worker := anObject
+	executor := anObject
 ]

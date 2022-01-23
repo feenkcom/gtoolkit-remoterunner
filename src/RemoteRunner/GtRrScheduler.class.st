@@ -181,6 +181,27 @@ GtRrScheduler >> applyCodeChanges: aCollection [
 	^ errors
 ]
 
+{ #category : #converting }
+GtRrScheduler >> asElement [
+
+	^ BlElement new
+		  layout: BlLinearLayout vertical;
+		  constraintsDo: [ :c | 
+			  c horizontal fitContent.
+			  c vertical fitContent ];
+		  in: [ :e | 
+			  (sharedAccess critical: [ executors copy ]) do: [ :x | 
+					  e addChild: x asElement as: x identityHash asString ].
+			  announcer
+				  when: GtRrWorkerConnectedAnnouncement do: [ :a | 
+					  e
+						  addChild: a executor asElement
+						  as: a executor identityHash asString ];
+				  when: GtRrWorkerDisconnectedAnnouncement
+				  do: [ :a | e removeChildNamed: a executor identityHash asString ] ];
+		  yourself
+]
+
 { #category : #'api - worker' }
 GtRrScheduler >> connectWithAttributes: aDictionary observer: aBlock [
 
@@ -194,16 +215,13 @@ GtRrScheduler >> connectWithAttributes: aDictionary observer: aBlock [
 		            attributes: aDictionary
 		            observer: aBlock
 		            timeoutQueue: timeoutQueue.
-	sharedAccess critical: [ executors at: connection put: executor ].
-	connection
-		when: PharoLinkServerConnectionDisconnectedAnnouncement
+	executor announcer
+		when: GtRrWorkerDisconnectedAnnouncement
 		send: #disconnect:
-		to: self.
-	self announceAndLog:
-		(GtRrWorkerConnectedAnnouncement worker: executor).
-	executor
-		commandConnected;
-		waitOnObserver
+		to: self;
+		when: GtRrAnnouncement send: #announceAndLog: to: self.
+	sharedAccess critical: [ executors at: connection put: executor ].
+	executor connect
 ]
 
 { #category : #'api - worker' }
@@ -222,17 +240,15 @@ GtRrScheduler >> debugMode [
 ]
 
 { #category : #'api - worker' }
-GtRrScheduler >> disconnect: aPharoLinkServerConnectionDisconnectedAnnouncement [
+GtRrScheduler >> disconnect: anWorkerDisconnectedAnnouncement [
 
-	| connection executor |
-	connection := aPharoLinkServerConnectionDisconnectedAnnouncement
-		              connection.
-	executor := sharedAccess critical: [ 
-		            executors removeKey: connection ifAbsent: [ nil ] ].
-	executor ifNotNil: #stop.
-	self announceAndLog: (GtRrWorkerDisconnectedAnnouncement new
-			 worker: executor;
-			 reason: 'Worker connection lost')
+	"executor already cleanup after himself, now we need to cut our ties as a final step"
+
+	| executor |
+	executor := anWorkerDisconnectedAnnouncement executor.
+	sharedAccess critical: [ 
+		executors removeKey: executor connection ifAbsent: [ nil ] ].
+	executor announcer unsubscribe: self
 ]
 
 { #category : #accessing }
@@ -315,6 +331,16 @@ GtRrScheduler >> gtExecutorsFor: aView [
 			column: 'Working Directory' text: [ :item | item attributes at: #workingDirectory ifAbsent: [ '' ] ];
 		  column: 'Platform' text: [ :item | item attributes at: #platform ];
 		  actionUpdateButton
+]
+
+{ #category : #'gt-extension' }
+GtRrScheduler >> gtLiveFor: aView [
+
+	<gtView>
+	^ aView explicit
+		  title: 'Live';
+		  priority: 9;
+		  stencil: [ self asElement ]
 ]
 
 { #category : #accessing }
@@ -436,22 +462,6 @@ GtRrScheduler >> scheduleTaskExecution: aTaskExecution [
 
 	aTaskExecution task execution: aTaskExecution.
 	taskQueue nextPut: aTaskExecution
-]
-
-{ #category : #schedulling }
-GtRrScheduler >> scheduleTimeout: aTimeout on: aTaskExecution [
-
-	"release the task execution, check later"
-
-	| weak |
-	weak := aTaskExecution asWeakReference.
-	timeoutQueue
-		schedule: [ 
-			weak first ifNotNil: [ :taskExecution | 
-				taskExecution isFinished ifFalse: [ 
-					taskExecution terminateWithReason:
-						'Timeout after: ' , aTimeout asString ] ] ]
-		at: DateAndTime now + aTimeout
 ]
 
 { #category : #'api - runner' }

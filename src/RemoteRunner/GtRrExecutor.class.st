@@ -38,14 +38,15 @@ GtRrExecutor >> announcer [
 GtRrExecutor >> asBusyElement [
 
 	^ BrButton new
-		  icon: self asBusyIcon;
 		  aptitude: BrGlamorousButtonWithIconAndLabelAptitude
 			  - BrGlamorousButtonExteriorAptitude;
-		  label: 'busy';
+		  icon: self asBusyIcon;
+		  label: self asBusyText;
 		  in: [ :e | 
-			  announcer
-				  when: GtRrTaskAnnouncement
-				  do: [ e icon: self asBusyIcon ] ];
+			  announcer when: GtRrTaskAnnouncement do: [ 
+					  e
+						  icon: self asBusyIcon;
+						  label: self asBusyText ] ];
 		  yourself
 ]
 
@@ -58,17 +59,26 @@ GtRrExecutor >> asBusyIcon [
 ]
 
 { #category : #converting }
+GtRrExecutor >> asBusyText [
+
+	^ busy
+		  ifTrue: [ 'busy' ]
+		  ifFalse: [ 'idle' ]
+]
+
+{ #category : #converting }
 GtRrExecutor >> asConnectedElement [
 
 	^ BrButton new
-		  icon: self asConnectedIcon;
 		  aptitude: BrGlamorousButtonWithIconAndLabelAptitude
 			  - BrGlamorousButtonExteriorAptitude;
-		  label: 'connected';
+		  icon: self asConnectedIcon;
+		  label: self asConnectedText;
 		  in: [ :e | 
-			  announcer
-				  when: GtRrTaskAnnouncement
-				  do: [ e icon: self asConnectedIcon ] ];
+			  announcer when: GtRrWorkerAnnouncement do: [ 
+					  e
+						  icon: self asConnectedIcon;
+						  label: self asConnectedText ] ];
 		  yourself
 ]
 
@@ -80,16 +90,24 @@ GtRrExecutor >> asConnectedIcon [
 		  ifFalse: [ BrGlamorousIcons redcircle ]
 ]
 
+{ #category : #converting }
+GtRrExecutor >> asConnectedText [
+
+	^ self isConnected
+		  ifTrue: [ 'connected' ]
+		  ifFalse: [ 'disconnected' ]
+]
+
 { #category : #accessing }
 GtRrExecutor >> asElement [
 
 	^ BlElement new
-		  layout: BlLinearLayout vertical;
+		  layout: BlLinearLayout horizontal;
 		  constraintsDo: [ :c | 
 			  c horizontal fitContent.
 			  c vertical fitContent ];
-		  addChild: self asBusyElement as: #busy;
 		  addChild: self asConnectedElement as: #connected;
+		  addChild: self asBusyElement as: #busy;
 		  addChild: self asLastTaskElement as: #lastTask;
 		  yourself
 ]
@@ -155,6 +173,26 @@ GtRrExecutor >> commandTerminateTaskId: aTaskId [
 		  (Message selector: #commandTerminateTaskId: argument: aTaskId)
 ]
 
+{ #category : #connecting }
+GtRrExecutor >> connect [
+
+	self assert: [ observerProcess isNil ].
+	connection
+		when: PharoLinkServerConnectionDisconnectedAnnouncement
+		send: #disconnect:
+		to: self.
+	self commandConnected.
+	announcer announce: (GtRrWorkerConnectedAnnouncement worker: self).
+	observerProcess := Processor activeProcess.
+	observerSemaphore wait
+]
+
+{ #category : #accessing }
+GtRrExecutor >> connection [
+
+	^ connection
+]
+
 { #category : #accessing }
 GtRrExecutor >> currentTask [
 
@@ -165,6 +203,22 @@ GtRrExecutor >> currentTask [
 GtRrExecutor >> currentTaskExecution [
 
 	^ currentTaskExecution
+]
+
+{ #category : #'start-stop' }
+GtRrExecutor >> disconnect: anPharoLinkAnnouncement [
+
+	currentTaskExecution ifNotNil: [ 
+		currentTaskExecution finishWithFailure: 'stop' gtRrAsError ].
+	currentTaskExecution := nil.
+	observerSemaphore ifNotNil: #signalAll.
+	observerSemaphore := nil.
+	observerProcess ifNotNil: #terminate.
+	observerProcess := nil.
+	observer := nil.
+	connection stop.
+	self noteBusy.
+	announcer announce: (GtRrWorkerDisconnectedAnnouncement worker: self)
 ]
 
 { #category : #accessing }
@@ -270,20 +324,6 @@ GtRrExecutor >> scheduleTimeout: aTimeout on: aTaskExecution [
 GtRrExecutor >> sendControlMessage: aMessage [
 
 	^ observer value: { aMessage selector. aMessage arguments. aMessage lookupClass }
-]
-
-{ #category : #'start-stop' }
-GtRrExecutor >> stop [
-
-	currentTaskExecution ifNotNil: #stop.
-	currentTaskExecution := nil.
-	observerSemaphore ifNotNil: #signalAll.
-	observerSemaphore := nil.
-	observerProcess ifNotNil: #terminate.
-	observerProcess := nil.
-	observer := nil.
-	connection stop.
-	self noteFree
 ]
 
 { #category : #ui }

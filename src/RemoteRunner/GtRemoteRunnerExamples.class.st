@@ -113,24 +113,24 @@ GtRemoteRunnerExamples >> controlChannelPing [
 	"Demonstrate the ping operation using the worker's control channel"
 	<gtExample>
 	<noTest>
-	| remoteRunner controlChannelSemaphore worker |
+	| remoteRunner controlChannelSemaphore executor |
 
 	controlChannelSemaphore := GtMutualExclusionSemaphore new.
 	remoteRunner := GtRrScheduler new port: 7089.
 	remoteRunner environment poolSize: 1.
 	remoteRunner when: GtRrWorkerConnectedAnnouncement do: [ :ann | 
-		worker := ann worker.
+		executor := ann executor.
 		controlChannelSemaphore signal ].
 	remoteRunner start.
 	[ controlChannelSemaphore wait.
 	self assert: remoteRunner executorsSize equals: 1.
 	self
-		assert: worker commandPing
+		assert: executor commandPing
 		equals: #ping.
 	self assert: remoteRunner executorsSize equals: 1.
 	] ensure: [ remoteRunner stop ].
 
-	^ worker
+	^ executor
 ]
 
 { #category : #examples }
@@ -138,25 +138,25 @@ GtRemoteRunnerExamples >> controlChannelQuitSmalltalk [
 	"Demonstrate the ping operation using the worker's control channel"
 	"This currently locks the image.  To be fixed (or removed)"
 	"<gtExample>"
-	| remoteRunner controlChannelSemaphore worker |
+	| remoteRunner controlChannelSemaphore executor |
 
 	controlChannelSemaphore := GtMutualExclusionSemaphore new.
 	remoteRunner := GtRrScheduler new port: 7090.
 	remoteRunner environment poolSize: 1.
 	remoteRunner when: GtRrWorkerConnectedAnnouncement do: [ :ann | 
-		worker := ann worker.
+		executor := ann executor.
 		controlChannelSemaphore signal ].
 	remoteRunner when: GtRrWorkerDisconnectedAnnouncement do: [ :ann | 
 		controlChannelSemaphore signal ].
 	remoteRunner start.
 	[ controlChannelSemaphore wait.
 	self assert: remoteRunner executorsSize equals: 1.
-	worker commandQuitSmalltalk.
+	executor commandQuitSmalltalk.
 	controlChannelSemaphore wait.
 	self assert: remoteRunner executorsSize equals: 0.
 	] ensure: [ remoteRunner stop ].
 
-	^ worker
+	^ executor
 ]
 
 { #category : #examples }
@@ -712,24 +712,24 @@ GtRemoteRunnerExamples >> workerAttributes [
 	"Demonstrate retrieving the remote worker's attributes"
 	<gtExample>
 	<noTest>
-	| remoteRunner registeredSemaphore worker |
+	| remoteRunner registeredSemaphore executor |
 
 	registeredSemaphore := GtMutualExclusionSemaphore new.
 	remoteRunner := GtRrScheduler new port: 7091.
 	remoteRunner environment poolSize: 1.
 	remoteRunner when: GtRrWorkerConnectedAnnouncement do: [ :ann | 
-		worker := ann worker.
+		executor := ann executor.
 		registeredSemaphore signal ].
 	remoteRunner start.
 	[ registeredSemaphore wait.
 	self assert: remoteRunner executorsSize equals: 1.
 	self
-		assert: (worker attributes at: #workingDirectory)
+		assert: (executor attributes at: #workingDirectory)
 		equals: FileLocator workingDirectory resolve fullName.
 	self 
-		assert: (worker attributes at: #platform)
+		assert: (executor attributes at: #platform)
 		equals: OSPlatform current name.
 	] ensure: [ remoteRunner stop ].
 
-	^ worker
+	^ executor
 ]

@@ -9,12 +9,38 @@ Trait {
 	#category : #'RemoteRunner-Runner'
 }
 
+{ #category : #converting }
+TGtRrExecutorExecution >> asElement [
+
+	^ BlElement new
+		  layout: BlLinearLayout horizontal;
+		  constraintsDo: [ :c | 
+			  c horizontal fitContent.
+			  c vertical fitContent ];
+		  in: [ :e | 
+			  e addChild: state gtRrAsElement as: #content.
+			  runner announcer when: GtRrTaskAnnouncement do: [ :a | 
+					  e removeChildNamed: #content.
+					  e addChild: state gtRrAsElement as: #content ] ];
+		  yourself
+]
+
 { #category : #evaluating }
 TGtRrExecutorExecution >> doExecuteTask [
 
 	"deploy on future is async"
 
 	timeout ifNotNil: [ :d | runner scheduleTimeout: d on: self ]
+]
+
+{ #category : #'gt-extension' }
+TGtRrExecutorExecution >> gtLiveFor: aView [
+
+	<gtView>
+	^ aView explicit
+		  title: 'Live';
+		  priority: 9;
+		  stencil: [ self asElement ]
 ]
 
 { #category : #initialization }

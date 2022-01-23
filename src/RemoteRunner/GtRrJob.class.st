@@ -21,12 +21,6 @@ GtRrJob >> addResult: aGtRrTask [
 		ifFalse: [ GtRrTaskFinishedAnnouncement task: aGtRrTask ])
 ]
 
-{ #category : #announcer }
-GtRrJob >> announce: anAnnouncement [
-
-	^ self announcer announce: anAnnouncement
-]
-
 { #category : #accessing }
 GtRrJob >> announcer [
 
@@ -130,12 +124,6 @@ GtRrJob >> hasErrors [
 	^ results anySatisfy: [ :task | task hasErrors ]
 ]
 
-{ #category : #announcer }
-GtRrJob >> hasSubscriber: anObject [
-
-	^ self announcer hasSubscriber: anObject
-]
-
 { #category : #printing }
 GtRrJob >> printOn: aStream [
 
@@ -147,13 +135,6 @@ GtRrJob >> printOn: aStream [
 		[ aStream << ' with errors' ].
 	aStream
 		nextPut: $).
-]
-
-{ #category : #'announcer - subscription' }
-GtRrJob >> removeSubscription: subscription [
-	"Remove the given subscription from the receiver"
-
-	^ self announcer removeSubscription: subscription
 ]
 
 { #category : #accessing }
@@ -231,62 +212,4 @@ GtRrJob >> terminate [
 
 	state := #terminating.
 
-]
-
-{ #category : #'announcer - subscription' }
-GtRrJob >> unsubscribe: anObject [
-	"Unsubscribe all subscriptions of anObject from the receiver"
-	
-	^ self announcer unsubscribe: anObject
-]
-
-{ #category : #'announcer - subscription' }
-GtRrJob >> weak [
-	"announcer weak subscribe: foo"
-
-	^ self announcer weak
-]
-
-{ #category : #'announcer - subscription' }
-GtRrJob >> when: anAnnouncementClass do: aValuable [
-	"Declare that when anAnnouncementClass is raised, aValuable is executed.  Pay attention that ushc method as well as when:do: should not be used on weak announcer since the block holds the receiver and more strongly."
-
-		^ self announcer when: anAnnouncementClass do: aValuable
-]
-
-{ #category : #'announcer - subscription' }
-GtRrJob >> when: anAnnouncementClass do: aValuable for: aSubscriber [
-	"Declare that when anAnnouncementClass is raised, aValuable is executed and define the subscriber."
-
-	^ (self when: anAnnouncementClass do: aValuable) subscriber: aSubscriber; yourself.
-]
-
-{ #category : #'announcer - subscription' }
-GtRrJob >> when: anAnnouncementClass doOnce: aValuable for: aSubscriber [
-	"Declare that when anAnnouncementClass is raised, aValuable is executed and define the subscriber.
-	A valuable is executed ONCE, and then a subscriber gets unsubscribed"
-
-	^ self
-		when: anAnnouncementClass
-		do: [ :anAnnouncement |
-			self unsubscribe: aSubscriber.
-			aValuable cull: anAnnouncement ]
-		for: aSubscriber
-]
-
-{ #category : #'announcer - subscription' }
-GtRrJob >> when: anAnnouncementClass send: aSelector to: anObject [
-	"Declare that when anAnnouncementClass is raised, anObject should receive the message aSelector.
-    When the message expects one argument (eg #fooAnnouncement:) the announcement is passed as argument.
-    When the message expects two arguments (eg #fooAnnouncement:announcer:) both the announcement and the announcer 
-    are passed as argument"
-
-		^ self announcer when: anAnnouncementClass send: aSelector to: anObject
-]
-
-{ #category : #'announcer - subscription' }
-GtRrJob >> when: anAnnouncementClass send: aSelector to: anObject for: aSubscriber [
-	"Declare that when anAnnouncementClass is raised, anObject should receive the message aSelector."
-
-	^ (self when: anAnnouncementClass send: aSelector to: anObject) subscriber: aSubscriber.
 ]

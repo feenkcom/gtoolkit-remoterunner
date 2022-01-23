@@ -117,9 +117,9 @@ GtRrLocalEnvironment >> startWatchDog [
 			            remove: e;
 			            add: process.
 		            remoteRunner announceAndLog:
-			            (GtRrWorkerReplacedAnnouncement new
-				             worker: e;
-				             newWorker: process) ] ] repeat ] forkNamed:
+			            (GtRrProcessReplacedAnnouncement
+				             before: e
+				             after: process) ] ] repeat ] forkNamed:
 		            'GtRemoteRunner local watch dog'
 ]
 

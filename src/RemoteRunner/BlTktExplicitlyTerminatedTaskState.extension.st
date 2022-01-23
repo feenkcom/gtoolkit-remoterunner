@@ -5,7 +5,7 @@ BlTktExplicitlyTerminatedTaskState >> gtRrAsElement [
 
 	^ BrButton new
 		  icon: BrGlamorousIcons redcircle;
-		  aptitude: BrGlamorousButtonWithLabelAndIconAptitude
+		  aptitude: BrGlamorousButtonWithIconAndLabelAptitude
 			  - BrGlamorousButtonExteriorAptitude;
 		  label: 'terminated';
 		  yourself

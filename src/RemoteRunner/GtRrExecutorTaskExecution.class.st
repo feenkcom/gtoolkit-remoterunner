@@ -9,12 +9,6 @@ Class {
 	#category : #'RemoteRunner-Runner'
 }
 
-{ #category : #converting }
-GtRrExecutorTaskExecution >> asElement [
-
-	^ state gtRrAsElement
-]
-
 { #category : #accessing }
 GtRrExecutorTaskExecution >> finishWithFailure: aGtRrError [
 
@@ -25,6 +19,16 @@ GtRrExecutorTaskExecution >> finishWithFailure: aGtRrError [
 GtRrExecutorTaskExecution >> finishWithSuccess: anObject [
 
 	self isFinished ifFalse: [ self setFinishedState ]
+]
+
+{ #category : #'gt-extension' }
+GtRrExecutorTaskExecution >> gtLiveFor: aView [
+
+	<gtView>
+	^ aView explicit
+		  title: 'Live';
+		  priority: 9;
+		  stencil: [ self asElement ]
 ]
 
 { #category : #initialization }
