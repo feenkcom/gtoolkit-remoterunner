@@ -185,20 +185,67 @@ GtRrScheduler >> applyCodeChanges: aCollection [
 GtRrScheduler >> asElement [
 
 	^ BlElement new
-		  layout: BlLinearLayout vertical;
+		  layout: BlLinearLayout horizontal;
 		  constraintsDo: [ :c | 
-			  c horizontal fitContent.
-			  c vertical fitContent ];
+			  c horizontal matchParent.
+			  c vertical matchParent ];
+		  addChild: self asTaskQueueElement as: #taskQueue;
+		  addChild: self asExecutorsElement as: #executors;
+		  addChild: self asFinishedTasksElement as: #finished;
+		  yourself
+]
+
+{ #category : #converting }
+GtRrScheduler >> asExecutorsElement [
+
+	^ BrSimpleList new 
+		  items: (sharedAccess critical: [ executors values copy ]);
+		  stencil: #asElement;
 		  in: [ :e | 
-			  (sharedAccess critical: [ executors copy ]) do: [ :x | 
-					  e addChild: x asElement as: x identityHash asString ].
 			  announcer
-				  when: GtRrWorkerConnectedAnnouncement do: [ :a | 
-					  e
-						  addChild: a executor asElement
-						  as: a executor identityHash asString ];
-				  when: GtRrWorkerDisconnectedAnnouncement
-				  do: [ :a | e removeChildNamed: a executor identityHash asString ] ];
+				  when: GtRrWorkerAnnouncement
+				  do: [ 
+					  e items: (sharedAccess critical: [ executors values copy ]) ] ];
+		  yourself
+]
+
+{ #category : #converting }
+GtRrScheduler >> asFinishedTasksElement [
+
+	^ BrSimpleList new
+		  items: #(  );
+		  stencil: #asElement;
+		  in: [ :e | 
+			  | buffer |
+			  buffer := OrderedCollection new.
+			  announcer
+				  when: GtRrTaskSucceededAnnouncement , GtRrTaskFailedAnnouncement
+				  do: [ :a | 
+					  buffer addFirst: a task.
+					  e items: buffer ] ];
+		  yourself
+]
+
+{ #category : #converting }
+GtRrScheduler >> asTaskQueueElement [
+
+	^ taskQueue gtRrAsElement
+		  in: [ :e | 
+			  announcer
+				  when: GtRrTaskScheduledAnnouncement, GtRrTaskRunningAnnouncement
+				  do: [ e items: taskQueue contents ] ];
+		  yourself
+]
+
+{ #category : #converting }
+GtRrScheduler >> asTimeoutQueueElement [
+
+	^ timeoutQueue gtRrAsElement
+		  stencil: #gtRrAsElement;
+		  in: [ :e | 
+			  announcer when: GtRrTaskAnnouncement do: [ 
+					  self flag: 'TODO find better way to update'.
+					  e items: (timeoutQueue instVarNamed: #queue) contents ] ];
 		  yourself
 ]
 
@@ -461,7 +508,9 @@ GtRrScheduler >> schedule: aTask [
 GtRrScheduler >> scheduleTaskExecution: aTaskExecution [
 
 	aTaskExecution task execution: aTaskExecution.
-	taskQueue nextPut: aTaskExecution
+	taskQueue nextPut: aTaskExecution.
+	self announceAndLog:
+		(GtRrTaskScheduledAnnouncement task: aTaskExecution task)
 ]
 
 { #category : #'api - runner' }

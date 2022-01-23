@@ -1,6 +1,15 @@
 Extension { #name : #SharedQueue }
 
 { #category : #'*RemoteRunner' }
+SharedQueue >> gtRrAsElement [
+
+	^ BrSimpleList new
+		  items: self contents;
+		  stencil: #asElement;
+		  yourself
+]
+
+{ #category : #'*RemoteRunner' }
 SharedQueue >> gtRrNextSuchThat: aBlock [
 
 	^ monitor critical: [ 

@@ -18,7 +18,7 @@ GtRrJob >> addResult: aGtRrTask [
 	results add: aGtRrTask.
 	self announce: (aGtRrTask hasErrors
 		ifTrue: [ GtRrTaskFailedAnnouncement task: aGtRrTask ]
-		ifFalse: [ GtRrTaskFinishedAnnouncement task: aGtRrTask ])
+		ifFalse: [ GtRrTaskSucceededAnnouncement task: aGtRrTask ])
 ]
 
 { #category : #accessing }

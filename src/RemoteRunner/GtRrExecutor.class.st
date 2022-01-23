@@ -11,7 +11,6 @@ Class {
 		'attributes',
 		'observer',
 		'observerProcess',
-		'observerSemaphore',
 		'currentTaskExecution'
 	],
 	#category : #'RemoteRunner-Runner'
@@ -43,7 +42,9 @@ GtRrExecutor >> asBusyElement [
 		  icon: self asBusyIcon;
 		  label: self asBusyText;
 		  in: [ :e | 
-			  announcer when: GtRrTaskAnnouncement do: [ 
+			  announcer
+				  when: GtRrTaskAnnouncement , GtRrWorkerAnnouncement
+				  do: [ 
 					  e
 						  icon: self asBusyIcon;
 						  label: self asBusyText ] ];
@@ -123,7 +124,9 @@ GtRrExecutor >> asLastTaskElement [
 		  in: [ :e | 
 			  currentTaskExecution ifNotNil: [ :t | 
 					  e addChild: t asElement as: #content ].
-			  announcer when: GtRrTaskAnnouncement do: [ :a | 
+			  announcer
+				  when: GtRrTaskAnnouncement , GtRrWorkerAnnouncement
+				  do: [ :a | 
 					  e removeChildNamed: #content.
 					  currentTaskExecution ifNotNil: [ :t | 
 							  e addChild: t asElement as: #content ] ] ];
@@ -176,15 +179,17 @@ GtRrExecutor >> commandTerminateTaskId: aTaskId [
 { #category : #connecting }
 GtRrExecutor >> connect [
 
+	"keeps the request alive by waiting on semaphore, just kill the process on disconnect."
+
 	self assert: [ observerProcess isNil ].
 	connection
 		when: PharoLinkServerConnectionDisconnectedAnnouncement
 		send: #disconnect:
 		to: self.
 	self commandConnected.
-	announcer announce: (GtRrWorkerConnectedAnnouncement worker: self).
+	announcer announce: (GtRrWorkerConnectedAnnouncement executor: self).
 	observerProcess := Processor activeProcess.
-	observerSemaphore wait
+	Semaphore new wait
 ]
 
 { #category : #accessing }
@@ -209,16 +214,15 @@ GtRrExecutor >> currentTaskExecution [
 GtRrExecutor >> disconnect: anPharoLinkAnnouncement [
 
 	currentTaskExecution ifNotNil: [ 
-		currentTaskExecution finishWithFailure: 'stop' gtRrAsError ].
+		currentTaskExecution finishWithFailure: 'disconnected' gtRrAsError ].
 	currentTaskExecution := nil.
-	observerSemaphore ifNotNil: #signalAll.
-	observerSemaphore := nil.
+	"the connection is dead, there is nothing we can do but cutting ties with our collaborators"
 	observerProcess ifNotNil: #terminate.
 	observerProcess := nil.
 	observer := nil.
-	connection stop.
 	self noteBusy.
-	announcer announce: (GtRrWorkerDisconnectedAnnouncement worker: self)
+	announcer announce:
+		(GtRrWorkerDisconnectedAnnouncement executor: self)
 ]
 
 { #category : #accessing }
@@ -251,7 +255,6 @@ GtRrExecutor >> initializeConnection: aConnection attributes: aDictionary observ
 	connection := aConnection.
 	attributes := aDictionary.
 	observer := aBlock.
-	observerSemaphore := Semaphore new.
 	timeoutQueue := aQueue.
 	announcer := Announcer new
 ]
@@ -343,10 +346,9 @@ GtRrExecutor >> summaryAttributes [
 GtRrExecutor >> task: aTaskId failure: aGtRrError [
 
 	| task |
-	self assert: [ busy ].
-	self assert: [ currentTaskExecution task id = aTaskId ].
+	currentTaskExecution ifNil: [ ^ self ].
+	currentTaskExecution task id = aTaskId ifFalse: [ ^ self ].
 	task := currentTaskExecution task.
-	currentTaskExecution setFinishedState.
 	currentTaskExecution finishWithFailure: aGtRrError.
 	currentTaskExecution := nil.
 	self noteFree.
@@ -357,22 +359,12 @@ GtRrExecutor >> task: aTaskId failure: aGtRrError [
 { #category : #running }
 GtRrExecutor >> task: aTaskId success: anObject [
 
+	| oldTaskExecution |
 	self assert: [ busy ].
 	self assert: [ currentTaskExecution task id = aTaskId ].
 	currentTaskExecution finishWithSuccess: anObject.
-	announcer announce:
-		(GtRrTaskFinishedAnnouncement task: currentTaskExecution task).
+	oldTaskExecution := currentTaskExecution.
 	currentTaskExecution := nil.
-	self noteFree
-]
-
-{ #category : #private }
-GtRrExecutor >> waitOnObserver [
-
-	"Wait on the observer semaphore.
-	This is called by the worker to keep the observer valid."
-
-	self assert: [ observerProcess isNil ].
-	observerProcess := Processor activeProcess.
-	observerSemaphore wait
+	self noteFree announcer announce:
+		(GtRrTaskSucceededAnnouncement task: oldTaskExecution task)
 ]

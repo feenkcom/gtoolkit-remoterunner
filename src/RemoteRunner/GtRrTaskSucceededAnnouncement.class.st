@@ -1,5 +1,5 @@
 Class {
-	#name : #GtRrTaskFinishedAnnouncement,
+	#name : #GtRrTaskSucceededAnnouncement,
 	#superclass : #GtRrTaskAnnouncement,
 	#category : #'RemoteRunner-Announcements'
 }

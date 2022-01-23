@@ -35,7 +35,7 @@ GtRemoteRunnerExamples >> assignTasksToWorkersTaskFirst [
 		when: GtRrJobCompletedAnnouncement do: [ 
 			jobCompletedCount := jobCompletedCount + 1.
 			semaphore signal ];
-		when: GtRrTaskFinishedAnnouncement
+		when: GtRrTaskSucceededAnnouncement
 		do: [ taskCompletedCount := taskCompletedCount + 1 ];
 		when: GtRrTaskFailedAnnouncement
 		do: [ taskFailedCount := taskFailedCount + 1 ].
@@ -92,7 +92,7 @@ GtRemoteRunnerExamples >> assignTasksToWorkersWorkerFirst [
 		when: GtRrJobCompletedAnnouncement do: [ 
 			jobCompletedCount := jobCompletedCount + 1.
 			semaphore signal ];
-		when: GtRrTaskFinishedAnnouncement
+		when: GtRrTaskSucceededAnnouncement
 		do: [ taskCompletedCount := taskCompletedCount + 1 ];
 		when: GtRrTaskFailedAnnouncement
 		do: [ taskFailedCount := taskFailedCount + 1 ].
@@ -278,7 +278,7 @@ GtRemoteRunnerExamples >> multipleJobs [
 				[ jobCompletedCount := jobCompletedCount + 1 ];
 			when: GtRrTaskRunningAnnouncement do: 
 				[ taskStartedCount := taskStartedCount + 1 ];
-			when: GtRrTaskFinishedAnnouncement do: 
+			when: GtRrTaskSucceededAnnouncement do: 
 				[ taskCompletedCount := taskCompletedCount + 1 ];
 			when: GtRrTaskFailedAnnouncement do: 
 				[ taskFailedCount := taskFailedCount + 1 ].
@@ -329,7 +329,7 @@ GtRemoteRunnerExamples >> simpleTask [
 		when: GtRrTaskRunningAnnouncement do: 
 			[ taskStartedCount := taskStartedCount + 1.
 			times add: 1 -> DateAndTime now ];
-		when: GtRrTaskFinishedAnnouncement do: 
+		when: GtRrTaskSucceededAnnouncement do: 
 			[ taskCompletedCount := taskCompletedCount + 1.
 			times add: 3 -> DateAndTime now. ];
 		when: GtRrTaskFailedAnnouncement do: 
@@ -384,7 +384,7 @@ GtRemoteRunnerExamples >> simpleTestTask [
 		when: GtRrTaskRunningAnnouncement do: 
 			[ taskStartedCount := taskStartedCount + 1.
 			times add: 1 -> DateAndTime now ];
-		when: GtRrTaskFinishedAnnouncement do: 
+		when: GtRrTaskSucceededAnnouncement do: 
 			[ taskCompletedCount := taskCompletedCount + 1.
 			times add: 3 -> DateAndTime now. ];
 		when: GtRrTaskFailedAnnouncement do: 
@@ -478,7 +478,7 @@ GtRemoteRunnerExamples >> terminateStartedJob [
 			[ taskStartedCount := taskStartedCount + 1.
 			times add: 1 -> DateAndTime now.
 			semaphore signal ];
-		when: GtRrTaskFinishedAnnouncement do: 
+		when: GtRrTaskSucceededAnnouncement do: 
 			[ taskCompletedCount := taskCompletedCount + 1.
 			times add: 3 -> DateAndTime now. ];
 		when: GtRrTaskFailedAnnouncement do: 
@@ -544,7 +544,7 @@ GtRemoteRunnerExamples >> timeoutJob [
 		when: GtRrTaskRunningAnnouncement do: 
 			[ taskStartedCount := taskStartedCount + 1.
 			times add: 1 -> DateAndTime now ];
-		when: GtRrTaskFinishedAnnouncement do: 
+		when: GtRrTaskSucceededAnnouncement do: 
 			[ taskCompletedCount := taskCompletedCount + 1.
 			times add: 3 -> DateAndTime now. ];
 		when: GtRrTaskFailedAnnouncement do: 
@@ -607,7 +607,7 @@ GtRemoteRunnerExamples >> timeoutTask [
 		when: GtRrTaskRunningAnnouncement do: 
 			[ taskStartedCount := taskStartedCount + 1.
 			times add: 1 -> DateAndTime now ];
-		when: GtRrTaskFinishedAnnouncement do: 
+		when: GtRrTaskSucceededAnnouncement do: 
 			[ taskCompletedCount := taskCompletedCount + 1.
 			times add: 3 -> DateAndTime now. ];
 		when: GtRrTaskFailedAnnouncement do: 
@@ -676,7 +676,7 @@ GtRemoteRunnerExamples >> timeoutWorker [
 		when: GtRrTaskRunningAnnouncement do: 
 			[ taskStartedCount := taskStartedCount + 1.
 			times add: 1 -> DateAndTime now ];
-		when: GtRrTaskFinishedAnnouncement do: 
+		when: GtRrTaskSucceededAnnouncement do: 
 			[ taskCompletedCount := taskCompletedCount + 1.
 			times add: 3 -> DateAndTime now. ];
 		when: GtRrTaskFailedAnnouncement do: 
