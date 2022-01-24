@@ -1,6 +1,8 @@
 Class {
 	#name : #PlpoGtRrWorkerConnection,
 	#superclass : #PharoLinkProxyObject,
+	#traits : 'TGtWorkerConnectionUI',
+	#classTraits : 'TGtWorkerConnectionUI classTrait',
 	#category : #'RemoteRunner-Runner'
 }
 
