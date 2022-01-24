@@ -8,7 +8,8 @@ Class {
 	#superclass : #BrHorizontalPane,
 	#instVars : [
 		'portInputField',
-		'workerConnection'
+		'workerConnection',
+		'spawnButton'
 	],
 	#category : #'RemoteRunner-UI'
 }
@@ -40,7 +41,7 @@ GtRrWorkerPortNumberWidget >> newOkButton [
 		label: 'Open a Worker Playground';
 		margin: (BlInsets top: 1);
 		action: [ :aButton | 
-			"aButton phlow spawnObject:" self workerApplication inspect ].
+			(spawnButton ifNil: [ aButton ]) phlow spawnObject: self workerApplication ].
 
 ]
 
@@ -81,6 +82,18 @@ GtRrWorkerPortNumberWidget >> onPortModifiedEvent: anEvent [
 		ifTrue: [ Color black ]
 		ifFalse: [ Color red ].
 	portInputField text foreground: colour.
+]
+
+{ #category : #accessing }
+GtRrWorkerPortNumberWidget >> spawnButton [
+
+	^ spawnButton
+]
+
+{ #category : #accessing }
+GtRrWorkerPortNumberWidget >> spawnButton: anObject [
+
+	spawnButton := anObject
 ]
 
 { #category : #private }
