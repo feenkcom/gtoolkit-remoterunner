@@ -252,6 +252,7 @@ GtRrScheduler >> connectWithAttributes: aDictionary observer: aBlock [
 		            connection: connection
 		            attributes: aDictionary
 		            observer: aBlock
+		            taskQueue: taskQueue
 		            timeoutQueue: timeoutQueue
 		            announcerScheduler: announcerWorker.
 	executor announcer
@@ -335,19 +336,6 @@ GtRrScheduler >> futureExecutionFor: aTask timeout: aTimeout [
 		  task: aTask;
 		  timeout: aTimeout;
 		  yourself
-]
-
-{ #category : #'as yet unclassified' }
-GtRrScheduler >> futureJob: aJob [
-
-	^ self futureJob: aJob timeout: aJob timeout
-]
-
-{ #category : #'as yet unclassified' }
-GtRrScheduler >> futureJob: aJob timeout: aTimeout [
-
-	aJob scheduler: self.
-	^ jobWorker future: aJob timeout: aTimeout
 ]
 
 { #category : #ui }
@@ -440,7 +428,7 @@ GtRrScheduler >> initialize [
 		          listenPort: 7042;
 		          setDebugMode;
 		          yourself.
-	server globals at: #GtAssignedRemoteRunner put: self.
+	server globals at: #GtRrThisScheduler put: self.
 	announcerWorker := TKTWorkerPool new
 		                   poolMaxSize: 8;
 		                   yourself.
@@ -453,6 +441,34 @@ GtRrScheduler >> initialize [
 	sharedAccess := GtMutualExclusionSemaphore forMutualExclusion.
 	executors := Dictionary new.
 	self environment: GtRrCodeSyncedLocalEnvironment new
+]
+
+{ #category : #'as yet unclassified' }
+GtRrScheduler >> jobFuture: aJob [
+
+	aJob scheduler: self.
+	^ jobWorker future: aJob
+]
+
+{ #category : #'as yet unclassified' }
+GtRrScheduler >> jobFuture: aJob timeout: aTimeout [
+
+	aJob scheduler: self.
+	^ jobWorker future: aJob timeout: aTimeout
+]
+
+{ #category : #'as yet unclassified' }
+GtRrScheduler >> jobSchedule: aJob [
+
+	aJob scheduler: self.
+	^ jobWorker schedule: aJob
+]
+
+{ #category : #'as yet unclassified' }
+GtRrScheduler >> jobSchedule: aJob timeout: aTimeout [
+
+	aJob scheduler: self.
+	^ jobWorker schedule: aJob timeout: aTimeout
 ]
 
 { #category : #'api - logger' }
@@ -504,19 +520,6 @@ GtRrScheduler >> removeSubscription: subscription [
 GtRrScheduler >> schedule: aTask [
 
 	^ self schedule: aTask timeout: aTask timeout
-]
-
-{ #category : #'as yet unclassified' }
-GtRrScheduler >> scheduleJob: aJob [
-
-	^ self scheduleJob: aJob timeout: aJob timeout
-]
-
-{ #category : #'as yet unclassified' }
-GtRrScheduler >> scheduleJob: aJob timeout: aTimeout [
-
-	aJob scheduler: self.
-	^ jobWorker schedule: aJob timeout: aTimeout
 ]
 
 { #category : #schedulling }
@@ -609,18 +612,6 @@ GtRrScheduler >> summaryAttributes [
 				  sharedAccess } ]
 ]
 
-{ #category : #'api - worker' }
-GtRrScheduler >> task: aTaskId failure: anObject [
-
-	^ self currentExecutor task: aTaskId failure: anObject
-]
-
-{ #category : #'api - worker' }
-GtRrScheduler >> task: aTaskId success: anObject [
-
-	^ self currentExecutor task: aTaskId success: anObject
-]
-
 { #category : #schedulling }
 GtRrScheduler >> taskExecutionFor: aTask [
 
@@ -635,20 +626,6 @@ GtRrScheduler >> taskExecutionFor: aTask timeout: aTimeout [
 		  task: aTask;
 		  timeout: aTimeout;
 		  yourself
-]
-
-{ #category : #'api - worker' }
-GtRrScheduler >> taskNext [
-
-	"Answer the next task allocated to the worker that is waiting on this method."
-
-	| executor taskExecution task |
-	executor := self currentExecutor.
-	taskExecution := taskQueue gtRrNextSuchThat: [ :e | 
-		                 e task constraint matches: executor attributes ].
-	task := taskExecution task.
-	executor scheduleTaskExecution: taskExecution.
-	^ task
 ]
 
 { #category : #'announcer - subscription' }

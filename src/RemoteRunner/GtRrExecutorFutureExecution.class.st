@@ -3,7 +3,7 @@ Class {
 	#superclass : #TKTFutureExecution,
 	#traits : 'TGtRrExecutorExecution',
 	#classTraits : 'TGtRrExecutorExecution classTrait',
-	#category : #'RemoteRunner-Runner'
+	#category : #'RemoteRunner-Runner-Support'
 }
 
 { #category : #accessing }

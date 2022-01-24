@@ -58,10 +58,10 @@ GtRrLocalEnvironment >> newWorkerLocalProcessArgumentsFor: someSettings [
 		add: someSettings serverImage fullName;
 		add: 'clap';
 		add: 'remoteRunnerWorker'.
-	remoteRunner debugMode ifTrue: [ args add: '--log' ].
+	scheduler debugMode ifTrue: [ args add: '--log' ].
 	args
 		add: '--serverSocketAddress';
-		add: remoteRunner port asString;
+		add: scheduler port asString;
 		add: '--detachChangesFromFileSystem'.
 	^ args
 ]
@@ -116,7 +116,7 @@ GtRrLocalEnvironment >> startWatchDog [
 		            processes
 			            remove: e;
 			            add: process.
-		            remoteRunner announceAndLog:
+		            scheduler announceAndLog:
 			            (GtRrProcessReplacedAnnouncement
 				             before: e
 				             after: process) ] ] repeat ] forkNamed:

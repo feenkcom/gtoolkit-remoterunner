@@ -1,7 +1,7 @@
 Class {
 	#name : #GtRrExecutorReadyTaskState,
 	#superclass : #TKTReadyTaskState,
-	#category : #'RemoteRunner-Runner'
+	#category : #'RemoteRunner-Runner-Support'
 }
 
 { #category : #executing }

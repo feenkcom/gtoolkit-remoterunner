@@ -52,9 +52,7 @@ GtRrCodeSyncTask >> serializedChanges: anObject [
 { #category : #executing }
 GtRrCodeSyncTask >> value [
 
-	| changes |
-	changes := LanguageLinkUtils base64Decode:
-		           serializedChanges readStream.
-	changes do: #applyCodeChange.
+	(LanguageLinkUtils base64Decode: serializedChanges readStream) do:
+		#applyCodeChange.
 	^ true
 ]

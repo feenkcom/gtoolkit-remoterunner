@@ -2,7 +2,7 @@ Class {
 	#name : #GtRrEnvironment,
 	#superclass : #Object,
 	#instVars : [
-		'remoteRunner'
+		'scheduler'
 	],
 	#category : #'RemoteRunner-Runner'
 }
@@ -10,13 +10,13 @@ Class {
 { #category : #accessing }
 GtRrEnvironment >> scheduler [
 
-	^ remoteRunner
+	^ scheduler
 ]
 
 { #category : #accessing }
 GtRrEnvironment >> scheduler: anObject [
 
-	remoteRunner := anObject
+	scheduler := anObject
 ]
 
 { #category : #'startup - shutdown' }

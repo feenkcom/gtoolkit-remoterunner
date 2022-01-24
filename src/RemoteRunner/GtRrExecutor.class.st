@@ -7,23 +7,25 @@ Class {
 	#instVars : [
 		'announcer',
 		'connection',
-		'timeoutQueue',
 		'attributes',
 		'observer',
 		'observerProcess',
+		'taskQueue',
+		'timeoutQueue',
 		'currentTaskExecution'
 	],
 	#category : #'RemoteRunner-Runner'
 }
 
 { #category : #'instance creation' }
-GtRrExecutor class >> connection: aConnection attributes: aDictionary observer: aBlock timeoutQueue: aQueue announcerScheduler: aScheduler [
+GtRrExecutor class >> connection: aConnection attributes: aDictionary observer: aBlock taskQueue: aQueue timeoutQueue: anotherQueue announcerScheduler: aScheduler [
 
 	^ self new
 		  initializeConnection: aConnection
 		  attributes: aDictionary
 		  observer: aBlock
-		  timeoutQueue: aQueue
+		  taskQueue: aQueue
+		  timeoutQueue: anotherQueue
 		  announcerScheduler: aScheduler;
 		  yourself
 ]
@@ -262,12 +264,13 @@ GtRrExecutor >> gtSummaryFor: aView [
 ]
 
 { #category : #initialization }
-GtRrExecutor >> initializeConnection: aConnection attributes: aDictionary observer: aBlock timeoutQueue: aQueue announcerScheduler: aScheduler [
+GtRrExecutor >> initializeConnection: aConnection attributes: aDictionary observer: aBlock taskQueue: aQueue timeoutQueue: anotherQueue announcerScheduler: aScheduler [
 
 	connection := aConnection.
 	attributes := aDictionary.
 	observer := aBlock.
-	timeoutQueue := aQueue.
+	taskQueue := aQueue.
+	timeoutQueue := anotherQueue.
 	announcer := GtRrAsyncAnnouncer scheduler: aScheduler
 ]
 
@@ -380,4 +383,17 @@ GtRrExecutor >> task: aTaskId success: anObject [
 	self noteFree.
 	announcer announce:
 		(GtRrTaskSucceededAnnouncement task: oldTaskExecution task)
+]
+
+{ #category : #tasks }
+GtRrExecutor >> taskNext [
+
+	"Answer the next task allocated to the worker that is waiting on this method."
+
+	| taskExecution task |
+	taskExecution := taskQueue gtRrNextSuchThat: [ :e | 
+		                 e task constraint matches: attributes ].
+	task := taskExecution task.
+	self scheduleTaskExecution: taskExecution.
+	^ task
 ]

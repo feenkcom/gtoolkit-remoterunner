@@ -1,7 +1,7 @@
 Class {
 	#name : #GtRrExecutorRunningTaskState,
 	#superclass : #TKTRunningTaskState,
-	#category : #'RemoteRunner-Runner'
+	#category : #'RemoteRunner-Runner-Support'
 }
 
 { #category : #cancelling }

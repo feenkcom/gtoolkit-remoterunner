@@ -24,7 +24,7 @@ GtRrCodeSync >> flush [
 	buffer := OrderedCollection new.
 	events flush: [ :event | buffer add: event ].
 	buffer ifEmpty: [ "nothing to send, ignore" ^ self ].
-	scheduler scheduleJob: (GtRrCodeSyncJob serializedChanges:
+	scheduler jobSchedule: (GtRrCodeSyncJob serializedChanges:
 			 (LanguageLinkUtils base64Encode: buffer))
 ]
 
@@ -77,10 +77,4 @@ GtRrCodeSync >> stop [
 	subscription ifNotNil: [ 
 		subscription announcer removeSubscription: subscription.
 		subscription := nil ]
-]
-
-{ #category : #pages }
-GtRrCodeSync >> testing [
-
-	
 ]

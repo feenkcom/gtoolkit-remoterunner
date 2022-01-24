@@ -8,7 +8,7 @@ Trait {
 		'startTime',
 		'endTime'
 	],
-	#category : #'RemoteRunner-Runner'
+	#category : #'RemoteRunner-Runner-Support'
 }
 
 { #category : #converting }

@@ -168,7 +168,7 @@ GtRrWorker >> connect [
 	^ commandFactory
 		  bindingAt: #attributes put: attributes;
 		  send:
-			  ('GtAssignedRemoteRunner connectWithAttributes: attributes observer: {1}. true' 
+			  ('GtRrThisScheduler connectWithAttributes: attributes observer: {1}. true' 
 				   format: { observer pharoLinkFormattedCode })
 ]
 
@@ -249,7 +249,7 @@ GtRrWorker >> task: aTask failure: anError [
 		  bindingAt: #error
 		  put: (LeJsonV4 uniqueInstance serialize: anError gtRrAsError);
 		  sendAndWait:
-			  'GtAssignedRemoteRunner task: id failure: (LeJsonV4 uniqueInstance deserialize: error readStream). true'
+			  'GtRrThisScheduler currentExecutor task: id failure: (LeJsonV4 uniqueInstance deserialize: error readStream). true'
 ]
 
 { #category : #accessing }
@@ -263,7 +263,7 @@ GtRrWorker >> task: aTask success: anObject [
 		  bindingAt: #result
 		  put: (LeJsonV4 uniqueInstance serialize: anObject);
 		  sendAndWait:
-			  'GtAssignedRemoteRunner task: id success: (LeJsonV4 uniqueInstance deserialize: result readStream). true'
+			  'GtRrThisScheduler currentExecutor task: id success: (LeJsonV4 uniqueInstance deserialize: result readStream). true'
 ]
 
 { #category : #private }
@@ -271,7 +271,7 @@ GtRrWorker >> taskNext [
 
 	| promise |
 	promise := application newCommandFactory send:
-		           'LeJsonV4 uniqueInstance serialize: GtAssignedRemoteRunner taskNext'.
+		           'LeJsonV4 uniqueInstance serialize: GtRrThisScheduler currentExecutor taskNext'.
 	^ LeJsonV4 uniqueInstance deserialize:
 		  promise waitForValue readStream
 ]
