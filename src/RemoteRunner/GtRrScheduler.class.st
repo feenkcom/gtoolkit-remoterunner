@@ -241,8 +241,7 @@ GtRrScheduler >> asTaskQueueElement [
 	^ taskQueue gtRrAsElement
 		  in: [ :e | 
 			  announcer
-				  when:
-					  GtRrTaskScheduledAnnouncement , GtRrTaskRunningAnnouncement
+				  when: GtRrTaskAnnouncement
 				  send: #requestUpdate
 				  to: (BrElementUpdater new
 						   element: e;
