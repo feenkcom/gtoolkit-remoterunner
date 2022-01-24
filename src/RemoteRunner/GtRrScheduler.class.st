@@ -156,32 +156,6 @@ GtRrScheduler >> announcer [
 	^ announcer
 ]
 
-{ #category : #'_shady' }
-GtRrScheduler >> applyCodeChanges: aCollection [
-
-	| errors serialized drainer futures |
-	serialized := LanguageLinkUtils base64Encode: aCollection.
-	drainer := TKTWorkerPool new
-		           name: 'CodeSync parallel';
-		           poolMaxSize: 32;
-		           start;
-		           yourself.
-	errors := OrderedCollection new.
-	futures := executors
-		           select: [ :executor | 
-		           executor attributes includesKey: #codeSynced ]
-		           thenCollect: [ :executor | 
-			           drainer
-				           future: [ 
-					           [ executor commandApplyCodeChanges: serialized ]
-						           on: Error
-						           do: [ :ex | errors add: executor -> ex freeze ] ]
-				           timeout: 1 minute ].
-	futures do: [ :e | e waitForCompletion: 1 minute ].
-	drainer stop.
-	^ errors
-]
-
 { #category : #converting }
 GtRrScheduler >> asElement [
 
@@ -200,7 +174,7 @@ GtRrScheduler >> asElement [
 GtRrScheduler >> asExecutorsElement [
 
 	^ BrSimpleList new
-		  items: (sharedAccess critical: [ executors values copy ]);
+		  items: self executors;
 		  stencil: #asElement;
 		  in: [ :e | 
 			  announcer
@@ -208,8 +182,7 @@ GtRrScheduler >> asExecutorsElement [
 				  send: #requestUpdate
 				  to: (BrElementUpdater new
 						   element: e;
-						   action: [ 
-							   e items: (sharedAccess critical: [ executors values copy ]) ];
+						   action: [ e items: self executors ];
 						   yourself) ];
 		  yourself
 ]
@@ -327,7 +300,13 @@ GtRrScheduler >> environment [
 GtRrScheduler >> environment: anEnvironment [
 
 	environment := anEnvironment.
-	environment remoteRunner: self.
+	environment scheduler: self.
+]
+
+{ #category : #accessing }
+GtRrScheduler >> executors [
+
+	^ sharedAccess critical: [ executors values copy ]
 ]
 
 { #category : #accessing }
@@ -367,6 +346,7 @@ GtRrScheduler >> futureJob: aJob [
 { #category : #'as yet unclassified' }
 GtRrScheduler >> futureJob: aJob timeout: aTimeout [
 
+	aJob scheduler: self.
 	^ jobWorker future: aJob timeout: aTimeout
 ]
 
@@ -524,6 +504,19 @@ GtRrScheduler >> removeSubscription: subscription [
 GtRrScheduler >> schedule: aTask [
 
 	^ self schedule: aTask timeout: aTask timeout
+]
+
+{ #category : #'as yet unclassified' }
+GtRrScheduler >> scheduleJob: aJob [
+
+	^ self scheduleJob: aJob timeout: aJob timeout
+]
+
+{ #category : #'as yet unclassified' }
+GtRrScheduler >> scheduleJob: aJob timeout: aTimeout [
+
+	aJob scheduler: self.
+	^ jobWorker schedule: aJob timeout: aTimeout
 ]
 
 { #category : #schedulling }

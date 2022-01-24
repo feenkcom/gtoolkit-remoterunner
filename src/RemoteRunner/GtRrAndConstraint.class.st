@@ -18,15 +18,9 @@ GtRrAndConstraint class >> leJsonV4Name [
 GtRrAndConstraint class >> left: aConstraint right: anotherConstraint [
 
 	^ self new
-		  initializeLeft: aConstraint right: anotherConstraint;
+		  left: aConstraint;
+		  right: anotherConstraint;
 		  yourself
-]
-
-{ #category : #initialization }
-GtRrAndConstraint >> initializeLeft: aConstraint right: anotherConstraint [
-
-	left := aConstraint.
-	right := anotherConstraint
 ]
 
 { #category : #accessing }
@@ -42,9 +36,9 @@ GtRrAndConstraint >> left: anObject [
 ]
 
 { #category : #testing }
-GtRrAndConstraint >> matches: aConnection [
+GtRrAndConstraint >> matches: aDictionary [
 
-	^ (left matches: aConnection) and: [ right matches: aConnection ]
+	^ (left matches: aDictionary) and: [ right matches: aDictionary ]
 ]
 
 { #category : #accessing }

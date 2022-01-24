@@ -8,13 +8,13 @@ Class {
 }
 
 { #category : #accessing }
-GtRrEnvironment >> remoteRunner [
+GtRrEnvironment >> scheduler [
 
 	^ remoteRunner
 ]
 
 { #category : #accessing }
-GtRrEnvironment >> remoteRunner: anObject [
+GtRrEnvironment >> scheduler: anObject [
 
 	remoteRunner := anObject
 ]

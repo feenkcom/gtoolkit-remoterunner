@@ -5,17 +5,10 @@ Class {
 		'events',
 		'subscription',
 		'flusher',
-		'remoteRunner',
-		'errors'
+		'scheduler'
 	],
 	#category : #'RemoteRunner-Runner-CodeSync'
 }
-
-{ #category : #accessing }
-GtRrCodeSync >> errors [
-
-	^ errors
-]
 
 { #category : #finalization }
 GtRrCodeSync >> finalize [
@@ -31,8 +24,8 @@ GtRrCodeSync >> flush [
 	buffer := OrderedCollection new.
 	events flush: [ :event | buffer add: event ].
 	buffer ifEmpty: [ "nothing to send, ignore" ^ self ].
-	(remoteRunner applyCodeChanges: buffer) ifNotEmpty: [ :e | 
-		errors add: buffer -> e ]
+	scheduler scheduleJob: (GtRrCodeSyncJob serializedChanges:
+			 (LanguageLinkUtils base64Encode: buffer))
 ]
 
 { #category : #initialization }
@@ -40,7 +33,6 @@ GtRrCodeSync >> initialize [
 
 	super initialize.
 	events := WaitfreeQueue new.
-	errors := OrderedCollection new.
 	flusher := TKTWorker new
 		           name: 'GtRrCodeSync flusher';
 		           yourself
@@ -56,15 +48,15 @@ GtRrCodeSync >> onEntryAdded: anEntryAddedEvent [
 ]
 
 { #category : #accessing }
-GtRrCodeSync >> remoteRunner [
+GtRrCodeSync >> scheduler [
 
-	^ remoteRunner
+	^ scheduler
 ]
 
 { #category : #accessing }
-GtRrCodeSync >> remoteRunner: aRemoteRunner [
+GtRrCodeSync >> scheduler: aRemoteRunner [
 
-	remoteRunner := aRemoteRunner
+	scheduler := aRemoteRunner
 ]
 
 { #category : #accessing }
@@ -85,4 +77,10 @@ GtRrCodeSync >> stop [
 	subscription ifNotNil: [ 
 		subscription announcer removeSubscription: subscription.
 		subscription := nil ]
+]
+
+{ #category : #pages }
+GtRrCodeSync >> testing [
+
+	
 ]

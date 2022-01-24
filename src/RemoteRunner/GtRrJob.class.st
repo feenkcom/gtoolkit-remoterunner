@@ -5,8 +5,8 @@ Class {
 	#name : #GtRrJob,
 	#superclass : #GtRrTask,
 	#instVars : [
-		'tasks',
-		'announcer'
+		'scheduler',
+		'tasks'
 	],
 	#category : #'RemoteRunner-Runner'
 }
@@ -150,6 +150,18 @@ GtRrJob >> resultsWithErrors [
 	^ results select: #hasErrors
 ]
 
+{ #category : #accessing }
+GtRrJob >> scheduler [
+
+	^ scheduler
+]
+
+{ #category : #accessing }
+GtRrJob >> scheduler: anObject [
+
+	scheduler := anObject
+]
+
 { #category : #'private - running' }
 GtRrJob >> start [
 
@@ -195,16 +207,11 @@ GtRrJob >> summaryAttributes [
 
 { #category : #accessing }
 GtRrJob >> tasks [
-	"Answer the collection of tasks to be executed"
+
+	"Answer the collection of tasks to be executed. Can use scheduler executors to create constraints for specific executor."
+
 	<return: #SequenceableCollection>
-
-	^ self subclassResponsibility 
-]
-
-{ #category : #'as yet unclassified' }
-GtRrJob >> tasksFor: someExecutors [
-
-	^ self tasks
+	^ tasks
 ]
 
 { #category : #'private - running' }
@@ -212,4 +219,10 @@ GtRrJob >> terminate [
 
 	state := #terminating.
 
+]
+
+{ #category : #accessing }
+GtRrJob >> value [
+
+	(tasks := self tasks) do: [ :e | scheduler future: e ]
 ]

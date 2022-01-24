@@ -5,11 +5,11 @@ Class {
 	#name : #GtRrWorker,
 	#superclass : #TKTService,
 	#instVars : [
-		'uid',
 		'application',
 		'attributes',
 		'taskWorker',
-		'connected'
+		'connected',
+		'id'
 	],
 	#category : #'RemoteRunner-Runner'
 }
@@ -118,16 +118,6 @@ GtRrWorker >> command: anArray [
 		  Processor activeProcess priority: priority ]
 ]
 
-{ #category : #accessing }
-GtRrWorker >> commandApplyCodeChanges: aFuelStringOfCollection [
-
-	| changes |
-	changes := LanguageLinkUtils base64Decode:
-		           aFuelStringOfCollection readStream.
-	changes do: #applyCodeChange.
-	^ true
-]
-
 { #category : #commands }
 GtRrWorker >> commandConnected [
 
@@ -192,10 +182,16 @@ GtRrWorker >> currentProcessId [
 ]
 
 { #category : #accessing }
+GtRrWorker >> id [
+
+	^ id
+]
+
+{ #category : #accessing }
 GtRrWorker >> initialize [
 
 	super initialize.
-	uid := UUID new asString.
+	id := UUID new asString.
 	connected := Semaphore new.
 	"put this at lower priority, but to what? taskWorker runs tasks, worker runs service steps"
 	taskWorker := TKTWorker new
@@ -208,6 +204,7 @@ GtRrWorker >> initialize [
 	attributes := Dictionary new
 		              at: #workingDirectory
 		              put: FileLocator workingDirectory resolve fullName;
+		              at: #id put: id;
 		              at: #pid put: self currentProcessId;
 		              at: #platform put: OSPlatform current name;
 		              yourself
@@ -285,10 +282,4 @@ GtRrWorker >> tearDown [
 	taskWorker stop.
 	application stop.
 	super tearDown
-]
-
-{ #category : #accessing }
-GtRrWorker >> uid [
-
-	^ uid
 ]

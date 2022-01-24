@@ -42,5 +42,5 @@ GtRrAllocatedItemsJob >> taskAllocator: aGtRrTaskAllocator [
 { #category : #accessing }
 GtRrAllocatedItemsJob >> tasks [
 
-	^ tasks ifNil: [ tasks := self taskAllocator allocateItems: self allItems ]
+	^ nil ifNil: [ self taskAllocator allocateItems: self allItems ]
 ]

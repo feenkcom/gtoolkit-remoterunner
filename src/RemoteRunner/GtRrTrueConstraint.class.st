@@ -20,7 +20,7 @@ GtRrTrueConstraint class >> leJsonV4Name [
 ]
 
 { #category : #testing }
-GtRrTrueConstraint >> matches: aConnection [
+GtRrTrueConstraint >> matches: aDictionary [
 
 	^ true
 ]

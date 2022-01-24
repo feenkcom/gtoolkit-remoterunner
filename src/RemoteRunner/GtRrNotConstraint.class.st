@@ -11,15 +11,7 @@ Class {
 GtRrNotConstraint class >> constraint: aConstraint [
 
 	^ self new
-		  initializeConstraint: aConstraint;
-		  yourself
-]
-
-{ #category : #jsonV3 }
-GtRrNotConstraint class >> leJsonV4AttributeMapping [
-
-	^ OrderedCollection new
-		  add: #constraint -> #constraint;
+		  constraint: aConstraint;
 		  yourself
 ]
 
@@ -41,8 +33,8 @@ GtRrNotConstraint >> constraint: aConstraint [
 	constraint := aConstraint
 ]
 
-{ #category : #initialization }
-GtRrNotConstraint >> initializeConstraint: aConstraint [
+{ #category : #testing }
+GtRrNotConstraint >> matches: aDictionary [
 
-	constraint := aConstraint
+	^ (constraint matches: aDictionary) not
 ]

@@ -34,11 +34,11 @@ GtRrTasksJob >> printOn: aStream [
 { #category : #accessing }
 GtRrTasksJob >> tasks [
 
-	^ tasks
+	^ nil
 ]
 
 { #category : #accessing }
 GtRrTasksJob >> tasks: anObject [
 
-	tasks := anObject
+	anObject
 ]

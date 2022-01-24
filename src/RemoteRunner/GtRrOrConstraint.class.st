@@ -8,15 +8,6 @@ Class {
 	#category : #'RemoteRunner-Constraints'
 }
 
-{ #category : #jsonV3 }
-GtRrOrConstraint class >> leJsonV4AttributeMapping [
-
-	^ OrderedCollection new
-		  add: #left -> #left;
-		  add: #right -> #right;
-		  yourself
-]
-
 { #category : #accessing }
 GtRrOrConstraint class >> leJsonV4Name [
 
@@ -27,15 +18,9 @@ GtRrOrConstraint class >> leJsonV4Name [
 GtRrOrConstraint class >> left: aConstraint right: anotherConstraint [
 
 	^ self new
-		  initializeLeft: aConstraint right: anotherConstraint;
+		  left: aConstraint;
+		  right: anotherConstraint;
 		  yourself
-]
-
-{ #category : #initialization }
-GtRrOrConstraint >> initializeLeft: aConstraint right: anotherConstraint [
-
-	left := aConstraint.
-	right := anotherConstraint
 ]
 
 { #category : #accessing }
@@ -51,9 +36,9 @@ GtRrOrConstraint >> left: anObject [
 ]
 
 { #category : #testing }
-GtRrOrConstraint >> matches: aConnection [
+GtRrOrConstraint >> matches: aDictionary [
 
-	^ (left matches: aConnection) or: [ right matches: aConnection ]
+	^ (left matches: aDictionary) or: [ right matches: aDictionary ]
 ]
 
 { #category : #accessing }

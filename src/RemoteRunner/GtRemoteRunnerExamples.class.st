@@ -45,7 +45,7 @@ GtRemoteRunnerExamples >> assignTasksToWorkersTaskFirst [
 		           GtRrInImageWorker new
 			           attributes:
 				           { (#platform -> ('plat' , i asString)) } asDictionary;
-			           remoteRunner: remoteRunner;
+			           scheduler: remoteRunner;
 			           connection: PharoLinkServerConnection new;
 			           start ].
 
@@ -75,7 +75,7 @@ GtRemoteRunnerExamples >> assignTasksToWorkersWorkerFirst [
 		           GtRrInImageWorker new
 			           attributes:
 				           { (#platform -> ('plat' , i asString)) } asDictionary;
-			           remoteRunner: remoteRunner;
+			           scheduler: remoteRunner;
 			           connection: PharoLinkServerConnection new;
 			           start ].
 

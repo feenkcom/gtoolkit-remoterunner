@@ -6,14 +6,14 @@ Class {
 	#category : #'RemoteRunner-Runner'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 GtRrExecutorFutureExecution >> finishWithFailure: aGtRrError [
 
 	self isFinished ifFalse: [ self setFinishedState ].
 	future isFinished ifFalse: [ future deployFailure: aGtRrError ]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 GtRrExecutorFutureExecution >> finishWithSuccess: anObject [
 
 	self isFinished ifFalse: [ self setFinishedState ].

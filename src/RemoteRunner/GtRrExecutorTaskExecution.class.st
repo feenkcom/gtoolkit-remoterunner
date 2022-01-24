@@ -3,9 +3,6 @@ Class {
 	#superclass : #TKTTaskExecution,
 	#traits : 'TGtRrExecutorExecution',
 	#classTraits : 'TGtRrExecutorExecution classTrait',
-	#instVars : [
-		'timeout'
-	],
 	#category : #'RemoteRunner-Runner'
 }
 
@@ -36,16 +33,4 @@ GtRrExecutorTaskExecution >> initialize [
 
 	super initialize.
 	state := GtRrExecutorReadyTaskState new
-]
-
-{ #category : #accessing }
-GtRrExecutorTaskExecution >> timeout [
-
-	^ timeout
-]
-
-{ #category : #accessing }
-GtRrExecutorTaskExecution >> timeout: anObject [
-
-	timeout := anObject
 ]

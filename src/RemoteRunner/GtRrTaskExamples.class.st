@@ -17,7 +17,7 @@ GtRrTaskExamples >> timeout [
 	task := GtRrExampleValueTask new.
 	job := GtRrTasksJob new
 		       tasks: { task };
-		       remoteRunner: runner;
+		       scheduler: runner;
 		       yourself.
 	self assert: task timeout equals: 1 minute.
 

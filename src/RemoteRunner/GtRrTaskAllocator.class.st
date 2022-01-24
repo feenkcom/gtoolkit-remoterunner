@@ -16,9 +16,9 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-GtRrTaskAllocator class >> remoteRunner: aGtRemoteRunner [
+GtRrTaskAllocator class >> scheduler: aGtRemoteRunner [
 
-	^ self new remoteRunner: aGtRemoteRunner
+	^ self new scheduler: aGtRemoteRunner
 ]
 
 { #category : #allocating }

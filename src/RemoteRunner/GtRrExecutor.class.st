@@ -160,14 +160,6 @@ GtRrExecutor >> attributes [
 ]
 
 { #category : #commands }
-GtRrExecutor >> commandApplyCodeChanges: aFuelStringOfCollection [
-
-	^ self sendControlMessage: (Message
-			   selector: #commandApplyCodeChanges:
-			   argument: aFuelStringOfCollection)
-]
-
-{ #category : #commands }
 GtRrExecutor >> commandConnected [
 
 	^ self sendControlMessage: (Message selector: #commandConnected)

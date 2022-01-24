@@ -4,12 +4,6 @@ Class {
 	#category : #'RemoteRunner-Constraints'
 }
 
-{ #category : #accessing }
-GtRrConstraint class >> leJsonV4Name [
-
-	^ name
-]
-
 { #category : #'logical operations' }
 GtRrConstraint >> & aConstraint [
 
@@ -17,9 +11,9 @@ GtRrConstraint >> & aConstraint [
 ]
 
 { #category : #testing }
-GtRrConstraint >> matches: aConnection [
+GtRrConstraint >> matches: aDictionary [
 
-	^ false
+	self subclassResponsibility
 ]
 
 { #category : #'logical operations' }

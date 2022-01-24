@@ -45,13 +45,13 @@ GtRrInImageWorker >> process [
 ]
 
 { #category : #accessing }
-GtRrInImageWorker >> remoteRunner [
+GtRrInImageWorker >> scheduler [
 
 	^ remoteRunner
 ]
 
 { #category : #accessing }
-GtRrInImageWorker >> remoteRunner: anObject [
+GtRrInImageWorker >> scheduler: anObject [
 
 	remoteRunner := anObject
 ]

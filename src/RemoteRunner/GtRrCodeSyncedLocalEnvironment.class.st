@@ -31,10 +31,10 @@ GtRrCodeSyncedLocalEnvironment >> newWorkerLocalProcessArgumentsFor: someSetting
 ]
 
 { #category : #accessing }
-GtRrCodeSyncedLocalEnvironment >> remoteRunner: aRemoteRunner [
+GtRrCodeSyncedLocalEnvironment >> scheduler: aRemoteRunner [
 
-	super remoteRunner: aRemoteRunner.
-	codeSync remoteRunner: aRemoteRunner
+	super scheduler: aRemoteRunner.
+	codeSync scheduler: aRemoteRunner
 ]
 
 { #category : #'startup - shutdown' }

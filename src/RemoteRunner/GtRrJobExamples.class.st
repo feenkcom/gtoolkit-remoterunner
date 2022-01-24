@@ -28,7 +28,7 @@ GtRrJobExamples >> createMultiplePlatformContexts [
 	job := GtRrTestsJob new
 		       classNames: #( GtRrSampleTest );
 		       constraint: #( plat1 plat2 );
-		       remoteRunner: remoteRunner;
+		       scheduler: remoteRunner;
 		       yourself.
 
 	job getTasks.
@@ -58,7 +58,7 @@ GtRrJobExamples >> createSinglePlatformContexts [
 	remoteRunner := GtRrScheduler new.
 	job := GtRrTestsJob new
 		       classNames: #( GtRrSampleTest );
-		       remoteRunner: remoteRunner;
+		       scheduler: remoteRunner;
 		       yourself.
 
 	job getTasks.
@@ -125,7 +125,7 @@ GtRrJobExamples >> timeout [
 	task := GtRrExampleValueTask new.
 	job := GtRrTasksJob new
 		       tasks: { task };
-		       remoteRunner: runner;
+		       scheduler: runner;
 		       yourself.
 
 	self assert: task timeout equals: 3 minutes.

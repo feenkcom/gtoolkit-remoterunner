@@ -15,7 +15,7 @@ GtRrTestsJobExamples >> scheduleTestsOneAtATime [
 	job := GtRrTestsJob new
 		       classNames: #( GtRrSampleTest );
 		       constraint: #( linux );
-		       remoteRunner: remoteRunner.
+		       scheduler: remoteRunner.
 	self
 		assert: job taskAllocator class
 		equals: GtRrOneAtATimeTestsTaskAllocator.

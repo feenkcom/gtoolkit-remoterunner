@@ -4,7 +4,9 @@ Trait {
 		'state',
 		'task',
 		'runner',
-		'timeout'
+		'timeout',
+		'startTime',
+		'endTime'
 	],
 	#category : #'RemoteRunner-Runner'
 }
@@ -44,6 +46,24 @@ TGtRrExecutorExecution >> doExecuteTask [
 	timeout ifNotNil: [ :d | runner scheduleTimeout: d on: self ]
 ]
 
+{ #category : #accessing }
+TGtRrExecutorExecution >> endTime [
+
+	^ endTime
+]
+
+{ #category : #accessing }
+TGtRrExecutorExecution >> finishWithFailure: aGtRrError [
+
+	self explicitRequirement
+]
+
+{ #category : #accessing }
+TGtRrExecutorExecution >> finishWithSuccess: anObject [
+
+	self explicitRequirement
+]
+
 { #category : #'gt-extension' }
 TGtRrExecutorExecution >> gtLiveFor: aView [
 
@@ -58,7 +78,8 @@ TGtRrExecutorExecution >> gtLiveFor: aView [
 TGtRrExecutorExecution >> setCancelStateWithReason: aReason [
 
 	super setCancelStateWithReason: aReason.
-	runner task: task id failure: aReason
+	runner task: task id failure: aReason.
+	endTime := DateAndTime now
 ]
 
 { #category : #initialization }
@@ -66,11 +87,38 @@ TGtRrExecutorExecution >> setExplicitlyTerminatedStateWithReason: aReason [
 
 	super setExplicitlyTerminatedStateWithReason: aReason.
 	runner commandTerminateTaskId: task id.
-	runner task: task id failure: aReason
+	runner task: task id failure: aReason.
+	endTime := DateAndTime now
+]
+
+{ #category : #initialization }
+TGtRrExecutorExecution >> setFinishedState [
+
+	super setFinishedState.
+	endTime := DateAndTime now
 ]
 
 { #category : #initialization }
 TGtRrExecutorExecution >> setRunningState [
 
-	state := GtRrExecutorRunningTaskState new
+	state := GtRrExecutorRunningTaskState new.
+	startTime := DateAndTime now
+]
+
+{ #category : #accessing }
+TGtRrExecutorExecution >> startTime [
+
+	^ startTime
+]
+
+{ #category : #accessing }
+TGtRrExecutorExecution >> timeout [
+
+	^ timeout
+]
+
+{ #category : #accessing }
+TGtRrExecutorExecution >> timeout: aDuration [
+
+	timeout := aDuration
 ]

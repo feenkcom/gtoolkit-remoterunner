@@ -12,7 +12,8 @@ Class {
 GtRrEqualsConstraint class >> attribute: aSymbol value: anObject [
 
 	^ self new
-		  initializeAttribute: aSymbol value: anObject;
+		  attribute: aSymbol;
+		  value: anObject;
 		  yourself
 ]
 
@@ -34,17 +35,10 @@ GtRrEqualsConstraint >> attribute: anObject [
 	attribute := anObject
 ]
 
-{ #category : #initialization }
-GtRrEqualsConstraint >> initializeAttribute: aSymbol value: anObject [
-
-	attribute := aSymbol.
-	value := anObject
-]
-
 { #category : #testing }
-GtRrEqualsConstraint >> matches: aConnection [
+GtRrEqualsConstraint >> matches: aDictionary [
 
-	^ aConnection attributes
+	^ aDictionary
 		  at: attribute
 		  ifPresent: [ :e | e = value ]
 		  ifAbsent: [ false ]
