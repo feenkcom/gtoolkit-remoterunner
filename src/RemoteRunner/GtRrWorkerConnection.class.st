@@ -4,6 +4,8 @@ GtRrWorkerConnection is the runner's representation of a worker.  The term 'prox
 Class {
 	#name : #GtRrWorkerConnection,
 	#superclass : #Object,
+	#traits : 'TGtWorkerConnectionUI',
+	#classTraits : 'TGtWorkerConnectionUI classTrait',
 	#instVars : [
 		'connection',
 		'platform',
