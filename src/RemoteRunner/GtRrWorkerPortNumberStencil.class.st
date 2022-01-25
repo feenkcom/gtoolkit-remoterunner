@@ -35,7 +35,10 @@ GtRrWorkerPortNumberStencil >> create [
 				element
 					workerConnection: workerConnection;
 					exact: self extent;
-					padding: (BlInsets all: 20) ])).
+					padding: (BlInsets all: 20);
+					"Pass the top original button to the widget to use for spawning the result.
+					The button passed in to the action is too high in the element hierarchy, and can't spawn the result."
+					spawnButton: aButton ])).
 	^ aButton
 ]
 
