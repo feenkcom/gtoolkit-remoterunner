@@ -8,27 +8,34 @@ Class {
 GtRrCodeSyncExamples >> addRemoveMethod [
 
 	<gtExample>
-	| runner codeSync |
+	| runner codeSync connectSemaphore |
 	runner := GtRrScheduler new
-		          port: 8042;
-		          startLogging;
+		          "    port: 8042;"startLogging;
 		          yourself.
 	codeSync := runner environment codeSync.
+	connectSemaphore := Semaphore new.
 	[ 
+	runner
+		when: GtRrWorkerConnectedAnnouncement
+		send: #signal
+		to: connectSemaphore.
 	runner start.
-	self
-		wait: 10 seconds
-		for: GtRrWorkerConnectedAnnouncement
-		in: runner.
+	"wait for both connects"
+	connectSemaphore
+		waitTimeoutSeconds: 20;
+		waitTimeoutSeconds: 2.
 	"add/remove method changes should be propagated to workers"
 	self assert: (self hasMethodIn: runner) not.
 	self class compile: 'blub ^ 1'.
+	2 seconds wait.
 	self assert: (self hasMethodIn: runner).
 	self class removeSelector: #blub.
+	2 seconds wait.
 	self assert: (self hasMethodIn: runner) not.
 	"stopping sync should no longer propagate changes"
 	codeSync stop.
 	self class compile: 'blub ^ 1'.
+	2 seconds wait.
 	self assert: (self hasMethodIn: runner) not ] ensure: [ 
 		self class removeSelector: #blub.
 		runner stop ].
@@ -38,13 +45,11 @@ GtRrCodeSyncExamples >> addRemoveMethod [
 { #category : #accessing }
 GtRrCodeSyncExamples >> hasMethodIn: aRunner [
 
-	| job |
-	job := GtRrTasksJob tasks:
-		       { (GtRrScriptTask script:
-			        self class name , ' includesSelector: #blub') }.
-	aRunner submitJob: job.
-	self wait: 5 seconds for: GtRrJobCompletedAnnouncement in: job.
-	^ job tasks first result
+	| task |
+	task := GtRrScriptTask script:
+		        self class name , ' includesSelector: #blub'.
+	^ (aRunner future: task timeout: 2 seconds) synchronizeTimeout:
+		  5 seconds
 ]
 
 { #category : #accessing }
@@ -52,10 +57,7 @@ GtRrCodeSyncExamples >> wait: aDuration for: anAnnouncement in: anAnnouncer [
 
 	| semaphore |
 	semaphore := Semaphore new.
-	anAnnouncer
-		when: anAnnouncement
-		doOnce: [ semaphore signal ]
-		for: self.
+	anAnnouncer when: anAnnouncement send: #signal to: semaphore.
 	semaphore wait: aDuration onCompletion: [ "noop" ] onTimeout: [ 
 		self error: ('wait {1} for {2} in {3} timed out' format: { 
 					 aDuration.

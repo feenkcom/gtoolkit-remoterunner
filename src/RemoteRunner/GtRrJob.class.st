@@ -11,65 +11,6 @@ Class {
 	#category : #'RemoteRunner-Runner'
 }
 
-{ #category : #accessing }
-GtRrJob >> addResult: aGtRrTask [
-	"Add the completed task to the results"
-
-	results add: aGtRrTask.
-	self announce: (aGtRrTask hasErrors
-		ifTrue: [ GtRrTaskFailedAnnouncement task: aGtRrTask ]
-		ifFalse: [ GtRrTaskSucceededAnnouncement task: aGtRrTask ])
-]
-
-{ #category : #accessing }
-GtRrJob >> announcer [
-
-	^ announcer ifNil: [ announcer := Announcer new ]
-]
-
-{ #category : #'private - running' }
-GtRrJob >> cancel [
-
-	"Mark the receiver as cancelled (before being started).
-	This not be called by the end user, but via {{gtMethod:GtRemoteRunner>>terminateJobId:}}"
-
-	state := #cancelled.
-	self announce: (GtRrJobCancelledAnnouncement job: self)
-]
-
-{ #category : #'private - running' }
-GtRrJob >> complete [
-
-	endTime := DateAndTime now.
-	state := #completed.
-	self announce: (GtRrJobCompletedAnnouncement job: self).
-
-]
-
-{ #category : #accessing }
-GtRrJob >> endTime [
-
-	^ endTime
-]
-
-{ #category : #accessing }
-GtRrJob >> errorDetails [
-	"If set, the error details will contain the overall reason for the failure of the job.
-	Some individual tasks may still successfully complete."
-	<return: #GtRrError or: nil>
-
-	^ errorDetails
-]
-
-{ #category : #accessing }
-GtRrJob >> errorDetails: aGtErrorDetails [
-	"Set the error details of the receiver.
-	Asynchronous events may cause multiple attempts at setting the details, use the first one"
-
-	errorDetails ifNotNil: [ ^ self ].
-	errorDetails := aGtErrorDetails
-]
-
 { #category : #ui }
 GtRrJob >> gtErrorsFor: aView [
 	<gtView>
@@ -109,19 +50,13 @@ GtRrJob >> gtSummaryFor: aView [
 
 { #category : #ui }
 GtRrJob >> gtTasksFor: aView [
+
 	<gtView>
-
+	tasks ifNil: [ ^ aView empty ].
 	^ aView list
-		title: 'Tasks';
-		priority: 50;
-		items: [ self tasks ]
-]
-
-{ #category : #testing }
-GtRrJob >> hasErrors [
-	"Answer a boolean indicating whether the receiver has tasks that failed"
-
-	^ results anySatisfy: [ :task | task hasErrors ]
+		  title: 'Tasks';
+		  priority: 50;
+		  items: [ tasks ]
 ]
 
 { #category : #printing }
@@ -135,19 +70,6 @@ GtRrJob >> printOn: aStream [
 		[ aStream << ' with errors' ].
 	aStream
 		nextPut: $).
-]
-
-{ #category : #accessing }
-GtRrJob >> results [
-
-	^ results
-]
-
-{ #category : #accessing }
-GtRrJob >> resultsWithErrors [
-	"Answer the subset of results that have errors"
-
-	^ results select: #hasErrors
 ]
 
 { #category : #accessing }
@@ -169,20 +91,6 @@ GtRrJob >> start [
 	state := #started.
 	self announce: (GtRrJobStartedAnnouncement job: self).
 
-]
-
-{ #category : #accessing }
-GtRrJob >> startTime [
-
-	^ startTime
-]
-
-{ #category : #accessing }
-GtRrJob >> state [
-	"One of: #notStarted, #started, #cancelled, #completed"
-	<return: #Symbol>
-
-	^ state
 ]
 
 { #category : #ui }
@@ -214,15 +122,15 @@ GtRrJob >> tasks [
 	^ tasks
 ]
 
-{ #category : #'private - running' }
-GtRrJob >> terminate [
+{ #category : #accessing }
+GtRrJob >> tasks: aCollection [
 
-	state := #terminating.
-
+	tasks := aCollection
 ]
 
 { #category : #accessing }
 GtRrJob >> value [
 
-	(tasks := self tasks) do: [ :e | scheduler future: e ]
+	scheduler announceAndLog: (GtRrJobStartedAnnouncement job: self).
+	self tasks do: [ :e | scheduler future: e ]
 ]

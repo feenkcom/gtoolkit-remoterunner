@@ -1,7 +1,12 @@
 Class {
 	#name : #GtRrTestsJob,
-	#superclass : #GtRrAbstractTestsJob,
-	#category : #'RemoteRunner-Tests'
+	#superclass : #GtRrJob,
+	#instVars : [
+		'testNames',
+		'classNames',
+		'packageNames'
+	],
+	#category : #'RemoteRunner-Tasks'
 }
 
 { #category : #private }
@@ -34,11 +39,17 @@ GtRrTestsJob >> allItems [
 	^ allTests
 ]
 
-{ #category : #private }
-GtRrTestsJob >> defaultTaskAllocator [
-	"Answer the object that will allocate job items to job tasks"
+{ #category : #accessing }
+GtRrTestsJob >> classNames [
+	<return: #Array of: #Symbol>
 
-	^ GtRrOneAtATimeTestsTaskAllocator new
+	^ classNames
+]
+
+{ #category : #accessing }
+GtRrTestsJob >> classNames: anObject [
+
+	classNames := anObject
 ]
 
 { #category : #accessing }
@@ -67,6 +78,29 @@ GtRrTestsJob >> gtTestErrorsFor: aView [
 		actionUpdateButton
 ]
 
+{ #category : #initialization }
+GtRrTestsJob >> initialize [
+
+	super initialize.
+	packageNames := #().
+	classNames := #().
+	testNames := #().
+
+]
+
+{ #category : #accessing }
+GtRrTestsJob >> packageNames [
+	<return: #Array of: #String>
+
+	^ packageNames
+]
+
+{ #category : #accessing }
+GtRrTestsJob >> packageNames: anObject [
+
+	packageNames := anObject
+]
+
 { #category : #ui }
 GtRrTestsJob >> summaryAttributes [
 	"Answer a collection of key/value attributes that can simply be listed as a summary of the receiver"
@@ -78,8 +112,44 @@ GtRrTestsJob >> summaryAttributes [
 ]
 
 { #category : #accessing }
+GtRrTestsJob >> tasks [
+
+	^ tasks ifNil: [ 
+		  | tests |
+		  tests := OrderedCollection new.
+		  tests addAll: testNames.
+		  classNames do: [ :className | 
+			  className asClass testSelectors do: [ :selector | 
+				  tests add: className -> selector ] ].
+		  packageNames do: [ :packageName | 
+			  packageName asPackage classes
+				  select: [ :cls | cls isTestCase and: [ cls isAbstract not ] ]
+				  thenDo: [ :cls | 
+					  cls testSelectors do: [ :selector | 
+						  tests add: cls name -> selector ] ] ].
+		  tasks := tests collect: [ :test | 
+			           GtRrTestTask tests:
+				           { (test key -> { test value }) } asDictionary ] ]
+]
+
+{ #category : #accessing }
 GtRrTestsJob >> testCount [
 	"Answer number of tests in the receiver"
 
 	^ self tasks inject: 0 into: [ :sum :task | sum + task testCount ]
+]
+
+{ #category : #accessing }
+GtRrTestsJob >> testNames [
+	"Answer the collection of test names.
+	Each test name is #ClassName -> #testSelector"
+	<return: #Array of: #Association>
+	
+	^ testNames
+]
+
+{ #category : #accessing }
+GtRrTestsJob >> testNames: anObject [
+
+	testNames := anObject
 ]

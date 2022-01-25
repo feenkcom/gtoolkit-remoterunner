@@ -20,6 +20,12 @@ GtRrExecutorFutureExecution >> finishWithSuccess: anObject [
 	future isFinished ifFalse: [ future deploySuccess: anObject ]
 ]
 
+{ #category : #accessing }
+GtRrExecutorFutureExecution >> futureRunner: aRunner [
+
+	future runner: aRunner
+]
+
 { #category : #'gt-extension' }
 GtRrExecutorFutureExecution >> gtLiveFor: aView [
 
@@ -35,4 +41,12 @@ GtRrExecutorFutureExecution >> initialize [
 
 	super initialize.
 	state := GtRrExecutorReadyTaskState new
+]
+
+{ #category : #accessing }
+GtRrExecutorFutureExecution >> runner: aRunner [
+
+	"future runner set through #futureRunner:"
+
+	runner := aRunner
 ]

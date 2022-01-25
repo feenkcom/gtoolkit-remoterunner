@@ -16,9 +16,5 @@ GtRrTestsJobExamples >> scheduleTestsOneAtATime [
 		       classNames: #( GtRrSampleTest );
 		       constraint: #( linux );
 		       scheduler: remoteRunner.
-	self
-		assert: job taskAllocator class
-		equals: GtRrOneAtATimeTestsTaskAllocator.
-	job getTasks.
 	self assert: job tasks size equals: 4
 ]

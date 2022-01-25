@@ -15,7 +15,7 @@ GtRrTaskExamples >> timeout [
 	| runner job task |
 	runner := GtRrScheduler new.
 	task := GtRrExampleValueTask new.
-	job := GtRrTasksJob new
+	job := GtRrJob new
 		       tasks: { task };
 		       scheduler: runner;
 		       yourself.

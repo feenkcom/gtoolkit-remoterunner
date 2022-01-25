@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'scheduler'
 	],
-	#category : #'RemoteRunner-Runner'
+	#category : #'RemoteRunner-Runner-Support'
 }
 
 { #category : #scheduler }

@@ -12,13 +12,14 @@ Class {
 		'observerProcess',
 		'taskQueue',
 		'timeoutQueue',
-		'currentTaskExecution'
+		'currentTaskExecution',
+		'pool'
 	],
 	#category : #'RemoteRunner-Runner'
 }
 
 { #category : #'instance creation' }
-GtRrExecutor class >> connection: aConnection attributes: aDictionary observer: aBlock taskQueue: aQueue timeoutQueue: anotherQueue announcerScheduler: aScheduler [
+GtRrExecutor class >> connection: aConnection attributes: aDictionary observer: aBlock taskQueue: aQueue timeoutQueue: anotherQueue pool: aWorkerPool [
 
 	^ self new
 		  initializeConnection: aConnection
@@ -26,7 +27,7 @@ GtRrExecutor class >> connection: aConnection attributes: aDictionary observer: 
 		  observer: aBlock
 		  taskQueue: aQueue
 		  timeoutQueue: anotherQueue
-		  announcerScheduler: aScheduler;
+		  pool: aWorkerPool;
 		  yourself
 ]
 
@@ -264,14 +265,15 @@ GtRrExecutor >> gtSummaryFor: aView [
 ]
 
 { #category : #initialization }
-GtRrExecutor >> initializeConnection: aConnection attributes: aDictionary observer: aBlock taskQueue: aQueue timeoutQueue: anotherQueue announcerScheduler: aScheduler [
+GtRrExecutor >> initializeConnection: aConnection attributes: aDictionary observer: aBlock taskQueue: aQueue timeoutQueue: anotherQueue pool: aWorkerPool [
 
 	connection := aConnection.
 	attributes := aDictionary.
 	observer := aBlock.
 	taskQueue := aQueue.
 	timeoutQueue := anotherQueue.
-	announcer := GtRrAsyncAnnouncer scheduler: aScheduler
+	pool := aWorkerPool.
+	announcer := GtRrAsyncAnnouncer scheduler: aWorkerPool
 ]
 
 { #category : #testing }
@@ -297,16 +299,6 @@ GtRrExecutor >> printOn: aStream [
 GtRrExecutor >> remoteAddress [
 
 	^ connection remoteAddress
-]
-
-{ #category : #schedulling }
-GtRrExecutor >> schedule: aTask [
-
-	"needed for future callbacks, scheduler should use #scheduleTaskExecution:"
-
-	[ aTask value ]
-		on: Error
-		do: [ :error | self exceptionHandler handleException: error ]
 ]
 
 { #category : #schedulling }
@@ -374,15 +366,14 @@ GtRrExecutor >> task: aTaskId failure: aGtRrError [
 { #category : #running }
 GtRrExecutor >> task: aTaskId success: anObject [
 
-	| oldTaskExecution |
+	| task |
 	currentTaskExecution ifNil: [ ^ self ].
 	currentTaskExecution task id = aTaskId ifFalse: [ ^ self ].
+	task := currentTaskExecution task.
 	currentTaskExecution finishWithSuccess: anObject.
-	oldTaskExecution := currentTaskExecution.
 	currentTaskExecution := nil.
 	self noteFree.
-	announcer announce:
-		(GtRrTaskSucceededAnnouncement task: oldTaskExecution task)
+	announcer announce: (GtRrTaskSucceededAnnouncement task: task)
 ]
 
 { #category : #tasks }

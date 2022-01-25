@@ -5,7 +5,7 @@ Class {
 		'trace',
 		'message'
 	],
-	#category : #'RemoteRunner-Runner'
+	#category : #'RemoteRunner-Runner-Support'
 }
 
 { #category : #accessing }

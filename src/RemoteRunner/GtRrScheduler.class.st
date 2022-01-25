@@ -62,7 +62,7 @@ Class {
 		'jobWorker',
 		'taskQueue',
 		'timeoutQueue',
-		'announcerWorker'
+		'pool'
 	],
 	#classInstVars : [
 		'uniqueInstance'
@@ -254,7 +254,7 @@ GtRrScheduler >> connectWithAttributes: aDictionary observer: aBlock [
 		            observer: aBlock
 		            taskQueue: taskQueue
 		            timeoutQueue: timeoutQueue
-		            announcerScheduler: announcerWorker.
+		            pool: pool.
 	executor announcer
 		when: GtRrWorkerDisconnectedAnnouncement
 		send: #disconnect:
@@ -332,7 +332,7 @@ GtRrScheduler >> futureExecutionFor: aTask [
 GtRrScheduler >> futureExecutionFor: aTask timeout: aTimeout [
 
 	^ GtRrExecutorFutureExecution new
-		  runner: self;
+		  futureRunner: pool;
 		  task: aTask;
 		  timeout: aTimeout;
 		  yourself
@@ -429,13 +429,13 @@ GtRrScheduler >> initialize [
 		          setDebugMode;
 		          yourself.
 	server globals at: #GtRrThisScheduler put: self.
-	announcerWorker := TKTWorkerPool new
-		                   poolMaxSize: 8;
-		                   yourself.
+	pool := TKTWorkerPool new
+		        poolMaxSize: 8;
+		        yourself.
 	jobWorker := TKTWorker new.
 	taskQueue := SharedQueue new.
 	timeoutQueue := BlTaskAtQueue new.
-	announcer := GtRrAsyncAnnouncer scheduler: announcerWorker.
+	announcer := GtRrAsyncAnnouncer scheduler: pool.
 	"Make sure you REALLY know what you're doing before changing sharedAccess to a Monitor.
 	PharoLinkServer requests are handled in individual processes, so any deadlock is unlikely to be resolved by converting sharedAccess to a Monitor."
 	sharedAccess := GtMutualExclusionSemaphore forMutualExclusion.
@@ -534,7 +534,7 @@ GtRrScheduler >> scheduleTaskExecution: aTaskExecution [
 { #category : #'api - runner' }
 GtRrScheduler >> start [
 
-	announcerWorker start.
+	pool start.
 	server start.
 	timeoutQueue start.
 	jobWorker start.
@@ -571,11 +571,15 @@ GtRrScheduler >> state [
 { #category : #'api - runner' }
 GtRrScheduler >> stop [
 
+	server stop. "will drag executors along by disconnect"
 	environment stop.
 	jobWorker stop.
 	timeoutQueue stop.
-	server stop.
-	announcerWorker stop
+	pool stop.
+	log ifNotNil: [ 
+		log
+			stop;
+			reset ]
 ]
 
 { #category : #ui }

@@ -28,7 +28,7 @@ GtRemoteRunnerExamples >> assignTasksToWorkersTaskFirst [
 	tasks add: (GtRrExampleValueTask new
 			 value: 'error1';
 			 setError).
-	job := GtRrTasksJob new
+	job := GtRrJob new
 		       constraint: #( plat1 plat2 );
 		       tasks: tasks.
 	job
@@ -85,7 +85,7 @@ GtRemoteRunnerExamples >> assignTasksToWorkersWorkerFirst [
 	tasks add: (GtRrExampleValueTask new
 			 value: 'error1';
 			 setError).
-	job := GtRrTasksJob new
+	job := GtRrJob new
 		       constraint: #( plat1 plat2 );
 		       tasks: tasks.
 	job
@@ -170,7 +170,7 @@ GtRemoteRunnerExamples >> getNextTaskFor [
 		GtRrExampleValueTask new
 			value: i ] as: OrderedCollection.
 	taskIds := tasks collect: #id as: Set.
-	job := GtRrTasksJob new
+	job := GtRrJob new
 		constraint: #(plat1 plat2);
 		tasks: tasks.
 	remoteRunner := GtRrScheduler new.
@@ -216,7 +216,7 @@ GtRemoteRunnerExamples >> handleWorkerDisconnection [
 	worker start.
 	startSemaphore := Semaphore new.
 	endSemaphore := Semaphore new.
-	job := GtRrTasksJob new
+	job := GtRrJob new
 		tasks: { GtRrScriptTask script: 'Semaphore new wait' }.
 	job
 		when: GtRrJobStartedAnnouncement
@@ -267,7 +267,7 @@ GtRemoteRunnerExamples >> multipleJobs [
 	[ 
 	jobs := (1 to: 2) collect: [  :i |
 		completingTask := GtRrScriptTask script: '#done'.
-		job := GtRrTasksJob new tasks: { completingTask }.
+		job := GtRrJob new tasks: { completingTask }.
 		job
 			when: GtRrJobStartedAnnouncement do: 
 				[ jobStartedCount := jobStartedCount + 1 ];
@@ -314,7 +314,7 @@ GtRemoteRunnerExamples >> simpleTask [
 	remoteRunner start.
 	[ 
 	completingTask := GtRrScriptTask script: '#done'.
-	job := GtRrTasksJob new tasks: { completingTask }.
+	job := GtRrJob new tasks: { completingTask }.
 	job
 		when: GtRrJobStartedAnnouncement do: 
 			[ jobStartedCount := jobStartedCount + 1.
@@ -418,12 +418,12 @@ GtRemoteRunnerExamples >> terminateNotStartedJob [
 
 	remoteRunner := GtRrScheduler new.
 	"Submit an empty job.  Since there are no workers, it will become the currently executing job, leaving the next not started"
-	remoteRunner submitJob: (GtRrTasksJob new tasks: #()).
+	remoteRunner submitJob: (GtRrJob new tasks: #()).
 
 	tasks := (1 to: 3) collect: [ :i |
 		GtRrExampleValueTask new
 			value: i ] as: OrderedCollection.
-	job := GtRrTasksJob new
+	job := GtRrJob new
 		tasks: tasks.
 	remoteRunner submitJob: job.
 
@@ -460,7 +460,7 @@ GtRemoteRunnerExamples >> terminateStartedJob [
 	"Create a set of tasks that never complete"
 	tasks := (1 to: 3) collect: [ :i |
 		GtRrScriptTask script: 'Semaphore new wait' ] as: OrderedCollection.
-	job := GtRrTasksJob new
+	job := GtRrJob new
 		tasks: tasks.
 	job
 		when: GtRrJobStartedAnnouncement do: 
@@ -527,7 +527,7 @@ GtRemoteRunnerExamples >> timeoutJob [
 	"Create a set of tasks that never complete"
 	tasks := (1 to: 3) collect: [ :i |
 		GtRrScriptTask script: 'Semaphore new wait' ] as: OrderedCollection.
-	job := GtRrTasksJob new
+	job := GtRrJob new
 		tasks: tasks;
 		timeout: 5 seconds.
 	job
@@ -591,7 +591,7 @@ GtRemoteRunnerExamples >> timeoutTask [
 	timeoutTask := GtRrScriptTask script: 'Semaphore new wait'.
 	timeoutTask timeout: 200 milliSeconds.
 	completingTask := GtRrScriptTask script: '#done'.
-	job := GtRrTasksJob new
+	job := GtRrJob new
 		tasks: { timeoutTask. completingTask }.
 	job
 		when: GtRrJobStartedAnnouncement do: 
@@ -660,7 +660,7 @@ GtRemoteRunnerExamples >> timeoutWorker [
 	timeoutTask := GtRrScriptTask script: 'Semaphore new wait'.
 	timeoutTask timeout: 1 minute.
 	completingTask := GtRrScriptTask script: '#done'.
-	job := GtRrTasksJob new
+	job := GtRrJob new
 		tasks: { timeoutTask. completingTask }.
 	job
 		when: GtRrJobStartedAnnouncement do: 

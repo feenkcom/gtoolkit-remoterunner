@@ -37,17 +37,11 @@ GtRrCodeSyncJob >> serializedChanges: anObject [
 { #category : #accessing }
 GtRrCodeSyncJob >> tasks [
 
-	^ tasks
-]
-
-{ #category : #accessing }
-GtRrCodeSyncJob >> value [
-
-	tasks := scheduler executors
-		         select: [ :e | e attributes includesKey: #codeSynced ]
-		         thenCollect: [ :e | 
-			         GtRrCodeSyncTask
-				         serializedChanges: serializedChanges
-				         workerId: (e attributes at: #id) ].
-	tasks do: [ :e | scheduler schedule: e ]
+	^ tasks ifNil: [ 
+		  tasks := scheduler executors
+			           select: [ :e | e attributes includesKey: #codeSynced ]
+			           thenCollect: [ :e | 
+				           GtRrCodeSyncTask
+					           serializedChanges: serializedChanges
+					           workerId: (e attributes at: #id) ] ]
 ]
