@@ -2,12 +2,12 @@ Class {
 	#name : #GtRrTaskContext,
 	#superclass : #GtRrContext,
 	#instVars : [
-		'platformContext',
 		'taskContextId',
 		'task',
 		'workerFuture',
 		'taskTimeoutTime',
-		'workerTimeoutTime'
+		'workerTimeoutTime',
+		'jobContext'
 	],
 	#category : #'RemoteRunner-Runner-State'
 }
@@ -26,6 +26,12 @@ GtRrTaskContext >> asWorkerTaskContext [
 GtRrTaskContext >> connection [
 
 	^ workerFuture connection
+]
+
+{ #category : #accessing }
+GtRrTaskContext >> constraint [
+
+	^ task constraint
 ]
 
 { #category : #accessing }
@@ -93,7 +99,7 @@ GtRrTaskContext >> initialize [
 { #category : #testing }
 GtRrTaskContext >> isFinished [
 
-	^ task hasCompleted
+	^ task isFinished
 ]
 
 { #category : #testing }
@@ -105,48 +111,42 @@ GtRrTaskContext >> isTaskContext [
 { #category : #accessing }
 GtRrTaskContext >> jobContext [
 
-	^ platformContext jobContext
+	^ jobContext
+]
+
+{ #category : #accessing }
+GtRrTaskContext >> jobContext: anObject [
+
+	jobContext := anObject
 ]
 
 { #category : #accessing }
 GtRrTaskContext >> jobTimeout [
 
-	^ platformContext jobTimeout
+	^ jobContext jobTimeout
 ]
 
 { #category : #running }
 GtRrTaskContext >> markTaskCancelled [
 
 	task markTaskCancelled.
-	platformContext markTaskCancelled: self.
+	jobContext markTaskCancelled: self.
 ]
 
 { #category : #running }
 GtRrTaskContext >> markTaskCompleted [
 
 	task markTaskCompleted.
-	platformContext markTaskCompleted: self.
+	jobContext markTaskCompleted: self.
 ]
 
 { #category : #running }
 GtRrTaskContext >> markTaskStarted [ 
 
 	task markTaskStarted.
-	platformContext markTaskStarted: self.
+	jobContext markTaskStarted: self.
 	taskTimeoutTime := task startTime + self taskTimeout.
 	workerTimeoutTime := task startTime + self workerTimeout.
-]
-
-{ #category : #accessing }
-GtRrTaskContext >> platformContext [
-
-	^ platformContext
-]
-
-{ #category : #accessing }
-GtRrTaskContext >> platformContext: anObject [
-
-	platformContext := anObject
 ]
 
 { #category : #printing }
@@ -160,7 +160,7 @@ GtRrTaskContext >> printOn: aStream [
 { #category : #accessing }
 GtRrTaskContext >> remoteRunner [
 
-	^ platformContext remoteRunner
+	^ jobContext remoteRunner
 ]
 
 { #category : #accessing }
@@ -221,7 +221,7 @@ GtRrTaskContext >> taskId [
 GtRrTaskContext >> taskTimeout [
 
 	^ task taskTimeout ifNil:
-		[ platformContext taskTimeout ]
+		[ jobContext taskTimeout ]
 ]
 
 { #category : #accessing }
@@ -236,7 +236,7 @@ GtRrTaskContext >> taskTimeoutTime [
 GtRrTaskContext >> terminateTask [
 	"Terminate the receiver"
 
-	task state = #started ifFalse: [ ^ self ].
+	task state = #started ifFalse: [ ^ self markTaskCancelled ].
 	(workerFuture terminateTaskContextId: taskContextId) ifFalse:
 		[ self error: 'Unable to terminate task' ].
 ]

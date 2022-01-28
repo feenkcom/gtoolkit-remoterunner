@@ -8,7 +8,6 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'semaphore',
-		'platform',
 		'connection',
 		'taskContext'
 	],
@@ -34,18 +33,6 @@ GtRrFutureWorkerTask >> initialize [
 	super initialize.
 	semaphore := Semaphore new.
 
-]
-
-{ #category : #accessing }
-GtRrFutureWorkerTask >> platform [
-
-	^ platform
-]
-
-{ #category : #accessing }
-GtRrFutureWorkerTask >> platform: anObject [
-
-	platform := anObject
 ]
 
 { #category : #accessing }

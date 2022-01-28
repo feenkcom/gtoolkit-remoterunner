@@ -178,6 +178,12 @@ GtRrJob >> initialize [
 	state := #notStarted.
 ]
 
+{ #category : #testing }
+GtRrJob >> isFinished [
+
+	^ state == #completed
+]
+
 { #category : #accessing }
 GtRrJob >> jobTimeout [
 	<return: #Duration>
@@ -335,6 +341,15 @@ GtRrJob >> tasks [
 	<return: #SequenceableCollection>
 
 	^ self subclassResponsibility 
+]
+
+{ #category : #accessing }
+GtRrJob >> tasksFor: aGtRemoteRunner [
+	"Special jobs may depend on the remote runner to create the tasks,
+	e.g. the code sync wants a task per worker.
+	Such subclasses can override this method."
+
+	^ self tasks.
 ]
 
 { #category : #'announcer - subscription' }

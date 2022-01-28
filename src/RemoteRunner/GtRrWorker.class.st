@@ -6,20 +6,19 @@ Class {
 	#superclass : #TKTService,
 	#instVars : [
 		'uid',
-		'rrPlatform',
+		'attributes',
 		'application',
 		'taskRunner',
-		'currentTaskExecution',
-		'codeSync'
+		'currentTaskExecution'
 	],
 	#category : #'RemoteRunner-Worker'
 }
 
 { #category : #accessing }
 GtRrWorker class >> commandLine [
-
 	<commandline>
-	| service |
+	| worker |
+
 	^ self commandLineCommand meaning: [ :args | 
 		  | logger serverSocketAddress |
 		  args
@@ -32,12 +31,15 @@ GtRrWorker class >> commandLine [
 				  logger startFor: GtRemoteRunnerAnnouncement , PharoLinkSignal ].
 		  serverSocketAddress := ((args at: #serverSocketAddress) at:
 			                          #address) value.
-		  StringSignal emit:
-			  'Connect server socket address: ' , serverSocketAddress.
-		  service := self serverSocketAddress: serverSocketAddress.
-		  args at: #codeSync ifPresent: [ service codeSync: true ].
+		  StringSignal emit: 'Server address: ' , serverSocketAddress.
+		  worker := self serverSocketAddress: serverSocketAddress.
+		  args occurrencesOf: #attribute do: [ :arg | 
+			  worker attributes
+				  at: (arg at: #key) value
+				  put: (arg at: #value) value ].
+		  args at: #codeSync ifPresent: [ worker codeSync: true ].
 		  StringSignal emit: 'Running'.
-		  service start.
+		  worker start.
 		  "Hibernate until the process exits"
 		  Semaphore new wait ]
 ]
@@ -54,6 +56,12 @@ GtRrWorker class >> commandLineCommand [
 				   description:
 					   'The server socket address on which to connect for requests';
 				   add: (ClapPositional id: #address);
+				   yourself);
+		  add: ((ClapFlag id: #attribute)
+				   description: 'add key/value pairs to attributes';
+				   multiple: true;
+				   add: (ClapPositional id: #key);
+				   add: (ClapPositional id: #value);
 				   yourself);
 		  yourself
 ]
@@ -95,39 +103,41 @@ GtRrWorker >> application: aPharoLinkApplication [
 	application := aPharoLinkApplication
 ]
 
-{ #category : #accessing }
-GtRrWorker >> codeSync [
-
-	^ codeSync
-]
-
-{ #category : #accessing }
-GtRrWorker >> codeSync: anObject [
-
-	codeSync := anObject
-]
-
 { #category : #observer }
 GtRrWorker >> command: anArray [
 	"Execute the command sent from the remote runner.
-	The message is encoded as { selector. arguments. lookupClass. }"
-	| message |
+	The message is encoded as { selector. arguments. lookupClass. }.
+	HACK: There isn't proper error handling here.  If an error occurs, return a string describing it."
+	| message result |
 
-	message := Message
-		selector: anArray first asSymbol
-		arguments: anArray second.
-	message lookupClass: anArray third.
-	^ message sendTo: self
+	GtRrWorkerCommandStartedAnnouncement new
+		command: anArray;
+		emit.
+	result := [ 
+		message := Message
+			selector: anArray first asSymbol
+			arguments: anArray second.
+		message lookupClass: anArray third.
+		message sendTo: self ]
+			on: Exception
+			do: [ :ex |
+				GtRrWorkerCommandAnnouncement new
+					command: anArray;
+					message: ex printString;
+					emit.
+				'#ERROR: ', ex printString. ].
+	GtRrWorkerCommandCompletedAnnouncement new
+		command: anArray;
+		message: result;
+		emit.
+	^ result
 ]
 
-{ #category : #accessing }
-GtRrWorker >> commandApplyCodeChanges: aFuelStringOfCollection [
+{ #category : #commands }
+GtRrWorker >> commandCurrentTaskContextId [
+	"Answer the current task context id, or nil if nothing is being currently executed"
 
-	| changes |
-	changes := LanguageLinkUtils base64Decode:
-		           aFuelStringOfCollection readStream.
-	changes do: #applyCodeChange.
-	^ true
+	^ currentTaskExecution ifNotNil: [ currentTaskExecution task taskContextId ]
 ]
 
 { #category : #commands }
@@ -183,17 +193,31 @@ GtRrWorker >> commandQuitSmalltalk [
 { #category : #commands }
 GtRrWorker >> commandTerminateTaskContextId: taskContextId [
 	"Terminate the current task, confirming the context id"
-	| result priority |
+	| priority canTerminate |
 
-	result := false.
 	"Once we start we don't want to be interrupted by the task, since it may change"
 	priority := Processor activeProcess priority.
 	[ Processor activeProcess priority: priority + 1.
-	(currentTaskExecution isNotNil and: [ currentTaskExecution task taskContextId = taskContextId ]) ifTrue: 
-		[ currentTaskExecution terminateWithReason: 'received TerminateCurrentTask from RemoteRunner'.
-		result := true ] ]
+	canTerminate := true.
+	currentTaskExecution ifNil:
+		[ GtRrWorkerCommandAnnouncement new
+			message: taskContextId printString, ': can''t terminate: currentTaskExecution isNil';
+			emit.
+		canTerminate := false. ]
+	ifNotNil:
+		[ currentTaskExecution task taskContextId = taskContextId ifFalse:
+			[ GtRrWorkerCommandAnnouncement new
+				message: (String streamContents: [ :stream |
+					stream
+						print: taskContextId;
+						<< ': can''t terminate: current taskContextId = ';
+						print: currentTaskExecution task taskContextId ]);
+				emit.
+			canTerminate := false. ] ].
+	canTerminate ifTrue: 
+		[ currentTaskExecution terminateWithReason: 'received TerminateCurrentTask from RemoteRunner' ] ]
 			ensure: [ Processor activeProcess priority: priority ].
-	^ result.
+	^ canTerminate
 ]
 
 { #category : #private }
@@ -210,9 +234,18 @@ GtRrWorker >> initialize [
 
 	super initialize.
 	uid := UUID new asString.
-	rrPlatform := OSPlatform current name.
 	taskRunner := TKTNewProcessTaskRunner new.
-	codeSync := false
+	"Attributes is a dictionary of information can be json encoded.
+	Additional values can be provided, or existing values overwritten, by the command line.
+	This is used by the remote runner to determine which workers can run a given task (the constraints).
+	Naming is inconsistent at the moment - 'attributes' are called 'details' GtRemoteRunner."
+	attributes := Dictionary new
+		at: #workingDirectory
+		put: FileLocator workingDirectory resolve fullName;
+		at: #id put: uid;
+		at: #pid put: self currentProcessId;
+		at: #platform put: OSPlatform current name;
+		yourself
 ]
 
 { #category : #private }
@@ -234,10 +267,7 @@ GtRrWorker >> nextTask [
 	| promise |
 	
 	promise := application newCommandFactory send:
-		(String streamContents: [ :stream |
-			stream
-				<< 'GtAssignedRemoteRunner nextTaskSerializedFor: ';
-				print: rrPlatform ]).
+		'GtAssignedRemoteRunner nextTaskSerializedForCurrentWorker'.
 	^ LeJsonV4 uniqueInstance deserialize: promise waitForValue readStream
 
 ]
@@ -245,22 +275,10 @@ GtRrWorker >> nextTask [
 { #category : #private }
 GtRrWorker >> registerWithRunner [
 	"Register the receiver with the remote runner"
-	| details |
 
-	"Details is a dictionary of information can be json encoded.
-	Apart from the platform, this is mostly useful for debugging."
-	details := Dictionary new
-		at: #workingDirectory put: FileLocator workingDirectory resolve fullName;
-		at: #pid put: self currentProcessId;
-		at: #platform put: rrPlatform;
-		at: #codeSync put: codeSync;
-		at: #vmBuildDate put: Smalltalk vm buildDate;
-		at: #gtVersion put: GtImage instance version versionString;
-		at: #imageVersion put: SystemVersion current asString;
-		yourself.
 	application newCommandFactory 
-		bindingAt: #details put: details;
-		sendAndWait: 'GtAssignedRemoteRunner registerWorkerWithDetails: details'.
+		bindingAt: #attributes put: attributes;
+		sendAndWait: 'GtAssignedRemoteRunner registerWorkerWithDetails: attributes'.
 
 ]
 
@@ -268,18 +286,6 @@ GtRrWorker >> registerWithRunner [
 GtRrWorker >> removeObserver [
 
 	^ application newCommandFactory send: 'GtAssignedRemoteRunner removeObserver'
-]
-
-{ #category : #accessing }
-GtRrWorker >> rrPlatform [
-
-	^ rrPlatform
-]
-
-{ #category : #accessing }
-GtRrWorker >> rrPlatform: anObject [
-
-	rrPlatform := anObject
 ]
 
 { #category : #private }
@@ -305,13 +311,27 @@ GtRrWorker >> stepService [
 
 	task := self nextTask.
 
+	GtRrWorkerTaskStartedAnnouncement new
+		task: task;
+		emit.
 	currentTaskExecution := task asTask futureTaskExecutionFor: taskRunner.
 	currentTaskExecution timeout: task taskTimeout.
 	taskRunner scheduleTaskExecution: currentTaskExecution.
 	currentTaskExecution future
-		onSuccessDo: [ :result | self taskDone: task with: result ];
-		onFailureDo: [ :error | self taskFailed: task with: error ];
-		waitForCompletion: 1 day
+		onSuccessDo: [ :result | 
+			GtRrWorkerTaskCompletedAnnouncement new
+				task: task;
+				message: 'Success: ', result printString;
+				emit.
+			self taskDone: task with: result ];
+		onFailureDo: [ :error | 
+			GtRrWorkerTaskCompletedAnnouncement new
+				task: task;
+				message: 'ERROR: ', error printString;
+				emit.
+			self taskFailed: task with: error ];
+		waitForCompletion: 1 day.
+	currentTaskExecution := nil.
 ]
 
 { #category : #stopping }

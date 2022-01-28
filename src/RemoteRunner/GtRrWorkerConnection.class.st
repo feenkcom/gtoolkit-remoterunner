@@ -8,7 +8,6 @@ Class {
 	#classTraits : 'TGtWorkerConnectionUI classTrait',
 	#instVars : [
 		'connection',
-		'platform',
 		'remoteAddress',
 		'details',
 		'observer',
@@ -37,18 +36,12 @@ GtRrWorkerConnection >> addObserver: aBlock [
 	^ true
 ]
 
-{ #category : #accessing }
-GtRrWorkerConnection >> codeSync [
-
-	^ details at: #codeSync
-]
-
 { #category : #commands }
-GtRrWorkerConnection >> commandApplyCodeChanges: aFuelStringOfCollection [
+GtRrWorkerConnection >> commandCurrentTaskContextId [
+	"Answer the taskContextId from the worker.
+	Will be nil if a task hasn't started yet on the worker."
 
-	^ self sendControlMessage: (Message
-			   selector: #commandApplyCodeChanges:
-			   argument: aFuelStringOfCollection)
+	^ self sendControlMessage: (Message selector: #commandCurrentTaskContextId)
 ]
 
 { #category : #commands }
@@ -124,7 +117,7 @@ GtRrWorkerConnection >> details [
 GtRrWorkerConnection >> details: anObject [
 
 	details := anObject.
-	platform := details at: #platform.
+
 ]
 
 { #category : #ui }
@@ -189,12 +182,6 @@ GtRrWorkerConnection >> pharoLinkServerOnPort: anInteger [
 	application := PharoLinkApplication newWith: settings.
 	application start.
 	^ application.
-]
-
-{ #category : #accessing }
-GtRrWorkerConnection >> platform [
-
-	^ platform
 ]
 
 { #category : #printing }

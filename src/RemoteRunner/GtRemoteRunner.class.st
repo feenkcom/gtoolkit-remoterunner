@@ -56,7 +56,6 @@ Class {
 		'jobStartupAndShutdown',
 		'managerStartupAndShutdown',
 		'availableWorkers',
-		'jobQueue',
 		'currentlyExecutingJobs',
 		'currentlyExecutingTasks',
 		'sharedAccess',
@@ -67,7 +66,8 @@ Class {
 		'timeoutManager',
 		'announcer',
 		'runnerStats',
-		'log'
+		'log',
+		'taskQueue'
 	],
 	#classInstVars : [
 		'uniqueInstance'
@@ -129,7 +129,7 @@ GtRemoteRunner class >> printIpAddress: aByteArray [
 
 { #category : #accessing }
 GtRemoteRunner class >> uniqueInstance [
-	^ uniqueInstance ifNil: [ uniqueInstance := self new start ]
+	^ uniqueInstance ifNil: [ uniqueInstance := self new start startLogging ]
 ]
 
 { #category : #accessing }
@@ -148,6 +148,14 @@ GtRemoteRunner >> addObserver: aBlock [
 	worker addObserver: aBlock.
 	self announceAndLog: (GtRrWorkerControlChannelRegisteredAnnouncement worker: worker).
 	worker observerWait.
+]
+
+{ #category : #adding }
+GtRemoteRunner >> addTaskContext: taskContext [
+	"Add the supplied taskContext to the task queue.
+	Can be called from anywhere since a SharedQueue is used."
+
+	taskQueue nextPut: taskContext.
 ]
 
 { #category : #announcer }
@@ -170,35 +178,12 @@ GtRemoteRunner >> announcer [
 	^ announcer
 ]
 
-{ #category : #'api - worker' }
-GtRemoteRunner >> applyCodeChanges: aCollection [
-
-	| errors serialized drainer futures |
-	serialized := LanguageLinkUtils base64Encode: aCollection.
-	drainer := TKTWorkerPool new
-		           name: 'CodeSync parallel';
-		           poolMaxSize: 32;
-		           start;
-		           yourself.
-	errors := OrderedCollection new.
-	futures := registeredWorkers
-		           select: #codeSync
-		           thenCollect: [ :worker | 
-			           drainer
-				           future: [ 
-					           [ worker commandApplyCodeChanges: serialized ]
-						           on: Error
-						           do: [ :ex | errors add: worker -> ex freeze ] ]
-				           timeout: 1 minute ].
-	futures do: [ :e | e waitForCompletion: 1 minute ].
-	drainer stop.
-	^ errors
-]
-
 { #category : #private }
 GtRemoteRunner >> assignTasksToWorkers [
 	"Assign tasks to any available workers.
-	Must be called within sharedAccess."
+	Must be called within sharedAccess.
+	
+	Note that we are using a SharedQueue for the taskQueue, so a simpler architecture would be for each worker to wait directly on the taskQueue.  However workers can disconnect at any time, which would terminate the process that is waiting on the taskQueue... and that can crash the VM."
 	| taskContext busyWorkers |
 
 	(availableWorkers isEmpty or: [ currentlyExecutingJobs isEmpty ]) ifTrue: [ ^ self ].
@@ -206,12 +191,13 @@ GtRemoteRunner >> assignTasksToWorkers [
 	busyWorkers := OrderedCollection new.
 	"Loop around assigning tasks to workers until there either no more workers or no more tasks available"
 	availableWorkers do: [ :workerFuture |
-		taskContext := self getNextTaskFor: workerFuture platform.
+		taskContext := self getNextTaskFor: workerFuture.
 		taskContext ifNotNil:
 			[ runnerStats incrementTaskCount.
 			taskContext
 				workerFuture: workerFuture;
 				markTaskStarted.
+			self addCurrentlyExecutingTask: taskContext.
 			"Set the task in the workerFuture, this will signal the workerFuture's semaphore, waking up the workerFuture's process"
 			workerFuture taskContext: taskContext.
 			busyWorkers add: workerFuture.
@@ -231,13 +217,12 @@ GtRemoteRunner >> checkJobCompleted: aGtRrContext [
 	"After each task has been completed, check if the job has finished, and if so, signal it.
 	Must be called within sharedAccess."
 	| jobContext |
-
+"self halt."
 	jobContext := aGtRrContext jobContext.
 	jobContext isFinished ifFalse: [ ^ self ].
 
 	jobStartupAndShutdown shutdownJob: jobContext.
 
-	self startNextJob.
 ]
 
 { #category : #private }
@@ -281,17 +266,15 @@ GtRemoteRunner >> defaultWorkerTimeout [
 ]
 
 { #category : #private }
-GtRemoteRunner >> getNextTaskFor: aPlatform [
-	"Answer the next task for the given platform, or nil.
+GtRemoteRunner >> getNextTaskFor: aWorkerFuture [
+	"Answer the next task for the supplied worker, or nil.
 	Must be called within sharedAccess."
 	<return: #GtRrTaskContext>
-	| platformContext taskContext |
+	| attributes |
 
-	currentlyExecutingJobs valuesDo: [ :jobContext |
-		platformContext := jobContext atPlatform: aPlatform.
-		taskContext := platformContext nextTaskOrNil.
-		taskContext ifNotNil: [ ^ taskContext ] ].
-	^ nil
+	attributes := aWorkerFuture connection details.
+	^ taskQueue nextOrNilSuchThat: [ :task | 
+		task constraint matches: attributes ].
 
 ]
 
@@ -318,18 +301,6 @@ GtRemoteRunner >> gtExecutingTasksFor: aView [
 		  items: [ 
 			  sharedAccess critical: [ currentlyExecutingTasks values ] ];
 		  send: [ :item | item ];
-		  updateWhen: GtRemoteRunnerAnnouncement in: [ self announcer ];
-		  actionUpdateButton
-]
-
-{ #category : #ui }
-GtRemoteRunner >> gtJobQueueFor: aView [
-	<gtView>
-
-	^ aView list
-		  title: 'Job Queue';
-		  priority: 20;
-		  items: [ jobQueue itemArray ];
 		  updateWhen: GtRemoteRunnerAnnouncement in: [ self announcer ];
 		  actionUpdateButton
 ]
@@ -364,12 +335,12 @@ GtRemoteRunner >> gtWorkersFor: aView [
 	<gtView>
 
 	^ aView columnedList
-		  title: 'Registered Workers';
+		  title: 'Task Queue';
 		  priority: 50;
-		  items: [ registeredWorkers values ];
-		  column: 'IP Address' text: [ :item | GtRemoteRunner printIpAddress: item remoteAddress ];
-			column: 'Working Directory' text: [ :item | item detailAt: #workingDirectory ifAbsent: [ '' ] ];
-		  column: 'Platform' text: [ :item | item platform ];
+		  items: [ taskQueue itemArray ];
+		  column: 'Job' text: [ :item | item jobContext id ];
+			column: 'Task' text: [ :item | item taskId ];
+		  column: 'Description' text: [ :item | item printString ];
 		  actionUpdateButton
 ]
 
@@ -392,11 +363,11 @@ GtRemoteRunner >> initialize [
 	super initialize.
 	announcer := Announcer new.
 	port := 7042.
-	jobQueue := SharedQueue new.
+	taskQueue := SharedQueue new.
 	runnerStats := GtRemoteRunnerStats new.
-	"currentlyExecutingJobs is a dictionary of GtRrJobContext keyed by job uid.
-	The keys are ordered to ensure that tasks are assigned to the job started first."
-	currentlyExecutingJobs := OrderedDictionary new.
+	"currentlyExecutingJobs is a dictionary of GtRrJobContext keyed by job uid"
+	currentlyExecutingJobs := Dictionary new.
+	"currentlyExecutingTasks is a dictionary of GtRrTaskContext keyed by task context id"
 	currentlyExecutingTasks := Dictionary new.
 	"Make sure you REALLY know what you're doing before changing sharedAccess to a Monitor.
 	PharoLinkServer requests are handled in individual processes, so any deadlock is unlikely to be resolved by converting sharedAccess to a Monitor."
@@ -406,10 +377,9 @@ GtRemoteRunner >> initialize [
 	availableWorkers := Set new.
 	registeredWorkers := Dictionary new.
 	timeoutManager := GtRrTimeoutManager remoteRunner: self.
-	self
-		managerStartupAndShutdown:
-			GtRrCodeSyncedLocalManagerStartupAndShutdown new;
-		jobStartupAndShutdown: GtRrLocalJobStartupAndShutdown new
+	self 
+		managerStartupAndShutdown: GtRrCodeSyncedLocalManagerStartupAndShutdown new;
+		jobStartupAndShutdown: GtRrLocalJobStartupAndShutdown new.
 ]
 
 { #category : #accessing }
@@ -458,14 +428,13 @@ GtRemoteRunner >> managerStartupAndShutdown: aGtRrManagerStartupAndShutdown [
 ]
 
 { #category : #'api - worker' }
-GtRemoteRunner >> nextTaskFor: aPlatform [
+GtRemoteRunner >> nextTaskForCurrentWorker [
 	"Answer the next task allocated to the worker that is waiting on this method.
 	The task is assigned in a separate process."
 	| taskFuture |
 
 	taskFuture := GtRrFutureWorkerTask new 
-		connection: (registeredWorkers at: PharoLinkServerCurrentConnection value);
-		platform: aPlatform.
+		connection: (registeredWorkers at: PharoLinkServerCurrentConnection value).
 	sharedAccess critical:
 		[ availableWorkers add: taskFuture.
 		self assignTasksToWorkers ].
@@ -475,15 +444,9 @@ GtRemoteRunner >> nextTaskFor: aPlatform [
 ]
 
 { #category : #'api - worker' }
-GtRemoteRunner >> nextTaskSerializedFor: aPlatform [
+GtRemoteRunner >> nextTaskSerializedForCurrentWorker [
 
-	^ LeJsonV4 uniqueInstance serialize: (self nextTaskFor: aPlatform)
-]
-
-{ #category : #accessing }
-GtRemoteRunner >> pendingJobCount [
-
-	^ sharedAccess critical: [ jobQueue size ]
+	^ LeJsonV4 uniqueInstance serialize: self nextTaskForCurrentWorker
 ]
 
 { #category : #'api - worker' }
@@ -533,6 +496,7 @@ GtRemoteRunner >> privateTaskFailed: aTaskContextId with: anGtRrTaskErrorDetails
 	taskContext errorDetails: anGtRrTaskErrorDetails.
 	taskContext markTaskCompleted.
 	self announceAndLog: (GtRrTaskCompletedAnnouncement task: taskContext).
+	self assignTasksToWorkers.
 	self checkJobCompleted: taskContext.
 ]
 
@@ -547,6 +511,7 @@ GtRemoteRunner >> registerWorkerWithDetails: aDictionary [
 	workerConnection details: aDictionary.
 	sharedAccess critical:
 		[ registeredWorkers at: pharoLinkServerConnection put: workerConnection ].
+	managerStartupAndShutdown registerWorker: workerConnection.
 	pharoLinkServerConnection
 		when: PharoLinkServerConnectionDisconnectedAnnouncement
 		send: #unregisterWorker:
@@ -569,6 +534,14 @@ GtRemoteRunner >> registeredWorkers [
 	WARNING: This is outside sharedAccess and is for debugging purposes only."
 
 	^ registeredWorkers
+]
+
+{ #category : #enumerating }
+GtRemoteRunner >> registeredWorkersDo: aBlock [
+	"Evaluate aBlock for each of the receiver's registered workers.
+	Must be called within sharedAccess."
+
+	registeredWorkers do: aBlock
 ]
 
 { #category : #'private - accessing' }
@@ -607,9 +580,9 @@ GtRemoteRunner >> server [
 ]
 
 { #category : #accessing }
-GtRemoteRunner >> server: anObject [
+GtRemoteRunner >> server: aPharoLinkServer [
 
-	server := anObject
+	server := aPharoLinkServer
 ]
 
 { #category : #accessing }
@@ -650,31 +623,22 @@ GtRemoteRunner >> startLogging [
 	log := CircularMemoryLogger new startFor: GtRemoteRunnerAnnouncement.
 ]
 
-{ #category : #private }
-GtRemoteRunner >> startNextJob [
-	"Start the next job, if the queue isn't empty.
-	Must be called within sharedAccess."
-
-	jobQueue nextOrNil ifNotNil: [ :job |
-		self startJob: job ]
-]
-
 { #category : #ui }
 GtRemoteRunner >> state [
 	"Answer a label that represents the overall state of the runner.
 	Must be called within sharedAccess"
-	| availableWorkerCount jobCount currentJobCount currentTaskCount registeredWorkerCount |
+	| availableWorkerCount taskQueueCount currentJobCount currentTaskCount registeredWorkerCount |
 
 	(server isNil or: [ server isRunning not ]) ifTrue: [ ^ #stopped ].
 	availableWorkerCount := availableWorkers size.
-	jobCount := jobQueue size.
+	taskQueueCount := taskQueue size.
 	currentJobCount := currentlyExecutingJobs size.
 	currentTaskCount := currentlyExecutingTasks size.
 	registeredWorkerCount := registeredWorkers size.
 	(registeredWorkerCount = 0 and:
-		[ jobCount > 0 or: [ currentJobCount > 0 ] ]) ifTrue: [ ^ #stuck ].
-	(jobCount = 0 and: [ currentJobCount = 0 ]) ifTrue: [ ^ #idle ].
-	(jobCount > 0 or: [ currentJobCount > 0 ]) ifTrue: [ ^ #busy ].
+		[ taskQueueCount > 0 or: [ currentJobCount > 0 ] ]) ifTrue: [ ^ #stuck ].
+	(taskQueueCount = 0 and: [ currentJobCount = 0 ]) ifTrue: [ ^ #idle ].
+	(taskQueueCount > 0 or: [ currentJobCount > 0 ]) ifTrue: [ ^ #busy ].
 	self error: 'Unknown state'.
 ]
 
@@ -689,14 +653,8 @@ GtRemoteRunner >> submitJob: aGtRrJob [
 	"Add the supplied job to the queue.
 	Start execution as soon as possible"
 
-	sharedAccess critical:
-		[ currentlyExecutingJobs ifEmpty:
-			[ self announceAndLog: (GtRrJobSubmittedAnnouncement job: aGtRrJob).
-			self startJob: aGtRrJob ]
-		ifNotEmpty:
-			[ "Multiple jobs may be allowed to run concurrently - functionality to be added"
-			jobQueue nextPut: aGtRrJob.
-			self announceAndLog: (GtRrJobSubmittedAnnouncement job: aGtRrJob). ] ].
+	sharedAccess critical: [ self startJob: aGtRrJob ].
+	self announceAndLog: (GtRrJobSubmittedAnnouncement job: aGtRrJob).
 
 ]
 
@@ -710,7 +668,7 @@ GtRemoteRunner >> summaryAttributes [
 				nextPut: { #State. self state. self state. };
 				nextPut: { 'Total Job Count'. runnerStats totalJobCount. self. };
 				nextPut: { 'Total Task Count'. runnerStats totalTaskCount. self. };
-				nextPut: {'Job Queue Size'. jobQueue size. jobQueue. };
+				nextPut: {'Task Queue Size'. taskQueue size. taskQueue. };
 				nextPut: {'Registered Workers'. registeredWorkers size. registeredWorkers. };
 				nextPut: {'Available Workers'. availableWorkers size. availableWorkers. };
 				nextPut: {'Currently Executing Jobs'. currentlyExecutingJobs size. currentlyExecutingJobs. };
@@ -732,6 +690,7 @@ GtRemoteRunner >> taskDone: aTaskContextId with: anObject [
 		taskContext result: anObject.
 		taskContext markTaskCompleted.
 		self announceAndLog: (GtRrTaskCompletedAnnouncement task: taskContext).
+		self assignTasksToWorkers.
 		self checkJobCompleted: taskContext ].
 ]
 
@@ -741,6 +700,14 @@ GtRemoteRunner >> taskFailed: aTaskContextId with: anGtRrTaskErrorDetails [
 
 	sharedAccess critical: 
 		[ self privateTaskFailed: aTaskContextId with: anGtRrTaskErrorDetails ].
+]
+
+{ #category : #'private - debugging' }
+GtRemoteRunner >> taskQueue [
+	"Answer the taskQueue.
+	WARNING: This is outside sharedAccess and is for debugging purposes only."
+
+	^ taskQueue
 ]
 
 { #category : #accessing }
@@ -770,19 +737,18 @@ GtRemoteRunner >> terminateJobId: aJobId [
 				aJobContext terminateJob.
 				self announceAndLog: (GtRrJobTerminatedAnnouncement job: aJobContext job).
 				aJobContext job ]
-			ifAbsent: 
-				[ (jobQueue nextOrNilSuchThat: [ :jobContext | jobContext id = aJobId ])
-				ifNotNil: [ :aJob |
-					aJob cancelJob.
-					self announceAndLog: (GtRrJobCancelledAnnouncement job: aJob).
-					aJob ] ] ].
+			"ifAbsent: 
+				[ The job has already completed, do nothing ]" ].
 ]
 
 { #category : #private }
 GtRemoteRunner >> terminateTaskContextId: aTaskContextId [
 	"Terminate the specified currently executing task"
 
-	^ (currentlyExecutingTasks at: aTaskContextId) terminateTask.
+	currentlyExecutingTasks at: aTaskContextId ifPresent:
+		[ :taskContext | taskContext terminateTask ].
+	(taskQueue nextOrNilSuchThat: [ :each | each taskContextId = aTaskContextId ])
+		ifNotNil: [ :taskContext | taskContext terminateTask ].
 ]
 
 { #category : #accessing }

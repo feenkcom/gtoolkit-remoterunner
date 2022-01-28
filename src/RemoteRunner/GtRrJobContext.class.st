@@ -6,20 +6,13 @@ Class {
 	#superclass : #GtRrContext,
 	#instVars : [
 		'job',
-		'tasks',
 		'remoteRunner',
-		'platformContexts',
-		'jobTimeoutTime'
+		'jobTimeoutTime',
+		'taskContexts',
+		'taskCompletedCount'
 	],
 	#category : #'RemoteRunner-Runner-State'
 }
-
-{ #category : #accessing }
-GtRrJobContext >> atPlatform: aPlatform [
-	"Answer the platform specific context for the named platform"
-
-	^ platformContexts at: aPlatform
-]
 
 { #category : #accessing }
 GtRrJobContext >> contextTimeoutTime [
@@ -27,53 +20,6 @@ GtRrJobContext >> contextTimeoutTime [
 	<return: #DateAndTime>
 
 	^ self jobTimeoutTime
-]
-
-{ #category : #private }
-GtRrJobContext >> createMultiplePlatformContexts [
-	| platformContext |
-
-	self platforms do: [ :platform |
-		platformContext := GtRrPlatformContext new
-			jobContext: self;
-			platform: platform.
-		platformContext pendingTasks items: (tasks collect: [ :task | 
-			GtRrTaskContext new
-				task: task copy;
-				platformContext: platformContext ]).
-		platformContexts at: platform put: platformContext ].
-]
-
-{ #category : #'api - startup' }
-GtRrJobContext >> createPlatformContexts [
-	"Create the platform contexts for the receiver.
-	If the receiver has only one platform, the tasks can be directly allocated, otherwise copies of each task must be created for each platform."
-
-	self platforms size = 1 ifTrue: 
-		[ self createSinglePlatformContext ]
-	ifFalse: 
-		[ self createMultiplePlatformContexts ]
-]
-
-{ #category : #private }
-GtRrJobContext >> createSinglePlatformContext [
-	| platform platformContext |
-
-	platform := self platforms first.
-	platformContext := GtRrPlatformContext new
-			jobContext: self;
-			platform: platform.
-	platformContext pendingTasks items: (tasks collect: [ :task |
-		GtRrTaskContext new
-			task: task;
-			platformContext: platformContext ]).
-	platformContexts at: platform put: platformContext.
-]
-
-{ #category : #private }
-GtRrJobContext >> getTasks [
-
-	tasks := job tasks
 ]
 
 { #category : #ui }
@@ -129,7 +75,7 @@ GtRrJobContext >> gtTasksFor: aView [
 	^ aView list
 		title: 'Tasks';
 		priority: 50;
-		items: [ tasks ];
+		items: [ taskContexts ];
 		actionUpdateButton
 ]
 
@@ -139,17 +85,10 @@ GtRrJobContext >> id [
 	^ job id
 ]
 
-{ #category : #initialization }
-GtRrJobContext >> initialize [ 
-
-	super initialize.
-	platformContexts := Dictionary new.
-]
-
 { #category : #testing }
 GtRrJobContext >> isFinished [
 
-	^ platformContexts allSatisfy: #isFinished
+	^ taskCompletedCount >= taskContexts size.
 ]
 
 { #category : #testing }
@@ -201,37 +140,26 @@ GtRrJobContext >> markJobStarted [
 
 	job markJobStarted.
 	jobTimeoutTime := job startTime + self jobTimeout.
+	taskCompletedCount := 0.
 ]
 
 { #category : #'api - running' }
 GtRrJobContext >> markTaskCancelled: aGtRrTaskContext [
 
-	job addResult: aGtRrTaskContext task.
+	self markTaskCompleted: aGtRrTaskContext.
 ]
 
 { #category : #'api - running' }
 GtRrJobContext >> markTaskCompleted: aGtRrTaskContext [
 
 	job addResult: aGtRrTaskContext task.
+	taskCompletedCount := taskCompletedCount + 1.
 ]
 
 { #category : #'api - running' }
 GtRrJobContext >> markTaskStarted: aGtRrTaskContext [
 
 	job announce: (GtRrTaskStartedAnnouncement task: aGtRrTaskContext task)
-]
-
-{ #category : #private }
-GtRrJobContext >> platformContexts [
-	"Private: only for testing internal state"
-
-	^ platformContexts
-]
-
-{ #category : #accessing }
-GtRrJobContext >> platforms [
-
-	^ job platforms
 ]
 
 { #category : #printing }
@@ -249,15 +177,23 @@ GtRrJobContext >> remoteRunner [
 ]
 
 { #category : #accessing }
-GtRrJobContext >> remoteRunner: anObject [
+GtRrJobContext >> remoteRunner: aGtRemoteRunner [
 
-	remoteRunner := anObject
+	remoteRunner := aGtRemoteRunner
 ]
 
 { #category : #accessing }
 GtRrJobContext >> results [
 
-	^ platformContexts values flatCollect: #results
+	^ job results
+]
+
+{ #category : #private }
+GtRrJobContext >> submitTasks [
+	"Submit the tasks to the receiver's runner"
+
+	self taskContexts do: [ :taskContext |
+		remoteRunner addTaskContext: taskContext ]
 ]
 
 { #category : #ui }
@@ -274,15 +210,18 @@ GtRrJobContext >> summaryAttributes [
 ]
 
 { #category : #accessing }
-GtRrJobContext >> taskTimeout [
+GtRrJobContext >> taskContexts [
 
-	^ job taskTimeout ifNil: [ remoteRunner taskTimeout ]
+	^ taskContexts ifNil: [ taskContexts := (job tasksFor: remoteRunner) collect: [ :task |
+			GtRrTaskContext new 
+				task: task;
+				jobContext: self ] ]
 ]
 
 { #category : #accessing }
-GtRrJobContext >> tasks [
+GtRrJobContext >> taskTimeout [
 
-	^ tasks
+	^ job taskTimeout ifNil: [ remoteRunner taskTimeout ]
 ]
 
 { #category : #'api - running' }
@@ -292,7 +231,8 @@ GtRrJobContext >> terminateJob [
 	Must be called within sharedAccess."
 
 	job markJobTerminating.
-	platformContexts do: #terminateJob.
+	self taskContexts do: [ :taskContext |
+		self remoteRunner terminateTaskContextId: taskContext taskContextId ].
 	remoteRunner checkJobCompleted: self.
 ]
 

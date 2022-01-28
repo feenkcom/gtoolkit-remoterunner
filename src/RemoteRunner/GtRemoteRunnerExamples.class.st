@@ -15,7 +15,6 @@ Class {
 GtRemoteRunnerExamples >> assignTasksToWorkersTaskFirst [
 	"Demonstrate assigning tasks to workers, with the tasks queued before the workers connect"
 	<gtExample>
-	<noTest>
 	| remoteRunner workers job tasks taskCompletedCount taskFailedCount jobCompletedCount semaphore |
 
 	jobCompletedCount := taskCompletedCount := taskFailedCount := 0.
@@ -27,9 +26,7 @@ GtRemoteRunnerExamples >> assignTasksToWorkersTaskFirst [
 	tasks add: (GtRrExampleValueTask new
 			value: 'error1';
 			setError).
-	job := GtRrTasksJob new
-		platforms: #(plat1 plat2);
-		tasks: tasks.
+	job := GtRrTasksJob new tasks: tasks.
 	job
 		when: GtRrJobCompletedAnnouncement do: 
 			[ jobCompletedCount := jobCompletedCount + 1.
@@ -42,15 +39,14 @@ GtRemoteRunnerExamples >> assignTasksToWorkersTaskFirst [
 
 	workers := (1 to: 2) collect: [ :i |
 		GtRrInImageWorker new
-			rrPlatform: 'plat', i asString;
 			remoteRunner: remoteRunner;
 			connection: PharoLinkServerConnection new;
 			start ].
 
 	semaphore wait.
-	self assert: job results size equals: 12.
-	self assert: taskCompletedCount equals: 10.
-	self assert: taskFailedCount equals: 2.
+	self assert: job results size equals: 6.
+	self assert: taskCompletedCount equals: 5.
+	self assert: taskFailedCount equals: 1.
 	self assert: jobCompletedCount equals: 1.
 
 	workers do: #stop.
@@ -61,7 +57,6 @@ GtRemoteRunnerExamples >> assignTasksToWorkersTaskFirst [
 GtRemoteRunnerExamples >> assignTasksToWorkersWorkerFirst [
 	"Demonstrate assigning tasks to workers, with the tasks queued before the workers connect"
 	<gtExample>
-	<noTest>
 	| remoteRunner workers job tasks taskCompletedCount taskFailedCount jobCompletedCount semaphore |
 
 	jobCompletedCount := taskCompletedCount := taskFailedCount := 0.
@@ -70,7 +65,6 @@ GtRemoteRunnerExamples >> assignTasksToWorkersWorkerFirst [
 
 	workers := (1 to: 2) collect: [ :i |
 		GtRrInImageWorker new
-			rrPlatform: 'plat', i asString;
 			remoteRunner: remoteRunner;
 			connection: PharoLinkServerConnection new;
 			start ].
@@ -81,9 +75,7 @@ GtRemoteRunnerExamples >> assignTasksToWorkersWorkerFirst [
 	tasks add: (GtRrExampleValueTask new
 			value: 'error1';
 			setError).
-	job := GtRrTasksJob new
-		platforms: #(plat1 plat2);
-		tasks: tasks.
+	job := GtRrTasksJob new tasks: tasks.
 	job
 		when: GtRrJobCompletedAnnouncement do: 
 			[ jobCompletedCount := jobCompletedCount + 1.
@@ -95,9 +87,9 @@ GtRemoteRunnerExamples >> assignTasksToWorkersWorkerFirst [
 	remoteRunner submitJob: job.
 
 	semaphore wait.
-	self assert: job results size equals: 12.
-	self assert: taskCompletedCount equals: 10.
-	self assert: taskFailedCount equals: 2.
+	self assert: job results size equals: 6.
+	self assert: taskCompletedCount equals: 5.
+	self assert: taskFailedCount equals: 1.
 	self assert: jobCompletedCount equals: 1.
 
 	workers do: #stop.
@@ -157,43 +149,41 @@ GtRemoteRunnerExamples >> controlChannelQuitSmalltalk [
 
 { #category : #examples }
 GtRemoteRunnerExamples >> getNextTaskFor [
-	"Demonstrate getting the next task for a given platform from a Remote Runner"
+	"Demonstrate getting the next task for a worker from a Remote Runner.
+	Tasks are created with a test constraint with a boolean value."
 	<gtExample>
-	<noTest>
-	| job tasks taskIds remoteRunner firstTask plat1Tasks plat2Tasks |
+	| job tasks remoteRunner evenWorker oddWorker evenTasks oddTasks |
 
 	tasks := (1 to: 5) collect: [ :i |
 		GtRrExampleValueTask new
-			value: i ] as: OrderedCollection.
-	taskIds := tasks collect: #taskId as: Set.
-	job := GtRrTasksJob new
-		platforms: #(plat1 plat2);
-		tasks: tasks.
+			value: i;
+			constraint: (GtRrEqualsConstraint attribute: #testConstraint value: i even) ].
+	job := GtRrTasksJob new tasks: tasks.
+	evenWorker := GtRrFutureWorkerTask new connection: 
+		(GtRrWorkerConnection new details: { #testConstraint -> true } asDictionary).
+	oddWorker := GtRrFutureWorkerTask new connection: 
+		(GtRrWorkerConnection new details: { #testConstraint -> false } asDictionary).
 	remoteRunner := GtRemoteRunner new.
 	"The remote runner has enough state to run this example without being started"
-	remoteRunner startJob: job.
+	remoteRunner submitJob: job.
 	self assert: remoteRunner currentlyExecutingJobs size equals: 1.
 	self assert: remoteRunner currentlyExecutingTasks size equals: 0.
-	firstTask := (remoteRunner currentlyExecutingJobs anyOne atPlatform: #plat2) pendingTasks itemArray first.
+	self assert: remoteRunner taskQueue size equals: 5.
 
-	plat1Tasks := OrderedCollection new.
-	plat2Tasks := OrderedCollection new.
-	plat1Tasks add: (remoteRunner getNextTaskFor: #plat1).
-	plat2Tasks add: (remoteRunner getNextTaskFor: #plat2).
-	plat1Tasks add: (remoteRunner getNextTaskFor: #plat1).
-	plat1Tasks add: (remoteRunner getNextTaskFor: #plat1).
-	plat2Tasks add: (remoteRunner getNextTaskFor: #plat2).
-	plat2Tasks add: (remoteRunner getNextTaskFor: #plat2).
-	plat1Tasks add: (remoteRunner getNextTaskFor: #plat1).
-	plat2Tasks add: (remoteRunner getNextTaskFor: #plat2).
-	plat1Tasks add: (remoteRunner getNextTaskFor: #plat1).
-	plat2Tasks add: (remoteRunner getNextTaskFor: #plat2).
+	evenTasks := OrderedCollection new.
+	oddTasks := OrderedCollection new.
+	evenTasks add: (remoteRunner getNextTaskFor: evenWorker).
+	oddTasks add: (remoteRunner getNextTaskFor: oddWorker).
+	oddTasks add: (remoteRunner getNextTaskFor: oddWorker).
+	evenTasks add: (remoteRunner getNextTaskFor: evenWorker).
+	oddTasks add: (remoteRunner getNextTaskFor: oddWorker).
 
-	self assert: plat1Tasks first task class equals: GtRrExampleValueTask.
-	self assert: (plat1Tasks collect: #taskId as: Set) equals: taskIds.
-	self assert: (plat2Tasks collect: #taskId as: Set) equals: taskIds.
-	self assert: (remoteRunner currentlyExecutingJobs anyOne atPlatform: #plat1) pendingTasks isEmpty.
-	self assert: (remoteRunner currentlyExecutingJobs anyOne atPlatform: #plat2) pendingTasks isEmpty.
+	self assert: evenTasks size equals: 2.
+	self assert: oddTasks size equals: 3.
+	self assert: evenTasks first task class equals: GtRrExampleValueTask.
+	self assert: evenTasks first task constraint value equals: true.
+	self assert: remoteRunner taskQueue size equals: 0.
+	^ job
 ]
 
 { #category : #examples }
@@ -259,7 +249,9 @@ GtRemoteRunnerExamples >> multipleJobs [
 	jobStartedCount := jobCompletedCount := taskStartedCount := taskCompletedCount := taskFailedCount := 0.
 	jobSemaphore := GtMutualExclusionSemaphore new.
 	remoteRunner := GtRemoteRunner new port: 7092.
-	remoteRunner start.
+	remoteRunner 
+		startLogging;
+		start.
 	[ 
 	jobs := (1 to: 2) collect: [  :i |
 		completingTask := GtRrScriptTask script: '#done'.
@@ -284,12 +276,51 @@ GtRemoteRunnerExamples >> multipleJobs [
 
 	self assert: remoteRunner currentlyExecutingJobs size equals: 0.
 	self assert: remoteRunner currentlyExecutingTasks size equals: 0.
-	self assert: remoteRunner pendingJobCount equals: 0.
+	self assert: remoteRunner taskQueue size equals: 0.
 	self assert: jobCompletedCount equals: 2.
 	self assert: jobStartedCount equals: 2.
 	self assert: taskCompletedCount equals: 2.
 	self assert: taskFailedCount equals: 0.
 	self assert: taskStartedCount equals: 2.
+	] ensure: [ remoteRunner stop ].
+
+	^ job
+]
+
+{ #category : #examples }
+GtRemoteRunnerExamples >> multipleJobsSimultaneously [
+	"Demonstrate executing multiple jobs started simultaneously"
+	<gtExample>
+	<noTest>
+	| remoteRunner job jobs semaphore workerConnections retryCount currentTask |
+
+	semaphore := GtMutualExclusionSemaphore new.
+	remoteRunner := GtRemoteRunner new.
+	remoteRunner managerStartupAndShutdown poolSize: 2.
+	remoteRunner 
+		port: 7092;
+		startLogging;
+		start.
+	[ 
+	jobs := (1 to: 2) collect: [  :i |
+		job := GtRrJob script: 'Semaphore new wait'.
+		job when: GtRrTaskStartedAnnouncement do: [ semaphore signal ].
+		job ].
+	jobs do: [ :aJob | remoteRunner submitJob: aJob ].
+	2 timesRepeat: [ semaphore wait ].
+
+	workerConnections := remoteRunner registeredWorkers values.
+	workerConnections do: [ :workerConnection |
+		retryCount := 10.
+		[ currentTask := workerConnection commandCurrentTaskContextId.
+		retryCount := retryCount - 1.
+		currentTask isNil and: [ retryCount > 0 ] ] whileTrue.
+		currentTask ifNil:
+			[ self error: 'Task never started on worker' ] ].
+
+	self assert: remoteRunner currentlyExecutingJobs size equals: 2.
+	self assert: remoteRunner currentlyExecutingTasks size equals: 2.
+	self assert: remoteRunner taskQueue size equals: 0.
 	] ensure: [ remoteRunner stop ].
 
 	^ job
@@ -334,9 +365,9 @@ GtRemoteRunnerExamples >> simpleTask [
 	remoteRunner submitJob: job.
 	jobSemaphore wait.
 
+	self assert: remoteRunner taskQueue size equals: 0.
 	self assert: remoteRunner currentlyExecutingJobs size equals: 0.
 	self assert: remoteRunner currentlyExecutingTasks size equals: 0.
-	self assert: remoteRunner pendingJobCount equals: 0.
 	self assert: jobCompletedCount equals: 1.
 	self assert: jobStartedCount equals: 1.
 	self assert: taskCompletedCount equals: 1.
@@ -389,9 +420,9 @@ GtRemoteRunnerExamples >> simpleTestTask [
 	remoteRunner submitJob: job.
 	jobSemaphore wait.
 
+	self assert: remoteRunner taskQueue size equals: 0.
 	self assert: remoteRunner currentlyExecutingJobs size equals: 0.
 	self assert: remoteRunner currentlyExecutingTasks size equals: 0.
-	self assert: remoteRunner pendingJobCount equals: 0.
 	self assert: jobStartedCount equals: 1.
 	self assert: jobCompletedCount equals: 1.
 	self assert: taskStartedCount equals: 1.
@@ -406,58 +437,25 @@ GtRemoteRunnerExamples >> simpleTestTask [
 ]
 
 { #category : #examples }
-GtRemoteRunnerExamples >> terminateNotStartedJob [
-	"Terminate a job that hasn't been started, ensuring that job is marked cancelled and has no results"
-	<gtExample>
-	<noTest>
-	| remoteRunner job tasks |
-
-	remoteRunner := GtRemoteRunner new.
-	"Submit an empty job.  Since there are no workers, it will become the currently executing job, leaving the next not started"
-	remoteRunner submitJob: (GtRrTasksJob new tasks: #()).
-
-	tasks := (1 to: 3) collect: [ :i |
-		GtRrExampleValueTask new
-			value: i ] as: OrderedCollection.
-	job := GtRrTasksJob new
-		tasks: tasks.
-	remoteRunner submitJob: job.
-
-	self assert: remoteRunner currentlyExecutingJobs size equals: 1.
-	self assert: remoteRunner currentlyExecutingTasks size equals: 0.
-	self assert: remoteRunner pendingJobCount equals: 1.
-
-	remoteRunner terminateJobId: job id.
-
-	self assert: remoteRunner currentlyExecutingJobs size equals: 1.
-	self assert: remoteRunner currentlyExecutingTasks size equals: 0.
-	self assert: remoteRunner pendingJobCount equals: 0.
-
-	self assert: job state equals: #cancelled.
-	self assert: job results isEmpty.
-
-	^ job
-]
-
-{ #category : #examples }
 GtRemoteRunnerExamples >> terminateStartedJob [
-	"Terminate a job that has been started, ensuring that all tasks have been marked as terminated (not yet started)"
+	"Terminate a job that has been started, ensuring that all tasks have been marked as terminated"
 	<gtExample>
 	<noTest>
-	| remoteRunner job tasks taskFailedCount taskCompletedCount jobCompletedCount semaphore jobStartedCount taskStartedCount times |
+	| remoteRunner job tasks taskFailedCount taskCompletedCount jobCompletedCount semaphore jobStartedCount taskStartedCount times workerConnection currentTask retryCount |
 
 	jobStartedCount := jobCompletedCount := taskStartedCount := taskCompletedCount := taskFailedCount := 0.
 	semaphore := GtMutualExclusionSemaphore new.
 	times := OrderedCollection new.
-	remoteRunner := GtRemoteRunner new port: 7084.
+	remoteRunner := GtRemoteRunner new 
+		port: 7084;
+		startLogging.
 	remoteRunner managerStartupAndShutdown poolSize: 1.
 	remoteRunner start.
 	[ 
 	"Create a set of tasks that never complete"
 	tasks := (1 to: 3) collect: [ :i |
-		GtRrScriptTask script: 'Semaphore new wait' ] as: OrderedCollection.
-	job := GtRrTasksJob new
-		tasks: tasks.
+		GtRrScriptTask script: 'Semaphore new wait' ].
+	job := GtRrTasksJob new tasks: tasks.
 	job
 		when: GtRrJobStartedAnnouncement do: 
 			[ jobStartedCount := jobStartedCount + 1.
@@ -480,19 +478,27 @@ GtRemoteRunnerExamples >> terminateStartedJob [
 		when: GtRrTaskFailedAnnouncement do: 
 			[ taskFailedCount := taskFailedCount + 1.
 			times add: 2 -> DateAndTime now ].
+
 	remoteRunner submitJob: job.
 	semaphore wait.
+	workerConnection := remoteRunner registeredWorkers anyOne.
+	retryCount := 10.
+	[ currentTask := workerConnection commandCurrentTaskContextId.
+	retryCount := retryCount - 1.
+	currentTask isNil and: [ retryCount > 0 ] ] whileTrue.
+	currentTask ifNil:
+		[ self error: 'Task never started on worker' ].
 
 	self assert: remoteRunner currentlyExecutingJobs size equals: 1.
 	self assert: remoteRunner currentlyExecutingTasks size equals: 1.
-	self assert: remoteRunner pendingJobCount equals: 0.
+	self assert: remoteRunner taskQueue size equals: 2.
 
 	remoteRunner terminateJobId: job id.
 	semaphore wait.
 
 	self assert: remoteRunner currentlyExecutingJobs size equals: 0.
 	self assert: remoteRunner currentlyExecutingTasks size equals: 0.
-	self assert: remoteRunner pendingJobCount equals: 0.
+	self assert: remoteRunner taskQueue size equals: 0.
 	self assert: jobCompletedCount equals: 1.
 	self assert: jobStartedCount equals: 1.
 	self assert: taskCompletedCount equals: 0.
@@ -551,7 +557,7 @@ GtRemoteRunnerExamples >> timeoutJob [
 
 	self assert: remoteRunner currentlyExecutingJobs size equals: 0.
 	self assert: remoteRunner currentlyExecutingTasks size equals: 0.
-	self assert: remoteRunner pendingJobCount equals: 0.
+	self assert: remoteRunner taskQueue size equals: 0.
 	self assert: jobCompletedCount equals: 1.
 	self assert: jobStartedCount equals: 1.
 	self assert: taskCompletedCount equals: 0.
@@ -622,7 +628,7 @@ GtRemoteRunnerExamples >> timeoutTask [
 
 	self assert: remoteRunner currentlyExecutingJobs size equals: 0.
 	self assert: remoteRunner currentlyExecutingTasks size equals: 0.
-	self assert: remoteRunner pendingJobCount equals: 0.
+	self assert: remoteRunner taskQueue size equals: 0.
 	self assert: jobCompletedCount equals: 1.
 	self assert: jobStartedCount equals: 1.
 	self assert: taskCompletedCount equals: 1.
@@ -690,7 +696,7 @@ GtRemoteRunnerExamples >> timeoutWorker [
 
 	self assert: remoteRunner currentlyExecutingJobs size equals: 0.
 	self assert: remoteRunner currentlyExecutingTasks size equals: 0.
-	self assert: remoteRunner pendingJobCount equals: 0.
+	self assert: remoteRunner taskQueue size equals: 0.
 	self assert: jobCompletedCount equals: 1.
 	self assert: jobStartedCount equals: 1.
 	self assert: taskCompletedCount equals: 1.

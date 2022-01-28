@@ -1,3 +1,6 @@
+"
+GtRrCodeSync is responsible for listening to the Epicea Monitor ({{gtClass:EpMonitor}}) and submitting code sync tasks to each of the synced workers when any code change is made.
+"
 Class {
 	#name : #GtRrCodeSync,
 	#superclass : #Object,
@@ -5,17 +8,10 @@ Class {
 		'events',
 		'subscription',
 		'flusher',
-		'remoteRunner',
-		'errors'
+		'remoteRunner'
 	],
-	#category : #'RemoteRunner-Runner'
+	#category : #'RemoteRunner-Runner-CodeSync'
 }
-
-{ #category : #accessing }
-GtRrCodeSync >> errors [
-
-	^ errors
-]
 
 { #category : #finalization }
 GtRrCodeSync >> finalize [
@@ -26,13 +22,13 @@ GtRrCodeSync >> finalize [
 
 { #category : #accessing }
 GtRrCodeSync >> flush [
-
 	| buffer |
+
 	buffer := OrderedCollection new.
 	events flush: [ :event | buffer add: event ].
 	buffer ifEmpty: [ "nothing to send, ignore" ^ self ].
-	(remoteRunner applyCodeChanges: buffer) ifNotEmpty: [ :e | 
-		errors add: buffer -> e ]
+	remoteRunner submitJob: (GtRrCodeSyncJob serializedChanges:
+			 (LanguageLinkUtils base64Encode: buffer))
 ]
 
 { #category : #initialization }
@@ -40,10 +36,7 @@ GtRrCodeSync >> initialize [
 
 	super initialize.
 	events := WaitfreeQueue new.
-	errors := OrderedCollection new.
-	flusher := TKTWorker new
-		           name: 'GtRrCodeSync flusher';
-		           yourself
+	flusher := TKTNewProcessTaskRunner new
 ]
 
 { #category : #accessing }
@@ -62,9 +55,9 @@ GtRrCodeSync >> remoteRunner [
 ]
 
 { #category : #accessing }
-GtRrCodeSync >> remoteRunner: aRemoteRunner [
+GtRrCodeSync >> remoteRunner: anObject [
 
-	remoteRunner := aRemoteRunner
+	remoteRunner := anObject
 ]
 
 { #category : #accessing }
@@ -75,13 +68,11 @@ GtRrCodeSync >> start [
 			                when: EpEntryAdded
 			                send: #onEntryAdded:
 			                to: self ].
-	flusher start
 ]
 
 { #category : #accessing }
 GtRrCodeSync >> stop [
 
-	flusher stop.
 	subscription ifNotNil: [ 
 		subscription announcer removeSubscription: subscription.
 		subscription := nil ]

@@ -2,6 +2,7 @@ Class {
 	#name : #GtRrTask,
 	#superclass : #Object,
 	#instVars : [
+		'constraint',
 		'startTime',
 		'endTime',
 		'workerIpAddress',
@@ -25,6 +26,18 @@ GtRrTask >> asJob [
 	"Answer a GtRrTasksJob with the receiver as its single task"
 
 	^ GtRrTasksJob tasks: { self }
+]
+
+{ #category : #accessing }
+GtRrTask >> constraint [
+
+	^ constraint
+]
+
+{ #category : #accessing }
+GtRrTask >> constraint: anObject [
+
+	constraint := anObject
 ]
 
 { #category : #accessing }
@@ -98,6 +111,13 @@ GtRrTask >> initialize [
 	super initialize.
 	taskId := UUID new asString.
 	state := #notStarted.
+	constraint := GtRrTrueConstraint instance.
+]
+
+{ #category : #testing }
+GtRrTask >> isFinished [
+
+	^ endTime isNotNil
 ]
 
 { #category : #running }

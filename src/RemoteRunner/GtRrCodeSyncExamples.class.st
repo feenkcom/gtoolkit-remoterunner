@@ -8,22 +8,36 @@ Class {
 GtRrCodeSyncExamples >> addRemoveMethod [
 	<gtExample>
 	<noTest>
-	| runner codeSync |
+	| runner codeSync semaphore |
 	runner := GtRemoteRunner new
 		          port: 8042;
+					startLogging;
 		          yourself.
 	codeSync := runner managerStartupAndShutdown codeSync.
-	[ 
+	[ semaphore := Semaphore new.
+	runner 
+		when: GtRrWorkerRegisteredAnnouncement
+		doOnce: [ semaphore signal ]
+		for: self.
 	runner start.
-	self
+	semaphore
 		wait: 10 seconds
-		for: GtRrWorkerRegisteredAnnouncement
-		in: runner.
+		onCompletion: [ "noop" ] 
+		onTimeout: [ self error: 'Didn''t receive expected registration announcement' ].
+	"Signal the semaphore when a code sync task completes so we can wait for changes to be propagated"
+	runner
+		when: GtRrTaskCompletedAnnouncement 
+		do: [ :ann | semaphore signal ] 
+		for: self.
 	"add/remove method changes should be propagated to workers"
 	self assert: (self hasMethodIn: runner) not.
+	semaphore consumeAllSignals.
 	self class compile: 'blub ^ 1'.
+	semaphore wait.
 	self assert: (self hasMethodIn: runner).
+	semaphore consumeAllSignals.
 	self class removeSelector: #blub.
+	semaphore wait.
 	self assert: (self hasMethodIn: runner) not.
 	"stopping sync should no longer propagate changes"
 	codeSync stop.
@@ -36,28 +50,18 @@ GtRrCodeSyncExamples >> addRemoveMethod [
 
 { #category : #accessing }
 GtRrCodeSyncExamples >> hasMethodIn: aRunner [
+	| job semaphore |
 
-	| job |
-	job := GtRrTasksJob tasks:
-		       { (GtRrScriptTask script:
-			        self class name , ' includesSelector: #blub') }.
-	aRunner submitJob: job.
-	self wait: 5 seconds for: GtRrJobCompletedAnnouncement in: job.
-	^ job tasks first result
-]
-
-{ #category : #accessing }
-GtRrCodeSyncExamples >> wait: aDuration for: anAnnouncement in: anAnnouncer [
-
-	| semaphore |
+	job := GtRrJob script: self class name , ' includesSelector: #blub'.
 	semaphore := Semaphore new.
-	anAnnouncer
-		when: anAnnouncement
+	job
+		when: GtRrJobCompletedAnnouncement
 		doOnce: [ semaphore signal ]
 		for: self.
-	semaphore wait: aDuration onCompletion: [ "noop" ] onTimeout: [ 
-		self error: ('wait {1} for {2} in {3} timed out' format: { 
-					 aDuration.
-					 anAnnouncement.
-					 anAnnouncer }) ]
+	aRunner submitJob: job.
+	semaphore 
+		wait: 5 seconds
+		onCompletion: [ "noop" ] 
+		onTimeout: [ self error: 'Didn''t receive expected job completion announcement' ].
+	^ job tasks first result
 ]
