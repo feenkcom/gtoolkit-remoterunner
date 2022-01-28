@@ -141,12 +141,14 @@ GtRrJob >> gtSummaryFor: aView [
 
 { #category : #ui }
 GtRrJob >> gtTasksFor: aView [
-	<gtView>
 
+	<gtView>
 	^ aView list
-		title: 'Tasks';
-		priority: 50;
-		items: [ self tasks ]
+		  title: 'Tasks';
+		  priority: 50;
+		  items: [ self tasks ];
+		  updateWhen: GtRrJobAnnouncement in: [ self announcer ];
+		  actionUpdateButton
 ]
 
 { #category : #testing }

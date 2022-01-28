@@ -252,6 +252,12 @@ GtRrTaskContext >> timeoutContext [
 ]
 
 { #category : #accessing }
+GtRrTaskContext >> workerAttributes: anObject [
+
+	task workerAttributes: anObject
+]
+
+{ #category : #accessing }
 GtRrTaskContext >> workerFuture [
 	<return: #GtRrFutureWorkerTask>
 
@@ -262,13 +268,7 @@ GtRrTaskContext >> workerFuture [
 GtRrTaskContext >> workerFuture: aGtRrFutureWorkerTask [
 
 	workerFuture := aGtRrFutureWorkerTask.
-	task workerIpAddress: workerFuture remoteAddress.
-]
-
-{ #category : #accessing }
-GtRrTaskContext >> workerIpAddress: anObject [
-
-	task workerIpAddress: anObject
+	task workerAttributes: workerFuture workerAttributes.
 ]
 
 { #category : #accessing }

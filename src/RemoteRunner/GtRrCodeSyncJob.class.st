@@ -43,7 +43,7 @@ GtRrCodeSyncJob >> tasksFor: aRemoteRunner [
 
 	tasks := OrderedCollection new.
 	aRemoteRunner registeredWorkersDo: [ :aWorkerConnection |
-		(aWorkerConnection details includesKey: #codeSynced) ifTrue:
+		(aWorkerConnection details at: #codeSynced ifAbsent: [ false ]) ifTrue:
 			[ tasks add: (GtRrCodeSyncTask
 				serializedChanges: serializedChanges
 				workerId: (aWorkerConnection details at: #id)) ] ].

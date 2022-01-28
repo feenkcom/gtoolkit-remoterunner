@@ -74,3 +74,9 @@ GtRrFutureWorkerTask >> wait [
 
 	semaphore wait
 ]
+
+{ #category : #accessing }
+GtRrFutureWorkerTask >> workerAttributes [
+
+	^ connection details
+]

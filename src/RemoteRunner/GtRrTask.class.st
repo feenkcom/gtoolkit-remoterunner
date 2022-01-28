@@ -5,7 +5,7 @@ Class {
 		'constraint',
 		'startTime',
 		'endTime',
-		'workerIpAddress',
+		'workerAttributes',
 		'result',
 		'taskId',
 		'errorDetails',
@@ -90,6 +90,18 @@ GtRrTask >> gtSummaryFor: aView [
 		  column: #Value text: [ :item | item value ];
 		send: [ :item | item value ];
 		  actionUpdateButton
+]
+
+{ #category : #ui }
+GtRrTask >> gtWorkerAttributesFor: aView [
+	<gtView>
+
+	workerAttributes ifNil: [ ^ aView empty ].
+	^ aView forward
+		  title: 'Worker Attributes';
+		  priority: 40;
+		  object: [ workerAttributes ];
+		  view: #gtLiveFor:
 ]
 
 { #category : #testing }
@@ -235,7 +247,7 @@ GtRrTask >> summaryAttributes [
 		[ attributes add: #Timeout -> taskTimeout ].
 	attributes
 		add: #ID -> taskId;
-		add: 'Worker IP Address' -> workerIpAddress.
+		add: 'Worker Attributes' -> workerAttributes.
 	^ attributes
 ]
 
@@ -265,13 +277,13 @@ GtRrTask >> taskTimeout: aDuration [
 ]
 
 { #category : #accessing }
-GtRrTask >> workerIpAddress [
+GtRrTask >> workerAttributes [
 
-	^ workerIpAddress
+	^ workerAttributes
 ]
 
 { #category : #accessing }
-GtRrTask >> workerIpAddress: anObject [
+GtRrTask >> workerAttributes: anObject [
 
-	workerIpAddress := anObject
+	workerAttributes := anObject
 ]
