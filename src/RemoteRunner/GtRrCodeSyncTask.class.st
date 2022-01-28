@@ -25,6 +25,18 @@ GtRrCodeSyncTask class >> serializedChanges: aFuelStringOfCollection workerId: a
 		  yourself
 ]
 
+{ #category : #'gt-extensions' }
+GtRrCodeSyncTask >> gtChangesFor: aView [
+	<gtView>
+
+	serializedChanges ifNil: [ ^ aView empty ].
+	^ aView forward
+		title: 'Changes';
+		priority: 20;
+		object: [ LanguageLinkUtils base64Decode: serializedChanges readStream ];
+		view: #gtLiveFor:
+]
+
 { #category : #executing }
 GtRrCodeSyncTask >> run [
 
