@@ -75,9 +75,9 @@ GtRrLocalManagerStartupAndShutdown >> shutdown [
 		on: ProcessAlreadyTerminating
 		do: [ "noop" ].
 	watchDog := nil.
-	processes
-		do: #terminate;
-		removeAll.
+	processes do: #terminate.
+	remoteRunner debugMode ifFalse:
+		[ processes removeAll ].
 	super shutdown.
 
 ]
