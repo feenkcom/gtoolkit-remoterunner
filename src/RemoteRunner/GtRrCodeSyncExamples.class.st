@@ -14,6 +14,7 @@ GtRrCodeSyncExamples >> addRemoveMethod [
 					startLogging;
 		          yourself.
 	codeSync := runner managerStartupAndShutdown codeSync.
+	runner managerStartupAndShutdown poolSize: 1.
 	[ semaphore := Semaphore new.
 	runner 
 		when: GtRrWorkerRegisteredAnnouncement
@@ -33,11 +34,17 @@ GtRrCodeSyncExamples >> addRemoveMethod [
 	self assert: (self hasMethodIn: runner) not.
 	semaphore consumeAllSignals.
 	self class compile: 'blub ^ 1'.
-	semaphore wait.
+	semaphore
+		wait: 5 seconds
+		onCompletion: [ "noop" ] 
+		onTimeout: [ self error: 'Didn''t receive expected code sync announcement 1' ].
 	self assert: (self hasMethodIn: runner).
 	semaphore consumeAllSignals.
 	self class removeSelector: #blub.
-	semaphore wait.
+	semaphore
+		wait: 5 seconds
+		onCompletion: [ "noop" ] 
+		onTimeout: [ self error: 'Didn''t receive expected code sync announcement 2' ].
 	self assert: (self hasMethodIn: runner) not.
 	"stopping sync should no longer propagate changes"
 	codeSync stop.
