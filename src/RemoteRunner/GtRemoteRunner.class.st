@@ -331,7 +331,7 @@ GtRemoteRunner >> gtSummaryFor: aView [
 ]
 
 { #category : #ui }
-GtRemoteRunner >> gtWorkersFor: aView [
+GtRemoteRunner >> gtTaskQueueFor: aView [
 	<gtView>
 
 	^ aView columnedList
@@ -341,6 +341,19 @@ GtRemoteRunner >> gtWorkersFor: aView [
 		  column: 'Job' text: [ :item | item jobContext id ];
 			column: 'Task' text: [ :item | item taskId ];
 		  column: 'Description' text: [ :item | item printString ];
+		  actionUpdateButton
+]
+
+{ #category : #ui }
+GtRemoteRunner >> gtWorkersFor: aView [
+	<gtView>
+
+	^ aView columnedList
+		  title: 'Registered Workers';
+		  priority: 50;
+		  items: [ registeredWorkers values ];
+		  column: 'IP Address' text: [ :item | GtRemoteRunner printIpAddress: item remoteAddress ];
+			column: 'Working Directory' text: [ :item | item detailAt: #workingDirectory ifAbsent: [ '' ] ];
 		  actionUpdateButton
 ]
 
