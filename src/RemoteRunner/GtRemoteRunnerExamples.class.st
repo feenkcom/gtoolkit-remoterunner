@@ -15,6 +15,7 @@ Class {
 GtRemoteRunnerExamples >> assignTasksToWorkersTaskFirst [
 	"Demonstrate assigning tasks to workers, with the tasks queued before the workers connect"
 	<gtExample>
+	<noTest>
 	| remoteRunner workers job tasks taskCompletedCount taskFailedCount jobCompletedCount semaphore |
 
 	jobCompletedCount := taskCompletedCount := taskFailedCount := 0.
@@ -57,6 +58,7 @@ GtRemoteRunnerExamples >> assignTasksToWorkersTaskFirst [
 GtRemoteRunnerExamples >> assignTasksToWorkersWorkerFirst [
 	"Demonstrate assigning tasks to workers, with the tasks queued before the workers connect"
 	<gtExample>
+	<noTest>
 	| remoteRunner workers job tasks taskCompletedCount taskFailedCount jobCompletedCount semaphore |
 
 	jobCompletedCount := taskCompletedCount := taskFailedCount := 0.
@@ -152,6 +154,7 @@ GtRemoteRunnerExamples >> getNextTaskFor [
 	"Demonstrate getting the next task for a worker from a Remote Runner.
 	Tasks are created with a test constraint with a boolean value."
 	<gtExample>
+	<noTest>
 	| job tasks remoteRunner evenWorker oddWorker evenTasks oddTasks |
 
 	tasks := (1 to: 5) collect: [ :i |
