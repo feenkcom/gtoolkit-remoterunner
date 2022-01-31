@@ -7,6 +7,12 @@ Class {
 	#category : #'RemoteRunner-Runner'
 }
 
+{ #category : #'api - worker' }
+GtRrManagerStartupAndShutdown >> registerWorker: aWorkerConnection [
+	"Subclasses can provide additional actions to perform when a worker is registered"
+
+]
+
 { #category : #accessing }
 GtRrManagerStartupAndShutdown >> remoteRunner [
 

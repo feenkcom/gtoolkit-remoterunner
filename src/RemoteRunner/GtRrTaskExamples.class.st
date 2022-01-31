@@ -19,7 +19,7 @@ GtRrTaskExamples >> taskTimeout [
 		job: job;
 		remoteRunner: runner.
 	taskContext := GtRrTaskContext new
-		platformContext: jobContext;
+		jobContext: jobContext;
 		task: task.
 
 	self assert: taskContext taskTimeout equals: runner defaultTaskTimeout.

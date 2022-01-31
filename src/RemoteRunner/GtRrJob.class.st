@@ -141,12 +141,14 @@ GtRrJob >> gtSummaryFor: aView [
 
 { #category : #ui }
 GtRrJob >> gtTasksFor: aView [
-	<gtView>
 
+	<gtView>
 	^ aView list
-		title: 'Tasks';
-		priority: 50;
-		items: [ self tasks ]
+		  title: 'Tasks';
+		  priority: 50;
+		  items: [ self tasks ];
+		  updateWhen: GtRrJobAnnouncement in: [ self announcer ];
+		  actionUpdateButton
 ]
 
 { #category : #testing }
@@ -176,6 +178,12 @@ GtRrJob >> initialize [
 	platforms := { OSPlatform current name }.
 	results := OrderedCollection new.
 	state := #notStarted.
+]
+
+{ #category : #testing }
+GtRrJob >> isFinished [
+
+	^ state == #completed
 ]
 
 { #category : #accessing }
@@ -335,6 +343,15 @@ GtRrJob >> tasks [
 	<return: #SequenceableCollection>
 
 	^ self subclassResponsibility 
+]
+
+{ #category : #accessing }
+GtRrJob >> tasksFor: aGtRemoteRunner [
+	"Special jobs may depend on the remote runner to create the tasks,
+	e.g. the code sync wants a task per worker.
+	Such subclasses can override this method."
+
+	^ self tasks.
 ]
 
 { #category : #'announcer - subscription' }

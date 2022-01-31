@@ -15,7 +15,9 @@ GtRrTestTask class >> leJsonV4Name [
 
 { #category : #accessing }
 GtRrTestTask class >> tests: aDictionary [
-
+	"Answer a task with the supplied tests. The dictionary is:
+		key: #TesteClassName
+		value: Array of #selector"
 	^ self new
 		  tests: aDictionary;
 		  yourself
@@ -87,6 +89,9 @@ GtRrTestTask >> tests [
 
 { #category : #accessing }
 GtRrTestTask >> tests: aDictionary [
+	"The dictionary is:
+		key: #TesteClassName
+		value: Array of #selector"
 
 	tests := aDictionary
 ]

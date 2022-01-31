@@ -1,3 +1,6 @@
+"
+GtRrCodeSyncedLocalManagerStartupAndShutdown extends the local manager to mark every worker started automatically as code synced.
+"
 Class {
 	#name : #GtRrCodeSyncedLocalManagerStartupAndShutdown,
 	#superclass : #GtRrLocalManagerStartupAndShutdown,
@@ -17,34 +20,27 @@ GtRrCodeSyncedLocalManagerStartupAndShutdown >> codeSync [
 GtRrCodeSyncedLocalManagerStartupAndShutdown >> initialize [
 
 	super initialize.
-	codeSync := GtRrCodeSync new
+	codeSync := GtRrCodeSync new.
 ]
 
-{ #category : #'instance creation' }
-GtRrCodeSyncedLocalManagerStartupAndShutdown >> newWorkerLocalProcessArgumentsFor: someSettings [
+{ #category : #'api - worker' }
+GtRrCodeSyncedLocalManagerStartupAndShutdown >> registerWorker: aWorkerConnection [
 
-	^ (super newWorkerLocalProcessArgumentsFor: someSettings)
-		  add: '--codeSync' before: '--serverSocketAddress';
-		  yourself
-]
-
-{ #category : #accessing }
-GtRrCodeSyncedLocalManagerStartupAndShutdown >> remoteRunner: aRemoteRunner [
-
-	super remoteRunner: aRemoteRunner.
-	codeSync remoteRunner: aRemoteRunner
+	aWorkerConnection details at: #codeSynced put: true.
 ]
 
 { #category : #'startup - shutdown' }
 GtRrCodeSyncedLocalManagerStartupAndShutdown >> shutdown [
 
 	codeSync stop.
-	super shutdown
+	super shutdown.
 ]
 
 { #category : #'startup - shutdown' }
 GtRrCodeSyncedLocalManagerStartupAndShutdown >> startup [
 
 	super startup.
-	codeSync start
+	codeSync 
+		remoteRunner: remoteRunner;
+		start.
 ]

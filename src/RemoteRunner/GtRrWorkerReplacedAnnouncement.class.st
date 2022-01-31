@@ -44,3 +44,10 @@ GtRrWorkerReplacedAnnouncement >> newWorker: anObject [
 
 	newWorker := anObject
 ]
+
+{ #category : #printing }
+GtRrWorkerReplacedAnnouncement >> printOneLineContentsOn: stream [
+
+	worker ifNil: [ ^ self ].
+	stream << worker stderr
+]

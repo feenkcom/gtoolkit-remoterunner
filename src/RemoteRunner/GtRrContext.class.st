@@ -26,12 +26,6 @@ GtRrContext >> isJobContext [
 ]
 
 { #category : #testing }
-GtRrContext >> isPlatformContext [
-
-	^ false
-]
-
-{ #category : #testing }
 GtRrContext >> isTaskContext [
 
 	^ false
