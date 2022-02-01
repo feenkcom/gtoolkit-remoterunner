@@ -10,6 +10,22 @@ Class {
 	#category : #'RemoteRunner-Jobs'
 }
 
+{ #category : #jsonV4 }
+GtRrTasksJob class >> leJsonV4AttributeMapping [
+	"Answer the Array of attribute to store keys.
+	Subclasses should override this with their attributes."
+
+	^ super leJsonV4AttributeMapping
+		add: #tasks -> #tasks;
+		yourself.
+]
+
+{ #category : #jsonV4 }
+GtRrTasksJob class >> leJsonV4Name [
+
+	^ #gtRrTasksJob
+]
+
 { #category : #'instance creation' }
 GtRrTasksJob class >> tasks: aCollection [
 

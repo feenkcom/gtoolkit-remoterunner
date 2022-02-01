@@ -18,7 +18,7 @@ Class {
 	#category : #'RemoteRunner-Jobs'
 }
 
-{ #category : #jsonV3 }
+{ #category : #jsonV4 }
 GtRrJob class >> leJsonV4AttributeMapping [
 	"Answer the Array of attribute to store keys.
 	Subclasses should override this with their attributes."
@@ -35,7 +35,7 @@ GtRrJob class >> leJsonV4AttributeMapping [
 	 } asOrderedCollection.
 ]
 
-{ #category : #accessing }
+{ #category : #jsonV4 }
 GtRrJob class >> leJsonV4Name [
 
 	^ #gtRrJob

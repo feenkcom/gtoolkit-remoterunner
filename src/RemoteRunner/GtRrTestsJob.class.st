@@ -4,6 +4,12 @@ Class {
 	#category : #'RemoteRunner-Tests'
 }
 
+{ #category : #jsonV4 }
+GtRrTestsJob class >> leJsonV4Name [
+
+	^ #gtRrTestsJob
+]
+
 { #category : #private }
 GtRrTestsJob >> allFailedTests [
 	"Answer all tests that failed (Fail or Error)"

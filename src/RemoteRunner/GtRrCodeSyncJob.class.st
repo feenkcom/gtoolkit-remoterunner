@@ -10,7 +10,7 @@ Class {
 	#category : #'RemoteRunner-Runner-CodeSync'
 }
 
-{ #category : #jsonV3 }
+{ #category : #jsonV4 }
 GtRrCodeSyncJob class >> leJsonV4AttributeMapping [
 	"Answer the Array of attribute to store keys.
 	Subclasses should override this with their attributes."
@@ -20,7 +20,7 @@ GtRrCodeSyncJob class >> leJsonV4AttributeMapping [
 		yourself
 ]
 
-{ #category : #accessing }
+{ #category : #jsonV4 }
 GtRrCodeSyncJob class >> leJsonV4Name [
 
 	^ #gtRrCodeSyncJob
