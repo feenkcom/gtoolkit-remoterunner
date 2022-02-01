@@ -458,6 +458,7 @@ GtRemoteRunner >> nextTaskForCurrentWorker [
 
 { #category : #'api - worker' }
 GtRemoteRunner >> nextTaskSerializedForCurrentWorker [
+	"Answer the next task allocated to the worker that is waiting on this method serialised for transmission over the wire"
 
 	^ LeJsonV4 uniqueInstance serialize: self nextTaskForCurrentWorker
 ]
@@ -669,6 +670,13 @@ GtRemoteRunner >> submitJob: aGtRrJob [
 	sharedAccess critical: [ self startJob: aGtRrJob ].
 	self announceAndLog: (GtRrJobSubmittedAnnouncement job: aGtRrJob).
 
+]
+
+{ #category : #'api - jobs' }
+GtRemoteRunner >> submitSerializedJob: aGtRrJobString [
+	"Submit the supplied job after deserialising it"
+
+	^ self submitJob: (LeJsonV4 uniqueInstance deserialize: aGtRrJobString readStream)
 ]
 
 { #category : #ui }

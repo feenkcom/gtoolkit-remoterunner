@@ -10,6 +10,22 @@ Class {
 	#category : #'RemoteRunner-Runner-CodeSync'
 }
 
+{ #category : #jsonV3 }
+GtRrCodeSyncJob class >> leJsonV4AttributeMapping [
+	"Answer the Array of attribute to store keys.
+	Subclasses should override this with their attributes."
+
+	^ super leJsonV4AttributeMapping
+		add: #serializedChanges -> #serializedChanges;
+		yourself
+]
+
+{ #category : #accessing }
+GtRrCodeSyncJob class >> leJsonV4Name [
+
+	^ #gtRrCodeSyncJob
+]
+
 { #category : #accessing }
 GtRrCodeSyncJob class >> serializedChanges: aFuelStringOfCollection [
 
