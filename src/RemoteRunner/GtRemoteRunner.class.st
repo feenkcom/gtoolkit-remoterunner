@@ -669,7 +669,7 @@ GtRemoteRunner >> submitJob: aGtRrJob [
 
 	sharedAccess critical: [ self startJob: aGtRrJob ].
 	self announceAndLog: (GtRrJobSubmittedAnnouncement job: aGtRrJob).
-
+	^ aGtRrJob
 ]
 
 { #category : #'api - jobs' }
