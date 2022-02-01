@@ -23,6 +23,17 @@ GtRrTestTask class >> tests: aDictionary [
 		  yourself
 ]
 
+{ #category : #'gt-extensions' }
+GtRrTestTask >> gtResultFor: aView [
+	<gtView>
+
+	^ aView list
+		  title: 'Tests';
+		  priority: 20;
+		 	items: [ result ifNil: [ errorDetails ifNil: [ '<No Result>' ] ] ];
+		  actionUpdateButton
+]
+
 { #category : #printing }
 GtRrTestTask >> printOn: aStream [
 	| grouped |
