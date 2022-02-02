@@ -28,13 +28,19 @@ GtRrCodeSyncTask class >> serializedChanges: aFuelStringOfCollection workerId: a
 { #category : #'gt-extensions' }
 GtRrCodeSyncTask >> gtChangesFor: aView [
 	<gtView>
+	| changes view |
 
 	serializedChanges ifNil: [ ^ aView empty ].
+	"The changes are typically an OrderedCollection of EpModifications."
+	changes := LanguageLinkUtils base64Decode: serializedChanges readStream.
+	view := changes isCollection
+		ifTrue: [ #gtItemsFor: ]
+		ifFalse: [ #gtLiveFor: ].
 	^ aView forward
 		title: 'Changes';
 		priority: 20;
-		object: [ LanguageLinkUtils base64Decode: serializedChanges readStream ];
-		view: #gtLiveFor:
+		object: [ changes ];
+		view: view.
 ]
 
 { #category : #executing }

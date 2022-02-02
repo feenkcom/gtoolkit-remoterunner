@@ -70,11 +70,16 @@ GtRrTask >> errorDetails: aGtErrorDetails [
 { #category : #ui }
 GtRrTask >> gtResultFor: aView [
 	<gtView>
+	| view |
 
+	view := result isCollection
+		ifTrue: [ #gtItemsFor: ]
+		ifFalse: [ #gtLiveFor: ].
 	^ aView forward
 		  title: 'Result';
 		  priority: 20;
 		  object: [ result ifNil: [ errorDetails ifNil: [ '<No Result>' ] ] ];
+		  view: view;
 		  actionUpdateButton
 ]
 
@@ -97,11 +102,14 @@ GtRrTask >> gtWorkerAttributesFor: aView [
 	<gtView>
 
 	workerAttributes ifNil: [ ^ aView empty ].
-	^ aView forward
+	^ aView columnedList
 		  title: 'Worker Attributes';
 		  priority: 40;
-		  object: [ workerAttributes ];
-		  view: #gtLiveFor:
+		  items: [ workerAttributes ];
+		  column: #Attribute text: [ :item | item key ];
+		  column: #Value text: [ :item | item value ];
+		  send: [ :item | item value ];
+		  actionUpdateButton
 ]
 
 { #category : #testing }

@@ -13,8 +13,7 @@ GtRrTestsJobExamples >> scheduleTestsOneAtATime [
 	remoteRunner := GtRemoteRunner new.
 
 	job := GtRrTestsJob new 
-		classNames: #(GtRrSampleTest);
-		platforms: #(linux).
+		classNames: #(GtRrSampleTest).
 	context := GtRrJobContext new
 		remoteRunner: remoteRunner;
 		job: job.

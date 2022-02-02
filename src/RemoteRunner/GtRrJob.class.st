@@ -5,7 +5,6 @@ Class {
 	#name : #GtRrJob,
 	#superclass : #Object,
 	#instVars : [
-		'platforms',
 		'results',
 		'announcer',
 		'id',
@@ -18,6 +17,29 @@ Class {
 	],
 	#category : #'RemoteRunner-Jobs'
 }
+
+{ #category : #jsonV4 }
+GtRrJob class >> leJsonV4AttributeMapping [
+	"Answer the Array of attribute to store keys.
+	Subclasses should override this with their attributes."
+
+	^ { 
+		#results -> #results.
+		#id -> #id.
+		#state -> #state.
+		#startTime -> #startTime.
+		#endTime -> #endTime.
+		#jobTimeout -> #jobTimeout.
+		#taskTimeout -> #taskTimeout.
+		#errorDetails -> #errorDetails.
+	 } asOrderedCollection.
+]
+
+{ #category : #jsonV4 }
+GtRrJob class >> leJsonV4Name [
+
+	^ #gtRrJob
+]
 
 { #category : #'job submission' }
 GtRrJob class >> script: aString [
@@ -82,6 +104,12 @@ GtRrJob >> cancelJob [
 GtRrJob >> endTime [
 
 	^ endTime
+]
+
+{ #category : #'private - serialization' }
+GtRrJob >> endTime: anObject [
+
+	endTime := anObject
 ]
 
 { #category : #accessing }
@@ -170,12 +198,17 @@ GtRrJob >> id [
 	^ id
 ]
 
+{ #category : #'private - serialization' }
+GtRrJob >> id: anObject [
+
+	id := anObject
+]
+
 { #category : #initialization }
 GtRrJob >> initialize [
 
 	super initialize.
 	id := UUID new asString.
-	platforms := { OSPlatform current name }.
 	results := OrderedCollection new.
 	state := #notStarted.
 ]
@@ -232,28 +265,6 @@ GtRrJob >> markJobTerminating [
 
 ]
 
-{ #category : #accessing }
-GtRrJob >> platforms [
-	<return: #Array>
-
-	^ platforms
-]
-
-{ #category : #accessing }
-GtRrJob >> platforms: anArray [
-
-	platforms := anArray
-]
-
-{ #category : #ui }
-GtRrJob >> platformsDisplayList [
-
-	^ String streamContents: [ :stream |
-		platforms
-			do: [ :platform | stream << platform ]
-			separatedBy: [ stream << ', ' ] ]
-]
-
 { #category : #printing }
 GtRrJob >> printOn: aStream [
 
@@ -280,6 +291,13 @@ GtRrJob >> results [
 	^ results
 ]
 
+{ #category : #'private - serialization' }
+GtRrJob >> results: aCollection [
+	"OrderedCollections are serialised as Arrays, so need to be converted back"
+
+	results := aCollection asOrderedCollection
+]
+
 { #category : #accessing }
 GtRrJob >> resultsWithErrors [
 	"Answer the subset of results that have errors"
@@ -293,12 +311,24 @@ GtRrJob >> startTime [
 	^ startTime
 ]
 
+{ #category : #'private - serialization' }
+GtRrJob >> startTime: anObject [
+
+	startTime := anObject
+]
+
 { #category : #accessing }
 GtRrJob >> state [
 	"One of: #notStarted, #started, #cancelled, #completed"
 	<return: #Symbol>
 
 	^ state
+]
+
+{ #category : #'private - serialization' }
+GtRrJob >> state: anObject [
+
+	state := anObject
 ]
 
 { #category : #ui }
@@ -310,7 +340,6 @@ GtRrJob >> summaryAttributes [
 	attributes 
 		add: #State -> self state;
 		add: #Tasks -> self tasks size;
-		add: #Platforms -> self platformsDisplayList;
 		add: #Results -> results size;
 		add: #Errors -> self resultsWithErrors size;
 		add: 'Start Time' -> startTime;
