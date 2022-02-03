@@ -21,6 +21,8 @@ GtRrCodeSyncedLocalManagerStartupAndShutdown >> initialize [
 
 	super initialize.
 	codeSync := GtRrCodeSync new.
+	"Disable worker auto-restart since the workers would then be out of sync."
+	autoRestart := false.
 ]
 
 { #category : #'api - worker' }
@@ -43,4 +45,12 @@ GtRrCodeSyncedLocalManagerStartupAndShutdown >> startup [
 	codeSync 
 		remoteRunner: remoteRunner;
 		start.
+]
+
+{ #category : #ui }
+GtRrCodeSyncedLocalManagerStartupAndShutdown >> summaryAttributes [
+
+	^ super summaryAttributes 
+		add: { #AutoRestartWorkers. autoRestart. self. };
+		yourself.
 ]
