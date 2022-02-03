@@ -212,6 +212,12 @@ GtRemoteRunner >> availableWorkerCount [
 	^ sharedAccess critical: [ availableWorkers size ]
 ]
 
+{ #category : #'private - accessing' }
+GtRemoteRunner >> availableWorkers [
+
+	^ availableWorkers 
+]
+
 { #category : #private }
 GtRemoteRunner >> checkJobCompleted: aGtRrContext [
 	"After each task has been completed, check if the job has finished, and if so, signal it.
@@ -223,6 +229,14 @@ GtRemoteRunner >> checkJobCompleted: aGtRrContext [
 
 	jobStartupAndShutdown shutdownJob: jobContext.
 
+]
+
+{ #category : #'private - accessing' }
+GtRemoteRunner >> critical: aBlock [
+	"Evaluate the supplied block within sharedAccess.
+	Only for use by cooperating objects."
+
+	sharedAccess critical: aBlock.
 ]
 
 { #category : #private }
@@ -393,6 +407,12 @@ GtRemoteRunner >> initialize [
 	self 
 		managerStartupAndShutdown: GtRrCodeSyncedLocalManagerStartupAndShutdown new;
 		jobStartupAndShutdown: GtRrLocalJobStartupAndShutdown new.
+]
+
+{ #category : #testing }
+GtRemoteRunner >> isRunning [
+
+	^ server isNotNil and: [ server isRunning ]
 ]
 
 { #category : #accessing }
@@ -659,7 +679,17 @@ GtRemoteRunner >> state [
 { #category : #'api - runner' }
 GtRemoteRunner >> stop [
 
-	self runManagerShutdown
+	self runManagerShutdown.
+	self stopLogging.
+]
+
+{ #category : #'api - logger' }
+GtRemoteRunner >> stopLogging [
+	"Stop the receiver's in-memory log"
+
+	log ifNotNil: [ ^ self ].
+	log stop.
+	log := nil.
 ]
 
 { #category : #'api - jobs' }
