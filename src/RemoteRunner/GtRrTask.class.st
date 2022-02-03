@@ -105,7 +105,7 @@ GtRrTask >> gtWorkerAttributesFor: aView [
 	^ aView columnedList
 		  title: 'Worker Attributes';
 		  priority: 40;
-		  items: [ workerAttributes ];
+		  items: [ workerAttributes associations sorted: [ :a :b | a key < b key ] ];
 		  column: #Attribute text: [ :item | item key ];
 		  column: #Value text: [ :item | item value ];
 		  send: [ :item | item value ];
