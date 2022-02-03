@@ -9,6 +9,16 @@ Class {
 	#category : #'RemoteRunner-Jobs'
 }
 
+{ #category : #jsonV3 }
+GtRrAbstractTestsJob class >> leJsonV4AttributeMapping [ 
+
+	^ super leJsonV4AttributeMapping 
+		add: #packageNames -> #packageNames;
+		add: #classNames -> #classNames;
+		add: #testNames -> #testNames;
+		yourself.
+]
+
 { #category : #accessing }
 GtRrAbstractTestsJob >> classNames [
 	<return: #Array of: #Symbol>

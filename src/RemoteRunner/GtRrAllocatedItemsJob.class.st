@@ -11,6 +11,15 @@ Class {
 	#category : #'RemoteRunner-Jobs'
 }
 
+{ #category : #jsonV3 }
+GtRrAllocatedItemsJob class >> leJsonV4AttributeMapping [
+
+	^ super leJsonV4AttributeMapping
+		add: #primTaskAllocator -> #taskAllocator;
+		add: #primTasks -> #tasks;
+		yourself.
+]
+
 { #category : #accessing }
 GtRrAllocatedItemsJob >> allItems [
 	"Answer all the tests / examples to be executed"
@@ -24,6 +33,30 @@ GtRrAllocatedItemsJob >> defaultTaskAllocator [
 	<return: #GtRrTaskAllocator>
 
 	^ self subclassResponsibility 
+]
+
+{ #category : #private }
+GtRrAllocatedItemsJob >> primTaskAllocator [
+
+	^ taskAllocator 
+]
+
+{ #category : #private }
+GtRrAllocatedItemsJob >> primTaskAllocator: anObject [
+
+	taskAllocator := anObject
+]
+
+{ #category : #private }
+GtRrAllocatedItemsJob >> primTasks [
+
+	^ tasks
+]
+
+{ #category : #private }
+GtRrAllocatedItemsJob >> primTasks: anObject [
+
+	tasks := anObject
 ]
 
 { #category : #private }

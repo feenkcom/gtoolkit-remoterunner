@@ -15,7 +15,7 @@ Class {
 	#category : #'RemoteRunner-Tasks'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #'instance creation' }
 GtRrTaskAllocator class >> remoteRunner: aGtRemoteRunner [
 
 	^ self new remoteRunner: aGtRemoteRunner

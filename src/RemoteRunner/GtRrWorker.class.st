@@ -37,7 +37,6 @@ GtRrWorker class >> commandLine [
 			  worker attributes
 				  at: (arg at: #key) value
 				  put: (arg at: #value) value ].
-		  args at: #codeSync ifPresent: [ worker codeSync: true ].
 		  StringSignal emit: 'Running'.
 		  worker start.
 		  "Hibernate until the process exits"
@@ -51,7 +50,6 @@ GtRrWorker class >> commandLineCommand [
 		  description: 'Run the RemoteRunner worker';
 		  add: ClapFlag forHelp;
 		  add: ((ClapFlag id: #log) description: 'Enable logging to stdout');
-		  add: ((ClapFlag id: #codeSync) description: 'Enable code-sync');
 		  add: ((ClapFlag id: #serverSocketAddress)
 				   description:
 					   'The server socket address on which to connect for requests';

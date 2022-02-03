@@ -4,6 +4,12 @@ Class {
 	#category : #'RemoteRunner-Tests'
 }
 
+{ #category : #accessing }
+GtRrOneAtATimeTestsTaskAllocator class >> leJsonV4Name [ 
+
+	^ #gtRrOneAtATimeTestsTaskAllocator
+]
+
 { #category : #scheduling }
 GtRrOneAtATimeTestsTaskAllocator >> allocateItems: aCollection [
 
