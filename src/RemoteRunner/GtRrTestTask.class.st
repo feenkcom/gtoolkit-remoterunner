@@ -30,7 +30,7 @@ GtRrTestTask >> gtResultFor: aView [
 	^ aView list
 		  title: 'Tests';
 		  priority: 20;
-		 	items: [ result ifNil: [ errorDetails ifNil: [ '<No Result>' ] ] ];
+		 	items: [ result ifNil: [ { errorDetails ifNil: [ '<No Result>' ] } ] ];
 		  actionUpdateButton
 ]
 

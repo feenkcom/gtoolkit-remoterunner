@@ -127,6 +127,14 @@ GtRemoteRunner class >> printIpAddress: aByteArray [
 		aByteArray printOn: stream delimiter: '.' ]
 ]
 
+{ #category : #initialization }
+GtRemoteRunner class >> setUniqueInstance: aGtRemoteRunner [
+
+	self hasUniqueInstance ifTrue: 
+		[ self error: 'GtRemoteRunner already running' ].
+	uniqueInstance := aGtRemoteRunner.
+]
+
 { #category : #accessing }
 GtRemoteRunner class >> uniqueInstance [
 	^ uniqueInstance ifNil: [ uniqueInstance := self new start startLogging ]
