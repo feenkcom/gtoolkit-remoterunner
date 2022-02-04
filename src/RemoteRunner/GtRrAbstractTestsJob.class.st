@@ -32,6 +32,21 @@ GtRrAbstractTestsJob >> classNames: anObject [
 	classNames := anObject
 ]
 
+{ #category : #ui }
+GtRrAbstractTestsJob >> gtRrTestsFor: aView [
+	<gtView>
+
+	^ aView list
+		title: 'Test Results';
+		priority: 12;
+		items: [ results
+			ifNil: [ #() ]
+			ifNotNil: [ Array streamContents: [ :stream |
+					results do: [ :each | each result do:
+						[ :result | stream nextPut: result ] ] ] ] ];
+		updateWhen: GtRrJobAnnouncement in: [ self announcer ].
+]
+
 { #category : #initialization }
 GtRrAbstractTestsJob >> initialize [
 
