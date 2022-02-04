@@ -127,6 +127,35 @@ GtRemoteRunner class >> printIpAddress: aByteArray [
 		aByteArray printOn: stream delimiter: '.' ]
 ]
 
+{ #category : #'headless remote runner' }
+GtRemoteRunner class >> setDefaultHeadless [
+	"Make the default remote runner a proxy to an existing headless runner"
+
+	^ self setDefaultHeadlessOnPort: 7042 codeSync: true
+]
+
+{ #category : #'headless remote runner' }
+GtRemoteRunner class >> setDefaultHeadlessOnPort: aNumber codeSync: aBoolean [
+	"Make the default remote runner a proxy to an existing headless runner"
+	| settings plApplication runner |
+
+	self hasUniqueInstance ifTrue: [ GtRemoteRunner cleanUp ].
+	settings := LanguageLinkSettings pharoDefaultSettings.
+	settings
+		serverProcessClass: LanguageLinkManualProcess;
+		serverSocketAddress: (LanguageLinkSocketAddress
+			ipOrName: 'localhost' port: 7042).
+	plApplication := PharoLinkApplication newWith: settings.
+	plApplication start.
+	runner := plApplication newCommandFactory
+		sendAndWait: 'GtAssignedRemoteRunner'.
+	self setUniqueInstance: runner.
+
+	aBoolean ifTrue: [ runner startCodeSync ].
+
+	^ runner.
+]
+
 { #category : #initialization }
 GtRemoteRunner class >> setUniqueInstance: aGtRemoteRunner [
 
