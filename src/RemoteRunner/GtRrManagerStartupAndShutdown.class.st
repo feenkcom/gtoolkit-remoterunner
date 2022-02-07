@@ -45,6 +45,7 @@ GtRrManagerStartupAndShutdown >> startup [
 		listenPort: remoteRunner port;
 		setDebugMode;
 		start;
+		setCloseOnExec: true;
 		yourself.
 	server globals at: #GtAssignedRemoteRunner put: remoteRunner.
 	remoteRunner server: server.

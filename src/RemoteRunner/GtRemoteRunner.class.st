@@ -578,6 +578,7 @@ GtRemoteRunner >> registerWorkerWithDetails: aDictionary [
 	| pharoLinkServerConnection workerConnection |
 
 	pharoLinkServerConnection := PharoLinkServerCurrentConnection value.
+	pharoLinkServerConnection setCloseOnExec: true.
 	workerConnection := GtRrWorkerConnection connection: pharoLinkServerConnection.
 	workerConnection details: aDictionary.
 	sharedAccess critical:
