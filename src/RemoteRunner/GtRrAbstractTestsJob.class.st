@@ -39,11 +39,7 @@ GtRrAbstractTestsJob >> gtRrTestsFor: aView [
 	^ aView list
 		title: 'Test Results';
 		priority: 12;
-		items: [ results
-			ifNil: [ #() ]
-			ifNotNil: [ Array streamContents: [ :stream |
-					results do: [ :each | each result do:
-						[ :result | stream nextPut: result ] ] ] ] ];
+		items: [ self testResults];
 		updateWhen: GtRrJobAnnouncement in: [ self announcer ].
 ]
 
@@ -83,4 +79,15 @@ GtRrAbstractTestsJob >> testNames [
 GtRrAbstractTestsJob >> testNames: anObject [
 
 	testNames := anObject
+]
+
+{ #category : #accessing }
+GtRrAbstractTestsJob >> testResults [
+	"Collect all the results from the receiver's tests in to a single collection"
+
+	^ results
+		ifNil: [ #() ]
+		ifNotNil: [ Array streamContents: [ :stream |
+			results do: [ :each | each result do:
+				[ :result | stream nextPut: result ] ] ] ] 
 ]
