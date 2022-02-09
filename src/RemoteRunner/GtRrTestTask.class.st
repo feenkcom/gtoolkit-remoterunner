@@ -104,5 +104,8 @@ GtRrTestTask >> tests: aDictionary [
 		key: #TesteClassName
 		value: Array of #selector"
 
+	self assert: [ aDictionary keys allSatisfy: #isString ].
+	self assert: [ aDictionary values allSatisfy: [ :each | each isSequenceable and:
+			[ each allSatisfy: #isString ] ] ].
 	tests := aDictionary
 ]
