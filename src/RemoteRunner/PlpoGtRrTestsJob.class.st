@@ -10,6 +10,12 @@ PlpoGtRrTestsJob class >> remoteClassName [
 	^ #GtRrTestsJob
 ]
 
+{ #category : #testing }
+PlpoGtRrTestsJob >> isFinished [
+
+	^ self proxyPerform: #isFinished
+]
+
 { #category : #accessing }
 PlpoGtRrTestsJob >> testResults [
 
