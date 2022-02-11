@@ -10,7 +10,7 @@ Class {
 GtRrSerialisationExamples >> jobWithTestNames [
 	<gtExample>
 	"Demonstrate (de)serialising a GtRrTestsJob with a collection of test names"
-	| job serialisedJob deserialisedJob |
+	| job serialisedJob deserialisedJob deserialisedTestName |
 
 	job := GtRrJob testTestNames: {#GtRrSampleTest -> #testPass}.
 
@@ -19,7 +19,10 @@ GtRrSerialisationExamples >> jobWithTestNames [
 	self assert: deserialisedJob class equals: GtRrTestsJob.
 	self assert: deserialisedJob testNames isArray.
 	self assert: deserialisedJob testNames size equals: 1.
-	self assert: deserialisedJob testNames first equals: #GtRrSampleTest -> #testPass.
+	deserialisedTestName := deserialisedJob testNames first.
+	self assert: deserialisedTestName equals: #GtRrSampleTest -> #testPass.
+	self assert: deserialisedTestName key isSymbol.
+	self assert: deserialisedTestName value isSymbol.
 ]
 
 { #category : #examples }

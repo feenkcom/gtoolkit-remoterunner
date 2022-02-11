@@ -14,8 +14,8 @@ GtRrAbstractTestsJob class >> leJsonV4AttributeMapping [
 
 	^ super leJsonV4AttributeMapping 
 		add: #packageNames -> #packageNames;
-		add: #classNames -> #classNames;
-		add: #testNames -> #testNames;
+		add: #serializedClassNames -> #classNames;
+		add: #serializedTestNames -> #testNames;
 		yourself.
 ]
 
@@ -64,6 +64,35 @@ GtRrAbstractTestsJob >> packageNames [
 GtRrAbstractTestsJob >> packageNames: anObject [
 
 	packageNames := anObject
+]
+
+{ #category : #serializing }
+GtRrAbstractTestsJob >> serializedClassNames [
+
+	^ classNames
+]
+
+{ #category : #serializing }
+GtRrAbstractTestsJob >> serializedClassNames: anArray [
+
+	classNames := anArray.
+	classNames doWithIndex: [ :item :index |
+		anArray at: index put: item asSymbol ].
+]
+
+{ #category : #serializing }
+GtRrAbstractTestsJob >> serializedTestNames [
+
+	^ testNames
+]
+
+{ #category : #serializing }
+GtRrAbstractTestsJob >> serializedTestNames: anArray [
+
+	testNames := anArray.
+	testNames doWithIndex: [ :association :index |
+		association key: association key asSymbol.
+		association value: association value asSymbol ].
 ]
 
 { #category : #accessing }
