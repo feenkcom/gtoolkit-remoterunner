@@ -7,6 +7,30 @@ Class {
 }
 
 { #category : #examples }
+GtRrSerialisationExamples >> gtRrClassExampleTask [
+	<gtExample>
+	"Demonstrate (de)serialising a GtRrClassExampleTask and its result"
+	| task serializedTask deserializedTask result serializedResult deserializedResult |
+
+	LeJsonV4 cleanUp.
+	task := GtRrClassExampleTask exampleClassName: #GtRrWorkerExamples.
+
+	serializedTask := LeJsonV4 uniqueInstance serialize: task.
+	deserializedTask := LeJsonV4 uniqueInstance deserialize: serializedTask readStream.
+	self assert: deserializedTask class equals: GtRrClassExampleTask.
+	self assert: deserializedTask className equals: #GtRrClassExampleTask.
+
+	result := task run.
+	serializedResult := LeJsonV4 uniqueInstance serialize: result.
+	deserializedResult := LeJsonV4 uniqueInstance deserialize: serializedResult readStream.
+	self assert: deserializedResult class equals: GtClassExampleGroup.
+	self assert: deserializedResult exampleClass equals: GtRrWorkerExamples.
+	self assert: deserializedResult examples first isSuccess.
+
+	^ result.
+]
+
+{ #category : #examples }
 GtRrSerialisationExamples >> jobWithTestNames [
 	<gtExample>
 	"Demonstrate (de)serialising a GtRrTestsJob with a collection of test names"

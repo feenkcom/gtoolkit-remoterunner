@@ -301,7 +301,7 @@ GtRemoteRunnerExamples >> multipleJobsSimultaneously [
 	remoteRunner := GtRemoteRunner new.
 	remoteRunner managerStartupAndShutdown poolSize: 2.
 	remoteRunner 
-		port: 7092;
+		port: 7084;
 		startLogging;
 		start.
 	[ 
@@ -721,7 +721,7 @@ GtRemoteRunnerExamples >> workerDetails [
 	| remoteRunner registeredSemaphore worker |
 
 	registeredSemaphore := GtMutualExclusionSemaphore new.
-	remoteRunner := GtRemoteRunner new port: 7091.
+	remoteRunner := GtRemoteRunner new port: 7083.
 	remoteRunner managerStartupAndShutdown poolSize: 1.
 	remoteRunner when: GtRrWorkerRegisteredAnnouncement do: [ :ann | 
 		worker := ann worker.

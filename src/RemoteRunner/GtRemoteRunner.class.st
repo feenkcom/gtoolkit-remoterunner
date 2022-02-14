@@ -103,7 +103,8 @@ GtRemoteRunner class >> hasUniqueInstance [
 
 { #category : #accessing }
 GtRemoteRunner class >> instance [
-	<gtExample>
+	"Override the default which makes this an example.
+	Starting multiple servers on the default port is a bad idea."
 
 	^ self uniqueInstance
 ]
