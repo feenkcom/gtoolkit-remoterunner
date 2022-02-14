@@ -17,7 +17,7 @@ GtRrManagerExamples >> decreasePoolSize [
 	semaphore := Semaphore new.
 	runner := GtRemoteRunner new
 		startLogging;
-		port: 7090.
+		port: 7082.
 	runner managerStartupAndShutdown poolSize: 2.
 	runner
 		when: GtRrWorkerReplacedAnnouncement
@@ -74,7 +74,7 @@ GtRrManagerExamples >> increasePoolSize [
 	semaphore := Semaphore new.
 	runner := GtRemoteRunner new
 		startLogging;
-		port: 7090.
+		port: 7081.
 	runner managerStartupAndShutdown poolSize: 1.
 	runner
 		when: GtRrWorkerRegisteredAnnouncement
