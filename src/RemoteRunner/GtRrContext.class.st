@@ -4,6 +4,30 @@ Class {
 	#category : #'RemoteRunner-Runner-State'
 }
 
+{ #category : #'instance creation' }
+GtRrContext class >> fromSton: stonReader [
+
+	| signal |
+
+	stonReader parseListDo: [ :each :idx |
+		idx = 1 ifFalse: [ self error: 'Invalid STON' ].
+		signal := self fromStonDictionary: each ].
+	^signal
+]
+
+{ #category : #'instance creation' }
+GtRrContext class >> fromStonDictionary: aDictionary [
+
+	^ self new
+]
+
+{ #category : #'ston persistence' }
+GtRrContext >> asDictionary [
+
+	^ Dictionary new
+
+]
+
 { #category : #accessing }
 GtRrContext >> contextTimeoutTime [
 	"Answer the absolute time this context will time out"
@@ -47,6 +71,13 @@ GtRrContext >> scheduleTimeoutContext [
 		anError freeze.
 		[ self error: anError printString ] fork ]
 
+]
+
+{ #category : #'ston persistence' }
+GtRrContext >> stonOn: stonWriter [
+
+	stonWriter writeObject: self streamShortList: [ :array |
+		array add: self asDictionary ]
 ]
 
 { #category : #accessing }

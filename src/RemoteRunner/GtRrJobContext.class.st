@@ -14,6 +14,28 @@ Class {
 	#category : #'RemoteRunner-Runner-State'
 }
 
+{ #category : #'instance creation' }
+GtRrJobContext class >> fromStonDictionary: aDictionary [
+
+	^ (super fromStonDictionary: aDictionary)
+		job: (aDictionary at: #job);
+		jobTimeoutTime: (aDictionary at: #jobTimeoutTime);
+		taskCompletedCount: (aDictionary at: #taskCompletedCount);
+		taskContexts: (aDictionary at: #taskContexts);
+		yourself.
+]
+
+{ #category : #converting }
+GtRrJobContext >> asDictionary [
+
+	^ super asDictionary
+		at: #job put: job;
+		at: #jobTimeoutTime put: jobTimeoutTime;
+		at: #taskCompletedCount put: taskCompletedCount;
+		at: #taskContexts put: taskContexts;
+		yourself.
+]
+
 { #category : #accessing }
 GtRrJobContext >> contextTimeoutTime [
 	"Answer the absolute time this context will time out"
@@ -129,6 +151,12 @@ GtRrJobContext >> jobTimeoutTime [
 	^ jobTimeoutTime
 ]
 
+{ #category : #accessing }
+GtRrJobContext >> jobTimeoutTime: anObject [
+
+	jobTimeoutTime := anObject
+]
+
 { #category : #'api - running' }
 GtRrJobContext >> markJobCompleted [
 
@@ -210,12 +238,30 @@ GtRrJobContext >> summaryAttributes [
 ]
 
 { #category : #accessing }
+GtRrJobContext >> taskCompletedCount [
+
+	^ taskCompletedCount
+]
+
+{ #category : #accessing }
+GtRrJobContext >> taskCompletedCount: anObject [
+
+	taskCompletedCount := anObject
+]
+
+{ #category : #accessing }
 GtRrJobContext >> taskContexts [
 
 	^ taskContexts ifNil: [ taskContexts := (job tasksFor: remoteRunner) collect: [ :task |
 			GtRrTaskContext new 
 				task: task;
 				jobContext: self ] ]
+]
+
+{ #category : #accessing }
+GtRrJobContext >> taskContexts: anObject [
+
+	taskContexts := anObject
 ]
 
 { #category : #accessing }

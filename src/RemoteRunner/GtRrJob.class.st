@@ -18,6 +18,27 @@ Class {
 	#category : #'RemoteRunner-Jobs'
 }
 
+{ #category : #'instance creation' }
+GtRrJob class >> fromSton: stonReader [
+
+	| signal |
+
+	stonReader parseListDo: [ :each :idx |
+		idx = 1 ifFalse: [ self error: 'Invalid STON' ].
+		signal := self fromStonDictionary: each ].
+	^signal
+]
+
+{ #category : #'instance creation' }
+GtRrJob class >> fromStonDictionary: aDictionary [
+	| object |
+	
+	object := self new.
+	aDictionary keysAndValuesDo: [ :key :value |
+		object perform: key asMutator with: value ].
+	^ object
+]
+
 { #category : #jsonV4 }
 GtRrJob class >> leJsonV4AttributeMapping [
 	"Answer the Array of attribute to store keys.
@@ -89,6 +110,17 @@ GtRrJob >> announce: anAnnouncement [
 GtRrJob >> announcer [
 
 	^ announcer ifNil: [ announcer := Announcer new ]
+]
+
+{ #category : #converting }
+GtRrJob >> asDictionary [
+	| dict |
+
+	dict := Dictionary new.
+	self class allInstVarNames do: [ :name |
+		dict at: name put: (name value: self) ].
+	dict removeKey: #announcer.
+	^ dict
 ]
 
 { #category : #'private - running' }
@@ -329,6 +361,13 @@ GtRrJob >> state [
 GtRrJob >> state: anObject [
 
 	state := anObject
+]
+
+{ #category : #'ston persistence' }
+GtRrJob >> stonOn: stonWriter [
+
+	stonWriter writeObject: self streamShortList: [ :array |
+		array add: self asDictionary ]
 ]
 
 { #category : #ui }

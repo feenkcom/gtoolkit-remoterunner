@@ -12,6 +12,30 @@ Class {
 	#category : #'RemoteRunner-Runner-State'
 }
 
+{ #category : #'instance creation' }
+GtRrTaskContext class >> fromStonDictionary: aDictionary [
+
+	^ (super fromStonDictionary: aDictionary)
+		taskContextId: (aDictionary at: #taskContextId);
+		task: (aDictionary at: #task);
+		taskTimeoutTime: (aDictionary at: #taskTimeoutTime);
+		workerTimeoutTime: (aDictionary at: #workerTimeoutTime);
+		jobContext: (aDictionary at: #jobContext);
+		yourself.
+]
+
+{ #category : #converting }
+GtRrTaskContext >> asDictionary [
+
+	^ super asDictionary
+		at: #taskContextId put: taskContextId;
+		at: #task put: task;
+		at: #taskTimeoutTime put: taskTimeoutTime;
+		at: #workerTimeoutTime put: workerTimeoutTime;
+		at: #jobContext put: jobContext;
+		yourself.
+]
+
 { #category : #converting }
 GtRrTaskContext >> asWorkerTaskContext [
 	"Answer a GtRrWorkerTaskContext ready for transfer to the worker"
@@ -232,6 +256,12 @@ GtRrTaskContext >> taskTimeoutTime [
 	^ taskTimeoutTime
 ]
 
+{ #category : #accessing }
+GtRrTaskContext >> taskTimeoutTime: anObject [
+
+	taskTimeoutTime := anObject
+]
+
 { #category : #running }
 GtRrTaskContext >> terminateTask [
 	"Terminate the receiver"
@@ -283,4 +313,10 @@ GtRrTaskContext >> workerTimeoutTime [
 	<return: #DateAndTime>
 
 	^ workerTimeoutTime
+]
+
+{ #category : #accessing }
+GtRrTaskContext >> workerTimeoutTime: anObject [
+
+	workerTimeoutTime := anObject
 ]

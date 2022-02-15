@@ -78,3 +78,9 @@ GtRrAllocatedItemsJob >> tasks [
 
 	^ tasks ifNil: [ tasks := self taskAllocator allocateItems: self allItems ]
 ]
+
+{ #category : #accessing }
+GtRrAllocatedItemsJob >> tasks: aCollection [
+
+	tasks := aCollection
+]
