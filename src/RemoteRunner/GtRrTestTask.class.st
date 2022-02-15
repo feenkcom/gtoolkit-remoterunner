@@ -56,7 +56,7 @@ GtRrTestTask >> printOn: aStream [
 	aStream nextPut: $)
 ]
 
-{ #category : #accessing }
+{ #category : #running }
 GtRrTestTask >> run [
 	| suite testResult events |
 

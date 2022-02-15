@@ -8,9 +8,26 @@ Class {
 }
 
 { #category : #'instance creation' }
+GtRrTaskAnnouncement class >> fromStonDictionary: aDictionary [
+
+	^ (super fromStonDictionary: aDictionary)
+		task: (aDictionary at: #task);
+		yourself
+
+]
+
+{ #category : #'instance creation' }
 GtRrTaskAnnouncement class >> task: aGtRrTask [
 
 	^ self new task: aGtRrTask 
+]
+
+{ #category : #converting }
+GtRrTaskAnnouncement >> asDictionary [
+
+	^ super asDictionary
+		at: #task put: task;
+		yourself.
 ]
 
 { #category : #accessing }

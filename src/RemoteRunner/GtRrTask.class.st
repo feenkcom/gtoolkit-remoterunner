@@ -203,7 +203,7 @@ GtRrTask >> result: anObject [
 	result := anObject
 ]
 
-{ #category : #accessing }
+{ #category : #running }
 GtRrTask >> run [
 
 	self subclassResponsibility
