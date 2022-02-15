@@ -43,6 +43,7 @@ GtRrInImageWorker >> initialize [
 
 	super initialize.
 	details := Dictionary new.
+	connection := GtRrPseudoPharoLinkServerConnection new.
 ]
 
 { #category : #accessing }
