@@ -41,7 +41,6 @@ GtRemoteRunnerExamples >> assignTasksToWorkersTaskFirst [
 	workers := (1 to: 2) collect: [ :i |
 		GtRrInImageWorker new
 			remoteRunner: remoteRunner;
-			connection: PharoLinkServerConnection new;
 			start ].
 
 	semaphore wait.
@@ -68,7 +67,6 @@ GtRemoteRunnerExamples >> assignTasksToWorkersWorkerFirst [
 	workers := (1 to: 2) collect: [ :i |
 		GtRrInImageWorker new
 			remoteRunner: remoteRunner;
-			connection: PharoLinkServerConnection new;
 			start ].
 
 	tasks := (1 to: 5) collect: [ :i |

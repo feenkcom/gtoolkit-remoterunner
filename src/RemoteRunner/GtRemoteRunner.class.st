@@ -726,7 +726,7 @@ GtRemoteRunner >> stop [
 GtRemoteRunner >> stopLogging [
 	"Stop the receiver's in-memory log"
 
-	log ifNotNil: [ ^ self ].
+	log ifNil: [ ^ self ].
 	log stop.
 	log := nil.
 ]
