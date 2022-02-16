@@ -33,8 +33,12 @@ GtRrClassExampleTask >> exampleClassName: anObject [
 
 { #category : #'private - running' }
 GtRrClassExampleTask >> group [
+	| exampleClass |
 
-	^ GtClassExampleGroup new exampleClass: exampleClassName asClass
+	exampleClass := (exampleClassName endsWith: ' class')
+		ifTrue: [ (exampleClassName copyFrom: 1 to: exampleClassName size - 6) asClass class ]
+		ifFalse: [ exampleClassName asClass ].
+	^ GtClassExampleGroup new exampleClass: exampleClass
 ]
 
 { #category : #ui }

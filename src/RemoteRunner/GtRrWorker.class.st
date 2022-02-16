@@ -342,14 +342,18 @@ GtRrWorker >> stop [
 
 { #category : #accessing }
 GtRrWorker >> taskDone: aTask with: anObject [
+	| serializedResult |
 
 	StringSignal emit: ('done {1} with {2}' format: { 
 				 aTask.
 				 anObject }).
+	serializedResult := [ LeJsonV4 uniqueInstance serialize: anObject ]
+		on: Error 
+		do: [ :ex | ^ self taskFailed: aTask with: ex ].
 	^ application newCommandFactory
 		  bindingAt: #taskContextId put: aTask taskContextId;
 		  bindingAt: #result
-		  put: (LeJsonV4 uniqueInstance serialize: anObject);
+		  put: serializedResult;
 		  sendAndWait:
 			  'GtAssignedRemoteRunner taskDone: taskContextId with: (LeJsonV4 uniqueInstance deserialize: result readStream). true'
 ]

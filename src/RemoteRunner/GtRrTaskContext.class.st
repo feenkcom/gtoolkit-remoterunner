@@ -267,8 +267,14 @@ GtRrTaskContext >> terminateTask [
 	"Terminate the receiver"
 
 	task state = #started ifFalse: [ ^ self markTaskCancelled ].
-	(workerFuture terminateTaskContextId: taskContextId) ifFalse:
-		[ self error: 'Unable to terminate task' ].
+	(workerFuture terminateTaskContextId: taskContextId) ifTrue: [ ^ self ].
+	"The worker failed to terminate the task, terminate it on the server"
+	self remoteRunner 
+		taskFailed: taskContextId
+		with: (GtRrErrorDetails new
+			errorMessage: 'RemoteRunner forced timeout termination';
+			setTrace;
+			yourself).
 ]
 
 { #category : #private }
