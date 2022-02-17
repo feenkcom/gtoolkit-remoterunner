@@ -200,6 +200,8 @@ GtRemoteRunnerExamples >> handleWorkerDisconnection [
 		startLogging;
 		start.
 	[ worker := GtRrWorker serverSocketAddress: 'localhost:7086'.
+	"If this example is being run within a worker it needs a different service name"
+	worker serviceName: 'handleWorkerDisconnection service'.
 	worker start.
 	startSemaphore := Semaphore new.
 	endSemaphore := Semaphore new.
