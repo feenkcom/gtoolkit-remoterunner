@@ -7,6 +7,24 @@ Class {
 	#category : #'RemoteRunner-Tests'
 }
 
+{ #category : #'accessing - dynamic' }
+GtRrExamplesTask >> erroredExamples [
+
+	^ result erroredExamples
+]
+
+{ #category : #'accessing - dynamic' }
+GtRrExamplesTask >> executedExamples [
+
+	^ result executedExamples
+]
+
+{ #category : #'accessing - dynamic' }
+GtRrExamplesTask >> failedExamples [
+
+	^ result failedExamples
+]
+
 { #category : #'private - running' }
 GtRrExamplesTask >> group [
 
@@ -47,6 +65,18 @@ GtRrExamplesTask >> run [
 GtRrExamplesTask >> setIgnoreNoTest [
 
 	ignoreNoTest := true.
+]
+
+{ #category : #'accessing - dynamic' }
+GtRrExamplesTask >> skippedExamples [
+
+	^ result skippedExamples
+]
+
+{ #category : #'accessing - dynamic' }
+GtRrExamplesTask >> successfulExamples [
+
+	^ result successfulExamples
 ]
 
 { #category : #ui }

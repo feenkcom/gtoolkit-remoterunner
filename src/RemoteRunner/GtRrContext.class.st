@@ -61,10 +61,18 @@ GtRrContext >> jobTimeout [
 	^ self subclassResponsibility 
 ]
 
+{ #category : #accessing }
+GtRrContext >> remoteRunner [
+
+	^ self subclassResponsibility 
+]
+
 { #category : #private }
 GtRrContext >> scheduleTimeoutContext [
 	| future |
 
+	self remoteRunner announceAndLog: (GtRrTimeoutScheduledAnnouncement  new
+		context: self).
 	future := BlTktWorkerProvider nonUIMultiPool future:
 		[ self timeoutContext ] asBlTktCommand.
 	future onFailureDo: [ :anError |

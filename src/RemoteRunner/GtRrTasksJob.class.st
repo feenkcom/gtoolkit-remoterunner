@@ -32,6 +32,17 @@ GtRrTasksJob class >> tasks: aCollection [
 	^ self new tasks: aCollection
 ]
 
+{ #category : #testing }
+GtRrTasksJob >> hasTests [
+	"Answer a boolean indicating if the receiver has one or more tasks that are considered test tasks"
+
+	^ self tasks 
+		detect: [ :task | (task isKindOf: GtRrExamplesTask) or: (task isKindOf: GtRrTestTask) ]
+		ifFound: [ true ]
+		ifNone: [ false ]
+	
+]
+
 { #category : #printing }
 GtRrTasksJob >> printOn: aStream [
 
@@ -48,6 +59,17 @@ GtRrTasksJob >> printOn: aStream [
 		[ aStream << ' with errors' ].
 	aStream
 		nextPut: $).
+]
+
+{ #category : #'private - running' }
+GtRrTasksJob >> runInImage [
+	"Run the receiver in the current process.
+	For testing only - no error handling, etc."
+
+	startTime := DateAndTime now.
+	results := tasks collect: #runInImage.
+	endTime := DateAndTime now.
+	state := #completed.
 ]
 
 { #category : #accessing }

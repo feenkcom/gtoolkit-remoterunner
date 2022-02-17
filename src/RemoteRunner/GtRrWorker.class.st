@@ -9,7 +9,8 @@ Class {
 		'attributes',
 		'application',
 		'taskRunner',
-		'currentTaskExecution'
+		'currentTaskExecution',
+		'serviceName'
 	],
 	#category : #'RemoteRunner-Worker'
 }
@@ -257,7 +258,7 @@ GtRrWorker >> kill [
 { #category : #accessing }
 GtRrWorker >> name [
 
-	^ 'GtRrWorker poll service'
+	^ serviceName ifNil: [ 'GtRrWorker poll service' ]
 ]
 
 { #category : #private }
@@ -284,6 +285,12 @@ GtRrWorker >> registerWithRunner [
 GtRrWorker >> removeObserver [
 
 	^ application newCommandFactory send: 'GtAssignedRemoteRunner removeObserver'
+]
+
+{ #category : #accessing }
+GtRrWorker >> serviceName: aString [
+
+	serviceName := aString
 ]
 
 { #category : #private }

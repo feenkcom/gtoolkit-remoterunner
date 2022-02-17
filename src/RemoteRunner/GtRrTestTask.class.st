@@ -23,6 +23,30 @@ GtRrTestTask class >> tests: aDictionary [
 		  yourself
 ]
 
+{ #category : #'accessing - dynamic' }
+GtRrTestTask >> erroredExamples [
+
+	^ result 
+		select: [ :pharoLinkTestCaseAnnouncement | 
+			pharoLinkTestCaseAnnouncement shortName = #error or:
+			[ pharoLinkTestCaseAnnouncement shortName = #warning ] ]
+
+]
+
+{ #category : #'accessing - dynamic' }
+GtRrTestTask >> executedExamples [
+
+	^ result
+]
+
+{ #category : #'accessing - dynamic' }
+GtRrTestTask >> failedExamples [
+
+	^ result 
+		select: [ :pharoLinkTestCaseAnnouncement | 	pharoLinkTestCaseAnnouncement shortName = #failure ]
+
+]
+
 { #category : #'gt-extensions' }
 GtRrTestTask >> gtResultFor: aView [
 	<gtView>
@@ -72,6 +96,23 @@ GtRrTestTask >> run [
 		do: [ :e | events add: e ].
 	suite run: testResult.
 	^ events asArray
+]
+
+{ #category : #'accessing - dynamic' }
+GtRrTestTask >> skippedExamples [
+
+	^ result 
+		select: [ :pharoLinkTestCaseAnnouncement | 	pharoLinkTestCaseAnnouncement shortName = #skip ]
+
+]
+
+{ #category : #'accessing - dynamic' }
+GtRrTestTask >> successfulExamples [
+
+	^ result 
+		select: [ :pharoLinkTestCaseAnnouncement | 
+			#(#pass #skip) includes: pharoLinkTestCaseAnnouncement shortName ]
+
 ]
 
 { #category : #ui }

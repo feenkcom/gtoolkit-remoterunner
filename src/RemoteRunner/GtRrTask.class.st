@@ -209,6 +209,14 @@ GtRrTask >> run [
 	self subclassResponsibility
 ]
 
+{ #category : #'private - running' }
+GtRrTask >> runInImage [
+	"Run the receiver in the current process.
+	For testing only - no error handling, etc."
+
+	result := self run.
+]
+
 { #category : #accessing }
 GtRrTask >> startTime [
 
