@@ -8,6 +8,7 @@ Class {
 	#classTraits : 'TGtWorkerConnectionUI classTrait',
 	#instVars : [
 		'connection',
+		'remoteRunner',
 		'remoteAddress',
 		'details',
 		'observer',
@@ -18,9 +19,11 @@ Class {
 }
 
 { #category : #'instance creation' }
-GtRrWorkerConnection class >> connection: aConnection [
+GtRrWorkerConnection class >> connection: aConnection runner: aGtRemoteRunner [
 
-	^ self new connection: aConnection
+	^ self new 
+		connection: aConnection;
+		remoteRunner: aGtRemoteRunner
 ]
 
 { #category : #accessing }
@@ -46,10 +49,15 @@ GtRrWorkerConnection >> commandCurrentTaskContextId [
 
 { #category : #commands }
 GtRrWorkerConnection >> commandEvaluate: aString [
+	| context result |
 
-	^ self sendControlMessage: (Message
+	context := GtRrWorkerContext workerConnection: self.
+	self timeoutManager addContext: context.
+	result := self sendControlMessage: (Message
 			   selector: #commandEvaluate:
-			   argument: aString)
+			   argument: aString).
+	context isFinished: true.
+	^ result.
 ]
 
 { #category : #commands }
@@ -209,6 +217,18 @@ GtRrWorkerConnection >> remoteAddressString [
 ]
 
 { #category : #accessing }
+GtRrWorkerConnection >> remoteRunner [
+
+	^ remoteRunner
+]
+
+{ #category : #accessing }
+GtRrWorkerConnection >> remoteRunner: anObject [
+
+	remoteRunner := anObject
+]
+
+{ #category : #accessing }
 GtRrWorkerConnection >> removeObserver [
 
 	observerProcess ifNotNil: #terminate.
@@ -242,4 +262,10 @@ GtRrWorkerConnection >> summaryAttributes [
 		details ifNotNil:
 			[ details associationsDo: [ :assoc |
 				stream nextPut: { assoc key. assoc value. self. } ] ] ].
+]
+
+{ #category : #private }
+GtRrWorkerConnection >> timeoutManager [ 
+
+	^ remoteRunner timeoutManager 
 ]

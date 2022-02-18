@@ -3,8 +3,23 @@ Class {
 	#superclass : #Object,
 	#traits : 'TAssertable',
 	#classTraits : 'TAssertable classTrait',
+	#instVars : [
+		'runner',
+		'process'
+	],
 	#category : #'RemoteRunner-Examples'
 }
+
+{ #category : #private }
+GtRrWorkerExamples >> cleanUp [
+
+	runner ifNotNil:
+		[ runner stop.
+		runner := nil ].
+	process ifNotNil:
+		[ process isTerminated ifFalse: [ process terminate ].
+		process := nil ]
+]
 
 { #category : #examples }
 GtRrWorkerExamples >> commandLineWithAttributes [
@@ -41,4 +56,70 @@ GtRrWorkerExamples >> commandLineWithoutAttributes [
 	self assert: ((commandLine at: #serverSocketAddress) at: #address) value equals: '7084'.
 
 	^ commandLine
+]
+
+{ #category : #private }
+GtRrWorkerExamples >> waitOn: aSemaphore description: descriptionString [
+
+	(aSemaphore waitTimeoutSeconds: 10)
+		ifTrue: [ self error: descriptionString ]
+]
+
+{ #category : #examples }
+GtRrWorkerExamples >> workerControlChannelCommandTimeout [
+	"Demonstrate timing out the worker when a control channel command doesn't respond in time"
+	<gtExample>
+	<noTest>
+	<after: #cleanUp>
+	| workerConnection semaphore registered timeoutScheduled timeoutAnnounced unregistered |
+
+	self assert: runner isNil.
+	semaphore := Semaphore new.
+	registered := timeoutScheduled := timeoutAnnounced := unregistered := false.
+	runner := GtRemoteRunner new
+		port: 7082;
+		managerStartupAndShutdown: GtRrLocalManagerStartupAndShutdown new;
+		workerTimeout: 2 seconds.
+	runner managerStartupAndShutdown
+		poolSize: 1;
+		autoRestart: false.
+	runner
+		when: GtRrWorkerControlChannelRegisteredAnnouncement 
+			do: [ :ann | 
+				registered := true.
+				semaphore signal ] 
+			for: self;
+		when: GtRrTimeoutScheduledAnnouncement
+			do: [ :ann | 
+				timeoutScheduled := true.
+				semaphore signal ] 
+			for: self;
+		when: GtRrWorkerTimeoutAnnouncement
+			do: [ :ann | 
+				timeoutAnnounced := true.
+				semaphore signal ] 
+			for: self;
+		when: GtRrWorkerUnregisteredAnnouncement
+			do: [ :ann | 
+				unregistered := true.
+				semaphore signal ] 
+			for: self.
+	runner start.
+	self waitOn: semaphore description: 'Didn''t get worker control channel'.
+	self assert: registered.
+	workerConnection := runner registeredWorkers anyOne.
+
+	process := [ 
+		[ workerConnection commandEvaluate: '1 minute wait' ]
+			on: PharoLinkServerConnectionLost 
+			do: [ :ex | ] ] fork.
+
+	#(GtRrTimeoutScheduledAnnouncement GtRrWorkerTimeoutAnnouncement GtRrWorkerUnregisteredAnnouncement) do: [ :announcement |
+		self waitOn: semaphore description: 'Didn''t receive: ', announcement printString ].
+
+	self assert: timeoutScheduled.
+	self assert: timeoutAnnounced.
+	self assert: unregistered.
+	self assert: runner registeredWorkerCount equals: 0.
+	^ runner.
 ]

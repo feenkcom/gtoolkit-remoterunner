@@ -56,12 +56,6 @@ GtRrContext >> isTaskContext [
 ]
 
 { #category : #accessing }
-GtRrContext >> jobTimeout [
-
-	^ self subclassResponsibility 
-]
-
-{ #category : #accessing }
 GtRrContext >> remoteRunner [
 
 	^ self subclassResponsibility 
@@ -86,12 +80,6 @@ GtRrContext >> stonOn: stonWriter [
 
 	stonWriter writeObject: self streamShortList: [ :array |
 		array add: self asDictionary ]
-]
-
-{ #category : #accessing }
-GtRrContext >> taskTimeout [
-
-	^ self subclassResponsibility 
 ]
 
 { #category : #private }

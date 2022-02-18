@@ -35,10 +35,20 @@ GtRrClassExampleTask >> exampleClassName: anObject [
 GtRrClassExampleTask >> group [
 	| exampleClass |
 
-	exampleClass := (exampleClassName endsWith: ' class')
-		ifTrue: [ (exampleClassName copyFrom: 1 to: exampleClassName size - 6) asClass class ]
-		ifFalse: [ exampleClassName asClass ].
+	exampleClass := self classWithName: exampleClassName.
 	^ GtClassExampleGroup new exampleClass: exampleClass
+]
+
+{ #category : #printing }
+GtRrClassExampleTask >> printSupplementalOn: aStream [
+
+	aStream
+		<< (exampleClassName ifNil: [ '<none>' ]);
+		<< ', ';
+		<< self state.
+	self hasErrors ifTrue:
+		[ aStream << ' with errors' ].
+
 ]
 
 { #category : #ui }

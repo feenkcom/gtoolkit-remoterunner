@@ -7,6 +7,18 @@ Class {
 	#category : #'RemoteRunner-Tests'
 }
 
+{ #category : #'instance creation' }
+GtRrExplicitExampleTask class >> examples: aCollectionOfGtExample [
+
+	^ self new examples: aCollectionOfGtExample 
+]
+
+{ #category : #accessing }
+GtRrExplicitExampleTask class >> leJsonV4Name [
+
+	^ #gtRrExplicitExampleTask
+]
+
 { #category : #accessing }
 GtRrExplicitExampleTask >> examples [
 
