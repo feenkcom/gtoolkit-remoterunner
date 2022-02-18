@@ -17,15 +17,20 @@ GtRrSerialisationExamples >> gtRrClassExampleTask [
 
 	serializedTask := LeJsonV4 uniqueInstance serialize: task.
 	deserializedTask := LeJsonV4 uniqueInstance deserialize: serializedTask readStream.
-	self assert: deserializedTask class equals: GtRrClassExampleTask.
-	self assert: deserializedTask exampleClassName equals: #GtRrWorkerExamples.
+	self assert: deserializedTask class = GtRrClassExampleTask
+		description: 'deserializedTask class incorrect: ', deserializedTask class name.
+	self assert: deserializedTask exampleClassName = #GtRrWorkerExamples
+		description: 'deserializedTask exampleClassName incorrect: ', deserializedTask exampleClassName printString.
 
 	result := task run.
 	serializedResult := LeJsonV4 uniqueInstance serialize: result.
 	deserializedResult := LeJsonV4 uniqueInstance deserialize: serializedResult readStream.
-	self assert: deserializedResult class equals: GtClassExampleGroup.
-	self assert: deserializedResult exampleClass equals: GtRrWorkerExamples.
-	self assert: deserializedResult examples first isSuccess.
+	self assert: deserializedResult class = GtClassExampleGroup
+		description: 'deserializedResult class incorrect: ', deserializedResult class name.
+	self assert: deserializedResult exampleClass = GtRrWorkerExamples
+		description: 'deserializedResult exampleClass incorrect: ', deserializedResult exampleClass printString.
+	self assert: deserializedResult examples first isSuccess
+		description: 'deserializedResult examples first isSuccess failed'.
 
 	^ result.
 ]
