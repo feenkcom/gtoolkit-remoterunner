@@ -273,8 +273,7 @@ GtRrJobContext >> taskTimeout [
 { #category : #'api - running' }
 GtRrJobContext >> terminateJob [
 	"Start the process of terminating the receiver.
-	This may be completed at a later time, after all the workers have terminated their tasks.
-	Must be called within sharedAccess."
+	This may be completed at a later time, after all the workers have terminated their tasks."
 
 	job markJobTerminating.
 	self taskContexts do: [ :taskContext |

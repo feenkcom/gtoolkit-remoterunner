@@ -580,7 +580,9 @@ GtRemoteRunner >> registerWorkerWithDetails: aDictionary [
 
 	pharoLinkServerConnection := PharoLinkServerCurrentConnection value.
 	pharoLinkServerConnection setCloseOnExec: true.
-	workerConnection := GtRrWorkerConnection connection: pharoLinkServerConnection.
+	workerConnection := GtRrWorkerConnection 
+		connection: pharoLinkServerConnection
+		runner: self.
 	workerConnection details: aDictionary.
 	sharedAccess critical:
 		[ registeredWorkers at: pharoLinkServerConnection put: workerConnection ].
@@ -703,6 +705,7 @@ GtRemoteRunner >> state [
 	| availableWorkerCount taskQueueCount currentJobCount currentTaskCount registeredWorkerCount |
 
 	(server isNil or: [ server isRunning not ]) ifTrue: [ ^ #stopped ].
+	sharedAccess size > 0 ifTrue: [ ^ #waiting ].
 	availableWorkerCount := availableWorkers size.
 	taskQueueCount := taskQueue size.
 	currentJobCount := currentlyExecutingJobs size.
@@ -753,23 +756,21 @@ GtRemoteRunner >> summaryAttributes [
 	"Answer a collection of key/value attributes that can simply be listed as a summary of the receiver"
 
 	^ Array streamContents: [ :stream |
-		sharedAccess critical:
-			[ stream
-				nextPut: { #State. self state. self state. };
-				nextPut: { 'Total Job Count'. runnerStats totalJobCount. self. };
-				nextPut: { 'Total Task Count'. runnerStats totalTaskCount. self. };
-				nextPut: {'Task Queue Size'. taskQueue size. taskQueue. };
-				nextPut: {'Registered Workers'. registeredWorkers size. registeredWorkers. };
-				nextPut: {'Available Workers'. availableWorkers size. availableWorkers. };
-				nextPut: {'Currently Executing Jobs'. currentlyExecutingJobs size. currentlyExecutingJobs. };
-				nextPut: {'Currently Executing Tasks'. currentlyExecutingTasks size. currentlyExecutingTasks. };
-				nextPut: { 'Default Worker Timeout'. self workerTimeout. self. };
-				nextPut: { 'Default Job Timeout'. self jobTimeout. self. };
-				nextPut: { 'Default Task Timeout'. self taskTimeout. self. };
-				nextPut: { #Port. port. server. };
-				nextPut: { #Logging. log isNotNil. log. }
-				 ].
-		stream nextPut: { 'Shared Access Waiting'. sharedAccess size. sharedAccess. } ]
+		stream
+			nextPut: { #State. self state. self state. };
+			nextPut: { 'Total Job Count'. runnerStats totalJobCount. self. };
+			nextPut: { 'Total Task Count'. runnerStats totalTaskCount. self. };
+			nextPut: {'Task Queue Size'. taskQueue size. taskQueue. };
+			nextPut: {'Registered Workers'. registeredWorkers size. registeredWorkers. };
+			nextPut: {'Available Workers'. availableWorkers size. availableWorkers. };
+			nextPut: {'Currently Executing Jobs'. currentlyExecutingJobs size. currentlyExecutingJobs. };
+			nextPut: {'Currently Executing Tasks'. currentlyExecutingTasks size. currentlyExecutingTasks. };
+			nextPut: { 'Default Worker Timeout'. self workerTimeout. self. };
+			nextPut: { 'Default Job Timeout'. self jobTimeout. self. };
+			nextPut: { 'Default Task Timeout'. self taskTimeout. self. };
+			nextPut: { #Port. port. server. };
+			nextPut: { #Logging. log isNotNil. log. };
+			nextPut: { 'Shared Access Waiting'. sharedAccess size. sharedAccess. } ]
 ]
 
 { #category : #'api - worker' }
@@ -816,20 +817,21 @@ GtRemoteRunner >> taskTimeout: anObject [
 { #category : #'api - jobs' }
 GtRemoteRunner >> terminateJobId: aJobId [
 	"Terminate the specified job.
-	If the job has not yet been started, it is marked cancelled.
 	If it has been started, it will be marked completed with errors."
 	<return: #GtRrJob>
+	| jobContext |
 
-	^ sharedAccess critical:
+	jobContext := sharedAccess critical:
 		[ currentlyExecutingJobs 
 			at: aJobId 
 			ifPresent: [ :aJobContext | 
 				currentlyExecutingJobs removeKey: aJobId.
-				aJobContext terminateJob.
-				self announceAndLog: (GtRrJobTerminatedAnnouncement job: aJobContext job).
-				aJobContext job ]
-			"ifAbsent: 
-				[ The job has already completed, do nothing ]" ].
+				aJobContext ] ].
+	jobContext ifNil: [ ^ nil ].
+	jobContext terminateJob.
+	self announceAndLog: (GtRrJobTerminatedAnnouncement job: jobContext job).
+	^ jobContext job
+
 ]
 
 { #category : #private }

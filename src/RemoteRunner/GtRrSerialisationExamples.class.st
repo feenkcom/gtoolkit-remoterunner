@@ -18,7 +18,7 @@ GtRrSerialisationExamples >> gtRrClassExampleTask [
 	serializedTask := LeJsonV4 uniqueInstance serialize: task.
 	deserializedTask := LeJsonV4 uniqueInstance deserialize: serializedTask readStream.
 	self assert: deserializedTask class equals: GtRrClassExampleTask.
-	self assert: deserializedTask className equals: #GtRrClassExampleTask.
+	self assert: deserializedTask exampleClassName equals: #GtRrWorkerExamples.
 
 	result := task run.
 	serializedResult := LeJsonV4 uniqueInstance serialize: result.
@@ -28,6 +28,57 @@ GtRrSerialisationExamples >> gtRrClassExampleTask [
 	self assert: deserializedResult examples first isSuccess.
 
 	^ result.
+]
+
+{ #category : #examples }
+GtRrSerialisationExamples >> gtRrClassSUnitTask [
+	<gtExample>
+	"Demonstrate (de)serialising a GtRrPackageExampleTask"
+	| task serializedTask deserializedTask |
+
+	LeJsonV4 cleanUp.
+	task := GtRrClassSUnitTask sunitClassName: #GtRrSampleTest.
+
+	serializedTask := LeJsonV4 uniqueInstance serialize: task.
+	deserializedTask := LeJsonV4 uniqueInstance deserialize: serializedTask readStream.
+	self assert: deserializedTask class equals: GtRrClassSUnitTask.
+	self assert: deserializedTask sunitClassName equals: #GtRrSampleTest.
+
+	^ task
+]
+
+{ #category : #examples }
+GtRrSerialisationExamples >> gtRrPackageExampleTask [
+	<gtExample>
+	"Demonstrate (de)serialising a GtRrPackageExampleTask"
+	| task serializedTask deserializedTask |
+
+	LeJsonV4 cleanUp.
+	task := GtRrPackageExampleTask examplePackageName: #RemoteRunner.
+
+	serializedTask := LeJsonV4 uniqueInstance serialize: task.
+	deserializedTask := LeJsonV4 uniqueInstance deserialize: serializedTask readStream.
+	self assert: deserializedTask class equals: GtRrPackageExampleTask.
+	self assert: deserializedTask examplePackageName equals: #RemoteRunner.
+
+	^ task
+]
+
+{ #category : #examples }
+GtRrSerialisationExamples >> gtRrPackageSUnitTask [
+	<gtExample>
+	"Demonstrate (de)serialising a GtRrPackageExampleTask"
+	| task serializedTask deserializedTask |
+
+	LeJsonV4 cleanUp.
+	task := GtRrPackageSUnitTask sunitPackageName: #PharoLink.
+
+	serializedTask := LeJsonV4 uniqueInstance serialize: task.
+	deserializedTask := LeJsonV4 uniqueInstance deserialize: serializedTask readStream.
+	self assert: deserializedTask class equals: GtRrPackageSUnitTask.
+	self assert: deserializedTask sunitPackageName equals: #PharoLink.
+
+	^ task
 ]
 
 { #category : #examples }

@@ -36,3 +36,15 @@ GtRrPackageExampleTask >> group [
 
 	^ GtPackageExampleGroup new examplePackage: examplePackageName asPackage.
 ]
+
+{ #category : #printing }
+GtRrPackageExampleTask >> printSupplementalOn: aStream [
+
+	aStream
+		<< (examplePackageName ifNil: [ '<none>' ]);
+		<< ', ';
+		<< self state.
+	self hasErrors ifTrue:
+		[ aStream << ' with errors' ].
+
+]

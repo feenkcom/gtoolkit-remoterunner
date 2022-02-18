@@ -28,6 +28,14 @@ GtRrTask >> asJob [
 	^ GtRrTasksJob tasks: { self }
 ]
 
+{ #category : #'private - utility' }
+GtRrTask >> classWithName: aString [
+
+	^ (aString endsWith: ' class')
+		ifTrue: [ (self class environment at: (aString copyFrom: 1 to: aString size - 6) asSymbol) class ]
+		ifFalse: [ self class environment at: aString asSymbol ].
+]
+
 { #category : #accessing }
 GtRrTask >> constraint [
 
@@ -95,6 +103,18 @@ GtRrTask >> gtSummaryFor: aView [
 		  column: #Value text: [ :item | item value ];
 		send: [ :item | item value ];
 		  actionUpdateButton
+]
+
+{ #category : #ui }
+GtRrTask >> gtTraceFor: aView [
+	<gtView>
+
+	errorDetails ifNil: [ ^ aView empty ].
+	^ aView forward
+		title: 'Trace';
+		priority: 20;
+		object: [ errorDetails ];
+		view: #gtTraceFor:
 ]
 
 { #category : #ui }
@@ -183,12 +203,18 @@ GtRrTask >> markTaskTerminating [
 GtRrTask >> printOn: aStream [
 
 	super printOn: aStream.
-	aStream
-		nextPut: $(;
-		<< self state.
+	aStream nextPut: $(.
+	self printSupplementalOn: aStream.
+	aStream nextPut: $).
+]
+
+{ #category : #printing }
+GtRrTask >> printSupplementalOn: aStream [
+
+	aStream << self state.
 	self hasErrors ifTrue:
 		[ aStream << ' with errors' ].
-	aStream nextPut: $).
+
 ]
 
 { #category : #accessing }
