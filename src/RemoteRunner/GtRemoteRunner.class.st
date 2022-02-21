@@ -826,7 +826,8 @@ GtRemoteRunner >> terminateJobId: aJobId [
 			at: aJobId 
 			ifPresent: [ :aJobContext | 
 				currentlyExecutingJobs removeKey: aJobId.
-				aJobContext ] ].
+				aJobContext ]
+			ifAbsent: [ ] ].
 	jobContext ifNil: [ ^ nil ].
 	jobContext terminateJob.
 	self announceAndLog: (GtRrJobTerminatedAnnouncement job: jobContext job).
