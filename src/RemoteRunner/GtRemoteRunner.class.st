@@ -773,6 +773,18 @@ GtRemoteRunner >> summaryAttributes [
 			nextPut: { 'Shared Access Waiting'. sharedAccess size. sharedAccess. } ]
 ]
 
+{ #category : #printing }
+GtRemoteRunner >> summaryString [
+
+	^ String streamContents: [ :stream |
+		stream << 'RemoteRunner Summary:'; cr.
+		self summaryAttributes do: [ :tuple |
+			stream
+				<< (tuple first padRightTo: 20);
+				<< (tuple second printString padLeftTo: 20);
+				cr ] ]
+]
+
 { #category : #'api - worker' }
 GtRemoteRunner >> taskDone: aTaskContextId with: anObject [
 	| taskContext |
