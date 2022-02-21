@@ -773,6 +773,18 @@ GtRemoteRunner >> summaryAttributes [
 			nextPut: { 'Shared Access Waiting'. sharedAccess size. sharedAccess. } ]
 ]
 
+{ #category : #printing }
+GtRemoteRunner >> summaryString [
+
+	^ String streamContents: [ :stream |
+		stream << 'RemoteRunner Summary:'; cr.
+		self summaryAttributes do: [ :tuple |
+			stream
+				<< (tuple first padRightTo: 20);
+				<< (tuple second printString padLeftTo: 20);
+				cr ] ]
+]
+
 { #category : #'api - worker' }
 GtRemoteRunner >> taskDone: aTaskContextId with: anObject [
 	| taskContext |
@@ -826,7 +838,8 @@ GtRemoteRunner >> terminateJobId: aJobId [
 			at: aJobId 
 			ifPresent: [ :aJobContext | 
 				currentlyExecutingJobs removeKey: aJobId.
-				aJobContext ] ].
+				aJobContext ]
+			ifAbsent: [ ] ].
 	jobContext ifNil: [ ^ nil ].
 	jobContext terminateJob.
 	self announceAndLog: (GtRrJobTerminatedAnnouncement job: jobContext job).
