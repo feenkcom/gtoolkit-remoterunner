@@ -40,7 +40,7 @@ GtRrPackageSUnitTask >> run [
 		(cls inheritsFrom: TestCase) and: [ cls isAbstract not ] ].
 	classes do: [ :cls |
 		suite addTests: cls buildSuiteFromSelectors tests ].
-	^ suite run.
+	^ self runSuite: suite.
 ]
 
 { #category : #accessing }

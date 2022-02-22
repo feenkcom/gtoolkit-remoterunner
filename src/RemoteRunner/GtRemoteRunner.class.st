@@ -780,8 +780,8 @@ GtRemoteRunner >> summaryString [
 		stream << 'RemoteRunner Summary:'; cr.
 		self summaryAttributes do: [ :tuple |
 			stream
-				<< (tuple first padRightTo: 20);
-				<< (tuple second printString padLeftTo: 20);
+				<< (tuple first padRightTo: 30);
+				<< (tuple second printString padLeftTo: 10);
 				cr ] ]
 ]
 

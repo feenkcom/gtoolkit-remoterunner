@@ -30,6 +30,14 @@ GtRrTaskAnnouncement >> asDictionary [
 		yourself.
 ]
 
+{ #category : #printing }
+GtRrTaskAnnouncement >> printOneLineContentsOn: stream [
+
+	task ifNil: [ ^ self ].
+	stream print: task.
+
+]
+
 { #category : #accessing }
 GtRrTaskAnnouncement >> task [
 

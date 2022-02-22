@@ -89,6 +89,7 @@ GtRrExampleTestFactory >> addSUnitTestNames: aCollection [
 { #category : #adding }
 GtRrExampleTestFactory >> addTask: aTask [
 
+	aTask taskTimeout: taskTimeout.
 	stream nextPut: aTask
 ]
 

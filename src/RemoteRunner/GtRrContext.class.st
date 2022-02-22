@@ -68,7 +68,9 @@ GtRrContext >> scheduleTimeoutContext [
 	self remoteRunner announceAndLog: (GtRrTimeoutScheduledAnnouncement  new
 		context: self).
 	future := BlTktWorkerProvider nonUIMultiPool future:
-		[ self timeoutContext ] asBlTktCommand.
+		[ self remoteRunner announceAndLog: (GtRrTimeoutStartedAnnouncement context: self).
+		self timeoutContext.
+		self remoteRunner announceAndLog: (GtRrTimeoutCompletedAnnouncement context: self) ] asBlTktCommand.
 	future onFailureDo: [ :anError |
 		anError freeze.
 		[ self error: anError printString ] fork ]

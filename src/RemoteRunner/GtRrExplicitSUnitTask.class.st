@@ -27,7 +27,7 @@ GtRrExplicitSUnitTask >> run [
 	sunitTestNames do: [ :assoc | | class |
 		class := self class environment at: assoc key asSymbol.
 		suite addTest: (class new setTestSelector: assoc value asSymbol) ].
-	^ suite run.
+	^ self runSuite: suite.
 ]
 
 { #category : #accessing }
