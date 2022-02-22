@@ -267,7 +267,8 @@ GtRrTaskContext >> terminateTask [
 	"Terminate the receiver"
 
 	task state = #started ifFalse: [ ^ self markTaskCancelled ].
-	(workerFuture terminateTaskContextId: taskContextId) ifTrue: [ ^ self ].
+	workerFuture terminateTaskContextId: taskContextId.
+	task hasCompleted ifTrue: [ ^ self ].
 	"The worker failed to terminate the task, terminate it on the server"
 	self remoteRunner 
 		taskFailed: taskContextId

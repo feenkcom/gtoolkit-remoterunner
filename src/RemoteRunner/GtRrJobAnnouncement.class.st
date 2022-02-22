@@ -41,3 +41,11 @@ GtRrJobAnnouncement >> job: anObject [
 
 	job := anObject
 ]
+
+{ #category : #printing }
+GtRrJobAnnouncement >> printOneLineContentsOn: stream [
+
+	job ifNil: [ ^ self ].
+	stream print: job.
+
+]

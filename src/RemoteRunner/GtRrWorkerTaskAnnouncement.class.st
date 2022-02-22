@@ -7,6 +7,12 @@ Class {
 	#category : #'RemoteRunner-Announcements'
 }
 
+{ #category : #printing }
+GtRrWorkerTaskAnnouncement >> printOneLineContentsOn: stream [
+
+	stream print: task
+]
+
 { #category : #accessing }
 GtRrWorkerTaskAnnouncement >> task [
 

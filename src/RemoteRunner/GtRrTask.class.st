@@ -275,9 +275,11 @@ GtRrTask >> state: aSymbol [
 { #category : #ui }
 GtRrTask >> summaryAttributes [
 	"Answer a collection of key/value attributes that can simply be listed as a summary of the receiver"
-	| attributes |
+	| attributes duration |
 
 	attributes := OrderedCollection new.
+	(startTime isNotNil and: [ endTime isNotNil ]) ifTrue:
+		[ duration := endTime - startTime ].
 	attributes add: #State -> self state.
 	self hasErrors ifTrue:
 		[ attributes add: #Error -> errorDetails ].
@@ -285,6 +287,8 @@ GtRrTask >> summaryAttributes [
 		[ attributes add: #Started -> startTime ].
 	endTime ifNotNil:
 		[ attributes add: #Ended -> endTime ].
+	duration ifNotNil:
+		[ attributes add: #Duration -> duration ].
 	taskTimeout ifNotNil:
 		[ attributes add: #Timeout -> taskTimeout ].
 	attributes
