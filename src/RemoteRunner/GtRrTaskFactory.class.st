@@ -2,7 +2,8 @@ Class {
 	#name : #GtRrTaskFactory,
 	#superclass : #Object,
 	#instVars : [
-		'stream'
+		'stream',
+		'taskTimeout'
 	],
 	#category : #'RemoteRunner-Tasks'
 }
@@ -32,6 +33,19 @@ GtRrTaskFactory >> job [
 GtRrTaskFactory >> reset [
 
 	stream := Array new writeStream.
+]
+
+{ #category : #accessing }
+GtRrTaskFactory >> taskTimeout [
+	<return: #Duration or: nil>
+
+	^ taskTimeout
+]
+
+{ #category : #accessing }
+GtRrTaskFactory >> taskTimeout: aDuration [
+
+	taskTimeout := aDuration
 ]
 
 { #category : #'api - generation' }
