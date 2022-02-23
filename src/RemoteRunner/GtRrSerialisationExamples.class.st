@@ -10,7 +10,7 @@ Class {
 GtRrSerialisationExamples >> gtRrClassExampleTask [
 	<gtExample>
 	"Demonstrate (de)serialising a GtRrClassExampleTask and its result"
-	| task serializedTask deserializedTask result serializedResult deserializedResult |
+	| task serializedTask deserializedTask result serializedResult deserializedResult example |
 
 	LeJsonV4 cleanUp.
 	task := GtRrClassExampleTask exampleClassName: #GtRrWorkerExamples.
@@ -29,8 +29,31 @@ GtRrSerialisationExamples >> gtRrClassExampleTask [
 		description: 'deserializedResult class incorrect: ', deserializedResult class name.
 	self assert: deserializedResult exampleClass = GtRrWorkerExamples
 		description: 'deserializedResult exampleClass incorrect: ', deserializedResult exampleClass printString.
-	self assert: deserializedResult examples first isSuccess
-		description: 'deserializedResult examples first isSuccess failed'.
+	
+	example := deserializedResult examples detect:
+		           [ :anExample | anExample selector = #commandLineWithAttributes ].
+	self
+		assert: example isSuccess
+		description:
+		'deserializedResult commandLineWithAttributes example isSuccess failed'.
+
+	example := deserializedResult examples detect:
+		           [ :anExample | anExample selector = #commandLineWithoutAttributes ].
+	self
+		assert: example isSuccess
+		description:
+		'deserializedResult commandLineWithoutAttributes example isSuccess failed'.
+
+	example := deserializedResult examples detect:
+		           [ :anExample | anExample selector = #workerControlChannelCommandTimeout ].
+	self
+		assert: example hasNoTestPragma
+		description:
+		'deserializedResult workerControlChannelCommandTimeout example hasNoTestPragma failed'.
+	self
+		assert: example hasResult not
+		description:
+		'deserializedResult workerControlChannelCommandTimeout example hasResult not failed'.
 
 	^ result.
 ]
