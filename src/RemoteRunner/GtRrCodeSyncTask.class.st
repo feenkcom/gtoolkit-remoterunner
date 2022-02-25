@@ -25,6 +25,12 @@ GtRrCodeSyncTask class >> serializedChanges: aFuelStringOfCollection workerId: a
 		  yourself
 ]
 
+{ #category : #visiting }
+GtRrCodeSyncTask >> acceptVisitor: aVisitor [
+
+	^ aVisitor visitCodeSyncTask: self
+]
+
 { #category : #'gt-extensions' }
 GtRrCodeSyncTask >> gtChangesFor: aView [
 	<gtView>

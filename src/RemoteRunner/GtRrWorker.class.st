@@ -18,7 +18,7 @@ Class {
 { #category : #accessing }
 GtRrWorker class >> commandLine [
 	<commandline>
-	| worker |
+	| worker readMonitor |
 
 	^ self commandLineCommand meaning: [ :args | 
 		  | logger serverSocketAddress |
@@ -40,6 +40,7 @@ GtRrWorker class >> commandLine [
 				  put: (arg at: #value) value ].
 		  StringSignal emit: 'Running'.
 		  worker start.
+		  readMonitor := GtLwWindowsSocketReadMonitor new start.
 		  "Hibernate until the process exits"
 		  Semaphore new wait ]
 ]
@@ -245,6 +246,13 @@ GtRrWorker >> initialize [
 		at: #pid put: self currentProcessId;
 		at: #platform put: OSPlatform current name;
 		yourself
+]
+
+{ #category : #stepping }
+GtRrWorker >> iterateService [
+
+	self stepService.
+	Processor yield.
 ]
 
 { #category : #private }

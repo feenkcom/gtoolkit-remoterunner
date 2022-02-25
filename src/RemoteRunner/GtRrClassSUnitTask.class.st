@@ -19,6 +19,12 @@ GtRrClassSUnitTask class >> sunitClassName: aSymbol [
 	^ self new sunitClassName: aSymbol 
 ]
 
+{ #category : #visiting }
+GtRrClassSUnitTask >> acceptVisitor: aVisitor [
+
+	^ aVisitor visitClassSUnitTask: self
+]
+
 { #category : #printing }
 GtRrClassSUnitTask >> printSupplementalOn: aStream [
 

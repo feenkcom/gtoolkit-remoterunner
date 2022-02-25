@@ -19,6 +19,12 @@ GtRrExplicitSUnitTask class >> sunitTestNames: aCollection [
 	^ self new sunitTestNames: aCollection
 ]
 
+{ #category : #visiting }
+GtRrExplicitSUnitTask >> acceptVisitor: aVisitor [
+
+	^ aVisitor visitExplicitSUnitTask: self
+]
+
 { #category : #running }
 GtRrExplicitSUnitTask >> run [
 	| suite |

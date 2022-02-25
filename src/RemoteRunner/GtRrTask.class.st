@@ -21,6 +21,12 @@ GtRrTask class >> leJsonV4Name [
 	^ #remoteRunnerWorkerTask
 ]
 
+{ #category : #visiting }
+GtRrTask >> acceptVisitor: aVisitor [
+
+	^ aVisitor visitTask: self
+]
+
 { #category : #converting }
 GtRrTask >> asJob [
 	"Answer a GtRrTasksJob with the receiver as its single task"
@@ -240,7 +246,9 @@ GtRrTask >> runInImage [
 	"Run the receiver in the current process.
 	For testing only - no error handling, etc."
 
-	result := self run.
+	self markTaskStarted.
+	self result: self run.
+	self markTaskCompleted.
 ]
 
 { #category : #accessing }

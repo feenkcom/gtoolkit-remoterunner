@@ -7,6 +7,27 @@ Class {
 }
 
 { #category : #examples }
+GtRrTaskExamples >> compoundTask [
+	"Demonstrate creating nested tasks and analysing the results"
+	<gtExample>
+	| tasks subTask compoundTask visitor results |
+
+	tasks := (1 to: 5) collect: [ :i |
+		GtRrScriptTask script: i printString ].
+	subTask := GtRrCompoundTask tasks: (tasks copyFrom: 1 to: 3).
+	compoundTask := GtRrCompoundTask tasks: { 
+		subTask.
+		tasks at: 4.
+		tasks at: 5. }.
+	compoundTask runInImage.
+	results := OrderedCollection new.
+	visitor := GtRrAllTasksVisitor visitBlock: [ :task | results add: task result ].
+	visitor visitNode: compoundTask.
+	self assert: results asArray equals: #(1 2 3 4 5).
+	^ compoundTask.
+]
+
+{ #category : #examples }
 GtRrTaskExamples >> taskTimeout [
 	"Demonstrate the use of task timeouts"
 	<gtExample>
