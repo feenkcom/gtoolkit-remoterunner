@@ -1,5 +1,5 @@
 Class {
-	#name : #GtRrClassSUnitTask,
+	#name : #LwGtRrClassTestTask,
 	#superclass : #GtRrSUnitTask,
 	#instVars : [
 		'sunitClassName'
@@ -8,25 +8,25 @@ Class {
 }
 
 { #category : #accessing }
-GtRrClassSUnitTask class >> leJsonV4Name [
+LwGtRrClassTestTask class >> leJsonV4Name [
 
 	^ #gtRrClassSUnitTask
 ]
 
 { #category : #'instance creation' }
-GtRrClassSUnitTask class >> sunitClassName: aSymbol [
+LwGtRrClassTestTask class >> sunitClassName: aSymbol [
 
 	^ self new sunitClassName: aSymbol 
 ]
 
 { #category : #visiting }
-GtRrClassSUnitTask >> acceptVisitor: aVisitor [
+LwGtRrClassTestTask >> acceptVisitor: aVisitor [
 
 	^ aVisitor visitClassSUnitTask: self
 ]
 
 { #category : #printing }
-GtRrClassSUnitTask >> printSupplementalOn: aStream [
+LwGtRrClassTestTask >> printSupplementalOn: aStream [
 
 	aStream
 		<< (sunitClassName ifNil: [ '<none>' ]);
@@ -38,7 +38,7 @@ GtRrClassSUnitTask >> printSupplementalOn: aStream [
 ]
 
 { #category : #running }
-GtRrClassSUnitTask >> run [
+LwGtRrClassTestTask >> run [
 	| class suite |
 
 	class := self classWithName: sunitClassName.
@@ -47,13 +47,13 @@ GtRrClassSUnitTask >> run [
 ]
 
 { #category : #accessing }
-GtRrClassSUnitTask >> sunitClassName [
+LwGtRrClassTestTask >> sunitClassName [
 
 	^ sunitClassName
 ]
 
 { #category : #accessing }
-GtRrClassSUnitTask >> sunitClassName: anObject [
+LwGtRrClassTestTask >> sunitClassName: anObject [
 
 	sunitClassName := anObject
 ]

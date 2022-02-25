@@ -17,6 +17,12 @@ GtRrExampleValueTask class >> leJsonV4Name [
 	^ #gtRrExampleValueTask
 ]
 
+{ #category : #visiting }
+GtRrExampleValueTask >> acceptVisitor: aVisitor [
+
+	^ aVisitor visitExampleValueTask: self
+]
+
 { #category : #accessing }
 GtRrExampleValueTask >> errorFlag [
 

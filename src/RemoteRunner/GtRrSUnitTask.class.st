@@ -4,6 +4,12 @@ Class {
 	#category : #'RemoteRunner-Tests'
 }
 
+{ #category : #visiting }
+GtRrSUnitTask >> acceptVisitor: aVisitor [
+
+	^ aVisitor visitSUnitTask: self
+]
+
 { #category : #running }
 GtRrSUnitTask >> runSuite: suite [
 	| events testResult |

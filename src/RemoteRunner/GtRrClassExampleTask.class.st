@@ -19,6 +19,12 @@ GtRrClassExampleTask class >> leJsonV4Name [
 	^ #gtRrClassExampleTask
 ]
 
+{ #category : #visiting }
+GtRrClassExampleTask >> acceptVisitor: aVisitor [
+
+	^ aVisitor visitClassExampleTask: self
+]
+
 { #category : #accessing }
 GtRrClassExampleTask >> exampleClassName [
 

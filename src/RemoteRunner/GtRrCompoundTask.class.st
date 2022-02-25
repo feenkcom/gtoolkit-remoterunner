@@ -2,7 +2,7 @@ Class {
 	#name : #GtRrCompoundTask,
 	#superclass : #GtRrTask,
 	#instVars : [
-		'subtasks'
+		'tasks'
 	],
 	#category : #'RemoteRunner-Tasks'
 }
@@ -13,20 +13,40 @@ GtRrCompoundTask class >> leJsonV4Name [
 	^ #gtRrCompoundTask
 ]
 
+{ #category : #'instance creation' }
+GtRrCompoundTask class >> tasks: aCollection [
+
+	^ self new tasks: aCollection
+]
+
+{ #category : #visiting }
+GtRrCompoundTask >> acceptVisitor: aVisitor [
+
+	^ aVisitor visitCompoundTask: self
+]
+
+{ #category : #accessing }
+GtRrCompoundTask >> result: aCollection [
+
+	tasks doWithIndex: [ :task :index |
+		task result: (aCollection at: index). ].
+	result := tasks.
+]
+
 { #category : #accessing }
 GtRrCompoundTask >> run [
 
-	^ subtasks collect: [ :task | task run ]
+	^ tasks collect: [ :task | task run ]
 ]
 
 { #category : #accessing }
-GtRrCompoundTask >> subtasks [
+GtRrCompoundTask >> tasks [
 
-	^ subtasks
+	^ tasks
 ]
 
 { #category : #accessing }
-GtRrCompoundTask >> subtasks: anObject [
+GtRrCompoundTask >> tasks: anObject [
 
-	subtasks := anObject
+	tasks := anObject
 ]

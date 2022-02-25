@@ -19,6 +19,12 @@ GtRrScriptTask class >> script: aString [
 	^ self new script: aString
 ]
 
+{ #category : #visiting }
+GtRrScriptTask >> acceptVisitor: aVisitor [
+
+	^ aVisitor visitScriptTask: self
+]
+
 { #category : #printing }
 GtRrScriptTask >> printOn: aStream [
 

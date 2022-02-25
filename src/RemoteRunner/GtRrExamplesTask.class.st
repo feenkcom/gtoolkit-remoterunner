@@ -7,6 +7,12 @@ Class {
 	#category : #'RemoteRunner-Tests'
 }
 
+{ #category : #visiting }
+GtRrExamplesTask >> acceptVisitor: aVisitor [
+
+	^ aVisitor visitExampleTask: self
+]
+
 { #category : #'accessing - dynamic' }
 GtRrExamplesTask >> erroredExamples [
 
