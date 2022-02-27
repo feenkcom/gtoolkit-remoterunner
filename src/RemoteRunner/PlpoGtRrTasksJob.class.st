@@ -1,6 +1,6 @@
 Class {
 	#name : #PlpoGtRrTasksJob,
-	#superclass : #PharoLinkProxyObject,
+	#superclass : #PlpoGtRrJob,
 	#instVars : [
 		'tasks'
 	],
@@ -30,4 +30,12 @@ PlpoGtRrTasksJob >> gtViewTestsActionFor: anAction [
 PlpoGtRrTasksJob >> hasTests [
 
 	^ self proxyPerform: #hasTests
+]
+
+{ #category : #accessing }
+PlpoGtRrTasksJob >> tasks [
+
+	^ self newCommandFactory 
+		<< 'tasks asArray';
+		sendAndWait.
 ]
