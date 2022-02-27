@@ -53,6 +53,12 @@ TGtRrTaskVisitor >> visitExplicitSUnitTask: aGtRrTask [
 ]
 
 { #category : #visiting }
+TGtRrTaskVisitor >> visitNode: aNode [ 
+
+	^ aNode acceptVisitor: self
+]
+
+{ #category : #visiting }
 TGtRrTaskVisitor >> visitPackageExampleTask: aGtRrTask [
 
 	self visitExampleTask: aGtRrTask

@@ -22,7 +22,7 @@ GtRrTaskExamples >> compoundTask [
 	compoundTask runInImage.
 	results := OrderedCollection new.
 	visitor := GtRrAllTasksVisitor visitBlock: [ :task | results add: task result ].
-	compoundTask acceptVisitor: visitor.
+	visitor visitNode: compoundTask.
 	self assert: results asArray equals: #(1 2 3 4 5).
 	^ compoundTask.
 ]
