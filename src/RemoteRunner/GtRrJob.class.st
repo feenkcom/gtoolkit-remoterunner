@@ -393,6 +393,18 @@ GtRrJob >> summaryAttributes [
 ]
 
 { #category : #accessing }
+GtRrJob >> summaryString [
+
+	^ String streamContents: [ :stream |
+		stream << 'Job Summary:'; cr.
+		self summaryAttributes do: [ :assoc |
+			stream
+				<< (assoc key padRightTo: 30);
+				<< (assoc value printString padLeftTo: 30);
+				cr ] ]
+]
+
+{ #category : #accessing }
 GtRrJob >> tasks [
 	"Answer the collection of tasks to be executed"
 	<return: #SequenceableCollection>
