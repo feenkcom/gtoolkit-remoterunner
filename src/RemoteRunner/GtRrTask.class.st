@@ -291,6 +291,10 @@ GtRrTask >> summaryAttributes [
 	attributes add: #State -> self state.
 	self hasErrors ifTrue:
 		[ attributes add: #Error -> errorDetails ].
+	result ifNotNil:
+		[ attributes add: #Result -> (result isCollection
+			ifTrue: [ result class name, '(', result size printString, ')' ]
+			ifFalse: [ result ])].
 	startTime ifNotNil:
 		[ attributes add: #Started -> startTime ].
 	endTime ifNotNil:
@@ -303,6 +307,18 @@ GtRrTask >> summaryAttributes [
 		add: #ID -> taskId;
 		add: 'Worker Attributes' -> workerAttributes.
 	^ attributes
+]
+
+{ #category : #accessing }
+GtRrTask >> summaryString [
+
+	^ String streamContents: [ :stream |
+		stream << 'Task Summary:'; cr.
+		self summaryAttributes do: [ :assoc |
+			stream
+				<< (assoc key padRightTo: 30);
+				<< (assoc value printString padLeftTo: 30);
+				cr ] ]
 ]
 
 { #category : #accessing }
