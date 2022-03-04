@@ -180,19 +180,6 @@ GtRrLocalManagerStartupAndShutdown >> signalWatchdog [
 	watchdogSemaphore signal.
 ]
 
-{ #category : #'startup - shutdown' }
-GtRrLocalManagerStartupAndShutdown >> startup [ 
-
-	self assert: processes isEmpty.
-	self assert: self isRunning not.
-	super startup.
-
-	poolSize timesRepeat: 
-		[ processes add: self newWorkerLocalProcess ].
-	self startWatchDog.
-
-]
-
 { #category : #private }
 GtRrLocalManagerStartupAndShutdown >> startWatchDog [
 
@@ -210,6 +197,19 @@ GtRrLocalManagerStartupAndShutdown >> startWatchDog [
 				newWorker: process) ].
 		 ] ] forkNamed:
 			'GtRemoteRunner local watch dog'
+]
+
+{ #category : #'startup - shutdown' }
+GtRrLocalManagerStartupAndShutdown >> startup [ 
+
+	self assert: processes isEmpty.
+	self assert: self isRunning not.
+	super startup.
+
+	poolSize timesRepeat: 
+		[ processes add: self newWorkerLocalProcess ].
+	self startWatchDog.
+
 ]
 
 { #category : #ui }
