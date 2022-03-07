@@ -18,7 +18,7 @@ Class {
 { #category : #accessing }
 GtRrWorker class >> commandLine [
 	<commandline>
-	| worker readMonitor |
+	| worker |
 
 	^ self commandLineCommand meaning: [ :args | 
 		  | logger serverSocketAddress |
@@ -40,7 +40,6 @@ GtRrWorker class >> commandLine [
 				  put: (arg at: #value) value ].
 		  StringSignal emit: 'Running'.
 		  worker start.
-		  readMonitor := GtLwWindowsSocketReadMonitor new start.
 		  "Hibernate until the process exits"
 		  Semaphore new wait ]
 ]
@@ -215,7 +214,7 @@ GtRrWorker >> commandTerminateTaskContextId: taskContextId [
 				emit.
 			canTerminate := false. ] ].
 	canTerminate ifTrue: 
-		[ currentTaskExecution terminateWithReason: 'received TerminateCurrentTask from RemoteRunner' ] ]
+		[ currentTaskExecution cancelWithReason: 'received TerminateCurrentTask from RemoteRunner' ] ]
 			ensure: [ Processor activeProcess priority: priority ].
 	^ canTerminate
 ]
@@ -385,7 +384,9 @@ GtRrWorker >> taskFailed: aTask with: anError [
 					trace: anError stackString));
 		  sendAndWait:
 			  'GtAssignedRemoteRunner taskFailed: taskContextId with: (LeJsonV4 uniqueInstance deserialize: errorDetails readStream). true'.
-	GtRrWorkerResponseSentAnnouncement new emit.
+	GtRrWorkerResponseSentAnnouncement new 
+		task: aTask;
+		emit.
 ]
 
 { #category : #accessing }

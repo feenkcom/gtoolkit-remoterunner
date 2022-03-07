@@ -18,9 +18,15 @@ GtRrWorkerTaskContext class >> leJsonV4Name [
 	^ #workerTaskContext
 ]
 
+{ #category : #running }
+GtRrWorkerTaskContext >> evaluateOn: anExecution [
+
+	^ self value
+]
+
 { #category : #executing }
 GtRrWorkerTaskContext >> futureTaskExecutionFor: aRunner [
-	^ self configureTaskExecution: BlTktFutureExecution new with: aRunner
+	^ self configureTaskExecution: GtRrFutureTimeoutableTaskExecution new with: aRunner
 ]
 
 { #category : #accessing }
@@ -45,6 +51,12 @@ GtRrWorkerTaskContext >> taskContextId [
 GtRrWorkerTaskContext >> taskContextId: anObject [
 
 	taskContextId := anObject
+]
+
+{ #category : #accessing }
+GtRrWorkerTaskContext >> taskId [
+
+	^ task taskId
 ]
 
 { #category : #accessing }

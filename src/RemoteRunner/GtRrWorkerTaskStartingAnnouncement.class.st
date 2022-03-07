@@ -8,5 +8,5 @@ Class {
 GtRrWorkerTaskStartingAnnouncement >> printOneLineContentsOn: stream [
 
 	task ifNil: [ ^ self ].
-	stream print: task
+	stream print: task taskId
 ]

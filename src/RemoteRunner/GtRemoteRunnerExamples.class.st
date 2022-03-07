@@ -340,6 +340,7 @@ GtRemoteRunnerExamples >> simpleTask [
 	times := OrderedCollection new.
 	remoteRunner := GtRemoteRunner new port: 7091.
 	remoteRunner managerStartupAndShutdown poolSize: 1.
+	remoteRunner startLogging.
 	remoteRunner start.
 	[ 
 	completingTask := GtRrScriptTask script: '#done'.
@@ -579,7 +580,6 @@ GtRemoteRunnerExamples >> timeoutTask [
 	"Demonstrate terminating a task due to it timing out"
 	<gtExample>
 	<noTest>
-	"This is a copy of timeoutWorker, waiting on proper task termination to be integrated"
 	| remoteRunner job completingTask timeoutTask taskFailedCount taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount times taskFailedSemaphore |
 
 	jobStartedCount := jobCompletedCount := taskStartedCount := taskCompletedCount := taskFailedCount := 0.
@@ -590,6 +590,7 @@ GtRemoteRunnerExamples >> timeoutTask [
 	remoteRunner managerStartupAndShutdown poolSize: 1.
 	self assert: remoteRunner jobTimeout > 1 minute.
 	self assert: remoteRunner workerTimeout > 1 minute.
+	remoteRunner startLogging.
 	remoteRunner start.
 	[ 
 	"Create a task that never completes"
@@ -638,7 +639,7 @@ GtRemoteRunnerExamples >> timeoutTask [
 	self assert: taskStartedCount equals: 2.
 	self assert: job state equals: #completed.
 	self assert: job hasErrors.
-	self assert: (times collect: #key) asArray equals: #(0 1 2 1 3 4).
+	self assert: (times collect: #key) asBag equals: #(0 1 2 1 3 4) asBag.
 	] ensure: [ remoteRunner stop ].
 
 	^ job
@@ -690,11 +691,7 @@ GtRemoteRunnerExamples >> timeoutWorker [
 			times add: 2 -> DateAndTime now.
 			taskFailedSemaphore signal. ].
 	remoteRunner submitJob: job.
-	"When the task has failed, trigger the watchdog to start a new worker, which will run the second task"
 	taskFailedSemaphore wait.
-	[ "Give the process time to die and be registered by the subprocess"
-		2 seconds wait.
-		remoteRunner managerStartupAndShutdown signalWatchdog ] fork.
 	jobSemaphore wait.
 
 	self assert: remoteRunner currentlyExecutingJobs size equals: 0.
@@ -707,6 +704,8 @@ GtRemoteRunnerExamples >> timeoutWorker [
 	self assert: taskStartedCount equals: 2.
 	self assert: job state equals: #completed.
 	self assert: job hasErrors.
+	self assert: timeoutTask errorDetails errorMessage equals: 'Worker exceeded time limit'.
+	self deny: completingTask hasErrors.
 	self assert: (times collect: #key) asArray equals: #(0 1 2 1 3 4).
 	] ensure: [ remoteRunner stop ].
 
