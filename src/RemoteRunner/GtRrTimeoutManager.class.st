@@ -90,8 +90,7 @@ GtRrTimeoutManager >> scheduleCheckTimeouts [
 	"Schedule a timeout check to be run"
 	| future |
 
-	future := BlTktWorkerProvider nonUIMultiPool future:
-		[ self checkTimeouts ] asBlTktCommand.
+	future := [ self checkTimeouts ] future.
 	future onFailureDo: [ :anError |
 		anError freeze.
 		[ self error: anError printString ] fork ]

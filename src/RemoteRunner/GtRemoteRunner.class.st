@@ -564,7 +564,8 @@ GtRemoteRunner >> privateTaskFailed: aTaskContextId with: anGtRrTaskErrorDetails
 	Must be called within sharedAccess"
 	| taskContext |
 
-	taskContext := currentlyExecutingTasks removeKey: aTaskContextId.
+	taskContext := currentlyExecutingTasks removeKey: aTaskContextId ifAbsent: [ nil ].
+	taskContext ifNil: [ ^ self ].
 	taskContext errorDetails: anGtRrTaskErrorDetails.
 	taskContext markTaskCompleted.
 	self announceAndLog: (GtRrTaskCompletedAnnouncement task: taskContext).

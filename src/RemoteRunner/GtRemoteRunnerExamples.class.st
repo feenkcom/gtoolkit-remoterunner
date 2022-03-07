@@ -658,6 +658,7 @@ GtRemoteRunnerExamples >> timeoutWorker [
 	remoteRunner := GtRemoteRunner new port: 7085.
 	remoteRunner managerStartupAndShutdown poolSize: 1.
 	remoteRunner workerTimeout: 3 seconds.
+	remoteRunner startLogging.
 	self assert: remoteRunner jobTimeout > 1 minute.
 	remoteRunner start.
 	[ 
