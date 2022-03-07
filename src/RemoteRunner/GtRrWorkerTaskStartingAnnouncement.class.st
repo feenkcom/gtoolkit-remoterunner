@@ -1,11 +1,11 @@
 Class {
-	#name : #GtRrWorkerTaskStartedAnnouncement,
+	#name : #GtRrWorkerTaskStartingAnnouncement,
 	#superclass : #GtRrWorkerTaskAnnouncement,
 	#category : #'RemoteRunner-Announcements'
 }
 
 { #category : #printing }
-GtRrWorkerTaskStartedAnnouncement >> printOneLineContentsOn: stream [
+GtRrWorkerTaskStartingAnnouncement >> printOneLineContentsOn: stream [
 
 	task ifNil: [ ^ self ].
 	stream print: task

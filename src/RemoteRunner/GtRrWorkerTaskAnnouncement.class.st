@@ -10,7 +10,7 @@ Class {
 { #category : #printing }
 GtRrWorkerTaskAnnouncement >> printOneLineContentsOn: stream [
 
-	stream print: task
+	stream print: task taskId
 ]
 
 { #category : #accessing }

@@ -322,9 +322,10 @@ GtRrWorker >> start [
 GtRrWorker >> stepService [
 	| task |
 
+	GtRrWorkerWaitForTaskAnnouncement new emit.
 	task := self nextTask.
 
-	GtRrWorkerTaskStartedAnnouncement new
+	GtRrWorkerTaskStartingAnnouncement new
 		task: task;
 		emit.
 	currentTaskExecution := task asTask futureTaskExecutionFor: taskRunner.
@@ -359,34 +360,32 @@ GtRrWorker >> stop [
 GtRrWorker >> taskDone: aTask with: anObject [
 	| serializedResult |
 
-	StringSignal emit: ('done {1} with {2}' format: { 
-				 aTask.
-				 anObject }).
 	serializedResult := [ LeJsonV4 uniqueInstance serialize: anObject ]
 		on: Error 
 		do: [ :ex | ^ self taskFailed: aTask with: ex ].
-	^ application newCommandFactory
+	application newCommandFactory
 		  bindingAt: #taskContextId put: aTask taskContextId;
 		  bindingAt: #result
 		  put: serializedResult;
 		  sendAndWait:
-			  'GtAssignedRemoteRunner taskDone: taskContextId with: (LeJsonV4 uniqueInstance deserialize: result readStream). true'
+			  'GtAssignedRemoteRunner taskDone: taskContextId with: (LeJsonV4 uniqueInstance deserialize: result readStream). true'.
+	GtRrWorkerResponseSentAnnouncement new 
+		task: aTask;
+		emit.
 ]
 
 { #category : #accessing }
 GtRrWorker >> taskFailed: aTask with: anError [
 
-	StringSignal emit: ('failed {1} with {2}' format: { 
-				 aTask.
-				 anError }).
-	^ application newCommandFactory
+	application newCommandFactory
 		  bindingAt: #taskContextId put: aTask taskContextId;
 		  bindingAt: #errorDetails put: (LeJsonV4 uniqueInstance serialize: 
 				(GtRrErrorDetails new
 					errorMessage: anError messageText;
 					trace: anError stackString));
 		  sendAndWait:
-			  'GtAssignedRemoteRunner taskFailed: taskContextId with: (LeJsonV4 uniqueInstance deserialize: errorDetails readStream). true'
+			  'GtAssignedRemoteRunner taskFailed: taskContextId with: (LeJsonV4 uniqueInstance deserialize: errorDetails readStream). true'.
+	GtRrWorkerResponseSentAnnouncement new emit.
 ]
 
 { #category : #accessing }

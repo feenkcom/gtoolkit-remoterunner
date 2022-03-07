@@ -24,7 +24,7 @@ GtRrWorkerTaskCompletedAnnouncement >> printOneLineContentsOn: stream [
 
 	task ifNil: [ ^ self ].
 	stream 
-		print: task taskContextId;
+		print: task taskId;
 		<< ': ';
 		print: message
 ]
