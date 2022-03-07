@@ -18,7 +18,7 @@ Class {
 { #category : #accessing }
 GtRrWorker class >> commandLine [
 	<commandline>
-	| worker readMonitor |
+	| worker |
 
 	^ self commandLineCommand meaning: [ :args | 
 		  | logger serverSocketAddress |
@@ -40,7 +40,6 @@ GtRrWorker class >> commandLine [
 				  put: (arg at: #value) value ].
 		  StringSignal emit: 'Running'.
 		  worker start.
-		  readMonitor := GtLwWindowsSocketReadMonitor new start.
 		  "Hibernate until the process exits"
 		  Semaphore new wait ]
 ]
