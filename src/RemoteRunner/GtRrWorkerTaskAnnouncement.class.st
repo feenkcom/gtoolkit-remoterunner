@@ -10,6 +10,7 @@ Class {
 { #category : #printing }
 GtRrWorkerTaskAnnouncement >> printOneLineContentsOn: stream [
 
+	task ifNil: [ ^ super printOneLineContentsOn: stream ].
 	stream print: task taskId
 ]
 
