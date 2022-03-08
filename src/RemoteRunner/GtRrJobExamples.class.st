@@ -43,20 +43,20 @@ GtRrJobExamples >> jobTimeout [
 	job jobTimeout: runner jobTimeout + 1 minute.
 	self assert: taskContext jobTimeout equals: job jobTimeout.
 	self assert: jobContext jobTimeout equals: job jobTimeout.
-
+	^ job
 ]
 
 { #category : #examples }
 GtRrJobExamples >> testJobClassNames [
+
 	"Confirm that GtRrTestsJob>>classNames: works as expected"
+
 	<gtExample>
 	| job |
-
-	job := GtRrTestsJob new
-		classNames: #(GtRrSampleTest).
+	job := GtRrTestsJob new classNames: #( GtRrSampleTest ).
 
 	self confirmAllTests: job allItems.
-
+	^ job
 ]
 
 { #category : #examples }
@@ -69,7 +69,7 @@ GtRrJobExamples >> testJobPackageNames [
 		packageNames: #(RemoteRunner).
 
 	self confirmAllTests: job allItems.
-
+	^ job
 ]
 
 { #category : #examples }
@@ -87,5 +87,5 @@ GtRrJobExamples >> testJobTestNames [
 			}.
 
 	self confirmAllTests: job allItems.
-
+	^ job
 ]

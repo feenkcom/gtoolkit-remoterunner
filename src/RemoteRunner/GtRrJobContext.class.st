@@ -44,6 +44,20 @@ GtRrJobContext >> contextTimeoutTime [
 	^ self jobTimeoutTime
 ]
 
+{ #category : #accessing }
+GtRrJobContext >> gtActionCancelFor: anAction [
+
+	<gtAction>
+	(self job state = #started) ifFalse: [ 
+		^ anAction ].
+	^ anAction button
+		  label: 'Cancel';
+		  priority: 3;
+		  action: [ :aButton | 
+		  	remoteRunner terminateJobId: job id.
+			  aButton phlow fireUpdateWish ]
+]
+
 { #category : #ui }
 GtRrJobContext >> gtErrorsFor: aView [
 	<gtView>
