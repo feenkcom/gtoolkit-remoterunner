@@ -58,6 +58,20 @@ GtRrJobContext >> gtActionCancelFor: anAction [
 			  aButton phlow fireUpdateWish ]
 ]
 
+{ #category : #accessing }
+GtRrJobContext >> gtActionStartFor: anAction [
+
+	<gtAction>
+	(self job state = #notStarted) ifFalsee: [ 
+		^ anAction ].
+	^ anAction button
+		  label: 'Start';
+		  priority: 2;
+		  action: [ :aButton | 
+		  	remoteRunner submitJob: job.
+			  aButton phlow fireUpdateWish ]
+]
+
 { #category : #ui }
 GtRrJobContext >> gtErrorsFor: aView [
 	<gtView>
