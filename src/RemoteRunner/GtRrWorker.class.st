@@ -214,7 +214,7 @@ GtRrWorker >> commandTerminateTaskContextId: taskContextId [
 				emit.
 			canTerminate := false. ] ].
 	canTerminate ifTrue: 
-		[ currentTaskExecution terminateWithReason: 'received TerminateCurrentTask from RemoteRunner' ] ]
+		[ currentTaskExecution cancelWithReason: 'received TerminateCurrentTask from RemoteRunner' ] ]
 			ensure: [ Processor activeProcess priority: priority ].
 	^ canTerminate
 ]
@@ -384,7 +384,9 @@ GtRrWorker >> taskFailed: aTask with: anError [
 					trace: anError stackString));
 		  sendAndWait:
 			  'GtAssignedRemoteRunner taskFailed: taskContextId with: (LeJsonV4 uniqueInstance deserialize: errorDetails readStream). true'.
-	GtRrWorkerResponseSentAnnouncement new emit.
+	GtRrWorkerResponseSentAnnouncement new 
+		task: aTask;
+		emit.
 ]
 
 { #category : #accessing }
