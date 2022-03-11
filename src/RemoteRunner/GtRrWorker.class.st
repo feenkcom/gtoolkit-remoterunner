@@ -10,7 +10,8 @@ Class {
 		'application',
 		'taskRunner',
 		'currentTaskExecution',
-		'serviceName'
+		'serviceName',
+		'pingServer'
 	],
 	#category : #'RemoteRunner-Worker'
 }
@@ -77,10 +78,26 @@ GtRrWorker class >> newPharoApplication: aString [
 ]
 
 { #category : #'instance creation' }
+GtRrWorker class >> newPharoLinkServer: aString [
+
+	^ PharoLinkServer new
+		  listenPort: aString;
+		  yourself
+]
+
+{ #category : #'instance creation' }
 GtRrWorker class >> serverSocketAddress: aString [
 
 	^ self new
 		application: (self newPharoApplication: aString)
+]
+
+{ #category : #'instance creation' }
+GtRrWorker class >> serverSocketAddress: aString pingSocketAddress: anotherString [
+
+	^ self new
+		application: (self newPharoApplication: aString);
+		pingServer: (self newPharoLinkServer: anotherString)
 ]
 
 { #category : #observer }
@@ -278,6 +295,11 @@ GtRrWorker >> nextTask [
 
 ]
 
+{ #category : #accessing }
+GtRrWorker >> pingServer: aServer [
+	pingServer := aServer
+]
+
 { #category : #private }
 GtRrWorker >> registerWithRunner [
 	"Register the receiver with the remote runner"
@@ -312,6 +334,7 @@ GtRrWorker >> stackString [
 GtRrWorker >> start [
 
 	application start.
+	pingServer ifNotNil: [ pingServer start ].
 	self registerWithRunner.
 	self addObserver.
 	super start
@@ -352,7 +375,7 @@ GtRrWorker >> stop [
 
 	super stop.
 	application stop.
-
+	pingServer ifNotNil: [ pingServer stop ]
 ]
 
 { #category : #accessing }
