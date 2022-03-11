@@ -6,24 +6,32 @@ Class {
 		'serverAddress',
 		'lastPing',
 		'timeout',
-		'process'
+		'process',
+		'pingAddress'
 	],
 	#category : #'RemoteRunner-Worker'
 }
 
 { #category : #accessing }
 GtRrWatchdogWorker >> buildStartScript [
-
 	^ '| worker |
-		worker := GtRRWorker serverSocketAddress: ''{{1}}''.
+		worker := GtRRWorker serverSocketAddress: ''{{1}}''; pingSocketAddress: ''{{2}}''.
 		worker start.
 		
-		Semaphore new wait.' format: { serverAddress }
+		Semaphore new wait.' format: { serverAddress . pingAddress }
 ]
 
 { #category : #accessing }
 GtRrWatchdogWorker >> defaultTimeout [
 	^ 60 seconds
+]
+
+{ #category : #accessing }
+GtRrWatchdogWorker >> ping [
+
+	| aMessage |
+	aMessage := Message selector: #commandPing.
+	"TODO: send message to pingAddress"
 ]
 
 { #category : #accessing }
@@ -35,9 +43,9 @@ GtRrWatchdogWorker >> pingAndCleanupIfNecessary [
 	(DateAndTime now - lastPing > self timeout) ifTrue: [
 		process kill.
 		^ self start.
-	]
+	].
 	
-	"TODO: ping"
+	self ping
 ]
 
 { #category : #accessing }
@@ -52,6 +60,8 @@ GtRrWatchdogWorker >> start [
 	serverAddress ifNil: [ 
 		self error: 'I need a server address to start.' ].
 
+	pingAddress := PharoLinkPortAllocator next.
+
 	startScript := self buildStartScript.
 
 
@@ -63,7 +73,9 @@ GtRrWatchdogWorker >> start [
 				           'eval'.
 				           '--no-quit'.
 				           startScript };
-		           spawm.
+				   "pipeStdin;
+				   pipdeStdout;"
+		           spawn.
 
 	lastPing := DateAndTime now
 ]
