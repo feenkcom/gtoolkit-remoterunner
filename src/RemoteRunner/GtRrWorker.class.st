@@ -334,7 +334,7 @@ GtRrWorker >> stackString [
 GtRrWorker >> start [
 
 	application start.
-	pingServer start.
+	pingServer ifNotNil: [ pingServer start ].
 	self registerWithRunner.
 	self addObserver.
 	super start
@@ -375,7 +375,7 @@ GtRrWorker >> stop [
 
 	super stop.
 	application stop.
-
+	pingServer ifNotNil: [ pingServer stop ]
 ]
 
 { #category : #accessing }
