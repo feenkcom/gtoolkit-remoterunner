@@ -5,7 +5,7 @@ Class {
 		'workers',
 		'serverSocketAddress'
 	],
-	#category : #'RemoteRunner-Worker'
+	#category : #'RemoteRunner-Watchdog'
 }
 
 { #category : #'instance creation' }

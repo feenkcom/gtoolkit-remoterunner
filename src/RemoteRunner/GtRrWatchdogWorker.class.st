@@ -9,7 +9,7 @@ Class {
 		'process',
 		'pingAddress'
 	],
-	#category : #'RemoteRunner-Worker'
+	#category : #'RemoteRunner-Watchdog'
 }
 
 { #category : #accessing }
