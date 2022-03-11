@@ -5,10 +5,21 @@ Class {
 		'pid',
 		'serverAddress',
 		'lastPing',
-		'timeout'
+		'timeout',
+		'process'
 	],
 	#category : #'RemoteRunner-Worker'
 }
+
+{ #category : #accessing }
+GtRrWatchdogWorker >> buildStartScript [
+
+	^ '| worker |
+		worker := GtRRWorker serverSocketAddress: ''{{1}}''.
+		worker start.
+		
+		Semaphore new wait.' format: { serverAddress }
+]
 
 { #category : #accessing }
 GtRrWatchdogWorker >> defaultTimeout [
@@ -17,14 +28,16 @@ GtRrWatchdogWorker >> defaultTimeout [
 
 { #category : #accessing }
 GtRrWatchdogWorker >> pingAndCleanupIfNecessary [
-	"TODO: lookup PID and see whether the process is still running"
-	
-	"TODO: ping"
+	process status isExitedWithCode ifTrue: [
+		^ self start.
+	].
 	
 	(DateAndTime now - lastPing > self timeout) ifTrue: [
-	"TODO: kill it with fire"
+		process kill.
+		^ self start.
 	]
 	
+	"TODO: ping"
 ]
 
 { #category : #accessing }
@@ -39,19 +52,20 @@ GtRrWatchdogWorker >> start [
 	serverAddress ifNil: [ 
 		self error: 'I need a server address to start.' ].
 
-	startScript := '
-		| worker |
-		worker := GtRRWorker serverSocketAddress: ''{{1}}''.
-		worker start.
-		
-		Semaphore new wait.' format: { serverAddress }.
+	startScript := self buildStartScript.
 
 
-	"TODO: and then we execute this and save the pid"
-	Smalltalk vm fileName , ' --headless ' , Smalltalk image imagePath
-	, '" eval --no-quit "' , startScript , '"'.
-	
-	lastPing := DateAndTime now.
+	process := GtExternalProcessBuilder new
+		           command: Smalltalk vm fileName;
+		           args: { 
+				           '--headless'.
+				           Smalltalk image imagePath.
+				           'eval'.
+				           '--no-quit'.
+				           startScript };
+		           spawm.
+
+	lastPing := DateAndTime now
 ]
 
 { #category : #accessing }
