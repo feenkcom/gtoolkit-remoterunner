@@ -7,18 +7,18 @@ Class {
 		'lastPing',
 		'timeout',
 		'process',
-		'pingAddress'
+		'application'
 	],
 	#category : #'RemoteRunner-Watchdog'
 }
 
 { #category : #accessing }
-GtRrWatchdogWorker >> buildStartScript [
+GtRrWatchdogWorker >> buildStartScript: aPingAddress [
 	^ '| worker |
 		worker := GtRRWorker serverSocketAddress: ''{{1}}''; pingSocketAddress: ''{{2}}''.
 		worker start.
 		
-		Semaphore new wait.' format: { serverAddress . pingAddress }
+		Semaphore new wait.' format: { serverAddress . aPingAddress }
 ]
 
 { #category : #accessing }
@@ -29,9 +29,9 @@ GtRrWatchdogWorker >> defaultTimeout [
 { #category : #accessing }
 GtRrWatchdogWorker >> ping [
 
-	| aMessage |
-	aMessage := Message selector: #commandPing.
-	"TODO: send message to pingAddress"
+	[ 
+	(application newCommandFactory sendAndWait: 'worker commandPing')
+	= #ping ifTrue: [ lastPing := DateAndTime now ] ] asAsyncFuture await
 ]
 
 { #category : #accessing }
@@ -56,14 +56,19 @@ GtRrWatchdogWorker >> serverAddress: aString [
 { #category : #accessing }
 GtRrWatchdogWorker >> start [
 
-	| startScript |
+	| startScript aPingAddress |
 	serverAddress ifNil: [ 
 		self error: 'I need a server address to start.' ].
 
-	pingAddress := PharoLinkPortAllocator next.
+	aPingAddress := PharoLinkPortAllocator next.
+	application := PharoLinkApplication newWith:
+		  (PharoLinkApplication defaultSettings
+			   serverProcessClass: LanguageLinkManualProcess;
+			   serverSocketAddress: (LanguageLinkSocketAddress from: aPingAddress printString);
+			   debugMode: true;
+			   yourself).
 
-	startScript := self buildStartScript.
-
+	startScript := self buildStartScript: aPingAddress.
 
 	process := GtExternalProcessBuilder new
 		           command: Smalltalk vm fileName;
@@ -77,7 +82,9 @@ GtRrWatchdogWorker >> start [
 				   pipdeStdout;"
 		           spawn.
 
-	lastPing := DateAndTime now
+	lastPing := DateAndTime now.
+	
+	application start.
 ]
 
 { #category : #accessing }
