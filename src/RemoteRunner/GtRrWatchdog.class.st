@@ -3,7 +3,8 @@ Class {
 	#superclass : #TKTService,
 	#instVars : [
 		'workers',
-		'serverSocketAddress'
+		'serverSocketAddress',
+		'future'
 	],
 	#category : #'RemoteRunner-Watchdog'
 }
@@ -40,7 +41,7 @@ GtRrWatchdog >> pingAll [
 { #category : #accessing }
 GtRrWatchdog >> schedulePingAll [
 
-	[ 
+	future := [ 
 	self pingAll.
 	self schedulePingAll ] asAsyncFuture delayed: 1 second await
 ]
@@ -55,4 +56,11 @@ GtRrWatchdog >> start [
 	workers do: [ :aWorker | aWorker start ].
 	
 	self schedulePingAll.
+]
+
+{ #category : #accessing }
+GtRrWatchdog >> stop [
+	workers do: [:aWorker | aWorker stop ].
+	
+	future cancelHard
 ]

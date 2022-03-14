@@ -88,6 +88,14 @@ GtRrWatchdogWorker >> start [
 ]
 
 { #category : #accessing }
+GtRrWatchdogWorker >> stop [
+
+	process status isExitedWithCode ifFalse: [ 
+		process kill.
+		process := nil ]
+]
+
+{ #category : #accessing }
 GtRrWatchdogWorker >> timeout [
 	^ timeout ifNil: [ timeout := self defaultTimeout ].
 ]
