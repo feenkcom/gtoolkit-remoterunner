@@ -15,7 +15,7 @@ Class {
 { #category : #accessing }
 GtRrWatchdogWorker >> buildStartScript: aPingAddress [
 	^ '| worker |
-		worker := GtRRWorker serverSocketAddress: ''{{1}}''; pingSocketAddress: ''{{2}}''.
+		worker := GtRRWorker serverSocketAddress: ''{1}''; pingSocketAddress: ''{2}''.
 		worker start.
 		
 		Semaphore new wait.' format: { serverAddress . aPingAddress }
