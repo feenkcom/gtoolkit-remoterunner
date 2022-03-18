@@ -173,6 +173,12 @@ GtRrTask >> isFinished [
 	^ endTime isNotNil
 ]
 
+{ #category : #testing }
+GtRrTask >> isNotStarted [
+
+	^ state = #notStarted
+]
+
 { #category : #running }
 GtRrTask >> markTaskCancelled [
 	"Mark the receiver cancelled.
@@ -365,4 +371,10 @@ GtRrTask >> workerAttributes [
 GtRrTask >> workerAttributes: anObject [
 
 	workerAttributes := anObject
+]
+
+{ #category : #accessing }
+GtRrTask >> workerId [
+	^ self workerAttributes ifNotNil: [ :attributes |
+		attributes at: 'id' ifAbsent: [ nil ] ]
 ]

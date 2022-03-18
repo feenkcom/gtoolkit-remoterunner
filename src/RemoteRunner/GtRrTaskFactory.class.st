@@ -17,15 +17,34 @@ GtRrTaskFactory >> classWithName: aString [
 ]
 
 { #category : #'gt - extensions' }
+GtRrTaskFactory >> gtViewTasksByWorkerFor: aView [
+	<gtView>
+	
+	^ aView columnedList
+		title: 'Executed Tasks (by Worker)';
+		priority: 20; 
+		items: [ 
+			self startedTasksGroupedByWorker associations  ];
+		column: 'Id' text: [ :assoc | assoc key ] width:300;
+		column: 'Task' text: [ :assoc | assoc value size ];
+		column: 'Duration' text: [ :assoc | 
+			((assoc value 
+				collect: [ :aTask | aTask duration ])
+				reject: [ :aDuration | aDuration isNil ]) sum ];
+		send: [ :assoc | assoc value ]
+]
+
+{ #category : #'gt - extensions' }
 GtRrTaskFactory >> gtViewTasksFor: aView [
 	<gtView>
 	^ aView columnedList
 		title: 'Tasks';
 		priority: 10; 
-		items: [ stream contents ];
+		items: [ self tasks ];
 		column: 'Type' text: [ :aTask | aTask className ] width: 200;
 		column: 'Task' text: [ :aTask | aTask supplementalDescription ];
-		column: 'Duration' text: [ :aTask | aTask duration ] width: 150
+		column: 'Duration' text: [ :aTask | 
+			aTask duration ifNil: [ '-' ] ] width: 150
 ]
 
 { #category : #initialization }
@@ -45,6 +64,15 @@ GtRrTaskFactory >> job [
 GtRrTaskFactory >> reset [
 
 	stream := Array new writeStream.
+]
+
+{ #category : #'accessing - grouping' }
+GtRrTaskFactory >> startedTasksGroupedByWorker [
+	^ (self tasks
+		reject: [ :aTask |
+			aTask isNotStarted ])
+	 	groupedBy: [ :aTask |
+			aTask workerId ]
 ]
 
 { #category : #accessing }
