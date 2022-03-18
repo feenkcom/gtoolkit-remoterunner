@@ -62,7 +62,7 @@ GtRrJobContext >> gtActionCancelFor: anAction [
 GtRrJobContext >> gtActionStartFor: anAction [
 
 	<gtAction>
-	(self job state = #notStarted) ifFalsee: [ 
+	(self job state = #notStarted) ifFalse: [ 
 		^ anAction ].
 	^ anAction button
 		  label: 'Start';
