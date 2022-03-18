@@ -55,6 +55,13 @@ GtRrTask >> constraint: anObject [
 ]
 
 { #category : #accessing }
+GtRrTask >> duration [
+	^ (startTime isNotNil and: [ endTime isNotNil ]) 
+		ifTrue: [ endTime - startTime ]
+		ifFalse: [ nil ]
+]
+
+{ #category : #accessing }
 GtRrTask >> endTime [
 
 	^ endTime
@@ -282,27 +289,23 @@ GtRrTask >> state: aSymbol [
 
 { #category : #ui }
 GtRrTask >> summaryAttributes [
-	"Answer a collection of key/value attributes that can simply be listed as a summary of the receiver"
-	| attributes duration |
 
+	"Answer a collection of key/value attributes that can simply be listed as a summary of the receiver"
+
+	| attributes duration |
 	attributes := OrderedCollection new.
-	(startTime isNotNil and: [ endTime isNotNil ]) ifTrue:
-		[ duration := endTime - startTime ].
+	duration := self duration.
 	attributes add: #State -> self state.
-	self hasErrors ifTrue:
-		[ attributes add: #Error -> errorDetails ].
-	result ifNotNil:
-		[ attributes add: #Result -> (result isCollection
-			ifTrue: [ result class name, '(', result size printString, ')' ]
-			ifFalse: [ result ])].
-	startTime ifNotNil:
-		[ attributes add: #Started -> startTime ].
-	endTime ifNotNil:
-		[ attributes add: #Ended -> endTime ].
-	duration ifNotNil:
-		[ attributes add: #Duration -> duration ].
-	taskTimeout ifNotNil:
-		[ attributes add: #Timeout -> taskTimeout ].
+	self hasErrors ifTrue: [ attributes add: #Error -> errorDetails ].
+	result ifNotNil: [ 
+		attributes add: #Result -> (result isCollection
+				 ifTrue: [ 
+				 result class name , '(' , result size printString , ')' ]
+				 ifFalse: [ result ]) ].
+	startTime ifNotNil: [ attributes add: #Started -> startTime ].
+	endTime ifNotNil: [ attributes add: #Ended -> endTime ].
+	duration ifNotNil: [ attributes add: #Duration -> duration ].
+	taskTimeout ifNotNil: [ attributes add: #Timeout -> taskTimeout ].
 	attributes
 		add: #ID -> taskId;
 		add: 'Worker Attributes' -> workerAttributes.
@@ -319,6 +322,12 @@ GtRrTask >> summaryString [
 				<< (assoc key padRightTo: 30);
 				<< (assoc value printString padLeftTo: 30);
 				cr ] ]
+]
+
+{ #category : #printing }
+GtRrTask >> supplementalDescription [
+	^ String streamContents: [ :aStream |
+		self printSupplementalOn: aStream ]
 ]
 
 { #category : #accessing }

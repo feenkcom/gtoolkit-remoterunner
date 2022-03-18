@@ -16,6 +16,18 @@ GtRrTaskFactory >> classWithName: aString [
 		ifFalse: [ self class environment at: aString asSymbol ].
 ]
 
+{ #category : #'gt - extensions' }
+GtRrTaskFactory >> gtViewTasksFor: aView [
+	<gtView>
+	^ aView columnedList
+		title: 'Tasks';
+		priority: 10; 
+		items: [ stream contents ];
+		column: 'Type' text: [ :aTask | aTask className ] width: 200;
+		column: 'Task' text: [ :aTask | aTask supplementalDescription ];
+		column: 'Duration' text: [ :aTask | aTask duration ] width: 150
+]
+
 { #category : #initialization }
 GtRrTaskFactory >> initialize [
 
