@@ -31,7 +31,8 @@ GtRrTaskFactory >> gtViewTasksByWorkerFor: aView [
 			((assoc value 
 				collect: [ :aTask | aTask duration ])
 				reject: [ :aDuration | aDuration isNil ]) sum ];
-		send: [ :assoc | assoc value ]
+		send: [ :assoc | 
+			GtRrTasksGroup withAll: assoc value ]
 ]
 
 { #category : #'gt - extensions' }
