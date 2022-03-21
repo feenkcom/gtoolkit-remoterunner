@@ -6,19 +6,22 @@ Class {
 		'watchDog',
 		'watchdogSemaphore',
 		'processes',
-		'poolSize'
+		'workerCountCalculator'
 	],
 	#category : #'RemoteRunner-Runner'
 }
 
 { #category : #private }
-GtRrLocalManagerStartupAndShutdown >> addOrRemoveWorkers: oldSize [
+GtRrLocalManagerStartupAndShutdown >> addOrRemoveWorkers [
 	"Add or remove workers in the remote runner to reach the current pool size"
+	 | poolSize currentSize |
 
-	oldSize = poolSize ifTrue: [ ^ self ].
-	poolSize > oldSize 
-		ifTrue: [ self addWorkers: poolSize - oldSize ]
-		ifFalse: [ self removeWorkers: oldSize - poolSize ]
+	poolSize := self poolSize.
+	currentSize := processes size.
+	currentSize = poolSize ifTrue: [ ^ self ].
+	poolSize > currentSize 
+		ifTrue: [ self addWorkers: poolSize - currentSize ]
+		ifFalse: [ self removeWorkers: currentSize - poolSize ].
 ]
 
 { #category : #private }
@@ -74,7 +77,7 @@ GtRrLocalManagerStartupAndShutdown >> initialize [
 
 	super initialize.
 	autoRestart := true.
-	poolSize := 2.
+	workerCountCalculator := GtRrResourceWorkerCountCalculator new.
 	processes := OrderedCollection new.
 	watchdogSemaphore := Semaphore new.
 ]
@@ -119,21 +122,21 @@ GtRrLocalManagerStartupAndShutdown >> newWorkerLocalProcessArgumentsFor: someSet
 { #category : #accessing }
 GtRrLocalManagerStartupAndShutdown >> poolSize [
 
-	^ poolSize
+	^ workerCountCalculator workerCount
 ]
 
 { #category : #accessing }
 GtRrLocalManagerStartupAndShutdown >> poolSize: anInteger [
-	"Set the receiver's pool size.
-	Start new workers or disconnect existing workers as required."
+	"Set the receiver's pool size to the fixed value provided.
+	If the runner has been started, add new workers or disconnect existing workers as required."
 	| oldSize |
 
-	oldSize := poolSize ifNil: [ 0 ].
-	poolSize := anInteger.
-	oldSize = poolSize ifTrue: [ ^ self ].
+	oldSize := self poolSize.
+	workerCountCalculator := GtRrFixedWorkerCountCalculator workerCount: anInteger.
+	oldSize = self poolSize ifTrue: [ ^ self ].
 	remoteRunner isRunning ifTrue:
 		[ remoteRunner critical:
-			[ self addOrRemoveWorkers: oldSize ] ]
+			[ self addOrRemoveWorkers ] ]
 ]
 
 { #category : #accessing }
@@ -206,7 +209,7 @@ GtRrLocalManagerStartupAndShutdown >> startup [
 	self assert: self isRunning not.
 	super startup.
 
-	poolSize timesRepeat: 
+	self poolSize timesRepeat: 
 		[ processes add: self newWorkerLocalProcess ].
 	self startWatchDog.
 
