@@ -251,6 +251,12 @@ GtRrJob >> isFinished [
 	^ state == #completed
 ]
 
+{ #category : #testing }
+GtRrJob >> isStarted [
+
+	^ state == #started
+]
+
 { #category : #accessing }
 GtRrJob >> jobTimeout [
 	<return: #Duration>
@@ -275,6 +281,7 @@ GtRrJob >> markJobCancelled [
 { #category : #'private - running' }
 GtRrJob >> markJobCompleted [
 
+	self isFinished ifTrue: [ ^ self ].
 	endTime := DateAndTime now.
 	state := #completed.
 	self announce: (GtRrJobCompletedAnnouncement job: self).
@@ -284,6 +291,7 @@ GtRrJob >> markJobCompleted [
 { #category : #'private - running' }
 GtRrJob >> markJobStarted [
 
+	self isStarted ifTrue: [ ^ self ].
 	startTime := DateAndTime now.
 	state := #started.
 	self announce: (GtRrJobStartedAnnouncement job: self).
