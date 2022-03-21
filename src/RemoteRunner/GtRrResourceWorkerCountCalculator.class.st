@@ -83,7 +83,7 @@ GtRrResourceWorkerCountCalculator >> workerCountFromVmMemory: vmMemorySize cpuCo
 	| freeMemCount |
 
 	freeMemCount := (freeMem / vmMemorySize / memorySizeMultiplier) truncated.
-	^ ((minWorkers max: cpuCores)
-		min: freeMemCount)
-		min: maxWorkers.
+	minWorkers <= maxWorkers ifFalse: [ 
+		self error: 'minWorkers must be <= maxWorkers' ].
+	^ ((cpuCores min: freeMemCount) min: maxWorkers) max: minWorkers
 ]
