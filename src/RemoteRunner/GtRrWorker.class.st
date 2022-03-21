@@ -350,7 +350,9 @@ GtRrWorker >> stepService [
 	GtRrWorkerTaskStartingAnnouncement new
 		task: task;
 		emit.
-	currentTaskExecution := task asTask futureTaskExecutionFor: taskRunner.
+	currentTaskExecution := task asTask 
+		configureTaskExecution: GtRrFutureTimeoutableTaskExecution new 
+		with: taskRunner.
 	currentTaskExecution timeout: task taskTimeout.
 	taskRunner scheduleTaskExecution: currentTaskExecution.
 	currentTaskExecution future

@@ -303,9 +303,10 @@ GtRrJobContext >> terminateJob [
 	"Start the process of terminating the receiver.
 	This may be completed at a later time, after all the workers have terminated their tasks."
 
-	job markJobTerminating.
-	self taskContexts do: [ :taskContext |
-		self remoteRunner terminateTaskContextId: taskContext taskContextId ].
+	job isFinished ifFalse:
+		[ job markJobTerminating.
+		self taskContexts do: [ :taskContext |
+			self remoteRunner terminateTaskContextId: taskContext taskContextId ] ].
 	remoteRunner checkJobCompleted: self.
 ]
 
