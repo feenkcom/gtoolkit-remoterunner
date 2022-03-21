@@ -223,3 +223,15 @@ GtRrLocalManagerStartupAndShutdown >> summaryAttributes [
 		add: { #ProcessCount. self processCount. processes. };
 		yourself
 ]
+
+{ #category : #accessing }
+GtRrLocalManagerStartupAndShutdown >> workerCountCalculator [
+
+	^ workerCountCalculator
+]
+
+{ #category : #accessing }
+GtRrLocalManagerStartupAndShutdown >> workerCountCalculator: anObject [
+
+	workerCountCalculator := anObject
+]
