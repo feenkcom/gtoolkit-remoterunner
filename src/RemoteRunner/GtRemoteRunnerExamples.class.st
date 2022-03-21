@@ -521,11 +521,10 @@ GtRemoteRunnerExamples >> timeoutJob [
 	"Demonstrate terminating a job due to it timing out"
 	<gtExample>
 	<noTest>
-	| remoteRunner job tasks taskFailedCount taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount times |
+	| remoteRunner job tasks taskFailedCount taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount |
 
 	jobStartedCount := jobCompletedCount := taskStartedCount := taskCompletedCount := taskFailedCount := 0.
 	jobSemaphore := GtMutualExclusionSemaphore new.
-	times := OrderedCollection new.
 	remoteRunner := GtRemoteRunner new port: 7087.
 	remoteRunner start.
 	[ 
@@ -537,24 +536,18 @@ GtRemoteRunnerExamples >> timeoutJob [
 		jobTimeout: 5 seconds.
 	job
 		when: GtRrJobStartedAnnouncement do: 
-			[ jobStartedCount := jobStartedCount + 1.
-			times add: 0 -> DateAndTime now. ];
+			[ jobStartedCount := jobStartedCount + 1. ];
 		when: GtRrJobCompletedAnnouncement do: 
 			[ jobCompletedCount := jobCompletedCount + 1.
-			times add: 4 -> DateAndTime now.
 			jobSemaphore signal ];
 		when: GtRrJobCancelledAnnouncement do: 
-			[ jobCompletedCount := jobCompletedCount + 1.
-			times add: 5 -> DateAndTime now ];
+			[ jobCompletedCount := jobCompletedCount + 1. ];
 		when: GtRrTaskStartedAnnouncement do: 
-			[ taskStartedCount := taskStartedCount + 1.
-			times add: 1 -> DateAndTime now ];
+			[ taskStartedCount := taskStartedCount + 1. ];
 		when: GtRrTaskCompletedAnnouncement do: 
-			[ taskCompletedCount := taskCompletedCount + 1.
-			times add: 3 -> DateAndTime now. ];
+			[ taskCompletedCount := taskCompletedCount + 1. ];
 		when: GtRrTaskFailedAnnouncement do: 
-			[ taskFailedCount := taskFailedCount + 1.
-			times add: 2 -> DateAndTime now ].
+			[ taskFailedCount := taskFailedCount + 1. ].
 	remoteRunner submitJob: job.
 	jobSemaphore wait.
 
@@ -565,11 +558,11 @@ GtRemoteRunnerExamples >> timeoutJob [
 	self assert: jobStartedCount equals: 1.
 	self assert: taskCompletedCount equals: 0.
 	self assert: taskFailedCount equals: 3.
-	self assert: taskStartedCount equals: 2.
+	self assert: (taskStartedCount between: 1 and: 3)
+		description: [ 'Unexpected taskStartedCount: ', taskStartedCount asString ].
 	self assert: job state equals: #completed.
 	self assert: job hasErrors.
 	self assert: job errorDetails errorMessage equals: 'Job exceeded time limit'.
-	self assert: (times collect: #key) asArray equals: #(0 1 1 2 2 2 4).
 	] ensure: [ remoteRunner stop ].
 
 	^ job
