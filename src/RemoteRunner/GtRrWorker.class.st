@@ -240,9 +240,7 @@ GtRrWorker >> commandTerminateTaskContextId: taskContextId [
 GtRrWorker >> currentProcessId [
 	"Answer the PID of this OS process"
 
-	^ OSPlatform current name = #Win32
-		  ifTrue: [ 0 ]
-		  ifFalse: [ LibC uniqueInstance currentProcessId ]
+	^ GtOsSystemInfo current currentProcessId
 ]
 
 { #category : #accessing }
