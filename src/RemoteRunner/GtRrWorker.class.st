@@ -340,34 +340,37 @@ GtRrWorker >> start [
 
 { #category : #stepping }
 GtRrWorker >> stepService [
-	| task |
 
+	| task semaphore |
+	semaphore := Semaphore new.
 	GtRrWorkerWaitForTaskAnnouncement new emit.
 	task := self nextTask.
-
 	GtRrWorkerTaskStartingAnnouncement new
 		task: task;
 		emit.
-	currentTaskExecution := task asTask 
-		configureTaskExecution: GtRrFutureTimeoutableTaskExecution new 
-		with: taskRunner.
+	currentTaskExecution := task asTask
+		                        configureTaskExecution:
+		                        GtRrFutureTimeoutableTaskExecution new
+		                        with: taskRunner.
 	currentTaskExecution timeout: task taskTimeout.
 	taskRunner scheduleTaskExecution: currentTaskExecution.
 	currentTaskExecution future
 		onSuccessDo: [ :result | 
 			GtRrWorkerTaskCompletedAnnouncement new
 				task: task;
-				message: 'Success: ', result printString;
+				message: 'Success: ' , result printString;
 				emit.
-			self taskDone: task with: result ];
+			self taskDone: task with: result.
+			semaphore signal ];
 		onFailureDo: [ :error | 
 			GtRrWorkerTaskCompletedAnnouncement new
 				task: task;
-				message: 'ERROR: ', error printString;
+				message: 'ERROR: ' , error printString;
 				emit.
-			self taskFailed: task with: error ];
-		waitForCompletion: 1 day.
-	currentTaskExecution := nil.
+			self taskFailed: task with: error.
+			semaphore signal ].
+	semaphore wait.
+	currentTaskExecution := nil
 ]
 
 { #category : #stopping }
