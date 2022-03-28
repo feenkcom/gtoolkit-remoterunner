@@ -264,10 +264,13 @@ GtRrTaskContext >> taskTimeoutTime: anObject [
 
 { #category : #running }
 GtRrTaskContext >> terminateTask [
-	"Terminate the receiver"
+	"Terminate the receiver.
+	Despite being in the GtRrTaskContext, this represents a worker timeout"
 
 	task state = #started ifFalse: [ ^ self markTaskCancelled ].
-	workerFuture terminateTaskContextId: taskContextId.
+	"If the worker has timed out its state is unknown,
+	simply close the connection."
+	workerFuture connection stop.
 	task hasCompleted ifTrue: [ ^ self ].
 	"The worker failed to terminate the task, terminate it on the server"
 	self remoteRunner 
