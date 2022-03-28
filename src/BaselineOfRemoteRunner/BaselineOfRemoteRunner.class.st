@@ -13,5 +13,6 @@ BaselineOfRemoteRunner >> baseline: spec [
 				baseline: 'PharoLink' with: [
 					spec repository: 'github://feenkcom/PharoLink:main/src' ];
 				package: 'RemoteRunner'
-					with: [ spec requires: #('PharoLink' ) ] ]
+					with: [ spec requires: #('PharoLink' ) ];
+				package: 'GtSocketLogging' ]
 ]
