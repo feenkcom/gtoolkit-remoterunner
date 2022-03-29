@@ -2,6 +2,8 @@ Class {
 	#name : #GtRrLocalManagerStartupAndShutdown,
 	#superclass : #GtRrManagerStartupAndShutdown,
 	#instVars : [
+		'inMemoryLog',
+		'workerIndex',
 		'autoRestart',
 		'watchDog',
 		'watchdogSemaphore',
@@ -72,10 +74,25 @@ GtRrLocalManagerStartupAndShutdown >> gtSummaryFor: aView [
 		  actionUpdateButton
 ]
 
+{ #category : #accessing }
+GtRrLocalManagerStartupAndShutdown >> inMemoryLog [
+	"Answer a boolean indicating whether worker output should be stored in memory or not"
+
+	^ inMemoryLog
+]
+
+{ #category : #accessing }
+GtRrLocalManagerStartupAndShutdown >> inMemoryLog: aBoolean [
+
+	inMemoryLog := aBoolean
+]
+
 { #category : #initialization }
 GtRrLocalManagerStartupAndShutdown >> initialize [
 
 	super initialize.
+	inMemoryLog := false.
+	workerIndex := 0.
 	autoRestart := true.
 	workerCountCalculator := GtRrResourceWorkerCountCalculator new.
 	processes := OrderedCollection new.
@@ -89,7 +106,7 @@ GtRrLocalManagerStartupAndShutdown >> isRunning [
 ]
 
 { #category : #private }
-GtRrLocalManagerStartupAndShutdown >> newWorkerLocalProcess [
+GtRrLocalManagerStartupAndShutdown >> newInMemoryWorkerLocalProcess [
 
 	| settings |
 	settings := LanguageLinkSettings pharoDefaultSettings.
@@ -100,6 +117,49 @@ GtRrLocalManagerStartupAndShutdown >> newWorkerLocalProcess [
 		  terminateOnShutdown;
 		  run;
 		  yourself
+]
+
+{ #category : #private }
+GtRrLocalManagerStartupAndShutdown >> newLogFileWorkerLocalProcess [
+	| settings builder shellCommand command args process |
+
+	settings := LanguageLinkSettings pharoDefaultSettings.
+	OSPlatform current isWindows ifTrue: 
+		[ shellCommand := 'cmd'.
+		args := OrderedCollection with: '/C' ]
+	ifFalse: 
+		[ shellCommand := 'sh'.
+		args := OrderedCollection with: '-c' ].
+	command := String streamContents: [ :stream |
+		stream
+			<< settings serverExecutable fullName;
+			<< ' '.
+		(self newWorkerLocalProcessArgumentsFor: settings)
+			do: [ :arg | stream << arg ]
+			separatedBy: [ stream space ].
+		workerIndex := workerIndex + 1.
+		stream
+			<< ' > worker.';
+			print: workerIndex;
+			<< '.log 2>&1' ].
+	args add: command.
+
+	builder := GtExternalProcessBuilder new
+		command: shellCommand;
+		args: args;
+		workingDirectory: settings workingDirectory resolve fullName.
+	process := builder createNativeCommand spawn.
+	process terminateOnShutdown.
+	^ process.
+
+]
+
+{ #category : #private }
+GtRrLocalManagerStartupAndShutdown >> newWorkerLocalProcess [
+
+	^ inMemoryLog
+		ifTrue: [ self newInMemoryWorkerLocalProcess ]
+		ifFalse: [ self newLogFileWorkerLocalProcess ]
 ]
 
 { #category : #'instance creation' }
@@ -115,7 +175,8 @@ GtRrLocalManagerStartupAndShutdown >> newWorkerLocalProcessArgumentsFor: someSet
 	args
 		add: '--serverSocketAddress';
 		add: remoteRunner port asString;
-		add: '--detachChangesFromFileSystem'.
+		add: '--detachChangesFromFileSystem';
+		add: '--noGtImageUpdate'.
 	^ args
 ]
 
@@ -168,7 +229,7 @@ GtRrLocalManagerStartupAndShutdown >> shutdown [
 		on: ProcessAlreadyTerminating
 		do: [ "noop" ].
 	watchDog := nil.
-	processes do: #terminate.
+	processes do: #kill.
 	remoteRunner debugMode ifFalse:
 		[ processes removeAll ].
 	super shutdown.

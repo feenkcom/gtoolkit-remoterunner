@@ -799,8 +799,7 @@ GtRemoteRunner >> taskDone: aTaskContextId with: anObject [
 	| taskContext |
 
 	GtRrWorkerTraceAnnouncement new
-		worker: aTaskContextId;
-		message: 'taskDone:with: pre';
+		message: 'taskDone:with: pre ', aTaskContextId asString;
 		emit.
 
 	sharedAccess critical: 
@@ -812,7 +811,7 @@ GtRemoteRunner >> taskDone: aTaskContextId with: anObject [
 		self checkJobCompleted: taskContext ].
 
 	GtRrWorkerTraceAnnouncement new
-		worker: taskContext;
+		worker: taskContext workerFuture connection;
 		message: 'taskDone:with: post';
 		emit.
 
@@ -823,14 +822,12 @@ GtRemoteRunner >> taskFailed: aTaskContextId with: anGtRrTaskErrorDetails [
 	"Mark the specified task as failed"
 
 	GtRrWorkerTraceAnnouncement new
-		worker: aTaskContextId;
-		message: 'taskFailed:with: pre';
+		message: 'taskFailed:with: pre ', aTaskContextId asString;
 		emit.
 	sharedAccess critical: 
 		[ self privateTaskFailed: aTaskContextId with: anGtRrTaskErrorDetails ].
 	GtRrWorkerTraceAnnouncement new
-		worker: aTaskContextId;
-		message: 'taskFailed:with: post';
+		message: 'taskFailed:with: post ', aTaskContextId asString;
 		emit.
 
 ]
