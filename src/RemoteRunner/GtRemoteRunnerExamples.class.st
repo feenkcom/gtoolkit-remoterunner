@@ -150,7 +150,6 @@ GtRemoteRunnerExamples >> getNextTaskFor [
 	"Demonstrate getting the next task for a worker from a Remote Runner.
 	Tasks are created with a test constraint with a boolean value."
 	<gtExample>
-	<noTest>
 	| job tasks remoteRunner evenWorker oddWorker evenTasks oddTasks |
 
 	tasks := (1 to: 5) collect: [ :i |
