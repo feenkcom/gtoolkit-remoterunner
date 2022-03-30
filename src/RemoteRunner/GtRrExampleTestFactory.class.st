@@ -10,6 +10,8 @@ Class {
 { #category : #adding }
 GtRrExampleTestFactory >> addExampleClass: aClass [
 	| task |
+	
+	(aClass isAbstract or: [ aClass isTrait ]) ifTrue: [ ^ self ].
 
 	aClass gtExamples ifNotEmpty:
 		[ task := GtRrClassExampleTask exampleClassName: aClass name.
