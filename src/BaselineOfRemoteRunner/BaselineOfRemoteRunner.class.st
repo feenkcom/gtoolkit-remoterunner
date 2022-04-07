@@ -10,7 +10,7 @@ BaselineOfRemoteRunner >> baseline: spec [
 	spec for: #'common' do: [
 		spec
 			baseline: 'PharoLink' with: [
-				spec repository: 'github://feenkcom/PharoLink:v0.8.172/src' ].
+				spec repository: 'github://feenkcom/PharoLink:v0.8.173/src' ].
 
 		spec package: 'RemoteRunner' with: [
 			spec requires: #('PharoLink') ].
