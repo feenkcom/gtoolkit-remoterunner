@@ -195,7 +195,7 @@ GtRrJob >> gtSummaryFor: aView [
 		  items: [ self summaryAttributes ];
 		  column: #Attribute text: [ :item | item key ];
 		  column: #Value text: [ :item | item value ];
-		  updateWhen: GtRrJobAnnouncement in: [ self announcer ];
+		  updateWhen: GtRemoteRunnerAnnouncement in: [ self announcer ];
 		  actionUpdateButton
 ]
 

@@ -92,7 +92,7 @@ GtRrExamplesView >> gtSummaryFor: aView [
 		  items: [ self summaryAttributes ];
 		  column: #Attribute text: [ :item | item first ];
 		  column: #Value text: [ :item | item second ];
-		  send: [ :item | item third ]
+		  send: [ :item | GtExampleGroup  withAll: item third ]
 ]
 
 { #category : #ui }
