@@ -11,7 +11,7 @@ Class {
 GtRrExampleTestFactory >> addExampleClass: aClass [
 	| task |
 
-	aClass gtExamples ifNotEmpty:
+	(aClass gtExamples isNotEmpty and: [ aClass isTrait not ]) ifTrue:
 		[ task := GtRrClassExampleTask exampleClassName: aClass name.
 		ignoreNoTest ifTrue: [ task setIgnoreNoTest ].
 		self addTask: task ].

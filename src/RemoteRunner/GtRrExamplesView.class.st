@@ -5,7 +5,8 @@ Class {
 	#name : #GtRrExamplesView,
 	#superclass : #Object,
 	#instVars : [
-		'job'
+		'job',
+		'tasks'
 	],
 	#category : #'RemoteRunner-UI'
 }
@@ -158,5 +159,11 @@ GtRrExamplesView >> summaryAttributes [
 { #category : #accessing }
 GtRrExamplesView >> tasks [
 
-	^ job tasks
+	^ tasks ifNil: [ tasks := job tasks ]
+]
+
+{ #category : #accessing }
+GtRrExamplesView >> tasks: aCollection [
+
+	tasks := aCollection
 ]

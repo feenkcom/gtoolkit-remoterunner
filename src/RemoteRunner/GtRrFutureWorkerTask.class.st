@@ -27,6 +27,12 @@ GtRrFutureWorkerTask >> connection: aGtRrWorkerConnection [
 	connection := aGtRrWorkerConnection
 ]
 
+{ #category : #accessing }
+GtRrFutureWorkerTask >> details [
+
+	^ connection details.
+]
+
 { #category : #initialization }
 GtRrFutureWorkerTask >> initialize [
 
@@ -41,6 +47,12 @@ GtRrFutureWorkerTask >> remoteAddress [
 	^ connection 
 		ifNil: [ ByteArray new: 4 ]
 		ifNotNil: [ connection remoteAddress ]
+]
+
+{ #category : #accessing }
+GtRrFutureWorkerTask >> remoteAddressString [
+
+	^ GtRemoteRunner printIpAddress: self remoteAddress
 ]
 
 { #category : #accessing }

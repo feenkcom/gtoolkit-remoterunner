@@ -345,6 +345,17 @@ GtRrJob >> resultsWithErrors [
 	^ results select: #hasErrors
 ]
 
+{ #category : #'private - running' }
+GtRrJob >> runInImage [
+
+	self markJobStarted.
+	results := OrderedCollection new.
+	self tasks do: [ :task |
+		task runInImage.
+		results add: task. ].
+	self markJobCompleted.
+]
+
 { #category : #accessing }
 GtRrJob >> startTime [
 
