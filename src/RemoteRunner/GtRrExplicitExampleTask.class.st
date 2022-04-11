@@ -32,13 +32,16 @@ GtRrExplicitExampleTask >> examples [
 ]
 
 { #category : #accessing }
-GtRrExplicitExampleTask >> examples: anObject [
+GtRrExplicitExampleTask >> examples: aCollection [
+	"aCollection is a collection of examples to run, in the form:
+		ClassNameSymbol -> SelectorSymbol"
 
-	examples := anObject
+	examples := aCollection
 ]
 
 { #category : #'private - running' }
 GtRrExplicitExampleTask >> group [
 
-	^ GtExplicitExampleGroup new examples: examples
+	^ GtExplicitExampleGroup new examples: (examples collect: [ :each | 
+		(each key asClass >> each value) gtExample asExampleWithResult ]).
 ]
