@@ -240,6 +240,7 @@ GtRrWorkerConnection >> removeObserver [
 { #category : #private }
 GtRrWorkerConnection >> sendControlMessage: aMessage [
 
+self halt.
 	^ observer value: { aMessage selector. aMessage arguments. aMessage lookupClass }
 ]
 

@@ -7,11 +7,11 @@ Class {
 	#instVars : [
 		'uid',
 		'attributes',
-		'application',
 		'taskRunner',
 		'currentTaskExecution',
 		'serviceName',
-		'pingServer'
+		'pingServer',
+		'connectionStrategy'
 	],
 	#category : #'RemoteRunner-Worker'
 }
@@ -104,19 +104,14 @@ GtRrWorker class >> serverSocketAddress: aString pingSocketAddress: anotherStrin
 GtRrWorker >> addObserver [
 	| commandFactory observer |
 
+	^ self connectDuring: [ :application |
 	commandFactory := application newCommandFactory.
 	observer := commandFactory observerFromCallback: [ :message | 
 		            self command: message ].
 	observer setByValue.
 	"register needs to keep request alive to keep observer alive"
-	^ commandFactory send: ('GtAssignedRemoteRunner addObserver: {1}' format:
-			   { observer pharoLinkFormattedCode })
-]
-
-{ #category : #accessing }
-GtRrWorker >> application: aPharoLinkApplication [
-
-	application := aPharoLinkApplication
+	commandFactory send: ('GtAssignedRemoteRunner addObserver: {1}' format:
+			   { observer pharoLinkFormattedCode }) ]
 ]
 
 { #category : #observer }
@@ -237,6 +232,25 @@ GtRrWorker >> commandTerminateTaskContextId: taskContextId [
 ]
 
 { #category : #private }
+GtRrWorker >> connectDuring: aBlock [
+	"Evaluate aBlock passing in a connected PharoLinkApplication"
+
+	^ connectionStrategy connectDuring: aBlock
+]
+
+{ #category : #accessing }
+GtRrWorker >> connectionStrategy [
+
+	^ connectionStrategy
+]
+
+{ #category : #accessing }
+GtRrWorker >> connectionStrategy: anObject [
+
+	connectionStrategy := anObject
+]
+
+{ #category : #private }
 GtRrWorker >> currentProcessId [
 	"Answer the PID of this OS process"
 
@@ -273,7 +287,7 @@ GtRrWorker >> iterateService [
 GtRrWorker >> kill [
 
 	super kill.
-	application stop.
+	connectionStrategy stop.
 	taskRunner stop
 ]
 
@@ -287,9 +301,10 @@ GtRrWorker >> name [
 GtRrWorker >> nextTask [
 	| promise |
 	
-	promise := application newCommandFactory send:
-		'GtAssignedRemoteRunner nextTaskSerializedForCurrentWorker'.
-	^ LeJsonV4 uniqueInstance deserialize: promise waitForValue readStream
+	^ self connectDuring: [ :application |
+		promise := application newCommandFactory send:
+			'GtAssignedRemoteRunner nextTaskSerializedForWorkerId: ''', uid, ''''.
+		LeJsonV4 uniqueInstance deserialize: promise waitForValue readStream ].
 
 ]
 
@@ -299,19 +314,13 @@ GtRrWorker >> pingServer: aServer [
 ]
 
 { #category : #private }
-GtRrWorker >> registerWithRunner [
-	"Register the receiver with the remote runner"
+GtRrWorker >> registerWith: aPharoLinkApplication [
+	"Register the receiver with the remote runner associated with the supplied PharoLinkApplication"
 
-	application newCommandFactory 
-		bindingAt: #attributes put: attributes;
-		sendAndWait: 'GtAssignedRemoteRunner registerWorkerWithDetails: attributes'.
+	^ aPharoLinkApplication newCommandFactory 
+			bindingAt: #attributes put: attributes;
+			sendAndWait: 'GtAssignedRemoteRunner registerWorkerWithDetails: attributes'.
 
-]
-
-{ #category : #observer }
-GtRrWorker >> removeObserver [
-
-	^ application newCommandFactory send: 'GtAssignedRemoteRunner removeObserver'
 ]
 
 { #category : #accessing }
@@ -331,10 +340,8 @@ GtRrWorker >> stackString [
 { #category : #starting }
 GtRrWorker >> start [
 
-	application start.
+	connectionStrategy start.
 	pingServer ifNotNil: [ pingServer start ].
-	self registerWithRunner.
-	self addObserver.
 	super start
 ]
 
@@ -377,7 +384,7 @@ GtRrWorker >> stepService [
 GtRrWorker >> stop [
 
 	super stop.
-	application stop.
+	connectionStrategy stop.
 	pingServer ifNotNil: [ pingServer stop ]
 ]
 
@@ -388,12 +395,13 @@ GtRrWorker >> taskDone: aTask with: anObject [
 	serializedResult := [ LeJsonV4 uniqueInstance serialize: anObject ]
 		on: Error 
 		do: [ :ex | ^ self taskFailed: aTask with: ex ].
-	application newCommandFactory
-		  bindingAt: #taskContextId put: aTask taskContextId;
-		  bindingAt: #result
-		  put: serializedResult;
-		  sendAndWait:
-			  'GtAssignedRemoteRunner taskDone: taskContextId with: (LeJsonV4 uniqueInstance deserialize: result readStream). true'.
+	self connectDuring: [ :application |
+		application newCommandFactory
+			  bindingAt: #taskContextId put: aTask taskContextId;
+			  bindingAt: #result
+			  put: serializedResult;
+			  sendAndWait:
+				  'GtAssignedRemoteRunner taskDone: taskContextId with: (LeJsonV4 uniqueInstance deserialize: result readStream). true' ].
 	GtRrWorkerResponseSentAnnouncement new 
 		task: aTask;
 		emit.
@@ -402,14 +410,15 @@ GtRrWorker >> taskDone: aTask with: anObject [
 { #category : #accessing }
 GtRrWorker >> taskFailed: aTask with: anError [
 
-	application newCommandFactory
-		  bindingAt: #taskContextId put: aTask taskContextId;
-		  bindingAt: #errorDetails put: (LeJsonV4 uniqueInstance serialize: 
-				(GtRrErrorDetails new
-					errorMessage: anError messageText;
-					trace: anError stackString));
-		  sendAndWait:
-			  'GtAssignedRemoteRunner taskFailed: taskContextId with: (LeJsonV4 uniqueInstance deserialize: errorDetails readStream). true'.
+	self connectDuring: [ :application |
+		application newCommandFactory
+			  bindingAt: #taskContextId put: aTask taskContextId;
+			  bindingAt: #errorDetails put: (LeJsonV4 uniqueInstance serialize: 
+					(GtRrErrorDetails new
+						errorMessage: anError messageText;
+						trace: anError stackString));
+			  sendAndWait:
+				  'GtAssignedRemoteRunner taskFailed: taskContextId with: (LeJsonV4 uniqueInstance deserialize: errorDetails readStream). true' ].
 	GtRrWorkerResponseSentAnnouncement new 
 		task: aTask;
 		emit.
@@ -419,4 +428,13 @@ GtRrWorker >> taskFailed: aTask with: anError [
 GtRrWorker >> uid [
 
 	^ uid
+]
+
+{ #category : #private }
+GtRrWorker >> unregisterWith: aPharoLinkApplication [
+	"Register the receiver with the remote runner associated with the supplied PharoLinkApplication"
+
+	^ aPharoLinkApplication newCommandFactory sendAndWait: 
+		'GtAssignedRemoteRunner unregisterWorkerId: ', uid, ' reason: ''Worker stopped'''.
+
 ]
