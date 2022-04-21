@@ -87,9 +87,12 @@ GtRrWorker class >> newPharoLinkServer: aString [
 
 { #category : #'instance creation' }
 GtRrWorker class >> serverSocketAddress: aString [
+	| worker |
 
-	^ self new
-		application: (self newPharoApplication: aString)
+	worker := self new.
+	worker connectionStrategy: 
+		(GtRrWorkerConnectionPerMessageStrategy serverSocketAddress: '7042' worker: worker).
+	^ worker.
 ]
 
 { #category : #'instance creation' }
