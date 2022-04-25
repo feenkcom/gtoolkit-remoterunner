@@ -18,9 +18,9 @@ Class {
 
 { #category : #accessing }
 GtRrWorker class >> commandLine [
-	<commandline>
-	| worker |
 
+	<commandline>
+	| worker connectionStrategyId connectionStrategy |
 	^ self commandLineCommand meaning: [ :args | 
 		  | logger serverSocketAddress |
 		  args
@@ -34,7 +34,29 @@ GtRrWorker class >> commandLine [
 		  serverSocketAddress := ((args at: #serverSocketAddress) at:
 			                          #address) value.
 		  StringSignal emit: 'Server address: ' , serverSocketAddress.
-		  worker := self serverSocketAddress: serverSocketAddress.
+		  connectionStrategyId := args
+			                          at: #connectionStrategy
+			                          ifPresent: [ :arg | 
+			                          (arg at: #strategyId) value ]
+			                          ifAbsent: [ #perMessage ].
+		  connectionStrategy := ({ 
+			                        (#perMessage
+			                         -> [ 
+			                         GtRrWorkerConnectionPerMessageStrategy new ]).
+			                        (#single
+			                         -> [ 
+			                         GtRrWorkerSingleConnectionStrategy new ]) }
+			                        asDictionary
+			                        at: connectionStrategyId
+			                        ifAbsent: [ 
+				                        self error:
+					                        'Invalid connectionStrategy: '
+					                        , connectionStrategyId printString ]) value.
+		  worker := self new.
+		  connectionStrategy
+			  socketAddress: serverSocketAddress;
+			  worker: worker.
+		  worker connectionStrategy: connectionStrategy.
 		  args occurrencesOf: #attribute do: [ :arg | 
 			  worker attributes
 				  at: (arg at: #key) value
@@ -56,6 +78,11 @@ GtRrWorker class >> commandLineCommand [
 				   description:
 					   'The server socket address on which to connect for requests';
 				   add: (ClapPositional id: #address);
+				   yourself);
+		  add: ((ClapFlag id: #connectionStrategy)
+				   description:
+					   'The connection strategy, e.g. #perMessage, #single';
+				   add: (ClapPositional id: #strategyId);
 				   yourself);
 		  add: ((ClapFlag id: #attribute)
 				   description: 'add key/value pairs to attributes';
@@ -91,7 +118,7 @@ GtRrWorker class >> serverSocketAddress: aString [
 
 	worker := self new.
 	worker connectionStrategy: 
-		(GtRrWorkerConnectionPerMessageStrategy serverSocketAddress: '7042' worker: worker).
+		(GtRrWorkerConnectionPerMessageStrategy serverSocketAddress: aString worker: worker).
 	^ worker.
 ]
 
@@ -113,8 +140,8 @@ GtRrWorker >> addObserver [
 		            self command: message ].
 	observer setByValue.
 	"register needs to keep request alive to keep observer alive"
-	commandFactory send: ('GtAssignedRemoteRunner addObserver: {1}' format:
-			   { observer pharoLinkFormattedCode }) ]
+	commandFactory send: ('GtAssignedRemoteRunner addObserver: {1} toWorkerId: ''{2}''' format:
+			   { observer pharoLinkFormattedCode. uid. }) ]
 ]
 
 { #category : #observer }

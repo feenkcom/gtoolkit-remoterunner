@@ -76,12 +76,6 @@ GtRrTaskFactory >> startedTasksGroupedByWorker [
 			aTask workerId ]
 ]
 
-{ #category : #'api - generation' }
-GtRrTaskFactory >> tasks [
-
-	^ stream contents
-]
-
 { #category : #accessing }
 GtRrTaskFactory >> taskTimeout [
 	<return: #Duration or: nil>
@@ -93,4 +87,10 @@ GtRrTaskFactory >> taskTimeout [
 GtRrTaskFactory >> taskTimeout: aDuration [
 
 	taskTimeout := aDuration
+]
+
+{ #category : #'api - generation' }
+GtRrTaskFactory >> tasks [
+
+	^ stream contents
 ]

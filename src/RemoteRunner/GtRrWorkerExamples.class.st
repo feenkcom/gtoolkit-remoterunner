@@ -44,6 +44,38 @@ GtRrWorkerExamples >> commandLineWithAttributes [
 ]
 
 { #category : #examples }
+GtRrWorkerExamples >> commandLineWithStrategy [
+	"Demonstrate parsing the Remote Runner Worker command line"
+	<gtExample>
+	| commandLine connectionStrategyId |
+
+	commandLine := GtRrWorker commandLineCommand match:
+		#('remoteRunnerWorker').
+
+	connectionStrategyId := commandLine 
+		at: #connectionStrategy
+		ifPresent: [ :arg | (arg at: #strategyId) value ]
+		ifAbsent: [ #perMessage ].
+
+	self assert: connectionStrategyId equals: #perMessage.
+
+
+	commandLine := GtRrWorker commandLineCommand match:
+		#('remoteRunnerWorker' 
+		'--connectionStrategy' 'single').
+
+	connectionStrategyId := commandLine 
+		at: #connectionStrategy
+		ifPresent: [ :arg | (arg at: #strategyId) value ]
+		ifAbsent: [ #perMessage ].
+
+	self assert: connectionStrategyId equals: #single.
+
+
+	^ commandLine
+]
+
+{ #category : #examples }
 GtRrWorkerExamples >> commandLineWithoutAttributes [
 	"Demonstrate parsing the Remote Runner Worker command line"
 	<gtExample>

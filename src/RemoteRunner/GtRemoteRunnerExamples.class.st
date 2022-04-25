@@ -103,7 +103,9 @@ GtRemoteRunnerExamples >> controlChannelPing [
 
 	controlChannelSemaphore := GtMutualExclusionSemaphore new.
 	remoteRunner := GtRemoteRunner new port: 7089.
-	remoteRunner managerStartupAndShutdown poolSize: 1.
+	remoteRunner managerStartupAndShutdown 
+		poolSize: 1;
+		connectionStrategyId: #single.
 	remoteRunner when: GtRrWorkerControlChannelRegisteredAnnouncement do: [ :ann | 
 		worker := ann worker.
 		controlChannelSemaphore signal ].
@@ -185,61 +187,6 @@ GtRemoteRunnerExamples >> getNextTaskFor [
 ]
 
 { #category : #examples }
-GtRemoteRunnerExamples >> handleWorkerDisconnection [
-	"Demonstrate the runner handling worker disconnection"
-	<gtExample>
-	<noTest>
-	| runner worker job startSemaphore endSemaphore retry |
-
-	runner := GtRemoteRunner new
-		port: 7086;
-		managerStartupAndShutdown: GtRrManualManagerStartupAndShutdown new;
-		startLogging;
-		start.
-	[ worker := GtRrWorker serverSocketAddress: 'localhost:7086'.
-	"If this example is being run within a worker it needs a different service name"
-	worker serviceName: 'handleWorkerDisconnection service'.
-	worker start.
-	startSemaphore := Semaphore new.
-	endSemaphore := Semaphore new.
-	job := GtRrTasksJob new
-		tasks: { GtRrScriptTask script: 'Semaphore new wait' }.
-	job
-		when: GtRrJobStartedAnnouncement
-			do: [ startSemaphore signal ];
-		when: GtRrJobCompletedAnnouncement
-			do: [ endSemaphore signal ].
-
-	retry := 50.
-	[ retry > 0 and: [ runner availableWorkerCount = 0 ] ] whileTrue:
-		[ 500 milliSeconds wait ].
-	retry = 0 ifTrue:
-		[ self error: 'Worker didn''t connect' ].
-	self assert: runner state equals: #idle.
-	self assert: runner registeredWorkerCount equals: 1.
-	self assert: runner availableWorkerCount equals: 1.
-
-	runner submitJob: job.
-
-	startSemaphore wait.
-	self assert: runner state equals: #busy.
-	self assert: runner registeredWorkerCount equals: 1.
-	self assert: runner availableWorkerCount equals: 0.
-	self assert: job state equals: #started.
-	worker stop.
-	endSemaphore wait.
-	self assert: runner state equals: #idle.
-	self assert: runner registeredWorkerCount equals: 0.
-	self assert: runner availableWorkerCount equals: 0.
-	self assert: job state equals: #completed.
-	self assert: job hasErrors.
-
-	] ensure:
-		[ worker stop.
-		runner stop ].
-]
-
-{ #category : #examples }
 GtRemoteRunnerExamples >> multipleJobs [
 	"Demonstrate executing a multiple jobs"
 	<gtExample>
@@ -296,7 +243,10 @@ GtRemoteRunnerExamples >> multipleJobsSimultaneously [
 
 	semaphore := GtMutualExclusionSemaphore new.
 	remoteRunner := GtRemoteRunner new.
-	remoteRunner managerStartupAndShutdown poolSize: 2.
+	"This example relies on the control channel, so force a single connection."
+	remoteRunner managerStartupAndShutdown 
+		poolSize: 2;
+		connectionStrategyId: #single.
 	remoteRunner 
 		port: 7084;
 		startLogging;
@@ -437,7 +387,7 @@ GtRemoteRunnerExamples >> simpleTestTask [
 ]
 
 { #category : #examples }
-GtRemoteRunnerExamples >> terminateStartedJob [
+GtRemoteRunnerExamples >> terminateStartedJobWithControlChannel [
 	"Terminate a job that has been started, ensuring that all tasks have been marked as terminated"
 	<gtExample>
 	<noTest>
@@ -449,7 +399,10 @@ GtRemoteRunnerExamples >> terminateStartedJob [
 	remoteRunner := GtRemoteRunner new 
 		port: 7084;
 		startLogging.
-	remoteRunner managerStartupAndShutdown poolSize: 1.
+	"This example relies on the control channel, so force a single connection."
+	remoteRunner managerStartupAndShutdown 
+		poolSize: 1;
+		connectionStrategyId: #single.
 	remoteRunner start.
 	[ 
 	"Create a set of tasks that never complete"
@@ -508,6 +461,80 @@ GtRemoteRunnerExamples >> terminateStartedJob [
 	self assert: job hasErrors.
 	self assert: (job results allSatisfy: [ :task | task hasErrors ]).
 	self assert: (times collect: #key) asArray equals: #(0 1 2 2 2 4).
+	] ensure: [ remoteRunner stop ].
+
+	^ job
+]
+
+{ #category : #examples }
+GtRemoteRunnerExamples >> terminateStartedJobWithoutControlChannel [
+	"Terminate a job that has been started, ensuring that all tasks have been marked as terminated"
+	<gtExample>
+	<noTest>
+	| remoteRunner job tasks taskFailedCount taskCompletedCount jobCompletedCount semaphore jobStartedCount taskStartedCount waitForTaskCompletion taskWaitTime |
+
+	"Waiting for the task to complete is slow and may fail if the processor is very busy,
+	so this is normally only set true for manual testing."
+	waitForTaskCompletion := false.
+	taskWaitTime := 15. "seconds"
+	jobStartedCount := jobCompletedCount := taskStartedCount := taskCompletedCount := taskFailedCount := 0.
+	semaphore := GtMutualExclusionSemaphore new.
+	remoteRunner := GtRemoteRunner new 
+		port: 7084;
+		startLogging.
+	remoteRunner managerStartupAndShutdown poolSize: 1.
+	remoteRunner start.
+	[ 
+	"Create a set of tasks that never complete"
+	tasks := (1 to: 3) collect: [ :i |
+		(GtRrScriptTask script: taskWaitTime asString, ' seconds wait')
+			taskTimeout: 5 minutes;
+			yourself ].
+	job := GtRrTasksJob new tasks: tasks.
+	job
+		when: GtRrJobStartedAnnouncement do: 
+			[ jobStartedCount := jobStartedCount + 1 ];
+		when: GtRrJobCompletedAnnouncement do: 
+			[ jobCompletedCount := jobCompletedCount + 1.
+			semaphore signal ];
+		when: GtRrJobCancelledAnnouncement do: 
+			[ jobCompletedCount := jobCompletedCount + 1.
+			semaphore signal ];
+		when: GtRrTaskStartedAnnouncement do: 
+			[ taskStartedCount := taskStartedCount + 1.
+			semaphore signal ];
+		when: GtRrTaskCompletedAnnouncement do: 
+			[ taskCompletedCount := taskCompletedCount + 1 ];
+		when: GtRrTaskFailedAnnouncement do: 
+			[ taskFailedCount := taskFailedCount + 1 ].
+
+	remoteRunner submitJob: job.
+	semaphore wait.
+
+	self assert: remoteRunner currentlyExecutingJobs size equals: 1.
+	self assert: remoteRunner currentlyExecutingTasks size equals: 1.
+	self assert: remoteRunner taskQueue size equals: 2.
+
+	remoteRunner terminateJobId: job id.
+	semaphore wait.
+
+	waitForTaskCompletion ifTrue:
+		[ (taskWaitTime + 5) seconds wait.
+		"After the task has completed on the worker it should become available again"
+		self assert: remoteRunner availableWorkerCount equals: 1.
+		 ].
+
+	self assert: remoteRunner currentlyExecutingJobs size equals: 0.
+	self assert: remoteRunner currentlyExecutingTasks size equals: 0.
+	self assert: remoteRunner taskQueue size equals: 0.
+	self assert: jobCompletedCount equals: 1.
+	self assert: jobStartedCount equals: 1.
+	self assert: taskCompletedCount equals: 0.
+	self assert: taskFailedCount equals: 3.
+	self assert: taskStartedCount equals: 1.
+	self assert: job state equals: #completed.
+	self assert: job hasErrors.
+	self assert: (job results allSatisfy: [ :task | task hasErrors ]).
 	] ensure: [ remoteRunner stop ].
 
 	^ job
@@ -640,7 +667,7 @@ GtRemoteRunnerExamples >> timeoutWorker [
 	"Demonstrate terminating a worker due to it timing out"
 	<gtExample>
 	<noTest>
-	| remoteRunner job completingTask timeoutTask taskFailedCount taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount times taskFailedSemaphore |
+	| remoteRunner job timeoutTask taskFailedCount taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount times taskFailedSemaphore |
 
 	jobStartedCount := jobCompletedCount := taskStartedCount := taskCompletedCount := taskFailedCount := 0.
 	jobSemaphore := GtMutualExclusionSemaphore new.
@@ -656,9 +683,7 @@ GtRemoteRunnerExamples >> timeoutWorker [
 	"Create a set of tasks that never complete"
 	timeoutTask := GtRrScriptTask script: 'Semaphore new wait'.
 	timeoutTask taskTimeout: 1 minute.
-	completingTask := GtRrScriptTask script: '#done'.
-	job := GtRrTasksJob new
-		tasks: { timeoutTask. completingTask }.
+	job := GtRrTasksJob new tasks: { timeoutTask. }.
 	job
 		when: GtRrJobStartedAnnouncement do: 
 			[ jobStartedCount := jobStartedCount + 1.
@@ -689,14 +714,12 @@ GtRemoteRunnerExamples >> timeoutWorker [
 	self assert: remoteRunner taskQueue size equals: 0.
 	self assert: jobCompletedCount equals: 1.
 	self assert: jobStartedCount equals: 1.
-	self assert: taskCompletedCount equals: 1.
+	self assert: taskCompletedCount equals: 0.
 	self assert: taskFailedCount equals: 1.
-	self assert: taskStartedCount equals: 2.
+	self assert: taskStartedCount equals: 1.
 	self assert: job state equals: #completed.
 	self assert: job hasErrors.
 	self assert: timeoutTask errorDetails errorMessage equals: 'Worker exceeded time limit'.
-	self deny: completingTask hasErrors.
-	self assert: (times collect: #key) asArray equals: #(0 1 2 1 3 4).
 	] ensure: [ remoteRunner stop ].
 
 	^ job

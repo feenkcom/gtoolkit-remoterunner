@@ -179,10 +179,10 @@ GtRemoteRunner >> addCurrentlyExecutingTask: aGtRrTaskContext [
 ]
 
 { #category : #'api - worker' }
-GtRemoteRunner >> addObserver: aBlock [
+GtRemoteRunner >> addObserver: aBlock toWorkerId: workerId [
 	| worker |
-self halt.
-	worker := registeredWorkers at: PharoLinkServerCurrentConnection value.
+
+	worker := registeredWorkers at: workerId.
 	worker addObserver: aBlock.
 	self announceAndLog: (GtRrWorkerControlChannelRegisteredAnnouncement worker: worker).
 	worker observerWait.
@@ -581,28 +581,6 @@ GtRemoteRunner >> privateTaskFailed: aTaskContextId with: anGtRrTaskErrorDetails
 	self checkJobCompleted: taskContext.
 ]
 
-{ #category : #accessing }
-GtRemoteRunner >> registeredWorkerCount [
-
-	^ sharedAccess critical: [ registeredWorkers size ]
-]
-
-{ #category : #'private - debugging' }
-GtRemoteRunner >> registeredWorkers [
-	"Answer the registeredWorkers.
-	WARNING: This is outside sharedAccess and is for debugging purposes only."
-
-	^ registeredWorkers
-]
-
-{ #category : #enumerating }
-GtRemoteRunner >> registeredWorkersDo: aBlock [
-	"Evaluate aBlock for each of the receiver's registered workers.
-	Must be called within sharedAccess."
-
-	registeredWorkers do: aBlock
-]
-
 { #category : #'api - worker' }
 GtRemoteRunner >> registerWorkerWithDetails: aDictionary [
 	"Register the supplied worker and connection details.
@@ -623,6 +601,28 @@ GtRemoteRunner >> registerWorkerWithDetails: aDictionary [
 			worker: workerConnection).
 	"Answer a PharoLink primitive so that a proxy isn't created for the runner (which is a global, anyway)"
 	^ nil
+]
+
+{ #category : #accessing }
+GtRemoteRunner >> registeredWorkerCount [
+
+	^ sharedAccess critical: [ registeredWorkers size ]
+]
+
+{ #category : #'private - debugging' }
+GtRemoteRunner >> registeredWorkers [
+	"Answer the registeredWorkers.
+	WARNING: This is outside sharedAccess and is for debugging purposes only."
+
+	^ registeredWorkers
+]
+
+{ #category : #enumerating }
+GtRemoteRunner >> registeredWorkersDo: aBlock [
+	"Evaluate aBlock for each of the receiver's registered workers.
+	Must be called within sharedAccess."
+
+	registeredWorkers do: aBlock
 ]
 
 { #category : #'private - accessing' }
@@ -800,17 +800,24 @@ GtRemoteRunner >> taskDone: aTaskContextId with: anObject [
 		emit.
 
 	sharedAccess critical: 
-		[ taskContext := currentlyExecutingTasks removeKey: aTaskContextId.
-		taskContext result: anObject.
-		taskContext markTaskCompleted.
-		self announceAndLog: (GtRrTaskCompletedAnnouncement task: taskContext).
-		self assignTasksToWorkers.
-		self checkJobCompleted: taskContext ].
+		[ taskContext := currentlyExecutingTasks removeKey: aTaskContextId ifAbsent: [].
+		"If the task hasn't been found, assumed that it was terminated and move on"
+		taskContext ifNotNil:
+			[ taskContext result: anObject.
+			taskContext markTaskCompleted.
+			self announceAndLog: (GtRrTaskCompletedAnnouncement task: taskContext).
+			self checkJobCompleted: taskContext ].
+		self assignTasksToWorkers. ].
 
-	GtRrWorkerTraceAnnouncement new
-		worker: taskContext workerFuture connection;
-		message: 'taskDone:with: post';
-		emit.
+	taskContext ifNil:
+		[ GtRrWorkerTraceAnnouncement new
+			message: 'taskDone:with: task not found';
+			emit ]
+	ifNotNil:
+		[ GtRrWorkerTraceAnnouncement new
+			worker: taskContext workerFuture connection;
+			message: 'taskDone:with: post';
+			emit ].
 
 ]
 

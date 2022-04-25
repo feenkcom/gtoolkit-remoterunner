@@ -21,7 +21,7 @@ Class {
 GtRrWorkerConnectionStrategy class >> serverSocketAddress: aString worker: aGtRrWorker [
 
 	^ self new
-		llSocketAddress: (LanguageLinkSocketAddress from: aString);
+		socketAddress: aString;
 		worker: aGtRrWorker
 ]
 
@@ -56,6 +56,12 @@ GtRrWorkerConnectionStrategy >> newApplication [
 			   serverSocketAddress: llSocketAddress;
 			   debugMode: true;
 			   yourself)
+]
+
+{ #category : #accessing }
+GtRrWorkerConnectionStrategy >> socketAddress: aString [
+
+	self llSocketAddress: (LanguageLinkSocketAddress from: aString)
 ]
 
 { #category : #'start-stop' }

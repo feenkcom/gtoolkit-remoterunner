@@ -1,3 +1,6 @@
+"
+GtRrWorkerConnectionPerMessageStrategy creates a new connection for each call to {{gtMethod:GtRrWorkerConnectionPerMessageStrategy>>#connectDuring:}}.
+"
 Class {
 	#name : #GtRrWorkerConnectionPerMessageStrategy,
 	#superclass : #GtRrWorkerConnectionStrategy,
