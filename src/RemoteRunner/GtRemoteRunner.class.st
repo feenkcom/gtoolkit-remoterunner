@@ -754,7 +754,6 @@ GtRemoteRunner >> summaryAttributes [
 			nextPut: {'Currently Executing Jobs'. currentlyExecutingJobs size. currentlyExecutingJobs. };
 			nextPut: {'Currently Executing Tasks'. currentlyExecutingTasks size. currentlyExecutingTasks. };
 			nextPut: { 'Default Worker Timeout'. self workerTimeout. self. };
-			nextPut: { 'Default Job Timeout'. self jobTimeout. self. };
 			nextPut: { 'Default Task Timeout'. self taskTimeout. self. };
 			nextPut: { #Port. port. server. };
 			nextPut: { #Logging. log isNotNil. log. };
