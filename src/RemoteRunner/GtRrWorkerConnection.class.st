@@ -240,6 +240,8 @@ GtRrWorkerConnection >> removeObserver [
 { #category : #private }
 GtRrWorkerConnection >> sendControlMessage: aMessage [
 
+	observer ifNil: [ self error: 'The control channel hasn''t been enabled' ].
+
 	^ observer value: { aMessage selector. aMessage arguments. aMessage lookupClass }
 ]
 
@@ -248,6 +250,7 @@ GtRrWorkerConnection >> stop [
 
 	self hasObserver ifTrue: [ self removeObserver ].
 	connection stop.
+	self remoteRunner unregisterWorkerId: self workerId reason: 'Worker stopped'
 
 ]
 
@@ -268,4 +271,10 @@ GtRrWorkerConnection >> summaryAttributes [
 GtRrWorkerConnection >> timeoutManager [ 
 
 	^ remoteRunner timeoutManager 
+]
+
+{ #category : #accessing }
+GtRrWorkerConnection >> workerId [
+
+	^ details at: #id
 ]

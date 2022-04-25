@@ -424,6 +424,12 @@ GtRrJob >> summaryString [
 ]
 
 { #category : #accessing }
+GtRrJob >> taskCount [
+
+	^ self tasks size.
+]
+
+{ #category : #accessing }
 GtRrJob >> taskTimeout [
 	<return: #Duration>
 

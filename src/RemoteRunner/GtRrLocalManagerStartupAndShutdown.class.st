@@ -8,7 +8,8 @@ Class {
 		'watchDog',
 		'watchdogSemaphore',
 		'processes',
-		'workerCountCalculator'
+		'workerCountCalculator',
+		'connectionStrategyId'
 	],
 	#category : #'RemoteRunner-Runner'
 }
@@ -46,6 +47,21 @@ GtRrLocalManagerStartupAndShutdown >> autoRestart [
 GtRrLocalManagerStartupAndShutdown >> autoRestart: aBoolean [
 
 	autoRestart := aBoolean
+]
+
+{ #category : #accessing }
+GtRrLocalManagerStartupAndShutdown >> connectionStrategyId [
+	"Answer the id of the strategy used by the worker to connect to the runner.
+	For a list of valid values, see {{gtMethod:GtRrWorker class>>#commandLine}}"
+	<return: #Symbol>
+
+	^ connectionStrategyId
+]
+
+{ #category : #accessing }
+GtRrLocalManagerStartupAndShutdown >> connectionStrategyId: aSymbol [
+
+	connectionStrategyId := aSymbol
 ]
 
 { #category : #'gt-extension' }
@@ -174,7 +190,12 @@ GtRrLocalManagerStartupAndShutdown >> newWorkerLocalProcessArgumentsFor: someSet
 	remoteRunner debugMode ifTrue: [ args add: '--log' ].
 	args
 		add: '--serverSocketAddress';
-		add: remoteRunner port asString;
+		add: remoteRunner port asString.
+	connectionStrategyId ifNotNil:
+		[ args
+			add: '--connectionStrategy';
+			add: connectionStrategyId ].
+	args
 		add: '--detachChangesFromFileSystem';
 		add: '--noGtImageUpdate'.
 	^ args

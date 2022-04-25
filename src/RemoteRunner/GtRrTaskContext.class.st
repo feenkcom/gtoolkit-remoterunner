@@ -283,7 +283,7 @@ GtRrTaskContext >> terminateTask [
 
 { #category : #private }
 GtRrTaskContext >> timeoutContext [
-	"Terminate the receiver without timeout as the reason"
+	"Terminate the receiver with worker timeout as the reason"
 
 	task errorDetails: (GtRrErrorDetails new
 		errorMessage: 'Worker exceeded time limit';

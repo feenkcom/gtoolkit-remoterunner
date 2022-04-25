@@ -8,7 +8,8 @@ Class {
 		'process',
 		'remoteRunner',
 		'connection',
-		'details'
+		'details',
+		'uid'
 	],
 	#category : #'RemoteRunner-Examples'
 }
@@ -27,6 +28,13 @@ GtRrInImageWorker >> connection: aPharoLinkServerConnection [
 ]
 
 { #category : #accessing }
+GtRrInImageWorker >> currentProcessId [
+	"Answer the PID of this OS process"
+
+	^ GtOsSystemInfo current currentProcessId
+]
+
+{ #category : #accessing }
 GtRrInImageWorker >> details [
 
 	^ details
@@ -42,7 +50,13 @@ GtRrInImageWorker >> details: anObject [
 GtRrInImageWorker >> initialize [
 
 	super initialize.
-	details := Dictionary new.
+	uid := UUID new asString.
+	details := Dictionary new
+		at: #workingDirectory put: FileLocator workingDirectory resolve fullName;
+		at: #id put: uid;
+		at: #pid put: self currentProcessId;
+		at: #platform put: OSPlatform current name;
+		yourself.
 	connection := GtRrPseudoPharoLinkServerConnection new.
 ]
 
@@ -106,7 +120,8 @@ GtRrInImageWorker >> taskPoll [
 
 	PharoLinkServerCurrentConnection 
 		value: connection
-		during: [ serialisedTask := remoteRunner nextTaskSerializedForCurrentWorker ].
+		during: [ serialisedTask := remoteRunner nextTaskSerializedForWorkerId: 
+			(details at: #id) ].
 	^ LeJsonV4 uniqueInstance deserialize: serialisedTask readStream.
 ]
 
