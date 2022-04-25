@@ -18,7 +18,7 @@ GtRrJobExamples >> confirmAllTests: allTests [
 ]
 
 { #category : #examples }
-GtRrJobExamples >> jobTimeout [
+GtRrJobExamples >> defaultJobTimeout1Task [
 	"Demonstrate setting job timeouts"
 	<gtExample>
 	| runner job task jobContext taskContext |
@@ -33,14 +33,57 @@ GtRrJobExamples >> jobTimeout [
 		jobContext: jobContext;
 		task: task.
 
-	self assert: taskContext jobTimeout equals: runner defaultJobTimeout.
-	self assert: jobContext jobTimeout equals: runner defaultJobTimeout.
+	"The default jobTimeout is the sum of the task timeouts.
+	In this case there is 1 task with a default task timeout."
+	self assert: taskContext jobTimeout equals: runner defaultTaskTimeout.
+	self assert: jobContext jobTimeout equals: runner defaultTaskTimeout.
 
-	runner jobTimeout: runner defaultJobTimeout + 1 minute.
-	self assert: taskContext jobTimeout equals: runner jobTimeout.
-	self assert: jobContext jobTimeout equals: runner jobTimeout.
+	^ job
+]
 
-	job jobTimeout: runner jobTimeout + 1 minute.
+{ #category : #examples }
+GtRrJobExamples >> defaultJobTimeout2Tasks [
+	"Demonstrate setting job timeouts"
+	<gtExample>
+	| runner job task1 task2 jobContext taskContext |
+
+	runner := GtRemoteRunner new.
+	task1 := GtRrExampleValueTask new.
+	task2 := GtRrExampleValueTask new.
+	job := GtRrTasksJob new tasks: { task1. task2. }.
+	jobContext := GtRrJobContext new 
+		job: job;
+		remoteRunner: runner.
+	taskContext := GtRrTaskContext new
+		jobContext: jobContext;
+		task: task1.
+
+	"The default jobTimeout is the sum of the task timeouts.
+	In this case there is 1 task with a default task timeout."
+	self assert: taskContext jobTimeout equals: runner defaultTaskTimeout * 2.
+	self assert: jobContext jobTimeout equals: runner defaultTaskTimeout * 2.
+
+	^ job
+]
+
+{ #category : #examples }
+GtRrJobExamples >> explicitJobTimeout [
+	"Demonstrate setting job timeouts"
+	<gtExample>
+	| runner job task jobContext taskContext |
+
+	runner := GtRemoteRunner new.
+	task := GtRrExampleValueTask new.
+	job := GtRrTasksJob new tasks: { task }.
+	jobContext := GtRrJobContext new 
+		job: job;
+		remoteRunner: runner.
+	taskContext := GtRrTaskContext new
+		jobContext: jobContext;
+		task: task.
+
+	job jobTimeout: runner defaultTaskTimeout + 1 minute.
+
 	self assert: taskContext jobTimeout equals: job jobTimeout.
 	self assert: jobContext jobTimeout equals: job jobTimeout.
 	^ job

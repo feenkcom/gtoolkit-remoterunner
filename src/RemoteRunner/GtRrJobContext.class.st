@@ -9,7 +9,8 @@ Class {
 		'remoteRunner',
 		'jobTimeoutTime',
 		'taskContexts',
-		'taskCompletedCount'
+		'taskCompletedCount',
+		'jobTimeout'
 	],
 	#category : #'RemoteRunner-Runner-State'
 }
@@ -167,8 +168,11 @@ GtRrJobContext >> jobContext [
 
 { #category : #accessing }
 GtRrJobContext >> jobTimeout [
+	"Answer the job timeout.
+	If the timeout is not explicitly set, allow enough time for all tasks to run"
 
-	^ job jobTimeout ifNil: [ remoteRunner jobTimeout ]
+	^ jobTimeout ifNil: [ jobTimeout := job jobTimeout ifNil: 
+		[ self taskContexts inject: Duration zero into: [ :s :v | s + v taskTimeout ] ] ]
 ]
 
 { #category : #accessing }

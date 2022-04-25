@@ -114,6 +114,7 @@ GtRrWorkerExamples >> workerControlChannelCommandTimeout [
 		workerTimeout: 2 seconds.
 	runner managerStartupAndShutdown
 		poolSize: 1;
+		connectionStrategyId: #single;
 		autoRestart: false.
 	runner
 		when: GtRrWorkerControlChannelRegisteredAnnouncement 

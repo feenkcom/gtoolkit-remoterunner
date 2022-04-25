@@ -300,12 +300,6 @@ GtRemoteRunner >> debugMode [
 ]
 
 { #category : #accessing }
-GtRemoteRunner >> defaultJobTimeout [
-
-	^ (self taskTimeout asMilliSeconds * 4) milliSeconds
-]
-
-{ #category : #accessing }
 GtRemoteRunner >> defaultTaskTimeout [
 
 	^ 15 minutes
@@ -464,18 +458,6 @@ GtRemoteRunner >> jobStartupAndShutdown: aGtDtsJobStartupAndShutdown [
 
 	jobStartupAndShutdown := aGtDtsJobStartupAndShutdown.
 	jobStartupAndShutdown remoteRunner: self
-]
-
-{ #category : #accessing }
-GtRemoteRunner >> jobTimeout [
-
-	^ jobTimeout ifNil: [ jobTimeout := self defaultJobTimeout ]
-]
-
-{ #category : #accessing }
-GtRemoteRunner >> jobTimeout: anObject [
-
-	jobTimeout := anObject
 ]
 
 { #category : #'api - logger' }
