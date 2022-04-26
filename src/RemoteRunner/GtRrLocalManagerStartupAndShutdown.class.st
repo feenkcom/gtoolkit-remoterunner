@@ -194,7 +194,7 @@ GtRrLocalManagerStartupAndShutdown >> newWorkerLocalProcessArgumentsFor: someSet
 	connectionStrategyId ifNotNil:
 		[ args
 			add: '--connectionStrategy';
-			add: connectionStrategyId ].
+			add: connectionStrategyId asString ].
 	args
 		add: '--detachChangesFromFileSystem';
 		add: '--noGtImageUpdate'.
