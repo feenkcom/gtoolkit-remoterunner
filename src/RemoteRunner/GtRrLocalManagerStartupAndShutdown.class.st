@@ -194,7 +194,7 @@ GtRrLocalManagerStartupAndShutdown >> newWorkerLocalProcessArgumentsFor: someSet
 	connectionStrategyId ifNotNil:
 		[ args
 			add: '--connectionStrategy';
-			add: connectionStrategyId ].
+			add: connectionStrategyId asString ].
 	args
 		add: '--detachChangesFromFileSystem';
 		add: '--noGtImageUpdate'.
@@ -250,7 +250,7 @@ GtRrLocalManagerStartupAndShutdown >> shutdown [
 		on: ProcessAlreadyTerminating
 		do: [ "noop" ].
 	watchDog := nil.
-	processes do: #kill.
+	processes do: #terminate.
 	remoteRunner debugMode ifFalse:
 		[ processes removeAll ].
 	super shutdown.
