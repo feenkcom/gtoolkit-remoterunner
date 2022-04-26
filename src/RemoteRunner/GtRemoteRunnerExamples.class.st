@@ -338,6 +338,7 @@ GtRemoteRunnerExamples >> simpleTask [
 GtRemoteRunnerExamples >> simpleTestTask [
 	"Demonstrate executing a simple test task"
 	<gtExample>
+	<noTest>
 
 	| remoteRunner job taskFailedCount taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount times |
 
