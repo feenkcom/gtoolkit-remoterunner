@@ -448,6 +448,14 @@ GtRemoteRunner >> isRunning [
 ]
 
 { #category : #accessing }
+GtRemoteRunner >> jobContextForJob: aGtRrJob [
+	"Answer the context for the supplied job"
+
+	^ sharedAccess critical:
+		[ currentlyExecutingJobs at: aGtRrJob id ].
+]
+
+{ #category : #accessing }
 GtRemoteRunner >> jobStartupAndShutdown [
 
 	^ jobStartupAndShutdown
