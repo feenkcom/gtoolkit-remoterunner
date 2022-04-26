@@ -261,6 +261,7 @@ GtRemoteRunnerExamples >> multipleJobsSimultaneously [
 
 	workerConnections := remoteRunner registeredWorkers values.
 	workerConnections do: [ :workerConnection |
+		500 milliSeconds wait.
 		retryCount := 10.
 		[ currentTask := workerConnection commandCurrentTaskContextId.
 		retryCount := retryCount - 1.
