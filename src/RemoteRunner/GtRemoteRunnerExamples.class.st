@@ -6,8 +6,8 @@ Note: Pharo appears to have problems when listening on a socket for connections,
 Class {
 	#name : #GtRemoteRunnerExamples,
 	#superclass : #Object,
-	#traits : 'TAssertable',
-	#classTraits : 'TAssertable classTrait',
+	#traits : 'TAssertable + TGtRrExampleHelp',
+	#classTraits : 'TAssertable classTrait + TGtRrExampleHelp classTrait',
 	#category : #'RemoteRunner-Examples'
 }
 
@@ -42,7 +42,8 @@ GtRemoteRunnerExamples >> assignTasksToWorkersTaskFirst [
 			remoteRunner: remoteRunner;
 			start ].
 
-	semaphore wait.
+	self waitOn: semaphore for: 10 
+		description: 'Job never completed'.
 	self assert: job results size equals: 6.
 	self assert: taskCompletedCount equals: 5.
 	self assert: taskFailedCount equals: 1.
@@ -84,7 +85,8 @@ GtRemoteRunnerExamples >> assignTasksToWorkersWorkerFirst [
 			do: [ taskFailedCount := taskFailedCount + 1 ].
 	remoteRunner submitJob: job.
 
-	semaphore wait.
+	self waitOn: semaphore for: 10
+		description: 'Job never completed'.
 	self assert: job results size equals: 6.
 	self assert: taskCompletedCount equals: 5.
 	self assert: taskFailedCount equals: 1.
@@ -109,38 +111,13 @@ GtRemoteRunnerExamples >> controlChannelPing [
 		worker := ann worker.
 		controlChannelSemaphore signal ].
 	remoteRunner start.
-	[ controlChannelSemaphore wait.
+	[ self waitOn: controlChannelSemaphore for: 10
+		description: 'Control channel never registered'.
 	self assert: remoteRunner registeredWorkerCount equals: 1.
 	self
 		assert: worker commandPing
 		equals: #ping.
 	self assert: remoteRunner registeredWorkerCount equals: 1.
-	] ensure: [ remoteRunner stop ].
-
-	^ worker
-]
-
-{ #category : #examples }
-GtRemoteRunnerExamples >> controlChannelQuitSmalltalk [
-	"Demonstrate the ping operation using the worker's control channel"
-	"This currently locks the image.  To be fixed (or removed)"
-	"<gtExample>"
-	| remoteRunner controlChannelSemaphore worker |
-
-	controlChannelSemaphore := GtMutualExclusionSemaphore new.
-	remoteRunner := GtRemoteRunner new port: 7090.
-	remoteRunner managerStartupAndShutdown poolSize: 1.
-	remoteRunner when: GtRrWorkerControlChannelRegisteredAnnouncement do: [ :ann | 
-		worker := ann worker.
-		controlChannelSemaphore signal ].
-	remoteRunner when: GtRrWorkerUnregisteredAnnouncement do: [ :ann | 
-		controlChannelSemaphore signal ].
-	remoteRunner start.
-	[ controlChannelSemaphore wait.
-	self assert: remoteRunner registeredWorkerCount equals: 1.
-	worker commandQuitSmalltalk.
-	controlChannelSemaphore wait.
-	self assert: remoteRunner registeredWorkerCount equals: 0.
 	] ensure: [ remoteRunner stop ].
 
 	^ worker
@@ -189,7 +166,6 @@ GtRemoteRunnerExamples >> getNextTaskFor [
 GtRemoteRunnerExamples >> multipleJobs [
 	"Demonstrate executing a multiple jobs"
 	<gtExample>
-
 	| remoteRunner job jobs completingTask taskFailedCount taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount |
 
 	jobStartedCount := jobCompletedCount := taskStartedCount := taskCompletedCount := taskFailedCount := 0.
@@ -218,7 +194,7 @@ GtRemoteRunnerExamples >> multipleJobs [
 				[ taskFailedCount := taskFailedCount + 1 ].
 		job ].
 	jobs do: [ :aJob | remoteRunner submitJob: aJob ].
-	2 timesRepeat: [ jobSemaphore wait ].
+	2 timesRepeat: [ self waitOn: jobSemaphore for: 10 description: 'Job didn''t complete in time' ].
 
 	self assert: remoteRunner currentlyExecutingJobs size equals: 0.
 	self assert: remoteRunner currentlyExecutingTasks size equals: 0.
@@ -256,7 +232,7 @@ GtRemoteRunnerExamples >> multipleJobsSimultaneously [
 		job when: GtRrTaskStartedAnnouncement do: [ semaphore signal ].
 		job ].
 	jobs do: [ :aJob | remoteRunner submitJob: aJob ].
-	2 timesRepeat: [ semaphore wait ].
+	2 timesRepeat: [ self waitOn: semaphore for: 10 description: 'Job didn''t start in time' ].
 
 	workerConnections := remoteRunner registeredWorkers values.
 	workerConnections do: [ :workerConnection |
@@ -313,7 +289,7 @@ GtRemoteRunnerExamples >> simpleTask [
 			[ taskFailedCount := taskFailedCount + 1.
 			times add: 2 -> DateAndTime now. ].
 	remoteRunner submitJob: job.
-	jobSemaphore wait.
+	self waitOn: jobSemaphore for: 10 description: 'Job didn''t complete in time'.
 
 	self assert: remoteRunner taskQueue size equals: 0.
 	self assert: remoteRunner currentlyExecutingJobs size equals: 0.
@@ -367,7 +343,7 @@ GtRemoteRunnerExamples >> simpleTestTask [
 			[ taskFailedCount := taskFailedCount + 1.
 			times add: 2 -> DateAndTime now. ].
 	remoteRunner submitJob: job.
-	jobSemaphore wait.
+	self waitOn: jobSemaphore for: 10 description: 'Job didn''t complete in time'.
 
 	self assert: remoteRunner taskQueue size equals: 0.
 	self assert: remoteRunner currentlyExecutingJobs size equals: 0.
@@ -431,7 +407,7 @@ GtRemoteRunnerExamples >> terminateStartedJobWithControlChannel [
 			times add: 2 -> DateAndTime now ].
 
 	remoteRunner submitJob: job.
-	semaphore wait.
+	self waitOn: semaphore for: 10 description: 'Task didn''t start in time'.
 	workerConnection := remoteRunner registeredWorkers anyOne.
 	retryCount := 10.
 	[ currentTask := workerConnection commandCurrentTaskContextId.
@@ -445,7 +421,7 @@ GtRemoteRunnerExamples >> terminateStartedJobWithControlChannel [
 	self assert: remoteRunner taskQueue size equals: 2.
 
 	remoteRunner terminateJobId: job id.
-	semaphore wait.
+	self waitOn: semaphore for: 10 description: 'Job didn''t terminate in time'.
 
 	self assert: remoteRunner currentlyExecutingJobs size equals: 0.
 	self assert: remoteRunner currentlyExecutingTasks size equals: 0.
@@ -506,14 +482,14 @@ GtRemoteRunnerExamples >> terminateStartedJobWithoutControlChannel [
 			[ taskFailedCount := taskFailedCount + 1 ].
 
 	remoteRunner submitJob: job.
-	semaphore wait.
+	self waitOn: semaphore for: 10 description: 'Task didn''t start in time'.
 
 	self assert: remoteRunner currentlyExecutingJobs size equals: 1.
 	self assert: remoteRunner currentlyExecutingTasks size equals: 1.
 	self assert: remoteRunner taskQueue size equals: 2.
 
 	remoteRunner terminateJobId: job id.
-	semaphore wait.
+	self waitOn: semaphore for: 10 description: 'Job didn''t terminate in time'.
 
 	waitForTaskCompletion ifTrue:
 		[ (taskWaitTime + 5) seconds wait.
@@ -569,7 +545,7 @@ GtRemoteRunnerExamples >> timeoutJob [
 		when: GtRrTaskFailedAnnouncement do: 
 			[ taskFailedCount := taskFailedCount + 1. ].
 	remoteRunner submitJob: job.
-	jobSemaphore wait.
+	self waitOn: jobSemaphore for: 10 description: 'Job didn''t complete in time'.
 
 	self assert: remoteRunner currentlyExecutingJobs size equals: 0.
 	self assert: remoteRunner currentlyExecutingTasks size equals: 0.
@@ -633,12 +609,12 @@ GtRemoteRunnerExamples >> timeoutTask [
 			taskFailedSemaphore signal. ].
 	remoteRunner submitJob: job.
 	"When the task has failed, trigger the watchdog to start a new worker, which will run the second task"
-	taskFailedSemaphore wait.
+	self waitOn: taskFailedSemaphore for: 10 description: 'Task didn''t fail in time'.
 	[ "Give the process time to die and be registered by the subprocess.
 	If this isn't enough time, it will be caught on the next cycle (just take longer)."
 		2 seconds wait.
 		remoteRunner managerStartupAndShutdown signalWatchdog ] fork.
-	jobSemaphore wait.
+	self waitOn: jobSemaphore for: 40 description: 'Job didn''t complete in time'.
 
 	self assert: remoteRunner currentlyExecutingJobs size equals: 0.
 	self assert: remoteRunner currentlyExecutingTasks size equals: 0.
@@ -698,8 +674,8 @@ GtRemoteRunnerExamples >> timeoutWorker [
 			times add: 2 -> DateAndTime now.
 			taskFailedSemaphore signal. ].
 	remoteRunner submitJob: job.
-	taskFailedSemaphore wait.
-	jobSemaphore wait.
+	self waitOn: taskFailedSemaphore for: 10 description: 'Task didn''t fail in time'.
+	self waitOn: jobSemaphore for: 40 description: 'Job didn''t complete in time'.
 
 	self assert: remoteRunner currentlyExecutingJobs size equals: 0.
 	self assert: remoteRunner currentlyExecutingTasks size equals: 0.
@@ -730,7 +706,7 @@ GtRemoteRunnerExamples >> workerDetails [
 		worker := ann worker.
 		registeredSemaphore signal ].
 	remoteRunner start.
-	[ registeredSemaphore wait.
+	[ self waitOn: registeredSemaphore for: 10 description: 'Worker didn''t register in time'.
 	self assert: remoteRunner registeredWorkerCount equals: 1.
 	self
 		assert: (worker details at: #workingDirectory)
