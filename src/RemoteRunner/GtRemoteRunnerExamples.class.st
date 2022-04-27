@@ -98,7 +98,6 @@ GtRemoteRunnerExamples >> assignTasksToWorkersWorkerFirst [
 GtRemoteRunnerExamples >> controlChannelPing [
 	"Demonstrate the ping operation using the worker's control channel"
 	<gtExample>
-	<noTest>
 	| remoteRunner controlChannelSemaphore worker |
 
 	controlChannelSemaphore := GtMutualExclusionSemaphore new.
@@ -190,7 +189,6 @@ GtRemoteRunnerExamples >> getNextTaskFor [
 GtRemoteRunnerExamples >> multipleJobs [
 	"Demonstrate executing a multiple jobs"
 	<gtExample>
-	<noTest>
 
 	| remoteRunner job jobs completingTask taskFailedCount taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount |
 
@@ -239,7 +237,6 @@ GtRemoteRunnerExamples >> multipleJobs [
 GtRemoteRunnerExamples >> multipleJobsSimultaneously [
 	"Demonstrate executing multiple jobs started simultaneously"
 	<gtExample>
-	<noTest>
 
 	| remoteRunner job jobs semaphore workerConnections retryCount currentTask |
 
@@ -283,7 +280,6 @@ GtRemoteRunnerExamples >> multipleJobsSimultaneously [
 GtRemoteRunnerExamples >> simpleTask [
 	"Demonstrate executing a simple task"
 	<gtExample>
-	<noTest>
 	| remoteRunner job completingTask taskFailedCount taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount times |
 
 	jobStartedCount := jobCompletedCount := taskStartedCount := taskCompletedCount := taskFailedCount := 0.
@@ -340,8 +336,6 @@ GtRemoteRunnerExamples >> simpleTask [
 GtRemoteRunnerExamples >> simpleTestTask [
 	"Demonstrate executing a simple test task"
 	<gtExample>
-	<noTest>
-
 	| remoteRunner job taskFailedCount taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount times |
 
 	jobStartedCount := jobCompletedCount := taskStartedCount := taskCompletedCount := taskFailedCount := 0.
@@ -395,7 +389,6 @@ GtRemoteRunnerExamples >> simpleTestTask [
 GtRemoteRunnerExamples >> terminateStartedJobWithControlChannel [
 	"Terminate a job that has been started, ensuring that all tasks have been marked as terminated"
 	<gtExample>
-	<noTest>
 	| remoteRunner job tasks taskFailedCount taskCompletedCount jobCompletedCount semaphore jobStartedCount taskStartedCount times workerConnection currentTask retryCount |
 
 	jobStartedCount := jobCompletedCount := taskStartedCount := taskCompletedCount := taskFailedCount := 0.
@@ -475,7 +468,6 @@ GtRemoteRunnerExamples >> terminateStartedJobWithControlChannel [
 GtRemoteRunnerExamples >> terminateStartedJobWithoutControlChannel [
 	"Terminate a job that has been started, ensuring that all tasks have been marked as terminated"
 	<gtExample>
-	<noTest>
 	| remoteRunner job tasks taskFailedCount taskCompletedCount jobCompletedCount semaphore jobStartedCount taskStartedCount waitForTaskCompletion taskWaitTime |
 
 	"Waiting for the task to complete is slow and may fail if the processor is very busy,
@@ -549,7 +541,6 @@ GtRemoteRunnerExamples >> terminateStartedJobWithoutControlChannel [
 GtRemoteRunnerExamples >> timeoutJob [
 	"Demonstrate terminating a job due to it timing out"
 	<gtExample>
-	<noTest>
 	| remoteRunner job tasks taskFailedCount taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount |
 
 	jobStartedCount := jobCompletedCount := taskStartedCount := taskCompletedCount := taskFailedCount := 0.
@@ -601,7 +592,6 @@ GtRemoteRunnerExamples >> timeoutJob [
 GtRemoteRunnerExamples >> timeoutTask [
 	"Demonstrate terminating a task due to it timing out"
 	<gtExample>
-	<noTest>
 	| remoteRunner job completingTask timeoutTask taskFailedCount taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount times taskFailedSemaphore |
 
 	jobStartedCount := jobCompletedCount := taskStartedCount := taskCompletedCount := taskFailedCount := 0.
@@ -610,7 +600,6 @@ GtRemoteRunnerExamples >> timeoutTask [
 	times := OrderedCollection new.
 	remoteRunner := GtRemoteRunner new port: 7088.
 	remoteRunner managerStartupAndShutdown poolSize: 1.
-	self assert: remoteRunner jobTimeout > 1 minute.
 	self assert: remoteRunner workerTimeout > 1 minute.
 	remoteRunner startLogging.
 	remoteRunner start.
@@ -671,7 +660,6 @@ GtRemoteRunnerExamples >> timeoutTask [
 GtRemoteRunnerExamples >> timeoutWorker [
 	"Demonstrate terminating a worker due to it timing out"
 	<gtExample>
-	<noTest>
 	| remoteRunner job timeoutTask taskFailedCount taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount times taskFailedSemaphore |
 
 	jobStartedCount := jobCompletedCount := taskStartedCount := taskCompletedCount := taskFailedCount := 0.
@@ -682,7 +670,6 @@ GtRemoteRunnerExamples >> timeoutWorker [
 	remoteRunner managerStartupAndShutdown poolSize: 1.
 	remoteRunner workerTimeout: 3 seconds.
 	remoteRunner startLogging.
-	self assert: remoteRunner jobTimeout > 1 minute.
 	remoteRunner start.
 	[ 
 	"Create a set of tasks that never complete"
@@ -734,8 +721,6 @@ GtRemoteRunnerExamples >> timeoutWorker [
 GtRemoteRunnerExamples >> workerDetails [
 	"Demonstrate retrieving the remote worker's details"
 	<gtExample>
-	<noTest>
-
 	| remoteRunner registeredSemaphore worker |
 
 	registeredSemaphore := GtMutualExclusionSemaphore new.
