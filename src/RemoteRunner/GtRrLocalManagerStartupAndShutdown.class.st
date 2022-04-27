@@ -137,32 +137,16 @@ GtRrLocalManagerStartupAndShutdown >> newInMemoryWorkerLocalProcess [
 
 { #category : #private }
 GtRrLocalManagerStartupAndShutdown >> newLogFileWorkerLocalProcess [
-	| settings builder shellCommand command args process |
+	| settings builder process logFile |
 
 	settings := LanguageLinkSettings pharoDefaultSettings.
-	OSPlatform current isWindows ifTrue: 
-		[ shellCommand := 'cmd'.
-		args := OrderedCollection with: '/C' ]
-	ifFalse: 
-		[ shellCommand := 'sh'.
-		args := OrderedCollection with: '-c' ].
-	command := String streamContents: [ :stream |
-		stream
-			<< settings serverExecutable fullName;
-			<< ' '.
-		(self newWorkerLocalProcessArgumentsFor: settings)
-			do: [ :arg | stream << arg ]
-			separatedBy: [ stream space ].
-		workerIndex := workerIndex + 1.
-		stream
-			<< ' > worker.';
-			print: workerIndex;
-			<< '.log 2>&1' ].
-	args add: command.
-
+	workerIndex := workerIndex + 1.
+	logFile := ('worker.', workerIndex asString, '.log') asFileReference.
 	builder := GtExternalProcessBuilder new
-		command: shellCommand;
-		args: args;
+		command: settings serverExecutable fullName;
+		args: (self newWorkerLocalProcessArgumentsFor: settings);
+		fileStdout: logFile;
+		fileStderr: logFile;
 		workingDirectory: settings workingDirectory resolve fullName.
 	process := builder createNativeCommand spawn.
 	process terminateOnShutdown.
