@@ -190,6 +190,7 @@ GtRemoteRunnerExamples >> getNextTaskFor [
 GtRemoteRunnerExamples >> multipleJobs [
 	"Demonstrate executing a multiple jobs"
 	<gtExample>
+	<noTest>
 
 	| remoteRunner job jobs completingTask taskFailedCount taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount |
 
@@ -282,6 +283,7 @@ GtRemoteRunnerExamples >> multipleJobsSimultaneously [
 GtRemoteRunnerExamples >> simpleTask [
 	"Demonstrate executing a simple task"
 	<gtExample>
+	<noTest>
 	| remoteRunner job completingTask taskFailedCount taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount times |
 
 	jobStartedCount := jobCompletedCount := taskStartedCount := taskCompletedCount := taskFailedCount := 0.
@@ -732,6 +734,7 @@ GtRemoteRunnerExamples >> timeoutWorker [
 GtRemoteRunnerExamples >> workerDetails [
 	"Demonstrate retrieving the remote worker's details"
 	<gtExample>
+	<noTest>
 
 	| remoteRunner registeredSemaphore worker |
 
