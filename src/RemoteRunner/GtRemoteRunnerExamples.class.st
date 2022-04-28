@@ -107,12 +107,14 @@ GtRemoteRunnerExamples >> controlChannelPing [
 	remoteRunner managerStartupAndShutdown 
 		poolSize: 1;
 		connectionStrategyId: #single.
+	"Worker processes can be slow to start up if the machine is busy or the image is large (multi GB).
+	Wait for the worker to register before proceeding with tests."
 	remoteRunner when: GtRrWorkerControlChannelRegisteredAnnouncement do: [ :ann | 
 		worker := ann worker.
 		controlChannelSemaphore signal ].
 	remoteRunner start.
-	[ self waitOn: controlChannelSemaphore for: 10
-		description: 'Control channel never registered'.
+	[ self waitOn: controlChannelSemaphore for: 20
+		description: 'Control channel didn''t register in time'.
 	self assert: remoteRunner registeredWorkerCount equals: 1.
 	self
 		assert: worker commandPing
@@ -166,15 +168,20 @@ GtRemoteRunnerExamples >> getNextTaskFor [
 GtRemoteRunnerExamples >> multipleJobs [
 	"Demonstrate executing a multiple jobs"
 	<gtExample>
-	| remoteRunner job jobs completingTask taskFailedCount taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount |
+	| remoteRunner job jobs completingTask taskFailedCount taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount workerRegisteredSemaphore |
 
 	jobStartedCount := jobCompletedCount := taskStartedCount := taskCompletedCount := taskFailedCount := 0.
 	jobSemaphore := GtMutualExclusionSemaphore new.
+	workerRegisteredSemaphore := Semaphore new.
 	remoteRunner := GtRemoteRunner new port: 7092.
-	remoteRunner 
-		startLogging;
-		start.
-	[ 
+	remoteRunner managerStartupAndShutdown poolSize: 2.
+	"Worker processes can be slow to start up if the machine is busy or the image is large (multi GB).
+	Wait for the worker to register before proceeding with tests."
+	remoteRunner when: GtRrWorkerRegisteredAnnouncement do: [ :ann | 
+		workerRegisteredSemaphore signal ].
+	remoteRunner start.
+	[ self waitOn: workerRegisteredSemaphore for: 20
+		description: 'Worker didn''t register in time'.
 	jobs := (1 to: 2) collect: [  :i |
 		completingTask := GtRrScriptTask script: '#done'.
 		job := GtRrTasksJob new tasks: { completingTask }.
@@ -214,19 +221,22 @@ GtRemoteRunnerExamples >> multipleJobsSimultaneously [
 	"Demonstrate executing multiple jobs started simultaneously"
 	<gtExample>
 
-	| remoteRunner job jobs semaphore workerConnections retryCount currentTask |
+	| remoteRunner job jobs semaphore workerConnections retryCount currentTask workerRegisteredSemaphore |
 
 	semaphore := GtMutualExclusionSemaphore new.
-	remoteRunner := GtRemoteRunner new.
+	workerRegisteredSemaphore := Semaphore new.
+	remoteRunner := GtRemoteRunner new port: 7084.
 	"This example relies on the control channel, so force a single connection."
 	remoteRunner managerStartupAndShutdown 
 		poolSize: 2;
 		connectionStrategyId: #single.
-	remoteRunner 
-		port: 7084;
-		startLogging;
-		start.
-	[ 
+	"Worker processes can be slow to start up if the machine is busy or the image is large (multi GB).
+	Wait for the worker to register before proceeding with tests."
+	remoteRunner when: GtRrWorkerRegisteredAnnouncement do: [ :ann | 
+		workerRegisteredSemaphore signal ].
+	remoteRunner start.
+	[ self waitOn: workerRegisteredSemaphore for: 20
+		description: 'Worker didn''t register in time'.
 	jobs := (1 to: 2) collect: [  :i |
 		job := GtRrJob script: 'Semaphore new wait'.
 		job when: GtRrTaskStartedAnnouncement do: [ semaphore signal ].
@@ -256,16 +266,21 @@ GtRemoteRunnerExamples >> multipleJobsSimultaneously [
 GtRemoteRunnerExamples >> simpleTask [
 	"Demonstrate executing a simple task"
 	<gtExample>
-	| remoteRunner job completingTask taskFailedCount taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount times |
+	| remoteRunner job completingTask taskFailedCount taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount times workerRegisteredSemaphore |
 
 	jobStartedCount := jobCompletedCount := taskStartedCount := taskCompletedCount := taskFailedCount := 0.
 	jobSemaphore := GtMutualExclusionSemaphore new.
+	workerRegisteredSemaphore := Semaphore new.
 	times := OrderedCollection new.
 	remoteRunner := GtRemoteRunner new port: 7091.
 	remoteRunner managerStartupAndShutdown poolSize: 1.
-	remoteRunner startLogging.
+	"Worker processes can be slow to start up if the machine is busy or the image is large (multi GB).
+	Wait for the worker to register before proceeding with tests."
+	remoteRunner when: GtRrWorkerRegisteredAnnouncement do: [ :ann | 
+		workerRegisteredSemaphore signal ].
 	remoteRunner start.
-	[ 
+	[ self waitOn: workerRegisteredSemaphore for: 20
+		description: 'Worker didn''t register in time'.
 	completingTask := GtRrScriptTask script: '#done'.
 	job := GtRrTasksJob new tasks: { completingTask }.
 	job
@@ -312,15 +327,21 @@ GtRemoteRunnerExamples >> simpleTask [
 GtRemoteRunnerExamples >> simpleTestTask [
 	"Demonstrate executing a simple test task"
 	<gtExample>
-	| remoteRunner job taskFailedCount taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount times |
+	| remoteRunner job taskFailedCount taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount times workerRegisteredSemaphore |
 
 	jobStartedCount := jobCompletedCount := taskStartedCount := taskCompletedCount := taskFailedCount := 0.
 	jobSemaphore := GtMutualExclusionSemaphore new.
+	workerRegisteredSemaphore := Semaphore new.
 	times := OrderedCollection new.
 	remoteRunner := GtRemoteRunner new port: 7093.
 	remoteRunner managerStartupAndShutdown poolSize: 1.
+	"Worker processes can be slow to start up if the machine is busy or the image is large (multi GB).
+	Wait for the worker to register before proceeding with tests."
+	remoteRunner when: GtRrWorkerRegisteredAnnouncement do: [ :ann | 
+		workerRegisteredSemaphore signal ].
 	remoteRunner start.
-	[ 
+	[ self waitOn: workerRegisteredSemaphore for: 20
+		description: 'Worker didn''t register in time'.
 	job := GtRrTestsJob new testNames: { #GtRrSampleTest -> #testPass }.
 	job
 		when: GtRrJobStartedAnnouncement do: 
@@ -365,10 +386,11 @@ GtRemoteRunnerExamples >> simpleTestTask [
 GtRemoteRunnerExamples >> terminateStartedJobWithControlChannel [
 	"Terminate a job that has been started, ensuring that all tasks have been marked as terminated"
 	<gtExample>
-	| remoteRunner job tasks taskFailedCount taskCompletedCount jobCompletedCount semaphore jobStartedCount taskStartedCount times workerConnection currentTask retryCount |
+	| remoteRunner job tasks taskFailedCount taskCompletedCount jobCompletedCount semaphore jobStartedCount taskStartedCount times workerConnection currentTask retryCount workerRegisteredSemaphore |
 
 	jobStartedCount := jobCompletedCount := taskStartedCount := taskCompletedCount := taskFailedCount := 0.
 	semaphore := GtMutualExclusionSemaphore new.
+	workerRegisteredSemaphore := Semaphore new.
 	times := OrderedCollection new.
 	remoteRunner := GtRemoteRunner new 
 		port: 7084;
@@ -377,8 +399,13 @@ GtRemoteRunnerExamples >> terminateStartedJobWithControlChannel [
 	remoteRunner managerStartupAndShutdown 
 		poolSize: 1;
 		connectionStrategyId: #single.
+	"Worker processes can be slow to start up if the machine is busy or the image is large (multi GB).
+	Wait for the worker to register before proceeding with tests."
+	remoteRunner when: GtRrWorkerRegisteredAnnouncement do: [ :ann | 
+		workerRegisteredSemaphore signal ].
 	remoteRunner start.
-	[ 
+	[ self waitOn: workerRegisteredSemaphore for: 20
+		description: 'Worker didn''t register in time'.
 	"Create a set of tasks that never complete"
 	tasks := (1 to: 3) collect: [ :i |
 		GtRrScriptTask script: 'Semaphore new wait' ].
@@ -444,7 +471,7 @@ GtRemoteRunnerExamples >> terminateStartedJobWithControlChannel [
 GtRemoteRunnerExamples >> terminateStartedJobWithoutControlChannel [
 	"Terminate a job that has been started, ensuring that all tasks have been marked as terminated"
 	<gtExample>
-	| remoteRunner job tasks taskFailedCount taskCompletedCount jobCompletedCount semaphore jobStartedCount taskStartedCount waitForTaskCompletion taskWaitTime |
+	| remoteRunner job tasks taskFailedCount taskCompletedCount jobCompletedCount semaphore jobStartedCount taskStartedCount waitForTaskCompletion taskWaitTime workerRegisteredSemaphore |
 
 	"Waiting for the task to complete is slow and may fail if the processor is very busy,
 	so this is normally only set true for manual testing."
@@ -452,12 +479,18 @@ GtRemoteRunnerExamples >> terminateStartedJobWithoutControlChannel [
 	taskWaitTime := 15. "seconds"
 	jobStartedCount := jobCompletedCount := taskStartedCount := taskCompletedCount := taskFailedCount := 0.
 	semaphore := GtMutualExclusionSemaphore new.
+	workerRegisteredSemaphore := Semaphore new.
 	remoteRunner := GtRemoteRunner new 
 		port: 7084;
 		startLogging.
 	remoteRunner managerStartupAndShutdown poolSize: 1.
+	"Worker processes can be slow to start up if the machine is busy or the image is large (multi GB).
+	Wait for the worker to register before proceeding with tests."
+	remoteRunner when: GtRrWorkerRegisteredAnnouncement do: [ :ann | 
+		workerRegisteredSemaphore signal ].
 	remoteRunner start.
-	[ 
+	[ self waitOn: workerRegisteredSemaphore for: 20
+		description: 'Worker didn''t register in time'.
 	"Create a set of tasks that never complete"
 	tasks := (1 to: 3) collect: [ :i |
 		(GtRrScriptTask script: taskWaitTime asString, ' seconds wait')
@@ -517,13 +550,20 @@ GtRemoteRunnerExamples >> terminateStartedJobWithoutControlChannel [
 GtRemoteRunnerExamples >> timeoutJob [
 	"Demonstrate terminating a job due to it timing out"
 	<gtExample>
-	| remoteRunner job tasks taskFailedCount taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount |
+	| remoteRunner job tasks taskFailedCount taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount workerRegisteredSemaphore |
 
 	jobStartedCount := jobCompletedCount := taskStartedCount := taskCompletedCount := taskFailedCount := 0.
 	jobSemaphore := GtMutualExclusionSemaphore new.
+	workerRegisteredSemaphore := Semaphore new.
 	remoteRunner := GtRemoteRunner new port: 7087.
+	remoteRunner managerStartupAndShutdown poolSize: 1.
+	"Worker processes can be slow to start up if the machine is busy or the image is large (multi GB).
+	Wait for the worker to register before proceeding with tests."
+	remoteRunner when: GtRrWorkerRegisteredAnnouncement do: [ :ann | 
+		workerRegisteredSemaphore signal ].
 	remoteRunner start.
-	[ 
+	[ self waitOn: workerRegisteredSemaphore for: 20
+		description: 'Worker didn''t register in time'.
 	"Create a set of tasks that never complete"
 	tasks := (1 to: 3) collect: [ :i |
 		GtRrScriptTask script: 'Semaphore new wait' ] as: OrderedCollection.
@@ -568,18 +608,24 @@ GtRemoteRunnerExamples >> timeoutJob [
 GtRemoteRunnerExamples >> timeoutTask [
 	"Demonstrate terminating a task due to it timing out"
 	<gtExample>
-	| remoteRunner job completingTask timeoutTask taskFailedCount taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount times taskFailedSemaphore |
+	| remoteRunner job completingTask timeoutTask taskFailedCount taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount times taskFailedSemaphore workerRegisteredSemaphore |
 
 	jobStartedCount := jobCompletedCount := taskStartedCount := taskCompletedCount := taskFailedCount := 0.
 	jobSemaphore := GtMutualExclusionSemaphore new.
 	taskFailedSemaphore := Semaphore new.
+	workerRegisteredSemaphore := Semaphore new.
 	times := OrderedCollection new.
 	remoteRunner := GtRemoteRunner new port: 7088.
 	remoteRunner managerStartupAndShutdown poolSize: 1.
 	self assert: remoteRunner workerTimeout > 1 minute.
 	remoteRunner startLogging.
+	"Worker processes can be slow to start up if the machine is busy or the image is large (multi GB).
+	Wait for the worker to register before proceeding with tests."
+	remoteRunner when: GtRrWorkerRegisteredAnnouncement do: [ :ann | 
+		workerRegisteredSemaphore signal ].
 	remoteRunner start.
-	[ 
+	[ self waitOn: workerRegisteredSemaphore for: 20
+		description: 'Worker didn''t register in time'.
 	"Create a task that never completes"
 	timeoutTask := GtRrScriptTask script: 'Semaphore new wait'.
 	timeoutTask taskTimeout: 200 milliSeconds.
@@ -636,18 +682,24 @@ GtRemoteRunnerExamples >> timeoutTask [
 GtRemoteRunnerExamples >> timeoutWorker [
 	"Demonstrate terminating a worker due to it timing out"
 	<gtExample>
-	| remoteRunner job timeoutTask taskFailedCount taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount times taskFailedSemaphore |
+	| remoteRunner job timeoutTask taskFailedCount taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount times taskFailedSemaphore workerRegisteredSemaphore |
 
 	jobStartedCount := jobCompletedCount := taskStartedCount := taskCompletedCount := taskFailedCount := 0.
 	jobSemaphore := GtMutualExclusionSemaphore new.
+	workerRegisteredSemaphore := Semaphore new.
 	taskFailedSemaphore := Semaphore new.
 	times := OrderedCollection new.
 	remoteRunner := GtRemoteRunner new port: 7085.
 	remoteRunner managerStartupAndShutdown poolSize: 1.
 	remoteRunner workerTimeout: 3 seconds.
 	remoteRunner startLogging.
+	"Worker processes can be slow to start up if the machine is busy or the image is large (multi GB).
+	Wait for the worker to register before proceeding with tests."
+	remoteRunner when: GtRrWorkerRegisteredAnnouncement do: [ :ann | 
+		workerRegisteredSemaphore signal ].
 	remoteRunner start.
-	[ 
+	[ self waitOn: workerRegisteredSemaphore for: 20
+		description: 'Worker didn''t register in time'.
 	"Create a set of tasks that never complete"
 	timeoutTask := GtRrScriptTask script: 'Semaphore new wait'.
 	timeoutTask taskTimeout: 1 minute.
@@ -706,7 +758,7 @@ GtRemoteRunnerExamples >> workerDetails [
 		worker := ann worker.
 		registeredSemaphore signal ].
 	remoteRunner start.
-	[ self waitOn: registeredSemaphore for: 10 description: 'Worker didn''t register in time'.
+	[ self waitOn: registeredSemaphore for: 20 description: 'Worker didn''t register in time'.
 	self assert: remoteRunner registeredWorkerCount equals: 1.
 	self
 		assert: (worker details at: #workingDirectory)
