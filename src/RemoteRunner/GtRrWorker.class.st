@@ -11,7 +11,8 @@ Class {
 		'currentTaskExecution',
 		'serviceName',
 		'pingServer',
-		'connectionStrategy'
+		'connectionStrategy',
+		'resultQueue'
 	],
 	#category : #'RemoteRunner-Worker'
 }
@@ -293,6 +294,8 @@ GtRrWorker >> initialize [
 	super initialize.
 	uid := UUID new asString.
 	taskRunner := TKTNewProcessTaskRunner new.
+	"WaitfreeQueues should have only one process reading - which is the #stepService"
+	resultQueue := WaitfreeQueue new.
 	"Attributes is a dictionary of information can be json encoded.
 	Additional values can be provided, or existing values overwritten, by the command line.
 	This is used by the remote runner to determine which workers can run a given task (the constraints).
@@ -329,9 +332,13 @@ GtRrWorker >> name [
 
 { #category : #private }
 GtRrWorker >> nextTask [
-	| promise |
+	"Send any queued results and get the next task"
+	| promise result |
 	
 	^ self connectDuring: [ :application |
+		[ result := resultQueue nextOrNil ] whileNotNil:
+			[ result sendThroughApplication: application ].
+
 		promise := application newCommandFactory send:
 			'GtAssignedRemoteRunner nextTaskSerializedForWorkerId: ''', uid, ''''.
 		LeJsonV4 uniqueInstance deserialize: promise waitForValue readStream ].
@@ -377,8 +384,8 @@ GtRrWorker >> start [
 
 { #category : #stepping }
 GtRrWorker >> stepService [
-
 	| task semaphore |
+
 	semaphore := Semaphore new.
 	GtRrWorkerWaitForTaskAnnouncement new emit.
 	task := self nextTask.
@@ -386,9 +393,8 @@ GtRrWorker >> stepService [
 		task: task;
 		emit.
 	currentTaskExecution := task asTask
-		                        configureTaskExecution:
-		                        GtRrFutureTimeoutableTaskExecution new
-		                        with: taskRunner.
+		configureTaskExecution: GtRrFutureTimeoutableTaskExecution new
+		with: taskRunner.
 	currentTaskExecution timeout: task taskTimeout.
 	taskRunner scheduleTaskExecution: currentTaskExecution.
 	currentTaskExecution future
@@ -398,14 +404,14 @@ GtRrWorker >> stepService [
 				message: 'Success: ' , result printString;
 				emit.
 			self taskDone: task with: result.
-			semaphore signal ];
+			semaphore signal. ];
 		onFailureDo: [ :error | 
 			GtRrWorkerTaskCompletedAnnouncement new
 				task: task;
 				message: 'ERROR: ' , error printString;
 				emit.
 			self taskFailed: task with: error.
-			semaphore signal ].
+			semaphore signal. ].
 	semaphore wait.
 	currentTaskExecution := nil
 ]
@@ -425,33 +431,40 @@ GtRrWorker >> taskDone: aTask with: anObject [
 	serializedResult := [ LeJsonV4 uniqueInstance serialize: anObject ]
 		on: Error 
 		do: [ :ex | ^ self taskFailed: aTask with: ex ].
-	self connectDuring: [ :application |
-		application newCommandFactory
-			  bindingAt: #taskContextId put: aTask taskContextId;
-			  bindingAt: #result
-			  put: serializedResult;
-			  sendAndWait:
-				  'GtAssignedRemoteRunner taskDone: taskContextId with: (LeJsonV4 uniqueInstance deserialize: result readStream). true' ].
-	GtRrWorkerResponseSentAnnouncement new 
-		task: aTask;
-		emit.
+	resultQueue nextPut: (GtRrWorkerResultEntry
+		task: aTask
+		bindings: { 
+			#taskContextId -> aTask taskContextId.
+			#startTime -> aTask startTime.
+			#endTime -> aTask endTime.
+			#result -> serializedResult. }
+		command: 'GtAssignedRemoteRunner 
+			taskDone: taskContextId 
+			started: startTime
+			completed: endTime
+			with: (LeJsonV4 uniqueInstance deserialize: result readStream). true').
+
 ]
 
 { #category : #accessing }
 GtRrWorker >> taskFailed: aTask with: anError [
 
-	self connectDuring: [ :application |
-		application newCommandFactory
-			  bindingAt: #taskContextId put: aTask taskContextId;
-			  bindingAt: #errorDetails put: (LeJsonV4 uniqueInstance serialize: 
+	resultQueue nextPut: (GtRrWorkerResultEntry
+		task: aTask
+		bindings: { 
+			#taskContextId -> aTask taskContextId.
+			#startTime -> aTask startTime.
+			#endTime -> aTask endTime.
+			#errorDetails -> (LeJsonV4 uniqueInstance serialize: 
 					(GtRrErrorDetails new
 						errorMessage: anError messageText;
-						trace: anError stackString));
-			  sendAndWait:
-				  'GtAssignedRemoteRunner taskFailed: taskContextId with: (LeJsonV4 uniqueInstance deserialize: errorDetails readStream). true' ].
-	GtRrWorkerResponseSentAnnouncement new 
-		task: aTask;
-		emit.
+						trace: anError stackString)) }
+		command: 'GtAssignedRemoteRunner 
+				taskFailed: taskContextId 
+				started: startTime
+				completed: endTime
+				with: (LeJsonV4 uniqueInstance deserialize: errorDetails readStream). true').
+
 ]
 
 { #category : #accessing }

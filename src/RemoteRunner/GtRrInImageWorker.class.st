@@ -101,7 +101,11 @@ GtRrInImageWorker >> stop [
 { #category : #running }
 GtRrInImageWorker >> taskDone: aTaskContext with: anObject [
 
-	remoteRunner taskDone: aTaskContext taskContextId with: anObject.
+	remoteRunner 
+		taskDone: aTaskContext taskContextId 
+		started: aTaskContext startTime
+		completed: aTaskContext endTime
+		with: anObject.
 ]
 
 { #category : #running }
@@ -109,6 +113,8 @@ GtRrInImageWorker >> taskFailed: aTaskContext with: anError [
 
 	remoteRunner 
 		taskFailed: aTaskContext taskContextId 
+		started: aTaskContext startTime
+		completed: aTaskContext endTime
 		with: (GtRrErrorDetails new
 			errorMessage: anError messageText;
 			trace: anError stackString).

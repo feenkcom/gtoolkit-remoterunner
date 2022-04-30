@@ -68,6 +68,12 @@ GtRrTaskContext >> contextTimeoutTime [
 ]
 
 { #category : #accessing }
+GtRrTaskContext >> endTime: aDuration [
+
+	task endTime: aDuration
+]
+
+{ #category : #accessing }
 GtRrTaskContext >> errorDetails: anObject [
 
 	task errorDetails: anObject
@@ -169,8 +175,8 @@ GtRrTaskContext >> markTaskStarted [
 
 	task markTaskStarted.
 	jobContext markTaskStarted: self.
-	taskTimeoutTime := task startTime + self taskTimeout.
-	workerTimeoutTime := task startTime + self workerTimeout.
+	taskTimeoutTime := task handoverTime + self taskTimeout.
+	workerTimeoutTime := task handoverTime + self workerTimeout.
 ]
 
 { #category : #printing }
@@ -198,6 +204,12 @@ GtRrTaskContext >> run [
 	"Run the receiver's task"
 
 	^ task run
+]
+
+{ #category : #accessing }
+GtRrTaskContext >> startTime: aDuration [
+
+	task startTime: aDuration
 ]
 
 { #category : #ui }

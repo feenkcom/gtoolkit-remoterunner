@@ -404,6 +404,8 @@ GtRrJob >> summaryAttributes [
 		add: 'End Time' -> endTime.
 	(startTime isNotNil and: [ endTime isNotNil ]) ifTrue:
 		[ attributes add: 'Duration' -> (endTime - startTime) humanReadablePrintString ].
+	self taskExecutionTime ifNotNil:
+		[ :time | attributes add: 'Task Execution Time' -> time humanReadablePrintString ].
 	attributes
 		add: 'Job Timeout' -> jobTimeout;
 		add: 'Task Timeout' -> taskTimeout;
@@ -427,6 +429,16 @@ GtRrJob >> summaryString [
 GtRrJob >> taskCount [
 
 	^ self tasks size.
+]
+
+{ #category : #accessing }
+GtRrJob >> taskExecutionTime [
+	"Answer the time actually spent by the workers executing the task (excludes communication and scheduling overheads)"
+	<return: #Duration or: nil>
+
+	self isFinished ifFalse: [ ^ nil ].
+
+	^ results inject: Duration zero into: [ :s :v | s + v duration ]
 ]
 
 { #category : #accessing }
