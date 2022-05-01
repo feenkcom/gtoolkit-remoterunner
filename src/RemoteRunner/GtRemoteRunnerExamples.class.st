@@ -226,6 +226,7 @@ GtRemoteRunnerExamples >> multipleJobsSimultaneously [
 	semaphore := GtMutualExclusionSemaphore new.
 	workerRegisteredSemaphore := Semaphore new.
 	remoteRunner := GtRemoteRunner new port: 7084.
+	remoteRunner managerStartupAndShutdown: GtRrLocalManagerStartupAndShutdown new.
 	"This example relies on the control channel, so force a single connection."
 	remoteRunner managerStartupAndShutdown 
 		poolSize: 2;
