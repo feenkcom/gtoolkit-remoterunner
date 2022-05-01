@@ -9,13 +9,19 @@ Class {
 		'task',
 		'taskTimeout'
 	],
-	#category : #'RemoteRunner-Runner-State'
+	#category : #'RemoteRunner-Worker'
 }
 
 { #category : #accessing }
 GtRrWorkerTaskContext class >> leJsonV4Name [
 
 	^ #workerTaskContext
+]
+
+{ #category : #accessing }
+GtRrWorkerTaskContext >> endTime [
+
+	^ task endTime
 ]
 
 { #category : #running }
@@ -27,6 +33,12 @@ GtRrWorkerTaskContext >> evaluateOn: anExecution [
 { #category : #executing }
 GtRrWorkerTaskContext >> futureTaskExecutionFor: aRunner [
 	^ self configureTaskExecution: GtRrFutureTimeoutableTaskExecution new with: aRunner
+]
+
+{ #category : #accessing }
+GtRrWorkerTaskContext >> startTime [
+
+	^ task startTime
 ]
 
 { #category : #accessing }
@@ -73,8 +85,10 @@ GtRrWorkerTaskContext >> taskTimeout: anObject [
 
 { #category : #executing }
 GtRrWorkerTaskContext >> value [
+	| result |
 
 	"Lower the priority of the receiver so that commands get priority."
-	Processor activeProcess priority: Processor userBackgroundPriority.
-	^ task run
+	"Processor activeProcess priority: Processor userBackgroundPriority."
+	result := task timedRun.
+	^ result.
 ]

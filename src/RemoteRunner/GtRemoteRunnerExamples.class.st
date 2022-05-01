@@ -102,6 +102,7 @@ GtRemoteRunnerExamples >> controlChannelPing [
 	<gtExample>
 	| remoteRunner controlChannelSemaphore worker |
 
+	self ignoreWorkerExamples ifTrue: [ ^ self ].
 	controlChannelSemaphore := GtMutualExclusionSemaphore new.
 	remoteRunner := GtRemoteRunner new port: 7089.
 	remoteRunner managerStartupAndShutdown 
@@ -164,12 +165,21 @@ GtRemoteRunnerExamples >> getNextTaskFor [
 	^ job
 ]
 
+{ #category : #private }
+GtRemoteRunnerExamples >> ignoreWorkerExamples [
+	"Answer a boolean indicating whether examples that require a subprocess should be run.
+	Convenience in case the CI decides it doesn't want to be nice."
+
+	^ true
+]
+
 { #category : #examples }
 GtRemoteRunnerExamples >> multipleJobs [
 	"Demonstrate executing a multiple jobs"
 	<gtExample>
 	| remoteRunner job jobs completingTask taskFailedCount taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount workerRegisteredSemaphore |
 
+	self ignoreWorkerExamples ifTrue: [ ^ self ].
 	jobStartedCount := jobCompletedCount := taskStartedCount := taskCompletedCount := taskFailedCount := 0.
 	jobSemaphore := GtMutualExclusionSemaphore new.
 	workerRegisteredSemaphore := Semaphore new.
@@ -223,9 +233,11 @@ GtRemoteRunnerExamples >> multipleJobsSimultaneously [
 
 	| remoteRunner job jobs semaphore workerConnections retryCount currentTask workerRegisteredSemaphore |
 
+	self ignoreWorkerExamples ifTrue: [ ^ self ].
 	semaphore := GtMutualExclusionSemaphore new.
 	workerRegisteredSemaphore := Semaphore new.
 	remoteRunner := GtRemoteRunner new port: 7084.
+	remoteRunner managerStartupAndShutdown: GtRrLocalManagerStartupAndShutdown new.
 	"This example relies on the control channel, so force a single connection."
 	remoteRunner managerStartupAndShutdown 
 		poolSize: 2;
@@ -268,6 +280,7 @@ GtRemoteRunnerExamples >> simpleTask [
 	<gtExample>
 	| remoteRunner job completingTask taskFailedCount taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount times workerRegisteredSemaphore |
 
+	self ignoreWorkerExamples ifTrue: [ ^ self ].
 	jobStartedCount := jobCompletedCount := taskStartedCount := taskCompletedCount := taskFailedCount := 0.
 	jobSemaphore := GtMutualExclusionSemaphore new.
 	workerRegisteredSemaphore := Semaphore new.
@@ -329,6 +342,7 @@ GtRemoteRunnerExamples >> simpleTestTask [
 	<gtExample>
 	| remoteRunner job taskFailedCount taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount times workerRegisteredSemaphore |
 
+	self ignoreWorkerExamples ifTrue: [ ^ self ].
 	jobStartedCount := jobCompletedCount := taskStartedCount := taskCompletedCount := taskFailedCount := 0.
 	jobSemaphore := GtMutualExclusionSemaphore new.
 	workerRegisteredSemaphore := Semaphore new.
@@ -388,6 +402,7 @@ GtRemoteRunnerExamples >> terminateStartedJobWithControlChannel [
 	<gtExample>
 	| remoteRunner job tasks taskFailedCount taskCompletedCount jobCompletedCount semaphore jobStartedCount taskStartedCount times workerConnection currentTask retryCount workerRegisteredSemaphore |
 
+	self ignoreWorkerExamples ifTrue: [ ^ self ].
 	jobStartedCount := jobCompletedCount := taskStartedCount := taskCompletedCount := taskFailedCount := 0.
 	semaphore := GtMutualExclusionSemaphore new.
 	workerRegisteredSemaphore := Semaphore new.
@@ -473,6 +488,7 @@ GtRemoteRunnerExamples >> terminateStartedJobWithoutControlChannel [
 	<gtExample>
 	| remoteRunner job tasks taskFailedCount taskCompletedCount jobCompletedCount semaphore jobStartedCount taskStartedCount waitForTaskCompletion taskWaitTime workerRegisteredSemaphore |
 
+	self ignoreWorkerExamples ifTrue: [ ^ self ].
 	"Waiting for the task to complete is slow and may fail if the processor is very busy,
 	so this is normally only set true for manual testing."
 	waitForTaskCompletion := false.
@@ -552,6 +568,7 @@ GtRemoteRunnerExamples >> timeoutJob [
 	<gtExample>
 	| remoteRunner job tasks taskFailedCount taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount workerRegisteredSemaphore |
 
+	self ignoreWorkerExamples ifTrue: [ ^ self ].
 	jobStartedCount := jobCompletedCount := taskStartedCount := taskCompletedCount := taskFailedCount := 0.
 	jobSemaphore := GtMutualExclusionSemaphore new.
 	workerRegisteredSemaphore := Semaphore new.
@@ -610,6 +627,7 @@ GtRemoteRunnerExamples >> timeoutTask [
 	<gtExample>
 	| remoteRunner job completingTask timeoutTask taskFailedCount taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount times taskFailedSemaphore workerRegisteredSemaphore |
 
+	self ignoreWorkerExamples ifTrue: [ ^ self ].
 	jobStartedCount := jobCompletedCount := taskStartedCount := taskCompletedCount := taskFailedCount := 0.
 	jobSemaphore := GtMutualExclusionSemaphore new.
 	taskFailedSemaphore := Semaphore new.
@@ -684,6 +702,7 @@ GtRemoteRunnerExamples >> timeoutWorker [
 	<gtExample>
 	| remoteRunner job timeoutTask taskFailedCount taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount times taskFailedSemaphore workerRegisteredSemaphore |
 
+	self ignoreWorkerExamples ifTrue: [ ^ self ].
 	jobStartedCount := jobCompletedCount := taskStartedCount := taskCompletedCount := taskFailedCount := 0.
 	jobSemaphore := GtMutualExclusionSemaphore new.
 	workerRegisteredSemaphore := Semaphore new.
@@ -751,6 +770,7 @@ GtRemoteRunnerExamples >> workerDetails [
 	<gtExample>
 	| remoteRunner registeredSemaphore worker |
 
+	self ignoreWorkerExamples ifTrue: [ ^ self ].
 	registeredSemaphore := GtMutualExclusionSemaphore new.
 	remoteRunner := GtRemoteRunner new port: 7083.
 	remoteRunner managerStartupAndShutdown poolSize: 1.

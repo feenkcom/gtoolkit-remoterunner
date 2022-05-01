@@ -557,6 +557,24 @@ GtRemoteRunner >> printOn: aStream [
 ]
 
 { #category : #'api - worker' }
+GtRemoteRunner >> privateTaskFailed: aTaskContextId started: startTime completed: endTime with: anGtRrTaskErrorDetails [
+	"Mark the specified task as failed.
+	Must be called within sharedAccess"
+	| taskContext |
+
+	taskContext := currentlyExecutingTasks removeKey: aTaskContextId ifAbsent: [ nil ].
+	taskContext ifNil: [ ^ self ].
+	taskContext
+		startTime: startTime;
+		endTime: endTime;
+		errorDetails: anGtRrTaskErrorDetails.
+	taskContext markTaskCompleted.
+	self announceAndLog: (GtRrTaskCompletedAnnouncement task: taskContext).
+	self assignTasksToWorkers.
+	self checkJobCompleted: taskContext.
+]
+
+{ #category : #'api - worker' }
 GtRemoteRunner >> privateTaskFailed: aTaskContextId with: anGtRrTaskErrorDetails [
 	"Mark the specified task as failed.
 	Must be called within sharedAccess"
@@ -781,7 +799,7 @@ GtRemoteRunner >> summaryString [
 ]
 
 { #category : #'api - worker' }
-GtRemoteRunner >> taskDone: aTaskContextId with: anObject [
+GtRemoteRunner >> taskDone: aTaskContextId started: startTime completed: endTime with: anObject [
 	| taskContext |
 
 	GtRrWorkerTraceAnnouncement new
@@ -792,7 +810,10 @@ GtRemoteRunner >> taskDone: aTaskContextId with: anObject [
 		[ taskContext := currentlyExecutingTasks removeKey: aTaskContextId ifAbsent: [].
 		"If the task hasn't been found, assumed that it was terminated and move on"
 		taskContext ifNotNil:
-			[ taskContext result: anObject.
+			[ taskContext
+				startTime: startTime;
+				endTime: endTime;
+				result: anObject.
 			taskContext markTaskCompleted.
 			self announceAndLog: (GtRrTaskCompletedAnnouncement task: taskContext).
 			self checkJobCompleted: taskContext ].
@@ -808,21 +829,25 @@ GtRemoteRunner >> taskDone: aTaskContextId with: anObject [
 			message: 'taskDone:with: post';
 			emit ].
 
+	"There is no useful result, avoid having to create proxies, etc."
+	^ nil.
 ]
 
 { #category : #'api - worker' }
-GtRemoteRunner >> taskFailed: aTaskContextId with: anGtRrTaskErrorDetails [
+GtRemoteRunner >> taskFailed: aTaskContextId started: startTime completed: endTime with: anGtRrTaskErrorDetails [
 	"Mark the specified task as failed"
 
 	GtRrWorkerTraceAnnouncement new
 		message: 'taskFailed:with: pre ', aTaskContextId asString;
 		emit.
 	sharedAccess critical: 
-		[ self privateTaskFailed: aTaskContextId with: anGtRrTaskErrorDetails ].
+		[ self privateTaskFailed: aTaskContextId started: startTime completed: endTime with: anGtRrTaskErrorDetails ].
 	GtRrWorkerTraceAnnouncement new
 		message: 'taskFailed:with: post ', aTaskContextId asString;
 		emit.
 
+	"There is no useful result, avoid having to create proxies, etc."
+	^ nil.
 ]
 
 { #category : #'private - debugging' }

@@ -3,8 +3,10 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'constraint',
+		'handoverTime',
 		'startTime',
 		'endTime',
+		'resultReceivedTime',
 		'workerAttributes',
 		'result',
 		'taskId',
@@ -63,6 +65,8 @@ GtRrTask >> duration [
 
 { #category : #accessing }
 GtRrTask >> endTime [
+	"Answer the time at which the task was completed on the worker"
+	<return: #Duration>
 
 	^ endTime
 ]
@@ -145,6 +149,18 @@ GtRrTask >> gtWorkerAttributesFor: aView [
 		  actionUpdateButton
 ]
 
+{ #category : #accessing }
+GtRrTask >> handoverTime [
+
+	^ handoverTime
+]
+
+{ #category : #accessing }
+GtRrTask >> handoverTime: anObject [
+
+	handoverTime := anObject
+]
+
 { #category : #testing }
 GtRrTask >> hasCompleted [
 
@@ -184,7 +200,9 @@ GtRrTask >> markTaskCancelled [
 	"Mark the receiver cancelled.
 	Cancellation is specifically terminating the task before it was started."
 
-	endTime := DateAndTime now.
+	endTime 
+		ifNil: [ endTime := resultReceivedTime := DateAndTime now ]
+		ifNotNil: [ resultReceivedTime := DateAndTime now ].
 	errorDetails := (GtRrErrorDetails new
 		errorMessage: 'Task cancelled before execution';
 		setTrace).
@@ -194,21 +212,23 @@ GtRrTask >> markTaskCancelled [
 { #category : #running }
 GtRrTask >> markTaskCompleted [
 
-	endTime := DateAndTime now.
+	resultReceivedTime := DateAndTime now.
 	state := #completed.
 ]
 
 { #category : #running }
 GtRrTask >> markTaskStarted [
 
-	startTime := DateAndTime now.
+	handoverTime := DateAndTime now.
 	state := #started.
 ]
 
 { #category : #running }
 GtRrTask >> markTaskTerminated [
 
-	endTime := DateAndTime now.
+	endTime 
+		ifNil: [ endTime := resultReceivedTime := DateAndTime now ]
+		ifNotNil: [ resultReceivedTime := DateAndTime now ].
 	state := #terminated.
 ]
 
@@ -248,24 +268,38 @@ GtRrTask >> result: anObject [
 	result := anObject
 ]
 
+{ #category : #accessing }
+GtRrTask >> resultReceivedTime [
+
+	^ resultReceivedTime
+]
+
+{ #category : #accessing }
+GtRrTask >> resultReceivedTime: anObject [
+
+	^ resultReceivedTime := anObject
+]
+
 { #category : #running }
 GtRrTask >> run [
 
 	self subclassResponsibility
 ]
 
-{ #category : #'private - running' }
+{ #category : #running }
 GtRrTask >> runInImage [
 	"Run the receiver in the current process.
 	For testing only - no error handling, etc."
 
 	self markTaskStarted.
-	self result: self run.
+	self result: self timedRun.
 	self markTaskCompleted.
 ]
 
 { #category : #accessing }
 GtRrTask >> startTime [
+	"Answer the time at which the task was started on the worker"
+	<return: #Duration>
 
 	^ startTime
 ]
@@ -308,9 +342,12 @@ GtRrTask >> summaryAttributes [
 				 ifTrue: [ 
 				 result class name , '(' , result size printString , ')' ]
 				 ifFalse: [ result ]) ].
+	handoverTime ifNotNil: [ attributes add: #HandedToWorker -> handoverTime ].
 	startTime ifNotNil: [ attributes add: #Started -> startTime ].
 	endTime ifNotNil: [ attributes add: #Ended -> endTime ].
 	duration ifNotNil: [ attributes add: #Duration -> duration ].
+	(handoverTime isNotNil and: [ resultReceivedTime isNotNil ]) ifTrue: 
+		[ attributes add: #ReceivedResultTime -> resultReceivedTime ].
 	taskTimeout ifNotNil: [ attributes add: #Timeout -> taskTimeout ].
 	attributes
 		add: #ID -> taskId;
@@ -359,6 +396,16 @@ GtRrTask >> taskTimeout [
 GtRrTask >> taskTimeout: aDuration [
 
 	taskTimeout := aDuration
+]
+
+{ #category : #running }
+GtRrTask >> timedRun [
+	| runResult |
+
+	startTime := DateAndTime now.
+	runResult := self run.
+	endTime := DateAndTime now.
+	^ runResult.
 ]
 
 { #category : #accessing }
