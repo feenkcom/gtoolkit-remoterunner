@@ -220,6 +220,7 @@ GtRemoteRunnerExamples >> multipleJobs [
 GtRemoteRunnerExamples >> multipleJobsSimultaneously [
 	"Demonstrate executing multiple jobs started simultaneously"
 	<gtExample>
+	<noTest>
 
 	| remoteRunner job jobs semaphore workerConnections retryCount currentTask workerRegisteredSemaphore |
 
