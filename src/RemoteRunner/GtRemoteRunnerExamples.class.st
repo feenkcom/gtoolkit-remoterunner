@@ -170,7 +170,7 @@ GtRemoteRunnerExamples >> ignoreWorkerExamples [
 	"Answer a boolean indicating whether examples that require a subprocess should be run.
 	Convenience in case the CI decides it doesn't want to be nice."
 
-	^ true
+	^ false
 ]
 
 { #category : #examples }
