@@ -35,29 +35,21 @@ GtRrWorker class >> commandLine [
 		  serverSocketAddress := ((args at: #serverSocketAddress) at:
 			                          #address) value.
 		  StringSignal emit: 'Server address: ' , serverSocketAddress.
-		  connectionStrategyId := args
-			                          at: #connectionStrategy
-			                          ifPresent: [ :arg | 
-			                          (arg at: #strategyId) value ]
-			                          ifAbsent: [ #perMessage ].
-		  connectionStrategy := ({ 
-			                        (#perMessage
-			                         -> [ 
-			                         GtRrWorkerConnectionPerMessageStrategy new ]).
-			                        (#single
-			                         -> [ 
-			                         GtRrWorkerSingleConnectionStrategy new ]) }
-			                        asDictionary
-			                        at: connectionStrategyId
-			                        ifAbsent: [ 
-				                        self error:
-					                        'Invalid connectionStrategy: '
-					                        , connectionStrategyId printString ]) value.
 		  worker := self new.
-		  connectionStrategy
-			  socketAddress: serverSocketAddress;
-			  worker: worker.
-		  worker connectionStrategy: connectionStrategy.
+		  connectionStrategyId := args
+			at: #connectionStrategy
+			ifPresent: [ :arg | (arg at: #strategyId) value ]
+			ifAbsent: [ ].
+		  connectionStrategyId ifNotNil: [ 
+			connectionStrategy := ({ 
+				(#perMessage -> [ GtRrWorkerConnectionPerMessageStrategy new ]).
+				(#single -> [ GtRrWorkerSingleConnectionStrategy new ]) } asDictionary
+					at: connectionStrategyId
+					ifAbsent: [ self error: 'Invalid connectionStrategy: ', connectionStrategyId printString ]) value.
+			connectionStrategy
+				socketAddress: serverSocketAddress;
+				worker: worker.
+		  	worker connectionStrategy: connectionStrategy ].
 		  args occurrencesOf: #attribute do: [ :arg | 
 			  worker attributes
 				  at: (arg at: #key) value
@@ -294,6 +286,11 @@ GtRrWorker >> initialize [
 	super initialize.
 	uid := UUID new asString.
 	taskRunner := TKTNewProcessTaskRunner new.
+	"Windows socket event delivery seems brittle, events seem to get swallowed by other subsystems such as the JVM or GUI.
+	Avoid the issue by only connecting to the server while not running tasks."
+	connectionStrategy := OSPlatform current isWindows
+		ifTrue: [ GtRrWorkerConnectionPerMessageStrategy new ]
+		ifFalse: [ GtRrWorkerSingleConnectionStrategy new ].
 	"WaitfreeQueues should have only one process reading - which is the #stepService"
 	resultQueue := WaitfreeQueue new.
 	"Attributes is a dictionary of information can be json encoded.
