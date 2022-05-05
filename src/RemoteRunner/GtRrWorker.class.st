@@ -19,45 +19,10 @@ Class {
 
 { #category : #accessing }
 GtRrWorker class >> commandLine [
-
 	<commandline>
-	| worker connectionStrategyId connectionStrategy |
+
 	^ self commandLineCommand meaning: [ :args | 
-		  | logger serverSocketAddress |
-		  args
-			  at: #help ifPresent: [ :help | 
-				  help value.
-				  help context exitSuccess ];
-			  at: #log ifPresent: [ 
-				  SignalLogger resetAllInstances.
-				  logger := RestartingStreamLogger stdout.
-				  logger startFor: GtRemoteRunnerAnnouncement , PharoLinkSignal ].
-		  serverSocketAddress := ((args at: #serverSocketAddress) at:
-			                          #address) value.
-		  StringSignal emit: 'Server address: ' , serverSocketAddress.
-		  worker := self new.
-		  connectionStrategyId := args
-			at: #connectionStrategy
-			ifPresent: [ :arg | (arg at: #strategyId) value ]
-			ifAbsent: [ ].
-		  connectionStrategyId ifNotNil: [ 
-			connectionStrategy := ({ 
-				(#perMessage -> [ GtRrWorkerConnectionPerMessageStrategy new ]).
-				(#single -> [ GtRrWorkerSingleConnectionStrategy new ]) } asDictionary
-					at: connectionStrategyId
-					ifAbsent: [ self error: 'Invalid connectionStrategy: ', connectionStrategyId printString ]) value.
-			connectionStrategy
-				socketAddress: serverSocketAddress;
-				worker: worker.
-		  	worker connectionStrategy: connectionStrategy ].
-		  args occurrencesOf: #attribute do: [ :arg | 
-			  worker attributes
-				  at: (arg at: #key) value
-				  put: (arg at: #value) value ].
-		  StringSignal emit: 'Running'.
-		  worker start.
-		  "Hibernate until the process exits"
-		  Semaphore new wait ]
+		self processCommandLineArgs: args ].
 ]
 
 { #category : #accessing }
@@ -103,6 +68,44 @@ GtRrWorker class >> newPharoLinkServer: aString [
 	^ PharoLinkServer new
 		  listenPort: aString;
 		  yourself
+]
+
+{ #category : #accessing }
+GtRrWorker class >> processCommandLineArgs: args [
+	| worker connectionStrategyId connectionStrategy logger serverSocketAddress |
+
+	args
+			  at: #help ifPresent: [ :help | 
+				  help value.
+				  help context exitSuccess ];
+			  at: #log ifPresent: [ 
+				  SignalLogger resetAllInstances.
+				  logger := RestartingStreamLogger stdout.
+				  logger startFor: GtRemoteRunnerAnnouncement , PharoLinkSignal ].
+	serverSocketAddress := ((args at: #serverSocketAddress) at:
+			                          #address) value.
+	StringSignal emit: 'Server address: ' , serverSocketAddress.
+	worker := self new.
+	connectionStrategyId := args
+			at: #connectionStrategy
+			ifPresent: [ :arg | (arg at: #strategyId) value ]
+			ifAbsent: [ ].
+	connectionStrategyId ifNotNil: [ 
+			connectionStrategy := ({ 
+				(#perMessage -> [ GtRrWorkerConnectionPerMessageStrategy new ]).
+				(#single -> [ GtRrWorkerSingleConnectionStrategy new ]) } asDictionary
+					at: connectionStrategyId
+					ifAbsent: [ self error: 'Invalid connectionStrategy: ', connectionStrategyId printString ]) value.
+			worker connectionStrategy: connectionStrategy ].
+	worker connectionStrategy socketAddress: serverSocketAddress.
+	args occurrencesOf: #attribute do: [ :arg | 
+			  worker attributes
+				  at: (arg at: #key) value
+				  put: (arg at: #value) value ].
+	StringSignal emit: 'Running'.
+	worker start.
+	"Hibernate until the process exits"
+	Semaphore new wait.
 ]
 
 { #category : #'instance creation' }
@@ -268,9 +271,10 @@ GtRrWorker >> connectionStrategy [
 ]
 
 { #category : #accessing }
-GtRrWorker >> connectionStrategy: anObject [
+GtRrWorker >> connectionStrategy: aGtRrConnectionStrategy [
 
-	connectionStrategy := anObject
+	connectionStrategy := aGtRrConnectionStrategy.
+	connectionStrategy worker: self.
 ]
 
 { #category : #private }
@@ -288,9 +292,9 @@ GtRrWorker >> initialize [
 	taskRunner := TKTNewProcessTaskRunner new.
 	"Windows socket event delivery seems brittle, events seem to get swallowed by other subsystems such as the JVM or GUI.
 	Avoid the issue by only connecting to the server while not running tasks."
-	connectionStrategy := OSPlatform current isWindows
+	self connectionStrategy: (OSPlatform current isWindows
 		ifTrue: [ GtRrWorkerConnectionPerMessageStrategy new ]
-		ifFalse: [ GtRrWorkerSingleConnectionStrategy new ].
+		ifFalse: [ GtRrWorkerSingleConnectionStrategy new ]).
 	"WaitfreeQueues should have only one process reading - which is the #stepService"
 	resultQueue := WaitfreeQueue new.
 	"Attributes is a dictionary of information can be json encoded.
