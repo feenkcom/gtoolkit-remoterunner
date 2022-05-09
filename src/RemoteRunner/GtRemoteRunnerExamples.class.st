@@ -104,7 +104,7 @@ GtRemoteRunnerExamples >> controlChannelPing [
 
 	self ignoreWorkerExamples ifTrue: [ ^ self ].
 	controlChannelSemaphore := GtMutualExclusionSemaphore new.
-	remoteRunner := GtRemoteRunner new port: 7089.
+	remoteRunner := GtRemoteRunner new.
 	remoteRunner managerStartupAndShutdown 
 		poolSize: 1;
 		connectionStrategyId: #single.
@@ -183,7 +183,7 @@ GtRemoteRunnerExamples >> multipleJobs [
 	jobStartedCount := jobCompletedCount := taskStartedCount := taskCompletedCount := taskFailedCount := 0.
 	jobSemaphore := GtMutualExclusionSemaphore new.
 	workerRegisteredSemaphore := Semaphore new.
-	remoteRunner := GtRemoteRunner new port: 7092.
+	remoteRunner := GtRemoteRunner new.
 	remoteRunner managerStartupAndShutdown poolSize: 2.
 	"Worker processes can be slow to start up if the machine is busy or the image is large (multi GB).
 	Wait for the worker to register before proceeding with tests."
@@ -236,7 +236,7 @@ GtRemoteRunnerExamples >> multipleJobsSimultaneously [
 	self ignoreWorkerExamples ifTrue: [ ^ self ].
 	semaphore := GtMutualExclusionSemaphore new.
 	workerRegisteredSemaphore := Semaphore new.
-	remoteRunner := GtRemoteRunner new port: 7084.
+	remoteRunner := GtRemoteRunner new.
 	remoteRunner managerStartupAndShutdown: GtRrLocalManagerStartupAndShutdown new.
 	"This example relies on the control channel, so force a single connection."
 	remoteRunner managerStartupAndShutdown 
@@ -285,7 +285,7 @@ GtRemoteRunnerExamples >> simpleTask [
 	jobSemaphore := GtMutualExclusionSemaphore new.
 	workerRegisteredSemaphore := Semaphore new.
 	times := OrderedCollection new.
-	remoteRunner := GtRemoteRunner new port: 7091.
+	remoteRunner := GtRemoteRunner new.
 	remoteRunner managerStartupAndShutdown poolSize: 1.
 	"Worker processes can be slow to start up if the machine is busy or the image is large (multi GB).
 	Wait for the worker to register before proceeding with tests."
@@ -347,7 +347,7 @@ GtRemoteRunnerExamples >> simpleTestTask [
 	jobSemaphore := GtMutualExclusionSemaphore new.
 	workerRegisteredSemaphore := Semaphore new.
 	times := OrderedCollection new.
-	remoteRunner := GtRemoteRunner new port: 7093.
+	remoteRunner := GtRemoteRunner new.
 	remoteRunner managerStartupAndShutdown poolSize: 1.
 	"Worker processes can be slow to start up if the machine is busy or the image is large (multi GB).
 	Wait for the worker to register before proceeding with tests."
@@ -407,9 +407,7 @@ GtRemoteRunnerExamples >> terminateStartedJobWithControlChannel [
 	semaphore := GtMutualExclusionSemaphore new.
 	workerRegisteredSemaphore := Semaphore new.
 	times := OrderedCollection new.
-	remoteRunner := GtRemoteRunner new 
-		port: 7084;
-		startLogging.
+	remoteRunner := GtRemoteRunner new startLogging.
 	"This example relies on the control channel, so force a single connection."
 	remoteRunner managerStartupAndShutdown 
 		poolSize: 1;
@@ -496,9 +494,7 @@ GtRemoteRunnerExamples >> terminateStartedJobWithoutControlChannel [
 	jobStartedCount := jobCompletedCount := taskStartedCount := taskCompletedCount := taskFailedCount := 0.
 	semaphore := GtMutualExclusionSemaphore new.
 	workerRegisteredSemaphore := Semaphore new.
-	remoteRunner := GtRemoteRunner new 
-		port: 7084;
-		startLogging.
+	remoteRunner := GtRemoteRunner new startLogging.
 	remoteRunner managerStartupAndShutdown poolSize: 1.
 	"Worker processes can be slow to start up if the machine is busy or the image is large (multi GB).
 	Wait for the worker to register before proceeding with tests."
@@ -572,7 +568,7 @@ GtRemoteRunnerExamples >> timeoutJob [
 	jobStartedCount := jobCompletedCount := taskStartedCount := taskCompletedCount := taskFailedCount := 0.
 	jobSemaphore := GtMutualExclusionSemaphore new.
 	workerRegisteredSemaphore := Semaphore new.
-	remoteRunner := GtRemoteRunner new port: 7087.
+	remoteRunner := GtRemoteRunner new.
 	remoteRunner managerStartupAndShutdown poolSize: 1.
 	"Worker processes can be slow to start up if the machine is busy or the image is large (multi GB).
 	Wait for the worker to register before proceeding with tests."
@@ -633,7 +629,7 @@ GtRemoteRunnerExamples >> timeoutTask [
 	taskFailedSemaphore := Semaphore new.
 	workerRegisteredSemaphore := Semaphore new.
 	times := OrderedCollection new.
-	remoteRunner := GtRemoteRunner new port: 7088.
+	remoteRunner := GtRemoteRunner new.
 	remoteRunner managerStartupAndShutdown poolSize: 1.
 	self assert: remoteRunner workerTimeout > 1 minute.
 	remoteRunner startLogging.
@@ -708,7 +704,7 @@ GtRemoteRunnerExamples >> timeoutWorker [
 	workerRegisteredSemaphore := Semaphore new.
 	taskFailedSemaphore := Semaphore new.
 	times := OrderedCollection new.
-	remoteRunner := GtRemoteRunner new port: 7085.
+	remoteRunner := GtRemoteRunner new.
 	remoteRunner managerStartupAndShutdown poolSize: 1.
 	remoteRunner workerTimeout: 3 seconds.
 	remoteRunner startLogging.
@@ -772,7 +768,7 @@ GtRemoteRunnerExamples >> workerDetails [
 
 	self ignoreWorkerExamples ifTrue: [ ^ self ].
 	registeredSemaphore := GtMutualExclusionSemaphore new.
-	remoteRunner := GtRemoteRunner new port: 7083.
+	remoteRunner := GtRemoteRunner new.
 	remoteRunner managerStartupAndShutdown poolSize: 1.
 	remoteRunner when: GtRrWorkerRegisteredAnnouncement do: [ :ann | 
 		worker := ann worker.
