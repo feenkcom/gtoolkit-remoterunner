@@ -421,7 +421,6 @@ GtRemoteRunner >> initialize [
 
 	super initialize.
 	announcer := Announcer new.
-	port := 7042.
 	taskQueue := SharedQueue new.
 	runnerStats := GtRemoteRunnerStats new.
 	"currentlyExecutingJobs is a dictionary of GtRrJobContext keyed by job uid"
@@ -537,7 +536,14 @@ GtRemoteRunner >> pingAllWorkers [
 { #category : #accessing }
 GtRemoteRunner >> port [
 
-	^ port
+	^ port ifNil: 
+		[ 	| socket |
+		socket := Socket newTCP listenOn: 0.
+		port := socket localPort.
+		socket closeAndDestroy.
+		self assert: port > 0
+			description: 'Failed to get an unallocated port'.
+		port ]
 ]
 
 { #category : #accessing }
