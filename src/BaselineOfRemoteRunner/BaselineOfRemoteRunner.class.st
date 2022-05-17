@@ -14,6 +14,5 @@ BaselineOfRemoteRunner >> baseline: spec [
 
 		spec package: 'RemoteRunner' with: [
 			spec requires: #('PharoLink') ].
-		spec package: 'GtSocketLogging'.
 	]
 ]
