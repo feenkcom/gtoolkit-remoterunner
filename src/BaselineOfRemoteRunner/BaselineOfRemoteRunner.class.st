@@ -12,9 +12,6 @@ BaselineOfRemoteRunner >> baseline: spec [
 			spec
 				baseline: 'PharoLink' with: [
 					spec repository: 'github://feenkcom/PharoLink:main/src' ];
-				"Ensure GToolkit-Notifications is loaded first"
-				baseline: 'GToolkit' with: [
-					spec repository: 'github://feenkcom/gtoolkit:main/src' ];
 				package: 'RemoteRunner'
-					with: [ spec requires: #('PharoLink' 'GToolkit') ] ]
+					with: [ spec requires: #('PharoLink' ) ] ]
 ]
