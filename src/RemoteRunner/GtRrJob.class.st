@@ -1,10 +1,5 @@
 "
 A GtRrJob is the object submitted to a remote runner for execution.  It answers a collection of tasks to be executed by the workers, and holds the results of the tasks.  Partial results are announced as each task is completed.
-
-Implementation Details:
-
-- An errorCount is kept up to date during execution for performance reasons.
-  The result count isn't required as an instance variable as OrderedCollections know their size without scanning.
 "
 Class {
 	#name : #GtRrJob,
@@ -18,9 +13,7 @@ Class {
 		'endTime',
 		'jobTimeout',
 		'taskTimeout',
-		'errorDetails',
-		'errorCount',
-		'name'
+		'errorDetails'
 	],
 	#category : #'RemoteRunner-Jobs'
 }
@@ -100,12 +93,9 @@ GtRrJob class >> testTestNames: aCollectionOfAssociations [
 { #category : #accessing }
 GtRrJob >> addResult: aGtRrTask [
 	"Add the completed task to the results"
-	| hasErrors |
 
 	results add: aGtRrTask.
-	hasErrors := aGtRrTask hasErrors.
-	hasErrors ifTrue: [ errorCount := errorCount + 1 ].
-	self announce: (hasErrors
+	self announce: (aGtRrTask hasErrors
 		ifTrue: [ GtRrTaskFailedAnnouncement task: aGtRrTask ]
 		ifFalse: [ GtRrTaskCompletedAnnouncement task: aGtRrTask ])
 ]
@@ -152,12 +142,6 @@ GtRrJob >> endTime [
 GtRrJob >> endTime: anObject [
 
 	endTime := anObject
-]
-
-{ #category : #accessing }
-GtRrJob >> errorCount [
-
-	^ errorCount
 ]
 
 { #category : #accessing }
@@ -231,7 +215,7 @@ GtRrJob >> gtTasksFor: aView [
 GtRrJob >> hasErrors [
 	"Answer a boolean indicating whether the receiver has tasks that failed"
 
-	^ errorCount > 0
+	^ results anySatisfy: [ :task | task hasErrors ]
 ]
 
 { #category : #announcer }
@@ -258,7 +242,6 @@ GtRrJob >> initialize [
 	super initialize.
 	id := UUID new asString.
 	results := OrderedCollection new.
-	errorCount := 0.
 	state := #notStarted.
 ]
 
@@ -322,18 +305,6 @@ GtRrJob >> markJobTerminating [
 
 ]
 
-{ #category : #accessing }
-GtRrJob >> name [
-
-	^ name ifNil: [ self printString ]
-]
-
-{ #category : #accessing }
-GtRrJob >> name: anObject [
-
-	name := anObject
-]
-
 { #category : #printing }
 GtRrJob >> printOn: aStream [
 
@@ -352,12 +323,6 @@ GtRrJob >> removeSubscription: subscription [
 	"Remove the given subscription from the receiver"
 
 	^ self announcer removeSubscription: subscription
-]
-
-{ #category : #accessing }
-GtRrJob >> resultCount [
-
-	^ results size
 ]
 
 { #category : #accessing }
@@ -387,15 +352,8 @@ GtRrJob >> runInImage [
 	results := OrderedCollection new.
 	self tasks do: [ :task |
 		task runInImage.
-		self addResult: task. ].
+		results add: task. ].
 	self markJobCompleted.
-]
-
-{ #category : #ui }
-GtRrJob >> showProgressNotification [
-	"Open a global notification showing the progress of the receiver"
-
-	^ GtRrJobProgressNotification job: self.
 ]
 
 { #category : #accessing }
@@ -431,12 +389,6 @@ GtRrJob >> stonOn: stonWriter [
 		array add: self asDictionary ]
 ]
 
-{ #category : #accessing }
-GtRrJob >> successfulCount [
-
-	^ results size - errorCount
-]
-
 { #category : #ui }
 GtRrJob >> summaryAttributes [
 	"Answer a collection of key/value attributes that can simply be listed as a summary of the receiver"
@@ -447,7 +399,7 @@ GtRrJob >> summaryAttributes [
 		add: #State -> self state;
 		add: #Tasks -> self tasks size;
 		add: #Results -> results size;
-		add: #Errors -> errorCount;
+		add: #Errors -> self resultsWithErrors size;
 		add: 'Start Time' -> startTime;
 		add: 'End Time' -> endTime.
 	(startTime isNotNil and: [ endTime isNotNil ]) ifTrue:
