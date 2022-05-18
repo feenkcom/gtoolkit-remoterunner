@@ -20,49 +20,29 @@ The notification UI will be enhanced to:
 "
 Class {
 	#name : #GtRrJobProgressNotification,
-	#superclass : #Object,
+	#superclass : #GtNotificationEvent,
 	#instVars : [
-		'taskCount',
-		'failedCount',
-		'successfulCount',
 		'job'
 	],
 	#category : #'RemoteRunner-UI'
 }
 
-{ #category : #updating }
-GtRrJobProgressNotification >> announceChange [
+{ #category : #'instance creation' }
+GtRrJobProgressNotification class >> job: aGtRrJob [
 
-	self announcer announce: (JobChange on: self)
+	^ self new job: aGtRrJob
 ]
 
 { #category : #accessing }
-GtRrJobProgressNotification >> announcer [
-
-	^ Job jobAnnouncer
-]
-
-{ #category : #accessing }
-GtRrJobProgressNotification >> children [
-	^ #()
-]
-
-{ #category : #'private - hooks' }
-GtRrJobProgressNotification >> incrementTaskCompletedCount: anAnnouncement [
-
-	successfulCount := successfulCount + 1.
-	self announceChange.
-]
-
-{ #category : #'private - hooks' }
-GtRrJobProgressNotification >> incrementTaskFailedCount: anAnnouncement [
-
-	failedCount := failedCount + 1.
-	self announceChange.
+GtRrJobProgressNotification >> elementClass [
+	"Return a class that when instantiated displayes the notification to user (as a widget)"
+	<return: #GtNotificationEventElement>
+	^ GtRrJobNotificationElement 
 ]
 
 { #category : #accessing }
 GtRrJobProgressNotification >> job [
+	<return: #GtRrJob>
 
 	^ job
 ]
@@ -70,83 +50,21 @@ GtRrJobProgressNotification >> job [
 { #category : #accessing }
 GtRrJobProgressNotification >> job: aGtRrJob [
 
-	self unsubscribeFromJob.
 	job := aGtRrJob.
-	self subscribeToJob.
-	self reset.
 	self registerNotifications.
-]
-
-{ #category : #'private - hooks' }
-GtRrJobProgressNotification >> onJobAnnouncement: anAnnouncement [
-
-	(#(GtRrJobCompletedAnnouncement 
-	GtRrJobCancelledAnnouncement 
-	GtRrJobTerminatedAnnouncement) 
-		includes: anAnnouncement class name) ifFalse: [ ^ self ].
-
-	self unsubscribeFromJob.
-	self announcer announce: (JobEnd on: self).
-]
-
-{ #category : #accessing }
-GtRrJobProgressNotification >> owner [
-	^ nil
-]
-
-{ #category : #accessing }
-GtRrJobProgressNotification >> parent [
-	^ nil
-]
-
-{ #category : #accessing }
-GtRrJobProgressNotification >> progress [
-
-	(taskCount isNil or: [ taskCount = 0]) ifTrue: [ ^ 0 ].
-	^ (successfulCount + failedCount) / taskCount
 ]
 
 { #category : #private }
 GtRrJobProgressNotification >> registerNotifications [
 
-	Job jobAnnouncer announce: (JobStart on: self).
-]
-
-{ #category : #initialization }
-GtRrJobProgressNotification >> reset [
-
-	taskCount := job taskCount.
-	failedCount := successfulCount := 0.
+	GtWorld allInstancesDo: [ :world |
+		world showNotification: self ].
 ]
 
 { #category : #private }
-GtRrJobProgressNotification >> subscribeToJob [
+GtRrJobProgressNotification >> setJob: aGtRrJob [
+	"Set the job without registering the notification.
+	For testing only"
 
-	job
-		when: GtRrTaskCompletedAnnouncement
-			send: #incrementTaskCompletedCount: to: self;
-		when: GtRrTaskFailedAnnouncement
-			send: #incrementTaskFailedCount: to: self;
-		when: GtRrJobAnnouncement
-			send: #onJobAnnouncement: to: self.
-]
-
-{ #category : #accessing }
-GtRrJobProgressNotification >> title [
-
-	^ String streamContents: [ :stream |
-		stream
-			<< 'Remain: ';
-			print: (taskCount - successfulCount - failedCount);
-			<< ', Done: ';
-			print: successfulCount;
-			<< ', Failed: ';
-			print: failedCount ]
-]
-
-{ #category : #private }
-GtRrJobProgressNotification >> unsubscribeFromJob [
-
-	job ifNil: [ ^ self ].
-	job unsubscribe: self.
+	job := aGtRrJob 
 ]
