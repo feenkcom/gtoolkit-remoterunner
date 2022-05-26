@@ -12,6 +12,8 @@ BaselineOfRemoteRunner >> baseline: spec [
 			spec
 				baseline: 'PharoLink' with: [
 					spec repository: 'github://feenkcom/PharoLink:main/src' ];
+				baseline: 'GToolkitNotifications' with: [
+					spec repository: 'github://feenkcom/gtoolkit-notifications:main/src' ];
 				package: 'RemoteRunner'
-					with: [ spec requires: #('PharoLink' ) ] ]
+					with: [ spec requires: #('PharoLink' 'GToolkitNotifications') ] ]
 ]
