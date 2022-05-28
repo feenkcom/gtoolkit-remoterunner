@@ -76,27 +76,6 @@ GtRrJob class >> script: aString [
 	^ GtRrTasksJob tasks: { (GtRrScriptTask script: aString) }
 ]
 
-{ #category : #'job submission' }
-GtRrJob class >> testClassNames: aCollectionOfSymbols [
-	"Answer a job that runs the supplied TestCases"
-
-	^ GtRrTestsJob new classNames: aCollectionOfSymbols
-]
-
-{ #category : #'job submission' }
-GtRrJob class >> testPackageNames: aCollectionOfSymbols [
-	"Answer a job that runs the supplied TestCases"
-
-	^ GtRrTestsJob new packageNames: aCollectionOfSymbols
-]
-
-{ #category : #'job submission' }
-GtRrJob class >> testTestNames: aCollectionOfAssociations [
-	"Answer a job that runs the supplied TestCases"
-
-	^ GtRrTestsJob new testNames: aCollectionOfAssociations
-]
-
 { #category : #accessing }
 GtRrJob >> addResult: aGtRrTask [
 	"Add the completed task to the results"
@@ -256,10 +235,7 @@ GtRrJob >> id: anObject [
 GtRrJob >> initialize [
 
 	super initialize.
-	id := UUID new asString.
-	results := OrderedCollection new.
-	errorCount := 0.
-	state := #notStarted.
+	self reset.
 ]
 
 { #category : #testing }
@@ -334,6 +310,14 @@ GtRrJob >> name: anObject [
 	name := anObject
 ]
 
+{ #category : #copying }
+GtRrJob >> postCopy [
+	"A copied job has its own UID and tasks (as a task holds its results)"
+
+	self reset.
+
+]
+
 { #category : #printing }
 GtRrJob >> printOn: aStream [
 
@@ -352,6 +336,20 @@ GtRrJob >> removeSubscription: subscription [
 	"Remove the given subscription from the receiver"
 
 	^ self announcer removeSubscription: subscription
+]
+
+{ #category : #initialization }
+GtRrJob >> reset [
+
+	id := UUID new asString.
+	results := OrderedCollection new.
+	errorCount := 0.
+	state := #notStarted.
+	announcer := nil.
+	startTime := nil.
+	endTime := nil.
+	errorDetails := nil.
+
 ]
 
 { #category : #accessing }

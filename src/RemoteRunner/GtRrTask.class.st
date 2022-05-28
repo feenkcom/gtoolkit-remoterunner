@@ -178,8 +178,7 @@ GtRrTask >> hasErrors [
 GtRrTask >> initialize [
 
 	super initialize.
-	taskId := UUID new asString.
-	state := #notStarted.
+	self reset.
 	constraint := GtRrTrueConstraint instance.
 ]
 
@@ -238,6 +237,15 @@ GtRrTask >> markTaskTerminating [
 	state := #terminating.
 ]
 
+{ #category : #copying }
+GtRrTask >> postCopy [
+	"A copied task has its own UID and loses any existing result"
+
+	super postCopy.
+	self reset.
+
+]
+
 { #category : #printing }
 GtRrTask >> printOn: aStream [
 
@@ -254,6 +262,20 @@ GtRrTask >> printSupplementalOn: aStream [
 	self hasErrors ifTrue:
 		[ aStream << ' with errors' ].
 
+]
+
+{ #category : #accessing }
+GtRrTask >> reset [
+
+	taskId := UUID new asString.
+	state := #notStarted.
+	handoverTime := nil.
+	startTime := nil.
+	endTime := nil.
+	resultReceivedTime := nil.
+	workerAttributes := nil.
+	result := nil.
+	errorDetails := nil.
 ]
 
 { #category : #accessing }

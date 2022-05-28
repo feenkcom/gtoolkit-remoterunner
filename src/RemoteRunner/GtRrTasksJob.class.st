@@ -43,6 +43,13 @@ GtRrTasksJob >> hasTests [
 	
 ]
 
+{ #category : #copying }
+GtRrTasksJob >> postCopy [
+
+	super postCopy.
+	tasks := tasks collect: #copy.
+]
+
 { #category : #printing }
 GtRrTasksJob >> printOn: aStream [
 
