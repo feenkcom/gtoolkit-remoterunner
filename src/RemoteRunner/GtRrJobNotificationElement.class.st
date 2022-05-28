@@ -18,6 +18,7 @@ Class {
 		'erroredLabel',
 		'progressElement',
 		'infoButton',
+		'runAgainButton',
 		'remainingLabel'
 	],
 	#category : #'RemoteRunner-UI'
@@ -71,6 +72,7 @@ GtRrJobNotificationElement >> initializeNameLabel [
 	| horizontalPane |
 
 	horizontalPane := BrHorizontalPane new
+			margin: (BlInsets bottom: 3);
 			hMatchParent;
 			vFitContent.
 	nameLabel := BrLabel new
@@ -83,9 +85,17 @@ GtRrJobNotificationElement >> initializeNameLabel [
 			icon: BrGlamorousVectorIcons inspect;
 			margin: (BlInsets top: 2 left: 10);
 			action: [ self inspectJob ].
+	runAgainButton := BrButton new
+			beTinySize;
+			aptitude: BrGlamorousButtonWithIconAptitude;
+			label: 'Run Job Again';
+			icon: BrGlamorousVectorIcons play;
+			margin: (BlInsets top: 2 left: 10);
+			action: [ self runJobAgain ].
 	horizontalPane
 		addChild: nameLabel;
-		addChild: infoButton.
+		addChild: infoButton;
+		addChild: runAgainButton.
 	^ horizontalPane
 ]
 
@@ -104,6 +114,7 @@ GtRrJobNotificationElement >> initializeStateElement [
 	| horizontalPane remainingBackground successfulBackground erroredBackground |
 
 	horizontalPane := BrHorizontalPane new
+		margin: (BlInsets bottom: 5);
 		hMatchParent;
 		vFitContent.
 	remainingLabel := BrLabel new
@@ -205,6 +216,16 @@ GtRrJobNotificationElement >> onTaskAnnouncement: aGtRrTaskAnnouncement [
 GtRrJobNotificationElement >> progress [
 
 	^ (job successfulCount + job errorCount) / job taskCount
+]
+
+{ #category : #private }
+GtRrJobNotificationElement >> runJobAgain [
+	"Create a copy of the receiver's job and run it with progress notifications"
+	| jobCopy |
+
+	jobCopy := job copy.
+	jobCopy showProgressNotification.
+	GtRemoteRunner default submitJob: jobCopy.
 ]
 
 { #category : #'private - subscriptions' }

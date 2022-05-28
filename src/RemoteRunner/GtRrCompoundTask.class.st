@@ -25,6 +25,13 @@ GtRrCompoundTask >> acceptVisitor: aVisitor [
 	^ aVisitor visitCompoundTask: self
 ]
 
+{ #category : #copying }
+GtRrCompoundTask >> postCopy [
+
+	super postCopy.
+	tasks := tasks collect: #copy.
+]
+
 { #category : #accessing }
 GtRrCompoundTask >> result: aCollection [
 
