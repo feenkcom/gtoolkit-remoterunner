@@ -340,7 +340,7 @@ GtRemoteRunnerExamples >> simpleTask [
 GtRemoteRunnerExamples >> simpleTestTask [
 	"Demonstrate executing a simple test task"
 	<gtExample>
-	| remoteRunner job taskFailedCount taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount times workerRegisteredSemaphore |
+	| remoteRunner factory job taskFailedCount taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount times workerRegisteredSemaphore |
 
 	self ignoreWorkerExamples ifTrue: [ ^ self ].
 	jobStartedCount := jobCompletedCount := taskStartedCount := taskCompletedCount := taskFailedCount := 0.
@@ -356,7 +356,9 @@ GtRemoteRunnerExamples >> simpleTestTask [
 	remoteRunner start.
 	[ self waitOn: workerRegisteredSemaphore for: 20
 		description: 'Worker didn''t register in time'.
-	job := GtRrTestsJob new testNames: { #GtRrSampleTest -> #testPass }.
+	factory := GtRrExampleTestFactory new.
+	factory addSUnitTestNames: { #GtRrSampleTest -> #testPass }.
+	job := factory job.
 	job
 		when: GtRrJobStartedAnnouncement do: 
 			[ jobStartedCount := jobStartedCount + 1.

@@ -91,27 +91,34 @@ GtRrJobExamples >> explicitJobTimeout [
 
 { #category : #examples }
 GtRrJobExamples >> testJobClassNames [
-
 	"Confirm that GtRrTestsJob>>classNames: works as expected"
-
 	<gtExample>
-	| job |
-	job := GtRrTestsJob new classNames: #( GtRrSampleTest ).
+	| factory job task |
 
-	self confirmAllTests: job allItems.
+	factory := GtRrExampleTestFactory new.
+	factory addSUnitClass: GtRrSampleTest.
+	job := factory job.
+
+	self assert: job tasks size equals: 1.
+	task := job tasks first.
+	self assert: task sunitClassName equals: #GtRrSampleTest.
 	^ job
 ]
 
 { #category : #examples }
 GtRrJobExamples >> testJobPackageNames [
-	"Confirm that packageNames are included in allTests correctly"
+	"Confirm that packageNames supplied to the factory are enumerated in to the appropriate classes"
 	<gtExample>
-	| job |
+	| factory job task |
 
-	job := GtRrTestsJob new
-		packageNames: #(RemoteRunner).
+	factory := GtRrExampleTestFactory new.
+	factory addSUnitPackages: { #RemoteRunner asPackage }.
+	job := factory job.
 
-	self confirmAllTests: job allItems.
+	self assert: job tasks size equals: 1.
+	task := job tasks first.
+	self assert: task sunitClassName equals: #GtRrSampleTest.
+
 	^ job
 ]
 
@@ -119,16 +126,21 @@ GtRrJobExamples >> testJobPackageNames [
 GtRrJobExamples >> testJobTestNames [
 	"Confirm that packageNames are included in allTests correctly"
 	<gtExample>
-	| job |
+	| factory testNames job task |
 
-	job := GtRrTestsJob new
-		testNames: {
+	factory := GtRrExampleTestFactory new.
+	testNames := {
 			#GtRrSampleTest->#testPass.
 			#GtRrSampleTest->#testFail.
 			#GtRrSampleTest->#testLong.
 			#GtRrSampleTest->#testError
 			}.
+	factory addSUnitTestNames: testNames.
+	job := factory job.
 
-	self confirmAllTests: job allItems.
+	self assert: job tasks size equals: 1.
+	task := job tasks first.
+	self assert: task sunitTestNames equals: testNames.
+
 	^ job
 ]
