@@ -176,9 +176,10 @@ GtRrJobNotificationElement >> initializeStateElement [
 GtRrJobNotificationElement >> inspectJob [
 	"Inspect the receiver's job in a new tab in GtWorld"
 
-	self showSpace: (BlSpace new
-		title: job name;
-		addChild: (GtInspector forObject: job)).
+	GtInspectorTool
+		openWrappedOn: job
+		title: job name
+		from: self
 
 ]
 
