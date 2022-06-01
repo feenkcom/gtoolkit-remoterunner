@@ -35,6 +35,12 @@ GtRrSUnitTask >> failedExamples [
 ]
 
 { #category : #running }
+GtRrSUnitTask >> run [
+
+	^ self runSuite: self testSuite
+]
+
+{ #category : #running }
 GtRrSUnitTask >> runSuite: suite [
 	| events testResult |
 
@@ -62,4 +68,19 @@ GtRrSUnitTask >> successfulExamples [
 		select: [ :pharoLinkTestCaseAnnouncement | 
 			#(#pass #skip) includes: pharoLinkTestCaseAnnouncement shortName ]
 
+]
+
+{ #category : #accessing }
+GtRrSUnitTask >> testSuite [
+	"Answer the test suite defined by the receiver."
+
+	^ self subclassResponsibility
+]
+
+{ #category : #accessing }
+GtRrSUnitTask >> totalCount [
+
+	^ self testSuite tests
+		ifNil: [ 0 ]
+		ifNotNil: [ :tests | tests size ]
 ]

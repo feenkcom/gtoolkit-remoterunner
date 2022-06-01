@@ -390,6 +390,13 @@ GtRrJob >> runInImage [
 ]
 
 { #category : #ui }
+GtRrJob >> showExamplesProgressNotification [
+	"Open a global notification showing the progress of the receiver assuming all tasks are exmples / test related"
+
+	^ GtRrExamplesProgressNotification job: self.
+]
+
+{ #category : #ui }
 GtRrJob >> showProgressNotification [
 	"Open a global notification showing the progress of the receiver"
 

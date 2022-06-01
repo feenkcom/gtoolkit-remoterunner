@@ -25,17 +25,6 @@ GtRrExplicitSUnitTask >> acceptVisitor: aVisitor [
 	^ aVisitor visitExplicitSUnitTask: self
 ]
 
-{ #category : #running }
-GtRrExplicitSUnitTask >> run [
-	| suite |
-
-	suite := TestSuite named: taskId.
-	sunitTestNames do: [ :assoc | | class |
-		class := self class environment at: assoc key asSymbol.
-		suite addTest: (class new setTestSelector: assoc value asSymbol) ].
-	^ self runSuite: suite.
-]
-
 { #category : #accessing }
 GtRrExplicitSUnitTask >> sunitTestNames [
 
@@ -46,4 +35,21 @@ GtRrExplicitSUnitTask >> sunitTestNames [
 GtRrExplicitSUnitTask >> sunitTestNames: anObject [
 
 	sunitTestNames := anObject
+]
+
+{ #category : #accessing }
+GtRrExplicitSUnitTask >> testSuite [
+	| suite |
+
+	suite := TestSuite named: taskId.
+	sunitTestNames do: [ :assoc | | class |
+		class := self class environment at: assoc key asSymbol.
+		suite addTest: (class new setTestSelector: assoc value asSymbol) ].
+	^ suite.
+]
+
+{ #category : #accessing }
+GtRrExplicitSUnitTask >> totalCount [
+
+	^ sunitTestNames size
 ]

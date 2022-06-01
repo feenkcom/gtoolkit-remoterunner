@@ -92,3 +92,10 @@ GtRrExamplesTask >> summaryAttributes [
 		add: 'Ignore noTest' -> ignoreNoTest;
 		yourself.
 ]
+
+{ #category : #accessing }
+GtRrExamplesTask >> totalCount [
+	"Answer the total number of examples the receiver contains"
+
+	^ self group examples size.
+]

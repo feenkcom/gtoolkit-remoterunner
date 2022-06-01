@@ -37,18 +37,6 @@ GtRrPackageSUnitTask >> printSupplementalOn: aStream [
 
 ]
 
-{ #category : #running }
-GtRrPackageSUnitTask >> run [
-	| suite classes |
-
-	suite := TestSuite named: taskId.
-	classes := sunitPackageName asPackage classes select: [ :cls |
-		(cls inheritsFrom: TestCase) and: [ cls isAbstract not ] ].
-	classes do: [ :cls |
-		suite addTests: cls buildSuiteFromSelectors tests ].
-	^ self runSuite: suite.
-]
-
 { #category : #accessing }
 GtRrPackageSUnitTask >> sunitPackageName [
 
@@ -59,4 +47,16 @@ GtRrPackageSUnitTask >> sunitPackageName [
 GtRrPackageSUnitTask >> sunitPackageName: anObject [
 
 	sunitPackageName := anObject
+]
+
+{ #category : #accessing }
+GtRrPackageSUnitTask >> testSuite [
+	| suite classes |
+
+	suite := TestSuite named: taskId.
+	classes := sunitPackageName asPackage classes select: [ :cls |
+		(cls inheritsFrom: TestCase) and: [ cls isAbstract not ] ].
+	classes do: [ :cls |
+		suite addTests: cls buildSuiteFromSelectors tests ].
+	^ suite.
 ]

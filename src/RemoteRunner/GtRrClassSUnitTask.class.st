@@ -37,15 +37,6 @@ GtRrClassSUnitTask >> printSupplementalOn: aStream [
 
 ]
 
-{ #category : #running }
-GtRrClassSUnitTask >> run [
-	| class suite |
-
-	class := self classWithName: sunitClassName.
-	suite := class buildSuite.
-	^ self runSuite: suite.
-]
-
 { #category : #accessing }
 GtRrClassSUnitTask >> sunitClassName [
 
@@ -56,4 +47,11 @@ GtRrClassSUnitTask >> sunitClassName [
 GtRrClassSUnitTask >> sunitClassName: anObject [
 
 	sunitClassName := anObject
+]
+
+{ #category : #accessing }
+GtRrClassSUnitTask >> testSuite [
+
+	^ (self classWithName: sunitClassName) buildSuite.
+
 ]
