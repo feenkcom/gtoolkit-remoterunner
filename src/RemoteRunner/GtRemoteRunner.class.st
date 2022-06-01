@@ -23,8 +23,8 @@ The main components of the system are:
 
 - GtRemoteRunner provides the primary interface to the system and the main control.
 - A {{gtClass:GtRrWorker}} is created for each client image that will run tests or examples.
-- A {{gtClass:GtRrJob}} is submitted by users for each collection or tests or examples to be executed.  The user will be notified of the progress of the job.
-- {{gtClass:GtRrTaskAllocator}} is responsible for taking all the tests / examples in a job and ordering and grouping them for equitable distribution amongst the workers.
+- A {{gtClass:GtRrJob}} is submitted by users for each collection or tests or examples to be executed.  The user will be notified of the progress of the job.  A {{gtClass:GtRrJob}} contains one or more {{gtClass:GtRrTask}}s.
+
 ### Phases
 
 The following phases are defined as part of the system.  Each of these phases is pluggable, so can be customised for individual scenarios:

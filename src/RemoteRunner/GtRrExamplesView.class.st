@@ -109,14 +109,28 @@ GtRrExamplesView >> gtView: aView forExamples: examplesCollection title: titleSt
 
 { #category : #accessing }
 GtRrExamplesView >> job [
+	<return: #GtRrJob>
 
 	^ job
 ]
 
 { #category : #accessing }
-GtRrExamplesView >> job: anObject [
+GtRrExamplesView >> job: aGtRrJob [
 
-	job := anObject
+	job := aGtRrJob
+]
+
+{ #category : #'accessing - job' }
+GtRrExamplesView >> name [
+
+	^ job name
+]
+
+{ #category : #copying }
+GtRrExamplesView >> postCopy [
+
+	job := job copy.
+	tasks := nil.
 ]
 
 { #category : #accessing }

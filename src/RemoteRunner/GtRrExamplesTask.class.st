@@ -16,18 +16,21 @@ GtRrExamplesTask >> acceptVisitor: aVisitor [
 { #category : #'accessing - dynamic' }
 GtRrExamplesTask >> erroredExamples [
 
+	result ifNil: [ ^ #() ].
 	^ result erroredExamples
 ]
 
 { #category : #'accessing - dynamic' }
 GtRrExamplesTask >> executedExamples [
 
+	result ifNil: [ ^ #() ].
 	^ result executedExamples
 ]
 
 { #category : #'accessing - dynamic' }
 GtRrExamplesTask >> failedExamples [
 
+	result ifNil: [ ^ #() ].
 	^ result failedExamples
 ]
 
@@ -76,12 +79,14 @@ GtRrExamplesTask >> setIgnoreNoTest [
 { #category : #'accessing - dynamic' }
 GtRrExamplesTask >> skippedExamples [
 
+	result ifNil: [ ^ #() ].
 	^ result skippedExamples
 ]
 
 { #category : #'accessing - dynamic' }
 GtRrExamplesTask >> successfulExamples [
 
+	result ifNil: [ ^ #() ].
 	^ result successfulExamples
 ]
 
@@ -91,4 +96,11 @@ GtRrExamplesTask >> summaryAttributes [
 	^ super summaryAttributes
 		add: 'Ignore noTest' -> ignoreNoTest;
 		yourself.
+]
+
+{ #category : #accessing }
+GtRrExamplesTask >> totalCount [
+	"Answer the total number of examples the receiver contains"
+
+	^ self group examples size.
 ]

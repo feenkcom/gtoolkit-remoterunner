@@ -35,6 +35,12 @@ GtRrJobNotificationElement >> defaultLayout [
 	^ BlLinearLayout vertical alignCenterRight
 ]
 
+{ #category : #'private - accessing' }
+GtRrJobNotificationElement >> errorCount [
+
+	^ job errorCount
+]
+
 { #category : #initialization }
 GtRrJobNotificationElement >> initialize [
 	| namePane statePane |
@@ -197,12 +203,16 @@ GtRrJobNotificationElement >> message [
 			print: job errorCount ]
 ]
 
-{ #category : #'api - accessing' }
-GtRrJobNotificationElement >> notification: aGtRrJobNotification [
+{ #category : #'private - accessing' }
+GtRrJobNotificationElement >> name [
 
-	job := aGtRrJobNotification job.
-	super notification: aGtRrJobNotification.
-	self updateTextEditor.
+	^ job name
+]
+
+{ #category : #'private - hooks' }
+GtRrJobNotificationElement >> onNotificationChanged [
+
+	self updateDisplay.
 ]
 
 { #category : #'private - hooks' }
@@ -210,13 +220,13 @@ GtRrJobNotificationElement >> onTaskAnnouncement: aGtRrTaskAnnouncement [
 
 	aGtRrTaskAnnouncement class = GtRrTaskStartedAnnouncement ifTrue: [ ^ self ].
 
-	self updateTextEditor.
+	self updateDisplay.
 ]
 
 { #category : #'private - accessing' }
 GtRrJobNotificationElement >> progress [
 
-	^ (job successfulCount + job errorCount) / job taskCount
+	^ (self successfulCount + self errorCount) / self totalCount
 ]
 
 { #category : #private }
@@ -232,24 +242,39 @@ GtRrJobNotificationElement >> runJobAgain [
 { #category : #'private - subscriptions' }
 GtRrJobNotificationElement >> subscribeToNotification [
 
+	job := notification job.
 	job
 		when: GtRrTaskAnnouncement
 			send: #onTaskAnnouncement: to: self.
 ]
 
+{ #category : #'private - accessing' }
+GtRrJobNotificationElement >> successfulCount [
+
+	^ job successfulCount
+]
+
+{ #category : #'private - accessing' }
+GtRrJobNotificationElement >> totalCount [
+
+	^ job taskCount
+]
+
 { #category : #'private - subscriptions' }
 GtRrJobNotificationElement >> unsubscribeFromNotification [
 
+	job ifNil: [ ^ self ].
 	job unsubscribe: self.
+	job := nil.
 ]
 
 { #category : #'private - updating' }
-GtRrJobNotificationElement >> updateTextEditor [
+GtRrJobNotificationElement >> updateDisplay [
 
 	self enqueueTask: (BlTaskAction new action:
-		[ nameLabel text: job name.
-		remainingLabel text: (job taskCount - job successfulCount - job errorCount) asString.
-		successfulLabel text: job successfulCount asString.
-		erroredLabel text: job errorCount asString.
+		[ nameLabel text: self name.
+		remainingLabel text: (self totalCount - self successfulCount - self errorCount) asString.
+		successfulLabel text: self successfulCount asString.
+		erroredLabel text: self errorCount asString.
 		progressElement fraction: self progress ]).
 ]
