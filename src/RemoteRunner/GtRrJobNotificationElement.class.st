@@ -209,11 +209,9 @@ GtRrJobNotificationElement >> name [
 	^ job name
 ]
 
-{ #category : #'api - accessing' }
-GtRrJobNotificationElement >> notification: aGtRrJobNotification [
+{ #category : #'private - hooks' }
+GtRrJobNotificationElement >> onNotificationChanged [
 
-	job := aGtRrJobNotification job.
-	super notification: aGtRrJobNotification.
 	self updateDisplay.
 ]
 
@@ -244,6 +242,7 @@ GtRrJobNotificationElement >> runJobAgain [
 { #category : #'private - subscriptions' }
 GtRrJobNotificationElement >> subscribeToNotification [
 
+	job := notification job.
 	job
 		when: GtRrTaskAnnouncement
 			send: #onTaskAnnouncement: to: self.
@@ -264,7 +263,9 @@ GtRrJobNotificationElement >> totalCount [
 { #category : #'private - subscriptions' }
 GtRrJobNotificationElement >> unsubscribeFromNotification [
 
+	job ifNil: [ ^ self ].
 	job unsubscribe: self.
+	job := nil.
 ]
 
 { #category : #'private - updating' }

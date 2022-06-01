@@ -55,9 +55,20 @@ GtRrExamplesNotificationElement >> onTaskAnnouncement: aGtRrTaskAnnouncement [
 	self updateDisplay.
 ]
 
+{ #category : #private }
+GtRrExamplesNotificationElement >> runJobAgain [
+	"Create a copy of the receiver's job and run it with progress notifications"
+	| jobCopy |
+
+	jobCopy := job copy.
+	jobCopy showExamplesProgressNotification.
+	GtRemoteRunner default submitJob: jobCopy.
+]
+
 { #category : #'private - subscriptions' }
 GtRrExamplesNotificationElement >> subscribeToNotification [
 
+	job := notification job.
 	successfulCount := self getSuccessfulCount.
 	errorCount := self getErrorCount.
 	totalCount := self getTotalCount.
