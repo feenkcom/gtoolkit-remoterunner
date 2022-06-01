@@ -18,6 +18,18 @@ GtRrExamplesNotificationElement >> errorCount [
 	^ errorCount
 ]
 
+{ #category : #accessing }
+GtRrExamplesNotificationElement >> getErrorCount [
+
+	^ job tasks inject: 0 into: [ :s :v | s + v erroredExamples size + v failedExamples size ]
+]
+
+{ #category : #accessing }
+GtRrExamplesNotificationElement >> getSuccessfulCount [
+
+	^ job tasks inject: 0 into: [ :s :v | s + v successfulExamples size ]
+]
+
 { #category : #private }
 GtRrExamplesNotificationElement >> getTotalCount [
 
@@ -46,7 +58,8 @@ GtRrExamplesNotificationElement >> onTaskAnnouncement: aGtRrTaskAnnouncement [
 { #category : #'private - subscriptions' }
 GtRrExamplesNotificationElement >> subscribeToNotification [
 
-	successfulCount := errorCount := 0.
+	successfulCount := self getSuccessfulCount.
+	errorCount := self getErrorCount.
 	totalCount := self getTotalCount.
 	super subscribeToNotification.
 

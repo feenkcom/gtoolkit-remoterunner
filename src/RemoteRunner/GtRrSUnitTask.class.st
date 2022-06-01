@@ -13,6 +13,7 @@ GtRrSUnitTask >> acceptVisitor: aVisitor [
 { #category : #'accessing - dynamic' }
 GtRrSUnitTask >> erroredExamples [
 
+	result ifNil: [ ^ #() ].
 	^ result 
 		select: [ :pharoLinkTestCaseAnnouncement | 
 			pharoLinkTestCaseAnnouncement shortName = #error or:
@@ -23,12 +24,14 @@ GtRrSUnitTask >> erroredExamples [
 { #category : #'accessing - dynamic' }
 GtRrSUnitTask >> executedExamples [
 
+	result ifNil: [ ^ #() ].
 	^ result
 ]
 
 { #category : #'accessing - dynamic' }
 GtRrSUnitTask >> failedExamples [
 
+	result ifNil: [ ^ #() ].
 	^ result 
 		select: [ :pharoLinkTestCaseAnnouncement | 	pharoLinkTestCaseAnnouncement shortName = #failure ]
 
@@ -56,6 +59,7 @@ GtRrSUnitTask >> runSuite: suite [
 { #category : #'accessing - dynamic' }
 GtRrSUnitTask >> skippedExamples [
 
+	result ifNil: [ ^ #() ].
 	^ result 
 		select: [ :pharoLinkTestCaseAnnouncement | 	pharoLinkTestCaseAnnouncement shortName = #skip ]
 
@@ -64,6 +68,7 @@ GtRrSUnitTask >> skippedExamples [
 { #category : #'accessing - dynamic' }
 GtRrSUnitTask >> successfulExamples [
 
+	result ifNil: [ ^ #() ].
 	^ result 
 		select: [ :pharoLinkTestCaseAnnouncement | 
 			#(#pass #skip) includes: pharoLinkTestCaseAnnouncement shortName ]
