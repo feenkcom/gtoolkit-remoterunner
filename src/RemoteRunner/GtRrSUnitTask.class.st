@@ -10,6 +10,13 @@ GtRrSUnitTask >> acceptVisitor: aVisitor [
 	^ aVisitor visitSUnitTask: self
 ]
 
+{ #category : #accessing }
+GtRrSUnitTask >> allMethods [
+	^ self testSuite tests
+		ifNil: [ {} ]
+		ifNotNil: [ :tests | tests collect: #gtCompiledMethod ]
+]
+
 { #category : #'accessing - dynamic' }
 GtRrSUnitTask >> erroredExamples [
 

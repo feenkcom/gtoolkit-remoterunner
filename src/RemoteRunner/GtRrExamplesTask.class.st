@@ -13,6 +13,11 @@ GtRrExamplesTask >> acceptVisitor: aVisitor [
 	^ aVisitor visitExampleTask: self
 ]
 
+{ #category : #accessing }
+GtRrExamplesTask >> allMethods [
+	^ self group examples collect: #method
+]
+
 { #category : #'accessing - dynamic' }
 GtRrExamplesTask >> erroredExamples [
 

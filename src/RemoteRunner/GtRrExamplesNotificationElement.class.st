@@ -5,42 +5,47 @@ Class {
 	#name : #GtRrExamplesNotificationElement,
 	#superclass : #GtRrJobNotificationElement,
 	#instVars : [
-		'totalCount',
-		'successfulCount',
-		'errorCount'
+		'successful',
+		'errored',
+		'failed',
+		'skipped'
 	],
 	#category : #'RemoteRunner-UI'
 }
 
 { #category : #accessing }
-GtRrExamplesNotificationElement >> errorCount [
-
-	^ errorCount
-]
-
-{ #category : #accessing }
-GtRrExamplesNotificationElement >> getErrorCount [
-
-	^ job tasks inject: 0 into: [ :s :v | s + v erroredExamples size + v failedExamples size ]
-]
-
-{ #category : #accessing }
-GtRrExamplesNotificationElement >> getSuccessfulCount [
-
-	^ job tasks inject: 0 into: [ :s :v | s + v successfulExamples size ]
-]
-
-{ #category : #private }
-GtRrExamplesNotificationElement >> getTotalCount [
-
-	^ job tasks inject: 0 into: [ :s :v | s + v totalCount ]
+GtRrExamplesNotificationElement >> constructStates [
+	job ifNil: [ ^ {} ].
+	^ {GtRrExamplesStateElement
+			name: 'All'
+			color: Color transparent
+			elements: (job tasks flatCollect: #allMethods).
+		GtRrExamplesStateElement
+			name: 'Success'
+			color: Color lightGreen
+			elements: successful.
+		GtRrExamplesStateElement
+			name: 'Skipped'
+			color: Color veryVeryLightGray
+			elements: skipped.
+		GtRrExamplesStateElement
+			name: 'Failure'
+			color: Color lightOrange
+			elements: failed.
+		GtRrExamplesStateElement
+			name: 'Error'
+			color: Color red
+			elements: errored.
+		GtRrExamplesStateElement
+			name: 'Not executed'
+			color: Color veryVeryLightGray
+			elements: ((job tasks reject: #isFinished) flatCollect: #allMethods)}
 ]
 
 { #category : #accessing }
 GtRrExamplesNotificationElement >> name [
 
-	^ totalCount asString, ' examples / tests'.
-
+	^ job name
 ]
 
 { #category : #'private - hooks' }
@@ -50,8 +55,10 @@ GtRrExamplesNotificationElement >> onTaskAnnouncement: aGtRrTaskAnnouncement [
 	aGtRrTaskAnnouncement class = GtRrTaskStartedAnnouncement ifTrue: [ ^ self ].
 
 	task := aGtRrTaskAnnouncement task.
-	successfulCount := successfulCount + task successfulExamples size.
-	errorCount := errorCount + task erroredExamples size + task failedExamples size.
+	successful addAll: (task successfulExamples collect: #method).
+	errored addAll: (task erroredExamples collect: #method).
+	failed addAll: (task failedExamples collect: #method).
+	skipped addAll: (task skippedExamples collect: #method).
 	self updateDisplay.
 ]
 
@@ -69,21 +76,10 @@ GtRrExamplesNotificationElement >> runJobAgain [
 GtRrExamplesNotificationElement >> subscribeToNotification [
 
 	job := notification job.
-	successfulCount := self getSuccessfulCount.
-	errorCount := self getErrorCount.
-	totalCount := self getTotalCount.
+	successful := OrderedCollection new.
+	errored := OrderedCollection new.
+	failed := OrderedCollection new.
+	skipped := OrderedCollection new.
 	super subscribeToNotification.
 
-]
-
-{ #category : #accessing }
-GtRrExamplesNotificationElement >> successfulCount [
-
-	^ successfulCount
-]
-
-{ #category : #accessing }
-GtRrExamplesNotificationElement >> totalCount [
-
-	^ totalCount
 ]
