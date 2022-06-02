@@ -94,9 +94,11 @@ GtRrJobNotificationElement >> initializeNameLabel [
 			hMatchParent;
 			vFitContent.
 	nameLabel := BrLabel new
-			aptitude: BrGlamorousLabelAptitude;
+			aptitude: (BrGlamorousLabelAptitude new foreground: BrGlamorousColors disabledHeaderTextColor);
+			
 			fitContent.
 	horizontalPane
+		addChild: (BlElement new size: 10@10);
 		addChild: nameLabel.
 	^ horizontalPane
 ]
