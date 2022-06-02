@@ -36,11 +36,7 @@ GtRrTasksJob class >> tasks: aCollection [
 GtRrTasksJob >> hasTests [
 	"Answer a boolean indicating if the receiver has one or more tasks that are considered test tasks"
 
-	^ self tasks 
-		detect: [ :task | (task isKindOf: GtRrExamplesTask) or: (task isKindOf: GtRrTestTask) ]
-		ifFound: [ true ]
-		ifNone: [ false ]
-	
+	^ self tasks anySatisfy: [ :task | task isKindOf: GtRrExamplesTask ]
 ]
 
 { #category : #copying }
