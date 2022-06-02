@@ -39,7 +39,7 @@ GtRrExamplesNotificationElement >> getTotalCount [
 { #category : #accessing }
 GtRrExamplesNotificationElement >> name [
 
-	^ totalCount asString, ' tests'.
+	^ totalCount asString, ' examples / tests'.
 
 ]
 
