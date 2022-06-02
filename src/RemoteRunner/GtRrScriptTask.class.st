@@ -25,6 +25,16 @@ GtRrScriptTask >> acceptVisitor: aVisitor [
 	^ aVisitor visitScriptTask: self
 ]
 
+{ #category : #accessing }
+GtRrScriptTask >> gtScriptFor: aView [
+	<gtView>
+	
+	^ aView explicit
+		title: 'Script';
+		priority: 1;
+		stencil: [ GtPharoSnippetCoder forSource: self script]
+]
+
 { #category : #printing }
 GtRrScriptTask >> printOn: aStream [
 
