@@ -22,7 +22,10 @@ Class {
 	#name : #GtRrJobProgressNotification,
 	#superclass : #GtNotificationEvent,
 	#instVars : [
-		'job'
+		'job',
+		'successful',
+		'failed',
+		'notStarted'
 	],
 	#category : #'RemoteRunner-UI'
 }
@@ -67,4 +70,10 @@ GtRrJobProgressNotification >> setJob: aGtRrJob [
 	For testing only"
 
 	job := aGtRrJob 
+]
+
+{ #category : #accessing }
+GtRrJobProgressNotification >> summaryClass [
+	"Return a class that when instantiated displays the notification summary to the user"
+	^ GtRrJobNotificationSummary
 ]

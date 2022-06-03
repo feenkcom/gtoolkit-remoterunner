@@ -14,12 +14,9 @@ Class {
 		'nameLabel',
 		'borderElement',
 		'job',
-		'successfulLabel',
-		'erroredLabel',
-		'progressElement',
 		'infoButton',
 		'runAgainButton',
-		'remainingLabel'
+		'statePane'
 	],
 	#category : #'RemoteRunner-UI'
 }
@@ -30,33 +27,48 @@ GtRrJobNotificationElement >> borderElement [
 	^ borderElement
 ]
 
+{ #category : #accessing }
+GtRrJobNotificationElement >> constructStates [
+	job ifNil: [ ^ {} ].
+	^ {GtRrStateElement
+			name: 'All'
+			color: Color transparent
+			elements: job tasks.
+		GtRrStateElement
+			name: 'Success'
+			color: Color lightGreen
+			elements: (job results reject: #hasErrors).
+		GtRrStateElement
+			name: 'Failure'
+			color: Color red
+			elements: job resultsWithErrors.
+		GtRrStateElement
+			name: 'Not executed'
+			color: Color veryVeryLightGray
+			elements: (job tasks reject: #isFinished)}
+]
+
 { #category : #initialization }
 GtRrJobNotificationElement >> defaultLayout [
 	^ BlLinearLayout vertical alignCenterRight
 ]
 
-{ #category : #'private - accessing' }
-GtRrJobNotificationElement >> errorCount [
-
-	^ job errorCount
-]
-
 { #category : #initialization }
 GtRrJobNotificationElement >> initialize [
-	| namePane statePane |
+	| namePane toolbarPane |
 
 	super initialize.
 	self initializeBorderElement.
 	namePane := self initializeNameLabel.
 	statePane := self initializeStateElement.
-	self initializeProgressElement.
+	toolbarPane := self initializeToolbar.
 	
 	self addChild: self borderElement as: #border.
 	self borderElement containerDo: [ :aContainer |
 		aContainer 
 			addChild: namePane;
 			addChild: statePane;
-			addChild: progressElement as: #progressElement ].
+			addChild: toolbarPane ].
 	
 	self addAptitude: (BrLayoutResizerAptitude new
 		hInherit;
@@ -82,8 +94,37 @@ GtRrJobNotificationElement >> initializeNameLabel [
 			hMatchParent;
 			vFitContent.
 	nameLabel := BrLabel new
-			aptitude: BrGlamorousLabelAptitude;
+			aptitude: (BrGlamorousLabelAptitude new foreground: BrGlamorousColors disabledHeaderTextColor);
+			
 			fitContent.
+	horizontalPane
+		addChild: (BlElement new size: 10@10);
+		addChild: nameLabel.
+	^ horizontalPane
+]
+
+{ #category : #initialization }
+GtRrJobNotificationElement >> initializeStateElement [
+	| verticalPane states |
+
+	verticalPane := BrVerticalPane new
+		margin: (BlInsets bottom: 5);
+		hMatchParent;
+		vFitContent.
+	states := self constructStates.
+	
+	states do: [:state | verticalPane addChild: state ].
+	
+	^ verticalPane
+]
+
+{ #category : #initialization }
+GtRrJobNotificationElement >> initializeToolbar [
+	| horizontalPane |
+	horizontalPane := BrHorizontalPane new
+			hMatchParent;
+			vFitContent;
+			alignCenterRight.
 	infoButton := BrButton new
 			beTinySize;
 			aptitude: BrGlamorousButtonWithIconAptitude;
@@ -99,82 +140,8 @@ GtRrJobNotificationElement >> initializeNameLabel [
 			margin: (BlInsets top: 2 left: 10);
 			action: [ self runJobAgain ].
 	horizontalPane
-		addChild: nameLabel;
 		addChild: infoButton;
 		addChild: runAgainButton.
-	^ horizontalPane
-]
-
-{ #category : #initialization }
-GtRrJobNotificationElement >> initializeProgressElement [
-
-	progressElement := BrProgress new
-		fixedLabel: '';
-		aptitude: BrGlamorousProgressWithBarAptitude;
-		layoutDo: [ :aLayout | 
-			aLayout alignCenterLeft ]
-]
-
-{ #category : #initialization }
-GtRrJobNotificationElement >> initializeStateElement [
-	| horizontalPane remainingBackground successfulBackground erroredBackground |
-
-	horizontalPane := BrHorizontalPane new
-		margin: (BlInsets bottom: 5);
-		hMatchParent;
-		vFitContent.
-	remainingLabel := BrLabel new
-		aptitude: (BrGlamorousLabelAptitude new
-			padding: (BlInsets left: 3 right: 3);
-			foreground: Color black);
-		text: ''.
-	remainingBackground := BlElement new
-		background: Color lightGray;
-		layout: BlFrameLayout new;
-		constraintsDo: [ :c |
-			c horizontal fitContent.
-			c vertical fitContent. ];
-		addChild: remainingLabel.
-	successfulLabel := BrLabel new
-		aptitude: (BrGlamorousLabelAptitude new
-			padding: (BlInsets left: 3 right: 3);
-			foreground: Color black);
-		text: ''.
-	successfulBackground := BlElement new
-		background: Color lightGreen;
-		layout: BlFrameLayout new;
-		constraintsDo: [ :c |
-			c horizontal fitContent.
-			c vertical fitContent. ];
-		addChild: successfulLabel.
-	erroredLabel := BrLabel new
-		aptitude: (BrGlamorousLabelAptitude new
-			padding: (BlInsets left: 3 right: 3);
-			foreground: Color white);
-		text: ''.
-	erroredBackground := BlElement new
-		background: Color red;
-		layout: BlFrameLayout new;
-		constraintsDo: [ :c |
-			c horizontal fitContent.
-			c vertical fitContent. ];
-		addChild: erroredLabel.
-	horizontalPane 
-		addChild: remainingBackground;
-		addChild: (BrLabel new 
-			aptitude: BrGlamorousLabelAptitude new;
-			margin: (BlInsets left: 3 right: 3);
-			text: 'remaining');
-		addChild: successfulBackground;
-		addChild: (BrLabel new 
-			aptitude: BrGlamorousLabelAptitude new;
-			margin: (BlInsets left: 3 right: 3);
-			text: 'successful');
-		addChild: erroredBackground;
-		addChild: (BrLabel new 
-			aptitude: BrGlamorousLabelAptitude new;
-			margin: (BlInsets left: 3 right: 3);
-			text: 'errored').
 	^ horizontalPane
 ]
 
@@ -254,12 +221,6 @@ GtRrJobNotificationElement >> successfulCount [
 	^ job successfulCount
 ]
 
-{ #category : #'private - accessing' }
-GtRrJobNotificationElement >> totalCount [
-
-	^ job taskCount
-]
-
 { #category : #'private - subscriptions' }
 GtRrJobNotificationElement >> unsubscribeFromNotification [
 
@@ -270,11 +231,13 @@ GtRrJobNotificationElement >> unsubscribeFromNotification [
 
 { #category : #'private - updating' }
 GtRrJobNotificationElement >> updateDisplay [
+	self
+		enqueueTask: (BlTaskAction new
+				action: [ | states |
+					nameLabel text: self name.
+					statePane removeChildren.
 
-	self enqueueTask: (BlTaskAction new action:
-		[ nameLabel text: self name.
-		remainingLabel text: (self totalCount - self successfulCount - self errorCount) asString.
-		successfulLabel text: self successfulCount asString.
-		erroredLabel text: self errorCount asString.
-		progressElement fraction: self progress ]).
+					states := self constructStates.
+
+					states do: [ :state | statePane addChild: state ] ])
 ]
