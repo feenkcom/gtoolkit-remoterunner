@@ -1,6 +1,6 @@
 Class {
 	#name : #GtRrExamplesTask,
-	#superclass : #GtRrTask,
+	#superclass : #GtRrAbstractExamplesTask,
 	#instVars : [
 		'ignoreNoTest'
 	],
