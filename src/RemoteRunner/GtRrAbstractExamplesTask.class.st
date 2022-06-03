@@ -5,6 +5,13 @@ Class {
 }
 
 { #category : #accessing }
+GtRrAbstractExamplesTask >> allMethods [
+	"Answer all the methods that will be tested"
+
+	^ self subclassResponsibility 
+]
+
+{ #category : #accessing }
 GtRrAbstractExamplesTask >> erroredExamples [
 	"Answer the examples / tests that finished with an error"
 
