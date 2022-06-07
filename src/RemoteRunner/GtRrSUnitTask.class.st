@@ -1,6 +1,6 @@
 Class {
 	#name : #GtRrSUnitTask,
-	#superclass : #GtRrTask,
+	#superclass : #GtRrAbstractExamplesTask,
 	#category : #'RemoteRunner-Tests'
 }
 
