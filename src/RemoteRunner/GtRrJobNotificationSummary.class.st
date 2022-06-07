@@ -24,7 +24,7 @@ GtRrJobNotificationSummary >> initialize [
 					aptitude: BrGlamorousLabelAptitude;
 					exact: 15 @ 15;
 					margin: (BlInsets all: 3);
-					background: Color veryVeryLightGray;
+					background: BrGlamorousColors neutralBackgroundColor;
 					layout: BlLinearLayout horizontal alignCenter;
 					geometry: (BlRoundedRectangleGeometry cornerRadius: 4);
 					text: '0');
@@ -32,7 +32,7 @@ GtRrJobNotificationSummary >> initialize [
 					aptitude: BrGlamorousLabelAptitude;
 					exact: 15 @ 15;
 					margin: (BlInsets all: 3);
-					background: Color lightRed;
+					background: BrGlamorousColors errorBackgroundColor;
 					layout: BlLinearLayout horizontal alignCenter;
 					geometry: (BlRoundedRectangleGeometry cornerRadius: 4);
 					text: '0');
@@ -40,7 +40,7 @@ GtRrJobNotificationSummary >> initialize [
 					aptitude: BrGlamorousLabelAptitude;
 					exact: 15 @ 15;
 					margin: (BlInsets all: 3);
-					background: Color lightGreen;
+					background: BrGlamorousColors successBackgroundColor;
 					layout: BlLinearLayout horizontal alignCenter;
 					geometry: (BlRoundedRectangleGeometry cornerRadius: 4);
 					text: '0')
