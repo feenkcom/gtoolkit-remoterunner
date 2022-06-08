@@ -101,6 +101,12 @@ GtRemoteRunner class >> hasUniqueInstance [
 	^ uniqueInstance isNotNil.
 ]
 
+{ #category : #'class initialization' }
+GtRemoteRunner class >> initialize [
+	SessionManager default
+		registerSystemClassNamed: self name
+]
+
 { #category : #accessing }
 GtRemoteRunner class >> instance [
 	"Override the default which makes this an example.
@@ -163,6 +169,11 @@ GtRemoteRunner class >> setUniqueInstance: aGtRemoteRunner [
 	self hasUniqueInstance ifTrue: 
 		[ self error: 'GtRemoteRunner already running' ].
 	uniqueInstance := aGtRemoteRunner.
+]
+
+{ #category : #'class initialization' }
+GtRemoteRunner class >> startUp: resuming [
+	resuming ifTrue: [ self cleanUp ]
 ]
 
 { #category : #accessing }
