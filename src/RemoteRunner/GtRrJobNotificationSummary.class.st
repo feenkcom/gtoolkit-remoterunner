@@ -61,7 +61,7 @@ GtRrJobNotificationSummary >> onNotificationsChanged [
 			failedCounter := failedCounter + aNotification job resultsWithErrors size.
 			aNotification job
 				when: GtRrTaskAnnouncement
-				send: #onNotificationsChanged
+				send: #requestUpdate
 				to: self ].
 	failed text: failedCounter asString.
 	successful text: successfulCounter asString.
