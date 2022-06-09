@@ -92,3 +92,9 @@ GtRrFutureWorkerTask >> workerAttributes [
 
 	^ connection details
 ]
+
+{ #category : #accessing }
+GtRrFutureWorkerTask >> workerPriority [
+
+	^ connection workerPriority
+]

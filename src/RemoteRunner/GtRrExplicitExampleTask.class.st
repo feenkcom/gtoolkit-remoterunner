@@ -25,6 +25,13 @@ GtRrExplicitExampleTask >> acceptVisitor: aVisitor [
 	^ aVisitor visitExplicitExampleTask: self
 ]
 
+{ #category : #converting }
+GtRrExplicitExampleTask >> asExplicitTask [
+	"Answer the receiver as a list of explicit examples / tasks"
+
+	^ self
+]
+
 { #category : #accessing }
 GtRrExplicitExampleTask >> examples [
 
@@ -43,5 +50,5 @@ GtRrExplicitExampleTask >> examples: aCollection [
 GtRrExplicitExampleTask >> group [
 
 	^ GtExplicitExampleGroup new examples: (examples collect: [ :each | 
-		(each key asClass >> each value) gtExample asExampleWithResult ]).
+		(each key asSymbol asClass >> each value asSymbol) gtExample asExampleWithResult ]).
 ]

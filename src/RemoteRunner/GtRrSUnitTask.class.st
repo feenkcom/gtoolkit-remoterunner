@@ -17,6 +17,15 @@ GtRrSUnitTask >> allMethods [
 		ifNotNil: [ :tests | tests collect: #gtCompiledMethod ]
 ]
 
+{ #category : #converting }
+GtRrSUnitTask >> asExplicitTask [
+	"Answer the receiver as a list of explicit examples / tasks"
+self halt.
+	^ GtRrExplicitExampleTask examples: 
+		(self testSuite collect: [ :each |
+			each class name -> each selector ])
+]
+
 { #category : #'accessing - dynamic' }
 GtRrSUnitTask >> erroredExamples [
 
@@ -42,6 +51,13 @@ GtRrSUnitTask >> failedExamples [
 	^ result 
 		select: [ :pharoLinkTestCaseAnnouncement | 	pharoLinkTestCaseAnnouncement shortName = #failure ]
 
+]
+
+{ #category : #testing }
+GtRrSUnitTask >> isSUnitTask [
+	"Answer a boolean indicating whether the receiver is for running SUnit tests"
+
+	^ true
 ]
 
 { #category : #running }

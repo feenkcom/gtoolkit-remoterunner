@@ -302,8 +302,7 @@ GtRrWorker >> initialize [
 	This is used by the remote runner to determine which workers can run a given task (the constraints).
 	Naming is inconsistent at the moment - 'attributes' are called 'details' GtRemoteRunner."
 	attributes := Dictionary new
-		at: #workingDirectory
-		put: FileLocator workingDirectory resolve fullName;
+		at: #workingDirectory put: FileLocator workingDirectory resolve fullName;
 		at: #id put: uid;
 		at: #pid put: self currentProcessId;
 		at: #platform put: OSPlatform current name;
