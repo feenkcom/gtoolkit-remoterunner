@@ -148,7 +148,6 @@ GtRrInImageWorker >> taskRun: aTaskContext [
 	[ result := aTaskContext value ]
 		on: Error 
 		do: [ :ex |
-			self halt.
 			ex freeze.
 			error := ex ].
 	error
