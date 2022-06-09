@@ -54,6 +54,10 @@ GtRrAbstractExamplesTask >> isSUnitTask [
 ]
 
 { #category : #accessing }
+GtRrAbstractExamplesTask >> setIgnoreNoTest [
+]
+
+{ #category : #accessing }
 GtRrAbstractExamplesTask >> skippedExamples [
 	"Answer the examples / tests that were skipped"
 
