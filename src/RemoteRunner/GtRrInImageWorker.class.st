@@ -1,7 +1,7 @@
 "
 GtRrInImageWorker is a simple worker that runs in the same image as the RemoteRunner server.
 
-The worker process runs at low priority to not interfere with user operations (see {{gtMethod:GtInImageWorker>>#start}}).
+The worker process runs at low priority to not interfere with user operations (see {{gtMethod:GtRrInImageWorker>>#start}}).
 "
 Class {
 	#name : #GtRrInImageWorker,

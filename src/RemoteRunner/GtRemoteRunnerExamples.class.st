@@ -100,7 +100,6 @@ GtRemoteRunnerExamples >> assignTasksToWorkersWorkerFirst [
 GtRemoteRunnerExamples >> controlChannelPing [
 	"Demonstrate the ping operation using the worker's control channel"
 	<gtExample>
-	<noTest>
 	| remoteRunner controlChannelSemaphore worker |
 
 	self ignoreWorkerExamples ifTrue: [ ^ self ].
@@ -117,11 +116,12 @@ GtRemoteRunnerExamples >> controlChannelPing [
 	remoteRunner start.
 	[ self waitOn: controlChannelSemaphore for: 20
 		description: 'Control channel didn''t register in time'.
-	self assert: remoteRunner registeredWorkerCount equals: 1.
+	"There are two registered workers: the in image worker and the worker pool (size = 1)"
+	self assert: remoteRunner registeredWorkerCount equals: 2.
 	self
 		assert: worker commandPing
 		equals: #ping.
-	self assert: remoteRunner registeredWorkerCount equals: 1.
+	self assert: remoteRunner registeredWorkerCount equals: 2.
 	] ensure: [ remoteRunner stop ].
 
 	^ worker
