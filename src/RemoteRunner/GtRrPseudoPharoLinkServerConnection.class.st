@@ -36,3 +36,13 @@ GtRrPseudoPharoLinkServerConnection >> remoteAddress [
 GtRrPseudoPharoLinkServerConnection >> setCloseOnExec: aBoolean [
 
 ]
+
+{ #category : #'start-stop' }
+GtRrPseudoPharoLinkServerConnection >> start [
+	"Nothing to do"
+]
+
+{ #category : #'start-stop' }
+GtRrPseudoPharoLinkServerConnection >> stop [
+	"Nothing to do"
+]

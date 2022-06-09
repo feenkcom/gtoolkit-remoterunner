@@ -100,6 +100,7 @@ GtRemoteRunnerExamples >> assignTasksToWorkersWorkerFirst [
 GtRemoteRunnerExamples >> controlChannelPing [
 	"Demonstrate the ping operation using the worker's control channel"
 	<gtExample>
+	<noTest>
 	| remoteRunner controlChannelSemaphore worker |
 
 	self ignoreWorkerExamples ifTrue: [ ^ self ].
@@ -230,7 +231,7 @@ GtRemoteRunnerExamples >> multipleJobs [
 GtRemoteRunnerExamples >> multipleJobsSimultaneously [
 	"Demonstrate executing multiple jobs started simultaneously"
 	<gtExample>
-
+	<noTest>
 	| remoteRunner job jobs semaphore workerConnections retryCount currentTask workerRegisteredSemaphore |
 
 	self ignoreWorkerExamples ifTrue: [ ^ self ].
@@ -402,6 +403,7 @@ GtRemoteRunnerExamples >> simpleTestTask [
 GtRemoteRunnerExamples >> terminateStartedJobWithControlChannel [
 	"Terminate a job that has been started, ensuring that all tasks have been marked as terminated"
 	<gtExample>
+	<noTest>
 	| remoteRunner job tasks taskFailedCount taskCompletedCount jobCompletedCount semaphore jobStartedCount taskStartedCount times workerConnection currentTask retryCount workerRegisteredSemaphore |
 
 	self ignoreWorkerExamples ifTrue: [ ^ self ].
@@ -486,6 +488,7 @@ GtRemoteRunnerExamples >> terminateStartedJobWithControlChannel [
 GtRemoteRunnerExamples >> terminateStartedJobWithoutControlChannel [
 	"Terminate a job that has been started, ensuring that all tasks have been marked as terminated"
 	<gtExample>
+	<noTest>
 	| remoteRunner job tasks taskFailedCount taskCompletedCount jobCompletedCount semaphore jobStartedCount taskStartedCount waitForTaskCompletion taskWaitTime workerRegisteredSemaphore |
 
 	self ignoreWorkerExamples ifTrue: [ ^ self ].
@@ -564,6 +567,7 @@ GtRemoteRunnerExamples >> terminateStartedJobWithoutControlChannel [
 GtRemoteRunnerExamples >> timeoutJob [
 	"Demonstrate terminating a job due to it timing out"
 	<gtExample>
+	<noTest>
 	| remoteRunner job tasks taskFailedCount taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount workerRegisteredSemaphore |
 
 	self ignoreWorkerExamples ifTrue: [ ^ self ].
@@ -623,6 +627,7 @@ GtRemoteRunnerExamples >> timeoutJob [
 GtRemoteRunnerExamples >> timeoutTask [
 	"Demonstrate terminating a task due to it timing out"
 	<gtExample>
+	<noTest>
 	| remoteRunner job completingTask timeoutTask taskFailedCount taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount times taskFailedSemaphore workerRegisteredSemaphore |
 
 	self ignoreWorkerExamples ifTrue: [ ^ self ].
@@ -698,6 +703,7 @@ GtRemoteRunnerExamples >> timeoutTask [
 GtRemoteRunnerExamples >> timeoutWorker [
 	"Demonstrate terminating a worker due to it timing out"
 	<gtExample>
+	<noTest>
 	| remoteRunner job timeoutTask taskFailedCount taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount times taskFailedSemaphore workerRegisteredSemaphore |
 
 	self ignoreWorkerExamples ifTrue: [ ^ self ].
