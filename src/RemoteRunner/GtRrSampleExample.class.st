@@ -10,7 +10,7 @@ Class {
 { #category : #accessing }
 GtRrSampleExample >> errorExample [
 	<gtExample>
-	"<noTest>"
+	<noTest>
 
 	self error: 'an error'
 ]
@@ -18,7 +18,7 @@ GtRrSampleExample >> errorExample [
 { #category : #accessing }
 GtRrSampleExample >> failExample [
 	<gtExample>
-	"<noTest>"
+	<noTest>
 
 	self assert: false.
 
@@ -27,7 +27,7 @@ GtRrSampleExample >> failExample [
 { #category : #accessing }
 GtRrSampleExample >> passExample [
 	<gtExample>
-	"<noTest>"
+	<noTest>
 
 	self assert: true.
 

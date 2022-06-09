@@ -252,6 +252,8 @@ GtRemoteRunnerExamples >> multipleJobsSimultaneously [
 		description: 'Worker didn''t register in time'.
 	jobs := (1 to: 2) collect: [  :i |
 		job := GtRrJob script: 'Semaphore new wait'.
+		job tasks do: [ :task |
+			task constraint: GtRrInImageConstraint new not ].
 		job when: GtRrTaskStartedAnnouncement do: [ semaphore signal ].
 		job ].
 	jobs do: [ :aJob | remoteRunner submitJob: aJob ].
@@ -341,6 +343,7 @@ GtRemoteRunnerExamples >> simpleTask [
 GtRemoteRunnerExamples >> simpleTestTask [
 	"Demonstrate executing a simple test task"
 	<gtExample>
+	<noTest>
 	| remoteRunner factory job taskFailedCount taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount times workerRegisteredSemaphore |
 
 	self ignoreWorkerExamples ifTrue: [ ^ self ].
