@@ -19,6 +19,13 @@ GtRrPseudoPharoLinkServerConnection >> announcer [
 	^ announcer ifNil: [ announcer := Announcer new ]
 ]
 
+{ #category : #testing }
+GtRrPseudoPharoLinkServerConnection >> isConnected [
+	"GtRrPseudoPharoLinkServerConnection doesn't really know if it is running or not, answer true"
+
+	^ true
+]
+
 { #category : #accessing }
 GtRrPseudoPharoLinkServerConnection >> remoteAddress [
 

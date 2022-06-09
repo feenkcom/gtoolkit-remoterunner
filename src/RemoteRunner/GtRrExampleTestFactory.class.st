@@ -2,7 +2,8 @@ Class {
 	#name : #GtRrExampleTestFactory,
 	#superclass : #GtRrTaskFactory,
 	#instVars : [
-		'ignoreNoTest'
+		'ignoreNoTest',
+		'inImageOnly'
 	],
 	#category : #'RemoteRunner-Tasks'
 }
@@ -91,8 +92,14 @@ GtRrExampleTestFactory >> addSUnitTestNames: aCollection [
 { #category : #adding }
 GtRrExampleTestFactory >> addTask: aTask [
 
-	aTask taskTimeout: taskTimeout.
 	stream nextPut: aTask
+]
+
+{ #category : #initialization }
+GtRrExampleTestFactory >> clearInImage [
+	"Set the flag to indicate that the job may be run in any worker"
+
+	inImageOnly := nil.
 ]
 
 { #category : #initialization }
@@ -106,4 +113,34 @@ GtRrExampleTestFactory >> initialize [
 GtRrExampleTestFactory >> setIgnoreNoTest [ 
 
 	ignoreNoTest := true.
+]
+
+{ #category : #initialization }
+GtRrExampleTestFactory >> setInImage [
+	"Set the flag to indicate that the job should be run in image only"
+
+	inImageOnly := true.
+]
+
+{ #category : #initialization }
+GtRrExampleTestFactory >> setNotInImage [
+	"Set the flag to indicate that the job should be run in remote workers only"
+
+	inImageOnly := false.
+]
+
+{ #category : #accessing }
+GtRrExampleTestFactory >> tasks [
+	| tasks |
+
+	tasks := super tasks.
+	tasks do: [ :task |
+		task taskTimeout: taskTimeout.
+		ignoreNoTest ifTrue: [ task setIgnoreNoTest ].
+		inImageOnly ifNotNil:
+			[ task constraint: (inImageOnly
+				ifTrue: [ GtRrInImageConstraint default ]
+				ifFalse: [ GtRrInImageConstraint default not ]) ].
+		 ].
+	^ tasks
 ]

@@ -25,6 +25,13 @@ GtRrExplicitSUnitTask >> acceptVisitor: aVisitor [
 	^ aVisitor visitExplicitSUnitTask: self
 ]
 
+{ #category : #converting }
+GtRrExplicitSUnitTask >> asExplicitTask [
+	"Answer the receiver as a list of explicit examples / tasks"
+
+	^ self
+]
+
 { #category : #accessing }
 GtRrExplicitSUnitTask >> sunitTestNames [
 

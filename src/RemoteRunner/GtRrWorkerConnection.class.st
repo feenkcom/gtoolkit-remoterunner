@@ -8,6 +8,7 @@ Class {
 	#classTraits : 'TGtWorkerConnectionUI classTrait',
 	#instVars : [
 		'connection',
+		'workerPriority',
 		'remoteRunner',
 		'remoteAddress',
 		'details',
@@ -277,4 +278,15 @@ GtRrWorkerConnection >> timeoutManager [
 GtRrWorkerConnection >> workerId [
 
 	^ details at: #id
+]
+
+{ #category : #accessing }
+GtRrWorkerConnection >> workerPriority [
+	"Answer the priority of the worker.
+	Larger number = higher priority.
+	50 = default priority.
+	Cache the priority in an instance variable since it is frequently accessed as part of the availableWorkers"
+
+	^ workerPriority ifNil:
+		[ workerPriority := details at: #workerPriority ifAbsent: [ 50 ] ].
 ]
