@@ -11,3 +11,9 @@ GtRrExamplesProgressNotification >> elementClass [
 
 	^ GtRrExamplesNotificationElement
 ]
+
+{ #category : #accessing }
+GtRrExamplesProgressNotification >> summaryClass [
+	"Return a class that when instantiated displays the notification summary to the user"
+	^ GtRrExamplesNotificationSummary
+]
