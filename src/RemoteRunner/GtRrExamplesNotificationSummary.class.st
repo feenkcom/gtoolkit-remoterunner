@@ -26,5 +26,11 @@ GtRrExamplesNotificationSummary >> onNotificationsChanged [
 				to: self ].
 	failed text: failedCounter asString.
 	successful text: successfulCounter asString.
-	notStarted text: notStartedCounter asString
+	notStarted text: notStartedCounter asString.
+	failed
+		visibility: (failedCounter = 0 ifTrue: [ BlVisibility gone ] ifFalse: [ BlVisibility visible ]).
+	successful
+		visibility: (successfulCounter = 0 ifTrue: [ BlVisibility gone ] ifFalse: [ BlVisibility visible ]).
+	notStarted
+		visibility: (notStartedCounter = 0 ifTrue: [ BlVisibility gone ] ifFalse: [ BlVisibility visible ]).
 ]
