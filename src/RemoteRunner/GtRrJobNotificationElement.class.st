@@ -21,6 +21,11 @@ Class {
 	#category : #'RemoteRunner-UI'
 }
 
+{ #category : #accessing }
+GtRrJobNotificationElement >> allTasks [
+	^ job tasks
+]
+
 { #category : #'private - accessing' }
 GtRrJobNotificationElement >> borderElement [
 	<return: #GtNotificationBorderElement>
@@ -33,7 +38,7 @@ GtRrJobNotificationElement >> constructStates [
 	^ {GtRrStateElement
 			name: 'All'
 			color: Color transparent
-			elements: job tasks.
+			elements: self allTasks.
 		GtRrStateElement
 			name: 'Success'
 			color: Color lightGreen
@@ -45,7 +50,7 @@ GtRrJobNotificationElement >> constructStates [
 		GtRrStateElement
 			name: 'Not executed'
 			color: Color veryVeryLightGray
-			elements: (job tasks reject: #isFinished)}
+			elements: self notExecutedTasks}
 ]
 
 { #category : #initialization }
@@ -174,6 +179,11 @@ GtRrJobNotificationElement >> message [
 GtRrJobNotificationElement >> name [
 
 	^ job name
+]
+
+{ #category : #accessing }
+GtRrJobNotificationElement >> notExecutedTasks [
+	^ job tasks reject: #isFinished
 ]
 
 { #category : #'private - hooks' }

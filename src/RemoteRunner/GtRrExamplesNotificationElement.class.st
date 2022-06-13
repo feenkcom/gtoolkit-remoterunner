@@ -14,12 +14,17 @@ Class {
 }
 
 { #category : #accessing }
+GtRrExamplesNotificationElement >> allTasks [
+	^ job tasks flatCollect: #allMethods
+]
+
+{ #category : #accessing }
 GtRrExamplesNotificationElement >> constructStates [
 	job ifNil: [ ^ {} ].
 	^ {GtRrExamplesStateElement
 			name: 'All'
 			color: Color transparent
-			elements: (job tasks flatCollect: #allMethods).
+			elements: self allTasks.
 		GtRrExamplesStateElement
 			name: 'Success'
 			color: Color lightGreen
@@ -39,13 +44,18 @@ GtRrExamplesNotificationElement >> constructStates [
 		GtRrExamplesStateElement
 			name: 'Not executed'
 			color: Color veryVeryLightGray
-			elements: ((job tasks reject: #isFinished) flatCollect: #allMethods)}
+			elements: self notExecutedTasks}
 ]
 
 { #category : #accessing }
 GtRrExamplesNotificationElement >> name [
 
 	^ job name
+]
+
+{ #category : #accessing }
+GtRrExamplesNotificationElement >> notExecutedTasks [
+	^ (job tasks reject: #isFinished) flatCollect: #allMethods
 ]
 
 { #category : #'private - hooks' }
