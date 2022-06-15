@@ -116,12 +116,11 @@ GtRemoteRunnerExamples >> controlChannelPing [
 	remoteRunner start.
 	[ self waitOn: controlChannelSemaphore for: 20
 		description: 'Control channel didn''t register in time'.
-	"There are two registered workers: the in image worker and the worker pool (size = 1)"
-	self assert: remoteRunner registeredWorkerCount equals: 2.
+	self assert: remoteRunner registeredWorkerCount equals: 1.
 	self
 		assert: worker commandPing
 		equals: #ping.
-	self assert: remoteRunner registeredWorkerCount equals: 2.
+	self assert: remoteRunner registeredWorkerCount equals: 1.
 	] ensure: [ remoteRunner stop ].
 
 	^ worker
