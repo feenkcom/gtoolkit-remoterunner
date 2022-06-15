@@ -313,7 +313,7 @@ GtRemoteRunner >> debugMode [
 { #category : #accessing }
 GtRemoteRunner >> defaultTaskTimeout [
 
-	^ 15 minutes
+	^ 1 hour
 ]
 
 { #category : #accessing }
