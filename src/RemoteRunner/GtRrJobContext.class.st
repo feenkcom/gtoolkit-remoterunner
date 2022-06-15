@@ -169,10 +169,9 @@ GtRrJobContext >> jobContext [
 { #category : #accessing }
 GtRrJobContext >> jobTimeout [
 	"Answer the job timeout.
-	If the timeout is not explicitly set, allow enough time for all tasks to run"
+	nil = no timeout"
 
-	^ jobTimeout ifNil: [ jobTimeout := job jobTimeout ifNil: 
-		[ self taskContexts inject: Duration zero into: [ :s :v | s + v taskTimeout ] ] ]
+	^ job jobTimeout
 ]
 
 { #category : #accessing }
@@ -199,7 +198,7 @@ GtRrJobContext >> markJobCompleted [
 GtRrJobContext >> markJobStarted [
 
 	job markJobStarted.
-	jobTimeoutTime := job startTime + self jobTimeout.
+	jobTimeoutTime := self jobTimeout ifNotNil: [ :timeout | job startTime + timeout ].
 	taskCompletedCount := 0.
 ]
 

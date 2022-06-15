@@ -18,6 +18,15 @@ GtRrExamplesTask >> allMethods [
 	^ self group examples collect: #method
 ]
 
+{ #category : #converting }
+GtRrExamplesTask >> asExplicitTask [
+	"Answer the receiver as a list of explicit examples / tasks"
+
+	^ GtRrExplicitExampleTask examples: 
+		(self group examples collect: [ :each |
+			each methodClass name -> each selector ])
+]
+
 { #category : #'accessing - dynamic' }
 GtRrExamplesTask >> erroredExamples [
 
@@ -62,6 +71,13 @@ GtRrExamplesTask >> initialize [
 
 	super initialize.
 	ignoreNoTest := false.
+]
+
+{ #category : #testing }
+GtRrExamplesTask >> isExamplesTask [
+	"Answer a boolean indicating whether the receiver is for running Gt examples"
+
+	^ true
 ]
 
 { #category : #running }

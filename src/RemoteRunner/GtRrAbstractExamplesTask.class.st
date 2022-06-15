@@ -11,6 +11,13 @@ GtRrAbstractExamplesTask >> allMethods [
 	^ self subclassResponsibility 
 ]
 
+{ #category : #converting }
+GtRrAbstractExamplesTask >> asExplicitTask [
+	"Answer the receiver as a list of explicit examples / tasks"
+
+	^ self subclassResponsibility 
+]
+
 { #category : #accessing }
 GtRrAbstractExamplesTask >> erroredExamples [
 	"Answer the examples / tests that finished with an error"
@@ -30,6 +37,24 @@ GtRrAbstractExamplesTask >> failedExamples [
 	"Answer the examples / tests that have an assertion failure"
 
 	^ self subclassResponsibility
+]
+
+{ #category : #testing }
+GtRrAbstractExamplesTask >> isExamplesTask [
+	"Answer a boolean indicating whether the receiver is for running Gt examples"
+
+	^ false
+]
+
+{ #category : #testing }
+GtRrAbstractExamplesTask >> isSUnitTask [
+	"Answer a boolean indicating whether the receiver is for running SUnit tests"
+
+	^ false
+]
+
+{ #category : #accessing }
+GtRrAbstractExamplesTask >> setIgnoreNoTest [
 ]
 
 { #category : #accessing }

@@ -101,6 +101,12 @@ GtRemoteRunner class >> hasUniqueInstance [
 	^ uniqueInstance isNotNil.
 ]
 
+{ #category : #'class initialization' }
+GtRemoteRunner class >> initialize [
+	SessionManager default
+		registerSystemClassNamed: self name
+]
+
 { #category : #accessing }
 GtRemoteRunner class >> instance [
 	"Override the default which makes this an example.
@@ -163,6 +169,11 @@ GtRemoteRunner class >> setUniqueInstance: aGtRemoteRunner [
 	self hasUniqueInstance ifTrue: 
 		[ self error: 'GtRemoteRunner already running' ].
 	uniqueInstance := aGtRemoteRunner.
+]
+
+{ #category : #'class initialization' }
+GtRemoteRunner class >> startUp: resuming [
+	resuming ifTrue: [ self cleanUp ]
 ]
 
 { #category : #accessing }
@@ -228,7 +239,7 @@ GtRemoteRunner >> assignTasksToWorkers [
 
 	busyWorkers := OrderedCollection new.
 	"Loop around assigning tasks to workers until there either no more workers or no more tasks available"
-	availableWorkers do: [ :workerFuture |
+	availableWorkers reverseDo: [ :workerFuture |
 		taskContext := self getNextTaskFor: workerFuture.
 		taskContext ifNotNil:
 			[ runnerStats incrementTaskCount.
@@ -302,7 +313,7 @@ GtRemoteRunner >> debugMode [
 { #category : #accessing }
 GtRemoteRunner >> defaultTaskTimeout [
 
-	^ 15 minutes
+	^ 1 hour
 ]
 
 { #category : #accessing }
@@ -430,9 +441,10 @@ GtRemoteRunner >> initialize [
 	"Make sure you REALLY know what you're doing before changing sharedAccess to a Monitor.
 	PharoLinkServer requests are handled in individual processes, so any deadlock is unlikely to be resolved by converting sharedAccess to a Monitor."
 	sharedAccess := GtMutualExclusionSemaphore forMutualExclusion.
-	"availableWorkers is a Set of GtRrFutureWorkerTask.
-	The worker is represented by the connection and is waiting on the semaphore held by the GtRrFutureWorkerTask."
-	availableWorkers := Set new.
+	"availableWorkers is a SortedCollection of GtRrFutureWorkerTask, sorted by #workerPriority.
+	The worker is represented by a GtRrWorkerConnection and is waiting on the semaphore held by the GtRrFutureWorkerTask.
+	Sort the collection ascending and remove the last item to minimise the need for repacking the collection."
+	availableWorkers := SortedCollection sortUsing: #workerPriority ascending.
 	registeredWorkers := Dictionary new.
 	timeoutManager := GtRrTimeoutManager remoteRunner: self.
 	self 

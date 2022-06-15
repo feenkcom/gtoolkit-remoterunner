@@ -1,17 +1,13 @@
 Class {
 	#name : #GtRrTrueConstraint,
 	#superclass : #GtRrConstraint,
+	#traits : 'TGtUniqueInstance',
+	#classTraits : 'TGtUniqueInstance classTrait',
 	#classInstVars : [
 		'instance'
 	],
 	#category : #'RemoteRunner-Constraints'
 }
-
-{ #category : #accessing }
-GtRrTrueConstraint class >> instance [
-
-	^ instance ifNil: [ instance := self new ]
-]
 
 { #category : #accessing }
 GtRrTrueConstraint class >> leJsonV4Name [

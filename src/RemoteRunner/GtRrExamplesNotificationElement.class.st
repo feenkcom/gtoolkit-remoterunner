@@ -14,32 +14,37 @@ Class {
 }
 
 { #category : #accessing }
+GtRrExamplesNotificationElement >> allTasks [
+	^ job tasks flatCollect: #allMethods
+]
+
+{ #category : #accessing }
 GtRrExamplesNotificationElement >> constructStates [
 	job ifNil: [ ^ {} ].
 	^ {GtRrExamplesStateElement
 			name: 'All'
 			color: Color transparent
-			elements: (job tasks flatCollect: #allMethods).
+			elements: self allTasks.
 		GtRrExamplesStateElement
 			name: 'Success'
 			color: Color lightGreen
-			elements: successful.
+			elements: (job tasks flatCollect: [:aTask | aTask successfulExamples collect: #method]).
 		GtRrExamplesStateElement
 			name: 'Skipped'
 			color: Color veryVeryLightGray
-			elements: skipped.
+			elements: (job tasks flatCollect: [:aTask | aTask skippedExamples collect: #method]).
 		GtRrExamplesStateElement
 			name: 'Failure'
 			color: Color lightOrange
-			elements: failed.
+			elements: (job tasks flatCollect: [:aTask | aTask failedExamples collect: #method]).
 		GtRrExamplesStateElement
 			name: 'Error'
 			color: Color red
-			elements: errored.
+			elements: (job tasks flatCollect: [:aTask | aTask erroredExamples collect: #method]).
 		GtRrExamplesStateElement
 			name: 'Not executed'
 			color: Color veryVeryLightGray
-			elements: ((job tasks reject: #isFinished) flatCollect: #allMethods)}
+			elements: self notExecutedTasks}
 ]
 
 { #category : #accessing }
@@ -48,17 +53,17 @@ GtRrExamplesNotificationElement >> name [
 	^ job name
 ]
 
+{ #category : #accessing }
+GtRrExamplesNotificationElement >> notExecutedTasks [
+	^ (job tasks reject: #isFinished) flatCollect: #allMethods
+]
+
 { #category : #'private - hooks' }
 GtRrExamplesNotificationElement >> onTaskAnnouncement: aGtRrTaskAnnouncement [
 	| task |
 
 	aGtRrTaskAnnouncement class = GtRrTaskStartedAnnouncement ifTrue: [ ^ self ].
-
-	task := aGtRrTaskAnnouncement task.
-	successful addAll: (task successfulExamples collect: #method).
-	errored addAll: (task erroredExamples collect: #method).
-	failed addAll: (task failedExamples collect: #method).
-	skipped addAll: (task skippedExamples collect: #method).
+	
 	self updateDisplay.
 ]
 

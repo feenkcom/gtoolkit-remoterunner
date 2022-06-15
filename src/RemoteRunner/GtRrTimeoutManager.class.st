@@ -28,6 +28,7 @@ GtRrTimeoutManager >> addContext: aGtRrContext [
 	"Add the supplied context to the receiver's timeouts and update the check time if required.
 	Must be called within the remoteRunner's sharedAccess"
 
+	aGtRrContext contextTimeoutTime ifNil: [ ^ self ].
 	contexts add: aGtRrContext.
 	self updateScheduledTask.
 ]
@@ -94,6 +95,13 @@ GtRrTimeoutManager >> scheduleCheckTimeouts [
 	future onFailureDo: [ :anError |
 		anError freeze.
 		[ self error: anError printString ] fork ]
+]
+
+{ #category : #accessing }
+GtRrTimeoutManager >> size [
+	"Answer the number of contexts being monitored"
+
+	^ contexts size
 ]
 
 { #category : #private }

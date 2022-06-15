@@ -1,5 +1,7 @@
 "
-GtRrInImageWorker is a simple worker that runs in the same image as the RemoteRunner server and is used for testing and demonstrating the system.
+GtRrInImageWorker is a simple worker that runs in the same image as the RemoteRunner server.
+
+The worker process runs at low priority to not interfere with user operations (see {{gtMethod:GtRrInImageWorker>>#start}}).
 "
 Class {
 	#name : #GtRrInImageWorker,
@@ -11,7 +13,7 @@ Class {
 		'details',
 		'uid'
 	],
-	#category : #'RemoteRunner-Examples'
+	#category : #'RemoteRunner-Worker'
 }
 
 { #category : #accessing }
@@ -56,6 +58,8 @@ GtRrInImageWorker >> initialize [
 		at: #id put: uid;
 		at: #pid put: self currentProcessId;
 		at: #platform put: OSPlatform current name;
+		at: #workerPriority put: 10;
+		at: #workerInImage put: true;
 		yourself.
 	connection := GtRrPseudoPharoLinkServerConnection new.
 ]
@@ -87,7 +91,7 @@ GtRrInImageWorker >> start [
 	PharoLinkServerCurrentConnection 
 		value: connection
 		during: [ remoteRunner registerWorkerWithDetails: details ].
-	process := [ self taskPollForever ] fork.
+	process := [ self taskPollForever ] forkAt: Processor userBackgroundPriority.
 ]
 
 { #category : #accessing }

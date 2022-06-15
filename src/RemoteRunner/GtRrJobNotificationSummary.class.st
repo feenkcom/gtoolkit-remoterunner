@@ -18,31 +18,38 @@ GtRrJobNotificationSummary >> initialize [
 			c vertical exact: 21.
 			c horizontal fitContent ].
 	self layout: BlLinearLayout horizontal.
-
+	self border: (BlBorder paint: Color orange width: 2).
+	self geometry: (BlRoundedRectangleGeometry cornerRadius: 4).
+	self padding: (BlInsets left: 5 right: 5).
+	self background: Color white.
 	self
 		addChild: (notStarted := BrLabel new
 					aptitude: BrGlamorousLabelAptitude;
+					beSmallSize;
 					exact: 15 @ 15;
 					margin: (BlInsets all: 3);
-					background: BrGlamorousColors neutralBackgroundColor;
 					layout: BlLinearLayout horizontal alignCenter;
 					geometry: (BlRoundedRectangleGeometry cornerRadius: 4);
 					text: '0');
 		addChild: (failed := BrLabel new
 					aptitude: BrGlamorousLabelAptitude;
+					beSmallSize;
 					exact: 15 @ 15;
 					margin: (BlInsets all: 3);
 					background: BrGlamorousColors errorBackgroundColor;
 					layout: BlLinearLayout horizontal alignCenter;
 					geometry: (BlRoundedRectangleGeometry cornerRadius: 4);
+					visibility: BlVisibility gone;
 					text: '0');
 		addChild: (successful := BrLabel new
 					aptitude: BrGlamorousLabelAptitude;
+					beSmallSize;
 					exact: 15 @ 15;
 					margin: (BlInsets all: 3);
 					background: BrGlamorousColors successBackgroundColor;
 					layout: BlLinearLayout horizontal alignCenter;
 					geometry: (BlRoundedRectangleGeometry cornerRadius: 4);
+					visibility: BlVisibility gone;
 					text: '0')
 ]
 
@@ -61,9 +68,15 @@ GtRrJobNotificationSummary >> onNotificationsChanged [
 			failedCounter := failedCounter + aNotification job resultsWithErrors size.
 			aNotification job
 				when: GtRrTaskAnnouncement
-				send: #onNotificationsChanged
+				send: #requestUpdate
 				to: self ].
 	failed text: failedCounter asString.
 	successful text: successfulCounter asString.
-	notStarted text: notStartedCounter asString
+	notStarted text: notStartedCounter asString.
+	failed
+		visibility: (failedCounter = 0 ifTrue: [ BlVisibility gone ] ifFalse: [ BlVisibility visible ]).
+	successful
+		visibility: (successfulCounter = 0 ifTrue: [ BlVisibility gone ] ifFalse: [ BlVisibility visible ]).
+	notStarted
+		visibility: (notStartedCounter = 0 ifTrue: [ BlVisibility gone ] ifFalse: [ BlVisibility visible ]).
 ]

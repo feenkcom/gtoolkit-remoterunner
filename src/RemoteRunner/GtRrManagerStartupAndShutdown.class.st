@@ -2,7 +2,8 @@ Class {
 	#name : #GtRrManagerStartupAndShutdown,
 	#superclass : #Object,
 	#instVars : [
-		'remoteRunner'
+		'remoteRunner',
+		'inImageWorker'
 	],
 	#category : #'RemoteRunner-Runner'
 }
@@ -36,8 +37,9 @@ GtRrManagerStartupAndShutdown >> shutdown [
 
 { #category : #'startup - shutdown' }
 GtRrManagerStartupAndShutdown >> startup [ 
-	"Perform any actions associated with starting the DTS cluster:
+	"Perform any actions associated with starting the RemoteRunner:
 	- Start the PharoLinkWorkerServer
+	- Create an in-image worker
 	Subclasses can perform additional actions"
 	| server |
 
@@ -48,5 +50,8 @@ GtRrManagerStartupAndShutdown >> startup [
 		setCloseOnExec: true;
 		yourself.
 	server globals at: #GtAssignedRemoteRunner put: remoteRunner.
+	"inImageWorker := GtRrInImageWorker new
+		remoteRunner: remoteRunner;
+		start."
 	remoteRunner server: server.
 ]

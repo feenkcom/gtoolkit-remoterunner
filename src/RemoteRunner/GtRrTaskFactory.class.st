@@ -16,6 +16,13 @@ GtRrTaskFactory >> classWithName: aString [
 		ifFalse: [ self class environment at: aString asSymbol ].
 ]
 
+{ #category : #'as yet unclassified' }
+GtRrTaskFactory >> groupTasksByAverageTime [
+
+	stream := (GtRrAverageTimeExampleAllocator new
+		allocateTasks: stream contents) readStream.
+]
+
 { #category : #'gt - extensions' }
 GtRrTaskFactory >> gtViewTasksByWorkerFor: aView [
 	<gtView>
