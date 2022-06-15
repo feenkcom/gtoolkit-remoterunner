@@ -50,8 +50,8 @@ GtRrManagerStartupAndShutdown >> startup [
 		setCloseOnExec: true;
 		yourself.
 	server globals at: #GtAssignedRemoteRunner put: remoteRunner.
-	inImageWorker := GtRrInImageWorker new
+	"inImageWorker := GtRrInImageWorker new
 		remoteRunner: remoteRunner;
-		start.
+		start."
 	remoteRunner server: server.
 ]

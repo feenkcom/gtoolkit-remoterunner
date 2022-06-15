@@ -186,6 +186,11 @@ GtRrJobNotificationElement >> notExecutedTasks [
 	^ job tasks reject: #isFinished
 ]
 
+{ #category : #accessing }
+GtRrJobNotificationElement >> onAddedToSceneGraph [
+	self updateDisplay
+]
+
 { #category : #'private - hooks' }
 GtRrJobNotificationElement >> onNotificationChanged [
 
