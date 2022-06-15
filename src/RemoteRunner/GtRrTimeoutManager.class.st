@@ -67,7 +67,7 @@ GtRrTimeoutManager >> initialize [
 
 	super initialize.
 	contexts := SortedCollection sortBlock: [ :a :b | a contextTimeoutTime < b contextTimeoutTime ].
-	scheduleTask := BlTaskAtQueueTask
+	scheduleTask := TaskAtQueueTask
 		valuable: [ self scheduleCheckTimeouts ]
 		at: DateAndTime now + 1 hour
 		entryIdentifier: Object new.
@@ -103,6 +103,6 @@ GtRrTimeoutManager >> updateScheduledTask [
 	contexts ifEmpty: [ ^ self ].
 	nextTimeout := contexts first contextTimeoutTime.
 	scheduleTask scheduledTime: nextTimeout.
-	BlTaskAtQueue schedule: scheduleTask.
+	TaskAtQueue schedule: scheduleTask.
 
 ]
