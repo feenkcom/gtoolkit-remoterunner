@@ -16,7 +16,8 @@ Class {
 		'job',
 		'infoButton',
 		'runAgainButton',
-		'statePane'
+		'statePane',
+		'isFinished'
 	],
 	#category : #'RemoteRunner-UI'
 }
@@ -63,6 +64,9 @@ GtRrJobNotificationElement >> initialize [
 	| namePane toolbarPane |
 
 	super initialize.
+
+	isFinished := false.
+	
 	self initializeBorderElement.
 	namePane := self initializeNameLabel.
 	statePane := self initializeStateElement.
@@ -205,12 +209,6 @@ GtRrJobNotificationElement >> onTaskAnnouncement: aGtRrTaskAnnouncement [
 	self updateDisplay.
 ]
 
-{ #category : #'private - accessing' }
-GtRrJobNotificationElement >> progress [
-
-	^ (self successfulCount + self errorCount) / self totalCount
-]
-
 { #category : #private }
 GtRrJobNotificationElement >> runJobAgain [
 	"Create a copy of the receiver's job and run it with progress notifications"
@@ -250,9 +248,17 @@ GtRrJobNotificationElement >> updateDisplay [
 		enqueueTask: (BlTaskAction new
 				action: [ | states |
 					nameLabel text: self name.
-					statePane removeChildren.
 
-					states := self constructStates.
+					isFinished
+						ifFalse: [ statePane removeChildren.
 
-					states do: [ :state | statePane addChild: state ] ])
+							states := self constructStates.
+
+							states do: [ :state | statePane addChild: state ].
+
+							job isFinished
+								ifTrue: [ nameLabel
+										addChild: (BrGlamorousVectorIcons accept asElement asScalableElement
+												addAptitude: (BrGlamorousWithLabelTooltipAptitude new text: 'Finished')).
+									isFinished := true ] ] ])
 ]
