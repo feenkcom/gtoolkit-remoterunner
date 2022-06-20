@@ -452,6 +452,12 @@ GtRemoteRunner >> initialize [
 		jobStartupAndShutdown: GtRrLocalJobStartupAndShutdown new.
 ]
 
+{ #category : #accessing }
+GtRemoteRunner >> isIdle [
+
+	^ self state = #idle
+]
+
 { #category : #testing }
 GtRemoteRunner >> isRunning [
 
