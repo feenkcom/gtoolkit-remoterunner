@@ -7,6 +7,12 @@ Class {
 	#category : #'RemoteRunner-Worker'
 }
 
+{ #category : #naming }
+GtRrWorkerConnectionPerMessageStrategy class >> strategyName [
+
+	^ #perMessageStrategy
+]
+
 { #category : #'api - running' }
 GtRrWorkerConnectionPerMessageStrategy >> connectDuring: aBlock [
 	"Evaluate aBlock passing in a connected PharoLinkApplication"

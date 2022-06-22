@@ -17,6 +17,13 @@ PlpoGtRrJob >> isFinished [
 ]
 
 { #category : #accessing }
+PlpoGtRrJob >> jobTimeout [
+	"Answer the receiver's timeout"
+
+	^ self proxyPerform: #jobTimeout
+]
+
+{ #category : #accessing }
 PlpoGtRrJob >> results [
 	"Answer the results from the job as an Array.
 	Leave the return type as a proxy object as the size may be large."

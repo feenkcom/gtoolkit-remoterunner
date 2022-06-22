@@ -275,6 +275,7 @@ GtRrWorker >> connectionStrategy: aGtRrConnectionStrategy [
 
 	connectionStrategy := aGtRrConnectionStrategy.
 	connectionStrategy worker: self.
+	attributes at: #workerConnectionStrategy put: connectionStrategy strategyName.
 ]
 
 { #category : #private }
@@ -290,11 +291,6 @@ GtRrWorker >> initialize [
 	super initialize.
 	uid := UUID new asString.
 	taskRunner := TKTNewProcessTaskRunner new.
-	"Windows socket event delivery seems brittle, events seem to get swallowed by other subsystems such as the JVM or GUI.
-	Avoid the issue by only connecting to the server while not running tasks."
-	self connectionStrategy: (OSPlatform current isWindows
-		ifTrue: [ GtRrWorkerConnectionPerMessageStrategy new ]
-		ifFalse: [ GtRrWorkerSingleConnectionStrategy new ]).
 	"WaitfreeQueues should have only one process reading - which is the #stepService"
 	resultQueue := WaitfreeQueue new.
 	"Attributes is a dictionary of information can be json encoded.
@@ -306,7 +302,17 @@ GtRrWorker >> initialize [
 		at: #id put: uid;
 		at: #pid put: self currentProcessId;
 		at: #platform put: OSPlatform current name;
-		yourself
+		yourself.
+
+	"Windows socket event delivery seems brittle, events seem to get swallowed by other subsystems such as the JVM or GUI.
+	Avoid the issue by only connecting to the server while not running tasks."
+	self connectionStrategy: (OSPlatform current isWindows
+		ifTrue: [ GtRrWorkerConnectionPerMessageStrategy new ]
+		ifFalse: [ GtRrWorkerSingleConnectionStrategy new ]).
+
+	self connectionStrategy: GtRrWorkerConnectionPerMessageStrategy new.
+
+
 ]
 
 { #category : #stepping }
