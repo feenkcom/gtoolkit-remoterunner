@@ -110,7 +110,7 @@ GtRrTasksGroup >> gtViewTimelineV3For: aView [
 		title: 'Timeline (v3)';
 		priority: 20; 
 		stencil: [
-			| startTime endTime offset markers scale finishedTasks barWidthScale container histogram labels ticks |
+			| startTime endTime offset scale finishedTasks barWidthScale container histogram labels ticks |
 			
 			startTime := self startTime.
 endTime := self endTime.
@@ -184,7 +184,7 @@ GtRrTasksGroup >> gtViewTimelineV4For: aView [
 		title: 'Timeline (v4)';
 		priority: 20; 
 		stencil: [
-			| startTime endTime offset markers scale finishedTasks barWidthScale container histogram labels ticks |
+			| startTime endTime offset scale finishedTasks barWidthScale container histogram labels ticks |
 			
 			startTime := self startTime.
 endTime := self endTime.
