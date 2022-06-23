@@ -142,7 +142,7 @@ GtRemoteRunner class >> setDefaultHeadless [
 ]
 
 { #category : #'headless remote runner' }
-GtRemoteRunner class >> setDefaultHeadlessOnPort: aNumber codeSync: aBoolean [
+GtRemoteRunner class >> setDefaultHeadlessOnPort: aNumberOrString codeSync: aBoolean [
 	"Make the default remote runner a proxy to an existing headless runner"
 	| settings plApplication runner |
 
@@ -150,8 +150,7 @@ GtRemoteRunner class >> setDefaultHeadlessOnPort: aNumber codeSync: aBoolean [
 	settings := LanguageLinkSettings pharoDefaultSettings.
 	settings
 		serverProcessClass: LanguageLinkManualProcess;
-		serverSocketAddress: (LanguageLinkSocketAddress
-			ipOrName: 'localhost' port: 7042).
+		serverSocketAddress: (LanguageLinkSocketAddress from: aNumberOrString).
 	plApplication := PharoLinkApplication newWith: settings.
 	plApplication start.
 	runner := plApplication newCommandFactory
