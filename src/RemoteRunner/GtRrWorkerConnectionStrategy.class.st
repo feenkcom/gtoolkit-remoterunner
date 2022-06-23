@@ -25,6 +25,12 @@ GtRrWorkerConnectionStrategy class >> serverSocketAddress: aString worker: aGtRr
 		worker: aGtRrWorker
 ]
 
+{ #category : #naming }
+GtRrWorkerConnectionStrategy class >> strategyName [
+
+	^ self subclassResponsibility 
+]
+
 { #category : #'api - running' }
 GtRrWorkerConnectionStrategy >> connectDuring: aBlock [
 	"Evaluate aBlock passing in a connected PharoLinkApplication"
@@ -74,6 +80,12 @@ GtRrWorkerConnectionStrategy >> start [
 GtRrWorkerConnectionStrategy >> stop [
 
 	self subclassResponsibility 
+]
+
+{ #category : #naming }
+GtRrWorkerConnectionStrategy >> strategyName [
+
+	^ self class strategyName
 ]
 
 { #category : #accessing }

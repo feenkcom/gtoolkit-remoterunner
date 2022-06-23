@@ -108,6 +108,10 @@ GtRrWorkerConnection >> connection: aPharoLinkServerConnection [
 
 	connection := aPharoLinkServerConnection.
 	remoteAddress := connection remoteAddress.
+	connection
+		when: PharoLinkServerConnectionDisconnectedAnnouncement 
+		send: #onConnectionLost 
+		to: self.
 ]
 
 { #category : #accessing }
@@ -168,6 +172,19 @@ GtRrWorkerConnection >> observerWait [
 	This is called by the worker to keep the observer valid."
 
 	observerSemaphore wait.
+]
+
+{ #category : #'private - events' }
+GtRrWorkerConnection >> onConnectionLost [
+	"Handle the worker disconnection.
+	Ignored if not a single connection"
+
+	(details at: #workerConnectionStrategy) = GtRrWorkerSingleConnectionStrategy strategyName ifFalse:
+		[ ^ self ].
+
+	self hasObserver ifTrue: [ self removeObserver ].
+	self remoteRunner unregisterWorkerId: self workerId reason: 'Worker stopped'
+
 ]
 
 { #category : #debugging }

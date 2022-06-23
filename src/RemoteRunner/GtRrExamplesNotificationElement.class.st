@@ -60,7 +60,6 @@ GtRrExamplesNotificationElement >> notExecutedTasks [
 
 { #category : #'private - hooks' }
 GtRrExamplesNotificationElement >> onTaskAnnouncement: aGtRrTaskAnnouncement [
-	| task |
 
 	aGtRrTaskAnnouncement class = GtRrTaskStartedAnnouncement ifTrue: [ ^ self ].
 	
