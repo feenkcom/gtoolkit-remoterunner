@@ -310,8 +310,6 @@ GtRrWorker >> initialize [
 		ifTrue: [ GtRrWorkerConnectionPerMessageStrategy new ]
 		ifFalse: [ GtRrWorkerSingleConnectionStrategy new ]).
 
-	self connectionStrategy: GtRrWorkerConnectionPerMessageStrategy new.
-
 
 ]
 
