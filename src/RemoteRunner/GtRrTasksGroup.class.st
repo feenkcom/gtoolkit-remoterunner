@@ -122,7 +122,7 @@ scale := GtPlotterTimeScale new
 finishedTasks := self select: #isFinished.
 
 barWidthScale := GtPlotterDurationScale new
-	domainFrom: 0 milliseconds
+	domainFrom: 0 milliSeconds
 	to: (finishedTasks maxValue: #duration) .
 
 container := BrVerticalPane new
@@ -196,7 +196,7 @@ scale := GtPlotterTimeScale new
 finishedTasks := self select: #isFinished.
 
 barWidthScale := GtPlotterDurationScale new
-	domainFrom: 0 milliseconds
+	domainFrom: 0 milliSeconds
 	to: (finishedTasks maxValue: #duration) .
 
 container := BrVerticalPane new
