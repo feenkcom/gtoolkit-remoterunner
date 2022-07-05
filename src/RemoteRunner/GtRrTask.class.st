@@ -92,6 +92,22 @@ GtRrTask >> errorDetails: aGtErrorDetails [
 	errorDetails := aGtErrorDetails
 ]
 
+{ #category : #'accessing - pharolink' }
+GtRrTask >> getSerialized [
+	"Anser the receiver as a local value.
+	For compatibility with PharoLinkProxyObject."
+
+	^ self	
+]
+
+{ #category : #'accessing - pharolink' }
+GtRrTask >> getValue [
+	"Anser the receiver as a local value.
+	For compatibility with PharoLinkProxyObject."
+
+	^ self	
+]
+
 { #category : #ui }
 GtRrTask >> gtResultFor: aView [
 	<gtView>
