@@ -157,6 +157,22 @@ GtRrJob >> errorDetails: aGtErrorDetails [
 	errorDetails := aGtErrorDetails
 ]
 
+{ #category : #'accessing - pharolink' }
+GtRrJob >> getSerialized [
+	"Anser the receiver as a local value.
+	For compatibility with PlpoGtRrJob."
+
+	^ self	
+]
+
+{ #category : #'accessing - pharolink' }
+GtRrJob >> getValue [
+	"Anser the receiver as a local value.
+	For compatibility with PlpoGtRrJob."
+
+	^ self	
+]
+
 { #category : #ui }
 GtRrJob >> gtErrorsFor: aView [
 	<gtView>
