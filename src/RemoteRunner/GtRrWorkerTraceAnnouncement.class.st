@@ -18,3 +18,12 @@ GtRrWorkerTraceAnnouncement >> message: anObject [
 
 	message := anObject
 ]
+
+{ #category : #accessing }
+GtRrWorkerTraceAnnouncement >> printOneLineContentsOn: stream [
+
+	stream 
+		print: message;
+		<< ' from: '.
+	super printOneLineContentsOn: stream.
+]
