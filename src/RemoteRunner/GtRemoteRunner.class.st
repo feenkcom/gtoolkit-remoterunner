@@ -893,6 +893,16 @@ GtRemoteRunner >> taskTimeout: anObject [
 	taskTimeout := anObject
 ]
 
+{ #category : #accessing }
+GtRemoteRunner >> terminateAllJobs [
+	"Terminate all the currently executing jobs"
+	| jobIds |
+
+	jobIds := sharedAccess critical:
+		[currentlyExecutingJobs values collect: #id ].
+	jobIds do: [ :id | self terminateJobId: id ].
+]
+
 { #category : #'api - jobs' }
 GtRemoteRunner >> terminateJobId: aJobId [
 	"Terminate the specified job.
