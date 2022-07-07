@@ -21,7 +21,7 @@ Features of the system (mostly not yet implemented) include:
 
 The main components of the system are:
 
-- GtRemoteRunner provides the primary interface to the system and the main control.
+- {{gtClass:GtRemoteRunner}} provides the primary interface to the system and the main control.
 - A {{gtClass:GtRrWorker}} is created for each client image that will run tests or examples.
 - A {{gtClass:GtRrJob}} is submitted by users for each collection or tests or examples to be executed.  The user will be notified of the progress of the job.  A {{gtClass:GtRrJob}} contains one or more {{gtClass:GtRrTask}}s.
 

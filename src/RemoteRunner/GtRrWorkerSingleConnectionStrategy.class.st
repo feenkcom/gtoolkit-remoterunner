@@ -1,5 +1,5 @@
 "
-GtRrWorkerSingleConnectionStrategy creates and uses a single connection to the RemoteRunner, i.e. it implements the original strategy of GtRrWorker.
+{{gtClass:GtRrWorkerSingleConnectionStrategy}} creates and uses a single connection to the RemoteRunner, i.e. it implements the original strategy of {{gtClass:GtRrWorker}}.
 
 No attempt to reconnect is made if the connection is lost.
 "

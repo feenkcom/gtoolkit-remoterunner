@@ -18,6 +18,26 @@ Class {
 	#category : #'RemoteRunner-Runner'
 }
 
+{ #category : #accessing }
+GtRrResourceWorkerCountCalculator >> gtViewDetailsFor: aView [
+	<gtView>
+	
+	^ aView columnedList 
+		title: 'Details';
+		priority: 10;
+		items: [ 
+			{
+				'CPU Cores'  -> GtOsSystemInfo current numberOfCores.
+				'Free Memory' -> (GtOsSystemInfo current 
+					freeMemory humanReadableSIByteSize).
+				'VM Memory Size' -> SmalltalkImage current vm 
+					memorySize humanReadableSIByteSize.
+				'Computed Workers Count' ->  self workerCount
+			} ];
+		column: 'Property' text: [ :assoc | assoc key ];
+		column: 'Property' text: [ :assoc | assoc value ]
+]
+
 { #category : #initialization }
 GtRrResourceWorkerCountCalculator >> initialize [
 
