@@ -277,18 +277,41 @@ GtRemoteRunnerExamples >> multipleJobsSimultaneously [
 ]
 
 { #category : #examples }
+GtRemoteRunnerExamples >> simpleJob [
+	<gtExample>
+	| completingTask |
+	completingTask := GtRrScriptTask script: '#done'.
+	^ GtRrTasksJob new tasks: {completingTask}
+]
+
+{ #category : #examples }
+GtRemoteRunnerExamples >> simpleRunner [
+	"Demonstrate executing a simple task"
+	<gtExample>
+	| remoteRunner  |
+
+	self ignoreWorkerExamples ifTrue: [ ^ self ].
+	remoteRunner := GtRemoteRunner new.
+	remoteRunner managerStartupAndShutdown poolSize: 1.
+
+	self assert: remoteRunner taskQueue size equals: 0.
+	self assert: remoteRunner currentlyExecutingJobs size equals: 0.
+	self assert: remoteRunner currentlyExecutingTasks size equals: 0.
+	^ remoteRunner
+]
+
+{ #category : #examples }
 GtRemoteRunnerExamples >> simpleTask [
 	"Demonstrate executing a simple task"
 	<gtExample>
-	| remoteRunner job completingTask taskFailedCount taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount times workerRegisteredSemaphore |
+	| remoteRunner job taskFailedCount taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount times workerRegisteredSemaphore |
 
 	self ignoreWorkerExamples ifTrue: [ ^ self ].
 	jobStartedCount := jobCompletedCount := taskStartedCount := taskCompletedCount := taskFailedCount := 0.
 	jobSemaphore := GtMutualExclusionSemaphore new.
 	workerRegisteredSemaphore := Semaphore new.
 	times := OrderedCollection new.
-	remoteRunner := GtRemoteRunner new.
-	remoteRunner managerStartupAndShutdown poolSize: 1.
+	remoteRunner := self simpleRunner.
 	"Worker processes can be slow to start up if the machine is busy or the image is large (multi GB).
 	Wait for the worker to register before proceeding with tests."
 	remoteRunner when: GtRrWorkerRegisteredAnnouncement do: [ :ann | 
@@ -296,8 +319,7 @@ GtRemoteRunnerExamples >> simpleTask [
 	remoteRunner start.
 	[ self waitOn: workerRegisteredSemaphore for: 20
 		description: 'Worker didn''t register in time'.
-	completingTask := GtRrScriptTask script: '#done'.
-	job := GtRrTasksJob new tasks: { completingTask }.
+	job := self simpleJob.
 	job
 		when: GtRrJobStartedAnnouncement do: 
 			[ jobStartedCount := jobStartedCount + 1.
@@ -350,8 +372,7 @@ GtRemoteRunnerExamples >> simpleTestTask [
 	jobSemaphore := GtMutualExclusionSemaphore new.
 	workerRegisteredSemaphore := Semaphore new.
 	times := OrderedCollection new.
-	remoteRunner := GtRemoteRunner new.
-	remoteRunner managerStartupAndShutdown poolSize: 1.
+	remoteRunner := self simpleRunner.
 	"Worker processes can be slow to start up if the machine is busy or the image is large (multi GB).
 	Wait for the worker to register before proceeding with tests."
 	remoteRunner when: GtRrWorkerRegisteredAnnouncement do: [ :ann | 

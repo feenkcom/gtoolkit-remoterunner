@@ -67,7 +67,8 @@ Class {
 		'announcer',
 		'runnerStats',
 		'log',
-		'taskQueue'
+		'taskQueue',
+		'announcementQueue'
 	],
 	#classInstVars : [
 		'uniqueInstance'

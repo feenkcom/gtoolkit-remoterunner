@@ -10,6 +10,13 @@ PlpoGtRemoteRunner class >> remoteClassName [
 	^ #GtRemoteRunner
 ]
 
+{ #category : #accessing }
+PlpoGtRemoteRunner >> remoteAnnouncementQueue [
+	^ self newCommandFactory
+		<< 'GtRemoteAnnouncementQueue onAnnouncer: self';
+		sendAndWait
+]
+
 { #category : #'code sync' }
 PlpoGtRemoteRunner >> startCodeSync [
 	"Start the code sync listener, submitting changes to the receiver"
