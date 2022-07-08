@@ -21,7 +21,7 @@ Features of the system (mostly not yet implemented) include:
 
 The main components of the system are:
 
-- GtRemoteRunner provides the primary interface to the system and the main control.
+- {{gtClass:GtRemoteRunner}} provides the primary interface to the system and the main control.
 - A {{gtClass:GtRrWorker}} is created for each client image that will run tests or examples.
 - A {{gtClass:GtRrJob}} is submitted by users for each collection or tests or examples to be executed.  The user will be notified of the progress of the job.  A {{gtClass:GtRrJob}} contains one or more {{gtClass:GtRrTask}}s.
 
@@ -67,7 +67,8 @@ Class {
 		'announcer',
 		'runnerStats',
 		'log',
-		'taskQueue'
+		'taskQueue',
+		'queues'
 	],
 	#classInstVars : [
 		'uniqueInstance'
@@ -446,6 +447,7 @@ GtRemoteRunner >> initialize [
 	availableWorkers := SortedCollection sortUsing: #workerPriority ascending.
 	registeredWorkers := Dictionary new.
 	timeoutManager := GtRrTimeoutManager remoteRunner: self.
+	queues := OrderedCollection new.
 	self 
 		managerStartupAndShutdown: GtRrCodeSyncedLocalManagerStartupAndShutdown new;
 		jobStartupAndShutdown: GtRrLocalJobStartupAndShutdown new.
@@ -610,6 +612,11 @@ GtRemoteRunner >> privateTaskFailed: aTaskContextId with: anGtRrTaskErrorDetails
 	self announceAndLog: (GtRrTaskCompletedAnnouncement task: taskContext).
 	self assignTasksToWorkers.
 	self checkJobCompleted: taskContext.
+]
+
+{ #category : #accessing }
+GtRemoteRunner >> queues [
+	^ queues
 ]
 
 { #category : #'api - worker' }
@@ -783,9 +790,12 @@ GtRemoteRunner >> submitJob: aGtRrJob [
 
 { #category : #'api - jobs' }
 GtRemoteRunner >> submitSerializedJob: aGtRrJobString [
-	"Submit the supplied job after deserialising it"
+	"Submit the supplied job after deserialising it, and save a queue for it"
 
-	^ self submitJob: (LeJsonV4 uniqueInstance deserialize: aGtRrJobString readStream)
+	| job |
+	job := (LeJsonV4 uniqueInstance deserialize: aGtRrJobString readStream).
+	queues add: (GtRemoteAnnouncementQueue onAnnouncer: job).
+	^ self submitJob: job
 ]
 
 { #category : #ui }

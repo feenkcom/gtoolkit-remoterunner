@@ -1,5 +1,5 @@
 "
-GtRrCodeSyncedLocalManagerStartupAndShutdown extends the local manager to mark every worker started automatically as code synced.
+{{gtClass:GtRrCodeSyncedLocalManagerStartupAndShutdown}} extends the local manager to mark every worker started automatically as code synced.
 "
 Class {
 	#name : #GtRrCodeSyncedLocalManagerStartupAndShutdown,
