@@ -447,7 +447,7 @@ GtRemoteRunner >> initialize [
 	availableWorkers := SortedCollection sortUsing: #workerPriority ascending.
 	registeredWorkers := Dictionary new.
 	timeoutManager := GtRrTimeoutManager remoteRunner: self.
-	queues := OrderedCollection new.
+	queues := Dictionary new.
 	self 
 		managerStartupAndShutdown: GtRrCodeSyncedLocalManagerStartupAndShutdown new;
 		jobStartupAndShutdown: GtRrLocalJobStartupAndShutdown new.
@@ -792,10 +792,12 @@ GtRemoteRunner >> submitJob: aGtRrJob [
 GtRemoteRunner >> submitSerializedJob: aGtRrJobString [
 	"Submit the supplied job after deserialising it, and save a queue for it"
 
-	| job |
+	| job remoteAnnouncer |
 	job := (LeJsonV4 uniqueInstance deserialize: aGtRrJobString readStream).
-	queues add: (GtRemoteAnnouncementQueue onAnnouncer: job).
-	^ self submitJob: job
+	remoteAnnouncer := (GtRemoteAnnouncementQueue onAnnouncer: job).
+	job := self submitJob: job.
+	queues at: job id put: remoteAnnouncer.
+	^ job
 ]
 
 { #category : #ui }
