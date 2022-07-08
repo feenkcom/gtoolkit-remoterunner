@@ -10,6 +10,13 @@ PlpoGtRemoteRunner class >> remoteClassName [
 	^ #GtRemoteRunner
 ]
 
+{ #category : #'api - jobs' }
+PlpoGtRemoteRunner >> queues [
+	^ self newCommandFactory
+		<< 'self queues asArray';
+		sendAndWait
+]
+
 { #category : #accessing }
 PlpoGtRemoteRunner >> remoteAnnouncementQueue [
 	^ self newCommandFactory
@@ -24,6 +31,11 @@ PlpoGtRemoteRunner >> startCodeSync [
 	^ GtRrCodeSync new
 		remoteRunner: self;
 		start.
+]
+
+{ #category : #accessing }
+PlpoGtRemoteRunner >> stop [
+	^ self application isRunning ifTrue: [ self proxyPerform: #stop ] ifFalse: [ nil ]
 ]
 
 { #category : #'api - jobs' }
