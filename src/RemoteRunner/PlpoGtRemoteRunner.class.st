@@ -10,6 +10,12 @@ PlpoGtRemoteRunner class >> remoteClassName [
 	^ #GtRemoteRunner
 ]
 
+{ #category : #accessing }
+PlpoGtRemoteRunner >> port [
+
+	^ self proxyPerform: #port.
+]
+
 { #category : #'api - jobs' }
 PlpoGtRemoteRunner >> queues [
 	^ self newCommandFactory
