@@ -9,6 +9,7 @@ Class {
 { #category : #accessing }
 GtRemoteAnnouncementQueueExamples >> simpleQueue [
 	<gtExample>
+	<noTest>
 	| runner queue |
 	runner := GtRemoteRunnerExamples new simpleRunner.
 	
@@ -22,6 +23,7 @@ GtRemoteAnnouncementQueueExamples >> simpleQueue [
 { #category : #accessing }
 GtRemoteAnnouncementQueueExamples >> simpleQueueWithAnnouncement [
 	<gtExample>
+	<noTest>
 	| queue polled runner |
 	queue := self simpleQueueWithStartedJobs.
 	runner := queue object.
@@ -44,6 +46,7 @@ GtRemoteAnnouncementQueueExamples >> simpleQueueWithAnnouncement [
 { #category : #accessing }
 GtRemoteAnnouncementQueueExamples >> simpleQueueWithStartedJobs [
 	<gtExample>
+	<noTest>
 	| queue runner |
 	queue := self simpleQueue.
 	runner := queue object.
