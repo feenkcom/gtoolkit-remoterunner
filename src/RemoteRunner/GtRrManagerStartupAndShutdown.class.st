@@ -1,3 +1,10 @@
+"
+{{gtClass:GtRrManagerStartupAndShutdown}} controls the lifecycle for the runner by proving several hooks:
+	- {{gtMethod:GtRrManagerStartupAndShutdown>>startup|label=#selector}}: action executed once when the runner is started
+	- {{gtMethod:GtRrManagerStartupAndShutdown>>shutdown|label=#selector}}: action executed once when the runner is stopped.
+	
+This class can be used to manage resources needed by the runner, like worker processes.
+"
 Class {
 	#name : #GtRrManagerStartupAndShutdown,
 	#superclass : #Object,
