@@ -790,7 +790,7 @@ GtRemoteRunner >> submitJob: aGtRrJob [
 
 { #category : #'api - jobs' }
 GtRemoteRunner >> submitSerializedJob: aGtRrJobString [
-	"Submit the supplied job after deserialising it, and spawn a queue for it"
+	"Submit the supplied job after deserialising it, and save a queue for it"
 
 	| job |
 	job := (LeJsonV4 uniqueInstance deserialize: aGtRrJobString readStream).
