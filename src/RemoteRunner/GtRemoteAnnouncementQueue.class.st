@@ -8,6 +8,12 @@ Class {
 	#category : #'RemoteRunner-Runner'
 }
 
+{ #category : #jsonV4 }
+GtRemoteAnnouncementQueue class >> leJsonV4Name [
+
+	^ #gtRemoteAnnouncementQueue
+]
+
 { #category : #accessing }
 GtRemoteAnnouncementQueue class >> onAnnouncer: anAnnouncingObject [
 	^ self new
@@ -41,6 +47,11 @@ GtRemoteAnnouncementQueue >> poll [
 	results := queue.
 	queue := OrderedCollection new.
 	^ results
+]
+
+{ #category : #accessing }
+GtRemoteAnnouncementQueue >> queue [
+	^ queue
 ]
 
 { #category : #accessing }
