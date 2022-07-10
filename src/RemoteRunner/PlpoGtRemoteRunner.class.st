@@ -10,6 +10,12 @@ PlpoGtRemoteRunner class >> remoteClassName [
 	^ #GtRemoteRunner
 ]
 
+{ #category : #testing }
+PlpoGtRemoteRunner >> isIdle [
+
+	^ self proxyPerform: #isIdle.
+]
+
 { #category : #accessing }
 PlpoGtRemoteRunner >> port [
 
@@ -40,8 +46,18 @@ PlpoGtRemoteRunner >> startCodeSync [
 ]
 
 { #category : #accessing }
+PlpoGtRemoteRunner >> state [
+
+	^ self proxyPerform: #state
+]
+
+{ #category : #accessing }
 PlpoGtRemoteRunner >> stop [
-	^ self application isRunning ifTrue: [ self proxyPerform: #stop ] ifFalse: [ nil ]
+	"Make a best attempt at stopping the remote, but don't raise an exception."
+
+	[ self proxyPerform: #stop ]
+		on: Error
+		do: [ :ex | ]
 ]
 
 { #category : #'api - jobs' }
