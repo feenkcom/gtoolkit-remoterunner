@@ -24,9 +24,9 @@ PlpoGtRemoteRunner >> port [
 
 { #category : #'api - jobs' }
 PlpoGtRemoteRunner >> queues [
-	^ self newCommandFactory
-		<< 'self queues asArray';
-		sendAndWait
+	^ (self newCommandFactory
+		<< 'self queues';
+		sendAndWait) getValue
 ]
 
 { #category : #accessing }
