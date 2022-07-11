@@ -502,12 +502,15 @@ GtRrJob >> taskCount [
 
 { #category : #accessing }
 GtRrJob >> taskExecutionTime [
-	"Answer the time actually spent by the workers executing the task (excludes communication and scheduling overheads)"
+	"Answer the time actually spent by the workers executing the task (excludes failed tasks and communication & scheduling overheads)."
 	<return: #Duration or: nil>
 
 	self isFinished ifFalse: [ ^ nil ].
 
-	^ results inject: Duration zero into: [ :s :v | s + v duration ]
+	^ results inject: Duration zero into: [ :s :v | 
+		v
+			ifNil: [ s ]
+			ifNotNil: [ s + v duration ] ].
 ]
 
 { #category : #accessing }
