@@ -22,6 +22,7 @@ GtRrJobNotificationSummary >> initialize [
 	self geometry: (BlRoundedRectangleGeometry cornerRadius: 4).
 	self padding: (BlInsets left: 5 right: 5).
 	self background: Color white.
+	
 	self
 		addChild: (notStarted := BrLabel new
 					aptitude: BrGlamorousLabelAptitude;

@@ -36,6 +36,7 @@ GtRrJobNotificationElement >> borderElement [
 { #category : #accessing }
 GtRrJobNotificationElement >> constructStates [
 	job ifNil: [ ^ {} ].
+	
 	^ {GtRrStateElement
 			name: 'All'
 			color: Color transparent
@@ -162,7 +163,6 @@ GtRrJobNotificationElement >> inspectJob [
 		openWrappedOn: job
 		title: job name
 		from: self
-
 ]
 
 { #category : #'api - accessing' }

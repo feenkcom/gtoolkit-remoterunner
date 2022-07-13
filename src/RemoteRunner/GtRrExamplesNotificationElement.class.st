@@ -15,7 +15,8 @@ Class {
 
 { #category : #accessing }
 GtRrExamplesNotificationElement >> allTasks [
-	^ job tasks flatCollect: #allMethods
+	^ job allExamples
+	"^ job tasks flatCollect: #allMethods"
 ]
 
 { #category : #accessing }
@@ -28,19 +29,19 @@ GtRrExamplesNotificationElement >> constructStates [
 		GtRrExamplesStateElement
 			name: 'Success'
 			color: Color lightGreen
-			elements: (job tasks flatCollect: [:aTask | aTask successfulExamples collect: #method]).
+			elements: job successfulExamples.
 		GtRrExamplesStateElement
 			name: 'Skipped'
 			color: Color veryVeryLightGray
-			elements: (job tasks flatCollect: [:aTask | aTask skippedExamples collect: #method]).
+			elements: job skippedExamples.
 		GtRrExamplesStateElement
 			name: 'Failure'
 			color: Color lightOrange
-			elements: (job tasks flatCollect: [:aTask | aTask failedExamples collect: #method]).
+			elements: job failedExamples.
 		GtRrExamplesStateElement
 			name: 'Error'
 			color: Color red
-			elements: (job tasks flatCollect: [:aTask | aTask erroredExamples collect: #method]).
+			elements: job erroredExamples.
 		GtRrExamplesStateElement
 			name: 'Not executed'
 			color: Color veryVeryLightGray
@@ -55,7 +56,7 @@ GtRrExamplesNotificationElement >> name [
 
 { #category : #accessing }
 GtRrExamplesNotificationElement >> notExecutedTasks [
-	^ (job tasks reject: #isFinished) flatCollect: #allMethods
+	^ job notExecutedExamples
 ]
 
 { #category : #'private - hooks' }
@@ -73,6 +74,7 @@ GtRrExamplesNotificationElement >> runJobAgain [
 
 	jobCopy := job copy.
 	jobCopy showExamplesProgressNotification.
+	
 	GtRemoteRunner default submitJob: jobCopy.
 ]
 

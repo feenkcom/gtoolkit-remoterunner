@@ -49,9 +49,10 @@ GtRrStateElement >> initialize [
 			text: elements size asString.
 
 	self
-		addChildren: {icon.
-				label.
-				amount}.
+		addChildren: {
+			icon.
+			label.
+			amount}.
 
 	self registerOnClick
 ]

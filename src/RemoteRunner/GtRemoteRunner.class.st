@@ -67,8 +67,7 @@ Class {
 		'announcer',
 		'runnerStats',
 		'log',
-		'taskQueue',
-		'queues'
+		'taskQueue'
 	],
 	#classInstVars : [
 		'uniqueInstance'
@@ -447,7 +446,7 @@ GtRemoteRunner >> initialize [
 	availableWorkers := SortedCollection sortUsing: #workerPriority ascending.
 	registeredWorkers := Dictionary new.
 	timeoutManager := GtRrTimeoutManager remoteRunner: self.
-	queues := Dictionary new.
+	
 	self 
 		managerStartupAndShutdown: GtRrCodeSyncedLocalManagerStartupAndShutdown new;
 		jobStartupAndShutdown: GtRrLocalJobStartupAndShutdown new.
@@ -612,11 +611,6 @@ GtRemoteRunner >> privateTaskFailed: aTaskContextId with: anGtRrTaskErrorDetails
 	self announceAndLog: (GtRrTaskCompletedAnnouncement task: taskContext).
 	self assignTasksToWorkers.
 	self checkJobCompleted: taskContext.
-]
-
-{ #category : #accessing }
-GtRemoteRunner >> queues [
-	^ queues
 ]
 
 { #category : #'api - worker' }
@@ -790,14 +784,17 @@ GtRemoteRunner >> submitJob: aGtRrJob [
 
 { #category : #'api - jobs' }
 GtRemoteRunner >> submitSerializedJob: aGtRrJobString [
-	"Submit the supplied job after deserialising it, and save a queue for it"
+	"Submit the supplied job after deserialising it, and enable a queue for it"
 
-	| job remoteAnnouncer |
-	job := (LeJsonV4 uniqueInstance deserialize: aGtRrJobString readStream).
-	remoteAnnouncer := (GtRemoteAnnouncementQueue onAnnouncer: job).
-	job := self submitJob: job.
-	queues at: job id put: remoteAnnouncer.
-	^ job
+	| job |
+	job := LeJsonV4 uniqueInstance 
+		deserialize: aGtRrJobString readStream.
+		
+	"Register an announcements queue here before submitting the job.
+	We do this to not loose announcements if the job executes fast."
+	job registerAnnouncementsQueue.
+	
+	^ self submitJob: job
 ]
 
 { #category : #ui }

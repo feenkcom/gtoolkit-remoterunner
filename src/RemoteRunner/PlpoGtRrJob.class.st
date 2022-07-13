@@ -1,6 +1,9 @@
 Class {
 	#name : #PlpoGtRrJob,
 	#superclass : #PharoLinkProxyObject,
+	#instVars : [
+		'announcer'
+	],
 	#category : #'RemoteRunner-Jobs'
 }
 
@@ -8,6 +11,21 @@ Class {
 PlpoGtRrJob class >> remoteClassName [
 
 	^ #GtRrJob
+]
+
+{ #category : #initiailize }
+PlpoGtRrJob >> actOnProxyObjectInitialized [
+	announcer := Announcer new.
+]
+
+{ #category : #'announcements - queue' }
+PlpoGtRrJob >> announcementQueue [
+	^ self proxyPerform: #announcementQueue
+]
+
+{ #category : #accessing }
+PlpoGtRrJob >> announcer [
+	^ announcer
 ]
 
 { #category : #accessing }
@@ -23,10 +41,35 @@ PlpoGtRrJob >> jobTimeout [
 	^ self proxyPerform: #jobTimeout
 ]
 
-{ #category : #accessing }
-PlpoGtRrJob >> remoteAnnouncementQueue [
+{ #category : #'announcements - queue' }
+PlpoGtRrJob >> pollAnnouncementQueue [
+	| pulledAnnouncements |
+	GtRrAnnouncementQueuePullInitiatedAnnouncement new emit.
+	
+	pulledAnnouncements := self pollSerializedAnnouncementQueue 
+		collect: [ :anAnnouncementData |
+			GtRemoteRunnerAnnouncement fromSerializedData: anAnnouncementData ].
+	
+	GtRrAnnouncementQueuePullCompletedAnnouncement new 
+		retrivedAnnouncementCount:  pulledAnnouncements size;
+		emit.
+	
+	^ pulledAnnouncements
+]
+
+{ #category : #'announcements - queue' }
+PlpoGtRrJob >> pollForAnnouncements [
+	| newAnnouncements |
+	newAnnouncements := self pollAnnouncementQueue.
+	newAnnouncements do: [ :anAnnouncement | 
+		self announcer announce: anAnnouncement ]
+]
+
+{ #category : #'announcements - queue' }
+PlpoGtRrJob >> pollSerializedAnnouncementQueue [
 	^ self newCommandFactory
-		<< 'GtRemoteAnnouncementQueue onAnnouncer: self';
+		setBySerialized;
+		<< ('self ', #pollSerializedAnnouncementQueue asString);
 		sendAndWait
 ]
 
@@ -38,4 +81,37 @@ PlpoGtRrJob >> results [
 	^ self newCommandFactory 
 		<< 'results asArray';
 		sendAndWait.
+]
+
+{ #category : #'announcements - queue' }
+PlpoGtRrJob >> startPollForAnnouncementsListener [
+	| duration count  |
+	duration := 1.
+	count := (self jobTimeout ifNil: [ 10 hours]) totalSeconds // 10 + 10.
+	
+	[
+		[ self isFinished not and: [ count > 0 ] ]
+			whileTrue: [ 
+				duration seconds wait.
+				self pollForAnnouncements.
+				count := count - 1.
+				duration < 10 ifTrue: [ duration := duration + 1 ] ].
+		"Ensure there is at least one check of the completed tasks"
+		self pollForAnnouncements 
+	]
+		forkAt: Processor userBackgroundPriority
+		named: 'Poll for job announcements'
+]
+
+{ #category : #'announcer - subscription' }
+PlpoGtRrJob >> unsubscribe: anObject [
+	"Unsubscribe all subscriptions of anObject from the receiver"
+	
+	^ self announcer unsubscribe: anObject
+]
+
+{ #category : #'announcer - subscription' }
+PlpoGtRrJob >> when: anAnnouncementClass send: aSelector to: anObject [
+
+		^ self announcer when: anAnnouncementClass send: aSelector to: anObject
 ]
