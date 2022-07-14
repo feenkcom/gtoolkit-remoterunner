@@ -96,7 +96,7 @@ GtRrJobNotificationElement >> buildToolbar [
 { #category : #'private - hooks' }
 GtRrJobNotificationElement >> clearContent [
 	nameLabel text: '<noJob>'.
-	nameLabel removeChildNamed: #statusIcon..
+	nameLabel removeChildNamed: #statusIcon.
 	statePane removeChildren.
 ]
 
@@ -279,23 +279,43 @@ GtRrJobNotificationElement >> unsubscribeFromNotification [
 
 { #category : #'private - updating' }
 GtRrJobNotificationElement >> updateContent [
-	| states |
 	
-	nameLabel text: self name.
+	self updateLabelContent.
  
 	"Do not update the state if the job is finished"
 	isFinished ifTrue: [ ^ self ].
 	
+	self jobDo: [ :aJob | 
+		"If the job is finished do a final update of the states."
+		aJob isFinished ifTrue: [ 
+			self updateStates.
+			self updateLabelStatusIcon.
+			isFinished := true.
+			
+			^ self ].
+		
+		"If the job is not finished yet we update the state."
+		self updateStates ]
+]
+
+{ #category : #'private - updating' }
+GtRrJobNotificationElement >> updateLabelContent [
+	nameLabel text: self name.
+]
+
+{ #category : #'private - updating' }
+GtRrJobNotificationElement >> updateLabelStatusIcon [
+	nameLabel
+		addChild: (BrGlamorousVectorIcons accept asElement asScalableElement
+			addAptitude: (BrGlamorousWithLabelTooltipAptitude new 
+				text: 'Finished'))
+		as: #statusIcon.
+]
+
+{ #category : #'private - updating' }
+GtRrJobNotificationElement >> updateStates [
+	| states |
 	statePane removeChildren.
 	states := self constructStates.
 	states do: [ :state | statePane addChild: state ].
-
-	self jobDo: [ :aJob | 
-		aJob isFinished ifTrue: [ 
-			nameLabel
-				addChild: (BrGlamorousVectorIcons accept asElement asScalableElement
-					addAptitude: (BrGlamorousWithLabelTooltipAptitude new 
-						text: 'Finished'))
-				as: #statusIcon.
-			isFinished := true ] ]
 ]
