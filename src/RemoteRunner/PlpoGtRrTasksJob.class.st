@@ -13,6 +13,42 @@ PlpoGtRrTasksJob class >> remoteClassName [
 	^ #GtRrTasksJob
 ]
 
+{ #category : #'accessing - examples' }
+PlpoGtRrTasksJob >> allExamples [
+
+	^ self proxyPerform: #allExamples
+]
+
+{ #category : #'accessing - examples' }
+PlpoGtRrTasksJob >> erroredExamples [
+
+	^ self proxyPerform: #erroredExamples
+]
+
+{ #category : #'accessing - examples' }
+PlpoGtRrTasksJob >> erroredExamplesCount [
+
+	^ self proxyPerform: #erroredExamplesCount
+]
+
+{ #category : #'accessing - examples' }
+PlpoGtRrTasksJob >> executedExamplesCount [
+
+	^ self proxyPerform: #executedExamplesCount
+]
+
+{ #category : #'accessing - examples' }
+PlpoGtRrTasksJob >> failedExamples [
+
+	^ self proxyPerform: #failedExamples
+]
+
+{ #category : #'accessing - examples' }
+PlpoGtRrTasksJob >> failedExamplesCount [
+
+	^ self proxyPerform: #failedExamplesCount
+]
+
 { #category : #ui }
 PlpoGtRrTasksJob >> gtViewTestsActionFor: anAction [
 	<gtAction>
@@ -32,10 +68,40 @@ PlpoGtRrTasksJob >> hasTests [
 	^ self proxyPerform: #hasTests
 ]
 
+{ #category : #'accessing - examples' }
+PlpoGtRrTasksJob >> notExecutedExamples [
+
+	^ self proxyPerform: #notExecutedExamples
+]
+
+{ #category : #'accessing - examples' }
+PlpoGtRrTasksJob >> skippedExamples [
+
+	^ self proxyPerform: #skippedExamples
+]
+
+{ #category : #'accessing - examples' }
+PlpoGtRrTasksJob >> successfulExamples [
+
+	^ self proxyPerform: #successfulExamples
+]
+
+{ #category : #'accessing - examples' }
+PlpoGtRrTasksJob >> successfulExamplesCount [
+
+	^ self proxyPerform: #successfulExamplesCount
+]
+
 { #category : #accessing }
 PlpoGtRrTasksJob >> tasks [
 
 	^ self newCommandFactory 
 		<< 'tasks asArray';
 		sendAndWait.
+]
+
+{ #category : #'accessing - examples' }
+PlpoGtRrTasksJob >> totalExamplesCount [
+
+	^ self proxyPerform: #totalExamplesCount
 ]

@@ -13,6 +13,7 @@ Class {
 { #category : #accessing }
 GtRrJobNotificationSummary >> initialize [
 	super initialize.
+	
 	self
 		constraintsDo: [ :c | 
 			c vertical exact: 21.
@@ -22,11 +23,13 @@ GtRrJobNotificationSummary >> initialize [
 	self geometry: (BlRoundedRectangleGeometry cornerRadius: 4).
 	self padding: (BlInsets left: 5 right: 5).
 	self background: Color white.
+	
 	self
 		addChild: (notStarted := BrLabel new
 					aptitude: BrGlamorousLabelAptitude;
 					beSmallSize;
-					exact: 15 @ 15;
+					hFitContent;
+					vExact: 15;
 					margin: (BlInsets all: 3);
 					layout: BlLinearLayout horizontal alignCenter;
 					geometry: (BlRoundedRectangleGeometry cornerRadius: 4);
@@ -34,7 +37,8 @@ GtRrJobNotificationSummary >> initialize [
 		addChild: (failed := BrLabel new
 					aptitude: BrGlamorousLabelAptitude;
 					beSmallSize;
-					exact: 15 @ 15;
+					hFitContent;
+					vExact: 15;
 					margin: (BlInsets all: 3);
 					background: BrGlamorousColors errorBackgroundColor;
 					layout: BlLinearLayout horizontal alignCenter;
@@ -44,7 +48,8 @@ GtRrJobNotificationSummary >> initialize [
 		addChild: (successful := BrLabel new
 					aptitude: BrGlamorousLabelAptitude;
 					beSmallSize;
-					exact: 15 @ 15;
+					hFitContent;
+					vExact: 15;
 					margin: (BlInsets all: 3);
 					background: BrGlamorousColors successBackgroundColor;
 					layout: BlLinearLayout horizontal alignCenter;
@@ -54,25 +59,40 @@ GtRrJobNotificationSummary >> initialize [
 ]
 
 { #category : #accessing }
-GtRrJobNotificationSummary >> onNotificationsChanged [
+GtRrJobNotificationSummary >> subscribeToNotifications [
+	notifications do: [ :aNotification |
+		aNotification job
+			when: GtRrTaskAnnouncement
+			send: #requestUpdate
+			to: self ]
+]
+
+{ #category : #accessing }
+GtRrJobNotificationSummary >> unsubscribeFromNotifications [
+	notifications do: [ :aNotification | 
+		aNotification job unsubscribe: self ]
+]
+
+{ #category : #accessing }
+GtRrJobNotificationSummary >> updateSummaryContent [
 	| successfulCounter notStartedCounter failedCounter |
+	
 	successfulCounter := 0.
 	notStartedCounter := 0.
 	failedCounter := 0.
+	
 	self notifications
 		do: [ :aNotification | 
 			successfulCounter := successfulCounter
 					+ (aNotification job results reject: #hasErrors) size.
 			notStartedCounter := notStartedCounter
 					+ (aNotification job tasks reject: #isFinished) size.
-			failedCounter := failedCounter + aNotification job resultsWithErrors size.
-			aNotification job
-				when: GtRrTaskAnnouncement
-				send: #requestUpdate
-				to: self ].
+			failedCounter := failedCounter + aNotification job resultsWithErrors size ].
+	
 	failed text: failedCounter asString.
 	successful text: successfulCounter asString.
 	notStarted text: notStartedCounter asString.
+	
 	failed
 		visibility: (failedCounter = 0 ifTrue: [ BlVisibility gone ] ifFalse: [ BlVisibility visible ]).
 	successful

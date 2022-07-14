@@ -40,6 +40,7 @@ GtRrJobProgressNotification class >> job: aGtRrJob [
 GtRrJobProgressNotification >> elementClass [
 	"Return a class that when instantiated displayes the notification to user (as a widget)"
 	<return: #GtNotificationEventElement>
+	
 	^ GtRrJobNotificationElement 
 ]
 
@@ -59,7 +60,8 @@ GtRrJobProgressNotification >> job: aGtRrJob [
 
 { #category : #private }
 GtRrJobProgressNotification >> registerNotifications [
-
+	"A different approach would be to show the notification using the UI Manager"
+	
 	GtWorld allInstancesDo: [ :world |
 		world showNotification: self ].
 ]

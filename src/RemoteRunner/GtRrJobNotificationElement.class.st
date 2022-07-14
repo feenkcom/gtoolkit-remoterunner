@@ -13,18 +13,18 @@ Class {
 	#instVars : [
 		'nameLabel',
 		'borderElement',
-		'job',
 		'infoButton',
 		'runAgainButton',
 		'statePane',
-		'isFinished'
+		'isFinished',
+		'updater'
 	],
 	#category : #'RemoteRunner-UI'
 }
 
 { #category : #accessing }
 GtRrJobNotificationElement >> allTasks [
-	^ job tasks
+	^ self currentJob tasks
 ]
 
 { #category : #'private - accessing' }
@@ -33,69 +33,8 @@ GtRrJobNotificationElement >> borderElement [
 	^ borderElement
 ]
 
-{ #category : #accessing }
-GtRrJobNotificationElement >> constructStates [
-	job ifNil: [ ^ {} ].
-	^ {GtRrStateElement
-			name: 'All'
-			color: Color transparent
-			elements: self allTasks.
-		GtRrStateElement
-			name: 'Success'
-			color: Color lightGreen
-			elements: (job results reject: #hasErrors).
-		GtRrStateElement
-			name: 'Failure'
-			color: Color red
-			elements: job resultsWithErrors.
-		GtRrStateElement
-			name: 'Not executed'
-			color: Color veryVeryLightGray
-			elements: self notExecutedTasks}
-]
-
 { #category : #initialization }
-GtRrJobNotificationElement >> defaultLayout [
-	^ BlLinearLayout vertical alignCenterRight
-]
-
-{ #category : #initialization }
-GtRrJobNotificationElement >> initialize [
-	| namePane toolbarPane |
-
-	super initialize.
-
-	isFinished := false.
-	
-	self initializeBorderElement.
-	namePane := self initializeNameLabel.
-	statePane := self initializeStateElement.
-	toolbarPane := self initializeToolbar.
-	
-	self addChild: self borderElement as: #border.
-	self borderElement containerDo: [ :aContainer |
-		aContainer 
-			addChild: namePane;
-			addChild: statePane;
-			addChild: toolbarPane ].
-	
-	self addAptitude: (BrLayoutResizerAptitude new
-		hInherit;
-		vAnyToFitContent;
-		hInherit: self borderElement;
-		vAnyToFitContent: self borderElement;
-		hInherit: statePane;
-		vAnyToFitContent: statePane).
-]
-
-{ #category : #initialization }
-GtRrJobNotificationElement >> initializeBorderElement [
-	borderElement := GtNotificationBorderElement new
-		withCloseButtonAction: [ self dismiss ]
-]
-
-{ #category : #initialization }
-GtRrJobNotificationElement >> initializeNameLabel [
+GtRrJobNotificationElement >> buildNameLabel [
 	| horizontalPane |
 
 	horizontalPane := BrHorizontalPane new
@@ -103,8 +42,8 @@ GtRrJobNotificationElement >> initializeNameLabel [
 			hMatchParent;
 			vFitContent.
 	nameLabel := BrLabel new
-			aptitude: (BrGlamorousLabelAptitude new foreground: BrGlamorousColors disabledHeaderTextColor);
-			
+			aptitude: (BrGlamorousLabelAptitude new 
+				foreground: BrGlamorousColors disabledHeaderTextColor);
 			fitContent.
 	horizontalPane
 		addChild: (BlElement new size: 10@10);
@@ -113,7 +52,7 @@ GtRrJobNotificationElement >> initializeNameLabel [
 ]
 
 { #category : #initialization }
-GtRrJobNotificationElement >> initializeStateElement [
+GtRrJobNotificationElement >> buildStateElement [
 	| verticalPane states |
 
 	verticalPane := BrVerticalPane new
@@ -128,7 +67,7 @@ GtRrJobNotificationElement >> initializeStateElement [
 ]
 
 { #category : #initialization }
-GtRrJobNotificationElement >> initializeToolbar [
+GtRrJobNotificationElement >> buildToolbar [
 	| horizontalPane |
 	horizontalPane := BrHorizontalPane new
 			hMatchParent;
@@ -154,51 +93,143 @@ GtRrJobNotificationElement >> initializeToolbar [
 	^ horizontalPane
 ]
 
+{ #category : #'private - hooks' }
+GtRrJobNotificationElement >> clearContent [
+	nameLabel text: '<noJob>'.
+	nameLabel removeChildNamed: #statusIcon.
+	statePane removeChildren.
+]
+
+{ #category : #accessing }
+GtRrJobNotificationElement >> constructStates [
+	self jobDo: [ :aJob |
+		^ {GtRrStateElement
+			name: 'All'
+			color: Color transparent
+			elements: self allTasks.
+		GtRrStateElement
+			name: 'Success'
+			color: Color lightGreen
+			elements: (aJob results reject: #hasErrors).
+		GtRrStateElement
+			name: 'Failure'
+			color: Color red
+			elements: aJob resultsWithErrors.
+		GtRrStateElement
+			name: 'Not executed'
+			color: Color veryVeryLightGray
+			elements: self notExecutedTasks} ].
+	^ #()
+]
+
+{ #category : #accessing }
+GtRrJobNotificationElement >> currentJob [
+	^ self notification job
+]
+
+{ #category : #initialization }
+GtRrJobNotificationElement >> defaultLayout [
+	^ BlLinearLayout vertical alignCenterRight
+]
+
+{ #category : #initialization }
+GtRrJobNotificationElement >> initialize [
+	| namePane toolbarPane |
+
+	super initialize.
+	
+	isFinished := false.
+	
+	self initializeBorderElement.
+	namePane := self buildNameLabel.
+	statePane := self buildStateElement.
+	toolbarPane := self buildToolbar.
+	
+	self addChild: self borderElement as: #border.
+	self borderElement containerDo: [ :aContainer |
+		aContainer 
+			addChild: namePane;
+			addChild: statePane;
+			addChild: toolbarPane ].
+	
+	self addAptitude: (BrLayoutResizerAptitude new
+		hInherit;
+		vAnyToFitContent;
+		hInherit: self borderElement;
+		vAnyToFitContent: self borderElement;
+		hInherit: statePane;
+		vAnyToFitContent: statePane).
+		
+	updater := BrElementUpdater new
+		element: self
+		selector: #updateContent.
+]
+
+{ #category : #initialization }
+GtRrJobNotificationElement >> initializeBorderElement [
+	borderElement := GtNotificationBorderElement new
+		withCloseButtonAction: [ self dismiss ]
+]
+
 { #category : #private }
 GtRrJobNotificationElement >> inspectJob [
 	"Inspect the receiver's job in a new tab in GtWorld"
+	
+	self jobDo: [ :aJob |
+		GtInspectorTool
+			openWrappedOn: aJob
+			title: aJob name
+			from: self ]
+]
 
-	GtInspectorTool
-		openWrappedOn: job
-		title: job name
-		from: self
-
+{ #category : #accessing }
+GtRrJobNotificationElement >> jobDo: aBlock [
+	self notificationDo: [ :anEvent | anEvent job ifNotNil: aBlock ]
 ]
 
 { #category : #'api - accessing' }
 GtRrJobNotificationElement >> message [
 
-	job ifNil: [ ^ '<no job>' ].
+	self currentJob ifNil: [ ^ '<no job>' ].
 	^ String streamContents: [ :stream |
 		stream
 			<< 'Remain: ';
-			print: (job taskCount - job successfulCount - job errorCount);
+			print: (self currentJob taskCount - self currentJob successfulCount - self currentJob errorCount);
 			<< ', Done: ';
-			print: job successfulCount;
+			print: self currentJob successfulCount;
 			<< ', Failed: ';
-			print: job errorCount ]
+			print: self currentJob errorCount ]
 ]
 
 { #category : #'private - accessing' }
 GtRrJobNotificationElement >> name [
 
-	^ job name
+	^ self currentJob jobName
 ]
 
 { #category : #accessing }
 GtRrJobNotificationElement >> notExecutedTasks [
-	^ job tasks reject: #isFinished
+	^ self currentJob tasks reject: #isFinished
+]
+
+{ #category : #accessing }
+GtRrJobNotificationElement >> notification: aGtNotificationEvent [
+	isFinished := false.
+	
+	super notification: aGtNotificationEvent
 ]
 
 { #category : #accessing }
 GtRrJobNotificationElement >> onAddedToSceneGraph [
-	self updateDisplay
+	super onAddedToSceneGraph.
+	
+	self requestUpdate.
 ]
 
 { #category : #'private - hooks' }
 GtRrJobNotificationElement >> onNotificationChanged [
-
-	self updateDisplay.
+	self clearContent.
+	self requestUpdate
 ]
 
 { #category : #'private - hooks' }
@@ -206,7 +237,12 @@ GtRrJobNotificationElement >> onTaskAnnouncement: aGtRrTaskAnnouncement [
 
 	aGtRrTaskAnnouncement class = GtRrTaskStartedAnnouncement ifTrue: [ ^ self ].
 
-	self updateDisplay.
+	self requestUpdate.
+]
+
+{ #category : #'private - updating' }
+GtRrJobNotificationElement >> requestUpdate [
+	updater requestUpdate
 ]
 
 { #category : #private }
@@ -214,51 +250,73 @@ GtRrJobNotificationElement >> runJobAgain [
 	"Create a copy of the receiver's job and run it with progress notifications"
 	| jobCopy |
 
-	jobCopy := job copy.
+	jobCopy := self currentJob copy.
 	jobCopy showProgressNotification.
+	
 	GtRemoteRunner default submitJob: jobCopy.
 ]
 
 { #category : #'private - subscriptions' }
 GtRrJobNotificationElement >> subscribeToNotification [
-
-	job := notification job.
-	job
-		when: GtRrTaskAnnouncement
-			send: #onTaskAnnouncement: to: self.
+	self jobDo: [ :aJob | 
+		aJob
+			when: GtRrTaskAnnouncement
+			send: #onTaskAnnouncement: 
+			to: self ]
 ]
 
 { #category : #'private - accessing' }
 GtRrJobNotificationElement >> successfulCount [
 
-	^ job successfulCount
+	^ self currentJob successfulCount
 ]
 
 { #category : #'private - subscriptions' }
 GtRrJobNotificationElement >> unsubscribeFromNotification [
-
-	job ifNil: [ ^ self ].
-	job unsubscribe: self.
-	job := nil.
+	self jobDo: [ :aJob | 
+		aJob unsubscribe: self ]	
 ]
 
 { #category : #'private - updating' }
-GtRrJobNotificationElement >> updateDisplay [
-	self
-		enqueueTask: (BlTaskAction new
-				action: [ | states |
-					nameLabel text: self name.
+GtRrJobNotificationElement >> updateContent [
+	
+	self updateLabelContent.
+ 
+	"Do not update the state if the job is finished"
+	isFinished ifTrue: [ ^ self ].
+	
+	self jobDo: [ :aJob | 
+		"If the job is finished do a final update of the states."
+		aJob isFinished ifTrue: [ 
+			self updateStates.
+			self updateLabelStatusIcon.
+			isFinished := true.
+			
+			^ self ].
+		
+		"If the job is not finished yet we update the state."
+		self updateStates ]
+]
 
-					isFinished
-						ifFalse: [ statePane removeChildren.
+{ #category : #'private - updating' }
+GtRrJobNotificationElement >> updateLabelContent [
+	nameLabel text: self name.
+]
 
-							states := self constructStates.
+{ #category : #'private - updating' }
+GtRrJobNotificationElement >> updateLabelStatusIcon [
+	nameLabel removeChildNamed: #statusIcon.
+	nameLabel
+		addChild: (BrGlamorousVectorIcons accept asElement asScalableElement
+			addAptitude: (BrGlamorousWithLabelTooltipAptitude new 
+				text: 'Finished'))
+		as: #statusIcon.
+]
 
-							states do: [ :state | statePane addChild: state ].
-
-							job isFinished
-								ifTrue: [ nameLabel
-										addChild: (BrGlamorousVectorIcons accept asElement asScalableElement
-												addAptitude: (BrGlamorousWithLabelTooltipAptitude new text: 'Finished')).
-									isFinished := true ] ] ])
+{ #category : #'private - updating' }
+GtRrJobNotificationElement >> updateStates [
+	| states |
+	statePane removeChildren.
+	states := self constructStates.
+	states do: [ :state | statePane addChild: state ].
 ]

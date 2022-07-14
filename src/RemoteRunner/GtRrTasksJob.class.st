@@ -32,11 +32,46 @@ GtRrTasksJob class >> tasks: aCollection [
 	^ self new tasks: aCollection
 ]
 
+{ #category : #'accessing - examples' }
+GtRrTasksJob >> allExamples [
+	^ tasks flatCollect: #examples
+]
+
+{ #category : #'accessing - examples' }
+GtRrTasksJob >> erroredExamples [
+	^ tasks flatCollect: [:aTask | aTask erroredExamples ]
+]
+
+{ #category : #'accessing - examples' }
+GtRrTasksJob >> erroredExamplesCount [ 
+	^ (tasks flatCollect: #erroredExamples) size
+]
+
+{ #category : #'accessing - examples' }
+GtRrTasksJob >> executedExamplesCount [ 
+	^ (tasks flatCollect: #executedExamples) size
+]
+
+{ #category : #'accessing - examples' }
+GtRrTasksJob >> failedExamples [
+	^ tasks flatCollect: [:aTask | aTask failedExamples ]
+]
+
+{ #category : #'accessing - examples' }
+GtRrTasksJob >> failedExamplesCount [ 
+	^ (tasks flatCollect: #failedExamples) size
+]
+
 { #category : #testing }
 GtRrTasksJob >> hasTests [
 	"Answer a boolean indicating if the receiver has one or more tasks that are considered test tasks"
 
 	^ self tasks anySatisfy: [ :task | task isKindOf: GtRrAbstractExamplesTask ]
+]
+
+{ #category : #'accessing - examples' }
+GtRrTasksJob >> notExecutedExamples [
+	^  (tasks reject: #isFinished) flatCollect: #examples
 ]
 
 { #category : #copying }
@@ -64,6 +99,21 @@ GtRrTasksJob >> printOn: aStream [
 		nextPut: $).
 ]
 
+{ #category : #'accessing - examples' }
+GtRrTasksJob >> skippedExamples [
+	^ tasks flatCollect: [ :aTask | aTask skippedExamples ]
+]
+
+{ #category : #'accessing - examples' }
+GtRrTasksJob >> successfulExamples [
+	^ tasks flatCollect: [ :aTask | aTask successfulExamples ]
+]
+
+{ #category : #'accessing - examples' }
+GtRrTasksJob >> successfulExamplesCount [ 
+	^ (tasks flatCollect: #successfulExamples) size
+]
+
 { #category : #accessing }
 GtRrTasksJob >> tasks [
 
@@ -74,4 +124,9 @@ GtRrTasksJob >> tasks [
 GtRrTasksJob >> tasks: anObject [
 
 	tasks := anObject
+]
+
+{ #category : #'accessing - examples' }
+GtRrTasksJob >> totalExamplesCount [ 
+	^ tasks sumNumbers: #totalCount
 ]

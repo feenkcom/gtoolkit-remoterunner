@@ -34,6 +34,11 @@ GtRrExamplesTask >> erroredExamples [
 	^ result erroredExamples
 ]
 
+{ #category : #accessing }
+GtRrExamplesTask >> examples [
+	^ self group examples
+]
+
 { #category : #'accessing - dynamic' }
 GtRrExamplesTask >> executedExamples [
 
