@@ -35,6 +35,12 @@ PlpoGtRrJob >> isFinished [
 ]
 
 { #category : #accessing }
+PlpoGtRrJob >> jobName [
+	
+	^ self proxyPerform: #jobName
+]
+
+{ #category : #accessing }
 PlpoGtRrJob >> jobTimeout [
 	"Answer the receiver's timeout"
 
@@ -101,6 +107,12 @@ PlpoGtRrJob >> startPollForAnnouncementsListener [
 	]
 		forkAt: Processor userBackgroundPriority
 		named: 'Poll for job announcements'
+]
+
+{ #category : #accessing }
+PlpoGtRrJob >> state [
+	
+	^ self proxyPerform: #state
 ]
 
 { #category : #'announcer - subscription' }

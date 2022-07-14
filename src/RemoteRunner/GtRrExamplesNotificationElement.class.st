@@ -53,7 +53,7 @@ GtRrExamplesNotificationElement >> constructStates [
 { #category : #accessing }
 GtRrExamplesNotificationElement >> name [
 
-	^ self currentJob name
+	^ 'Run Examples (', self currentJob  state, ')'
 ]
 
 { #category : #accessing }

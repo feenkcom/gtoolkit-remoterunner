@@ -278,6 +278,11 @@ GtRrJob >> isStarted [
 ]
 
 { #category : #accessing }
+GtRrJob >> jobName [
+	^ self name
+]
+
+{ #category : #accessing }
 GtRrJob >> jobTimeout [
 	<return: #Duration>
 

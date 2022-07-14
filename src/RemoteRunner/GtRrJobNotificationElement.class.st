@@ -197,12 +197,19 @@ GtRrJobNotificationElement >> message [
 { #category : #'private - accessing' }
 GtRrJobNotificationElement >> name [
 
-	^ self currentJob name
+	^ self currentJob jobName
 ]
 
 { #category : #accessing }
 GtRrJobNotificationElement >> notExecutedTasks [
 	^ self currentJob tasks reject: #isFinished
+]
+
+{ #category : #accessing }
+GtRrJobNotificationElement >> notification: aGtNotificationEvent [
+	isFinished := false.
+	
+	super notification: aGtNotificationEvent
 ]
 
 { #category : #accessing }
