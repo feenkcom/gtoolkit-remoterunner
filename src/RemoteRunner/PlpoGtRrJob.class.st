@@ -67,8 +67,17 @@ PlpoGtRrJob >> pollAnnouncementQueue [
 PlpoGtRrJob >> pollForAnnouncements [
 	| newAnnouncements |
 	newAnnouncements := self pollAnnouncementQueue.
+	
+	GtRrAnnouncementQueueDeliveryInitiatedAnnouncement new 
+		announcementsCount: newAnnouncements size;
+		emit.
+	
 	newAnnouncements do: [ :anAnnouncement | 
-		self announcer announce: anAnnouncement ]
+		self announcer announce: anAnnouncement ].
+		
+	GtRrAnnouncementQueueDeliveryCompletedAnnouncement new 
+		announcementsCount: newAnnouncements size;
+		emit.
 ]
 
 { #category : #'announcements - queue' }

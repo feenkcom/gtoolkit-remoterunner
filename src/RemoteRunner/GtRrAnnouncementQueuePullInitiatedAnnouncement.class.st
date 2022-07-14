@@ -1,5 +1,5 @@
 Class {
 	#name : #GtRrAnnouncementQueuePullInitiatedAnnouncement,
-	#superclass : #GtRrAnnouncementQueueAnnouncement,
+	#superclass : #GtRrAnnouncementQueuePullAnnouncement,
 	#category : #'RemoteRunner-Announcements'
 }

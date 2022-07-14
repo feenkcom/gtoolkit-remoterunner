@@ -1,6 +1,6 @@
 Class {
 	#name : #GtRrAnnouncementQueuePullCompletedAnnouncement,
-	#superclass : #GtRrAnnouncementQueueAnnouncement,
+	#superclass : #GtRrAnnouncementQueuePullAnnouncement,
 	#instVars : [
 		'retrivedAnnouncementCount'
 	],
