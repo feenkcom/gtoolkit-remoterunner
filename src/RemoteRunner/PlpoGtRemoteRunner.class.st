@@ -20,6 +20,12 @@ PlpoGtRemoteRunner >> isIdle [
 ]
 
 { #category : #accessing }
+PlpoGtRemoteRunner >> jobStartupAndShutdown [
+
+	^ self proxyPerform: #jobStartupAndShutdown.
+]
+
+{ #category : #accessing }
 PlpoGtRemoteRunner >> port [
 
 	^ self proxyPerform: #port.
