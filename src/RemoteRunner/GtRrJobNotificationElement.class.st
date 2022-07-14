@@ -93,6 +93,13 @@ GtRrJobNotificationElement >> buildToolbar [
 	^ horizontalPane
 ]
 
+{ #category : #'private - hooks' }
+GtRrJobNotificationElement >> clearContent [
+	nameLabel text: '<noJob>'.
+	nameLabel removeChildNamed: #statusIcon..
+	statePane removeChildren.
+]
+
 { #category : #accessing }
 GtRrJobNotificationElement >> constructStates [
 	self jobDo: [ :aJob |
@@ -153,7 +160,7 @@ GtRrJobNotificationElement >> initialize [
 		hInherit: statePane;
 		vAnyToFitContent: statePane).
 		
-	updater := BrElementUpdater2 new
+	updater := BrElementUpdater new
 		element: self
 		selector: #updateContent.
 ]
@@ -221,7 +228,7 @@ GtRrJobNotificationElement >> onAddedToSceneGraph [
 
 { #category : #'private - hooks' }
 GtRrJobNotificationElement >> onNotificationChanged [
-
+	self clearContent.
 	self requestUpdate
 ]
 
@@ -288,6 +295,7 @@ GtRrJobNotificationElement >> updateContent [
 			nameLabel
 				addChild: (BrGlamorousVectorIcons accept asElement asScalableElement
 					addAptitude: (BrGlamorousWithLabelTooltipAptitude new 
-						text: 'Finished')).
+						text: 'Finished'))
+				as: #statusIcon.
 			isFinished := true ] ]
 ]
