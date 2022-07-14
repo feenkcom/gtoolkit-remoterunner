@@ -1,6 +1,9 @@
 Class {
 	#name : #PlpoGtRemoteRunner,
 	#superclass : #PharoLinkProxyObject,
+	#instVars : [
+		'announcementsQueue'
+	],
 	#category : #'RemoteRunner-Runner'
 }
 
@@ -62,9 +65,15 @@ PlpoGtRemoteRunner >> stop [
 
 { #category : #'api - jobs' }
 PlpoGtRemoteRunner >> submitJob: aGtRrJob [
+	| jobProxy |
 	"Submit the supplied job to the runner"
 
-	^ self
+	jobProxy := self
 		proxyPerform: #submitSerializedJob:
-		withPrimitiveArguments: { LeJsonV4 uniqueInstance serialize: aGtRrJob }
+		withPrimitiveArguments: { LeJsonV4 uniqueInstance serialize: aGtRrJob }.
+		
+	"Start manually here the listening for announcements, in tandem with #submitSerializedJob:, that registers the announcements queue."
+	jobProxy startPollForAnnouncementsListener.
+	
+	^ jobProxy
 ]

@@ -20,6 +20,15 @@ GtRemoteAnnouncementQueue class >> onAnnouncer: anAnnouncingObject [
 		object: anAnnouncingObject
 ]
 
+{ #category : #'gt - extensions' }
+GtRemoteAnnouncementQueue >> gtViewQueueFor: aView [
+	<gtView>
+	
+	^ aView list
+		title: 'Queue';
+		items: [ queue ]
+]
+
 { #category : #accessing }
 GtRemoteAnnouncementQueue >> initialize [
 	queue := OrderedCollection new
