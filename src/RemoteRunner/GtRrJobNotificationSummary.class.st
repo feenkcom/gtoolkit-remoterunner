@@ -13,6 +13,7 @@ Class {
 { #category : #accessing }
 GtRrJobNotificationSummary >> initialize [
 	super initialize.
+	
 	self
 		constraintsDo: [ :c | 
 			c vertical exact: 21.
@@ -55,25 +56,40 @@ GtRrJobNotificationSummary >> initialize [
 ]
 
 { #category : #accessing }
-GtRrJobNotificationSummary >> onNotificationsChanged [
+GtRrJobNotificationSummary >> subscribeToNotifications [
+	notifications do: [ :aNotification |
+		aNotification job
+			when: GtRrTaskAnnouncement
+			send: #requestUpdate
+			to: self ]
+]
+
+{ #category : #accessing }
+GtRrJobNotificationSummary >> unsubscribeFromNotifications [
+	notifications do: [ :aNotification | 
+		aNotification job unsubscribe: self ]
+]
+
+{ #category : #accessing }
+GtRrJobNotificationSummary >> updateSummaryContent [
 	| successfulCounter notStartedCounter failedCounter |
+	
 	successfulCounter := 0.
 	notStartedCounter := 0.
 	failedCounter := 0.
+	
 	self notifications
 		do: [ :aNotification | 
 			successfulCounter := successfulCounter
 					+ (aNotification job results reject: #hasErrors) size.
 			notStartedCounter := notStartedCounter
 					+ (aNotification job tasks reject: #isFinished) size.
-			failedCounter := failedCounter + aNotification job resultsWithErrors size.
-			aNotification job
-				when: GtRrTaskAnnouncement
-				send: #requestUpdate
-				to: self ].
+			failedCounter := failedCounter + aNotification job resultsWithErrors size ].
+	
 	failed text: failedCounter asString.
 	successful text: successfulCounter asString.
 	notStarted text: notStartedCounter asString.
+	
 	failed
 		visibility: (failedCounter = 0 ifTrue: [ BlVisibility gone ] ifFalse: [ BlVisibility visible ]).
 	successful

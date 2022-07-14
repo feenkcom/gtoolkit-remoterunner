@@ -5,11 +5,13 @@ Class {
 }
 
 { #category : #accessing }
-GtRrExamplesNotificationSummary >> onNotificationsChanged [
+GtRrExamplesNotificationSummary >> updateSummaryContent [
 	| successfulCounter notStartedCounter failedCounter |
+	
 	successfulCounter := 0.
 	notStartedCounter := 0.
 	failedCounter := 0.
+	
 	self notifications
 		do: [ :aNotification | 
 			| currentJob |
@@ -20,14 +22,12 @@ GtRrExamplesNotificationSummary >> onNotificationsChanged [
 				- currentJob executedExamplesCount.
 			failedCounter := failedCounter 
 				+ currentJob failedExamplesCount
-				+ currentJob erroredExamplesCount.
-			aNotification job
-				when: GtRrTaskAnnouncement
-				send: #requestUpdate
-				to: self ].
+				+ currentJob erroredExamplesCount ].
+				
 	failed text: failedCounter asString.
 	successful text: successfulCounter asString.
 	notStarted text: notStartedCounter asString.
+	
 	failed
 		visibility: (failedCounter = 0 ifTrue: [ BlVisibility gone ] ifFalse: [ BlVisibility visible ]).
 	successful
