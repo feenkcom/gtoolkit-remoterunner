@@ -28,7 +28,8 @@ GtRrJobNotificationSummary >> initialize [
 		addChild: (notStarted := BrLabel new
 					aptitude: BrGlamorousLabelAptitude;
 					beSmallSize;
-					exact: 15 @ 15;
+					hFitContent;
+					vExact: 15;
 					margin: (BlInsets all: 3);
 					layout: BlLinearLayout horizontal alignCenter;
 					geometry: (BlRoundedRectangleGeometry cornerRadius: 4);
@@ -36,7 +37,8 @@ GtRrJobNotificationSummary >> initialize [
 		addChild: (failed := BrLabel new
 					aptitude: BrGlamorousLabelAptitude;
 					beSmallSize;
-					exact: 15 @ 15;
+					hFitContent;
+					vExact: 15;
 					margin: (BlInsets all: 3);
 					background: BrGlamorousColors errorBackgroundColor;
 					layout: BlLinearLayout horizontal alignCenter;
@@ -46,7 +48,8 @@ GtRrJobNotificationSummary >> initialize [
 		addChild: (successful := BrLabel new
 					aptitude: BrGlamorousLabelAptitude;
 					beSmallSize;
-					exact: 15 @ 15;
+					hFitContent;
+					vExact: 15;
 					margin: (BlInsets all: 3);
 					background: BrGlamorousColors successBackgroundColor;
 					layout: BlLinearLayout horizontal alignCenter;
