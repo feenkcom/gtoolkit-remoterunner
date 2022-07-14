@@ -15,48 +15,50 @@ Class {
 
 { #category : #accessing }
 GtRrExamplesNotificationElement >> allTasks [
-	^ job allExamples
-	"^ job tasks flatCollect: #allMethods"
+	^ self currentJob allExamples
+	"^ self currentJob tasks flatCollect: #allMethods"
 ]
 
 { #category : #accessing }
 GtRrExamplesNotificationElement >> constructStates [
-	job ifNil: [ ^ {} ].
-	^ {GtRrExamplesStateElement
+	self jobDo: [ :aJob |
+		^ {GtRrExamplesStateElement
 			name: 'All'
 			color: Color transparent
 			elements: self allTasks.
 		GtRrExamplesStateElement
 			name: 'Success'
 			color: Color lightGreen
-			elements: job successfulExamples.
+			elements: aJob successfulExamples.
 		GtRrExamplesStateElement
 			name: 'Skipped'
 			color: Color veryVeryLightGray
-			elements: job skippedExamples.
+			elements: aJob skippedExamples.
 		GtRrExamplesStateElement
 			name: 'Failure'
 			color: Color lightOrange
-			elements: job failedExamples.
+			elements: aJob failedExamples.
 		GtRrExamplesStateElement
 			name: 'Error'
 			color: Color red
-			elements: job erroredExamples.
+			elements: aJob erroredExamples.
 		GtRrExamplesStateElement
 			name: 'Not executed'
 			color: Color veryVeryLightGray
-			elements: self notExecutedTasks}
+			elements: self notExecutedTasks} ].
+			
+	^ #()
 ]
 
 { #category : #accessing }
 GtRrExamplesNotificationElement >> name [
 
-	^ job name
+	^ self currentJob name
 ]
 
 { #category : #accessing }
 GtRrExamplesNotificationElement >> notExecutedTasks [
-	^ job notExecutedExamples
+	^ self currentJob notExecutedExamples
 ]
 
 { #category : #'private - hooks' }
@@ -64,7 +66,7 @@ GtRrExamplesNotificationElement >> onTaskAnnouncement: aGtRrTaskAnnouncement [
 
 	aGtRrTaskAnnouncement class = GtRrTaskStartedAnnouncement ifTrue: [ ^ self ].
 	
-	self updateDisplay.
+	self requestUpdate.
 ]
 
 { #category : #private }
@@ -72,7 +74,7 @@ GtRrExamplesNotificationElement >> runJobAgain [
 	"Create a copy of the receiver's job and run it with progress notifications"
 	| jobCopy |
 
-	jobCopy := job copy.
+	jobCopy := self currentJob copy.
 	jobCopy showExamplesProgressNotification.
 	
 	GtRemoteRunner default submitJob: jobCopy.
@@ -80,8 +82,7 @@ GtRrExamplesNotificationElement >> runJobAgain [
 
 { #category : #'private - subscriptions' }
 GtRrExamplesNotificationElement >> subscribeToNotification [
-
-	job := notification job.
+	
 	successful := OrderedCollection new.
 	errored := OrderedCollection new.
 	failed := OrderedCollection new.
