@@ -17,5 +17,8 @@ PlpoGtRemoteAnnouncementQueue >> poll [
 
 { #category : #accessing }
 PlpoGtRemoteAnnouncementQueue >> pollSerialized [
-	^ self proxyPerform: #pollSerialized
+	^ self newCommandFactory
+		setBySerialized;
+		<< ('self ', #pollSerialized asString);
+		sendAndWait
 ]
