@@ -1,3 +1,6 @@
+"
+{{gtClass:TGtWithAnnouncementsQueue}} is an utily trait that adds a {{gtClass:name=GtRemoteAnnouncementQueue}} to an object. The object needs to control the lifecycle of the queue.
+"
 Trait {
 	#name : #TGtWithAnnouncementsQueue,
 	#instVars : [

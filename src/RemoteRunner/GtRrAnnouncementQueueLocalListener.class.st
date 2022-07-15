@@ -1,3 +1,15 @@
+"
+{{gtClass:GtRrAnnouncementQueueLocalListener}} retries remote announcements and announces them locally.
+
+This object wraps an announcement queue and starts a background process that retries announcements and announces them locally. The announcements queue can be a local or proxy object.
+
+There are several methods for configuring the listener:
+	- {{gtMethod:name=GtRrAnnouncementQueueLocalListener>>processLabel:|label=#selector}}
+	-  {{gtMethod:name=GtRrAnnouncementQueueLocalListener>>timeout:|label=#selector}}
+	-  {{gtMethod:name=GtRrAnnouncementQueueLocalListener>>terminationCondition::|label=#selector}}
+	
+There is no support currently provided for force-stopping or restarting listening for announcements.
+"
 Class {
 	#name : #GtRrAnnouncementQueueLocalListener,
 	#superclass : #Object,
@@ -6,7 +18,8 @@ Class {
 		'announcementQueue',
 		'processLabel',
 		'terminationCondition',
-		'timeout'
+		'timeout',
+		'isPolling'
 	],
 	#category : #'RemoteRunner-AnnouncementQueue'
 }
@@ -26,6 +39,11 @@ GtRrAnnouncementQueueLocalListener >> announcer [
 GtRrAnnouncementQueueLocalListener >> initializeForAnnouncingProxy: aProxy [ 
 	announcementQueue := aProxy announcementQueue.
 	announcer := Announcer new.
+]
+
+{ #category : #testing }
+GtRrAnnouncementQueueLocalListener >> isPolling [
+	^ isPolling ifNil: [ false] 
 ]
 
 { #category : #accessing }
@@ -73,7 +91,13 @@ GtRrAnnouncementQueueLocalListener >> processLabel: aLabel [
 
 { #category : #accessing }
 GtRrAnnouncementQueueLocalListener >> startPoll [
+	"Start polling annoucements from the current announcement queue"
 	| duration count  |
+	
+	self assert: [ announcementQueue  notNil ].
+	self assert: [ self isPolling not ].
+	
+	isPolling := true.
 	duration := 1.
 	count := (self timeout ifNil: [ 10 hours]) totalSeconds // 10 + 10.
 	
@@ -85,7 +109,8 @@ GtRrAnnouncementQueueLocalListener >> startPoll [
 				count := count - 1.
 				duration < 10 ifTrue: [ duration := duration + 1 ] ].
 		"Ensure there is at least one check of the completed tasks"
-		self pollAndDeliverAnnouncements 
+		self pollAndDeliverAnnouncements .
+		isPolling := false.
 	]
 		forkAt: Processor userBackgroundPriority
 		named: (processLabel ifNil: [ 'Poll for Announcements' ])
