@@ -1,5 +1,5 @@
 "
-GtRrInImageConstraint will only run tasks on a worker that is part of the RemoteRunner image.
+{{gtClass:GtRrInImageConstraint}} will only run tasks on a worker that is part of the RemoteRunner image.
 
 This relies on the workers correctly setting the #workerInImage attribute.
 "

@@ -9,6 +9,8 @@ Implementation Details:
 Class {
 	#name : #GtRrJob,
 	#superclass : #Object,
+	#traits : 'TGtWithAnnouncementsQueue',
+	#classTraits : 'TGtWithAnnouncementsQueue classTrait',
 	#instVars : [
 		'results',
 		'announcer',
@@ -20,8 +22,7 @@ Class {
 		'taskTimeout',
 		'errorDetails',
 		'errorCount',
-		'name',
-		'announcementQueue'
+		'name'
 	],
 	#category : #'RemoteRunner-Jobs'
 }
@@ -96,11 +97,6 @@ GtRrJob >> announce: anAnnouncement [
 	^ self announcer announce: anAnnouncement
 ]
 
-{ #category : #'announcements - queue' }
-GtRrJob >> announcementQueue [
-	^ announcementQueue
-]
-
 { #category : #accessing }
 GtRrJob >> announcer [
 
@@ -125,11 +121,6 @@ GtRrJob >> cancelJob [
 
 	self markJobCancelled.
 
-]
-
-{ #category : #'announcements - queue' }
-GtRrJob >> createRemoteAnnouncementQueue [
-	^ GtRemoteAnnouncementQueue onAnnouncer: self
 ]
 
 { #category : #accessing }
@@ -342,19 +333,6 @@ GtRrJob >> name: anObject [
 	name := anObject
 ]
 
-{ #category : #'announcements - queue' }
-GtRrJob >> pollAnnouncementQueue [
-	^ self announcementQueue poll asArray
-]
-
-{ #category : #'announcements - queue' }
-GtRrJob >> pollSerializedAnnouncementQueue [
-	^ self pollAnnouncementQueue 
-		collect: [ :anAnnouncement | 
-			anAnnouncement serializeForRemoteDelivery ]
-		as: Array
-]
-
 { #category : #copying }
 GtRrJob >> postCopy [
 	"A copied job has its own UID and tasks (as a task holds its results)"
@@ -374,14 +352,6 @@ GtRrJob >> printOn: aStream [
 		[ aStream << ' with errors' ].
 	aStream
 		nextPut: $).
-]
-
-{ #category : #'announcements - queue' }
-GtRrJob >> registerAnnouncementsQueue [
-	"Register a queue that stores announcements."
-	self assert: [ announcementQueue isNil ].
-	
-	announcementQueue := self createRemoteAnnouncementQueue
 ]
 
 { #category : #'announcer - subscription' }
