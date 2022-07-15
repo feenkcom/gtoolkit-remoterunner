@@ -13,8 +13,8 @@ PlpoGtRrJob class >> remoteClassName [
 ]
 
 { #category : #initiailize }
-PlpoGtRrJob >> actOnProxyObjectInitialized [
-	super actOnProxyObjectInitialized.
+PlpoGtRrJob >> actOnProxyObjectCreated [
+	super actOnProxyObjectCreated.
 	
 	"We can start receiving announcements right after the proxy object has been fully initialized.
 	The code that creates the remote job is responsible with attaching the queue before any relevant action that can trigger annoouncements is executed."
