@@ -15,11 +15,11 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'announcer',
-		'announcementQueue',
 		'processLabel',
 		'terminationCondition',
 		'timeout',
-		'isPolling'
+		'isPolling',
+		'proxy'
 	],
 	#category : #'RemoteRunner-AnnouncementQueue'
 }
@@ -37,7 +37,7 @@ GtRrAnnouncementQueueLocalListener >> announcer [
 
 { #category : #initialization }
 GtRrAnnouncementQueueLocalListener >> initializeForAnnouncingProxy: aProxy [ 
-	announcementQueue := aProxy announcementQueue.
+	proxy := aProxy.
 	announcer := Announcer new.
 ]
 
@@ -81,7 +81,7 @@ GtRrAnnouncementQueueLocalListener >> pollAnnouncementQueue [
 
 { #category : #accessing }
 GtRrAnnouncementQueueLocalListener >> pollSerializedAnnouncementQueue [
-	^ announcementQueue pollSerialized
+	^ proxy pollSerializedAnnouncementQueue
 ]
 
 { #category : #accessing }
@@ -94,7 +94,7 @@ GtRrAnnouncementQueueLocalListener >> startPoll [
 	"Start polling annoucements from the current announcement queue"
 	| duration count  |
 	
-	self assert: [ announcementQueue  notNil ].
+	self assert: [ proxy  notNil ].
 	self assert: [ self isPolling not ].
 	
 	isPolling := true.

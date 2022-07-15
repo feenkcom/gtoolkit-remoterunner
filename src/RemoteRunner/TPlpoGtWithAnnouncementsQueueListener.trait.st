@@ -34,6 +34,14 @@ TPlpoGtWithAnnouncementsQueueListener >> initializeAnnouncementsQueueListener [
 ]
 
 { #category : #'announcements - queue' }
+TPlpoGtWithAnnouncementsQueueListener >> pollSerializedAnnouncementQueue [
+	^ self newCommandFactory
+		setBySerialized;
+		<< ('self ', #pollSerializedAnnouncementQueue asString);
+		sendAndWait
+]
+
+{ #category : #'announcements - queue' }
 TPlpoGtWithAnnouncementsQueueListener >> startAnnouncementsListener [
 	"Start propagating locally announcements from the remote queue."
 	self assert: [ announcementQueueListener notNil ].

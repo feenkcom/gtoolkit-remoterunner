@@ -29,7 +29,7 @@ PlpoGtRrJob >> announcementQueue [
 { #category : #initiailize }
 PlpoGtRrJob >> configureAnnouncementsQueueListener: aListener [
 	aListener
-		timeout: self jobTimeout;
+		"timeout: self jobTimeout;"
 		terminationCondition: [ self isFinished]
 ]
 

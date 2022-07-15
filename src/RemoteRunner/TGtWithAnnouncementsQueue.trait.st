@@ -15,6 +15,11 @@ TGtWithAnnouncementsQueue >> announcementQueue [
 ]
 
 { #category : #'announcements - queue' }
+TGtWithAnnouncementsQueue >> pollSerializedAnnouncementQueue [
+	^ self announcementQueue pollSerialized
+]
+
+{ #category : #'announcements - queue' }
 TGtWithAnnouncementsQueue >> registerAnnouncementsQueue [
 	"Register a queue that stores announcements."
 	self assert: [ announcementQueue isNil ].
