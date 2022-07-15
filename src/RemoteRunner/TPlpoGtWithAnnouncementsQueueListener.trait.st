@@ -27,7 +27,8 @@ TPlpoGtWithAnnouncementsQueueListener >> configureAnnouncementsQueueListener: aL
 
 { #category : #'announcements - queue' }
 TPlpoGtWithAnnouncementsQueueListener >> initializeAnnouncementsQueueListener [
-	"Initialize and configure the queue listener. Should be called only after the proxy object has been fully initialize."
+	"Initialize and configure the queue listener. 
+	Should be called only after the proxy object has been fully initialize, and there should be no calls to the remote object."
 	
 	announcementQueueListener := GtRrAnnouncementQueueLocalListener forAnnouncingProxy: self.
 	self configureAnnouncementsQueueListener: announcementQueueListener

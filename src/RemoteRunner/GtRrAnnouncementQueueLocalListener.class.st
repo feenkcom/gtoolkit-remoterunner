@@ -1,7 +1,7 @@
 "
 {{gtClass:GtRrAnnouncementQueueLocalListener}} retries remote announcements and announces them locally.
 
-This object wraps an announcement queue and starts a background process that retries announcements and announces them locally. The announcements queue can be a local or proxy object.
+This object wraps a proxy that has an announcement queue and starts a background process that retries announcements and announces them locally. 
 
 There are several methods for configuring the listener:
 	- {{gtMethod:name=GtRrAnnouncementQueueLocalListener>>processLabel:|label=#selector}}
