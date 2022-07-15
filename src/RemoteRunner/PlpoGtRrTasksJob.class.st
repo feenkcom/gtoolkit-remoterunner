@@ -59,7 +59,7 @@ PlpoGtRrTasksJob >> gtViewTestsActionFor: anAction [
 		tooltip: 'View Test Results';
 		icon: BrGlamorousVectorIcons signal;
 		action: [ :button | button phlow spawnObject:
-			(GtRrExamplesView new job: self getSerialized) ].
+			(GtRrExamplesView new job: self "getSerialized") ].
 ]
 
 { #category : #testing }

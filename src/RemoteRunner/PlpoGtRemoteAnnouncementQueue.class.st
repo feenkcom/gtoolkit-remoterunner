@@ -1,7 +1,7 @@
 Class {
 	#name : #PlpoGtRemoteAnnouncementQueue,
 	#superclass : #PharoLinkProxyObject,
-	#category : #'RemoteRunner-Runner'
+	#category : #'RemoteRunner-AnnouncementQueue'
 }
 
 { #category : #accessing }
@@ -12,7 +12,10 @@ PlpoGtRemoteAnnouncementQueue class >> remoteClassName [
 
 { #category : #accessing }
 PlpoGtRemoteAnnouncementQueue >> poll [
-	^ (self newCommandFactory
-		<< 'self poll asArray';
-		sendAndWait) getValue
+	^ self proxyPerform: #poll
+]
+
+{ #category : #accessing }
+PlpoGtRemoteAnnouncementQueue >> pollSerialized [
+	^ self proxyPerform: #pollSerialized
 ]

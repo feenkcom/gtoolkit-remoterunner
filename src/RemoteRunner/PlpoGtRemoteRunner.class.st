@@ -25,20 +25,6 @@ PlpoGtRemoteRunner >> port [
 	^ self proxyPerform: #port.
 ]
 
-{ #category : #'api - jobs' }
-PlpoGtRemoteRunner >> queues [
-	^ (self newCommandFactory
-		<< 'self queues';
-		sendAndWait) getValue
-]
-
-{ #category : #accessing }
-PlpoGtRemoteRunner >> remoteAnnouncementQueue [
-	^ self newCommandFactory
-		<< 'GtRemoteAnnouncementQueue onAnnouncer: self';
-		sendAndWait
-]
-
 { #category : #'code sync' }
 PlpoGtRemoteRunner >> startCodeSync [
 	"Start the code sync listener, submitting changes to the receiver"
@@ -73,7 +59,7 @@ PlpoGtRemoteRunner >> submitJob: aGtRrJob [
 		withPrimitiveArguments: { LeJsonV4 uniqueInstance serialize: aGtRrJob }.
 		
 	"Start manually here the listening for announcements, in tandem with #submitSerializedJob:, that registers the announcements queue."
-	jobProxy startPollForAnnouncementsListener.
+	jobProxy startAnnouncementsListener.
 	
 	^ jobProxy
 ]

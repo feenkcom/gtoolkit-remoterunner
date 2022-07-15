@@ -2,10 +2,9 @@ Class {
 	#name : #GtRemoteAnnouncementQueue,
 	#superclass : #Object,
 	#instVars : [
-		'queue',
-		'object'
+		'queue'
 	],
-	#category : #'RemoteRunner-Runner'
+	#category : #'RemoteRunner-AnnouncementQueue'
 }
 
 { #category : #jsonV4 }
@@ -17,7 +16,13 @@ GtRemoteAnnouncementQueue class >> leJsonV4Name [
 { #category : #accessing }
 GtRemoteAnnouncementQueue class >> onAnnouncer: anAnnouncingObject [
 	^ self new
-		object: anAnnouncingObject
+		initializeForAnnouncingObject: anAnnouncingObject
+]
+
+{ #category : #accessing }
+GtRemoteAnnouncementQueue class >> onAnnouncingObject: anAnnouncingObject [
+	^ self new
+		initializeForAnnouncingObject: anAnnouncingObject
 ]
 
 { #category : #'gt - extensions' }
@@ -29,20 +34,15 @@ GtRemoteAnnouncementQueue >> gtViewQueueFor: aView [
 		items: [ queue ]
 ]
 
-{ #category : #accessing }
+{ #category : #initiailize }
 GtRemoteAnnouncementQueue >> initialize [
+	super initialize.
 	queue := OrderedCollection new
 ]
 
 { #category : #accessing }
-GtRemoteAnnouncementQueue >> object [
-	^ object
-]
-
-{ #category : #accessing }
-GtRemoteAnnouncementQueue >> object: anAnnouncingObject [ 
-	object := anAnnouncingObject.
-	self subscribeToObject
+GtRemoteAnnouncementQueue >> initializeForAnnouncingObject: anAnnouncingObject [ 
+	self subscribeAnnouncingObject: anAnnouncingObject 
 ]
 
 { #category : #accessing }
@@ -59,11 +59,20 @@ GtRemoteAnnouncementQueue >> poll [
 ]
 
 { #category : #accessing }
+GtRemoteAnnouncementQueue >> pollSerialized [
+	^ self poll 
+		collect: [ :anAnnouncement | 
+			anAnnouncement serializeForRemoteDelivery ]
+		as: Array
+]
+
+{ #category : #accessing }
 GtRemoteAnnouncementQueue >> queue [
 	^ queue
 ]
 
 { #category : #accessing }
-GtRemoteAnnouncementQueue >> subscribeToObject [
-	object when: Announcement send: #onAnnouncement: to: self
+GtRemoteAnnouncementQueue >> subscribeAnnouncingObject: anAnnouncingObject [
+	anAnnouncingObject 
+		when: Announcement send: #onAnnouncement: to: self
 ]

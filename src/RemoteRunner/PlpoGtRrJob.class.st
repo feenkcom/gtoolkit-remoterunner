@@ -1,9 +1,8 @@
 Class {
 	#name : #PlpoGtRrJob,
 	#superclass : #PharoLinkProxyObject,
-	#instVars : [
-		'announcer'
-	],
+	#traits : 'TPlpoGtWithAnnouncementsQueueListener',
+	#classTraits : 'TPlpoGtWithAnnouncementsQueueListener classTrait',
 	#category : #'RemoteRunner-Jobs'
 }
 
@@ -15,7 +14,11 @@ PlpoGtRrJob class >> remoteClassName [
 
 { #category : #initiailize }
 PlpoGtRrJob >> actOnProxyObjectInitialized [
-	announcer := Announcer new.
+	super actOnProxyObjectInitialized.
+	
+	"We can start receiving announcements right after the proxy object has been fully initialized.
+	The code that creates the remote job is responsible with attaching the queue before any relevant action that can trigger annoouncements is executed."
+	self initializeAnnouncementsQueueListener.
 ]
 
 { #category : #'announcements - queue' }
@@ -23,9 +26,11 @@ PlpoGtRrJob >> announcementQueue [
 	^ self proxyPerform: #announcementQueue
 ]
 
-{ #category : #accessing }
-PlpoGtRrJob >> announcer [
-	^ announcer
+{ #category : #initiailize }
+PlpoGtRrJob >> configureAnnouncementsQueueListener: aListener [
+	aListener
+		timeout: self jobTimeout;
+		terminationCondition: [ self isFinished]
 ]
 
 { #category : #accessing }
@@ -47,47 +52,6 @@ PlpoGtRrJob >> jobTimeout [
 	^ self proxyPerform: #jobTimeout
 ]
 
-{ #category : #'announcements - queue' }
-PlpoGtRrJob >> pollAnnouncementQueue [
-	| pulledAnnouncements |
-	GtRrAnnouncementQueuePullInitiatedAnnouncement new emit.
-	
-	pulledAnnouncements := self pollSerializedAnnouncementQueue 
-		collect: [ :anAnnouncementData |
-			GtRemoteRunnerAnnouncement fromSerializedData: anAnnouncementData ].
-	
-	GtRrAnnouncementQueuePullCompletedAnnouncement new 
-		retrivedAnnouncementCount:  pulledAnnouncements size;
-		emit.
-	
-	^ pulledAnnouncements
-]
-
-{ #category : #'announcements - queue' }
-PlpoGtRrJob >> pollForAnnouncements [
-	| newAnnouncements |
-	newAnnouncements := self pollAnnouncementQueue.
-	
-	GtRrAnnouncementQueueDeliveryInitiatedAnnouncement new 
-		announcementsCount: newAnnouncements size;
-		emit.
-	
-	newAnnouncements do: [ :anAnnouncement | 
-		self announcer announce: anAnnouncement ].
-		
-	GtRrAnnouncementQueueDeliveryCompletedAnnouncement new 
-		announcementsCount: newAnnouncements size;
-		emit.
-]
-
-{ #category : #'announcements - queue' }
-PlpoGtRrJob >> pollSerializedAnnouncementQueue [
-	^ self newCommandFactory
-		setBySerialized;
-		<< ('self ', #pollSerializedAnnouncementQueue asString);
-		sendAndWait
-]
-
 { #category : #accessing }
 PlpoGtRrJob >> results [
 	"Answer the results from the job as an Array.
@@ -96,26 +60,6 @@ PlpoGtRrJob >> results [
 	^ self newCommandFactory 
 		<< 'results asArray';
 		sendAndWait.
-]
-
-{ #category : #'announcements - queue' }
-PlpoGtRrJob >> startPollForAnnouncementsListener [
-	| duration count  |
-	duration := 1.
-	count := (self jobTimeout ifNil: [ 10 hours]) totalSeconds // 10 + 10.
-	
-	[
-		[ self isFinished not and: [ count > 0 ] ]
-			whileTrue: [ 
-				duration seconds wait.
-				self pollForAnnouncements.
-				count := count - 1.
-				duration < 10 ifTrue: [ duration := duration + 1 ] ].
-		"Ensure there is at least one check of the completed tasks"
-		self pollForAnnouncements 
-	]
-		forkAt: Processor userBackgroundPriority
-		named: 'Poll for job announcements'
 ]
 
 { #category : #accessing }
