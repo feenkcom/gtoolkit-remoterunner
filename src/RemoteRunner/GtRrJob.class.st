@@ -517,7 +517,8 @@ GtRrJob >> taskExecutionTime [
 	^ results inject: Duration zero into: [ :s :v | 
 		v
 			ifNil: [ s ]
-			ifNotNil: [ s + v duration ] ].
+			ifNotNil: [ s + ((v duration
+				ifNil: [ Duration zero ])) ] ].
 ]
 
 { #category : #accessing }
