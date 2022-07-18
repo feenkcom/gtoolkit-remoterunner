@@ -66,7 +66,9 @@ GtRrWorkerPortNumberWidget >> newPortInput [
 
 { #category : #private }
 GtRrWorkerPortNumberWidget >> newPortLabel [
-	^ BrLabel new
+
+	^ BrLabel new 
+		aptitude: BrGlamorousLabelAptitude;
 		margin: (BlInsets top: 3 right: 5);
 		text: 'Port:'
 ]
