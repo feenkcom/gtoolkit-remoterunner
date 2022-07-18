@@ -19,7 +19,8 @@ Class {
 		'terminationCondition',
 		'timeout',
 		'isPolling',
-		'proxy'
+		'proxy',
+		'requestTermination'
 	],
 	#category : #'RemoteRunner-AnnouncementQueue'
 }
@@ -81,7 +82,12 @@ GtRrAnnouncementQueueLocalListener >> pollAnnouncementQueue [
 
 { #category : #accessing }
 GtRrAnnouncementQueueLocalListener >> pollSerializedAnnouncementQueue [
-	^ proxy pollSerializedAnnouncementQueue
+	^ [ proxy pollSerializedAnnouncementQueue ] 
+		on: LanguageLinkServerNotRunningError
+		do: [ :anExeption |
+			anExeption asBeaconSignal emit.
+			requestTermination := true.
+			#() ]
 ]
 
 { #category : #accessing }
@@ -92,24 +98,27 @@ GtRrAnnouncementQueueLocalListener >> processLabel: aLabel [
 { #category : #accessing }
 GtRrAnnouncementQueueLocalListener >> startPoll [
 	"Start polling annoucements from the current announcement queue"
-	| duration count  |
 	
 	self assert: [ proxy  notNil ].
 	self assert: [ self isPolling not ].
 	
 	isPolling := true.
-	duration := 1.
-	count := (self timeout ifNil: [ 10 hours]) totalSeconds // 10 + 10.
+	requestTermination := false.
 	
 	[
-		[ terminationCondition value not and: [ count > 0 ] ]
+		| duration count  |
+		duration := 1.
+		count := (self timeout ifNil: [ 10 hours]) totalSeconds // 10 + 10.
+		[ requestTermination not and: [ count > 0 and: [ terminationCondition value not ] ] ]
 			whileTrue: [ 
 				duration seconds wait.
 				self pollAndDeliverAnnouncements.
 				count := count - 1.
 				duration < 10 ifTrue: [ duration := duration + 1 ] ].
-		"Ensure there is at least one check of the completed tasks"
-		self pollAndDeliverAnnouncements .
+		"Ensure there is at least one check of the completed tasks,
+		but only if termination was not requested."
+		requestTermination ifFalse: [
+			self pollAndDeliverAnnouncements ].
 		isPolling := false.
 	]
 		forkAt: Processor userBackgroundPriority
