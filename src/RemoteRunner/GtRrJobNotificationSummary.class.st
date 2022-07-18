@@ -13,7 +13,7 @@ Class {
 { #category : #accessing }
 GtRrJobNotificationSummary >> initialize [
 	super initialize.
-	
+
 	self
 		constraintsDo: [ :c | 
 			c vertical exact: 21.
@@ -23,10 +23,9 @@ GtRrJobNotificationSummary >> initialize [
 	self geometry: (BlRoundedRectangleGeometry cornerRadius: 4).
 	self padding: (BlInsets left: 5 right: 5).
 	self background: Color white.
-	
+
 	self
 		addChild: (notStarted := BrLabel new
-					aptitude: BrGlamorousLabelAptitude;
 					beSmallSize;
 					hFitContent;
 					vExact: 15;
@@ -35,7 +34,6 @@ GtRrJobNotificationSummary >> initialize [
 					geometry: (BlRoundedRectangleGeometry cornerRadius: 4);
 					text: '0');
 		addChild: (failed := BrLabel new
-					aptitude: BrGlamorousLabelAptitude;
 					beSmallSize;
 					hFitContent;
 					vExact: 15;
@@ -46,7 +44,6 @@ GtRrJobNotificationSummary >> initialize [
 					visibility: BlVisibility gone;
 					text: '0');
 		addChild: (successful := BrLabel new
-					aptitude: BrGlamorousLabelAptitude;
 					beSmallSize;
 					hFitContent;
 					vExact: 15;

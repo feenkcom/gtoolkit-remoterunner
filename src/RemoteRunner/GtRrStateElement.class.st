@@ -40,19 +40,14 @@ GtRrStateElement >> initialize [
 		alignCenterLeft.
 
 	icon := GtPharoTestCaseUtility newColoredIcon: color.
-	label := BrLabel new
-			aptitude: BrGlamorousLabelAptitude;
-			text: name , ':'.
+	label := BrLabel new text: name , ':'.
 
-	amount := BrLabel new
-			aptitude: BrGlamorousLabelAptitude;
-			text: elements size asString.
+	amount := BrLabel new text: elements size asString.
 
 	self
-		addChildren: {
-			icon.
-			label.
-			amount}.
+		addChildren: {icon.
+				label.
+				amount}.
 
 	self registerOnClick
 ]
