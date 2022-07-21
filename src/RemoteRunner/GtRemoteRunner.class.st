@@ -11,12 +11,11 @@ Features of the system (mostly not yet implemented) include:
 
 - Handling of the scenarios described above.
 - Support for running tests / examples across multiple platforms.
-  - Initially a platform is an OS / hardware combination, but as it is just a name, it can be any set of desired attributes.
-- If the current job has any failures or errors the next job can be started prior to the current job completing, maximising resource (worker) usage.
 - Timeouts on:
   - Tasks
   - Workers
   - Jobs
+  
 ### Main Components
 
 The main components of the system are:
