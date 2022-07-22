@@ -43,6 +43,16 @@ GtRrManagerStartupAndShutdown >> shutdown [
 ]
 
 { #category : #'startup - shutdown' }
+GtRrManagerStartupAndShutdown >> startInImageWorker [
+	"Start a worker in the same image as the runner"
+
+	inImageWorker := GtRrInImageWorker new
+		remoteRunner: remoteRunner;
+		start.
+
+]
+
+{ #category : #'startup - shutdown' }
 GtRrManagerStartupAndShutdown >> startup [ 
 	"Perform any actions associated with starting the RemoteRunner:
 	- Start the PharoLinkWorkerServer
@@ -57,8 +67,5 @@ GtRrManagerStartupAndShutdown >> startup [
 		setCloseOnExec: true;
 		yourself.
 	server globals at: #GtAssignedRemoteRunner put: remoteRunner.
-	"inImageWorker := GtRrInImageWorker new
-		remoteRunner: remoteRunner;
-		start."
 	remoteRunner server: server.
 ]
