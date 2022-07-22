@@ -92,14 +92,6 @@ PlpoGtRrTasksJob >> successfulExamplesCount [
 	^ self proxyPerform: #successfulExamplesCount
 ]
 
-{ #category : #accessing }
-PlpoGtRrTasksJob >> tasks [
-
-	^ self newCommandFactory 
-		<< 'tasks asArray';
-		sendAndWait.
-]
-
 { #category : #'accessing - examples' }
 PlpoGtRrTasksJob >> totalExamplesCount [
 
