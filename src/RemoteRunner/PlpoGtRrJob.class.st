@@ -58,6 +58,7 @@ PlpoGtRrJob >> results [
 	Leave the return type as a proxy object as the size may be large."
 
 	^ self newCommandFactory 
+		setByValue;
 		<< 'results asArray';
 		sendAndWait.
 ]
@@ -82,6 +83,15 @@ PlpoGtRrJob >> showProgressNotification [
 PlpoGtRrJob >> state [
 	
 	^ self proxyPerform: #state
+]
+
+{ #category : #accessing }
+PlpoGtRrJob >> tasks [
+
+	^ self newCommandFactory 
+		setByValue;
+		<< 'self tasks asArray';
+		sendAndWait.
 ]
 
 { #category : #'announcer - subscription' }
