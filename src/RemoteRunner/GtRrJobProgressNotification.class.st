@@ -42,7 +42,7 @@ GtRrJobProgressNotification >> constructStates [
 		GtRrDataGroupState new
 			name: 'All';
 			color: Color transparent;
-			items: self job allTasks.
+			items: self job tasks.
 		GtRrDataGroupState new
 			name: 'Success';
 			color: Color lightGreen;
