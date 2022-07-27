@@ -76,7 +76,7 @@ PlpoGtRrTasksJob >> notExecutedExamples [
 
 { #category : #notifications }
 PlpoGtRrTasksJob >> showExamplesProgressNotification [
-	"Open a global notification showing the progress of the receiver assuming all tasks are exmples / test related.
+	"Open a global notification showing the progress of the receiver assuming all tasks are exemples / test related.
 	This method is explicitly added to the proxy object, so that the notification will open on the actual proxy."
 
 	^ GtRrExamplesProgressNotification job: self.
