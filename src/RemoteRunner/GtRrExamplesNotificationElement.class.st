@@ -22,30 +22,31 @@ GtRrExamplesNotificationElement >> allTasks [
 { #category : #accessing }
 GtRrExamplesNotificationElement >> constructStates [
 	self jobDo: [ :aJob |
-		^ {GtRrExamplesStateElement
-			name: 'All'
-			color: Color transparent
-			elements: self allTasks.
-		GtRrExamplesStateElement
-			name: 'Success'
-			color: Color lightGreen
-			elements: aJob successfulExamples.
-		GtRrExamplesStateElement
-			name: 'Skipped'
-			color: Color veryVeryLightGray
-			elements: aJob skippedExamples.
-		GtRrExamplesStateElement
-			name: 'Failure'
-			color: Color lightOrange
-			elements: aJob failedExamples.
-		GtRrExamplesStateElement
-			name: 'Error'
-			color: Color red
-			elements: aJob erroredExamples.
-		GtRrExamplesStateElement
-			name: 'Not executed'
-			color: Color veryVeryLightGray
-			elements: self notExecutedTasks} ].
+		^ {
+			GtRrDataGroupState new
+				name: 'All';
+				color: Color transparent;
+				items: self allTasks.
+			GtRrDataGroupState new
+				name: 'Success';
+				color: Color lightGreen;
+				items: aJob successfulExamples.
+			GtRrDataGroupState new
+				name: 'Skipped';
+				color: Color veryVeryLightGray;
+				items: aJob skippedExamples.
+			GtRrDataGroupState new
+				name: 'Failure';
+				color: Color lightOrange;
+				items: aJob failedExamples.
+			GtRrDataGroupState new
+				name: 'Error';
+				color: Color red;
+				items: aJob erroredExamples.
+			GtRrDataGroupState new
+				name: 'Not executed';
+				color: Color veryVeryLightGray;
+				items: self notExecutedTasks} ].
 			
 	^ #()
 ]

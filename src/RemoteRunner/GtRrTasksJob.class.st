@@ -1,5 +1,5 @@
 "
-GtRrTasksJob is a simple job that is given a list of tasks to execute.
+{{gtClass:GtRrTasksJob}} is a simple job that is given a list of tasks to execute.
 "
 Class {
 	#name : #GtRrTasksJob,
