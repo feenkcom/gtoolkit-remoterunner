@@ -8,8 +8,8 @@ Class {
 GtRrExamplesProgressNotification >> elementClass [
 	"Return a class that when instantiated displayes the notification to user (as a widget)"
 	<return: #GtNotificationEventElement>
-
-	^ GtRrExamplesNotificationElement
+	
+	^ GtRrJobNotificationElement 
 ]
 
 { #category : #accessing }

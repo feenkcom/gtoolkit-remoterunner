@@ -5,10 +5,25 @@ Class {
 		'name',
 		'color',
 		'items',
-		'itemCount'
+		'itemCount',
+		'progressNotification'
 	],
 	#category : #'RemoteRunner-UI'
 }
+
+{ #category : #accessing }
+GtRrDataGroupState class >> forNotification: aNotification [
+	^ self new
+		progressNotification:  aNotification
+]
+
+{ #category : #callbacks }
+GtRrDataGroupState >> actOnClickFrom: anElement [
+	progressNotification 
+		ifNil: [ self defaultActOnClickFrom: anElement ]
+		ifNotNil: [ :aNotification |
+			aNotification spawnState:  self fromSource: anElement ]
+]
 
 { #category : #accessing }
 GtRrDataGroupState >> color [
@@ -20,6 +35,14 @@ GtRrDataGroupState >> color [
 GtRrDataGroupState >> color: anObject [
 
 	color := anObject
+]
+
+{ #category : #callbacks }
+GtRrDataGroupState >> defaultActOnClickFrom: anElement [ 
+	GtInspectorTool
+		openWrappedOn: self  items
+		title: self name
+		from: anElement
 ]
 
 { #category : #accessing }
@@ -58,4 +81,9 @@ GtRrDataGroupState >> name [
 GtRrDataGroupState >> name: anObject [
 
 	name := anObject
+]
+
+{ #category : #accessing }
+GtRrDataGroupState >> progressNotification: aNotifications [
+	progressNotification := aNotifications
 ]

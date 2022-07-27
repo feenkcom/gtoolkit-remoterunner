@@ -15,10 +15,7 @@ GtRrDataGroupStateElement class >> forState: aState [
 
 { #category : #callbacks }
 GtRrDataGroupStateElement >> actOnClickEvent [
-	GtInspectorTool
-		openWrappedOn: self state items
-		title: self state name
-		from: self
+	self state actOnClickFrom: self
 ]
 
 { #category : #initialization }

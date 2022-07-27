@@ -8,30 +8,30 @@ Class {
 GtRrChecksJobProgressNotification >> constructStates [
 	
 	^ {
-		GtRrDataGroupState new
+		(GtRrDataGroupState forNotification: self)
 			name: 'All';
 			color: Color transparent;
 			items: self job allExamples.
-		GtRrDataGroupState new
+		(GtRrDataGroupState forNotification: self)
 			name: 'Success';
 			color: Color lightGreen;
 			items: self job successfulExamples.
-		GtRrDataGroupState new
+		(GtRrDataGroupState forNotification: self)
 			name: 'Skipped';
 			color: Color veryVeryLightGray;
 			items: self job skippedExamples.
-		GtRrDataGroupState new
+		(GtRrDataGroupState forNotification: self)
 			name: 'Failure';
 			color: Color lightOrange;
 			items: self job failedExamples.
-		GtRrDataGroupState new
+		(GtRrDataGroupState forNotification: self)
 			name: 'Error';
 			color: Color red;
 			items: self job erroredExamples.
-		GtRrDataGroupState new
+		(GtRrDataGroupState forNotification: self)
 			name: 'Not executed';
 			color: Color veryVeryLightGray;
-		items: self job notExecutedExamples} 
+			items: self job notExecutedExamples} 
 ]
 
 { #category : #accessing }

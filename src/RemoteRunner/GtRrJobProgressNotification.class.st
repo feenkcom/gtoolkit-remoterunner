@@ -111,6 +111,14 @@ GtRrJobProgressNotification >> setJob: aGtRrJob [
 	job := aGtRrJob 
 ]
 
+{ #category : #callbacks }
+GtRrJobProgressNotification >> spawnState: aGroupState fromSource: anElement [
+	GtInspectorTool
+		openWrappedOn: aGroupState  items
+		title: aGroupState name
+		from: anElement
+]
+
 { #category : #accessing }
 GtRrJobProgressNotification >> summaryClass [
 	"Return a class that when instantiated displays the notification summary to the user"
