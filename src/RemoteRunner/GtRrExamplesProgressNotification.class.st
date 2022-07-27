@@ -1,6 +1,6 @@
 Class {
 	#name : #GtRrExamplesProgressNotification,
-	#superclass : #GtRrJobProgressNotification,
+	#superclass : #GtRrChecksJobProgressNotification,
 	#category : #'RemoteRunner-UI'
 }
 

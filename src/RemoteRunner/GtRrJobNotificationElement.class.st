@@ -22,11 +22,6 @@ Class {
 	#category : #'RemoteRunner-UI'
 }
 
-{ #category : #accessing }
-GtRrJobNotificationElement >> allTasks [
-	^ self currentJob tasks
-]
-
 { #category : #'private - accessing' }
 GtRrJobNotificationElement >> borderElement [
 	<return: #GtNotificationBorderElement>
@@ -101,24 +96,8 @@ GtRrJobNotificationElement >> constructStateElements [
 
 { #category : #accessing }
 GtRrJobNotificationElement >> constructStates [
-	self jobDo: [ :aJob |
-		^ {
-			GtRrDataGroupState new
-				name: 'All';
-				color: Color transparent;
-				items: self allTasks.
-			GtRrDataGroupState new
-				name: 'Success';
-				color: Color lightGreen;
-				items: (aJob results reject: #hasErrors).
-			GtRrDataGroupState new
-				name: 'Failure';
-				color: Color red;
-				items: aJob resultsWithErrors.
-			GtRrDataGroupState new
-				name: 'Not executed';
-				color: Color veryVeryLightGray;
-				items: self notExecutedTasks} ].
+	self notificationDo: [ :aNotification |
+		^ aNotification constructStates ].
 	^ #()
 ]
 
@@ -187,29 +166,11 @@ GtRrJobNotificationElement >> jobDo: aBlock [
 	self notificationDo: [ :anEvent | anEvent job ifNotNil: aBlock ]
 ]
 
-{ #category : #'api - accessing' }
-GtRrJobNotificationElement >> message [
-
-	self currentJob ifNil: [ ^ '<no job>' ].
-	^ String streamContents: [ :stream |
-		stream
-			<< 'Remain: ';
-			print: (self currentJob taskCount - self currentJob successfulCount - self currentJob errorCount);
-			<< ', Done: ';
-			print: self currentJob successfulCount;
-			<< ', Failed: ';
-			print: self currentJob errorCount ]
-]
-
 { #category : #'private - accessing' }
 GtRrJobNotificationElement >> name [
-
-	^ self currentJob jobName
-]
-
-{ #category : #accessing }
-GtRrJobNotificationElement >> notExecutedTasks [
-	^ self currentJob tasks reject: #isFinished
+	self notificationDo: [ :aNotification | 
+		^ aNotification notificationLabel ].
+	^ '<missing job>'
 ]
 
 { #category : #accessing }
@@ -247,13 +208,8 @@ GtRrJobNotificationElement >> requestUpdate [
 
 { #category : #private }
 GtRrJobNotificationElement >> runJobAgain [
-	"Create a copy of the receiver's job and run it with progress notifications"
-	| jobCopy |
-
-	jobCopy := self currentJob copy.
-	jobCopy showProgressNotification.
-	
-	GtRemoteRunner default submitJob: jobCopy.
+	self notificationDo: [ :aNotification |
+		aNotification runJobAgain ]
 ]
 
 { #category : #'private - subscriptions' }
