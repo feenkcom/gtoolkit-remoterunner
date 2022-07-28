@@ -1,5 +1,5 @@
 "
-GtRrTasksJob is a simple job that is given a list of tasks to execute.
+{{gtClass:GtRrTasksJob}} is a simple job that is given a list of tasks to execute.
 "
 Class {
 	#name : #GtRrTasksJob,
@@ -97,6 +97,13 @@ GtRrTasksJob >> printOn: aStream [
 		[ aStream << ' with errors' ].
 	aStream
 		nextPut: $).
+]
+
+{ #category : #ui }
+GtRrTasksJob >> showExamplesProgressNotification [
+	"Open a global notification showing the progress of the receiver assuming all tasks are exemples / test related"
+
+	^ GtRrExamplesProgressNotification job: self.
 ]
 
 { #category : #'accessing - examples' }

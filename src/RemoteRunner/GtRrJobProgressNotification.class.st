@@ -1,5 +1,5 @@
 "
-GtRrJobProgressNotification is currently a Proof-of-Concept for providing a notification of job execution progress.
+{{gtClass:GtRrJobProgressNotification}} is currently a Proof-of-Concept for providing a notification of job execution progress.
 
 The notification must be manually started at the moment, e.g.:
 
@@ -37,6 +37,27 @@ GtRrJobProgressNotification class >> job: aGtRrJob [
 ]
 
 { #category : #accessing }
+GtRrJobProgressNotification >> constructStates [
+	^ {
+		GtRrDataGroupState new
+			name: 'All';
+			color: Color transparent;
+			items: self job tasks.
+		GtRrDataGroupState new
+			name: 'Success';
+			color: Color lightGreen;
+			items: (self job results reject: #hasErrors).
+		GtRrDataGroupState new
+			name: 'Failure';
+			color: Color red;
+			items: self job resultsWithErrors.
+		GtRrDataGroupState new
+			name: 'Not executed';
+			color: Color veryVeryLightGray;
+			items: (self job tasks reject: #isFinished) }
+]
+
+{ #category : #accessing }
 GtRrJobProgressNotification >> elementClass [
 	"Return a class that when instantiated displayes the notification to user (as a widget)"
 	<return: #GtNotificationEventElement>
@@ -58,6 +79,11 @@ GtRrJobProgressNotification >> job: aGtRrJob [
 	self registerNotifications.
 ]
 
+{ #category : #accessing }
+GtRrJobProgressNotification >> notificationLabel [
+	^ self job jobName
+]
+
 { #category : #private }
 GtRrJobProgressNotification >> registerNotifications [
 	"A different approach would be to show the notification using the UI Manager"
@@ -66,12 +92,31 @@ GtRrJobProgressNotification >> registerNotifications [
 		world showNotification: self ].
 ]
 
+{ #category : #accessing }
+GtRrJobProgressNotification >> runJobAgain [
+	"Create a copy of the receiver's job and run it with progress notifications"
+	| jobCopy |
+
+	jobCopy := self job copy.
+	jobCopy showProgressNotification.
+	
+	GtRemoteRunner default submitJob: jobCopy.
+]
+
 { #category : #private }
 GtRrJobProgressNotification >> setJob: aGtRrJob [
 	"Set the job without registering the notification.
 	For testing only"
 
 	job := aGtRrJob 
+]
+
+{ #category : #callbacks }
+GtRrJobProgressNotification >> spawnState: aGroupState fromSource: anElement [
+	GtInspectorTool
+		openWrappedOn: aGroupState  items
+		title: aGroupState name
+		from: anElement
 ]
 
 { #category : #accessing }

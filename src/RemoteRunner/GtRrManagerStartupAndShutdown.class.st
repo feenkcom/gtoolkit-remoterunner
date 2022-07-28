@@ -49,7 +49,6 @@ GtRrManagerStartupAndShutdown >> startInImageWorker [
 	inImageWorker := GtRrInImageWorker new
 		remoteRunner: remoteRunner;
 		start.
-
 ]
 
 { #category : #'startup - shutdown' }

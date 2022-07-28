@@ -15,17 +15,12 @@ Class {
 		'borderElement',
 		'infoButton',
 		'runAgainButton',
-		'statePane',
 		'isFinished',
-		'updater'
+		'updater',
+		'statesPane'
 	],
 	#category : #'RemoteRunner-UI'
 }
-
-{ #category : #accessing }
-GtRrJobNotificationElement >> allTasks [
-	^ self currentJob tasks
-]
 
 { #category : #'private - accessing' }
 GtRrJobNotificationElement >> borderElement [
@@ -52,18 +47,11 @@ GtRrJobNotificationElement >> buildNameLabel [
 ]
 
 { #category : #initialization }
-GtRrJobNotificationElement >> buildStateElement [
-	| verticalPane states |
-
-	verticalPane := BrVerticalPane new
+GtRrJobNotificationElement >> buildStatesElement [
+	^ BrVerticalPane new
 		margin: (BlInsets bottom: 5);
 		hMatchParent;
-		vFitContent.
-	states := self constructStates.
-	
-	states do: [:state | verticalPane addChild: state ].
-	
-	^ verticalPane
+		vFitContent
 ]
 
 { #category : #initialization }
@@ -97,28 +85,19 @@ GtRrJobNotificationElement >> buildToolbar [
 GtRrJobNotificationElement >> clearContent [
 	nameLabel text: '<noJob>'.
 	nameLabel removeChildNamed: #statusIcon.
-	statePane removeChildren.
+	statesPane removeChildren.
+]
+
+{ #category : #accessing }
+GtRrJobNotificationElement >> constructStateElements [
+	^ self constructStates collect: [ :aDataGroupState |
+		GtRrDataGroupStateElement forState: aDataGroupState ]
 ]
 
 { #category : #accessing }
 GtRrJobNotificationElement >> constructStates [
-	self jobDo: [ :aJob |
-		^ {GtRrStateElement
-			name: 'All'
-			color: Color transparent
-			elements: self allTasks.
-		GtRrStateElement
-			name: 'Success'
-			color: Color lightGreen
-			elements: (aJob results reject: #hasErrors).
-		GtRrStateElement
-			name: 'Failure'
-			color: Color red
-			elements: aJob resultsWithErrors.
-		GtRrStateElement
-			name: 'Not executed'
-			color: Color veryVeryLightGray
-			elements: self notExecutedTasks} ].
+	self notificationDo: [ :aNotification |
+		^ aNotification constructStates ].
 	^ #()
 ]
 
@@ -142,14 +121,14 @@ GtRrJobNotificationElement >> initialize [
 	
 	self initializeBorderElement.
 	namePane := self buildNameLabel.
-	statePane := self buildStateElement.
+	statesPane := self buildStatesElement.
 	toolbarPane := self buildToolbar.
 	
 	self addChild: self borderElement as: #border.
 	self borderElement containerDo: [ :aContainer |
 		aContainer 
 			addChild: namePane;
-			addChild: statePane;
+			addChild: statesPane;
 			addChild: toolbarPane ].
 	
 	self addAptitude: (BrLayoutResizerAptitude new
@@ -157,8 +136,8 @@ GtRrJobNotificationElement >> initialize [
 		vAnyToFitContent;
 		hInherit: self borderElement;
 		vAnyToFitContent: self borderElement;
-		hInherit: statePane;
-		vAnyToFitContent: statePane).
+		hInherit: statesPane;
+		vAnyToFitContent: statesPane).
 		
 	updater := BrElementUpdater new
 		element: self
@@ -187,29 +166,11 @@ GtRrJobNotificationElement >> jobDo: aBlock [
 	self notificationDo: [ :anEvent | anEvent job ifNotNil: aBlock ]
 ]
 
-{ #category : #'api - accessing' }
-GtRrJobNotificationElement >> message [
-
-	self currentJob ifNil: [ ^ '<no job>' ].
-	^ String streamContents: [ :stream |
-		stream
-			<< 'Remain: ';
-			print: (self currentJob taskCount - self currentJob successfulCount - self currentJob errorCount);
-			<< ', Done: ';
-			print: self currentJob successfulCount;
-			<< ', Failed: ';
-			print: self currentJob errorCount ]
-]
-
 { #category : #'private - accessing' }
 GtRrJobNotificationElement >> name [
-
-	^ self currentJob jobName
-]
-
-{ #category : #accessing }
-GtRrJobNotificationElement >> notExecutedTasks [
-	^ self currentJob tasks reject: #isFinished
+	self notificationDo: [ :aNotification | 
+		^ aNotification notificationLabel ].
+	^ '<missing job>'
 ]
 
 { #category : #accessing }
@@ -247,13 +208,8 @@ GtRrJobNotificationElement >> requestUpdate [
 
 { #category : #private }
 GtRrJobNotificationElement >> runJobAgain [
-	"Create a copy of the receiver's job and run it with progress notifications"
-	| jobCopy |
-
-	jobCopy := self currentJob copy.
-	jobCopy showProgressNotification.
-	
-	GtRemoteRunner default submitJob: jobCopy.
+	self notificationDo: [ :aNotification |
+		aNotification runJobAgain ]
 ]
 
 { #category : #'private - subscriptions' }
@@ -315,8 +271,8 @@ GtRrJobNotificationElement >> updateLabelStatusIcon [
 
 { #category : #'private - updating' }
 GtRrJobNotificationElement >> updateStates [
-	| states |
-	statePane removeChildren.
-	states := self constructStates.
-	states do: [ :state | statePane addChild: state ].
+	| stateElements |
+	statesPane removeChildren.
+	stateElements := self constructStateElements.
+	stateElements do: [ :state | statesPane addChild: state ].
 ]
