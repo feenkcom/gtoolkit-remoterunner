@@ -171,6 +171,40 @@ GtRrExamplesView >> summaryAttributes [
 ]
 
 { #category : #accessing }
+GtRrExamplesView >> summaryString [
+	"Answer a textual summary of the receiver"
+	| examples |
+
+	^ String streamContents: [ :stream |
+		stream << 'Summary'; cr; cr.
+		self summaryAttributes do: [ :attr |
+			stream
+				<< attr first;
+				tab; tab;
+				print: attr second; cr ].
+		stream cr.
+		examples := self failedExamples.
+		examples ifNotEmpty:
+			[ stream << 'Failed Examples'; cr; cr.
+			examples do: [ :example |
+				stream print: example method; cr ].
+			stream cr; cr ].
+		examples := self erroredExamples.
+		examples ifNotEmpty:
+			[ stream << 'Errored Examples'; cr; cr.
+			examples do: [ :example |
+				stream print: example method; cr ].
+			stream cr; cr ].
+		examples := self skippedExamples.
+		examples ifNotEmpty:
+			[ stream << 'Skipped Examples'; cr; cr.
+			examples do: [ :example |
+				stream print: example method; cr ].
+			stream cr; cr ].
+	]
+]
+
+{ #category : #accessing }
 GtRrExamplesView >> tasks [
 
 	^ tasks ifNil: [ tasks := job tasks ]
