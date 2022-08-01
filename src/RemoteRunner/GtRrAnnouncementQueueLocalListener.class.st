@@ -36,6 +36,26 @@ GtRrAnnouncementQueueLocalListener >> announcer [
 	^ announcer
 ]
 
+{ #category : #accessing }
+GtRrAnnouncementQueueLocalListener >> doPoll [
+	"Poll annoucements from the current announcement queue"
+	| duration count  |
+
+	duration := 1.
+	count := (self timeout ifNil: [ 10 hours]) totalSeconds // 10 + 10.
+	[ requestTermination not and: [ count > 0 and: [ terminationCondition value not ] ] ]
+		whileTrue: [ 
+			duration seconds wait.
+			self pollAndDeliverAnnouncements.
+			count := count - 1.
+			duration < 10 ifTrue: [ duration := duration + 1 ] ].
+	"Ensure there is at least one check of the completed tasks,
+	but only if termination was not requested."
+	requestTermination ifFalse: [
+		self pollAndDeliverAnnouncements ].
+	isPolling := false.
+]
+
 { #category : #initialization }
 GtRrAnnouncementQueueLocalListener >> initializeForAnnouncingProxy: aProxy [ 
 	proxy := aProxy.
@@ -106,20 +126,11 @@ GtRrAnnouncementQueueLocalListener >> startPoll [
 	requestTermination := false.
 	
 	[
-		| duration count  |
-		duration := 1.
-		count := (self timeout ifNil: [ 10 hours]) totalSeconds // 10 + 10.
-		[ requestTermination not and: [ count > 0 and: [ terminationCondition value not ] ] ]
-			whileTrue: [ 
-				duration seconds wait.
-				self pollAndDeliverAnnouncements.
-				count := count - 1.
-				duration < 10 ifTrue: [ duration := duration + 1 ] ].
-		"Ensure there is at least one check of the completed tasks,
-		but only if termination was not requested."
-		requestTermination ifFalse: [
-			self pollAndDeliverAnnouncements ].
-		isPolling := false.
+		[ self doPoll ]
+			on: LanguageLinkServerNotRunningError
+			do: [ :ex |
+				isPolling := false.
+				requestTermination := true ].
 	]
 		forkAt: Processor userBackgroundPriority
 		named: (processLabel ifNil: [ 'Poll for Announcements' ])
