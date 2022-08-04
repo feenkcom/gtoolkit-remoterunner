@@ -11,6 +11,13 @@ Class {
 	#category : #'RemoteRunner-UI'
 }
 
+{ #category : #accessing }
+GtRrExamplesView >> allExamples [
+
+	^ self tasks flatCollect: [ :task |
+			task allExamples ].
+]
+
 { #category : #'accessing - dynamic' }
 GtRrExamplesView >> erroredExamples [
 
@@ -156,13 +163,15 @@ GtRrExamplesView >> successfulExamples [
 { #category : #ui }
 GtRrExamplesView >> summaryAttributes [
 
-	^ Array streamContents: [ :stream | | executed successful failed errored skipped |
+	^ Array streamContents: [ :stream | | all executed successful failed errored skipped |
+		all := self allExamples.
 		executed := self executedExamples.
 		errored := self erroredExamples.
 		failed := self failedExamples.
 		skipped := self skippedExamples.
 		successful := self successfulExamples.
 		stream 
+			nextPut: { #All. all size. all. };
 			nextPut: { #Executed. executed size. executed. };
 			nextPut: { #Successful. successful size. successful. };
 			nextPut: { #Failed. failed size. failed. };
