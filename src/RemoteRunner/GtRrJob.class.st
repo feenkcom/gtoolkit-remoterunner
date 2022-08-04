@@ -515,19 +515,6 @@ GtRrJob >> taskExecutionTime [
 ]
 
 { #category : #accessing }
-GtRrJob >> taskTimeout [
-	<return: #Duration>
-
-	^ taskTimeout
-]
-
-{ #category : #accessing }
-GtRrJob >> taskTimeout: aDuration [
-
-	taskTimeout := aDuration
-]
-
-{ #category : #accessing }
 GtRrJob >> tasks [
 	"Answer the collection of tasks to be executed"
 	<return: #SequenceableCollection>
@@ -542,6 +529,19 @@ GtRrJob >> tasksFor: aGtRemoteRunner [
 	Such subclasses can override this method."
 
 	^ self tasks.
+]
+
+{ #category : #accessing }
+GtRrJob >> taskTimeout [
+	<return: #Duration>
+
+	^ taskTimeout
+]
+
+{ #category : #accessing }
+GtRrJob >> taskTimeout: aDuration [
+
+	taskTimeout := aDuration
 ]
 
 { #category : #'announcer - subscription' }

@@ -612,28 +612,6 @@ GtRemoteRunner >> privateTaskFailed: aTaskContextId with: anGtRrTaskErrorDetails
 	self checkJobCompleted: taskContext.
 ]
 
-{ #category : #'api - worker' }
-GtRemoteRunner >> registerWorkerWithDetails: aDictionary [
-	"Register the supplied worker and connection details.
-	Register the connection for disconnection notification"
-	| pharoLinkServerConnection workerConnection workerId |
-
-	pharoLinkServerConnection := PharoLinkServerCurrentConnection value.
-	pharoLinkServerConnection setCloseOnExec: true.
-	workerConnection := GtRrWorkerConnection 
-		connection: pharoLinkServerConnection
-		runner: self.
-	workerConnection details: aDictionary.
-	workerId := aDictionary at: #id.
-	sharedAccess critical:
-		[ registeredWorkers at: workerId put: workerConnection ].
-	managerStartupAndShutdown registerWorker: workerConnection.
-	self announceAndLog: (GtRrWorkerRegisteredAnnouncement new
-			worker: workerConnection).
-	"Answer a PharoLink primitive so that a proxy isn't created for the runner (which is a global, anyway)"
-	^ nil
-]
-
 { #category : #accessing }
 GtRemoteRunner >> registeredWorkerCount [
 
@@ -654,6 +632,28 @@ GtRemoteRunner >> registeredWorkersDo: aBlock [
 	Must be called within sharedAccess."
 
 	registeredWorkers do: aBlock
+]
+
+{ #category : #'api - worker' }
+GtRemoteRunner >> registerWorkerWithDetails: aDictionary [
+	"Register the supplied worker and connection details.
+	Register the connection for disconnection notification"
+	| pharoLinkServerConnection workerConnection workerId |
+
+	pharoLinkServerConnection := PharoLinkServerCurrentConnection value.
+	pharoLinkServerConnection setCloseOnExec: true.
+	workerConnection := GtRrWorkerConnection 
+		connection: pharoLinkServerConnection
+		runner: self.
+	workerConnection details: aDictionary.
+	workerId := aDictionary at: #id.
+	sharedAccess critical:
+		[ registeredWorkers at: workerId put: workerConnection ].
+	managerStartupAndShutdown registerWorker: workerConnection.
+	self announceAndLog: (GtRrWorkerRegisteredAnnouncement new
+			worker: workerConnection).
+	"Answer a PharoLink primitive so that a proxy isn't created for the runner (which is a global, anyway)"
+	^ nil
 ]
 
 { #category : #'private - accessing' }
