@@ -8,6 +8,11 @@ Class {
 }
 
 { #category : #accessing }
+GtRrWorkerTraceAnnouncement >> emit [
+	"Disable as they are mostly noise unless there is something really wrong."
+]
+
+{ #category : #accessing }
 GtRrWorkerTraceAnnouncement >> message [
 
 	^ message
