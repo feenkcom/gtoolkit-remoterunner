@@ -12,7 +12,7 @@ GtRrExamplesNotificationSummary >> updateSummaryContent [
 	notStartedCounter := 0.
 	failedCounter := 0.
 	
-	self notifications
+	[ self notifications
 		do: [ :aNotification | 
 			| currentJob |
 			currentJob := aNotification job.
@@ -22,8 +22,13 @@ GtRrExamplesNotificationSummary >> updateSummaryContent [
 				- currentJob executedExamplesCount.
 			failedCounter := failedCounter 
 				+ currentJob failedExamplesCount
-				+ currentJob erroredExamplesCount ].
-				
+				+ currentJob erroredExamplesCount ] ]
+		on: LanguageLinkServerNotRunningError
+		do: [ :ex |
+			successfulCounter := 0.
+			failedCounter := 0.
+			notStartedCounter := 0 ].
+
 	failed text: failedCounter asString.
 	successful text: successfulCounter asString.
 	notStarted text: notStartedCounter asString.
