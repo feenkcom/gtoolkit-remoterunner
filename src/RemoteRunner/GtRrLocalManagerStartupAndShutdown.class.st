@@ -90,18 +90,6 @@ GtRrLocalManagerStartupAndShutdown >> gtSummaryFor: aView [
 		  actionUpdateButton
 ]
 
-{ #category : #initialization }
-GtRrLocalManagerStartupAndShutdown >> initialize [
-
-	super initialize.
-	inMemoryLog := false.
-	workerIndex := 0.
-	autoRestart := true.
-	workerCountCalculator := GtRrResourceWorkerCountCalculator new.
-	processes := OrderedCollection new.
-	watchdogSemaphore := Semaphore new.
-]
-
 { #category : #accessing }
 GtRrLocalManagerStartupAndShutdown >> inMemoryLog [
 	"Answer a boolean indicating whether worker output should be stored in memory or not"
@@ -113,6 +101,18 @@ GtRrLocalManagerStartupAndShutdown >> inMemoryLog [
 GtRrLocalManagerStartupAndShutdown >> inMemoryLog: aBoolean [
 
 	inMemoryLog := aBoolean
+]
+
+{ #category : #initialization }
+GtRrLocalManagerStartupAndShutdown >> initialize [
+
+	super initialize.
+	inMemoryLog := false.
+	workerIndex := 0.
+	autoRestart := true.
+	workerCountCalculator := GtRrResourceWorkerCountCalculator new.
+	processes := OrderedCollection new.
+	watchdogSemaphore := Semaphore new.
 ]
 
 { #category : #testing }
@@ -249,25 +249,6 @@ GtRrLocalManagerStartupAndShutdown >> signalWatchdog [
 	watchdogSemaphore signal.
 ]
 
-{ #category : #'startup - shutdown' }
-GtRrLocalManagerStartupAndShutdown >> startup [ 
-	| isWindows |
-
-	self assert: processes isEmpty.
-	self assert: self isRunning not.
-	super startup.
-
-	isWindows := OSPlatform current isWin32.
-	self poolSize timesRepeat: 
-		[ processes add: self newWorkerLocalProcess.
-		"Pharo writes a number of files during startup.
-		Windows locks these files causing the workers to fail during startup,
-		give each worker a fighting chance to get going."
-		isWindows ifTrue: [ 1 second wait ] ].
-	self startWatchDog.
-
-]
-
 { #category : #private }
 GtRrLocalManagerStartupAndShutdown >> startWatchDog [
 
@@ -285,6 +266,25 @@ GtRrLocalManagerStartupAndShutdown >> startWatchDog [
 				newWorker: process) ].
 		 ] ] forkNamed:
 			'GtRemoteRunner local watch dog'
+]
+
+{ #category : #'startup - shutdown' }
+GtRrLocalManagerStartupAndShutdown >> startup [ 
+	| isWindows |
+
+	self assert: processes isEmpty.
+	self assert: self isRunning not.
+	super startup.
+
+	isWindows := OSPlatform current isWin32.
+	self poolSize timesRepeat: 
+		[ processes add: self newWorkerLocalProcess.
+		"Pharo writes a number of files during startup.
+		Windows locks these files causing the workers to fail during startup,
+		give each worker a fighting chance to get going."
+		isWindows ifTrue: [ 1 second wait ] ].
+	self startWatchDog.
+
 ]
 
 { #category : #ui }
