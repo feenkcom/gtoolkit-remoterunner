@@ -48,11 +48,17 @@ PlpoGtRemoteRunner >> state [
 
 { #category : #accessing }
 PlpoGtRemoteRunner >> stop [
-	"Make a best attempt at stopping the remote, but don't raise an exception."
+	"We should be telling the remote to shut down, however in some circumstances it is terminating the listen process and shutting down existing connections, but not getting to the point of shutting down the server socket.
+	Also, we should stop the PharoLinkApplication from listening for incoming messages since the connection is about to be closed.
+	For now just shut down the application.
+	TODO"
 
-	[ self proxyPerform: #stop ]
-		on: Error
-		do: [ :ex | ]
+	application stop.
+	"[ self newCommandFactory
+		<< 'self stop';
+		send ]
+			on: Error
+			do: [ :ex | ]"
 ]
 
 { #category : #'api - jobs' }
