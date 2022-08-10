@@ -149,7 +149,7 @@ GtRemoteRunner class >> setDefaultHeadlessOnPort: aNumberOrString codeSync: aBoo
 	settings := LanguageLinkSettings pharoDefaultSettings.
 	settings
 		serverProcessClass: LanguageLinkManualProcess;
-		serverSocketAddress: (LanguageLinkSocketAddress from: aNumberOrString).
+		serverSocketAddress: (LanguageLinkSocketAddress from: aNumberOrString asString).
 	plApplication := PharoLinkApplication newWith: settings.
 	plApplication start.
 	runner := plApplication newCommandFactory
