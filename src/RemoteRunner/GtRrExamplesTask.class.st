@@ -14,6 +14,11 @@ GtRrExamplesTask >> acceptVisitor: aVisitor [
 ]
 
 { #category : #accessing }
+GtRrExamplesTask >> allExamples [
+	^ self group examples
+]
+
+{ #category : #accessing }
 GtRrExamplesTask >> allMethods [
 	^ self group examples collect: #method
 ]
