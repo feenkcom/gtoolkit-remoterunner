@@ -108,6 +108,18 @@ GtRrTask >> getValue [
 	^ self	
 ]
 
+{ #category : #accessing }
+GtRrTask >> gtConstraintFor: aView [
+	<gtView>
+	
+	constraint ifNil: [ ^ aView empty ].
+	^ aView forward
+		title: 'Constraint';
+		priority: 40;
+		object: constraint;
+		view: #gtLiveFor:
+]
+
 { #category : #ui }
 GtRrTask >> gtResultFor: aView [
 	<gtView>
