@@ -388,6 +388,11 @@ GtRrWorker >> start [
 
 { #category : #stepping }
 GtRrWorker >> stepService [
+	"On each iteration:
+	- send any results (while requesting the next task)
+	- get the next task
+	- evaluate the task
+	- queue the result (success or failure)"
 	| task semaphore |
 
 	semaphore := Semaphore new.
