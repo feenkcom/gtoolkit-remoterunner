@@ -42,7 +42,8 @@ GtRrCodeSync >> initialize [
 { #category : #accessing }
 GtRrCodeSync >> onEntryAdded: anEntryAddedEvent [
 
-	anEntryAddedEvent entry content isCodeChange ifFalse: [ "only capture code changes" 
+	anEntryAddedEvent entry content isCodeChange ifFalse: 
+		[ "only capture code changes" 
 		^ self ].
 	events nextPut: anEntryAddedEvent entry content.
 	flusher schedule: [ self flush ]
