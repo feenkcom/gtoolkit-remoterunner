@@ -11,6 +11,12 @@ GtRrSUnitTask >> acceptVisitor: aVisitor [
 ]
 
 { #category : #accessing }
+GtRrSUnitTask >> allExamples [
+
+	^ self testSuite tests.
+]
+
+{ #category : #accessing }
 GtRrSUnitTask >> allMethods [
 	^ self testSuite tests
 		ifNil: [ {} ]
@@ -35,6 +41,12 @@ GtRrSUnitTask >> erroredExamples [
 			pharoLinkTestCaseAnnouncement shortName = #error or:
 			[ pharoLinkTestCaseAnnouncement shortName = #warning ] ]
 
+]
+
+{ #category : #accessing }
+GtRrSUnitTask >> examples [
+
+	^ self allExamples
 ]
 
 { #category : #'accessing - dynamic' }

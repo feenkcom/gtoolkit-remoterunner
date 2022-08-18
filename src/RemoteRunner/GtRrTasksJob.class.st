@@ -99,13 +99,6 @@ GtRrTasksJob >> printOn: aStream [
 		nextPut: $).
 ]
 
-{ #category : #ui }
-GtRrTasksJob >> showExamplesProgressNotification [
-	"Open a global notification showing the progress of the receiver assuming all tasks are exemples / test related"
-
-	^ GtRrExamplesProgressNotification job: self.
-]
-
 { #category : #'accessing - examples' }
 GtRrTasksJob >> skippedExamples [
 	^ tasks flatCollect: [ :aTask | aTask skippedExamples ]
