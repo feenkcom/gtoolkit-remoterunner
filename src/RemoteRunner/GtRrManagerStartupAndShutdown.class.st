@@ -55,7 +55,6 @@ GtRrManagerStartupAndShutdown >> startInImageWorker [
 GtRrManagerStartupAndShutdown >> startup [ 
 	"Perform any actions associated with starting the RemoteRunner:
 	- Start the PharoLinkWorkerServer
-	- Create an in-image worker
 	Subclasses can perform additional actions"
 	| server |
 
