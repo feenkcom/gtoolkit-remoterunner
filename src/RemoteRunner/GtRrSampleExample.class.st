@@ -27,7 +27,7 @@ GtRrSampleExample >> failExample [
 { #category : #accessing }
 GtRrSampleExample >> passExample [
 	<gtExample>
-	<noTest>
+	"<noTest>"
 
 	self assert: true.
 

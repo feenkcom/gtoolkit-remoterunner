@@ -249,7 +249,9 @@ GtRrWorkerConnection >> remoteRunner: anObject [
 { #category : #accessing }
 GtRrWorkerConnection >> removeObserver [
 
-	observerProcess ifNotNil: #terminate.
+	[ observerProcess ifNotNil: #terminate ]
+		on: ProcessAlreadyTerminating
+		do: [ :ex | "nothing" ].
 	observerProcess := nil.
 	observer := nil.
 	^ true
