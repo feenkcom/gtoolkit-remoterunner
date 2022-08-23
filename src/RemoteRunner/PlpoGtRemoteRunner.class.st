@@ -1,9 +1,8 @@
 Class {
 	#name : #PlpoGtRemoteRunner,
 	#superclass : #PharoLinkProxyObject,
-	#instVars : [
-		'announcementsQueue'
-	],
+	#traits : 'TPlpoGtWithAnnouncementsQueueListener',
+	#classTraits : 'TPlpoGtWithAnnouncementsQueueListener classTrait',
 	#category : #'RemoteRunner-Runner'
 }
 
@@ -13,10 +12,32 @@ PlpoGtRemoteRunner class >> remoteClassName [
 	^ #GtRemoteRunner
 ]
 
+{ #category : #accessing }
+PlpoGtRemoteRunner >> actOnProxyObjectCreated [
+	super actOnProxyObjectCreated.
+	
+	"We can start receiving announcements right after the proxy object has been fully initialized.
+	The code that creates the remote job is responsible with attaching the queue before any relevant action that can trigger announcements is executed."
+	self initializeAnnouncementsQueueListener.
+]
+
+{ #category : #'announcements - queue' }
+PlpoGtRemoteRunner >> configureAnnouncementsQueueListener: aListener [
+	aListener
+		"timeout: self jobTimeout;"
+		terminationCondition: [ self isRunning not ]
+]
+
 { #category : #testing }
 PlpoGtRemoteRunner >> isIdle [
 
 	^ self proxyPerform: #isIdle.
+]
+
+{ #category : #testing }
+PlpoGtRemoteRunner >> isRunning [
+
+	^ self proxyPerform: #isRunning.
 ]
 
 { #category : #accessing }
@@ -74,4 +95,17 @@ PlpoGtRemoteRunner >> submitJob: aGtRrJob [
 	jobProxy startAnnouncementsListener.
 	
 	^ jobProxy
+]
+
+{ #category : #accessing }
+PlpoGtRemoteRunner >> unsubscribe: anObject [
+	"Unsubscribe all subscriptions of anObject from the receiver"
+	
+	^ self announcer unsubscribe: anObject
+]
+
+{ #category : #accessing }
+PlpoGtRemoteRunner >> when: anAnnouncementClass send: aSelector to: anObject [
+
+		^ self announcer when: anAnnouncementClass send: aSelector to: anObject
 ]

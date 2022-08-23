@@ -49,6 +49,8 @@ The worker images are assumed to be up to date when the Job Execution phase is r
 Class {
 	#name : #GtRemoteRunner,
 	#superclass : #Object,
+	#traits : 'TGtWithAnnouncementsQueue',
+	#classTraits : 'TGtWithAnnouncementsQueue classTrait',
 	#instVars : [
 		'port',
 		'server',
