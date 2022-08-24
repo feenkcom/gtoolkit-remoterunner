@@ -49,6 +49,8 @@ The worker images are assumed to be up to date when the Job Execution phase is r
 Class {
 	#name : #GtRemoteRunner,
 	#superclass : #Object,
+	#traits : 'TGtWithAnnouncementsQueue',
+	#classTraits : 'TGtWithAnnouncementsQueue classTrait',
 	#instVars : [
 		'port',
 		'server',
@@ -436,9 +438,7 @@ GtRemoteRunner >> initialize [
 	currentlyExecutingJobs := Dictionary new.
 	"currentlyExecutingTasks is a dictionary of GtRrTaskContext keyed by task context id"
 	currentlyExecutingTasks := Dictionary new.
-	"Make sure you REALLY know what you're doing before changing sharedAccess to a Monitor.
-	PharoLinkServer requests are handled in individual processes, so any deadlock is unlikely to be resolved by converting sharedAccess to a Monitor."
-	sharedAccess := GtMutualExclusionSemaphore forMutualExclusion.
+	sharedAccess := Monitor new.
 	"availableWorkers is a SortedCollection of GtRrFutureWorkerTask, sorted by #workerPriority.
 	The worker is represented by a GtRrWorkerConnection and is waiting on the semaphore held by the GtRrFutureWorkerTask.
 	Sort the collection ascending and remove the last item to minimise the need for repacking the collection."
