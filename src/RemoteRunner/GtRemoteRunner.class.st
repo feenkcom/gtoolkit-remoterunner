@@ -965,9 +965,10 @@ GtRemoteRunner >> unregisterWorkerId: aUidString reason: aString [
 					errorMessage: 'Worker Unregistered';
 					setTrace.
 			self privateTaskFailed: taskContext taskContextId with: errorDetails ]. ].
-	self announceAndLog: (GtRrWorkerUnregisteredAnnouncement new
-		worker: workerConnection;
-		reason: aString).
+	workerConnection ifNotNil:
+		[ self announceAndLog: (GtRrWorkerUnregisteredAnnouncement new
+			worker: workerConnection;
+			reason: aString) ].
 ]
 
 { #category : #'announcer - subscription' }
