@@ -6,7 +6,8 @@ Class {
 		'color',
 		'items',
 		'itemCount',
-		'progressNotification'
+		'progressNotification',
+		'testCaseState'
 	],
 	#category : #'RemoteRunner-UI'
 }
@@ -86,4 +87,14 @@ GtRrDataGroupState >> name: anObject [
 { #category : #accessing }
 GtRrDataGroupState >> progressNotification: aNotifications [
 	progressNotification := aNotifications
+]
+
+{ #category : #accessing }
+GtRrDataGroupState >> testCaseState [
+	^ testCaseState
+]
+
+{ #category : #accessing }
+GtRrDataGroupState >> testCaseState: aState [
+	testCaseState := aState
 ]
