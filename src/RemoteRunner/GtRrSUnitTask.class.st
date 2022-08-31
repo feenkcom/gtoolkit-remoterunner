@@ -101,8 +101,8 @@ GtRrSUnitTask >> skippedExamples [
 
 	result ifNil: [ ^ #() ].
 	^ result 
-		select: [ :pharoLinkTestCaseAnnouncement | 	pharoLinkTestCaseAnnouncement shortName = #skip ]
-
+		select: [ :pharoLinkTestCaseAnnouncement | 
+			pharoLinkTestCaseAnnouncement shortName = #skip ]
 ]
 
 { #category : #'accessing - dynamic' }

@@ -115,6 +115,13 @@ GtRrExamplesTask >> skippedExamples [
 ]
 
 { #category : #'accessing - dynamic' }
+GtRrExamplesTask >> skippedExamplesCount [
+
+	result ifNil: [ ^ 0 ].
+	^ result skippedExamplesCount
+]
+
+{ #category : #'accessing - dynamic' }
 GtRrExamplesTask >> successfulExamples [
 
 	result ifNil: [ ^ #() ].

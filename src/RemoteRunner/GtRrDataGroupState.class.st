@@ -4,9 +4,10 @@ Class {
 	#instVars : [
 		'name',
 		'color',
-		'items',
 		'itemCount',
-		'progressNotification'
+		'progressNotification',
+		'itemsComputation',
+		'cachedItems'
 	],
 	#category : #'RemoteRunner-UI'
 }
@@ -60,15 +61,28 @@ GtRrDataGroupState >> itemCount: anObject [
 { #category : #accessing }
 GtRrDataGroupState >> items [
 
-	^ items
+	^ cachedItems ifNil: [
+		cachedItems := itemsComputation value ]
 ]
 
 { #category : #accessing }
 GtRrDataGroupState >> items: aCollection [
 
-	items := aCollection.
+	cachedItems := aCollection.
 	self itemCount ifNil: [
 		self itemCount: aCollection size ]
+]
+
+{ #category : #accessing }
+GtRrDataGroupState >> itemsComputation [
+
+	^ itemsComputation
+]
+
+{ #category : #accessing }
+GtRrDataGroupState >> itemsComputation: aBlock [
+
+	itemsComputation := aBlock
 ]
 
 { #category : #accessing }

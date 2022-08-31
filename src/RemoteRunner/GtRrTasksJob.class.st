@@ -105,6 +105,11 @@ GtRrTasksJob >> skippedExamples [
 ]
 
 { #category : #'accessing - examples' }
+GtRrTasksJob >> skippedExamplesCount [  
+	^ tasks sumNumbers: [ :aTask | aTask skippedExamplesCount ]
+]
+
+{ #category : #'accessing - examples' }
 GtRrTasksJob >> successfulExamples [
 	^ tasks flatCollect: [ :aTask | aTask successfulExamples ]
 ]

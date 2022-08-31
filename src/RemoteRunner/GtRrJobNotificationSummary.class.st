@@ -2,15 +2,15 @@ Class {
 	#name : #GtRrJobNotificationSummary,
 	#superclass : #GtNotificationSummary,
 	#instVars : [
-		'notStarted',
 		'job',
-		'failed',
-		'successful'
+		'notStartedLabel',
+		'successfulLabel',
+		'failedLabel'
 	],
 	#category : #'RemoteRunner-UI'
 }
 
-{ #category : #accessing }
+{ #category : #initialization }
 GtRrJobNotificationSummary >> initialize [
 	super initialize.
 	
@@ -25,7 +25,7 @@ GtRrJobNotificationSummary >> initialize [
 	self background: Color white.
 	
 	self
-		addChild: (notStarted := BrLabel new
+		addChild: (notStartedLabel := BrLabel new
 					aptitude: BrGlamorousLabelAptitude;
 					beSmallSize;
 					hFitContent;
@@ -34,7 +34,7 @@ GtRrJobNotificationSummary >> initialize [
 					layout: BlLinearLayout horizontal alignCenter;
 					geometry: (BlRoundedRectangleGeometry cornerRadius: 4);
 					text: '0');
-		addChild: (failed := BrLabel new
+		addChild: (failedLabel := BrLabel new
 					aptitude: BrGlamorousLabelAptitude;
 					beSmallSize;
 					hFitContent;
@@ -45,7 +45,7 @@ GtRrJobNotificationSummary >> initialize [
 					geometry: (BlRoundedRectangleGeometry cornerRadius: 4);
 					visibility: BlVisibility gone;
 					text: '0');
-		addChild: (successful := BrLabel new
+		addChild: (successfulLabel := BrLabel new
 					aptitude: BrGlamorousLabelAptitude;
 					beSmallSize;
 					hFitContent;
@@ -58,22 +58,22 @@ GtRrJobNotificationSummary >> initialize [
 					text: '0')
 ]
 
-{ #category : #accessing }
+{ #category : #subscriptions }
 GtRrJobNotificationSummary >> subscribeToNotifications [
 	notifications do: [ :aNotification |
-		aNotification job
-			when: GtRrTaskAnnouncement
+		aNotification
+			when: GtNotificationDataChangedAnnouncement
 			send: #requestUpdate
 			to: self ]
 ]
 
-{ #category : #accessing }
+{ #category : #subscriptions }
 GtRrJobNotificationSummary >> unsubscribeFromNotifications [
 	notifications do: [ :aNotification | 
-		aNotification job unsubscribe: self ]
+		aNotification unsubscribe: self ]
 ]
 
-{ #category : #accessing }
+{ #category : #updating }
 GtRrJobNotificationSummary >> updateSummaryContent [
 	| successfulCounter notStartedCounter failedCounter |
 	
@@ -89,14 +89,20 @@ GtRrJobNotificationSummary >> updateSummaryContent [
 					+ (aNotification job tasks reject: #isFinished) size.
 			failedCounter := failedCounter + aNotification job resultsWithErrors size ].
 	
-	failed text: failedCounter asString.
-	successful text: successfulCounter asString.
-	notStarted text: notStartedCounter asString.
+	failedLabel text: failedCounter asString.
+	successfulLabel text: successfulCounter asString.
+	notStartedLabel text: notStartedCounter asString.
 	
-	failed
-		visibility: (failedCounter = 0 ifTrue: [ BlVisibility gone ] ifFalse: [ BlVisibility visible ]).
-	successful
-		visibility: (successfulCounter = 0 ifTrue: [ BlVisibility gone ] ifFalse: [ BlVisibility visible ]).
-	notStarted
-		visibility: (notStartedCounter = 0 ifTrue: [ BlVisibility gone ] ifFalse: [ BlVisibility visible ]).
+	failedLabel
+		visibility: (failedCounter = 0 
+			ifTrue: [ BlVisibility gone ] 
+			ifFalse: [ BlVisibility visible ]).
+	successfulLabel
+		visibility: (successfulCounter = 0 
+			ifTrue: [ BlVisibility gone ] 
+			ifFalse: [ BlVisibility visible ]).
+	notStartedLabel
+		visibility: (notStartedCounter = 0 
+			ifTrue: [ BlVisibility gone ] 
+			ifFalse: [ BlVisibility visible ]).
 ]

@@ -4,7 +4,7 @@ Class {
 	#category : #'RemoteRunner-UI'
 }
 
-{ #category : #accessing }
+{ #category : #updating }
 GtRrExamplesNotificationSummary >> updateSummaryContent [
 	| successfulCounter notStartedCounter failedCounter |
 	
@@ -12,31 +12,30 @@ GtRrExamplesNotificationSummary >> updateSummaryContent [
 	notStartedCounter := 0.
 	failedCounter := 0.
 	
-	[ self notifications
+	self notifications
 		do: [ :aNotification | 
-			| currentJob |
-			currentJob := aNotification job.
-			successfulCounter := successfulCounter + currentJob successfulExamplesCount.
+			successfulCounter := successfulCounter + aNotification successfulChecksCount.
 			notStartedCounter := notStartedCounter 
-				+ currentJob totalExamplesCount
-				- currentJob executedExamplesCount.
+				+ aNotification totalChecksCount
+				- aNotification executedChecksCount.
 			failedCounter := failedCounter 
-				+ currentJob failedExamplesCount
-				+ currentJob erroredExamplesCount ] ]
-		on: LanguageLinkServerNotRunningError
-		do: [ :ex |
-			successfulCounter := 0.
-			failedCounter := 0.
-			notStartedCounter := 0 ].
+				+ aNotification failedChecksCount
+				+ aNotification erroredChecksCount ].
 
-	failed text: failedCounter asString.
-	successful text: successfulCounter asString.
-	notStarted text: notStartedCounter asString.
+	failedLabel text: failedCounter asString.
+	successfulLabel text: successfulCounter asString.
+	notStartedLabel text: notStartedCounter asString.
 	
-	failed
-		visibility: (failedCounter = 0 ifTrue: [ BlVisibility gone ] ifFalse: [ BlVisibility visible ]).
-	successful
-		visibility: (successfulCounter = 0 ifTrue: [ BlVisibility gone ] ifFalse: [ BlVisibility visible ]).
-	notStarted
-		visibility: (notStartedCounter = 0 ifTrue: [ BlVisibility gone ] ifFalse: [ BlVisibility visible ]).
+	failedLabel
+		visibility: (failedCounter = 0 
+			ifTrue: [ BlVisibility gone ] 
+			ifFalse: [ BlVisibility visible ]).
+	successfulLabel
+		visibility: (successfulCounter = 0 
+			ifTrue: [ BlVisibility gone ] 
+			ifFalse: [ BlVisibility visible ]).
+	notStartedLabel
+		visibility: (notStartedCounter = 0 
+			ifTrue: [ BlVisibility gone ] 
+			ifFalse: [ BlVisibility visible ]).
 ]

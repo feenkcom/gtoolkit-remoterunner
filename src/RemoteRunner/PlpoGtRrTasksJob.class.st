@@ -89,6 +89,12 @@ PlpoGtRrTasksJob >> skippedExamples [
 ]
 
 { #category : #'accessing - examples' }
+PlpoGtRrTasksJob >> skippedExamplesCount [
+
+	^ self proxyPerform: #skippedExamplesCount
+]
+
+{ #category : #'accessing - examples' }
 PlpoGtRrTasksJob >> successfulExamples [
 
 	^ self proxyPerform: #successfulExamples
