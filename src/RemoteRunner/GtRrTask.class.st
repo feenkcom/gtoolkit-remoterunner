@@ -280,6 +280,8 @@ GtRrTask >> printOn: aStream [
 	super printOn: aStream.
 	aStream nextPut: $(.
 	self printSupplementalOn: aStream.
+	aStream << ', '.
+	aStream print: taskId.
 	aStream nextPut: $).
 ]
 

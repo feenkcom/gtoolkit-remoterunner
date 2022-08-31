@@ -184,7 +184,11 @@ GtRrTaskContext >> printOn: aStream [
 
 	task
 		ifNil: [ super printOn: aStream ]
-		ifNotNil: [ task printOn: aStream ]
+		ifNotNil: 
+			[ task printOn: aStream.
+			aStream
+				<< ', ';
+				print: taskContextId ]
 ]
 
 { #category : #accessing }
