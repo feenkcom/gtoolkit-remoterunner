@@ -11,6 +11,24 @@ GtRrSUnitTask >> acceptVisitor: aVisitor [
 ]
 
 { #category : #accessing }
+GtRrSUnitTask >> addEndAnnouncement: endAnnouncement to: events [ 
+	"Add the supplied announcment to the collection of events, ensuring there is only one announcment for each test.
+	An error announcement replaces an existing success announcement."
+
+	events ifEmpty:
+		[ events add: endAnnouncement ]
+	ifNotEmpty:
+		[ "endAnnouncement equality is only based on the identity of the test, not the result"
+		events last = endAnnouncement ifTrue:
+			[ events last isPassAnnouncement ifTrue:
+				[ "Replace the pass announcement with the error announcement"
+				events atLast: 1 put: endAnnouncement ] ]
+			"ifFalse: discard the second error announcement and only report the first"
+		ifFalse:
+			[ events add: endAnnouncement ] ].
+]
+
+{ #category : #accessing }
 GtRrSUnitTask >> allExamples [
 
 	^ self testSuite tests.
@@ -86,7 +104,7 @@ GtRrSUnitTask >> runSuite: suite [
 	testResult := PharoLinkTestResult new.
 	testResult announcer
 		when: PharoLinkTestCaseEndAnnouncement
-		do: [ :e | events add: e ].
+		do: [ :e | self addEndAnnouncement: e to: events ].
 	suite run: testResult.
 	^ events asArray
 ]

@@ -834,7 +834,7 @@ GtRemoteRunner >> taskDone: aTaskContextId started: startTime completed: endTime
 	| taskContext |
 
 	GtRrWorkerTraceAnnouncement new
-		message: 'taskDone:with: pre ', aTaskContextId asString;
+		message: 'taskDone: ', aTaskContextId asString, ' result: ', anObject asString;
 		emit.
 
 	sharedAccess critical: 
