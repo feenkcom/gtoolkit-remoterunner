@@ -32,15 +32,18 @@ self halt.
 			each class name -> each selector ])
 ]
 
+{ #category : #enumerating }
+GtRrSUnitTask >> count: aBlockClosure [
+
+	result ifNil: [ ^ 0 ].
+	^ result 
+		count: aBlockClosure
+]
+
 { #category : #'accessing - dynamic' }
 GtRrSUnitTask >> erroredExamples [
-
-	result ifNil: [ ^ #() ].
-	^ result 
-		select: [ :pharoLinkTestCaseAnnouncement | 
-			pharoLinkTestCaseAnnouncement shortName = #error or:
-			[ pharoLinkTestCaseAnnouncement shortName = #warning ] ]
-
+	^ self select: [ :pharoLinkTestCaseAnnouncement | 
+		self isErrorResult: pharoLinkTestCaseAnnouncement ]
 ]
 
 { #category : #accessing }
@@ -59,10 +62,14 @@ GtRrSUnitTask >> executedExamples [
 { #category : #'accessing - dynamic' }
 GtRrSUnitTask >> failedExamples [
 
-	result ifNil: [ ^ #() ].
-	^ result 
-		select: [ :pharoLinkTestCaseAnnouncement | 	pharoLinkTestCaseAnnouncement shortName = #failure ]
+	^ self select: [ :pharoLinkTestCaseAnnouncement | 
+		pharoLinkTestCaseAnnouncement isFailure ]
+]
 
+{ #category : #'accessing - dynamic' }
+GtRrSUnitTask >> isErrorResult: aPharoLinkTestCaseResult [
+	^ aPharoLinkTestCaseResult isError or: [
+		aPharoLinkTestCaseResult isWarning ]
 ]
 
 { #category : #testing }
@@ -74,7 +81,32 @@ GtRrSUnitTask >> isSUnitTask [
 
 { #category : #'accessing - dynamic' }
 GtRrSUnitTask >> isSuccessResult: aPharoLinkTestCaseResult [
-	^ #(#pass #skip) includes: aPharoLinkTestCaseResult shortName
+	^ aPharoLinkTestCaseResult isSuccess "or: [ 
+		aPharoLinkTestCaseResult isSkipped ]"
+]
+
+{ #category : #'accessing - dynamic' }
+GtRrSUnitTask >> numberOfErrors [
+	^ self count: [ :pharoLinkTestCaseAnnouncement | 
+		self isErrorResult: pharoLinkTestCaseAnnouncement ]
+]
+
+{ #category : #'accessing - dynamic' }
+GtRrSUnitTask >> numberOfFailures [
+	^ self count: [ :pharoLinkTestCaseAnnouncement | 
+		pharoLinkTestCaseAnnouncement isFailure ]
+]
+
+{ #category : #'accessing - dynamic' }
+GtRrSUnitTask >> numberOfSkipps [
+	^ self count: [ :pharoLinkTestCaseAnnouncement | 
+		pharoLinkTestCaseAnnouncement isSkipped ]
+]
+
+{ #category : #'accessing - dynamic' }
+GtRrSUnitTask >> numberOfSuccesses [
+	^ self count: [ :pharoLinkTestCaseAnnouncement | 
+		self isSuccessResult: pharoLinkTestCaseAnnouncement ]
 ]
 
 { #category : #running }
@@ -96,33 +128,25 @@ GtRrSUnitTask >> runSuite: suite [
 	^ events asArray
 ]
 
+{ #category : #enumerating }
+GtRrSUnitTask >> select: aBlockClosure [
+
+	result ifNil: [ ^ #() ].
+	^ result select: aBlockClosure
+]
+
 { #category : #'accessing - dynamic' }
 GtRrSUnitTask >> skippedExamples [
 
-	result ifNil: [ ^ #() ].
-	^ result 
-		select: [ :pharoLinkTestCaseAnnouncement | 
-			pharoLinkTestCaseAnnouncement shortName = #skip ]
+	^ self select: [ :pharoLinkTestCaseAnnouncement | 
+		pharoLinkTestCaseAnnouncement isSkipped ]
 ]
 
 { #category : #'accessing - dynamic' }
 GtRrSUnitTask >> successfulExamples [
 
-	result ifNil: [ ^ #() ].
-	
-	^ result 
-		select: [ :pharoLinkTestCaseAnnouncement | 
-			self isSuccessResult: pharoLinkTestCaseAnnouncement ]
-]
-
-{ #category : #'accessing - dynamic' }
-GtRrSUnitTask >> successfulExamplesCount [
-
-	result ifNil: [ ^ 0 ].
-	
-	^ result
-		count: [ :pharoLinkTestCaseAnnouncement | 
-			self isSuccessResult: pharoLinkTestCaseAnnouncement ]
+	^ self select: [ :pharoLinkTestCaseAnnouncement | 
+		self isSuccessResult: pharoLinkTestCaseAnnouncement ]
 ]
 
 { #category : #accessing }

@@ -15,17 +15,21 @@ GtRrExamplesProgressNotification >> elementClass [
 { #category : #accessing }
 GtRrExamplesProgressNotification >> summaryClass [
 	"Return a class that when instantiated displays the notification summary to the user"
-	^ GtRrExamplesNotificationSummary
+	^ GtRrChecksJobNotificationSummary
 ]
 
 { #category : #accessing }
 GtRrExamplesProgressNotification >> updateSummaryWithTaskResult: aTaskResult [
 	super updateSummaryWithTaskResult: aTaskResult.
 	
-	self incrementSuccessfulChecksCountWith: aTaskResult successfulExamplesCount.
-	self incrementSkippedChecksCountWith: aTaskResult skippedExamplesCount.
-	self incrementFailedChecksCountWith: aTaskResult failedExamplesCount.
-	self incrementErrorChecksCountWith: aTaskResult erroredExamplesCount.
+	self incrementSuccessfulChecksCountWith: (aTaskResult count: [ :aResult | 
+		aResult isSuccess ]).
+	self incrementSkippedChecksCountWith: (aTaskResult count: [ :aResult | 
+		aResult isSkipped ]).
+	self incrementFailedChecksCountWith: (aTaskResult count: [ :aResult | 
+		aResult isFailure ]).
+	self incrementErrorChecksCountWith: (aTaskResult count: [ :aResult | 
+		aResult isError or: [ aResult isWarning ] ]).
 	
 	self notifyNotificationDataChanged.
 ]

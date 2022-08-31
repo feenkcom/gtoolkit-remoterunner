@@ -43,23 +43,8 @@ GtRrTasksJob >> erroredExamples [
 ]
 
 { #category : #'accessing - examples' }
-GtRrTasksJob >> erroredExamplesCount [ 
-	^ (tasks flatCollect: #erroredExamples) size
-]
-
-{ #category : #'accessing - examples' }
-GtRrTasksJob >> executedExamplesCount [ 
-	^ (tasks flatCollect: #executedExamples) size
-]
-
-{ #category : #'accessing - examples' }
 GtRrTasksJob >> failedExamples [
 	^ tasks flatCollect: [:aTask | aTask failedExamples ]
-]
-
-{ #category : #'accessing - examples' }
-GtRrTasksJob >> failedExamplesCount [ 
-	^ (tasks flatCollect: #failedExamples) size
 ]
 
 { #category : #testing }
@@ -72,6 +57,26 @@ GtRrTasksJob >> hasTests [
 { #category : #'accessing - examples' }
 GtRrTasksJob >> notExecutedExamples [
 	^  (tasks reject: #isFinished) flatCollect: #examples
+]
+
+{ #category : #'accessing - examples' }
+GtRrTasksJob >> numberOfErroredExamples [ 
+	^ tasks sumNumbers: [ :aTask | aTask numberOfErrors ]
+]
+
+{ #category : #'accessing - examples' }
+GtRrTasksJob >> numberOfFailedExamples [ 
+	^ tasks sumNumbers: [ :aTask | aTask numberOfFailures ]
+]
+
+{ #category : #'accessing - examples' }
+GtRrTasksJob >> numberOfSkippedExamples [ 
+	^ tasks sumNumbers: [ :aTask | aTask numberOfSkipps ]
+]
+
+{ #category : #'accessing - examples' }
+GtRrTasksJob >> numberOfSuccessfulExamples [ 
+	^ tasks sumNumbers: [ :aTask | aTask numberOfSuccesses ]
 ]
 
 { #category : #copying }
@@ -105,19 +110,8 @@ GtRrTasksJob >> skippedExamples [
 ]
 
 { #category : #'accessing - examples' }
-GtRrTasksJob >> skippedExamplesCount [  
-	^ tasks sumNumbers: [ :aTask | aTask skippedExamplesCount ]
-]
-
-{ #category : #'accessing - examples' }
 GtRrTasksJob >> successfulExamples [
 	^ tasks flatCollect: [ :aTask | aTask successfulExamples ]
-]
-
-{ #category : #'accessing - examples' }
-GtRrTasksJob >> successfulExamplesCount [  
-	^ (tasks flatCollect: #successfulExamples) size
-	"^ tasks sumNumbers: [ :aTask | aTask successfulExamplesCount ]"
 ]
 
 { #category : #accessing }
