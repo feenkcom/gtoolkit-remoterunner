@@ -173,6 +173,12 @@ GtRrChecksJobProgressNotification >> successfulChecksCount: anObject [
 ]
 
 { #category : #accessing }
+GtRrChecksJobProgressNotification >> summaryClass [
+	"Return a class that when instantiated displays the notification summary to the user"
+	^ GtRrChecksJobNotificationSummary
+]
+
+{ #category : #accessing }
 GtRrChecksJobProgressNotification >> totalChecksCount [
 
 	^ totalChecksCount
@@ -185,6 +191,15 @@ GtRrChecksJobProgressNotification >> totalChecksCount: anInteger [
 ]
 
 { #category : #'updating - summary' }
-GtRrChecksJobProgressNotification >> updateSummaryWithTaskResult: aTaskResult [ 
-	"Update the summary with information about runned checks extracted from the result"
+GtRrChecksJobProgressNotification >> updateSummaryWithTaskResult: aTaskResult [
+	self incrementSuccessfulChecksCountWith: (aTaskResult count: [ :aResult | 
+		aResult isSuccess ]).
+	self incrementSkippedChecksCountWith: (aTaskResult count: [ :aResult | 
+		aResult isSkipped ]).
+	self incrementFailedChecksCountWith: (aTaskResult count: [ :aResult | 
+		aResult isFailure ]).
+	self incrementErrorChecksCountWith: (aTaskResult count: [ :aResult | 
+		aResult isError or: [ aResult isWarning ] ]).
+	
+	self notifyNotificationDataChanged.
 ]
