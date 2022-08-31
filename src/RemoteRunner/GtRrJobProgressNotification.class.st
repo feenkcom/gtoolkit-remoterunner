@@ -23,9 +23,7 @@ Class {
 	#superclass : #GtNotificationEvent,
 	#instVars : [
 		'job',
-		'successful',
-		'failed',
-		'notStarted'
+		'taskResults'
 	],
 	#category : #'RemoteRunner-UI'
 }
@@ -34,6 +32,16 @@ Class {
 GtRrJobProgressNotification class >> job: aGtRrJob [
 
 	^ self new job: aGtRrJob
+]
+
+{ #category : #callbacks }
+GtRrJobProgressNotification >> actOnTaskCompletedFor: anAnnouncement [
+	self addTaskResult: anAnnouncement taskResult
+]
+
+{ #category : #accessing }
+GtRrJobProgressNotification >> addTaskResult: aTaskResult [
+	taskResults add: aTaskResult
 ]
 
 { #category : #accessing }
@@ -78,9 +86,14 @@ GtRrJobProgressNotification >> job [
 
 { #category : #accessing }
 GtRrJobProgressNotification >> job: aGtRrJob [
-
+	job ifNotNil: [
+		self unsubscribeFromJob ].
+	
 	job := aGtRrJob.
+	taskResults := OrderedCollection new.
+	
 	self registerNotifications.
+	self subscribeToJob.
 ]
 
 { #category : #accessing }
@@ -123,8 +136,26 @@ GtRrJobProgressNotification >> spawnState: aGroupState fromSource: anElement [
 		from: anElement
 ]
 
+{ #category : #subscriptions }
+GtRrJobProgressNotification >> subscribeToJob [
+	self job
+		when: GtRrTaskCompletedAnnouncement
+		send: #actOnTaskCompletedFor:
+		to: self
+]
+
 { #category : #accessing }
 GtRrJobProgressNotification >> summaryClass [
 	"Return a class that when instantiated displays the notification summary to the user"
 	^ GtRrJobNotificationSummary
+]
+
+{ #category : #accessing }
+GtRrJobProgressNotification >> taskResults [
+	^ taskResults
+]
+
+{ #category : #accessing }
+GtRrJobProgressNotification >> unsubscribeFromJob [
+	self job unsubscribe: self
 ]

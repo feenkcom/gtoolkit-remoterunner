@@ -194,11 +194,8 @@ GtRrJobNotificationElement >> onNotificationChanged [
 ]
 
 { #category : #'private - hooks' }
-GtRrJobNotificationElement >> onTaskAnnouncement: aGtRrTaskAnnouncement [
-
-	aGtRrTaskAnnouncement class = GtRrTaskStartedAnnouncement ifTrue: [ ^ self ].
-
-	self requestUpdate.
+GtRrJobNotificationElement >> onNotificationDataChangedFor: anAnnouncement [
+	self requestUpdate
 ]
 
 { #category : #'private - updating' }
@@ -212,12 +209,12 @@ GtRrJobNotificationElement >> runJobAgain [
 		aNotification runJobAgain ]
 ]
 
-{ #category : #'private - subscriptions' }
+{ #category : #subscriptions }
 GtRrJobNotificationElement >> subscribeToNotification [
-	self jobDo: [ :aJob | 
-		aJob
-			when: GtRrTaskAnnouncement
-			send: #onTaskAnnouncement: 
+	self notificationDo: [ :aNotification | 
+		aNotification
+			when: GtNotificationDataChangedAnnouncement
+			send: #onNotificationDataChangedFor: 
 			to: self ]
 ]
 
@@ -229,8 +226,8 @@ GtRrJobNotificationElement >> successfulCount [
 
 { #category : #'private - subscriptions' }
 GtRrJobNotificationElement >> unsubscribeFromNotification [
-	self jobDo: [ :aJob | 
-		aJob unsubscribe: self ]	
+	self notificationDo: [ :aNotification | 
+		aNotification unsubscribe: self ]	
 ]
 
 { #category : #'private - updating' }

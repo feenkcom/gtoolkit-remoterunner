@@ -90,6 +90,34 @@ GtRrExamplesTask >> isExamplesTask [
 	^ true
 ]
 
+{ #category : #'accessing - dynamic' }
+GtRrExamplesTask >> numberOfErrors [
+
+	result ifNil: [ ^ 0 ].
+	^ result numberOfErrors
+]
+
+{ #category : #'accessing - dynamic' }
+GtRrExamplesTask >> numberOfFailures [
+
+	result ifNil: [ ^ 0 ].
+	^ result numberOfFailures
+]
+
+{ #category : #'accessing - dynamic' }
+GtRrExamplesTask >> numberOfSkipps [
+
+	result ifNil: [ ^ 0 ].
+	^ result numberOfSkipps
+]
+
+{ #category : #'accessing - dynamic' }
+GtRrExamplesTask >> numberOfSuccesses [
+
+	result ifNil: [ ^ 0 ].
+	^ result numberOfSuccesses
+]
+
 { #category : #running }
 GtRrExamplesTask >> run [
 	| group |
@@ -119,13 +147,6 @@ GtRrExamplesTask >> successfulExamples [
 
 	result ifNil: [ ^ #() ].
 	^ result successfulExamples
-]
-
-{ #category : #'accessing - dynamic' }
-GtRrExamplesTask >> successfulExamplesCount [
-
-	result ifNil: [ ^ 0 ].
-	^ result successfulExamplesCount
 ]
 
 { #category : #ui }

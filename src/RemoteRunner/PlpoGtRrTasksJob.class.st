@@ -26,27 +26,9 @@ PlpoGtRrTasksJob >> erroredExamples [
 ]
 
 { #category : #'accessing - examples' }
-PlpoGtRrTasksJob >> erroredExamplesCount [
-
-	^ self proxyPerform: #erroredExamplesCount
-]
-
-{ #category : #'accessing - examples' }
-PlpoGtRrTasksJob >> executedExamplesCount [
-
-	^ self proxyPerform: #executedExamplesCount
-]
-
-{ #category : #'accessing - examples' }
 PlpoGtRrTasksJob >> failedExamples [
 
 	^ self proxyPerform: #failedExamples
-]
-
-{ #category : #'accessing - examples' }
-PlpoGtRrTasksJob >> failedExamplesCount [
-
-	^ self proxyPerform: #failedExamplesCount
 ]
 
 { #category : #ui }
@@ -74,6 +56,30 @@ PlpoGtRrTasksJob >> notExecutedExamples [
 	^ self proxyPerform: #notExecutedExamples
 ]
 
+{ #category : #'accessing - examples' }
+PlpoGtRrTasksJob >> numberOfErroredExamples [
+
+	^ self proxyPerform: #numberOfErroredExamples
+]
+
+{ #category : #'accessing - examples' }
+PlpoGtRrTasksJob >> numberOfFailedExamples [
+
+	^ self proxyPerform: #numberOfFailedExamples
+]
+
+{ #category : #'accessing - examples' }
+PlpoGtRrTasksJob >> numberOfSkippedExamples [
+
+	^ self proxyPerform: #numberOfSkippedExamples
+]
+
+{ #category : #'accessing - examples' }
+PlpoGtRrTasksJob >> numberOfSuccessfulExamples [
+
+	^ self proxyPerform: #numberOfSuccessfulExamples
+]
+
 { #category : #notifications }
 PlpoGtRrTasksJob >> showExamplesProgressNotification [
 	"Open a global notification showing the progress of the receiver assuming all tasks are exemples / test related.
@@ -92,12 +98,6 @@ PlpoGtRrTasksJob >> skippedExamples [
 PlpoGtRrTasksJob >> successfulExamples [
 
 	^ self proxyPerform: #successfulExamples
-]
-
-{ #category : #'accessing - examples' }
-PlpoGtRrTasksJob >> successfulExamplesCount [
-
-	^ self proxyPerform: #successfulExamplesCount
 ]
 
 { #category : #'accessing - examples' }
