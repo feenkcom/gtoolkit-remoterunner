@@ -121,6 +121,13 @@ GtRrExamplesTask >> successfulExamples [
 	^ result successfulExamples
 ]
 
+{ #category : #'accessing - dynamic' }
+GtRrExamplesTask >> successfulExamplesCount [
+
+	result ifNil: [ ^ 0 ].
+	^ result successfulExamplesCount
+]
+
 { #category : #ui }
 GtRrExamplesTask >> summaryAttributes [ 
 
