@@ -7,7 +7,8 @@ Class {
 		'itemCount',
 		'progressNotification',
 		'itemsComputation',
-		'cachedItems'
+		'cachedItems',
+		'testCaseState'
 	],
 	#category : #'RemoteRunner-UI'
 }
