@@ -22,20 +22,7 @@ GtRrExamplesNotificationSummary >> updateSummaryContent [
 				+ aNotification failedChecksCount
 				+ aNotification erroredChecksCount ].
 
-	failedLabel text: failedCounter asString.
-	successfulLabel text: successfulCounter asString.
-	notStartedLabel text: notStartedCounter asString.
-	
-	failedLabel
-		visibility: (failedCounter = 0 
-			ifTrue: [ BlVisibility gone ] 
-			ifFalse: [ BlVisibility visible ]).
-	successfulLabel
-		visibility: (successfulCounter = 0 
-			ifTrue: [ BlVisibility gone ] 
-			ifFalse: [ BlVisibility visible ]).
-	notStartedLabel
-		visibility: (notStartedCounter = 0 
-			ifTrue: [ BlVisibility gone ] 
-			ifFalse: [ BlVisibility visible ]).
+	self updateLabel: failedLabel withCount: failedCounter.
+	self updateLabel: successfulLabel withCount: successfulCounter.
+	self updateLabel: notStartedLabel withCount: notStartedCounter.
 ]
