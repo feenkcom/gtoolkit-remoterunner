@@ -101,3 +101,13 @@ GtRrDataGroupState >> name: anObject [
 GtRrDataGroupState >> progressNotification: aNotifications [
 	progressNotification := aNotifications
 ]
+
+{ #category : #accessing }
+GtRrDataGroupState >> testCaseState [
+	^ testCaseState
+]
+
+{ #category : #accessing }
+GtRrDataGroupState >> testCaseState: aState [
+	testCaseState := aState
+]

@@ -50,18 +50,22 @@ GtRrJobProgressNotification >> constructStates [
 		GtRrDataGroupState new
 			name: 'All';
 			color: Color transparent;
+			testCaseState: GtPharoMethodTestCasePassedState;
 			items: self job tasks.
 		GtRrDataGroupState new
 			name: 'Success';
 			color: Color lightGreen;
+			testCaseState: GtPharoMethodTestCasePassedState;
 			items: (self job results reject: #hasErrors).
 		GtRrDataGroupState new
 			name: 'Failure';
 			color: Color red;
+			testCaseState: GtPharoMethodTestCasePassedState;
 			items: self job resultsWithErrors.
 		GtRrDataGroupState new
 			name: 'Not executed';
 			color: Color veryVeryLightGray;
+			testCaseState: GtPharoMethodTestCasePassedState;
 			items: (self job tasks reject: #isFinished) }
 ]
 
