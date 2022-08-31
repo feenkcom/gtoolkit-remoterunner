@@ -110,8 +110,9 @@ GtRrTasksJob >> successfulExamples [
 ]
 
 { #category : #'accessing - examples' }
-GtRrTasksJob >> successfulExamplesCount [ 
-	^ tasks sumNumbers: [ :aTask | aTask successfulExamplesCount ]
+GtRrTasksJob >> successfulExamplesCount [  
+	^ (tasks flatCollect: #successfulExamples) size
+	"^ tasks sumNumbers: [ :aTask | aTask successfulExamplesCount ]"
 ]
 
 { #category : #accessing }
