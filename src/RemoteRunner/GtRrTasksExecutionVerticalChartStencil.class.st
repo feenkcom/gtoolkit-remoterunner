@@ -1,5 +1,5 @@
 Class {
-	#name : #GtRrTasksVerticalExecutionChartStencil,
+	#name : #GtRrTasksExecutionVerticalChartStencil,
 	#superclass : #BrStencil,
 	#instVars : [
 		'tasksGroup'
@@ -8,7 +8,7 @@ Class {
 }
 
 { #category : #accessing }
-GtRrTasksVerticalExecutionChartStencil >> create [
+GtRrTasksExecutionVerticalChartStencil >> create [
 	| timelineScale barsScale container histogram labels ticks |
 	
 	timelineScale := self timelineScale.
@@ -32,7 +32,7 @@ GtRrTasksVerticalExecutionChartStencil >> create [
 ]
 
 { #category : #accessing }
-GtRrTasksVerticalExecutionChartStencil >> createHistogramChartWithScale: barsScale [
+GtRrTasksExecutionVerticalChartStencil >> createHistogramChartWithScale: barsScale [
 	^ BlElement new
 		margin: (BlInsets left: 50);
 		constraintsDo: [ :c | 
@@ -49,7 +49,7 @@ GtRrTasksVerticalExecutionChartStencil >> createHistogramChartWithScale: barsSca
 ]
 
 { #category : #accessing }
-GtRrTasksVerticalExecutionChartStencil >> createLabelsElementWithScale: barsScale [
+GtRrTasksExecutionVerticalChartStencil >> createLabelsElementWithScale: barsScale [
 	^ GtPlotterHorizontalTickLabelsElement new
 		clipChildren: false;
 		scale: barsScale;
@@ -65,7 +65,7 @@ GtRrTasksVerticalExecutionChartStencil >> createLabelsElementWithScale: barsScal
 ]
 
 { #category : #accessing }
-GtRrTasksVerticalExecutionChartStencil >> createThicksElementWithScale: barsScale [
+GtRrTasksExecutionVerticalChartStencil >> createThicksElementWithScale: barsScale [
 	^ GtPlotterHorizontalTicksElement new
 		padding: (BlInsets left: 50);
 		preventMeAndChildrenMouseEvents;
@@ -78,17 +78,17 @@ GtRrTasksVerticalExecutionChartStencil >> createThicksElementWithScale: barsScal
 ]
 
 { #category : #accessing }
-GtRrTasksVerticalExecutionChartStencil >> tasksGroup [
+GtRrTasksExecutionVerticalChartStencil >> tasksGroup [
 	^ tasksGroup
 ]
 
 { #category : #accessing }
-GtRrTasksVerticalExecutionChartStencil >> tasksGroup: aTasksGroup [
+GtRrTasksExecutionVerticalChartStencil >> tasksGroup: aTasksGroup [
 	tasksGroup := aTasksGroup
 ]
 
 { #category : #accessing }
-GtRrTasksVerticalExecutionChartStencil >> timelineScale [
+GtRrTasksExecutionVerticalChartStencil >> timelineScale [
 	| endTime startTime offset |
 	
 	startTime := self tasksGroup startTime.
