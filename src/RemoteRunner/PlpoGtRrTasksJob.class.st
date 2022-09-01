@@ -25,6 +25,11 @@ PlpoGtRrTasksJob >> erroredExamples [
 	^ self proxyPerform: #erroredExamples
 ]
 
+{ #category : #accessing }
+PlpoGtRrTasksJob >> examplesReport [
+	^ self proxyPerform: #examplesReport
+]
+
 { #category : #'accessing - examples' }
 PlpoGtRrTasksJob >> failedExamples [
 
@@ -39,9 +44,9 @@ PlpoGtRrTasksJob >> gtViewTestsActionFor: anAction [
 
 	^ anAction button
 		tooltip: 'View Test Results';
-		icon: BrGlamorousVectorIcons signal;
+		icon: BrGlamorousVectorIcons eg;
 		action: [ :button | button phlow spawnObject:
-			(GtRrExamplesView new job: self getSerialized) ].
+			self examplesReport ].
 ]
 
 { #category : #testing }

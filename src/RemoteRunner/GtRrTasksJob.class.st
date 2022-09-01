@@ -42,9 +42,30 @@ GtRrTasksJob >> erroredExamples [
 	^ tasks flatCollect: [:aTask | aTask erroredExamples ]
 ]
 
+{ #category : #accessing }
+GtRrTasksJob >> examplesReport [
+	^ GtRrExamplesReport new
+		job: self 
+]
+
 { #category : #'accessing - examples' }
 GtRrTasksJob >> failedExamples [
 	^ tasks flatCollect: [:aTask | aTask failedExamples ]
+]
+
+{ #category : #'gt - extensions' }
+GtRrTasksJob >> gtViewTestsActionFor: anAction [
+	<gtAction>
+
+	self hasTests ifFalse: [ ^ anAction noAction ].
+
+	^ anAction button
+		tooltip: 'View Test Results';
+		icon: BrGlamorousVectorIcons eg;
+		action: [ :button | 
+			button phlow spawnObject:
+				(GtRrExamplesReport new 
+					job: self) ].
 ]
 
 { #category : #testing }
