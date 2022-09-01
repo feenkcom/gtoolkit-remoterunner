@@ -31,7 +31,9 @@ Class {
 { #category : #'instance creation' }
 GtRrJobProgressNotification class >> job: aGtRrJob [
 
-	^ self new job: aGtRrJob
+	^ self new 
+		job: aGtRrJob;
+		registerNotifications
 ]
 
 { #category : #callbacks }
@@ -77,6 +79,28 @@ GtRrJobProgressNotification >> elementClass [
 	^ GtRrJobNotificationElement 
 ]
 
+{ #category : #'gt - extensions' }
+GtRrJobProgressNotification >> gtViewNotificationStatesFor: aView [
+	<gtView>
+	
+	^ aView columnedList
+		title: 'Notification States';
+		items: [ self constructStates];
+		column: 'Color' icon: [ :aState | 
+			GtPharoTestCaseUtility newColoredIcon: aState color ];
+		column: 'State' text: [ :aState | aState name ];
+		column: 'Item Count' text: [ :aState | aState itemCount ]
+]
+
+{ #category : #'gt - extensions' }
+GtRrJobProgressNotification >> gtViewTaskResultsFor: aView [
+	<gtView>
+	
+	^ aView list
+		title: 'Task Results';
+		items: [ self taskResults]
+]
+
 { #category : #accessing }
 GtRrJobProgressNotification >> job [
 	<return: #GtRrJob>
@@ -92,7 +116,6 @@ GtRrJobProgressNotification >> job: aGtRrJob [
 	job := aGtRrJob.
 	taskResults := OrderedCollection new.
 	
-	self registerNotifications.
 	self subscribeToJob.
 ]
 
