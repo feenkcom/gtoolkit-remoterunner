@@ -131,9 +131,11 @@ GtRrJobProgressNotification >> setJob: aGtRrJob [
 { #category : #callbacks }
 GtRrJobProgressNotification >> spawnState: aGroupState fromSource: anElement [
 	GtInspectorTool
-		openWrappedOn: aGroupState  items
+		openWrappedOn: (GtSearchFixedMethodsFilter new 
+			methods: (aGroupState  items 
+				collect: [ :aResult | aResult method ]))
 		title: aGroupState name
-		from: anElement
+		from: anElement 
 ]
 
 { #category : #subscriptions }
