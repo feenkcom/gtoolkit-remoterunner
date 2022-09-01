@@ -113,11 +113,11 @@ GtRrTasksGroup >> gtViewTimelineV3For: aView [
 			| startTime endTime offset scale finishedTasks barWidthScale container histogram labels ticks |
 			
 			startTime := self startTime.
-endTime := self endTime.
-offset :=  (endTime - startTime) * 0.1.
+			endTime := self endTime.
+			offset :=  (endTime - startTime) * 0.1.
 			
-scale := GtPlotterTimeScale new
-		domainFrom: startTime  - offset to: endTime + offset. 
+			scale := GtPlotterTimeScale new
+				domainFrom: startTime  - offset to: endTime + offset. 
 
 finishedTasks := self select: #isFinished.
 
@@ -276,4 +276,9 @@ GtRrTasksGroup >> startTime [
 			ifTrue: [
 				time := aTask startTime ] ].
 	^ time
+]
+
+{ #category : #'math functions' }
+GtRrTasksGroup >> sumNumbers: aBlock [
+	^ self items sumNumbers: aBlock
 ]
