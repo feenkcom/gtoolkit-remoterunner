@@ -181,7 +181,7 @@ GtRemoteRunner class >> setUniqueInstance: aGtRemoteRunner [
 
 { #category : #'class initialization' }
 GtRemoteRunner class >> startUp: resuming [
-	resuming ifTrue: [ Stdio stdout lf; << 'GtRemoteRunner startUp:'; lf. self cleanUp ]
+	resuming ifTrue: [ self cleanUp ]
 ]
 
 { #category : #accessing }
