@@ -40,6 +40,21 @@ GtRrExamplesReport >> failedExamples [
 ]
 
 { #category : #ui }
+GtRrExamplesReport >> gtErroredExamplesByErrorFor: aView [
+	<gtView>
+
+	^ aView columnedList 
+		title: 'Errors (by message)';
+		priority: 14.2;
+		items: [ (self erroredExamples 
+			groupedBy: [ :each | each exceptionMessageText ]) associations 
+				sort: [ :a :b | a value size > b value size ] ];
+		column: 'Error Message' text: [ :assoc | assoc key ];
+		column: 'Errors Count' text: [ :assoc | assoc value size ];
+		send: [ :assoc | assoc value ]
+]
+
+{ #category : #ui }
 GtRrExamplesReport >> gtErroredExamplesFor: aView [
 	<gtView>
 
