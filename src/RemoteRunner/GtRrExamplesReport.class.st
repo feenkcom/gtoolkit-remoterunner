@@ -2,7 +2,7 @@
 GtRrTestView takes a job that consists of a mixture of SUnit tests and Gt examples and presents a coherent view of the results.
 "
 Class {
-	#name : #GtRrExamplesView,
+	#name : #GtRrExamplesReport,
 	#superclass : #Object,
 	#instVars : [
 		'job',
@@ -12,35 +12,35 @@ Class {
 }
 
 { #category : #accessing }
-GtRrExamplesView >> allExamples [
+GtRrExamplesReport >> allExamples [
 
 	^ self tasks flatCollect: [ :task |
 			task allExamples ].
 ]
 
 { #category : #'accessing - dynamic' }
-GtRrExamplesView >> erroredExamples [
+GtRrExamplesReport >> erroredExamples [
 
 	^ self tasks flatCollect: [ :task |
 			task erroredExamples ].
 ]
 
 { #category : #'accessing - dynamic' }
-GtRrExamplesView >> executedExamples [
+GtRrExamplesReport >> executedExamples [
 
 	^ self tasks flatCollect: [ :task |
 			task executedExamples ].
 ]
 
 { #category : #'accessing - dynamic' }
-GtRrExamplesView >> failedExamples [
+GtRrExamplesReport >> failedExamples [
 
 	^ self tasks flatCollect: [ :task |
 			task failedExamples ].
 ]
 
 { #category : #ui }
-GtRrExamplesView >> gtErroredExamplesFor: aView [
+GtRrExamplesReport >> gtErroredExamplesFor: aView [
 	<gtView>
 
 	^ self gtView: aView 
@@ -50,7 +50,7 @@ GtRrExamplesView >> gtErroredExamplesFor: aView [
 ]
 
 { #category : #ui }
-GtRrExamplesView >> gtExecutedExamplesFor: aView [
+GtRrExamplesReport >> gtExecutedExamplesFor: aView [
 	<gtView>
 
 	^ self gtView: aView 
@@ -60,7 +60,7 @@ GtRrExamplesView >> gtExecutedExamplesFor: aView [
 ]
 
 { #category : #ui }
-GtRrExamplesView >> gtFailedExamplesFor: aView [
+GtRrExamplesReport >> gtFailedExamplesFor: aView [
 	<gtView>
 
 	^ self gtView: aView 
@@ -70,7 +70,7 @@ GtRrExamplesView >> gtFailedExamplesFor: aView [
 ]
 
 { #category : #ui }
-GtRrExamplesView >> gtSkippedExamplesFor: aView [
+GtRrExamplesReport >> gtSkippedExamplesFor: aView [
 	<gtView>
 
 	^ self gtView: aView 
@@ -80,7 +80,7 @@ GtRrExamplesView >> gtSkippedExamplesFor: aView [
 ]
 
 { #category : #ui }
-GtRrExamplesView >> gtSuccesfulExamplesFor: aView [
+GtRrExamplesReport >> gtSuccesfulExamplesFor: aView [
 	<gtView>
 
 	^ self gtView: aView 
@@ -90,7 +90,7 @@ GtRrExamplesView >> gtSuccesfulExamplesFor: aView [
 ]
 
 { #category : #ui }
-GtRrExamplesView >> gtSummaryFor: aView [
+GtRrExamplesReport >> gtSummaryFor: aView [
 	<gtView>
 
 	^ aView columnedList
@@ -103,7 +103,7 @@ GtRrExamplesView >> gtSummaryFor: aView [
 ]
 
 { #category : #ui }
-GtRrExamplesView >> gtView: aView forExamples: examplesCollection title: titleString priority: priorityNumber [.
+GtRrExamplesReport >> gtView: aView forExamples: examplesCollection title: titleString priority: priorityNumber [.
 
 	(examplesCollection isNil or: [ examplesCollection isEmpty ]) ifTrue:
 		[  ^ aView empty ].
@@ -115,53 +115,53 @@ GtRrExamplesView >> gtView: aView forExamples: examplesCollection title: titleSt
 ]
 
 { #category : #accessing }
-GtRrExamplesView >> job [
+GtRrExamplesReport >> job [
 	<return: #GtRrJob>
 
 	^ job
 ]
 
 { #category : #accessing }
-GtRrExamplesView >> job: aGtRrJob [
+GtRrExamplesReport >> job: aGtRrJob [
 
 	job := aGtRrJob
 ]
 
 { #category : #'accessing - job' }
-GtRrExamplesView >> name [
+GtRrExamplesReport >> name [
 
 	^ job name
 ]
 
 { #category : #copying }
-GtRrExamplesView >> postCopy [
+GtRrExamplesReport >> postCopy [
 
 	job := job copy.
 	tasks := nil.
 ]
 
 { #category : #accessing }
-GtRrExamplesView >> results [
+GtRrExamplesReport >> results [
 
 	^ job results
 ]
 
 { #category : #'accessing - dynamic' }
-GtRrExamplesView >> skippedExamples [
+GtRrExamplesReport >> skippedExamples [
 
 	^ self tasks flatCollect: [ :task |
 			task skippedExamples ].
 ]
 
 { #category : #'accessing - dynamic' }
-GtRrExamplesView >> successfulExamples [
+GtRrExamplesReport >> successfulExamples [
 
 	^ self tasks flatCollect: [ :task |
 			task successfulExamples ].
 ]
 
 { #category : #ui }
-GtRrExamplesView >> summaryAttributes [
+GtRrExamplesReport >> summaryAttributes [
 
 	^ Array streamContents: [ :stream | | all executed successful failed errored skipped |
 		all := self allExamples.
@@ -180,7 +180,7 @@ GtRrExamplesView >> summaryAttributes [
 ]
 
 { #category : #accessing }
-GtRrExamplesView >> summaryString [
+GtRrExamplesReport >> summaryString [
 	"Answer a textual summary of the receiver"
 	| examples |
 
@@ -214,13 +214,13 @@ GtRrExamplesView >> summaryString [
 ]
 
 { #category : #accessing }
-GtRrExamplesView >> tasks [
+GtRrExamplesReport >> tasks [
 
 	^ tasks ifNil: [ tasks := job tasks ]
 ]
 
 { #category : #accessing }
-GtRrExamplesView >> tasks: aCollection [
+GtRrExamplesReport >> tasks: aCollection [
 
 	tasks := aCollection
 ]
