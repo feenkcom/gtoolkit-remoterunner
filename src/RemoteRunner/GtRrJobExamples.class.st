@@ -79,6 +79,23 @@ GtRrJobExamples >> testJobClassNames [
 ]
 
 { #category : #examples }
+GtRrJobExamples >> testJobExamplesClassNames [
+	"Confirm that GtRrTestsJob>>classNames: works as expected"
+	<gtExample>
+	| factory job task |
+
+	factory := GtRrExampleTestFactory new.
+	factory addExampleClass: GtRrSampleExample.
+	job := factory job.
+
+	self assert: job tasks size equals: 1.
+	task := job tasks first.
+	self assert: task exampleClassName equals: #GtRrSampleExample.
+	
+	^ job
+]
+
+{ #category : #examples }
 GtRrJobExamples >> testJobPackageNames [
 	"Confirm that packageNames supplied to the factory are enumerated in to the appropriate classes"
 	<gtExample>
