@@ -102,6 +102,24 @@ GtRemoteRunner class >> hasUniqueInstance [
 	^ uniqueInstance isNotNil.
 ]
 
+{ #category : #accessing }
+GtRemoteRunner class >> headlessOnPort: aNumberOrString codeSync: aBoolean [
+	"Answer a proxy remote runner connected to the supplied address"
+	| settings plApplication runner |
+
+	settings := LanguageLinkSettings pharoDefaultSettings.
+	settings
+		serverProcessClass: LanguageLinkManualProcess;
+		serverSocketAddress: (LanguageLinkSocketAddress from: aNumberOrString asString).
+	plApplication := PharoLinkApplication newWith: settings.
+	plApplication start.
+	runner := plApplication newCommandFactory
+		sendAndWait: 'GtAssignedRemoteRunner'.
+	aBoolean ifTrue: [ runner startCodeSync ].
+
+	^ runner.
+]
+
 { #category : #'class initialization' }
 GtRemoteRunner class >> initialize [
 	SessionManager default
@@ -145,21 +163,11 @@ GtRemoteRunner class >> setDefaultHeadless [
 { #category : #'headless remote runner' }
 GtRemoteRunner class >> setDefaultHeadlessOnPort: aNumberOrString codeSync: aBoolean [
 	"Make the default remote runner a proxy to an existing headless runner"
-	| settings plApplication runner |
+	| runner |
 
 	self hasUniqueInstance ifTrue: [ GtRemoteRunner cleanUp ].
-	settings := LanguageLinkSettings pharoDefaultSettings.
-	settings
-		serverProcessClass: LanguageLinkManualProcess;
-		serverSocketAddress: (LanguageLinkSocketAddress from: aNumberOrString asString).
-	plApplication := PharoLinkApplication newWith: settings.
-	plApplication start.
-	runner := plApplication newCommandFactory
-		sendAndWait: 'GtAssignedRemoteRunner'.
+	runner := self headlessOnPort: aNumberOrString codeSync: aBoolean.
 	self setUniqueInstance: runner.
-
-	aBoolean ifTrue: [ runner startCodeSync ].
-
 	^ runner.
 ]
 
