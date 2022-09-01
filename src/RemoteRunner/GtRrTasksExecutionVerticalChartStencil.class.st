@@ -1,8 +1,13 @@
+"
+{{gtClass:name=GtRrTasksExecutionVerticalChartStencil}} is a stencil that creates a chart showing the duration of tasks. 
+
+It works in tandem  with  a collection of {{gtClass:name=GtRrTask}} or  {{gtClass:name=GtRrTasksExecutionChartTaskDataModel}} instances set using {{gtMethod:name=GtRrTasksExecutionVerticalChartStencil>>taskItems:|label=#selector}}. It is compatible with {{gtClass:name=GtRrTasksExecutionChartTaskDataModel}}  provides an alternative to using proxies to tasks.
+"
 Class {
 	#name : #GtRrTasksExecutionVerticalChartStencil,
 	#superclass : #BrStencil,
 	#instVars : [
-		'tasksGroup'
+		'taskItems'
 	],
 	#category : #'RemoteRunner-Tasks'
 }
@@ -14,7 +19,7 @@ GtRrTasksExecutionVerticalChartStencil >> create [
 	timelineScale := self timelineScale.
 	barsScale := GtPlotterDurationScale new
 		domainFrom: 0 milliSeconds
-		to: (self tasksGroup maxValue: #duration).
+		to: self maximumTaskDuration.
 
 	histogram := self createHistogramChartWithScale: barsScale.
 	labels := self createLabelsElementWithScale: barsScale.
@@ -40,12 +45,13 @@ GtRrTasksExecutionVerticalChartStencil >> createHistogramChartWithScale: barsSca
 			c vertical matchParent ];
 		geometry: (BlHistogram new
 			beLeftToRight;
-			values: (self tasksGroup 
-				collect: [ :aTask | 
-					(barsScale map: aTask duration) min: 1 ]));
+			values: (self taskItems 
+				collect: [ :aTaskOrItem | 
+					(barsScale map: aTaskOrItem duration) min: 1 ]));
 		background: (BlLinearGradientPaint horizontal
-				stops: {0.2 -> Color red.
-						1 -> (Color red alpha: 0.0)})
+			stops: {
+				0.2 -> Color red.
+				1 -> (Color red alpha: 0.0)})
 ]
 
 { #category : #accessing }
@@ -78,22 +84,41 @@ GtRrTasksExecutionVerticalChartStencil >> createThicksElementWithScale: barsScal
 ]
 
 { #category : #accessing }
-GtRrTasksExecutionVerticalChartStencil >> tasksGroup [
-	^ tasksGroup
+GtRrTasksExecutionVerticalChartStencil >> maximumTaskDuration [
+	^ self taskItems maxValue: #duration
 ]
 
 { #category : #accessing }
-GtRrTasksExecutionVerticalChartStencil >> tasksGroup: aTasksGroup [
-	tasksGroup := aTasksGroup
+GtRrTasksExecutionVerticalChartStencil >> taskItems [
+
+	^ taskItems
+]
+
+{ #category : #accessing }
+GtRrTasksExecutionVerticalChartStencil >> taskItems: aCollection [
+
+	taskItems := aCollection
+]
+
+{ #category : #accessing }
+GtRrTasksExecutionVerticalChartStencil >> tasksEndTime [
+	^ self taskItems maxValue: #endTime
+]
+
+{ #category : #accessing }
+GtRrTasksExecutionVerticalChartStencil >> tasksStartTime [
+	^ self taskItems maxValue: #startTime
 ]
 
 { #category : #accessing }
 GtRrTasksExecutionVerticalChartStencil >> timelineScale [
 	| endTime startTime offset |
 	
-	startTime := self tasksGroup startTime.
-	endTime := self tasksGroup endTime.
+	startTime := self tasksStartTime.
+	endTime := self  tasksEndTime.
 	offset := (endTime - startTime) * 0.1.
 	
-	^ GtPlotterTimeScale new domainFrom: startTime - offset to: endTime + offset
+	^ GtPlotterTimeScale new 
+		domainFrom: startTime - offset 
+		to: endTime + offset
 ]

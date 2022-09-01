@@ -111,7 +111,7 @@ GtRrTasksGroup >> gtViewTimelineV3For: aView [
 		priority: 20; 
 		stencil: [
 			GtRrTasksExecutionVerticalChartStencil new 
-				tasksGroup: ((self select: #isFinished)
+				taskItems: ((self select: #isFinished)
 					sorted: [ :aTask | aTask duration ] descending) ]
 ]
 
@@ -122,8 +122,9 @@ GtRrTasksGroup >> gtViewTimelineV4For: aView [
 		title: 'Timeline (v4)';
 		priority: 20; 
 		stencil: [
-			GtRrTasksVerticalExecutionChartStencil new 
-				tasksGroup: (self select: #isFinished) ]
+			GtRrTasksExecutionVerticalChartStencil new 
+				taskItems: (self 
+					select: #isFinished) ]
 ]
 
 { #category : #initialization }
