@@ -92,6 +92,13 @@ GtRrWorkerExamplesReport >> tasks: aCollection [
 ]
 
 { #category : #accessing }
+GtRrWorkerExamplesReport >> tasksExecutionChartItemsData [
+	^ (self tasks select: #isFinished)
+		collect: [ :aTask |
+			(GtRrTasksExecutionChartTaskDataModel fromTask: aTask) asDictionary ] 
+]
+
+{ #category : #accessing }
 GtRrWorkerExamplesReport >> workerAttributes [
 
 	^ workerAttributes

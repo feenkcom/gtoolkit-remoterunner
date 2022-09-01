@@ -28,6 +28,14 @@ GtRrTasksExecutionChartTaskDataModel class >> fromTask: aTask [
 		endTime: aTask endTime
 ]
 
+{ #category : #converting }
+GtRrTasksExecutionChartTaskDataModel >> asDictionary [ 
+	^ Dictionary new 
+		at: 'startTime' put: self startTime;
+		at: 'endTime' put: self endTime;
+		yourself
+]
+
 { #category : #accessing }
 GtRrTasksExecutionChartTaskDataModel >> duration [
 	^ duration ifNil: [
