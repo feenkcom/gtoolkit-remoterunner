@@ -20,7 +20,7 @@ GtRrSUnitTask >> addEndAnnouncement: endAnnouncement to: events [
 	ifNotEmpty:
 		[ "endAnnouncement equality is only based on the identity of the test, not the result"
 		events last = endAnnouncement ifTrue:
-			[ events last isPassAnnouncement ifTrue:
+			[ events last isSuccess ifTrue:
 				[ "Replace the pass announcement with the error announcement"
 				events atLast: 1 put: endAnnouncement ] ]
 			"ifFalse: discard the second error announcement and only report the first"
