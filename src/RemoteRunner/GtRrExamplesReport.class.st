@@ -70,6 +70,16 @@ GtRrExamplesReport >> gtFailedExamplesFor: aView [
 ]
 
 { #category : #ui }
+GtRrExamplesReport >> gtNotExecutedExamplesFor: aView [
+	<gtView>
+
+	^ self gtView: aView 
+		forExamples: self notExecutedExamples
+		title: 'Not Executed'
+		priority: 17.
+]
+
+{ #category : #ui }
 GtRrExamplesReport >> gtSkippedExamplesFor: aView [
 	<gtView>
 
@@ -131,6 +141,12 @@ GtRrExamplesReport >> job: aGtRrJob [
 GtRrExamplesReport >> name [
 
 	^ job name
+]
+
+{ #category : #'accessing - dynamic' }
+GtRrExamplesReport >> notExecutedExamples [
+
+	^ (self tasks reject: #isFinished) flatCollect: #examples
 ]
 
 { #category : #copying }
