@@ -6,5 +6,54 @@ It provides the same API as a task, and it is meant to be used polymorphically w
 Class {
 	#name : #GtRrTasksExecutionChartTaskDataModel,
 	#superclass : #Object,
+	#instVars : [
+		'startTime',
+		'endTime',
+		'duration'
+	],
 	#category : #'RemoteRunner-Tasks'
 }
+
+{ #category : #'instance - creation' }
+GtRrTasksExecutionChartTaskDataModel class >> fromDictionary: aDictionary [
+	^ self new 
+		startTime: (aDictionary at: 'startTime');
+		endTime: (aDictionary at: 'endTime')
+]
+
+{ #category : #'instance - creation' }
+GtRrTasksExecutionChartTaskDataModel class >> fromTask: aTask [
+	^ self new 
+		startTime: aTask startTime;
+		endTime: aTask endTime
+]
+
+{ #category : #accessing }
+GtRrTasksExecutionChartTaskDataModel >> duration [
+	^ duration ifNil: [
+		duration := self endTime - startTime ]
+]
+
+{ #category : #accessing }
+GtRrTasksExecutionChartTaskDataModel >> endTime [
+
+	^ endTime
+]
+
+{ #category : #accessing }
+GtRrTasksExecutionChartTaskDataModel >> endTime: anObject [
+
+	endTime := anObject
+]
+
+{ #category : #accessing }
+GtRrTasksExecutionChartTaskDataModel >> startTime [
+
+	^ startTime
+]
+
+{ #category : #accessing }
+GtRrTasksExecutionChartTaskDataModel >> startTime: anObject [
+
+	startTime := anObject
+]
