@@ -47,6 +47,21 @@ GtRrTasksJob >> failedExamples [
 	^ tasks flatCollect: [:aTask | aTask failedExamples ]
 ]
 
+{ #category : #'gt - extensions' }
+GtRrTasksJob >> gtViewTestsActionFor: anAction [
+	<gtAction>
+
+	self hasTests ifFalse: [ ^ anAction noAction ].
+
+	^ anAction button
+		tooltip: 'View Test Results';
+		icon: BrGlamorousVectorIcons eg;
+		action: [ :button | 
+			button phlow spawnObject:
+				(GtRrExamplesReport new 
+					job: self) ].
+]
+
 { #category : #testing }
 GtRrTasksJob >> hasTests [
 	"Answer a boolean indicating if the receiver has one or more tasks that are considered test tasks"
