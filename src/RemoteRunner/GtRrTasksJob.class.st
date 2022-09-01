@@ -42,6 +42,12 @@ GtRrTasksJob >> erroredExamples [
 	^ tasks flatCollect: [:aTask | aTask erroredExamples ]
 ]
 
+{ #category : #accessing }
+GtRrTasksJob >> examplesReport [
+	^ GtRrExamplesReport new
+		job: self 
+]
+
 { #category : #'accessing - examples' }
 GtRrTasksJob >> failedExamples [
 	^ tasks flatCollect: [:aTask | aTask failedExamples ]
