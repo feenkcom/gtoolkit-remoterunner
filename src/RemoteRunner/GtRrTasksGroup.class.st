@@ -110,71 +110,9 @@ GtRrTasksGroup >> gtViewTimelineV3For: aView [
 		title: 'Timeline (v3)';
 		priority: 20; 
 		stencil: [
-			| startTime endTime offset scale finishedTasks barWidthScale container histogram labels ticks |
-			
-			startTime := self startTime.
-endTime := self endTime.
-offset :=  (endTime - startTime) * 0.1.
-			
-scale := GtPlotterTimeScale new
-		domainFrom: startTime  - offset to: endTime + offset. 
-
-finishedTasks := self select: #isFinished.
-
-barWidthScale := GtPlotterDurationScale new
-	domainFrom: 0 milliSeconds
-	to: (finishedTasks maxValue: #duration) .
-
-container := BrVerticalPane new
-	matchParent.
-	
-histogram := BlElement new
-	margin: (BlInsets left: 50);
-	constraintsDo: [ :c | 
-		c horizontal matchParent.
-		c vertical matchParent ];
-	geometry: (BlHistogram new
-		beLeftToRight; 
-		values: ((finishedTasks 
-			sorted: [ :aTask | aTask duration ] descending)
-			collect: [ :aTask | 
-				(barWidthScale map: aTask duration ) min: 1  ]));
-	background: (BlLinearGradientPaint horizontal
-		stops: {
-			(0.2 -> Color red).
-			(1 -> (Color red alpha: 0.0))}).
-			
-labels := (GtPlotterHorizontalTickLabelsElement new
-	clipChildren: false;
-	scale: barWidthScale;
-	padding: (BlInsets left: 50);
-	constraintsDo: [ :c | c vertical fitContent ];
-	labelElement: [ :aGtPlotterScaleContext | 
-		BrLabel new
-			aptitude: (BrLabelAptitude new
-				foreground: Color gray);
-			text: (aGtPlotterScaleContext scale
-				formattedTick: aGtPlotterScaleContext originalValue) ];
-			labels: 5).
-			
-			
-ticks := (GtPlotterHorizontalTicksElement new
-						padding: (BlInsets left: 50);
-						preventMeAndChildrenMouseEvents;
-						scale: barWidthScale;
-						tickStyle: [ :anElement | 
-							anElement
-								width: 2;
-								background: (Color gray alpha: 0.2) ];
-						ticks: 5).
-container 
-	addChild: labels;
-	addChild: (BrFrame new
-				matchParent;
-				addChild: histogram;
-			addChild: ticks)
-	
-													  ]
+			GtRrTasksExecutionVerticalChartStencil new 
+				taskItems: ((self select: #isFinished)
+					sorted: [ :aTask | aTask duration ] descending) ]
 ]
 
 { #category : #'gt - extensions' }
@@ -184,71 +122,9 @@ GtRrTasksGroup >> gtViewTimelineV4For: aView [
 		title: 'Timeline (v4)';
 		priority: 20; 
 		stencil: [
-			| startTime endTime offset scale finishedTasks barWidthScale container histogram labels ticks |
-			
-			startTime := self startTime.
-endTime := self endTime.
-offset :=  (endTime - startTime) * 0.1.
-			
-scale := GtPlotterTimeScale new
-		domainFrom: startTime  - offset to: endTime + offset. 
-
-finishedTasks := self select: #isFinished.
-
-barWidthScale := GtPlotterDurationScale new
-	domainFrom: 0 milliSeconds
-	to: (finishedTasks maxValue: #duration) .
-
-container := BrVerticalPane new
-	matchParent.
-	
-histogram := BlElement new
-	margin: (BlInsets left: 50);
-	constraintsDo: [ :c | 
-		c horizontal matchParent.
-		c vertical matchParent ];
-	geometry: (BlHistogram new
-		beLeftToRight; 
-		values: ((finishedTasks 
-			"sorted: [ :aTask | aTask duration ] descending")
-			collect: [ :aTask | 
-				(barWidthScale map: aTask duration ) min: 1  ]));
-	background: (BlLinearGradientPaint horizontal
-		stops: {
-			(0.2 -> Color red).
-			(1 -> (Color red alpha: 0.0))}).
-			
-labels := (GtPlotterHorizontalTickLabelsElement new
-	clipChildren: false;
-	scale: barWidthScale;
-	padding: (BlInsets left: 50);
-	constraintsDo: [ :c | c vertical fitContent ];
-	labelElement: [ :aGtPlotterScaleContext | 
-		BrLabel new
-			aptitude: (BrLabelAptitude new
-				foreground: Color gray);
-			text: (aGtPlotterScaleContext scale
-				formattedTick: aGtPlotterScaleContext originalValue) ];
-			labels: 5).
-			
-			
-ticks := (GtPlotterHorizontalTicksElement new
-						padding: (BlInsets left: 50);
-						preventMeAndChildrenMouseEvents;
-						scale: barWidthScale;
-						tickStyle: [ :anElement | 
-							anElement
-								width: 2;
-								background: (Color gray alpha: 0.2) ];
-						ticks: 5).
-container 
-	addChild: labels;
-	addChild: (BrFrame new
-				matchParent;
-				addChild: histogram;
-			addChild: ticks)
-	
-													  ]
+			GtRrTasksExecutionVerticalChartStencil new 
+				taskItems: (self 
+					select: #isFinished) ]
 ]
 
 { #category : #initialization }
@@ -268,6 +144,29 @@ GtRrTasksGroup >> items [
 ]
 
 { #category : #accessing }
+GtRrTasksGroup >> maxValue: aBlock [
+	^ self items maxValue: aBlock
+]
+
+{ #category : #accessing }
+GtRrTasksGroup >> reject: aBlock [
+	^ self class 
+		withAll: (self items reject: aBlock)
+]
+
+{ #category : #accessing }
+GtRrTasksGroup >> select: aBlock [
+	^ self class 
+		withAll: (self items select: aBlock)
+]
+
+{ #category : #accessing }
+GtRrTasksGroup >> sorted: aBlock [
+	^ self class 
+		withAll: (self items sorted: aBlock)
+]
+
+{ #category : #accessing }
 GtRrTasksGroup >> startTime [ 
 	| time |
 	time := self items first startTime.
@@ -276,4 +175,9 @@ GtRrTasksGroup >> startTime [
 			ifTrue: [
 				time := aTask startTime ] ].
 	^ time
+]
+
+{ #category : #'math functions' }
+GtRrTasksGroup >> sumNumbers: aBlock [
+	^ self items sumNumbers: aBlock
 ]
