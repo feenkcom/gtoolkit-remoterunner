@@ -1,5 +1,5 @@
 "
-GtRrTestView takes a job that consists of a mixture of SUnit tests and Gt examples and presents a coherent view of the results.
+{{gtClass:GtRrExamplesReport}} takes a job that consists of a mixture of SUnit tests and Gt examples and presents a coherent view of the results.
 "
 Class {
 	#name : #GtRrExamplesReport,
