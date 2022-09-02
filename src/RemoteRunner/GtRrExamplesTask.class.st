@@ -142,6 +142,21 @@ GtRrExamplesTask >> skippedExamples [
 	^ result skippedExamples
 ]
 
+{ #category : #accessing }
+GtRrExamplesTask >> splitTests [
+	"Answer a collection of tasks in which each task has only 1 test from the receiver.
+	If the receiver only has 1 test, answer the receiver."
+	| group |
+
+	group := self group.
+	group size = 1 ifTrue: [ ^ { self reset } ].
+	^ group collect: [ :example |
+		(GtRrExplicitExampleTask examples: 
+			{ example methodClass name -> example selector })
+				constraint: self constraint;
+				taskTimeout: self taskTimeout ].
+]
+
 { #category : #'accessing - dynamic' }
 GtRrExamplesTask >> successfulExamples [
 

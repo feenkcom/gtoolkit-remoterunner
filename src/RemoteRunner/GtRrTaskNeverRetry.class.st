@@ -8,7 +8,7 @@ Class {
 }
 
 { #category : #accessing }
-GtRrTaskNeverRetry >> retryTasks [
+GtRrTaskNeverRetry >> retryTask: aGtRrTask [
 	"Answer the collection of tasks to be retried, in this case none."
 
 	^ #()

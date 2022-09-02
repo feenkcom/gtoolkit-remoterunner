@@ -271,6 +271,7 @@ GtRrTask >> postCopy [
 
 	super postCopy.
 	self reset.
+	taskId := UUID new asString.
 
 ]
 
@@ -297,7 +298,6 @@ GtRrTask >> printSupplementalOn: aStream [
 { #category : #accessing }
 GtRrTask >> reset [
 
-	taskId := UUID new asString.
 	state := #notStarted.
 	handoverTime := nil.
 	startTime := nil.

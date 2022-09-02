@@ -10,7 +10,7 @@ To handle these cases a task can specify conditions under which it will be re-ru
 
 The alternate set of tasks is useful for example when a task contains multiple tests to be executed.  In this case we want the task to be broken out in to a single test per task, allowing the problem test to be isolated and all the remaining tests to pass.
 
-On task failre, the {{gtClass:GtRemoteRunner}} will call {{gtMethod:GtRrTaskRetry>>#retryTasks}} to get the set of tasks to retry, or an empty collection if the task should just fail.
+On task failure, the {{gtClass:GtRemoteRunner}} will call {{gtMethod:GtRrTaskRetry>>#retryTasks}} to get the set of tasks to retry, or an empty collection if the task should just fail.
 "
 Class {
 	#name : #GtRrTaskRetry,
@@ -19,7 +19,7 @@ Class {
 }
 
 { #category : #accessing }
-GtRrTaskRetry >> retryTasks [
+GtRrTaskRetry >> retryTask: aGtRrTask [
 	"Answer the collection of tasks to be retried.
 	If the task should just fail answer an empty collection."
 
