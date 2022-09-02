@@ -9,6 +9,8 @@ Class {
 
 { #category : #'instance creation' }
 GtRrExplicitExampleTask class >> examples: aCollectionOfGtExample [
+	"aCollection is a collection of examples to run, in the form:
+		ClassNameSymbol -> SelectorSymbol"
 
 	^ self new examples: aCollectionOfGtExample 
 ]
@@ -51,4 +53,14 @@ GtRrExplicitExampleTask >> group [
 
 	^ GtExplicitExampleGroup new examples: (examples collect: [ :each | 
 		(each key asSymbol asClass >> each value asSymbol) gtExample asExampleWithResult ]).
+]
+
+{ #category : #accessing }
+GtRrExplicitExampleTask >> splitTests [
+	"Answer a collection of tasks in which each task has only 1 test from the receiver.
+	If the receiver only has 1 test, answer the receiver."
+
+	examples size = 1 ifTrue: [ ^ { self reset } ].
+	^ examples collect: [ :example |
+		self copy examples: { example } ].
 ]

@@ -5,6 +5,13 @@ Class {
 }
 
 { #category : #accessing }
+GtRrAbstractExamplesTask >> allExamples [
+	"Answer all the examples that will be tested"
+
+	^ self subclassResponsibility 
+]
+
+{ #category : #accessing }
 GtRrAbstractExamplesTask >> allMethods [
 	"Answer all the methods that will be tested"
 
@@ -60,6 +67,14 @@ GtRrAbstractExamplesTask >> setIgnoreNoTest [
 { #category : #accessing }
 GtRrAbstractExamplesTask >> skippedExamples [
 	"Answer the examples / tests that were skipped"
+
+	^ self subclassResponsibility
+]
+
+{ #category : #accessing }
+GtRrAbstractExamplesTask >> splitTests [
+	"Answer a collection of tasks in which each task has only 1 test from the receiver.
+	If the receiver only has 1 test, answer the receiver."
 
 	^ self subclassResponsibility
 ]
