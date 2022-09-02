@@ -22,6 +22,12 @@ Class {
 	#category : #'RemoteRunner-UI'
 }
 
+{ #category : #accessing }
+GtRrJobNotificationElement >> actOnElementDetached [
+	self clearNotification.
+	self clearContent.
+]
+
 { #category : #'private - accessing' }
 GtRrJobNotificationElement >> borderElement [
 	<return: #GtNotificationBorderElement>
