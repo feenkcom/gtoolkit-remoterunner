@@ -25,7 +25,7 @@ PlpoGtRrTasksJob >> erroredExamples [
 	^ self proxyPerform: #erroredExamples
 ]
 
-{ #category : #accessing }
+{ #category : #'accessing - reports' }
 PlpoGtRrTasksJob >> examplesReport [
 	^ self proxyPerform: #examplesReport
 ]
@@ -47,6 +47,17 @@ PlpoGtRrTasksJob >> gtViewTestsActionFor: anAction [
 		icon: BrGlamorousVectorIcons eg;
 		action: [ :button | button phlow spawnObject:
 			self examplesReport ].
+]
+
+{ #category : #ui }
+PlpoGtRrTasksJob >> gtViewWorkersReportActionFor: anAction [
+	<gtAction>
+
+	^ anAction button
+		tooltip: 'View Workers Report';
+		icon: BrGlamorousVectorIcons changes;
+		action: [ :button | button phlow spawnObject:
+			self workersReport ].
 ]
 
 { #category : #testing }
@@ -109,4 +120,9 @@ PlpoGtRrTasksJob >> successfulExamples [
 PlpoGtRrTasksJob >> totalExamplesCount [
 
 	^ self proxyPerform: #totalExamplesCount
+]
+
+{ #category : #'accessing - reports' }
+PlpoGtRrTasksJob >> workersReport [
+	^ self proxyPerform: #workersReport
 ]
