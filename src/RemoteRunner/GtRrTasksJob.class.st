@@ -42,7 +42,7 @@ GtRrTasksJob >> erroredExamples [
 	^ tasks flatCollect: [:aTask | aTask erroredExamples ]
 ]
 
-{ #category : #accessing }
+{ #category : #'accessing - reports' }
 GtRrTasksJob >> examplesReport [
 	^ GtRrExamplesReport new
 		job: self 
@@ -66,6 +66,17 @@ GtRrTasksJob >> gtViewTestsActionFor: anAction [
 			button phlow spawnObject:
 				(GtRrExamplesReport new 
 					job: self) ].
+]
+
+{ #category : #'gt - extensions' }
+GtRrTasksJob >> gtViewWorkersReportActionFor: anAction [
+	<gtAction>
+
+	^ anAction button
+		tooltip: 'View Workers Report';
+		icon: BrGlamorousVectorIcons changes;
+		action: [ :button | button phlow spawnObject:
+			self workersReport ].
 ]
 
 { #category : #testing }
@@ -150,4 +161,9 @@ GtRrTasksJob >> tasks: anObject [
 { #category : #'accessing - examples' }
 GtRrTasksJob >> totalExamplesCount [ 
 	^ tasks sumNumbers: #totalCount
+]
+
+{ #category : #'accessing - reports' }
+GtRrTasksJob >> workersReport [
+	^ GtRrWorkersExamplesReport forJob: self 
 ]
