@@ -17,6 +17,12 @@ GtRrAnnouncementQueueUpdateCycleEvent >> addSubEvent: anEvent [
 	self subEvents add: anEvent
 ]
 
+{ #category : #adding }
+GtRrAnnouncementQueueUpdateCycleEvent >> addSubEvents: aCollection [
+	aCollection do: [ :each |
+		self addSubEvent: each ]
+]
+
 { #category : #accessing }
 GtRrAnnouncementQueueUpdateCycleEvent >> allSignals [
 	^ self subEvents allSignals
