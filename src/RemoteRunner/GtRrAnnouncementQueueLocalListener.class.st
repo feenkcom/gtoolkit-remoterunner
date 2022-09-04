@@ -5,8 +5,8 @@ This object wraps a proxy that has an announcement queue and starts a background
 
 There are several methods for configuring the listener:
 	- {{gtMethod:name=GtRrAnnouncementQueueLocalListener>>processLabel:|label=#selector}}
-	-  {{gtMethod:name=GtRrAnnouncementQueueLocalListener>>timeout:|label=#selector}}
-	-  {{gtMethod:name=GtRrAnnouncementQueueLocalListener>>terminationCondition::|label=#selector}}
+	- {{gtMethod:name=GtRrAnnouncementQueueLocalListener>>timeout:|label=#selector}}
+	- {{gtMethod:name=GtRrAnnouncementQueueLocalListener>>terminationCondition:|label=#selector}}
 	
 There is no support currently provided for force-stopping or restarting listening for announcements.
 "
@@ -56,6 +56,32 @@ GtRrAnnouncementQueueLocalListener >> doPoll [
 	isPolling := false.
 ]
 
+{ #category : #accessing }
+GtRrAnnouncementQueueLocalListener >> emitAnnouncementQueueDeliveryCompletedFor: aCollectionOfAnnouncements [ 
+	GtRrAnnouncementQueueDeliveryCompletedAnnouncement new 
+		announcementsCount: aCollectionOfAnnouncements size;
+		emit
+]
+
+{ #category : #signaling }
+GtRrAnnouncementQueueLocalListener >> emitAnnouncementQueueDeliveryInitiatedFor: aCollectionOfAnnouncements [
+	GtRrAnnouncementQueueDeliveryInitiatedAnnouncement new 
+		announcementsCount: aCollectionOfAnnouncements size;
+		emit
+]
+
+{ #category : #signaling }
+GtRrAnnouncementQueueLocalListener >> emitAnnouncementQueuePullCompletedWithCount: anInteger [
+	GtRrAnnouncementQueuePullCompletedAnnouncement new 
+		retrivedAnnouncementCount:  anInteger;
+		emit. 
+]
+
+{ #category : #signaling }
+GtRrAnnouncementQueueLocalListener >> emitAnnouncementQueuePullInitiated [
+	GtRrAnnouncementQueuePullInitiatedAnnouncement new emit.
+]
+
 { #category : #initialization }
 GtRrAnnouncementQueueLocalListener >> initializeForAnnouncingProxy: aProxy [ 
 	proxy := aProxy.
@@ -72,30 +98,25 @@ GtRrAnnouncementQueueLocalListener >> pollAndDeliverAnnouncements [
 	| newAnnouncements |
 	newAnnouncements := self pollAnnouncementQueue.
 	
-	GtRrAnnouncementQueueDeliveryInitiatedAnnouncement new 
-		announcementsCount: newAnnouncements size;
-		emit.
+	self emitAnnouncementQueueDeliveryInitiatedFor: newAnnouncements.
 	
 	newAnnouncements do: [ :anAnnouncement | 
 		self announcer announce: anAnnouncement ].
-		
-	GtRrAnnouncementQueueDeliveryCompletedAnnouncement new 
-		announcementsCount: newAnnouncements size;
-		emit.
+	
+	self emitAnnouncementQueueDeliveryCompletedFor: newAnnouncements.
 ]
 
 { #category : #accessing }
 GtRrAnnouncementQueueLocalListener >> pollAnnouncementQueue [
 	| pulledAnnouncements |
-	GtRrAnnouncementQueuePullInitiatedAnnouncement new emit.
+	
+	self emitAnnouncementQueuePullInitiated.
 	
 	pulledAnnouncements := self pollSerializedAnnouncementQueue 
 		collect: [ :anAnnouncementData |
 			GtRemoteRunnerAnnouncement fromSerializedData: anAnnouncementData ].
 	
-	GtRrAnnouncementQueuePullCompletedAnnouncement new 
-		retrivedAnnouncementCount:  pulledAnnouncements size;
-		emit.
+	self emitAnnouncementQueuePullCompletedWithCount:pulledAnnouncements size.
 	
 	^ pulledAnnouncements
 ]
