@@ -18,7 +18,7 @@ GtRrAnnouncementQueueDynamicEventsCollector >> initialize [
 	
 	logger := MemoryLogger new
 		initializeInterestingSubscriptionsWith: GtRrAnnouncementQueueAnnouncement.
-	logger 
+	logger announcer
 		when: GtRrAnnouncementQueueAnnouncement 
 		send: #actOnQueueSignalFor: 
 		to: self
