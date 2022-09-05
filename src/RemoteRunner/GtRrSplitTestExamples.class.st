@@ -53,3 +53,25 @@ GtRrSplitTestExamples >> splitExplicitExamples [
 	self assert: (splitTasks flatCollect: #examples) equals: compoundExampleNames.
 
 ]
+
+{ #category : #accessing }
+GtRrSplitTestExamples >> splitPackageExamples [
+	"Demonstrate splitting examples out of a {{gtClass::GtRrPackageExampleTask}}"
+	<gtExample>
+	| compoundTask splitTasks taskNames |
+
+	compoundTask := GtRrPackageExampleTask examplePackageName: 'RemoteRunner'.
+	splitTasks := compoundTask splitTests.
+
+	taskNames := compoundTask group examples
+		collect: [ :example | example methodClass name -> example selector ]
+		as: Set.
+
+	splitTasks do: [ :splitTask |
+		self assert: splitTask constraint identicalTo: compoundTask constraint.
+		self assert: splitTask taskTimeout identicalTo: compoundTask taskTimeout.
+		self assert: (taskNames includes: splitTask examples first).
+		taskNames remove: splitTask examples first ].
+	self assert: taskNames isEmpty.
+
+]
