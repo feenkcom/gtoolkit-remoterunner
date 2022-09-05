@@ -167,9 +167,7 @@ GtRrJobProgressNotification >> spawnInspectToolFromSource: anElement [
 { #category : #callbacks }
 GtRrJobProgressNotification >> spawnState: aGroupState fromSource: anElement [
 	GtInspectorTool
-		openWrappedOn: (GtSearchFixedMethodsFilter new 
-			methods: (aGroupState  items 
-				collect: [ :aResult | aResult method ]))
+		openWrappedOn: aGroupState items
 		title: aGroupState name
 		from: anElement 
 ]
