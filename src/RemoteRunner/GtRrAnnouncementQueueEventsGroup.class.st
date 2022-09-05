@@ -28,3 +28,14 @@ GtRrAnnouncementQueueEventsGroup >> gtItemsFor: aView [
 		column: 'Announcements' 
 			text: [ :anEvent | anEvent numberOfAnnouncements ]
 ]
+
+{ #category : #enumerating }
+GtRrAnnouncementQueueEventsGroup >> inject: thisValue into: binaryBlock [
+	^ self items 
+		inject: thisValue into: binaryBlock
+]
+
+{ #category : #'math functions' }
+GtRrAnnouncementQueueEventsGroup >> sumNumbers: aBlock [
+	^ self items sumNumbers: aBlock
+]

@@ -120,6 +120,11 @@ GtRrJobProgressNotification >> job: aGtRrJob [
 ]
 
 { #category : #accessing }
+GtRrJobProgressNotification >> jobName [
+	^ self job name
+]
+
+{ #category : #accessing }
 GtRrJobProgressNotification >> notificationLabel [
 	^ self job jobName
 ]
@@ -149,6 +154,14 @@ GtRrJobProgressNotification >> setJob: aGtRrJob [
 	For testing only"
 
 	job := aGtRrJob 
+]
+
+{ #category : #callbacks }
+GtRrJobProgressNotification >> spawnInspectToolFromSource: anElement [
+	GtInspectorTool
+		openWrappedOn: self job
+		title: self job name
+		from: anElement 
 ]
 
 { #category : #callbacks }

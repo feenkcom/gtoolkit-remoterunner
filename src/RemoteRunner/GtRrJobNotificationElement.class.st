@@ -13,8 +13,6 @@ Class {
 	#instVars : [
 		'nameLabel',
 		'borderElement',
-		'infoButton',
-		'runAgainButton',
 		'isFinished',
 		'updater',
 		'statesPane'
@@ -62,11 +60,24 @@ GtRrJobNotificationElement >> buildStatesElement [
 
 { #category : #initialization }
 GtRrJobNotificationElement >> buildToolbar [
-	| horizontalPane |
+	| horizontalPane  toolbarButtons |
+	
 	horizontalPane := BrHorizontalPane new
 			hMatchParent;
 			vFitContent;
 			alignCenterRight.
+			
+	toolbarButtons := self buildToolbarButtons.
+	
+	horizontalPane
+		addChildren: toolbarButtons.
+	^ horizontalPane
+]
+
+{ #category : #initialization }
+GtRrJobNotificationElement >> buildToolbarButtons [
+	| infoButton runAgainButton |
+	
 	infoButton := BrButton new
 			beTinySize;
 			aptitude: BrGlamorousButtonWithIconAptitude;
@@ -74,6 +85,7 @@ GtRrJobNotificationElement >> buildToolbar [
 			icon: BrGlamorousVectorIcons inspect;
 			margin: (BlInsets top: 2 left: 10);
 			action: [ self inspectJob ].
+	
 	runAgainButton := BrButton new
 			beTinySize;
 			aptitude: BrGlamorousButtonWithIconAptitude;
@@ -81,10 +93,8 @@ GtRrJobNotificationElement >> buildToolbar [
 			icon: BrGlamorousVectorIcons play;
 			margin: (BlInsets top: 2 left: 10);
 			action: [ self runJobAgain ].
-	horizontalPane
-		addChild: infoButton;
-		addChild: runAgainButton.
-	^ horizontalPane
+			
+	^ {infoButton. runAgainButton}
 ]
 
 { #category : #'private - hooks' }
@@ -160,11 +170,8 @@ GtRrJobNotificationElement >> initializeBorderElement [
 GtRrJobNotificationElement >> inspectJob [
 	"Inspect the receiver's job in a new tab in GtWorld"
 	
-	self jobDo: [ :aJob |
-		GtInspectorTool
-			openWrappedOn: aJob
-			title: aJob name
-			from: self ]
+	self notificationDo: [ :aNotification |
+		aNotification spawnInspectToolFromSource: self ]
 ]
 
 { #category : #accessing }
