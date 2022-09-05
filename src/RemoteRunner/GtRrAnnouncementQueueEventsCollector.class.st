@@ -14,6 +14,18 @@ GtRrAnnouncementQueueEventsCollector >> actOnQueueSignalFor: aSignal [
 ]
 
 { #category : #'gt - extensions' }
+GtRrAnnouncementQueueEventsCollector >> gtOverviewFor: aView [
+	<gtView>
+	
+	^ aView columnedList
+		title: 'Overview';
+		priority: 5;
+		items: [ self overviewData ];
+		column: 'Property' text: [ :assoc | assoc key ];
+		column: 'Value' text: [ :assoc | assoc value ]
+]
+
+{ #category : #'gt - extensions' }
 GtRrAnnouncementQueueEventsCollector >> gtViewBeaconSignalsFor: aView [
 	<gtView>
 	
@@ -58,6 +70,28 @@ GtRrAnnouncementQueueEventsCollector >> initialize [
 ]
 
 { #category : #accessing }
+GtRrAnnouncementQueueEventsCollector >> numberOfAnnouncements [
+	^ self queueUpdateEvents 
+		sumNumbers: [ :anEvent | anEvent numberOfAnnouncements]
+]
+
+{ #category : #accessing }
+GtRrAnnouncementQueueEventsCollector >> numberOfUpdateEvents [
+	^ self queueUpdateEvents size
+]
+
+{ #category : #'accessing - overview' }
+GtRrAnnouncementQueueEventsCollector >> overviewData [
+	^ {
+		'Number of Updates' -> self numberOfUpdateEvents.
+		'Number of Announcements' -> self numberOfAnnouncements.
+		'Total Duration' -> self totalDuration.
+		'Announcements Pool Duration' -> self totalPollDuration.
+		'Announcements Delivery Duration' -> self totalDeliveryDuration
+	} 
+]
+
+{ #category : #accessing }
 GtRrAnnouncementQueueEventsCollector >> queueUpdateEvents [
 	^ eventsGrouper queueUpdateEvents
 ]
@@ -70,4 +104,25 @@ GtRrAnnouncementQueueEventsCollector >> start [
 { #category : #accessing }
 GtRrAnnouncementQueueEventsCollector >> stop [
 	logger stop
+]
+
+{ #category : #accessing }
+GtRrAnnouncementQueueEventsCollector >> totalDeliveryDuration [
+	^ self queueUpdateEvents
+		inject: 0 seconds 
+		into: [ :total  :anEvent | total + anEvent deliveryDuration ]
+]
+
+{ #category : #accessing }
+GtRrAnnouncementQueueEventsCollector >> totalDuration [
+	^ self queueUpdateEvents
+		inject: 0 seconds 
+		into: [ :total  :anEvent | total + anEvent duration ]
+]
+
+{ #category : #accessing }
+GtRrAnnouncementQueueEventsCollector >> totalPollDuration [
+^ self queueUpdateEvents
+		inject: 0 seconds 
+		into: [ :total  :anEvent | total + anEvent pollDuration ]
 ]

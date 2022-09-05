@@ -34,6 +34,11 @@ GtRrAnnouncementQueueUpdateCycleEvent >> completedEvent [
 ]
 
 { #category : #accessing }
+GtRrAnnouncementQueueUpdateCycleEvent >> deliveryDuration [
+	^ self completedEvent duration
+]
+
+{ #category : #accessing }
 GtRrAnnouncementQueueUpdateCycleEvent >> duration [
 	^ self completedEvent timestamp - self startedEvent timestamp
 ]
@@ -70,6 +75,11 @@ GtRrAnnouncementQueueUpdateCycleEvent >> initialize [
 { #category : #accessing }
 GtRrAnnouncementQueueUpdateCycleEvent >> numberOfAnnouncements [
 	^ self completedEvent numberOfAnnouncements
+]
+
+{ #category : #accessing }
+GtRrAnnouncementQueueUpdateCycleEvent >> pollDuration [
+	^ self startedEvent duration
 ]
 
 { #category : #printing }
