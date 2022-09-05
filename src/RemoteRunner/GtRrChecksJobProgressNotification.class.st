@@ -27,6 +27,15 @@ GtRrChecksJobProgressNotification >> clearSummaryDetails [
 	successfulChecksCount := 0.
 ]
 
+{ #category : #'accessing - results' }
+GtRrChecksJobProgressNotification >> collectChecksMatching: aBlock [
+	| matchingChecks |
+	matchingChecks := OrderedCollection  new.
+	self taskResults do: [ :aTaskResult |
+			matchingChecks addAll: (aTaskResult select: aBlock) ].
+	^ matchingChecks 
+]
+
 { #category : #'accessing - states' }
 GtRrChecksJobProgressNotification >> constructStates [
 	
@@ -41,7 +50,7 @@ GtRrChecksJobProgressNotification >> constructStates [
 			color: Color lightGreen;
 			testCaseState: GtPharoMethodTestCasePassedState;
 			itemCount: self successfulChecksCount;
-			itemsComputation: [ self job successfulExamples ].
+			itemsComputation: [ self successfulChecks ].
 		(GtRrDataGroupState forNotification: self)
 			name: 'Skipped';
 			color: Color veryVeryLightGray;
@@ -53,19 +62,25 @@ GtRrChecksJobProgressNotification >> constructStates [
 			color: Color lightOrange;
 			testCaseState: GtPharoMethodTestCaseFailureState;
 			itemCount: self failedChecksCount;
-			itemsComputation: [ self job failedExamples ].
+			itemsComputation: [ self failedChecks ].
 		(GtRrDataGroupState forNotification: self)
 			name: 'Error';
 			color: Color red;
 			testCaseState: GtPharoMethodTestCaseErrorState;
 			itemCount: self erroredChecksCount;
-			itemsComputation: [ self job erroredExamples ].
+			itemsComputation: [ self erroredChecks ].
 		(GtRrDataGroupState forNotification: self)
 			name: 'Not executed';
 			color: Color veryVeryLightGray;
 			testCaseState: GtPharoMethodNotExecutedState;
 			itemCount: self notExecutedChecksCount;
 			itemsComputation: [ self job notExecutedExamples ]} 
+]
+
+{ #category : #'accessing - results' }
+GtRrChecksJobProgressNotification >> erroredChecks [
+	^ self collectChecksMatching: [ :aResult |
+			aResult isError or: [ aResult isWarning ] ]
 ]
 
 { #category : #accessing }
@@ -85,6 +100,11 @@ GtRrChecksJobProgressNotification >> executedChecksCount [
 	^ self successfulChecksCount 
 		+ self erroredChecksCount
 		+ self failedChecksCount
+]
+
+{ #category : #'accessing - results' }
+GtRrChecksJobProgressNotification >> failedChecks [
+	^ self collectChecksMatching: [ :aResult | aResult isFailure ]
 ]
 
 { #category : #accessing }
@@ -163,6 +183,28 @@ GtRrChecksJobProgressNotification >> skippedChecksCount [
 GtRrChecksJobProgressNotification >> skippedChecksCount: anObject [
 
 	skippedChecksCount := anObject
+]
+
+{ #category : #callbacks }
+GtRrChecksJobProgressNotification >> spawnState: aGroupState fromSource: anElement [
+	| computedItems targetItems |
+
+	computedItems := aGroupState items.
+	targetItems := (computedItems isKindOf: PharoLinkProxyObject)
+		ifTrue: [ computedItems ]
+		ifFalse: [(GtSearchFixedMethodsFilter new 
+			methods: (computedItems
+				collect: [ :aResult | aResult method ])) ].
+	
+	GtInspectorTool
+		openWrappedOn: targetItems
+		title: aGroupState name
+		from: anElement 
+]
+
+{ #category : #'accessing - results' }
+GtRrChecksJobProgressNotification >> successfulChecks [
+	^ self collectChecksMatching: [ :aResult | aResult isSuccess ]
 ]
 
 { #category : #accessing }
