@@ -194,20 +194,23 @@ GtRrExamplesReport >> successfulExamples [
 { #category : #ui }
 GtRrExamplesReport >> summaryAttributes [
 
-	^ Array streamContents: [ :stream | | all executed successful failed errored skipped |
+	^ Array streamContents: [ :stream | 
+		| all executed successful failed errored skipped notExecuted |
 		all := self allExamples.
 		executed := self executedExamples.
 		errored := self erroredExamples.
 		failed := self failedExamples.
 		skipped := self skippedExamples.
 		successful := self successfulExamples.
+		notExecuted := self notExecutedExamples.
 		stream 
 			nextPut: { #All. all size. all. };
 			nextPut: { #Executed. executed size. executed. };
 			nextPut: { #Successful. successful size. successful. };
 			nextPut: { #Failed. failed size. failed. };
 			nextPut: { #Errored. errored size. errored. };
-			nextPut: { #Skipped. skipped size. skipped. } ]
+			nextPut: { #Skipped. skipped size. skipped. };
+			nextPut: { #NotExecuted. notExecuted size. notExecuted. } ]
 ]
 
 { #category : #accessing }
