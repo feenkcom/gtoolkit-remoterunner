@@ -279,9 +279,7 @@ GtRrWorkerConnection >> summaryAttributes [
 	"Answer a collection of key/value attributes that can simply be listed as a summary of the receiver"
 
 	^ Array streamContents: [ :stream |
-		stream
-			nextPut: { #Connected. self isConnected. connection. };
-			nextPut: { 'Remote Address'. GtRemoteRunner printIpAddress:  remoteAddress. self. }.
+		stream nextPut: { #Connected. self isConnected. connection. }.
 		details ifNotNil:
 			[ details associationsDo: [ :assoc |
 				stream nextPut: { assoc key. assoc value. self. } ] ] ].
