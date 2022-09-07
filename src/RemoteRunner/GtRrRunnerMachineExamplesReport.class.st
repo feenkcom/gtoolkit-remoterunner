@@ -9,6 +9,16 @@ Class {
 }
 
 { #category : #accessing }
+GtRrRunnerMachineExamplesReport >> gtViewWorkersFor: aView [
+	<gtView>
+	
+	^ aView forward 
+		title: 'Workers';
+		object: [ self workersReport ];
+		view: #gtViewWorkersFor:
+]
+
+{ #category : #accessing }
 GtRrRunnerMachineExamplesReport >> ipAddress [
 
 	^ ipAddress
@@ -18,6 +28,23 @@ GtRrRunnerMachineExamplesReport >> ipAddress [
 GtRrRunnerMachineExamplesReport >> ipAddress: anIpAddressString [
 
 	ipAddress := anIpAddressString
+]
+
+{ #category : #accessing }
+GtRrRunnerMachineExamplesReport >> numberOfWorkers [
+	^ self workersReport workers size
+]
+
+{ #category : #printing }
+GtRrRunnerMachineExamplesReport >> printOn: aStream [
+	super printOn: aStream.
+	
+	aStream parenthesize: [ 
+		aStream 
+			<< self ipAddress;
+			<< ', ';
+			print: self numberOfWorkers;
+			<< ' workers'].
 ]
 
 { #category : #accessing }

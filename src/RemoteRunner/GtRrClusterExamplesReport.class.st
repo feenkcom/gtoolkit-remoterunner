@@ -26,6 +26,19 @@ GtRrClusterExamplesReport >> addRunnerMachineReport: aReport [
 	self machineReports add: aReport
 ]
 
+{ #category : #accessing }
+GtRrClusterExamplesReport >> gtViewMachinesFor: aView [
+	<gtView>
+	
+	^ aView columnedList 
+		title: 'Machines';
+		items: [ self machineReports ];
+		column: 'Ip Address' text: [ :aMachineReport |
+			aMachineReport ipAddress ];
+		column: 'Workers Count' text: [ :aMachineReport |
+			aMachineReport numberOfWorkers ]
+]
+
 { #category : #initialization }
 GtRrClusterExamplesReport >> initialize [ 
 	super initialize.
@@ -43,4 +56,14 @@ GtRrClusterExamplesReport >> machineReports [
 GtRrClusterExamplesReport >> machineReports: aCollectionOfReports [
 
 	machineReports := aCollectionOfReports
+]
+
+{ #category : #printing }
+GtRrClusterExamplesReport >> printOn: aStream [
+	super printOn: aStream.
+	
+	aStream parenthesize: [ 
+		aStream 
+			print: self machineReports size;
+			<< ' runner machines'].
 ]
