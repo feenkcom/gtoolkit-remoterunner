@@ -9,8 +9,13 @@ Class {
 
 { #category : #'instance - creation' }
 GtRrWorkersExamplesReport class >> forJob: aJob [
+	^ self forJob: aJob tasks
+]
+
+{ #category : #'instance - creation' }
+GtRrWorkersExamplesReport class >> forTasks: aCollectionOfTasks [
 	| workers |
-	workers := (aJob tasks groupedBy: [ :aTask |
+	workers := (aCollectionOfTasks groupedBy: [ :aTask |
 		aTask workerId ])  associations collect: [ :assoc |
 			GtRrWorkerExamplesReport new
 				tasks: assoc value ;

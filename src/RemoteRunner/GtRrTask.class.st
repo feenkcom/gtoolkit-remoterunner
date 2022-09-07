@@ -477,3 +477,9 @@ GtRrTask >> workerId [
 	^ self workerAttributes ifNotNil: [ :attributes |
 		attributes at: 'id' ifAbsent: [ nil ] ]
 ]
+
+{ #category : #accessing }
+GtRrTask >> workerIpAddress [
+	^ self workerAttributes ifNotNil: [ :attributes |
+		attributes at: 'workerIpAddress' ifAbsent: [ nil ] ]
+]
