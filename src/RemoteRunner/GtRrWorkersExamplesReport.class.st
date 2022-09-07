@@ -9,7 +9,7 @@ Class {
 
 { #category : #'instance - creation' }
 GtRrWorkersExamplesReport class >> forJob: aJob [
-	^ self forJob: aJob tasks
+	^ self forTasks: aJob tasks
 ]
 
 { #category : #'instance - creation' }
