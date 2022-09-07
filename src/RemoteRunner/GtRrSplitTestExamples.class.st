@@ -31,12 +31,37 @@ GtRrSplitTestExamples >> splitClassExamples [
 
 { #category : #accessing }
 GtRrSplitTestExamples >> splitExplicitExamples [
-	"Demonstrate splitting examples out of a {{gtClass::GtRrExplicitExamplesTask}}"
+	"Demonstrate splitting examples out of a {{gtClass::GtRrExplicitExampleTask}}"
 	<gtExample>
 	| compoundTask splitTasks compoundExampleNames |
 
 	compoundTask := GtRrExplicitExampleTask examples:
 		{ #GtRrSampleExample -> #passExample }.
+	splitTasks := compoundTask splitTests.
+
+	self assert: splitTasks size equals: 1.
+	self assert: splitTasks first identicalTo: compoundTask.
+
+
+	compoundExampleNames := { #GtRrSampleExample -> #passExample.
+		#GtRrSampleExample -> #failExample.
+		#GtRrSampleExample -> #errorExample. }.
+	compoundTask := GtRrExplicitExampleTask examples: compoundExampleNames.
+	splitTasks := compoundTask splitTests.
+
+	self assert: splitTasks size equals: 3.
+	self assert: (splitTasks flatCollect: #examples) equals: compoundExampleNames.
+
+]
+
+{ #category : #accessing }
+GtRrSplitTestExamples >> splitExplicitTests [
+	"Demonstrate splitting tests out of a {{gtClass::GtRrExplicitSUnitTask}}"
+	<gtExample>
+	| compoundTask splitTasks compoundExampleNames |
+
+	compoundTask := GtRrExplicitSUnitTask examples:
+		{ #GtRrSampleTest -> #testPass }.
 	splitTasks := compoundTask splitTests.
 
 	self assert: splitTasks size equals: 1.
