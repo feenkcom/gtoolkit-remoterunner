@@ -37,6 +37,11 @@ GtRrWorkersExamplesReport >> gtViewWorkersFor: aView [
 		column: 'Checks' text: [ :aWorker | aWorker numberOfExamples ]
 ]
 
+{ #category : #accessing }
+GtRrWorkersExamplesReport >> numberOfWorkers [
+	^ self workers size
+]
+
 { #category : #printing }
 GtRrWorkersExamplesReport >> printOn: aStream [
 	super printOn: aStream.
