@@ -72,7 +72,7 @@ GtRrWorker class >> newPharoLinkServer: aString [
 
 { #category : #accessing }
 GtRrWorker class >> processCommandLineArgs: args [
-	| worker connectionStrategyId connectionStrategy logger serverSocketAddress |
+	| worker connectionStrategyId connectionStrategy logger serverSocketAddress announcements |
 
 	args
 			  at: #help ifPresent: [ :help | 
@@ -81,7 +81,13 @@ GtRrWorker class >> processCommandLineArgs: args [
 			  at: #log ifPresent: [ 
 				  SignalLogger resetAllInstances.
 				  logger := RestartingStreamLogger stdout.
-				  logger startFor: GtRemoteRunnerAnnouncement , PharoLinkSignal ].
+					announcements := AnnouncementSetWithExclusions withAll:
+						{ GtRemoteRunnerAnnouncement, 
+						PharoLinkSignal,
+						StringSignal,
+						ContextStackSignal }.
+					announcements addExclusions: ContextStackSignal allSubclasses.
+				  logger startFor: announcements ].
 	serverSocketAddress := ((args at: #serverSocketAddress) at:
 			                          #address) value.
 	StringSignal emit: 'Server address: ' , serverSocketAddress.
