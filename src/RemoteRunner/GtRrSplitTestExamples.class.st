@@ -56,8 +56,11 @@ GtRrSplitTestExamples >> splitExplicitExamples [
 
 { #category : #accessing }
 GtRrSplitTestExamples >> splitExplicitTests [
-	"Demonstrate splitting tests out of a {{gtClass::GtRrExplicitSUnitTask}}"
+	"Demonstrate splitting tests out of a {{gtClass::GtRrExplicitSUnitTask}}.
+	WIP"
 	<gtExample>
+	<noTest>
+
 	| compoundTask splitTasks compoundExampleNames |
 
 	compoundTask := GtRrExplicitSUnitTask examples:
