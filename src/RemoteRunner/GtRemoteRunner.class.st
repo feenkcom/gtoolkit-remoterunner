@@ -633,6 +633,7 @@ GtRemoteRunner >> registerWorkerWithDetails: aDictionary [
 		runner: self.
 	workerConnection details: aDictionary.
 	workerId := aDictionary at: #id.
+	aDictionary at: #workerIpAddress put: workerConnection remoteAddressString.
 	sharedAccess critical:
 		[ registeredWorkers at: workerId put: workerConnection ].
 	managerStartupAndShutdown registerWorker: workerConnection.
