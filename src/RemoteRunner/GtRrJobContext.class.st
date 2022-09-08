@@ -21,7 +21,6 @@ GtRrJobContext class >> fromStonDictionary: aDictionary [
 	^ (super fromStonDictionary: aDictionary)
 		job: (aDictionary at: #job);
 		jobTimeoutTime: (aDictionary at: #jobTimeoutTime);
-		taskCompletedCount: (aDictionary at: #taskCompletedCount);
 		taskContexts: (aDictionary at: #taskContexts);
 		yourself.
 ]
@@ -32,7 +31,6 @@ GtRrJobContext >> asDictionary [
 	^ super asDictionary
 		at: #job put: job;
 		at: #jobTimeoutTime put: jobTimeoutTime;
-		at: #taskCompletedCount put: taskCompletedCount;
 		at: #taskContexts put: taskContexts;
 		yourself.
 ]
@@ -138,8 +136,23 @@ GtRrJobContext >> id [
 
 { #category : #testing }
 GtRrJobContext >> isFinished [
+	"Answer a boolean indicating whether the receiver's job is finished.
+	The job is finished if there are no tasks left in the queue or currently being processed.
+	Must be called within shared access.
+	I'm assuming that performance will be OK as the most common scenario is that only one job is executing at a time, so the first entry in currentlyExecutingTasks will  cause the method to answer false.  Only when the job is in fact finished will it need to iterate over the taskQueue, which could well be empty."
 
-	^ taskCompletedCount >= taskContexts size.
+	"Check the executing tasks first as that will be faster, and if the job isn't finished there's probably a task being executed"
+	remoteRunner currentlyExecutingTasks 
+		detect: [ :taskContext | taskContext jobContext == self ]
+		ifFound: [ ^ false ]
+		ifNone: [ ].
+
+	remoteRunner taskQueue itemArray
+		detect: [ :taskContext | taskContext jobContext == self ]
+		ifFound: [ ^ false ]
+		ifNone: [ ].
+
+		^ true
 ]
 
 { #category : #testing }
@@ -199,7 +212,6 @@ GtRrJobContext >> markJobStarted [
 
 	job markJobStarted.
 	jobTimeoutTime := self jobTimeout ifNotNil: [ :timeout | job startTime + timeout ].
-	taskCompletedCount := 0.
 ]
 
 { #category : #'api - running' }
@@ -212,7 +224,6 @@ GtRrJobContext >> markTaskCancelled: aGtRrTaskContext [
 GtRrJobContext >> markTaskCompleted: aGtRrTaskContext [
 
 	job addResult: aGtRrTaskContext task.
-	taskCompletedCount := taskCompletedCount + 1.
 ]
 
 { #category : #'api - running' }
@@ -266,18 +277,6 @@ GtRrJobContext >> summaryAttributes [
 		add: 'Job Context Timeout' -> self jobTimeout;
 		add: 'Task Context Timeout' -> self taskTimeout.
 	^ attributes
-]
-
-{ #category : #accessing }
-GtRrJobContext >> taskCompletedCount [
-
-	^ taskCompletedCount
-]
-
-{ #category : #accessing }
-GtRrJobContext >> taskCompletedCount: anObject [
-
-	taskCompletedCount := anObject
 ]
 
 { #category : #accessing }

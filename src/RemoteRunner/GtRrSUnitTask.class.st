@@ -160,6 +160,21 @@ GtRrSUnitTask >> skippedExamples [
 		pharoLinkTestCaseAnnouncement isSkipped ]
 ]
 
+{ #category : #accessing }
+GtRrSUnitTask >> splitTests [
+	"Answer a collection of tasks in which each task has only 1 test from the receiver.
+	If the receiver only has 1 test, answer the receiver."
+	| group |
+
+	group := self allExamples.
+	group size = 1 ifTrue: [ ^ { self copy } ].
+	^ group collect: [ :testCase |
+		(GtRrExplicitSUnitTask sunitTestNames: 
+			{ testCase class name -> testCase selector })
+				constraint: self constraint;
+				taskTimeout: self taskTimeout ].
+]
+
 { #category : #'accessing - dynamic' }
 GtRrSUnitTask >> successfulExamples [
 

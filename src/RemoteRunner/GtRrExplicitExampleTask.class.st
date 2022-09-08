@@ -60,7 +60,7 @@ GtRrExplicitExampleTask >> splitTests [
 	"Answer a collection of tasks in which each task has only 1 test from the receiver.
 	If the receiver only has 1 test, answer the receiver."
 
-	examples size = 1 ifTrue: [ ^ { self reset } ].
+	examples size = 1 ifTrue: [ ^ { self copy } ].
 	^ examples collect: [ :example |
 		self copy examples: { example } ].
 ]

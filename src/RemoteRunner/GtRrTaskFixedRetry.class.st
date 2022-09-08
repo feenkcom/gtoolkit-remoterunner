@@ -12,6 +12,12 @@ Class {
 }
 
 { #category : #accessing }
+GtRrTaskFixedRetry class >> leJsonV4Name [
+
+	^ #gtRrTaskFixedRetry
+]
+
+{ #category : #accessing }
 GtRrTaskFixedRetry >> initialize [
 
 	super initialize.
@@ -50,6 +56,6 @@ GtRrTaskFixedRetry >> retryTask: aGtRrTask [
 
 	retryCount := retryCount + 1.
 	^ retryCount <= maxRetries 
-		ifTrue: [ { aGtRrTask } ]
+		ifTrue: [ { self privateRetryTaskFor: aGtRrTask } ]
 		ifFalse: [ #() ].
 ]
