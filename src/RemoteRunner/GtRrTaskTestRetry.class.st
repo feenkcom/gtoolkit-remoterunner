@@ -12,6 +12,12 @@ Class {
 }
 
 { #category : #accessing }
+GtRrTaskTestRetry class >> leJsonV4Name [
+
+	^ #gtRrTaskNeverRetry
+]
+
+{ #category : #accessing }
 GtRrTaskTestRetry >> initialize [
 
 	super initialize.
@@ -46,9 +52,14 @@ GtRrTaskTestRetry >> retryCount: anObject [
 { #category : #accessing }
 GtRrTaskTestRetry >> retryTask: aGtRrTask [
 	"Test retry has a maximum number of retries, however if the task contains multiple tests we want to break out the tests in to individual tasks so that one test can't cause the failure of others"
+	| retryTasks |
 
 	retryCount := retryCount + 1.
-	^ retryCount <= maxRetries 
-		ifTrue: [ aGtRrTask splitTests ]
-		ifFalse: [ #() ].
+	^ retryCount <= maxRetries ifTrue: 
+		[ retryTasks := aGtRrTask splitTests.
+		retryTasks do: [ :retryTask |
+			retryTask retryStrategy failedTask: aGtRrTask. ].
+		retryTasks ]
+	ifFalse: 
+		[ #() ].
 ]

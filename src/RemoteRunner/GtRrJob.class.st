@@ -1,5 +1,6 @@
 "
 A {{gtClass:GtRrJob}} is the object submitted to a remote runner for execution.  It answers a collection of tasks to be executed by the workers, and holds the results of the tasks.  Partial results are announced as each task is completed.
+Since task retry may split tasks out, e.g. see {{gtClass:GtRrTaskTestRetry}}, the number of results may be different to the number of tasks.
 
 Implementation Details:
 

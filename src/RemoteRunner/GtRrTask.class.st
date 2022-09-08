@@ -12,7 +12,8 @@ Class {
 		'taskId',
 		'errorDetails',
 		'state',
-		'taskTimeout'
+		'taskTimeout',
+		'retryStrategy'
 	],
 	#category : #'RemoteRunner-Tasks'
 }
@@ -208,6 +209,7 @@ GtRrTask >> initialize [
 	super initialize.
 	self reset.
 	constraint := GtRrTrueConstraint instance.
+	retryStrategy := GtRrTaskNeverRetry uniqueInstance.
 ]
 
 { #category : #testing }
@@ -272,7 +274,7 @@ GtRrTask >> postCopy [
 	super postCopy.
 	self reset.
 	taskId := UUID new asString.
-
+	retryStrategy := retryStrategy copy.
 ]
 
 { #category : #printing }
@@ -330,6 +332,25 @@ GtRrTask >> resultReceivedTime [
 GtRrTask >> resultReceivedTime: anObject [
 
 	^ resultReceivedTime := anObject
+]
+
+{ #category : #accessing }
+GtRrTask >> retryStrategy [
+
+	^ retryStrategy
+]
+
+{ #category : #accessing }
+GtRrTask >> retryStrategy: anObject [
+
+	retryStrategy := anObject
+]
+
+{ #category : #accessing }
+GtRrTask >> retryTasks [
+	"Answer the collection of tasks to be retried"
+
+	^ retryStrategy retryTask: self.
 ]
 
 { #category : #running }

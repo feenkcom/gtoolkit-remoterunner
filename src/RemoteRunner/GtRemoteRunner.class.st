@@ -296,16 +296,16 @@ GtRemoteRunner >> critical: aBlock [
 	sharedAccess critical: aBlock.
 ]
 
-{ #category : #private }
+{ #category : #'private - accessing' }
 GtRemoteRunner >> currentlyExecutingJobs [
-	"Private: for testing internal state only"
+	"Must be called within shared access"
 
 	^ currentlyExecutingJobs
 ]
 
-{ #category : #private }
+{ #category : #'private - accessing' }
 GtRemoteRunner >> currentlyExecutingTasks [
-	"Private: for testing internal state only"
+	"Must be called within shared access"
 
 	^ currentlyExecutingTasks
 ]
@@ -440,7 +440,7 @@ GtRemoteRunner >> initialize [
 
 	super initialize.
 	announcer := Announcer new.
-	taskQueue := SharedQueue new.
+	taskQueue := SharedQueue new. "of GtRrTaskContext"
 	runnerStats := GtRemoteRunnerStats new.
 	"currentlyExecutingJobs is a dictionary of GtRrJobContext keyed by job uid"
 	currentlyExecutingJobs := Dictionary new.
@@ -587,11 +587,11 @@ GtRemoteRunner >> printOn: aStream [
 		nextPut: $).
 ]
 
-{ #category : #'api - worker' }
+{ #category : #private }
 GtRemoteRunner >> privateTaskFailed: aTaskContextId started: startTime completed: endTime with: anGtRrTaskErrorDetails [
-	"Mark the specified task as failed.
+	"Mark the specified task as failed and retry if required.
 	Must be called within sharedAccess"
-	| taskContext |
+	| taskContext retryTasks |
 
 	taskContext := currentlyExecutingTasks removeKey: aTaskContextId ifAbsent: [ nil ].
 	taskContext ifNil: [ ^ self ].
@@ -601,23 +601,22 @@ GtRemoteRunner >> privateTaskFailed: aTaskContextId started: startTime completed
 		errorDetails: anGtRrTaskErrorDetails.
 	taskContext markTaskCompleted.
 	self announceAndLog: (GtRrTaskCompletedAnnouncement task: taskContext).
+	retryTasks := taskContext task retryTasks.
+	retryTasks ifNotEmpty:
+		[ self queueTasks: retryTasks jobContext: taskContext jobContext ].
 	self assignTasksToWorkers.
-	self checkJobCompleted: taskContext.
+	"If there were retry tasks there's no need to check if the job is completed"
+	retryTasks ifEmpty:
+		[ self checkJobCompleted: taskContext ].
 ]
 
-{ #category : #'api - worker' }
-GtRemoteRunner >> privateTaskFailed: aTaskContextId with: anGtRrTaskErrorDetails [
-	"Mark the specified task as failed.
-	Must be called within sharedAccess"
-	| taskContext |
+{ #category : #private }
+GtRemoteRunner >> queueTasks: retryTasks jobContext: anObject [ 
 
-	taskContext := currentlyExecutingTasks removeKey: aTaskContextId ifAbsent: [ nil ].
-	taskContext ifNil: [ ^ self ].
-	taskContext errorDetails: anGtRrTaskErrorDetails.
-	taskContext markTaskCompleted.
-	self announceAndLog: (GtRrTaskCompletedAnnouncement task: taskContext).
-	self assignTasksToWorkers.
-	self checkJobCompleted: taskContext.
+	retryTasks do: [ :task |
+		self addTaskContext: (GtRrTaskContext new 
+			task: task;
+			jobContext: anObject) ]
 ]
 
 { #category : #'api - worker' }
@@ -890,10 +889,10 @@ GtRemoteRunner >> taskFailed: aTaskContextId started: startTime completed: endTi
 	^ nil.
 ]
 
-{ #category : #'private - debugging' }
+{ #category : #'private - accessing' }
 GtRemoteRunner >> taskQueue [
 	"Answer the taskQueue.
-	WARNING: This is outside sharedAccess and is for debugging purposes only."
+	Must be called with shared access."
 
 	^ taskQueue
 ]
@@ -973,7 +972,11 @@ GtRemoteRunner >> unregisterWorkerId: aUidString reason: aString [
 			errorDetails := GtRrErrorDetails new
 					errorMessage: 'Worker Unregistered';
 					setTrace.
-			self privateTaskFailed: taskContext taskContextId with: errorDetails ]. ].
+			self 
+				privateTaskFailed: taskContext taskContextId 
+				started: nil
+				completed: nil
+				with: errorDetails ]. ].
 	workerConnection ifNotNil:
 		[ self announceAndLog: (GtRrWorkerUnregisteredAnnouncement new
 			worker: workerConnection;

@@ -15,8 +15,33 @@ On task failure, the {{gtClass:GtRemoteRunner}} will call {{gtMethod:GtRrTaskRet
 Class {
 	#name : #GtRrTaskRetry,
 	#superclass : #Object,
+	#instVars : [
+		'failedTask'
+	],
 	#category : #'RemoteRunner-TaskRetry'
 }
+
+{ #category : #accessing }
+GtRrTaskRetry >> failedTask [
+
+	^ failedTask
+]
+
+{ #category : #accessing }
+GtRrTaskRetry >> failedTask: anObject [
+
+	failedTask := anObject
+]
+
+{ #category : #private }
+GtRrTaskRetry >> privateRetryTaskFor: aGtRrTask [
+	"Answer a copy of the supplied task"
+	| retryTask |
+
+	retryTask := aGtRrTask copy.
+	retryTask retryStrategy failedTask: aGtRrTask.
+	^ retryTask
+]
 
 { #category : #accessing }
 GtRrTaskRetry >> retryTask: aGtRrTask [

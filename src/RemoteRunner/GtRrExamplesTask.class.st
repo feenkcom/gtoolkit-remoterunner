@@ -149,7 +149,7 @@ GtRrExamplesTask >> splitTests [
 	| group |
 
 	group := self group.
-	group size = 1 ifTrue: [ ^ { self reset } ].
+	group size = 1 ifTrue: [ ^ { self copy } ].
 	^ group collect: [ :example |
 		(GtRrExplicitExampleTask examples: 
 			{ example methodClass name -> example selector })
