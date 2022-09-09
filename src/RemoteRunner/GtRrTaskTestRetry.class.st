@@ -14,7 +14,7 @@ Class {
 { #category : #accessing }
 GtRrTaskTestRetry class >> leJsonV4Name [
 
-	^ #gtRrTaskNeverRetry
+	^ #gtRrTaskTestRetry
 ]
 
 { #category : #accessing }

@@ -562,10 +562,10 @@ GtRemoteRunner >> pingAllWorkers [
 GtRemoteRunner >> port [
 
 	^ port ifNil: 
-		[ 	| socket |
-		socket := Socket newTCP listenOn: 0.
-		port := socket localPort.
-		socket closeAndDestroy.
+		[ | socket |
+		[ socket := Socket newTCP listenOn: 0.
+		port := socket localPort ]
+			ensure: [ socket closeAndDestroy ].
 		self assert: port > 0
 			description: 'Failed to get an unallocated port'.
 		port ]
