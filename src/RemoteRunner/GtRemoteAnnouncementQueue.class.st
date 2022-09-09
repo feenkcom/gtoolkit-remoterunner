@@ -16,12 +16,6 @@ Class {
 	#category : #'RemoteRunner-AnnouncementQueue'
 }
 
-{ #category : #jsonV4 }
-GtRemoteAnnouncementQueue class >> leJsonV4Name [
-
-	^ #gtRemoteAnnouncementQueue
-]
-
 { #category : #accessing }
 GtRemoteAnnouncementQueue class >> onAnnouncer: anAnnouncingObject [
 	^ self new
