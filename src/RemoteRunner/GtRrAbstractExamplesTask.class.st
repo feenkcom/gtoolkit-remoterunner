@@ -5,6 +5,12 @@ Class {
 }
 
 { #category : #accessing }
+GtRrAbstractExamplesTask class >> leJsonV4Name [
+
+	^ nil
+]
+
+{ #category : #accessing }
 GtRrAbstractExamplesTask >> allExamples [
 	"Answer all the examples that will be tested"
 
