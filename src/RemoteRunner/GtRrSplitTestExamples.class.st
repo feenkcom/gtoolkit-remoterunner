@@ -6,7 +6,7 @@ Class {
 	#category : #'RemoteRunner-Examples'
 }
 
-{ #category : #accessing }
+{ #category : #examples }
 GtRrSplitTestExamples >> splitClassExamples [
 	"Demonstrate splitting examples out of a {{gtClass::GtRrClassExampleTask}}"
 	<gtExample>
@@ -29,7 +29,7 @@ GtRrSplitTestExamples >> splitClassExamples [
 
 ]
 
-{ #category : #accessing }
+{ #category : #examples }
 GtRrSplitTestExamples >> splitClassTests [
 	"Demonstrate splitting tests out of a {{gtClass::GtRrClassSUnitTask}}"
 	<gtExample>
@@ -53,7 +53,7 @@ GtRrSplitTestExamples >> splitClassTests [
 
 ]
 
-{ #category : #accessing }
+{ #category : #examples }
 GtRrSplitTestExamples >> splitExplicitExamples [
 	"Demonstrate splitting examples out of a {{gtClass::GtRrExplicitExampleTask}}"
 	<gtExample>
@@ -76,7 +76,7 @@ GtRrSplitTestExamples >> splitExplicitExamples [
 
 ]
 
-{ #category : #accessing }
+{ #category : #examples }
 GtRrSplitTestExamples >> splitExplicitTests [
 	"Demonstrate splitting tests out of a {{gtClass::GtRrExplicitSUnitTask}}.
 	WIP"
@@ -101,7 +101,7 @@ GtRrSplitTestExamples >> splitExplicitTests [
 
 ]
 
-{ #category : #accessing }
+{ #category : #examples }
 GtRrSplitTestExamples >> splitPackageExamples [
 	"Demonstrate splitting examples out of a {{gtClass::GtRrPackageExampleTask}}"
 	<gtExample>
@@ -123,7 +123,7 @@ GtRrSplitTestExamples >> splitPackageExamples [
 
 ]
 
-{ #category : #accessing }
+{ #category : #examples }
 GtRrSplitTestExamples >> splitPackageTests [
 	"Demonstrate splitting examples out of a {{gtClass::GtRrPackageSUnitTask}}"
 	<gtExample>
