@@ -26,15 +26,43 @@ GtRrWorkersExamplesReport class >> forTasks: aCollectionOfTasks [
 ]
 
 { #category : #accessing }
+GtRrWorkersExamplesReport >> cummulativeTasksDuration [
+	^ self workers  
+		inject: 0 seconds 
+		into: [ :totalDuration :aWorker |
+			totalDuration + aWorker tasksDuration ]
+]
+
+{ #category : #'gt - extensions' }
 GtRrWorkersExamplesReport >> gtViewWorkersFor: aView [
 	<gtView>
 	
 	^ aView columnedList 
-		title: 'Workers';
+		title: 'Workers Stats';
 		items: [ self workers ];
 		column: 'Id' text: [ :aWorker | aWorker workerId ];
 		column: 'Tasks' text: [ :aWorker | aWorker numberOfTasks ];
-		column: 'Checks' text: [ :aWorker | aWorker numberOfExamples ]
+		column: 'Checks' text: [ :aWorker | aWorker numberOfExamples ];
+		column: 'Tasks Duration' text: [ :aWorker | aWorker tasksDuration ]
+]
+
+{ #category : #'gt - extensions' }
+GtRrWorkersExamplesReport >> gtViewWorkersTimingFor: aView [
+	<gtView>
+	
+	^ aView columnedList 
+		title: 'Workers Timing';
+		priority: 20;
+		items: [ self workers ];
+		column: 'Id' text: [ :aWorker | aWorker workerId ];
+		column: 'Tasks Start Time' text: [ :aWorker | aWorker tasksStartTime ];
+		column: 'Tasks Duration' text: [ :aWorker | aWorker tasksDuration ];
+		column: 'Task Gap' text: [ :aWorker | aWorker taskGapsDuration ]
+]
+
+{ #category : #accessing }
+GtRrWorkersExamplesReport >> numberOfExamples [
+	^ self workers sumNumbers: [ :aWorker | aWorker numberOfExamples ]
 ]
 
 { #category : #accessing }
@@ -50,6 +78,40 @@ GtRrWorkersExamplesReport >> printOn: aStream [
 		aStream 
 			print: self workers size;
 			<< ' workers' ]
+]
+
+{ #category : #accessing }
+GtRrWorkersExamplesReport >> tasksFirstStartTime [ 
+	^ self workers 
+		inject: self workers first tasksStartTime
+		into: [ :startTime :aWorker |
+			| workerStartTime |
+			workerStartTime := aWorker tasksStartTime.
+			workerStartTime < startTime 
+				ifTrue: [ workerStartTime ]
+				ifFalse: [ startTime ]  ]
+]
+
+{ #category : #accessing }
+GtRrWorkersExamplesReport >> tasksLastStartTime [ 
+	^ self workers 
+		inject: self workers first tasksStartTime
+		into: [ :startTime :aWorker |
+			| workerStartTime |
+			workerStartTime := aWorker tasksStartTime.
+			workerStartTime > startTime 
+				ifTrue: [ workerStartTime ]
+				ifFalse: [ startTime ]  ]
+]
+
+{ #category : #accessing }
+GtRrWorkersExamplesReport >> tasksStartInterval [
+	^ self tasksLastStartTime - self tasksFirstStartTime
+]
+
+{ #category : #accessing }
+GtRrWorkersExamplesReport >> tasksStartTime [ 
+	^ self tasksFirstStartTime
 ]
 
 { #category : #accessing }

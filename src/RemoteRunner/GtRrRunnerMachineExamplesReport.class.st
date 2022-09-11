@@ -9,6 +9,11 @@ Class {
 }
 
 { #category : #accessing }
+GtRrRunnerMachineExamplesReport >> cummulativeTasksDuration [
+	^ self workersReport cummulativeTasksDuration
+]
+
+{ #category : #'gt - extensions' }
 GtRrRunnerMachineExamplesReport >> gtViewWorkersFor: aView [
 	<gtView>
 	
@@ -16,6 +21,17 @@ GtRrRunnerMachineExamplesReport >> gtViewWorkersFor: aView [
 		title: 'Workers';
 		object: [ self workersReport ];
 		view: #gtViewWorkersFor:
+]
+
+{ #category : #'gt - extensions' }
+GtRrRunnerMachineExamplesReport >> gtViewWorkersTimingFor: aView [
+	<gtView>
+	
+	^ aView forward 
+		title: 'Workers Timing';
+		priority: 20;
+		object: [ self workersReport ];
+		view: #gtViewWorkersTimingFor:
 ]
 
 { #category : #accessing }
@@ -28,6 +44,11 @@ GtRrRunnerMachineExamplesReport >> ipAddress [
 GtRrRunnerMachineExamplesReport >> ipAddress: anIpAddressString [
 
 	ipAddress := anIpAddressString
+]
+
+{ #category : #accessing }
+GtRrRunnerMachineExamplesReport >> numberOfExamples [
+	^ self workersReport numberOfExamples
 ]
 
 { #category : #accessing }
@@ -45,6 +66,16 @@ GtRrRunnerMachineExamplesReport >> printOn: aStream [
 			<< ', ';
 			print: self numberOfWorkers;
 			<< ' workers'].
+]
+
+{ #category : #accessing }
+GtRrRunnerMachineExamplesReport >> tasksStartInterval [
+	^ self workersReport tasksStartInterval
+]
+
+{ #category : #accessing }
+GtRrRunnerMachineExamplesReport >> tasksStartTime [
+	^ self workersReport tasksStartTime
 ]
 
 { #category : #accessing }
