@@ -26,17 +26,40 @@ GtRrClusterExamplesReport >> addRunnerMachineReport: aReport [
 	self machineReports add: aReport
 ]
 
-{ #category : #accessing }
+{ #category : #'gt - extensions' }
 GtRrClusterExamplesReport >> gtViewMachinesFor: aView [
 	<gtView>
 	
 	^ aView columnedList 
-		title: 'Machines';
+		title: 'Machines Stats';
+		priority: 10;
 		items: [ self machineReports ];
 		column: 'Ip Address' text: [ :aMachineReport |
 			aMachineReport ipAddress ];
 		column: 'Workers Count' text: [ :aMachineReport |
-			aMachineReport numberOfWorkers ]
+			aMachineReport numberOfWorkers ];
+		column: 'Checks Count' text: [ :aMachineReport |
+			aMachineReport numberOfExamples ];
+		column: 'Cummulative Duration' text: [ :aMachineReport |
+			aMachineReport cummulativeTasksDuration ]
+]
+
+{ #category : #'gt - extensions' }
+GtRrClusterExamplesReport >> gtViewMachinesTimingFor: aView [
+	<gtView>
+	
+	^ aView columnedList 
+		title: 'Machines Timing';
+		priority: 20;
+		items: [ self machineReports ];
+		column: 'Ip Address' text: [ :aMachineReport |
+			aMachineReport ipAddress ];
+		column: 'Workers Count' text: [ :aMachineReport |
+			aMachineReport numberOfWorkers ];
+		column: 'Tasks First Start Time' text: [ :aMachineReport |
+			aMachineReport tasksStartTime ];
+		column: 'Workers Start Interval' text: [ :aMachineReport |
+			aMachineReport tasksStartInterval ]
 ]
 
 { #category : #initialization }

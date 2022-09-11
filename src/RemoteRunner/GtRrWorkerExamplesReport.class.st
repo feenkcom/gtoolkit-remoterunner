@@ -82,6 +82,15 @@ GtRrWorkerExamplesReport >> printOn: aStream [
 ]
 
 { #category : #accessing }
+GtRrWorkerExamplesReport >> taskGapsDuration [
+	| gapDuration|
+	gapDuration := 0 seconds.
+	self tasks  pairsDo: [ :aTask :anotherTask |
+		gapDuration := gapDuration + (anotherTask startTime - aTask endTime) ].
+	^ gapDuration
+]
+
+{ #category : #accessing }
 GtRrWorkerExamplesReport >> tasks [
 	^ tasks
 ]
@@ -92,10 +101,20 @@ GtRrWorkerExamplesReport >> tasks: aCollection [
 ]
 
 { #category : #accessing }
+GtRrWorkerExamplesReport >> tasksDuration [
+	^ self tasks  duration
+]
+
+{ #category : #accessing }
 GtRrWorkerExamplesReport >> tasksExecutionChartItemsData [
 	^ (self tasks select: #isFinished)
 		collect: [ :aTask |
 			(GtRrTasksExecutionChartTaskDataModel fromTask: aTask) asDictionary ] 
+]
+
+{ #category : #accessing }
+GtRrWorkerExamplesReport >> tasksStartTime [ 
+	^ self tasks startTime
 ]
 
 { #category : #accessing }

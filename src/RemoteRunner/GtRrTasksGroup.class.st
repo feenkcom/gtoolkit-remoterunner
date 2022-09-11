@@ -16,6 +16,16 @@ GtRrTasksGroup class >> withAll: aCollection [
 ]
 
 { #category : #accessing }
+GtRrTasksGroup >> duration [
+	^ self items  
+		inject: 0 seconds 
+		into: [ :totalDuration :aTask |
+			aTask duration 
+				ifNil: [ totalDuration ]
+				ifNotNil: [ :aDuration | totalDuration + aDuration ] ]
+]
+
+{ #category : #accessing }
 GtRrTasksGroup >> endTime [ 
 	| time |
 	time := self items first endTime.
@@ -146,6 +156,11 @@ GtRrTasksGroup >> items [
 { #category : #accessing }
 GtRrTasksGroup >> maxValue: aBlock [
 	^ self items maxValue: aBlock
+]
+
+{ #category : #accessing }
+GtRrTasksGroup >> pairsDo: aBlock [
+	^ self items  pairsDo: aBlock
 ]
 
 { #category : #accessing }
