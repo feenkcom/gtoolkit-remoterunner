@@ -55,7 +55,10 @@ GtRrWorkersExamplesReport >> gtViewWorkersTimingFor: aView [
 		priority: 20;
 		items: [ self workers ];
 		column: 'Id' text: [ :aWorker | aWorker workerId ];
-		column: 'Tasks Start Time' text: [ :aWorker | aWorker tasksStartTime ];
+		column: 'Tasks Start Time' text: [ :aWorker | 
+			aWorker tasksStartTime printToSeconds ];
+		column: 'Tasks End Time' text: [ :aWorker | 
+			aWorker tasksEndTime printToSeconds ];
 		column: 'Tasks Duration' text: [ :aWorker | aWorker tasksDuration ];
 		column: 'Task Gap' text: [ :aWorker | aWorker taskGapsDuration ]
 ]
@@ -90,6 +93,18 @@ GtRrWorkersExamplesReport >> tasksFirstStartTime [
 			workerStartTime < startTime 
 				ifTrue: [ workerStartTime ]
 				ifFalse: [ startTime ]  ]
+]
+
+{ #category : #accessing }
+GtRrWorkersExamplesReport >> tasksLastEndTime [ 
+	^ self workers 
+		inject: self workers first tasksEndTime
+		into: [ :endTime :aWorker |
+			| workerEndTime |
+			workerEndTime := aWorker tasksEndTime.
+			workerEndTime > endTime 
+				ifTrue: [ workerEndTime ]
+				ifFalse: [ endTime ]  ]
 ]
 
 { #category : #accessing }
