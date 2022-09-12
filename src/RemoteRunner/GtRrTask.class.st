@@ -65,6 +65,13 @@ GtRrTask >> duration [
 ]
 
 { #category : #accessing }
+GtRrTask >> durationOnRunner [
+	^ (handoverTime isNotNil and: [ resultReceivedTime isNotNil ]) 
+		ifTrue: [ resultReceivedTime - handoverTime ]
+		ifFalse: [ nil ]
+]
+
+{ #category : #accessing }
 GtRrTask >> endTime [
 	"Answer the time at which the task was completed on the worker"
 	<return: #Duration>
