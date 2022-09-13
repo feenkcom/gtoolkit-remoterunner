@@ -5,7 +5,8 @@ Class {
 		'executions',
 		'startTimeComputation',
 		'endTimeComputation',
-		'rowLabelComputation'
+		'rowLabelComputation',
+		'colorComputation'
 	],
 	#category : #'RemoteRunner-UI'
 }
@@ -18,6 +19,12 @@ GtRrExecutionHorizontalChartStencil >> amountOfTicks [
 { #category : #accessing }
 GtRrExecutionHorizontalChartStencil >> barHeight [
 	^ 15
+]
+
+{ #category : #accessing }
+GtRrExecutionHorizontalChartStencil >> colorComputation: anObject [
+
+	colorComputation := anObject
 ]
 
 { #category : #accessing }
@@ -118,6 +125,11 @@ GtRrExecutionHorizontalChartStencil >> createRow [
 		hMatchParent
 ]
 
+{ #category : #initialization }
+GtRrExecutionHorizontalChartStencil >> defaultBarColor [
+	^ ((Color r: 92 g: 204 b: 231 range: 255) alpha: 0.2)
+]
+
 { #category : #accessing }
 GtRrExecutionHorizontalChartStencil >> endTimeComputation: anObject [
 
@@ -171,6 +183,7 @@ GtRrExecutionHorizontalChartStencil >> initialize [
 	startTimeComputation := [ :anExecution | anExecution startTime ].
 	endTimeComputation :=  [ :anExecution | anExecution endTime ].
 	rowLabelComputation := [ :anExecution | anExecution gtDisplayString ].
+	colorComputation := [ self defaultBarColor ]
 ]
 
 { #category : #accessing }
@@ -218,5 +231,6 @@ GtRrExecutionHorizontalChartStencil >> startTimeComputation: anObject [
 GtRrExecutionHorizontalChartStencil >> styleBar: anElement execution: anObject [ 
 	^ anElement
 		geometry: BlStadium new;
-		background: ((Color r: 92 g: 204 b: 231 range: 255) alpha: 0.2)
+		background: ((colorComputation cull: anObject) ifNil: [
+			self defaultBarColor ]) 
 ]
