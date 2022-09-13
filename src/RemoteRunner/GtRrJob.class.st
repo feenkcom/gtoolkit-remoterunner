@@ -23,7 +23,8 @@ Class {
 		'taskTimeout',
 		'errorDetails',
 		'errorCount',
-		'name'
+		'name',
+		'creationTime'
 	],
 	#category : #'RemoteRunner-Jobs'
 }
@@ -60,6 +61,7 @@ GtRrJob class >> leJsonV4AttributeMapping [
 		#state -> #state.
 		#startTime -> #startTime.
 		#endTime -> #endTime.
+		#creationTime -> #creationTime.
 		#jobTimeout -> #jobTimeout.
 		#taskTimeout -> #taskTimeout.
 		#errorDetails -> #errorDetails.
@@ -122,6 +124,18 @@ GtRrJob >> cancelJob [
 
 	self markJobCancelled.
 
+]
+
+{ #category : #accessing }
+GtRrJob >> creationTime [
+
+	^ creationTime
+]
+
+{ #category : #accessing }
+GtRrJob >> creationTime: anObject [
+
+	creationTime := anObject
 ]
 
 { #category : #accessing }
@@ -373,7 +387,7 @@ GtRrJob >> reset [
 	startTime := nil.
 	endTime := nil.
 	errorDetails := nil.
-
+	creationTime := DateAndTime now.
 ]
 
 { #category : #accessing }
