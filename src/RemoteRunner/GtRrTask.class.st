@@ -377,6 +377,13 @@ GtRrTask >> runInImage [
 ]
 
 { #category : #accessing }
+GtRrTask >> serverDuration [
+	^ (handoverTime isNotNil and: [ resultReceivedTime isNotNil ]) 
+		ifTrue: [ resultReceivedTime - handoverTime ]
+		ifFalse: [ nil ]
+]
+
+{ #category : #accessing }
 GtRrTask >> startTime [
 	"Answer the time at which the task was started on the worker"
 	<return: #Duration>

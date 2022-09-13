@@ -39,15 +39,13 @@ GtRrTimeoutManager >> checkTimeouts [
 	| now context |
 
 	contexts ifEmpty: [ ^ self ].
-	remoteRunner sharedAccess critical:
-		[ now := DateAndTime now.
-		[ contexts isNotEmpty and: 
-			[ (context := contexts first) contextTimeoutTime <= now ] ] whileTrue:
-				[ contexts removeFirst.
-				context isFinished ifFalse:
-					[ context scheduleTimeoutContext.
-					 ] ].
-		self updateScheduledTask ].
+	now := DateAndTime now.
+	[ contexts isNotEmpty and: 
+		[ (context := contexts first) contextTimeoutTime <= now ] ] whileTrue:
+			[ contexts removeFirst.
+			context isFinished ifFalse:
+				[ context scheduleTimeoutContext ] ].
+	self updateScheduledTask.
 ]
 
 { #category : #ui }

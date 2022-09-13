@@ -314,6 +314,13 @@ GtRrTaskContext >> workerAttributes: anObject [
 ]
 
 { #category : #accessing }
+GtRrTaskContext >> workerConnection [
+	<return: #GtRrWorkerConnection>
+
+	^ workerFuture connection
+]
+
+{ #category : #accessing }
 GtRrTaskContext >> workerFuture [
 	<return: #GtRrFutureWorkerTask>
 

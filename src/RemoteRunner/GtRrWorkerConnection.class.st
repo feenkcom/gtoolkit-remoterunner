@@ -14,7 +14,8 @@ Class {
 		'details',
 		'observer',
 		'observerProcess',
-		'observerSemaphore'
+		'observerSemaphore',
+		'lastHeartbeat'
 	],
 	#category : #'RemoteRunner-Runner'
 }
@@ -158,12 +159,19 @@ GtRrWorkerConnection >> initialize [
 
 	super initialize.
 	details := Dictionary new.
+	lastHeartbeat := DateAndTime now.
 ]
 
 { #category : #testing }
 GtRrWorkerConnection >> isConnected [
 
 	^ connection isConnected
+]
+
+{ #category : #accessing }
+GtRrWorkerConnection >> lastHeartbeat [
+
+	^ lastHeartbeat
 ]
 
 { #category : #private }
@@ -183,7 +191,7 @@ GtRrWorkerConnection >> onConnectionLost [
 		[ ^ self ].
 
 	self hasObserver ifTrue: [ self removeObserver ].
-	self remoteRunner unregisterWorkerId: self workerId reason: 'Worker stopped'
+	self remoteRunner unregisterWorkerId: self workerId reason: 'Worker connection lost'
 
 ]
 
@@ -220,6 +228,15 @@ GtRrWorkerConnection >> printOn: aStream [
 		<< (GtRemoteRunner printIpAddress: remoteAddress);
 		<< ':';
 		<< (details at: #workingDirectory ifAbsent: [ '' ]).
+]
+
+{ #category : #accessing }
+GtRrWorkerConnection >> registerHeartbeat [
+
+	GtRemoteRunnerTraceAnnouncement new
+		message: 'Heartbeat received for: ', self workerId;
+		emit.
+	lastHeartbeat := DateAndTime now.
 ]
 
 { #category : #accessing }
@@ -268,9 +285,16 @@ GtRrWorkerConnection >> sendControlMessage: aMessage [
 { #category : #'start-stop' }
 GtRrWorkerConnection >> stop [
 
+	self stopWithReason: 'Worker stopped'
+
+]
+
+{ #category : #'start-stop' }
+GtRrWorkerConnection >> stopWithReason: aString [
+
 	self hasObserver ifTrue: [ self removeObserver ].
 	connection stop.
-	self remoteRunner unregisterWorkerId: self workerId reason: 'Worker stopped'
+	self remoteRunner unregisterWorkerId: self workerId reason: aString
 
 ]
 

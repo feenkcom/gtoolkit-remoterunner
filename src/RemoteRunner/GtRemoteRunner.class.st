@@ -293,7 +293,7 @@ GtRemoteRunner >> critical: aBlock [
 	"Evaluate the supplied block within sharedAccess.
 	Only for use by cooperating objects."
 
-	sharedAccess critical: aBlock.
+	^ sharedAccess critical: aBlock.
 ]
 
 { #category : #'private - accessing' }
@@ -435,6 +435,16 @@ GtRemoteRunner >> hasSubscriber: anObject [
 	^ self announcer hasSubscriber: anObject
 ]
 
+{ #category : #accessing }
+GtRemoteRunner >> heartbeatForWorkerId: aUidString [
+	"Register the heartbeat for the specified worker.
+	If the worker isn't registered do nothing"
+
+	registeredWorkers 
+		at: aUidString
+		ifPresent: [ :worker | worker registerHeartbeat ].
+]
+
 { #category : #initialization }
 GtRemoteRunner >> initialize [
 
@@ -516,10 +526,12 @@ GtRemoteRunner >> managerStartupAndShutdown: aGtRrManagerStartupAndShutdown [
 GtRemoteRunner >> nextTaskForWorkerId: aUidString [
 	"Answer the next task allocated to the specified worker that is waiting on this method.
 	The task is assigned in a separate process."
-	| taskFuture |
+	| taskFuture workerConnection |
 
+	workerConnection := registeredWorkers at: aUidString.
+	workerConnection registerHeartbeat.
 	taskFuture := GtRrFutureWorkerTask new 
-		connection: (registeredWorkers at: aUidString).
+		connection: workerConnection.
 	GtRrWorkerTraceAnnouncement new
 		worker: taskFuture;
 		message: 'nextTaskForWorkerId: pre';
@@ -849,7 +861,8 @@ GtRemoteRunner >> taskDone: aTaskContextId started: startTime completed: endTime
 		[ taskContext := currentlyExecutingTasks removeKey: aTaskContextId ifAbsent: [].
 		"If the task hasn't been found, assumed that it was terminated and move on"
 		taskContext ifNotNil:
-			[ taskContext
+			[ taskContext workerConnection registerHeartbeat.
+			taskContext
 				startTime: startTime;
 				endTime: endTime;
 				result: anObject.
@@ -970,7 +983,7 @@ GtRemoteRunner >> unregisterWorkerId: aUidString reason: aString [
 			each connection = workerConnection ].
 		failedTasks valuesDo: [ :taskContext |
 			errorDetails := GtRrErrorDetails new
-					errorMessage: 'Worker Unregistered';
+					errorMessage: 'Worker Unregistered:', aString printString;
 					setTrace.
 			self 
 				privateTaskFailed: taskContext taskContextId 

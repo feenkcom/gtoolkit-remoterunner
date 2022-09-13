@@ -43,6 +43,13 @@ GtRrManagerStartupAndShutdown >> shutdown [
 ]
 
 { #category : #'startup - shutdown' }
+GtRrManagerStartupAndShutdown >> startHeartbeatContext [
+	"Schedule the worker heartbeat checks"
+
+	remoteRunner timeoutManager addContext: (GtRrHeartbeatContext remoteRunner: remoteRunner)
+]
+
+{ #category : #'startup - shutdown' }
 GtRrManagerStartupAndShutdown >> startInImageWorker [
 	"Start a worker in the same image as the runner"
 
@@ -66,4 +73,5 @@ GtRrManagerStartupAndShutdown >> startup [
 		yourself.
 	server globals at: #GtAssignedRemoteRunner put: remoteRunner.
 	remoteRunner server: server.
+	"self startHeartbeatContext."
 ]

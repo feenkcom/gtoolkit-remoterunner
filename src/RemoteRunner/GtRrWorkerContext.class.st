@@ -54,7 +54,7 @@ GtRrWorkerContext >> timeoutContext [
 	"Terminate the receiver without timeout as the reason"
 
 	self remoteRunner announceAndLog: (GtRrWorkerTimeoutAnnouncement worker: workerConnection).
-	workerConnection stop.
+	workerConnection stopWithReason: 'Worker Context Timed Out'.
 ]
 
 { #category : #accessing }

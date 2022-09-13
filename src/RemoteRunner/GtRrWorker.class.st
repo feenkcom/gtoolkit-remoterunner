@@ -10,9 +10,11 @@ Class {
 		'taskRunner',
 		'currentTaskExecution',
 		'serviceName',
-		'pingServer',
 		'connectionStrategy',
-		'resultQueue'
+		'resultQueue',
+		'lastHeartbeat',
+		'heartbeatProcess',
+		'heartbeatDelay'
 	],
 	#category : #'RemoteRunner-Worker'
 }
@@ -49,6 +51,13 @@ GtRrWorker class >> commandLineCommand [
 				   add: (ClapPositional id: #value);
 				   yourself);
 		  yourself
+]
+
+{ #category : #accessing }
+GtRrWorker class >> heartbeatDelay [
+	"Answer the Duration between heartbeats"
+
+	^ 20 seconds
 ]
 
 { #category : #private }
@@ -119,17 +128,8 @@ GtRrWorker class >> serverSocketAddress: aString [
 	| worker |
 
 	worker := self new.
-	worker connectionStrategy: 
-		(GtRrWorkerConnectionPerMessageStrategy serverSocketAddress: aString worker: worker).
+	worker connectionStrategy socketAddress: aString.
 	^ worker.
-]
-
-{ #category : #'instance creation' }
-GtRrWorker class >> serverSocketAddress: aString pingSocketAddress: anotherString [
-
-	^ self new
-		application: (self newPharoApplication: aString);
-		pingServer: (self newPharoLinkServer: anotherString)
 ]
 
 { #category : #observer }
@@ -309,6 +309,7 @@ GtRrWorker >> initialize [
 		at: #pid put: self currentProcessId;
 		at: #platform put: OSPlatform current name;
 		yourself.
+	heartbeatDelay := self class heartbeatDelay.
 
 	"Windows socket event delivery seems brittle, events seem to get swallowed by other subsystems such as the JVM or GUI.
 	Avoid the issue by only connecting to the server while not running tasks."
@@ -343,7 +344,7 @@ GtRrWorker >> name [
 { #category : #private }
 GtRrWorker >> nextTask [
 	"Send any queued results and get the next task"
-	| promise result |
+	| promise result serializedTask |
 	
 	^ self connectDuring: [ :application |
 		[ result := resultQueue nextOrNil ] whileNotNil:
@@ -351,13 +352,10 @@ GtRrWorker >> nextTask [
 
 		promise := application newCommandFactory send:
 			'GtAssignedRemoteRunner nextTaskSerializedForWorkerId: ''', uid, ''''.
-		LeJsonV4 uniqueInstance deserialize: promise waitForValue readStream ].
+		serializedTask := promise waitForValue.
+		lastHeartbeat := DateAndTime now.
+		LeJsonV4 uniqueInstance deserialize: serializedTask readStream ].
 
-]
-
-{ #category : #accessing }
-GtRrWorker >> pingServer: aServer [
-	pingServer := aServer
 ]
 
 { #category : #private }
@@ -368,6 +366,15 @@ GtRrWorker >> registerWith: aPharoLinkApplication [
 			bindingAt: #attributes put: attributes;
 			sendAndWait: 'GtAssignedRemoteRunner registerWorkerWithDetails: attributes'.
 
+]
+
+{ #category : #private }
+GtRrWorker >> sendHeartbeat [
+
+	self connectDuring: [ :application |
+		lastHeartbeat := DateAndTime now.
+		application newCommandFactory send:
+			'GtAssignedRemoteRunner heartbeatForWorkerId: ''', uid, '''' ].
 ]
 
 { #category : #accessing }
@@ -388,8 +395,22 @@ GtRrWorker >> stackString [
 GtRrWorker >> start [
 
 	connectionStrategy start.
-	pingServer ifNotNil: [ pingServer start ].
-	super start
+	super start.
+	self startHeartbeat.
+]
+
+{ #category : #starting }
+GtRrWorker >> startHeartbeat [
+	| expiry |
+
+	lastHeartbeat := DateAndTime now.
+	expiry := lastHeartbeat + heartbeatDelay.
+	heartbeatProcess := [ [
+		(expiry - DateAndTime now)  wait.
+		(DateAndTime now - lastHeartbeat) >= heartbeatDelay ifTrue:
+			[ self sendHeartbeat ].
+		expiry := lastHeartbeat + heartbeatDelay. ] repeat.
+				] forkAt: Processor lowIOPriority named: 'Worker Heartbeat'.
 ]
 
 { #category : #stepping }
@@ -434,9 +455,18 @@ GtRrWorker >> stepService [
 { #category : #stopping }
 GtRrWorker >> stop [
 
+	self stopHeartbeat.
 	super stop.
 	connectionStrategy stop.
-	pingServer ifNotNil: [ pingServer stop ]
+
+]
+
+{ #category : #stopping }
+GtRrWorker >> stopHeartbeat [
+	"Stop the heartbeat from running"
+
+	heartbeatProcess ifNotNil:
+		[ heartbeatProcess terminate ].
 ]
 
 { #category : #accessing }
