@@ -80,7 +80,7 @@ GtRrHeartbeatExamples >> workerHeartbeatTimeout [
 		description: 'successTask should not have errors'.
 	self assert: timeoutTask hasErrors
 		description: 'timeoutTask should have errors'.
-	self assert: (timeoutTask errorDetails errorMessage beginsWith: 'Worker Unregistered')
+	self assert: (timeoutTask errorDetails errorMessage = 'Worker Heartbeat Lost')
 		description: 'Expected Worker Unregistered error'.
 	self assert: ((successTask duration totalSeconds - (timeout * 3)) abs < 5)
 		description: 'successTask duration outside acceptable bounds'.

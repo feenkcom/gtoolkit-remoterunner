@@ -64,6 +64,27 @@ GtRrHeartbeatContext >> scheduleTimeoutContext [
 ]
 
 { #category : #accessing }
+GtRrHeartbeatContext >> setErrorForWorkerConnection: aGtRrWorkerConnection [
+	| taskContext |
+
+	taskContext := remoteRunner critical: 
+		[ remoteRunner currentlyExecutingTasks 
+			detect: [ :each | each workerConnection == aGtRrWorkerConnection ]
+			ifNone: [ ] ].
+	taskContext ifNil: [ ^ self ].
+	taskContext task errorDetails:(GtRrErrorDetails new
+		errorMessage: 'Worker Heartbeat Lost';
+		setTrace).
+]
+
+{ #category : #accessing }
+GtRrHeartbeatContext >> stopWorkerConnection: aGtRrWorkerConnection [
+
+	self setErrorForWorkerConnection: aGtRrWorkerConnection.
+	aGtRrWorkerConnection stopWithReason: 'Worker Heartbeat Lost'.
+]
+
+{ #category : #accessing }
 GtRrHeartbeatContext >> timeoutContext [
 	"Check all the worker heartbeats and stop any that have timed out"
 	| now maxDuration registeredWorkers |
@@ -73,9 +94,9 @@ GtRrHeartbeatContext >> timeoutContext [
 	registeredWorkers := remoteRunner critical:
 		[ remoteRunner registeredWorkers ].
 	now := DateAndTime now.
-	registeredWorkers do: [ :workerContext |
-		(now - workerContext lastHeartbeat) > maxDuration ifTrue:
-			[ workerContext stopWithReason: 'Worker Heartbeat Lost' ] ].
+	registeredWorkers do: [ :workerConnection |
+		(now - workerConnection lastHeartbeat) > maxDuration ifTrue:
+			[ self stopWorkerConnection: workerConnection ] ].
 	nextRunTime := DateAndTime now + GtRrWorker heartbeatDelay.
 	remoteRunner timeoutManager addContext: self.
 ]
