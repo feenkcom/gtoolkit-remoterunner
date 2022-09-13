@@ -401,12 +401,14 @@ GtRrWorker >> start [
 
 { #category : #starting }
 GtRrWorker >> startHeartbeat [
-	| expiry |
+	| expiry waitDuration zero |
 
 	lastHeartbeat := DateAndTime now.
 	expiry := lastHeartbeat + heartbeatDelay.
+	zero := Duration zero.
 	heartbeatProcess := [ [
-		(expiry - DateAndTime now)  wait.
+		waitDuration := expiry - DateAndTime now.
+		waitDuration > zero ifTrue: [ waitDuration wait ].
 		(DateAndTime now - lastHeartbeat) >= heartbeatDelay ifTrue:
 			[ self sendHeartbeat ].
 		expiry := lastHeartbeat + heartbeatDelay. ] repeat.
