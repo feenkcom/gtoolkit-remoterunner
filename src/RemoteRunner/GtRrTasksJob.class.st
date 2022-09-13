@@ -48,9 +48,50 @@ GtRrTasksJob >> examplesReport [
 		job: self 
 ]
 
+{ #category : #accessing }
+GtRrTasksJob >> executionTimelineChartItems [
+	| firstTaskHandoverTime lastResultReceivedTime |
+	firstTaskHandoverTime := self firstTaskHandoverTime.
+	lastResultReceivedTime := self lastTaskResultReceivedTime.
+	
+	^ {
+		GtRrExecutionChartDataItem new 
+			startTime: self  creationTime;
+			endTime: self startTime;
+			label:  'Send to remote runner'.
+			
+		GtRrExecutionChartDataItem new 
+			startTime: self  startTime;
+			endTime: firstTaskHandoverTime;
+			label:  'Waiting for workers'.
+			
+		GtRrExecutionChartDataItem new 
+			startTime: firstTaskHandoverTime;
+			endTime: lastResultReceivedTime;
+			label:  'Tasks Execution'.
+			
+		GtRrExecutionChartDataItem new 
+			startTime: lastResultReceivedTime;
+			endTime: self endTime;
+			label:  'Finishing execution' } collect: #asDictionary
+]
+
 { #category : #'accessing - examples' }
 GtRrTasksJob >> failedExamples [
 	^ tasks flatCollect: [:aTask | aTask failedExamples ]
+]
+
+{ #category : #accessing }
+GtRrTasksJob >> firstTaskHandoverTime [
+	| handoverTime|
+	
+	handoverTime := self tasks first handoverTime.
+	self tasks do: [ :aTask | 
+		(aTask handoverTime notNil and: [ aTask handoverTime < handoverTime ])
+			ifTrue: [
+				handoverTime := aTask handoverTime ] ]. 
+	
+	^ handoverTime
 ]
 
 { #category : #'gt - extensions' }
@@ -84,6 +125,19 @@ GtRrTasksJob >> hasTests [
 	"Answer a boolean indicating if the receiver has one or more tasks that are considered test tasks"
 
 	^ self tasks anySatisfy: [ :task | task isKindOf: GtRrAbstractExamplesTask ]
+]
+
+{ #category : #accessing }
+GtRrTasksJob >> lastTaskResultReceivedTime [
+	| resultReceivedTime |
+	
+	resultReceivedTime := self tasks first resultReceivedTime.
+	self tasks do: [ :aTask | 
+		(aTask resultReceivedTime notNil and: [ aTask resultReceivedTime > resultReceivedTime ])
+			ifTrue: [
+				resultReceivedTime := aTask resultReceivedTime ] ].
+				
+	^ resultReceivedTime
 ]
 
 { #category : #'accessing - examples' }
