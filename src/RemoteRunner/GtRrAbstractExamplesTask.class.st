@@ -32,6 +32,19 @@ GtRrAbstractExamplesTask >> asExplicitTask [
 ]
 
 { #category : #accessing }
+GtRrAbstractExamplesTask >> description [
+	^ (String streamContents: [ :aStream |
+		aStream 
+			print: self totalCount;
+			<< ' ';
+			<< (self totalCount = 1 
+				ifTrue: [ 'check' ] ifFalse: [ 'checks' ]);
+			<< ' (';
+			<< self stateDescription;
+			<< ')  ' ])
+]
+
+{ #category : #accessing }
 GtRrAbstractExamplesTask >> erroredExamples [
 	"Answer the examples / tests that finished with an error"
 

@@ -9,7 +9,8 @@ Class {
 	#instVars : [
 		'startTime',
 		'endTime',
-		'duration'
+		'duration',
+		'label'
 	],
 	#category : #'RemoteRunner-UI'
 }
@@ -18,14 +19,16 @@ Class {
 GtRrExecutionChartDataItem class >> fromDictionary: aDictionary [
 	^ self new 
 		startTime: (aDictionary at: 'startTime');
-		endTime: (aDictionary at: 'endTime')
+		endTime: (aDictionary at: 'endTime');
+		label: (aDictionary at: 'label' ifAbsent: [ nil ])
 ]
 
 { #category : #'instance - creation' }
 GtRrExecutionChartDataItem class >> fromTask: aTask [
 	^ self new 
 		startTime: aTask startTime;
-		endTime: aTask endTime
+		endTime: aTask endTime;
+		label:  aTask description
 ]
 
 { #category : #converting }
@@ -33,6 +36,7 @@ GtRrExecutionChartDataItem >> asDictionary [
 	^ Dictionary new 
 		at: 'startTime' put: self startTime;
 		at: 'endTime' put: self endTime;
+		at: 'label' put: self label;
 		yourself
 ]
 
@@ -52,6 +56,18 @@ GtRrExecutionChartDataItem >> endTime [
 GtRrExecutionChartDataItem >> endTime: anObject [
 
 	endTime := anObject
+]
+
+{ #category : #accessing }
+GtRrExecutionChartDataItem >> label [
+
+	^ label
+]
+
+{ #category : #accessing }
+GtRrExecutionChartDataItem >> label: anObject [
+
+	label := anObject
 ]
 
 { #category : #accessing }

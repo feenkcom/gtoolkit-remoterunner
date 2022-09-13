@@ -43,7 +43,8 @@ PlpoGtRrWorkerExamplesReport >> gtViewExecutionTimelineListFor: aView [
 		priority: 25;
 		stencil: [ 
 			GtRrExecutionHorizontalChartStencil new 
-				executions: self tasksExecutionChartItems ]
+				executions: self tasksExecutionChartItems;
+				rowLabelComputation: [ :anItem | anItem label ]]
 ]
 
 { #category : #accessing }

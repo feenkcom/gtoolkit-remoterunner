@@ -17,7 +17,7 @@ GtRrExecutionHorizontalChartStencil >> amountOfTicks [
 
 { #category : #accessing }
 GtRrExecutionHorizontalChartStencil >> barHeight [
-	^ 20
+	^ 15
 ]
 
 { #category : #accessing }
@@ -193,7 +193,7 @@ GtRrExecutionHorizontalChartStencil >> lastEndDate [
 
 { #category : #accessing }
 GtRrExecutionHorizontalChartStencil >> rowHeight [
-	^ 30
+	^ 20
 ]
 
 { #category : #accessing }
