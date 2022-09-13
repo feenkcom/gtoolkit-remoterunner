@@ -23,6 +23,19 @@ PlpoGtRrWorkersExamplesReport >> gtViewExecutionTimelineListFor: aView [
 ]
 
 { #category : #accessing }
+PlpoGtRrWorkersExamplesReport >> gtViewTasksExecutionTimelineListFor: aView [
+	<gtView>
+	
+	^ aView explicit
+		title: 'Tasks Timeline';
+		priority: 25;
+		stencil: [ 
+			GtRrExecutionHorizontalChartStencil new 
+				executions: self workersTasksExecutionChartItemsGroup;
+				rowLabelComputation: [ :anItem | anItem label ] ]
+]
+
+{ #category : #accessing }
 PlpoGtRrWorkersExamplesReport >> workersExecutionChartItems [
 	^ self workersExecutionChartItemsData collect: [ :aDictionary |
 		GtRrExecutionChartDataItem fromDictionary: aDictionary]
@@ -31,4 +44,15 @@ PlpoGtRrWorkersExamplesReport >> workersExecutionChartItems [
 { #category : #accessing }
 PlpoGtRrWorkersExamplesReport >> workersExecutionChartItemsData [
 	^ (self proxyPerform: #workersExecutionChartItemsData) getSerialized
+]
+
+{ #category : #accessing }
+PlpoGtRrWorkersExamplesReport >> workersTasksExecutionChartItemsData [
+	^ (self proxyPerform: #workersTasksExecutionChartItemsData) getSerialized
+]
+
+{ #category : #accessing }
+PlpoGtRrWorkersExamplesReport >> workersTasksExecutionChartItemsGroup [
+	^ self workersTasksExecutionChartItemsData collect: [ :aDictionary |
+		GtRrExecutionChartDataItemsGroup fromDictionary: aDictionary]
 ]

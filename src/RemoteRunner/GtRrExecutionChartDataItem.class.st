@@ -63,8 +63,7 @@ GtRrExecutionChartDataItem >> duration [
 ]
 
 { #category : #accessing }
-GtRrExecutionChartDataItem >> endTime [
-
+GtRrExecutionChartDataItem >> endTime [ 
 	^ endTime
 ]
 

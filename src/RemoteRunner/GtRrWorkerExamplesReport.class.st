@@ -133,9 +133,17 @@ GtRrWorkerExamplesReport >> tasksEndTime [
 
 { #category : #accessing }
 GtRrWorkerExamplesReport >> tasksExecutionChartItemsData [
-	^ (self tasks select: #hasCompleted)
-		collect: [ :aTask |
-			(GtRrExecutionChartDataItem fromTask: aTask) asDictionary ] 
+	^ self tasksExecutionChartItemsGroup 
+		collect: [ :anItem | anItem asDictionary ] 
+]
+
+{ #category : #accessing }
+GtRrWorkerExamplesReport >> tasksExecutionChartItemsGroup [
+	^ (GtRrExecutionChartDataItemsGroup withAll: ((self tasks 
+		select: #hasCompleted)
+			collect: [ :aTask |
+				(GtRrExecutionChartDataItem fromTask: aTask) ]))
+		label: self workerId
 ]
 
 { #category : #accessing }
