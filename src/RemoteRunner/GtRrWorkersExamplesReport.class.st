@@ -88,6 +88,11 @@ GtRrWorkersExamplesReport >> printOn: aStream [
 ]
 
 { #category : #accessing }
+GtRrWorkersExamplesReport >> tasksFirstHandoveTime [ 
+	^ self tasksFirstTimeFor: [ :aWorker | aWorker tasksFirstHandoveTime ]
+]
+
+{ #category : #accessing }
 GtRrWorkersExamplesReport >> tasksFirstStartTime [ 
 	^ self tasksFirstTimeFor: [ :aWorker |  aWorker tasksStartTime ]
 ]
@@ -113,6 +118,11 @@ GtRrWorkersExamplesReport >> tasksFirstTimeFor: aBlock [
 { #category : #accessing }
 GtRrWorkersExamplesReport >> tasksLastEndTime [ 
 	^ self tasksLastTimeFor: [ :aWorker | aWorker tasksEndTime ] 
+]
+
+{ #category : #accessing }
+GtRrWorkersExamplesReport >> tasksLastResultReceivedTime [ 
+	^ self tasksLastTimeFor: [ :aWorker | aWorker tasksLastResultReceivedTime ] 
 ]
 
 { #category : #accessing }
@@ -158,4 +168,11 @@ GtRrWorkersExamplesReport >> workers [
 GtRrWorkersExamplesReport >> workers: anObject [
 
 	workers := anObject
+]
+
+{ #category : #accessing }
+GtRrWorkersExamplesReport >> workersExecutionChartItemsData [
+	^ self workers
+		collect: [ :aWorker |
+			(GtRrExecutionChartDataItem fromWorker: aWorker) asDictionary ] 
 ]

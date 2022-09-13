@@ -8,6 +8,11 @@ Class {
 	#category : #'RemoteRunner-Reports'
 }
 
+{ #category : #accessing }
+GtRrWorkerExamplesReport >> description [
+	^ self workerId 
+]
+
 { #category : #'gt - extensions' }
 GtRrWorkerExamplesReport >> gtViewDurationExecutionChartListFor: aView [
 	<gtView>
@@ -128,9 +133,19 @@ GtRrWorkerExamplesReport >> tasksEndTime [
 
 { #category : #accessing }
 GtRrWorkerExamplesReport >> tasksExecutionChartItemsData [
-	^ (self tasks select: #isFinished)
+	^ (self tasks select: #hasCompleted)
 		collect: [ :aTask |
 			(GtRrExecutionChartDataItem fromTask: aTask) asDictionary ] 
+]
+
+{ #category : #accessing }
+GtRrWorkerExamplesReport >> tasksFirstHandoveTime [ 
+	^ self tasks firstHandoverTime
+]
+
+{ #category : #accessing }
+GtRrWorkerExamplesReport >> tasksLastResultReceivedTime [ 
+	^ self tasks lastResultReceivedTime
 ]
 
 { #category : #accessing }

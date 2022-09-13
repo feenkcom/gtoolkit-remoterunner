@@ -83,6 +83,13 @@ GtRrClusterExamplesReport >> machineReports: aCollectionOfReports [
 	machineReports := aCollectionOfReports
 ]
 
+{ #category : #accessing }
+GtRrClusterExamplesReport >> machinesExecutionChartItemsData [
+	^ self machineReports
+		collect: [ :aMachineReport |
+			(GtRrExecutionChartDataItem fromMachine: aMachineReport) asDictionary ] 
+]
+
 { #category : #printing }
 GtRrClusterExamplesReport >> printOn: aStream [
 	super printOn: aStream.

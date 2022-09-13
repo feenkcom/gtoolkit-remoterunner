@@ -24,11 +24,27 @@ GtRrExecutionChartDataItem class >> fromDictionary: aDictionary [
 ]
 
 { #category : #'instance - creation' }
+GtRrExecutionChartDataItem class >> fromMachine: aMachine [
+	^ self new 
+		startTime: aMachine tasksFirstHandoveTime;
+		endTime: aMachine tasksLastResultReceivedTime;
+		label:  aMachine description
+]
+
+{ #category : #'instance - creation' }
 GtRrExecutionChartDataItem class >> fromTask: aTask [
 	^ self new 
-		startTime: aTask startTime;
-		endTime: aTask endTime;
+		startTime: aTask handoverTime;
+		endTime: aTask resultReceivedTime;
 		label:  aTask description
+]
+
+{ #category : #'instance - creation' }
+GtRrExecutionChartDataItem class >> fromWorker: aWorker [
+	^ self new 
+		startTime: aWorker tasksFirstHandoveTime;
+		endTime: aWorker tasksLastResultReceivedTime;
+		label:  aWorker description
 ]
 
 { #category : #converting }

@@ -186,9 +186,9 @@ GtRrExecutionHorizontalChartStencil >> labelWidth [
 { #category : #accessing }
 GtRrExecutionHorizontalChartStencil >> lastEndDate [
 	^ self executions 
-		inject: (startTimeComputation value: self executions  first) 
+		inject: (endTimeComputation value: self executions  first) 
 		into: [ :maxDate :each | 
-			maxDate max: (startTimeComputation value: each) ]
+			maxDate max: (endTimeComputation value: each) ]
 ]
 
 { #category : #accessing }
