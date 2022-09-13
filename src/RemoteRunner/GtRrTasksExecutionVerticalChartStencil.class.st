@@ -9,7 +9,7 @@ Class {
 	#instVars : [
 		'taskItems'
 	],
-	#category : #'RemoteRunner-Tasks'
+	#category : #'RemoteRunner-UI'
 }
 
 { #category : #accessing }

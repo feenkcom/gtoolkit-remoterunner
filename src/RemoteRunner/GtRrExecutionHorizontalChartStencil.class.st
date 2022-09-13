@@ -2,7 +2,10 @@ Class {
 	#name : #GtRrExecutionHorizontalChartStencil,
 	#superclass : #BrStencil,
 	#instVars : [
-		'executions'
+		'executions',
+		'startTimeComputation',
+		'endTimeComputation',
+		'rowLabelComputation'
 	],
 	#category : #'RemoteRunner-UI'
 }
@@ -47,10 +50,10 @@ GtRrExecutionHorizontalChartStencil >> create [
 		| aRowContainer aLabel theBars |
 		
 		aRowContainer := self createRow.
-		aLabel := self createLabelCell: (
+		aLabel := self createLabelCell: (rowLabelComputation value: anExecutionDetails) "(
 			anExecutionDetails totalCount asString,
 			(anExecutionDetails totalCount = 1 ifTrue: [ 'test'] ifFalse: ['tests']),
-			' (', anExecutionDetails state, ')  '  ).
+			' (', anExecutionDetails state, ')  '  )".
 		
 		theBars := GtPlotterHorizontalValueBarsElement new
 			height: self barHeight;
@@ -58,7 +61,7 @@ GtRrExecutionHorizontalChartStencil >> create [
 				self styleBar: anElement execution: aGtScaleContext originalValue.
 				anElement constraintsDo: [ :c | 
 					c frame horizontal 
-						alignLeftAt: (timeScale map: aGtScaleContext originalValue startTime) ] ];
+						alignLeftAt: (timeScale map: (startTimeComputation value: aGtScaleContext originalValue)) ] ];
 			scale: barWidthScale;
 			scaleData: [ :each | each duration ];
 			values: {anExecutionDetails}.
@@ -116,6 +119,12 @@ GtRrExecutionHorizontalChartStencil >> createRow [
 ]
 
 { #category : #accessing }
+GtRrExecutionHorizontalChartStencil >> endTimeComputation: anObject [
+
+	endTimeComputation := anObject
+]
+
+{ #category : #accessing }
 GtRrExecutionHorizontalChartStencil >> executions [
 
 	^ executions
@@ -130,8 +139,9 @@ GtRrExecutionHorizontalChartStencil >> executions: anObject [
 { #category : #accessing }
 GtRrExecutionHorizontalChartStencil >> firstStartDate [
 	^ self executions
-		inject: self executions first startTime 
-		into: [ :minDate :each | minDate min: each startTime ]
+		inject: (startTimeComputation value: self executions first)
+		into: [ :minDate :each | 
+			minDate min: (startTimeComputation value: each) ]
 ]
 
 { #category : #accessing }
@@ -154,6 +164,15 @@ GtRrExecutionHorizontalChartStencil >> gridlineWidth [
 	^ 1
 ]
 
+{ #category : #initialization }
+GtRrExecutionHorizontalChartStencil >> initialize [
+	super initialize.
+	
+	startTimeComputation := [ :anExecution | anExecution startTime ].
+	endTimeComputation :=  [ :anExecution | anExecution endTime ].
+	rowLabelComputation := [ :anExecution | anExecution gtDisplayString ].
+]
+
 { #category : #accessing }
 GtRrExecutionHorizontalChartStencil >> labelColor [
 	^ Color gray
@@ -167,13 +186,32 @@ GtRrExecutionHorizontalChartStencil >> labelWidth [
 { #category : #accessing }
 GtRrExecutionHorizontalChartStencil >> lastEndDate [
 	^ self executions 
-		inject: self executions  first endTime 
-		into: [ :maxDate :each | maxDate max: each endTime ]
+		inject: (startTimeComputation value: self executions  first) 
+		into: [ :maxDate :each | 
+			maxDate max: (startTimeComputation value: each) ]
 ]
 
 { #category : #accessing }
 GtRrExecutionHorizontalChartStencil >> rowHeight [
 	^ 30
+]
+
+{ #category : #accessing }
+GtRrExecutionHorizontalChartStencil >> rowLabelComputation [
+
+	^ rowLabelComputation
+]
+
+{ #category : #accessing }
+GtRrExecutionHorizontalChartStencil >> rowLabelComputation: anObject [
+
+	rowLabelComputation := anObject
+]
+
+{ #category : #accessing }
+GtRrExecutionHorizontalChartStencil >> startTimeComputation: anObject [
+
+	startTimeComputation := anObject
 ]
 
 { #category : #accessing }

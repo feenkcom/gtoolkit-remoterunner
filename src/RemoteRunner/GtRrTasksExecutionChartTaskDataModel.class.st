@@ -11,7 +11,7 @@ Class {
 		'endTime',
 		'duration'
 	],
-	#category : #'RemoteRunner-Tasks'
+	#category : #'RemoteRunner-UI'
 }
 
 { #category : #'instance - creation' }

@@ -31,6 +31,18 @@ GtRrWorkerExamplesReport >> gtViewDurationSortedChartListFor: aView [
 ]
 
 { #category : #'gt - extensions' }
+GtRrWorkerExamplesReport >> gtViewExecutionTimelineListFor: aView [
+	<gtView>
+	
+	^ aView explicit
+		title: 'Execution Timeline';
+		priority: 25;
+		stencil: [ 
+			GtRrExecutionHorizontalChartStencil new 
+				executions: self tasks ]
+]
+
+{ #category : #'gt - extensions' }
 GtRrWorkerExamplesReport >> gtViewTasksListFor: aView [
 	<gtView>
 	
