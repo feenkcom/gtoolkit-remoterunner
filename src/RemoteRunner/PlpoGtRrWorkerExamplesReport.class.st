@@ -17,7 +17,7 @@ PlpoGtRrWorkerExamplesReport >> gtViewDurationExecutionChartListFor: aView [
 		title: 'Duration Chart';
 		priority: 11;
 		stencil: [
-			GtRrTasksExecutionVerticalChartStencil new 
+			GtRrTasksExecutionHorizontalChartStencil new 
 				taskItems: self tasksExecutionChartItems ]
 ]
 
@@ -29,7 +29,7 @@ PlpoGtRrWorkerExamplesReport >> gtViewDurationSortedChartListFor: aView [
 		title: 'Duration Chart (sorted)';
 		priority: 10;
 		stencil: [
-			GtRrTasksExecutionVerticalChartStencil new 
+			GtRrTasksExecutionHorizontalChartStencil new 
 				taskItems: (self tasksExecutionChartItems
 					sorted: [ :aTaskItem | aTaskItem duration ] descending) ]
 ]
@@ -49,7 +49,7 @@ PlpoGtRrWorkerExamplesReport >> gtViewExecutionTimelineListFor: aView [
 { #category : #accessing }
 PlpoGtRrWorkerExamplesReport >> tasksExecutionChartItems [
 	^ self tasksExecutionChartItemsData collect: [ :aDictionary |
-		GtRrTasksExecutionChartTaskDataModel fromDictionary: aDictionary]
+		GtRrExecutionChartDataItem fromDictionary: aDictionary]
 ]
 
 { #category : #accessing }

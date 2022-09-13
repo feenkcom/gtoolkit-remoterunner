@@ -130,7 +130,7 @@ GtRrWorkerExamplesReport >> tasksEndTime [
 GtRrWorkerExamplesReport >> tasksExecutionChartItemsData [
 	^ (self tasks select: #isFinished)
 		collect: [ :aTask |
-			(GtRrTasksExecutionChartTaskDataModel fromTask: aTask) asDictionary ] 
+			(GtRrExecutionChartDataItem fromTask: aTask) asDictionary ] 
 ]
 
 { #category : #accessing }
