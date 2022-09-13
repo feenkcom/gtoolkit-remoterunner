@@ -18,7 +18,8 @@ GtRrRunnerMachineExamplesReport >> gtViewWorkersFor: aView [
 	<gtView>
 	
 	^ aView forward 
-		title: 'Workers';
+		title: 'Workers Stats';
+		priority: 10;
 		object: [ self workersReport ];
 		view: #gtViewWorkersFor:
 ]
@@ -66,6 +67,21 @@ GtRrRunnerMachineExamplesReport >> printOn: aStream [
 			<< ', ';
 			print: self numberOfWorkers;
 			<< ' workers'].
+]
+
+{ #category : #accessing }
+GtRrRunnerMachineExamplesReport >> tasksEndTime [
+	^ self tasksLastEndTime
+]
+
+{ #category : #accessing }
+GtRrRunnerMachineExamplesReport >> tasksLastEndTime [
+	^ self workersReport tasksLastEndTime
+]
+
+{ #category : #accessing }
+GtRrRunnerMachineExamplesReport >> tasksLastStartTime [
+	^ self workersReport tasksLastStartTime
 ]
 
 { #category : #accessing }

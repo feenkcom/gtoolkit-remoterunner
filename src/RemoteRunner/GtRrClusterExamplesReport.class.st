@@ -57,7 +57,9 @@ GtRrClusterExamplesReport >> gtViewMachinesTimingFor: aView [
 		column: 'Workers Count' text: [ :aMachineReport |
 			aMachineReport numberOfWorkers ];
 		column: 'Tasks First Start Time' text: [ :aMachineReport |
-			aMachineReport tasksStartTime ];
+			aMachineReport tasksStartTime printToSeconds ];
+		column: 'Tasks Last End Time' text: [ :aMachineReport |
+			aMachineReport tasksEndTime printToSeconds ];
 		column: 'Workers Start Interval' text: [ :aMachineReport |
 			aMachineReport tasksStartInterval ]
 ]

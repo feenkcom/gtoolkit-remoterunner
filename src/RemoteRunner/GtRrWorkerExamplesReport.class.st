@@ -54,7 +54,9 @@ GtRrWorkerExamplesReport >> gtViewTasksOverviewFor: aView [
 		column: 'Skipped' text: [ :aTask | aTask numberOfSkipps ];
 		column: 'Failures' text: [ :aTask | aTask numberOfFailures ];
 		column: 'Errors' text: [ :aTask | aTask numberOfErrors ];
-		column: 'Duration' text: [ :aTask | 
+		column: 'Duration (runner)' text: [ :aTask | 
+			aTask durationOnRunner ifNil: [ '-' ] ];
+		column: 'Duration (worker)' text: [ :aTask | 
 			aTask duration ifNil: [ '-' ] ] "width: 150"
 ]
 
@@ -86,7 +88,9 @@ GtRrWorkerExamplesReport >> taskGapsDuration [
 	| gapDuration|
 	gapDuration := 0 seconds.
 	self tasks  pairsDo: [ :aTask :anotherTask |
-		gapDuration := gapDuration + (anotherTask startTime - aTask endTime) ].
+		(anotherTask startTime notNil and: [aTask endTime notNil])
+			ifTrue: [ gapDuration := gapDuration + (anotherTask startTime - aTask endTime) ].
+		gapDuration ].
 	^ gapDuration
 ]
 
@@ -103,6 +107,11 @@ GtRrWorkerExamplesReport >> tasks: aCollection [
 { #category : #accessing }
 GtRrWorkerExamplesReport >> tasksDuration [
 	^ self tasks  duration
+]
+
+{ #category : #accessing }
+GtRrWorkerExamplesReport >> tasksEndTime [ 
+	^ self tasks endTime
 ]
 
 { #category : #accessing }
