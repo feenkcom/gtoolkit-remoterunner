@@ -5,12 +5,17 @@ Class {
 		'ipAddress',
 		'workersReport'
 	],
-	#category : #'RemoteRunner-Worker'
+	#category : #'RemoteRunner-Reports'
 }
 
 { #category : #accessing }
 GtRrRunnerMachineExamplesReport >> cummulativeTasksDuration [
 	^ self workersReport cummulativeTasksDuration
+]
+
+{ #category : #accessing }
+GtRrRunnerMachineExamplesReport >> description [
+	^ self ipAddress
 ]
 
 { #category : #'gt - extensions' }
@@ -75,8 +80,18 @@ GtRrRunnerMachineExamplesReport >> tasksEndTime [
 ]
 
 { #category : #accessing }
+GtRrRunnerMachineExamplesReport >> tasksFirstHandoveTime [
+	^ self workersReport tasksFirstHandoveTime
+]
+
+{ #category : #accessing }
 GtRrRunnerMachineExamplesReport >> tasksLastEndTime [
 	^ self workersReport tasksLastEndTime
+]
+
+{ #category : #accessing }
+GtRrRunnerMachineExamplesReport >> tasksLastResultReceivedTime [
+	^ self workersReport tasksLastResultReceivedTime
 ]
 
 { #category : #accessing }
@@ -92,6 +107,11 @@ GtRrRunnerMachineExamplesReport >> tasksStartInterval [
 { #category : #accessing }
 GtRrRunnerMachineExamplesReport >> tasksStartTime [
 	^ self workersReport tasksStartTime
+]
+
+{ #category : #accessing }
+GtRrRunnerMachineExamplesReport >> workersExecutionChartItemsData [
+	^ self workersReport workersExecutionChartItemsData
 ]
 
 { #category : #accessing }

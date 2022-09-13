@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'machineReports'
 	],
-	#category : #'RemoteRunner-Worker'
+	#category : #'RemoteRunner-Reports'
 }
 
 { #category : #'instance creation' }
@@ -81,6 +81,13 @@ GtRrClusterExamplesReport >> machineReports [
 GtRrClusterExamplesReport >> machineReports: aCollectionOfReports [
 
 	machineReports := aCollectionOfReports
+]
+
+{ #category : #accessing }
+GtRrClusterExamplesReport >> machinesExecutionChartItemsData [
+	^ self machineReports
+		collect: [ :aMachineReport |
+			(GtRrExecutionChartDataItem fromMachine: aMachineReport) asDictionary ] 
 ]
 
 { #category : #printing }

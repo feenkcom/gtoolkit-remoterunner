@@ -1,19 +1,19 @@
 "
-{{gtClass:name=GtRrTasksExecutionVerticalChartStencil}} is a stencil that creates a chart showing the duration of tasks. 
+{{gtClass:name=GtRrTasksExecutionHorizontalChartStencil}} is a stencil that creates a chart showing the duration of tasks. 
 
-It works in tandem  with  a collection of {{gtClass:name=GtRrTask}} or  {{gtClass:name=GtRrTasksExecutionChartTaskDataModel}} instances set using {{gtMethod:name=GtRrTasksExecutionVerticalChartStencil>>taskItems:|label=#selector}}. It is compatible with {{gtClass:name=GtRrTasksExecutionChartTaskDataModel}}  provides an alternative to using proxies to tasks.
+It works in tandem  with  a collection of {{gtClass:name=GtRrTask}} or  {{gtClass:name=GtRrExecutionChartDataItem}} instances set using {{gtMethod:name=GtRrTasksExecutionHorizontalChartStencil>>taskItems:|label=#selector}}. It is compatible with {{gtClass:name=GtRrExecutionChartDataItem}}  provides an alternative to using proxies to tasks.
 "
 Class {
-	#name : #GtRrTasksExecutionVerticalChartStencil,
+	#name : #GtRrTasksExecutionHorizontalChartStencil,
 	#superclass : #BrStencil,
 	#instVars : [
 		'taskItems'
 	],
-	#category : #'RemoteRunner-Tasks'
+	#category : #'RemoteRunner-UI'
 }
 
 { #category : #accessing }
-GtRrTasksExecutionVerticalChartStencil >> create [
+GtRrTasksExecutionHorizontalChartStencil >> create [
 	| timelineScale barsScale container histogram labels ticks |
 	
 	timelineScale := self timelineScale.
@@ -37,7 +37,7 @@ GtRrTasksExecutionVerticalChartStencil >> create [
 ]
 
 { #category : #accessing }
-GtRrTasksExecutionVerticalChartStencil >> createHistogramChartWithScale: barsScale [
+GtRrTasksExecutionHorizontalChartStencil >> createHistogramChartWithScale: barsScale [
 	^ BlElement new
 		margin: (BlInsets left: 50);
 		constraintsDo: [ :c | 
@@ -55,7 +55,7 @@ GtRrTasksExecutionVerticalChartStencil >> createHistogramChartWithScale: barsSca
 ]
 
 { #category : #accessing }
-GtRrTasksExecutionVerticalChartStencil >> createLabelsElementWithScale: barsScale [
+GtRrTasksExecutionHorizontalChartStencil >> createLabelsElementWithScale: barsScale [
 	^ GtPlotterHorizontalTickLabelsElement new
 		clipChildren: false;
 		scale: barsScale;
@@ -71,7 +71,7 @@ GtRrTasksExecutionVerticalChartStencil >> createLabelsElementWithScale: barsScal
 ]
 
 { #category : #accessing }
-GtRrTasksExecutionVerticalChartStencil >> createThicksElementWithScale: barsScale [
+GtRrTasksExecutionHorizontalChartStencil >> createThicksElementWithScale: barsScale [
 	^ GtPlotterHorizontalTicksElement new
 		padding: (BlInsets left: 50);
 		preventMeAndChildrenMouseEvents;
@@ -84,34 +84,34 @@ GtRrTasksExecutionVerticalChartStencil >> createThicksElementWithScale: barsScal
 ]
 
 { #category : #accessing }
-GtRrTasksExecutionVerticalChartStencil >> maximumTaskDuration [
+GtRrTasksExecutionHorizontalChartStencil >> maximumTaskDuration [
 	^ self taskItems maxValue: #duration
 ]
 
 { #category : #accessing }
-GtRrTasksExecutionVerticalChartStencil >> taskItems [
+GtRrTasksExecutionHorizontalChartStencil >> taskItems [
 
 	^ taskItems
 ]
 
 { #category : #accessing }
-GtRrTasksExecutionVerticalChartStencil >> taskItems: aCollection [
+GtRrTasksExecutionHorizontalChartStencil >> taskItems: aCollection [
 
 	taskItems := aCollection
 ]
 
 { #category : #accessing }
-GtRrTasksExecutionVerticalChartStencil >> tasksEndTime [
+GtRrTasksExecutionHorizontalChartStencil >> tasksEndTime [
 	^ self taskItems maxValue: #endTime
 ]
 
 { #category : #accessing }
-GtRrTasksExecutionVerticalChartStencil >> tasksStartTime [
+GtRrTasksExecutionHorizontalChartStencil >> tasksStartTime [
 	^ self taskItems maxValue: #startTime
 ]
 
 { #category : #accessing }
-GtRrTasksExecutionVerticalChartStencil >> timelineScale [
+GtRrTasksExecutionHorizontalChartStencil >> timelineScale [
 	| endTime startTime offset |
 	
 	startTime := self tasksStartTime.

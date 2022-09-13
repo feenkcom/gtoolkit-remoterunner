@@ -1,7 +1,7 @@
 Class {
 	#name : #PlpoGtRrWorkerExamplesReport,
 	#superclass : #PharoLinkProxyObject,
-	#category : #'RemoteRunner-Worker'
+	#category : #'RemoteRunner-Reports'
 }
 
 { #category : #accessing }
@@ -9,7 +9,7 @@ PlpoGtRrWorkerExamplesReport class >> remoteClassName [
 	^ #GtRrWorkerExamplesReport
 ]
 
-{ #category : #accessing }
+{ #category : #'gt - extensions' }
 PlpoGtRrWorkerExamplesReport >> gtViewDurationExecutionChartListFor: aView [
 	<gtView>
 	
@@ -17,11 +17,11 @@ PlpoGtRrWorkerExamplesReport >> gtViewDurationExecutionChartListFor: aView [
 		title: 'Duration Chart';
 		priority: 11;
 		stencil: [
-			GtRrTasksExecutionVerticalChartStencil new 
+			GtRrTasksExecutionHorizontalChartStencil new 
 				taskItems: self tasksExecutionChartItems ]
 ]
 
-{ #category : #accessing }
+{ #category : #'gt - extensions' }
 PlpoGtRrWorkerExamplesReport >> gtViewDurationSortedChartListFor: aView [
 	<gtView>
 	
@@ -29,15 +29,28 @@ PlpoGtRrWorkerExamplesReport >> gtViewDurationSortedChartListFor: aView [
 		title: 'Duration Chart (sorted)';
 		priority: 10;
 		stencil: [
-			GtRrTasksExecutionVerticalChartStencil new 
+			GtRrTasksExecutionHorizontalChartStencil new 
 				taskItems: (self tasksExecutionChartItems
 					sorted: [ :aTaskItem | aTaskItem duration ] descending) ]
+]
+
+{ #category : #'gt - extensions' }
+PlpoGtRrWorkerExamplesReport >> gtViewExecutionTimelineListFor: aView [
+	<gtView>
+	
+	^ aView explicit
+		title: 'Execution Timeline';
+		priority: 25;
+		stencil: [ 
+			GtRrExecutionHorizontalChartStencil new 
+				executions: self tasksExecutionChartItems;
+				rowLabelComputation: [ :anItem | anItem label ]]
 ]
 
 { #category : #accessing }
 PlpoGtRrWorkerExamplesReport >> tasksExecutionChartItems [
 	^ self tasksExecutionChartItemsData collect: [ :aDictionary |
-		GtRrTasksExecutionChartTaskDataModel fromDictionary: aDictionary]
+		GtRrExecutionChartDataItem fromDictionary: aDictionary]
 ]
 
 { #category : #accessing }

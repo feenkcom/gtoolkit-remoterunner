@@ -415,6 +415,12 @@ GtRrTask >> state: aSymbol [
 	state := aSymbol
 ]
 
+{ #category : #printing }
+GtRrTask >> stateDescription [
+	^ String streamContents: [ :aStream |
+		self printSupplementalOn: aStream ]
+]
+
 { #category : #ui }
 GtRrTask >> summaryAttributes [
 

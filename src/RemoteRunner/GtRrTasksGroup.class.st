@@ -36,6 +36,17 @@ GtRrTasksGroup >> endTime [
 	^ time
 ]
 
+{ #category : #accessing }
+GtRrTasksGroup >> firstHandoverTime [ 
+	| time |
+	time := self items first handoverTime.
+	self do: [ :aTask | 
+		(aTask handoverTime notNil and: [ aTask handoverTime < time ])
+			ifTrue: [
+				time := aTask handoverTime ] ].
+	^ time
+]
+
 { #category : #'gt - extensions' }
 GtRrTasksGroup >> gtViewTasksFor: aView [
 	<gtView>
@@ -120,7 +131,7 @@ GtRrTasksGroup >> gtViewTimelineV3For: aView [
 		title: 'Timeline (v3)';
 		priority: 20; 
 		stencil: [
-			GtRrTasksExecutionVerticalChartStencil new 
+			GtRrTasksExecutionHorizontalChartStencil new 
 				taskItems: ((self select: #isFinished)
 					sorted: [ :aTask | aTask duration ] descending) ]
 ]
@@ -132,7 +143,7 @@ GtRrTasksGroup >> gtViewTimelineV4For: aView [
 		title: 'Timeline (v4)';
 		priority: 20; 
 		stencil: [
-			GtRrTasksExecutionVerticalChartStencil new 
+			GtRrTasksExecutionHorizontalChartStencil new 
 				taskItems: (self 
 					select: #isFinished) ]
 ]
@@ -151,6 +162,17 @@ GtRrTasksGroup >> initializeWith: aCollection [
 { #category : #accessing }
 GtRrTasksGroup >> items [
 	^ items
+]
+
+{ #category : #accessing }
+GtRrTasksGroup >> lastResultReceivedTime [ 
+	| time |
+	time := self items first resultReceivedTime.
+	self do: [ :aTask | 
+		(aTask resultReceivedTime notNil and: [ aTask resultReceivedTime > time ])
+			ifTrue: [
+				time := aTask resultReceivedTime ] ].
+	^ time
 ]
 
 { #category : #accessing }

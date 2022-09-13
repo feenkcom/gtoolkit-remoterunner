@@ -5,8 +5,13 @@ Class {
 		'workerAttributes',
 		'tasks'
 	],
-	#category : #'RemoteRunner-Worker'
+	#category : #'RemoteRunner-Reports'
 }
+
+{ #category : #accessing }
+GtRrWorkerExamplesReport >> description [
+	^ self workerId 
+]
 
 { #category : #'gt - extensions' }
 GtRrWorkerExamplesReport >> gtViewDurationExecutionChartListFor: aView [
@@ -28,6 +33,18 @@ GtRrWorkerExamplesReport >> gtViewDurationSortedChartListFor: aView [
 		priority: 10;
 		object: [ self tasks ];
 		view: #gtViewTimelineV3For: 
+]
+
+{ #category : #'gt - extensions' }
+GtRrWorkerExamplesReport >> gtViewExecutionTimelineListFor: aView [
+	<gtView>
+	
+	^ aView explicit
+		title: 'Execution Timeline';
+		priority: 25;
+		stencil: [ 
+			GtRrExecutionHorizontalChartStencil new 
+				executions: self tasks ]
 ]
 
 { #category : #'gt - extensions' }
@@ -116,9 +133,19 @@ GtRrWorkerExamplesReport >> tasksEndTime [
 
 { #category : #accessing }
 GtRrWorkerExamplesReport >> tasksExecutionChartItemsData [
-	^ (self tasks select: #isFinished)
+	^ (self tasks select: #hasCompleted)
 		collect: [ :aTask |
-			(GtRrTasksExecutionChartTaskDataModel fromTask: aTask) asDictionary ] 
+			(GtRrExecutionChartDataItem fromTask: aTask) asDictionary ] 
+]
+
+{ #category : #accessing }
+GtRrWorkerExamplesReport >> tasksFirstHandoveTime [ 
+	^ self tasks firstHandoverTime
+]
+
+{ #category : #accessing }
+GtRrWorkerExamplesReport >> tasksLastResultReceivedTime [ 
+	^ self tasks lastResultReceivedTime
 ]
 
 { #category : #accessing }
