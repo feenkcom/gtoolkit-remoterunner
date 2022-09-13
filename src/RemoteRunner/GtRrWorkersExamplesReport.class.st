@@ -176,3 +176,10 @@ GtRrWorkersExamplesReport >> workersExecutionChartItemsData [
 		collect: [ :aWorker |
 			(GtRrExecutionChartDataItem fromWorker: aWorker) asDictionary ] 
 ]
+
+{ #category : #accessing }
+GtRrWorkersExamplesReport >> workersTasksExecutionChartItemsData [
+	^ self workers
+		collect: [ :aWorker |
+			aWorker tasksExecutionChartItemsGroup asDictionary ] 
+]

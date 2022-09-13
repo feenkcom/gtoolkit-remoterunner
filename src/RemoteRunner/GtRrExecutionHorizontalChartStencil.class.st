@@ -6,7 +6,8 @@ Class {
 		'startTimeComputation',
 		'endTimeComputation',
 		'rowLabelComputation',
-		'colorComputation'
+		'colorComputation',
+		'rowValuesComputation'
 	],
 	#category : #'RemoteRunner-UI'
 }
@@ -57,10 +58,7 @@ GtRrExecutionHorizontalChartStencil >> create [
 		| aRowContainer aLabel theBars |
 		
 		aRowContainer := self createRow.
-		aLabel := self createLabelCell: (rowLabelComputation value: anExecutionDetails) "(
-			anExecutionDetails totalCount asString,
-			(anExecutionDetails totalCount = 1 ifTrue: [ 'test'] ifFalse: ['tests']),
-			' (', anExecutionDetails state, ')  '  )".
+		aLabel := self createLabelCell: (rowLabelComputation value: anExecutionDetails).
 		
 		theBars := GtPlotterHorizontalValueBarsElement new
 			height: self barHeight;
@@ -71,7 +69,7 @@ GtRrExecutionHorizontalChartStencil >> create [
 						alignLeftAt: (timeScale map: (startTimeComputation value: aGtScaleContext originalValue)) ] ];
 			scale: barWidthScale;
 			scaleData: [ :each | each duration ];
-			values: {anExecutionDetails}.
+			values: (rowValuesComputation cull: anExecutionDetails).
 	
 		aRowContainer addChildren: {
 			aLabel.
@@ -130,6 +128,11 @@ GtRrExecutionHorizontalChartStencil >> defaultBarColor [
 	^ ((Color r: 92 g: 204 b: 231 range: 255) alpha: 0.2)
 ]
 
+{ #category : #initialization }
+GtRrExecutionHorizontalChartStencil >> enabledGroupsInRow [
+	rowValuesComputation := [ :anExecution | anExecution items ].
+]
+
 { #category : #accessing }
 GtRrExecutionHorizontalChartStencil >> endTimeComputation: anObject [
 
@@ -183,7 +186,8 @@ GtRrExecutionHorizontalChartStencil >> initialize [
 	startTimeComputation := [ :anExecution | anExecution startTime ].
 	endTimeComputation :=  [ :anExecution | anExecution endTime ].
 	rowLabelComputation := [ :anExecution | anExecution gtDisplayString ].
-	colorComputation := [ self defaultBarColor ]
+	colorComputation := [ self defaultBarColor ].
+	rowValuesComputation := [ :anExecution | {anExecution} ].
 ]
 
 { #category : #accessing }
@@ -219,6 +223,12 @@ GtRrExecutionHorizontalChartStencil >> rowLabelComputation [
 GtRrExecutionHorizontalChartStencil >> rowLabelComputation: anObject [
 
 	rowLabelComputation := anObject
+]
+
+{ #category : #accessing }
+GtRrExecutionHorizontalChartStencil >> rowValuesComputation: anObject [
+
+	rowValuesComputation := anObject
 ]
 
 { #category : #accessing }
