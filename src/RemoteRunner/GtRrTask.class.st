@@ -217,6 +217,7 @@ GtRrTask >> initialize [
 	self reset.
 	constraint := GtRrTrueConstraint instance.
 	retryStrategy := GtRrTaskNeverRetry uniqueInstance.
+	taskId := UUID new asString.
 ]
 
 { #category : #testing }
