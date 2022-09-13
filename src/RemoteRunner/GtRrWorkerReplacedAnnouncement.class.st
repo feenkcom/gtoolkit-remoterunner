@@ -2,52 +2,42 @@ Class {
 	#name : #GtRrWorkerReplacedAnnouncement,
 	#superclass : #GtRrWorkerAnnouncement,
 	#instVars : [
-		'newWorker'
+		'oldProcess',
+		'newProcess'
 	],
 	#category : #'RemoteRunner-Announcements'
 }
 
-{ #category : #ui }
-GtRrWorkerReplacedAnnouncement >> gtStderrFor: aView [
-	<gtView>
+{ #category : #accessing }
+GtRrWorkerReplacedAnnouncement >> newProcess [
 
-	worker ifNil: [ ^ aView empty ].
-	^ aView forward
-		title: 'stderr';
-		priority: 10;
-		object: [ worker ];
-		view: #gtStderrFor:
-	
-]
-
-{ #category : #ui }
-GtRrWorkerReplacedAnnouncement >> gtStdoutFor: aView [
-	<gtView>
-
-	worker ifNil: [ ^ aView empty ].
-	^ aView forward
-		title: 'stdout';
-		priority: 10;
-		object: [ worker ];
-		view: #gtStdoutFor:
-	
+	^ newProcess
 ]
 
 { #category : #accessing }
-GtRrWorkerReplacedAnnouncement >> newWorker [
+GtRrWorkerReplacedAnnouncement >> newProcess: anObject [
 
-	^ newWorker
+	newProcess := anObject
 ]
 
 { #category : #accessing }
-GtRrWorkerReplacedAnnouncement >> newWorker: anObject [
+GtRrWorkerReplacedAnnouncement >> oldProcess [
 
-	newWorker := anObject
+	^ oldProcess
+]
+
+{ #category : #accessing }
+GtRrWorkerReplacedAnnouncement >> oldProcess: anObject [
+
+	oldProcess := anObject
 ]
 
 { #category : #printing }
 GtRrWorkerReplacedAnnouncement >> printOneLineContentsOn: stream [
 
-	worker ifNil: [ ^ self ].
-	stream << worker stderr
+	stream
+		<< 'old: ';
+		print: oldProcess;
+		<< ', new: ';
+		print: newProcess
 ]

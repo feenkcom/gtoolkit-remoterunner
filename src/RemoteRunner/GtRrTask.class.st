@@ -217,6 +217,7 @@ GtRrTask >> initialize [
 	self reset.
 	constraint := GtRrTrueConstraint instance.
 	retryStrategy := GtRrTaskNeverRetry uniqueInstance.
+	taskId := UUID new asString.
 ]
 
 { #category : #testing }
@@ -374,6 +375,13 @@ GtRrTask >> runInImage [
 	self markTaskStarted.
 	self result: self timedRun.
 	self markTaskCompleted.
+]
+
+{ #category : #accessing }
+GtRrTask >> serverDuration [
+	^ (handoverTime isNotNil and: [ resultReceivedTime isNotNil ]) 
+		ifTrue: [ resultReceivedTime - handoverTime ]
+		ifFalse: [ nil ]
 ]
 
 { #category : #accessing }

@@ -262,8 +262,8 @@ GtRrLocalManagerStartupAndShutdown >> startWatchDog [
 				ifTrue: [ processes add: self newWorkerLocalProcess ]
 				ifFalse: [ ].
 			remoteRunner announceAndLog: (GtRrWorkerReplacedAnnouncement new
-				worker: e;
-				newWorker: process) ].
+				oldProcess: e;
+				newProcess: process) ].
 		 ] ] forkNamed:
 			'GtRemoteRunner local watch dog'
 ]
