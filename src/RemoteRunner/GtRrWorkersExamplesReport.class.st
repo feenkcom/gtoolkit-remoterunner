@@ -56,9 +56,13 @@ GtRrWorkersExamplesReport >> gtViewWorkersTimingFor: aView [
 		items: [ self workers ];
 		column: 'Id' text: [ :aWorker | aWorker workerId ];
 		column: 'Tasks Start Time' text: [ :aWorker | 
-			aWorker tasksStartTime printToSeconds ];
+			aWorker tasksStartTime 
+				ifNil: [ '-'] 
+				ifNotNil: [ :aTimestamp | aTimestamp printToSeconds ] ];
 		column: 'Tasks End Time' text: [ :aWorker | 
-			aWorker tasksEndTime printToSeconds ];
+			aWorker tasksEndTime 
+				ifNil: [ '-'] 
+				ifNotNil: [ :aTimestamp | aTimestamp printToSeconds ]  ];
 		column: 'Tasks Duration' text: [ :aWorker | aWorker tasksDuration ];
 		column: 'Task Gap' text: [ :aWorker | aWorker taskGapsDuration ]
 ]
@@ -85,38 +89,53 @@ GtRrWorkersExamplesReport >> printOn: aStream [
 
 { #category : #accessing }
 GtRrWorkersExamplesReport >> tasksFirstStartTime [ 
+	^ self tasksFirstTimeFor: [ :aWorker |  aWorker tasksStartTime ]
+]
+
+{ #category : #accessing }
+GtRrWorkersExamplesReport >> tasksFirstTimeFor: aBlock [ 
 	^ self workers 
-		inject: self workers first tasksStartTime
+		inject: (aBlock value: self workers first)
 		into: [ :startTime :aWorker |
 			| workerStartTime |
-			workerStartTime := aWorker tasksStartTime.
-			workerStartTime < startTime 
-				ifTrue: [ workerStartTime ]
-				ifFalse: [ startTime ]  ]
+			workerStartTime := aBlock value: aWorker.
+			workerStartTime 
+				ifNil: [ startTime ]
+				ifNotNil: [
+					startTime 
+						ifNil: [ workerStartTime ]
+						ifNotNil: [
+							workerStartTime < startTime 
+								ifTrue: [ workerStartTime ]
+								ifFalse: [ startTime ] ] ] ]
 ]
 
 { #category : #accessing }
 GtRrWorkersExamplesReport >> tasksLastEndTime [ 
-	^ self workers 
-		inject: self workers first tasksEndTime
-		into: [ :endTime :aWorker |
-			| workerEndTime |
-			workerEndTime := aWorker tasksEndTime.
-			workerEndTime > endTime 
-				ifTrue: [ workerEndTime ]
-				ifFalse: [ endTime ]  ]
+	^ self tasksLastTimeFor: [ :aWorker | aWorker tasksEndTime ] 
 ]
 
 { #category : #accessing }
 GtRrWorkersExamplesReport >> tasksLastStartTime [ 
+	^ self tasksLastTimeFor: [ :aWorker | aWorker tasksStartTime ] 
+]
+
+{ #category : #accessing }
+GtRrWorkersExamplesReport >> tasksLastTimeFor: aBlock [ 
 	^ self workers 
-		inject: self workers first tasksStartTime
+		inject: (aBlock value: self workers first)
 		into: [ :startTime :aWorker |
 			| workerStartTime |
-			workerStartTime := aWorker tasksStartTime.
-			workerStartTime > startTime 
-				ifTrue: [ workerStartTime ]
-				ifFalse: [ startTime ]  ]
+			workerStartTime := aBlock value: aWorker.
+			workerStartTime 
+				ifNil: [ startTime ]
+				ifNotNil: [
+					startTime 
+						ifNil: [ workerStartTime ]
+						ifNotNil: [
+							workerStartTime > startTime 
+								ifTrue: [ workerStartTime ]
+								ifFalse: [ startTime ] ] ] ]
 ]
 
 { #category : #accessing }
