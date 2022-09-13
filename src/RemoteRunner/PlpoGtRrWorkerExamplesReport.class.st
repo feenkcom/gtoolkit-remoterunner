@@ -1,7 +1,7 @@
 Class {
 	#name : #PlpoGtRrWorkerExamplesReport,
 	#superclass : #PharoLinkProxyObject,
-	#category : #'RemoteRunner-Worker'
+	#category : #'RemoteRunner-Reports'
 }
 
 { #category : #accessing }

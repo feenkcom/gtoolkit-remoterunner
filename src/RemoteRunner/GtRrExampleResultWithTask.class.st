@@ -5,7 +5,7 @@ Class {
 		'exampleResult',
 		'task'
 	],
-	#category : #'RemoteRunner-UI'
+	#category : #'RemoteRunner-Reports'
 }
 
 { #category : #accessing }

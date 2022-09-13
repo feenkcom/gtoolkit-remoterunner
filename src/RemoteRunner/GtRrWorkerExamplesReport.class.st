@@ -5,7 +5,7 @@ Class {
 		'workerAttributes',
 		'tasks'
 	],
-	#category : #'RemoteRunner-Worker'
+	#category : #'RemoteRunner-Reports'
 }
 
 { #category : #'gt - extensions' }

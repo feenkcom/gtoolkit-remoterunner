@@ -5,7 +5,7 @@ Class {
 		'ipAddress',
 		'workersReport'
 	],
-	#category : #'RemoteRunner-Worker'
+	#category : #'RemoteRunner-Reports'
 }
 
 { #category : #accessing }

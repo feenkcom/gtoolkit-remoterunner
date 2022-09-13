@@ -8,7 +8,7 @@ Class {
 		'job',
 		'tasks'
 	],
-	#category : #'RemoteRunner-UI'
+	#category : #'RemoteRunner-Reports'
 }
 
 { #category : #accessing }
