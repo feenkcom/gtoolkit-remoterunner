@@ -47,6 +47,11 @@ GtRrTasksGroup >> firstHandoverTime [
 	^ time
 ]
 
+{ #category : #accessing }
+GtRrTasksGroup >> from: start to: stop do: aBlock [
+	^ self items from: start to: stop do: aBlock
+]
+
 { #category : #'gt - extensions' }
 GtRrTasksGroup >> gtViewTasksFor: aView [
 	<gtView>

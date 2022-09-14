@@ -10,14 +10,25 @@ PlpoGtRrRunnerMachineExamplesReport class >> remoteClassName [
 ]
 
 { #category : #'gt - extensions' }
-PlpoGtRrRunnerMachineExamplesReport >> gtViewCondensedTasksExecutionTimelineListFor:aView [
+PlpoGtRrRunnerMachineExamplesReport >> gtViewCondensedExecutionTimelineFor:aView [
 	<gtView>
 	
 	^ aView forward
 		title: 'Condensed Execution Timeline';
 		priority: 35;
 		object: [ self workersReport];
-		view: #gtViewCondensedTasksExecutionTimelineListFor:
+		view: #gtViewCondensedExecutionTimelineFor:
+]
+
+{ #category : #'gt - extensions' }
+PlpoGtRrRunnerMachineExamplesReport >> gtViewCondensedTasksTimelineFor:  aView [
+	<gtView>
+	
+	^ aView forward
+		title: 'Condensed Tasks Timeline';
+		priority: 45;
+		object: [ self workersReport];
+		view: #gtViewCondensedTasksTimelineFor: 
 ]
 
 { #category : #'gt - extensions' }
