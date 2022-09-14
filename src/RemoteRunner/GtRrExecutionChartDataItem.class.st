@@ -10,7 +10,8 @@ Class {
 		'startTime',
 		'endTime',
 		'duration',
-		'label'
+		'label',
+		'properties'
 	],
 	#category : #'RemoteRunner-UI'
 }
@@ -20,7 +21,8 @@ GtRrExecutionChartDataItem class >> fromDictionary: aDictionary [
 	^ self new 
 		startTime: (aDictionary at: 'startTime');
 		endTime: (aDictionary at: 'endTime');
-		label: (aDictionary at: 'label' ifAbsent: [ nil ])
+		label: (aDictionary at: 'label' ifAbsent: [ nil ]);
+		properties: (aDictionary at: 'properties' ifAbsent: [ nil ])
 ]
 
 { #category : #'instance - creation' }
@@ -67,6 +69,7 @@ GtRrExecutionChartDataItem >> asDictionary [
 		at: 'startTime' put: self startTime;
 		at: 'endTime' put: self endTime;
 		at: 'label' put: self label;
+		at: 'properties' put: self properties;
 		yourself
 ]
 
@@ -97,6 +100,34 @@ GtRrExecutionChartDataItem >> label [
 GtRrExecutionChartDataItem >> label: anObject [
 
 	label := anObject
+]
+
+{ #category : #'accessing - properties' }
+GtRrExecutionChartDataItem >> properties [
+
+	^ properties
+]
+
+{ #category : #'accessing - properties' }
+GtRrExecutionChartDataItem >> properties: anObject [
+
+	^ properties := anObject
+]
+
+{ #category : #'accessing - properties' }
+GtRrExecutionChartDataItem >> propertyAt: aKey ifAbsent: anAbsentBloc [
+	properties ifNil: [
+		^ anAbsentBloc value ].
+	
+	^ properties at: aKey ifAbsent: anAbsentBloc
+]
+
+{ #category : #'accessing - properties' }
+GtRrExecutionChartDataItem >> propertyAt: aKey put: aValue [
+	properties ifNil: [
+		properties := Dictionary new].
+		
+	properties at: aKey put: aValue
 ]
 
 { #category : #accessing }

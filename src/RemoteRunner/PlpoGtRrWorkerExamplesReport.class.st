@@ -47,6 +47,19 @@ PlpoGtRrWorkerExamplesReport >> gtViewExecutionTimelineListFor: aView [
 				rowLabelComputation: [ :anItem | anItem label ]]
 ]
 
+{ #category : #'gt - extensions' }
+PlpoGtRrWorkerExamplesReport >> gtViewExecutionTimelineWithSchedulingFor: aView [
+	<gtView>
+	
+	^ aView explicit
+		title: 'Execution Timeline (with scheduling)';
+		priority: 45;
+		stencil: [ 
+			GtRrExecutionHorizontalChartStencil new 
+				executions: self tasksExecutionChartItemsGroupWithScheduling;
+				rowLabelComputation: [ :anItem | anItem label ]]
+]
+
 { #category : #accessing }
 PlpoGtRrWorkerExamplesReport >> tasksExecutionChartItems [
 	^ self tasksExecutionChartItemsData collect: [ :aDictionary |
@@ -56,4 +69,15 @@ PlpoGtRrWorkerExamplesReport >> tasksExecutionChartItems [
 { #category : #accessing }
 PlpoGtRrWorkerExamplesReport >> tasksExecutionChartItemsData [
 	^ (self proxyPerform: #tasksExecutionChartItemsData) getSerialized
+]
+
+{ #category : #accessing }
+PlpoGtRrWorkerExamplesReport >> tasksExecutionChartItemsGroupWithScheduling [
+	^  GtRrExecutionChartDataItemsGroup 
+		fromDictionary: self tasksExecutionChartItemsGroupWithSchedulingData
+]
+
+{ #category : #accessing }
+PlpoGtRrWorkerExamplesReport >> tasksExecutionChartItemsGroupWithSchedulingData [
+	^ (self proxyPerform: #tasksExecutionChartItemsGroupWithSchedulingData) getSerialized
 ]

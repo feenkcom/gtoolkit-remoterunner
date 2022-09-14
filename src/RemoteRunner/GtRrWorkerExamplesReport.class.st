@@ -77,6 +77,16 @@ GtRrWorkerExamplesReport >> gtViewTasksOverviewFor: aView [
 			aTask duration ifNil: [ '-' ] ] "width: 150"
 ]
 
+{ #category : #'accessing - chart data' }
+GtRrWorkerExamplesReport >> isTaskCorrectlyScheduledAtIndex: taskIndex inGroup: aTasksGroup [ 
+	| targetTask targetDuration|
+	targetTask := aTasksGroup at: taskIndex.
+	targetDuration := targetTask durationOnRunner.
+	aTasksGroup from: 1 to: taskIndex - 1 do: [ :aTask |
+		targetDuration > aTask durationOnRunner ifTrue: [ ^ false ] ].
+	^ true
+]
+
 { #category : #accessing }
 GtRrWorkerExamplesReport >> numberOfExamples [ 
 	^ tasks sumNumbers: #totalCount
@@ -131,19 +141,41 @@ GtRrWorkerExamplesReport >> tasksEndTime [
 	^ self tasks endTime
 ]
 
-{ #category : #accessing }
+{ #category : #'accessing - chart data' }
 GtRrWorkerExamplesReport >> tasksExecutionChartItemsData [
 	^ self tasksExecutionChartItemsGroup 
 		collect: [ :anItem | anItem asDictionary ] 
 ]
 
-{ #category : #accessing }
+{ #category : #'accessing - chart data' }
 GtRrWorkerExamplesReport >> tasksExecutionChartItemsGroup [
 	^ (GtRrExecutionChartDataItemsGroup withAll: ((self tasks 
 		select: #hasCompleted)
 			collect: [ :aTask |
 				(GtRrExecutionChartDataItem fromTask: aTask) ]))
 		label: self workerId
+]
+
+{ #category : #'accessing - chart data' }
+GtRrWorkerExamplesReport >> tasksExecutionChartItemsGroupWithScheduling [
+	| completedTasks |
+	completedTasks := self tasks select: #hasCompleted.
+	^ (GtRrExecutionChartDataItemsGroup withAll: (completedTasks items
+			collectWithIndex: [ :aTask :anIndex |
+				| dataItem | 
+				dataItem := GtRrExecutionChartDataItem fromTask: aTask.
+				dataItem 
+					propertyAt: #correctScheduling 
+					put: (self 
+						isTaskCorrectlyScheduledAtIndex: anIndex
+						inGroup: completedTasks).
+				dataItem ]))
+		label: self workerId
+]
+
+{ #category : #'accessing - chart data' }
+GtRrWorkerExamplesReport >> tasksExecutionChartItemsGroupWithSchedulingData [
+	^ self tasksExecutionChartItemsGroupWithScheduling asDictionary
 ]
 
 { #category : #accessing }

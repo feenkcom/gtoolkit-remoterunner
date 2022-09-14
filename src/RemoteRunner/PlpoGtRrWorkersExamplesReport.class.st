@@ -25,6 +25,25 @@ PlpoGtRrWorkersExamplesReport >> gtViewCondensedExecutionTimelineFor: aView [
 ]
 
 { #category : #accessing }
+PlpoGtRrWorkersExamplesReport >> gtViewCondensedTasksTimelineFor: aView [
+	<gtView>
+	
+	^ aView explicit
+		title: 'Condensed Tasks Timeline';
+		priority: 45;
+		stencil: [ 
+			GtRrExecutionHorizontalChartStencil new 
+				executions: self workersTasksExecutionChartItemsGroupWithScheduling;
+				rowLabelComputation: [ :anItem | anItem label ];
+				colorComputation: [ :anItem |
+					(anItem propertyAt: #correctScheduling ifAbsent: [ false ])
+						ifFalse: [ Color red ] 
+						ifTrue: [ Color gray ] ];
+				enabledGroupsInRow;
+				configureWithMinimalDetails ]
+]
+
+{ #category : #accessing }
 PlpoGtRrWorkersExamplesReport >> gtViewExecutionTimelineListFor: aView [
 	<gtView>
 	
@@ -70,4 +89,15 @@ PlpoGtRrWorkersExamplesReport >> workersTasksExecutionChartItemsData [
 PlpoGtRrWorkersExamplesReport >> workersTasksExecutionChartItemsGroup [
 	^ self workersTasksExecutionChartItemsData collect: [ :aDictionary |
 		GtRrExecutionChartDataItemsGroup fromDictionary: aDictionary]
+]
+
+{ #category : #accessing }
+PlpoGtRrWorkersExamplesReport >> workersTasksExecutionChartItemsGroupWithScheduling [
+	^ self workersTasksExecutionChartItemsGroupWithSchedulingData collect: [ :aDictionary |
+		GtRrExecutionChartDataItemsGroup fromDictionary: aDictionary]
+]
+
+{ #category : #accessing }
+PlpoGtRrWorkersExamplesReport >> workersTasksExecutionChartItemsGroupWithSchedulingData [
+	^ (self proxyPerform: #workersTasksExecutionChartItemsGroupWithSchedulingData) getSerialized
 ]

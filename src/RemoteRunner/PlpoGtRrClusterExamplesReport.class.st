@@ -20,6 +20,17 @@ PlpoGtRrClusterExamplesReport >> gtViewCondensedExecutionTimelineFor:aView [
 		view: #gtViewCondensedExecutionTimelineFor:
 ]
 
+{ #category : #accessing }
+PlpoGtRrClusterExamplesReport >> gtViewCondensedTasksTimelineFor:  aView [
+	<gtView>
+	
+	^ aView forward
+		title: 'Condensed Tasks Timeline';
+		priority: 45;
+		object: [ self workersReport];
+		view: #gtViewCondensedTasksTimelineFor: 
+]
+
 { #category : #'gt - extensions' }
 PlpoGtRrClusterExamplesReport >> gtViewExecutionTimelineListFor: aView [
 	<gtView>

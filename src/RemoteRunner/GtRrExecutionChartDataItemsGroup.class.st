@@ -42,6 +42,12 @@ GtRrExecutionChartDataItemsGroup >> endTime [
 ]
 
 { #category : #accessing }
+GtRrExecutionChartDataItemsGroup >> inject: thisValue into: binaryBlock [ 
+	^ self items 
+		inject: thisValue into: binaryBlock 
+]
+
+{ #category : #accessing }
 GtRrExecutionChartDataItemsGroup >> label [
 
 	^ label
