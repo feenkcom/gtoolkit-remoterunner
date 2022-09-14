@@ -99,3 +99,10 @@ GtRrClusterExamplesReport >> printOn: aStream [
 			print: self machineReports size;
 			<< ' runner machines'].
 ]
+
+{ #category : #accessing }
+GtRrClusterExamplesReport >> workersReport [
+	^ GtRrWorkersExamplesReport new 
+		workers: (self machineReports flatCollect: [ :aMachineReport |
+			aMachineReport workersReport workers ])
+]

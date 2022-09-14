@@ -9,6 +9,17 @@ PlpoGtRrClusterExamplesReport class >> remoteClassName [
 	^ #GtRrClusterExamplesReport
 ]
 
+{ #category : #accessing }
+PlpoGtRrClusterExamplesReport >> gtViewCondensedExecutionTimelineFor:aView [
+	<gtView>
+	
+	^ aView forward
+		title: 'Condensed Execution Timeline';
+		priority: 35;
+		object: [ self workersReport];
+		view: #gtViewCondensedExecutionTimelineFor:
+]
+
 { #category : #'gt - extensions' }
 PlpoGtRrClusterExamplesReport >> gtViewExecutionTimelineListFor: aView [
 	<gtView>
@@ -31,4 +42,9 @@ PlpoGtRrClusterExamplesReport >> machinesExecutionChartItems [
 { #category : #accessing }
 PlpoGtRrClusterExamplesReport >> machinesExecutionChartItemsData [
 	^ (self proxyPerform: #machinesExecutionChartItemsData) getSerialized
+]
+
+{ #category : #accessing }
+PlpoGtRrClusterExamplesReport >> workersReport [
+	^ self proxyPerform: #workersReport
 ]
