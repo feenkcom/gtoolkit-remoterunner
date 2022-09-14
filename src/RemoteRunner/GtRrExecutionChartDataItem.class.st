@@ -47,6 +47,20 @@ GtRrExecutionChartDataItem class >> fromWorker: aWorker [
 		label:  aWorker description
 ]
 
+{ #category : #accessing }
+GtRrExecutionChartDataItem >> appendDurationToLabel [
+	| newLabel |
+	
+	newLabel := String streamContents: [ :aStream |
+		aStream 
+			<< self label;
+			<< ' (';
+			<< self duration gtShortPrintString;
+			<< ')' ].
+		
+	self label: newLabel
+]
+
 { #category : #converting }
 GtRrExecutionChartDataItem >> asDictionary [ 
 	^ Dictionary new 
