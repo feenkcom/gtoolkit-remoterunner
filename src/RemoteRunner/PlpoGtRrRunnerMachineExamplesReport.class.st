@@ -10,6 +10,17 @@ PlpoGtRrRunnerMachineExamplesReport class >> remoteClassName [
 ]
 
 { #category : #'gt - extensions' }
+PlpoGtRrRunnerMachineExamplesReport >> gtViewCondensedTasksExecutionTimelineListFor:aView [
+	<gtView>
+	
+	^ aView forward
+		title: 'Condensed Execution Timeline';
+		priority: 35;
+		object: [ self workersReport];
+		view: #gtViewCondensedTasksExecutionTimelineListFor:
+]
+
+{ #category : #'gt - extensions' }
 PlpoGtRrRunnerMachineExamplesReport >> gtViewExecutionTimelineListFor: aView [
 	<gtView>
 	
@@ -31,4 +42,9 @@ PlpoGtRrRunnerMachineExamplesReport >> workersExecutionChartItems [
 { #category : #accessing }
 PlpoGtRrRunnerMachineExamplesReport >> workersExecutionChartItemsData [
 	^ (self proxyPerform: #workersExecutionChartItemsData) getSerialized
+]
+
+{ #category : #accessing }
+PlpoGtRrRunnerMachineExamplesReport >> workersReport [
+	^ self proxyPerform: #workersReport
 ]

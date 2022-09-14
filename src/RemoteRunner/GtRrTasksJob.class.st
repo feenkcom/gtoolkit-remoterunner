@@ -58,22 +58,26 @@ GtRrTasksJob >> executionTimelineChartItems [
 		GtRrExecutionChartDataItem new 
 			startTime: self  creationTime;
 			endTime: self startTime;
-			label:  'Send to remote runner'.
+			label: 'Send to remote runner';
+			appendDurationToLabel.
 			
 		GtRrExecutionChartDataItem new 
 			startTime: self  startTime;
 			endTime: firstTaskHandoverTime;
-			label:  'Waiting for workers'.
+			label:  'Waiting for workers';
+			appendDurationToLabel.
 			
 		GtRrExecutionChartDataItem new 
 			startTime: firstTaskHandoverTime;
 			endTime: lastResultReceivedTime;
-			label:  'Tasks Execution'.
+			label:  'Tasks Execution';
+			appendDurationToLabel.
 			
 		GtRrExecutionChartDataItem new 
 			startTime: lastResultReceivedTime;
 			endTime: self endTime;
-			label:  'Finishing execution' } collect: #asDictionary
+			label:  'Finishing execution';
+			appendDurationToLabel } collect: #asDictionary
 ]
 
 { #category : #'accessing - examples' }

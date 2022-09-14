@@ -10,6 +10,21 @@ PlpoGtRrWorkersExamplesReport class >> remoteClassName [
 ]
 
 { #category : #accessing }
+PlpoGtRrWorkersExamplesReport >> gtViewCondensedTasksExecutionTimelineListFor: aView [
+	<gtView>
+	
+	^ aView explicit
+		title: 'Condensed Tasks Timeline';
+		priority: 35;
+		stencil: [ 
+			GtRrExecutionHorizontalChartStencil new 
+				executions: self workersTasksExecutionChartItemsGroup;
+				rowLabelComputation: [ :anItem | anItem label ];
+				colorComputation: [ Color darkGray ];
+				configureWithMinimalDetails ]
+]
+
+{ #category : #accessing }
 PlpoGtRrWorkersExamplesReport >> gtViewExecutionTimelineListFor: aView [
 	<gtView>
 	

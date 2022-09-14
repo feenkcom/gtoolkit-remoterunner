@@ -7,7 +7,13 @@ Class {
 		'endTimeComputation',
 		'rowLabelComputation',
 		'colorComputation',
-		'rowValuesComputation'
+		'rowValuesComputation',
+		'barHeight',
+		'rowHeight',
+		'hideRowLabels',
+		'hideAxisLabels',
+		'labelWidth',
+		'leftPadding'
 	],
 	#category : #'RemoteRunner-UI'
 }
@@ -19,7 +25,7 @@ GtRrExecutionHorizontalChartStencil >> amountOfTicks [
 
 { #category : #accessing }
 GtRrExecutionHorizontalChartStencil >> barHeight [
-	^ 15
+	^ barHeight
 ]
 
 { #category : #accessing }
@@ -29,9 +35,19 @@ GtRrExecutionHorizontalChartStencil >> colorComputation: anObject [
 ]
 
 { #category : #accessing }
+GtRrExecutionHorizontalChartStencil >> configureWithMinimalDetails [
+	barHeight := 1.
+	rowHeight := 1.
+	leftPadding := 20.
+	
+	hideRowLabels := true.
+	hideAxisLabels := false.
+]
+
+{ #category : #accessing }
 GtRrExecutionHorizontalChartStencil >> create [
 	<return: #Object>
-	| minCreationDate maxExpireDate scrollableContent plot timeScale barWidthScale |
+	| minCreationDate maxExpireDate plot timeScale barWidthScale |
 	
 	minCreationDate := self firstStartDate.	
 	maxExpireDate := self lastEndDate.
@@ -39,47 +55,21 @@ GtRrExecutionHorizontalChartStencil >> create [
 	timeScale := GtPlotterTimeScale new 
 		domainFrom: minCreationDate to: maxExpireDate.
 	timeScale tickFormat: [ :eachDateAndTime | 
-		eachDateAndTime asTime print24 ].
+		(eachDateAndTime - minCreationDate) gtShortPrintString ].
 	
 	barWidthScale := GtPlotterDurationScale new 
 		domainFrom: 0 seconds 
 		to: maxExpireDate - minCreationDate.
 	
-	plot := BrVerticalPane new matchParent.
-
-	plot addChild: (GtPlotterHorizontalTickLabelsElement new
-		padding: (BlInsets left: self labelWidth + self gridlineOffset);
-		scale: timeScale;
-		height: self barHeight;
-		labels: self amountOfTicks).
+	plot := BrVerticalPane new 
+		matchParent.
 	
-	scrollableContent := GtPlotterSingleScaleScrollElement new.
-	scrollableContent stencil: [ :anExecutionDetails |
-		| aRowContainer aLabel theBars |
-		
-		aRowContainer := self createRow.
-		aLabel := self createLabelCell: (rowLabelComputation value: anExecutionDetails).
-		
-		theBars := GtPlotterHorizontalValueBarsElement new
-			height: self barHeight;
-			valueStyle: [ :anElement :aGtScaleContext |
-				self styleBar: anElement execution: aGtScaleContext originalValue.
-				anElement constraintsDo: [ :c | 
-					c frame horizontal 
-						alignLeftAt: (timeScale map: (startTimeComputation value: aGtScaleContext originalValue)) ] ];
-			scale: barWidthScale;
-			scaleData: [ :each | each duration ];
-			values: (rowValuesComputation cull: anExecutionDetails).
-	
-		aRowContainer addChildren: {
-			aLabel.
-			theBars } ].
-	scrollableContent values: self executions.
-
-	scrollableContent addChild: (self createGridlines: timeScale).
-
-	
-	plot addChild: scrollableContent.
+	hideAxisLabels ifFalse: [
+		plot addChild: (self 
+			createHorizontalThicksLabelsElementForTimeScale: timeScale) ].
+	plot addChild: (self
+		createPlotterScrollableElementForTimeScale: timeScale 
+		andWidthScale: barWidthScale).
 
 	^ plot
 ]
@@ -94,6 +84,16 @@ GtRrExecutionHorizontalChartStencil >> createGridlines: aGtPlotterScale [
 			width: self gridlineWidth;
 			background: self gridlineColor ];
 		ticks: self amountOfTicks
+]
+
+{ #category : #accessing }
+GtRrExecutionHorizontalChartStencil >> createHorizontalThicksLabelsElementForTimeScale: aTimeScale [
+	^ (GtPlotterHorizontalTickLabelsElement new
+		padding: (BlInsets 
+			left: self labelWidth + self gridlineOffset + self leftPadding);
+		scale: aTimeScale;
+		height: 30;
+		labels: self amountOfTicks)
 ]
 
 { #category : #accessing }
@@ -113,6 +113,42 @@ GtRrExecutionHorizontalChartStencil >> createLabelCell: aString [
 		alignCenterRight;
 		addChild: (self createLabel: aString);
 		hExact: self labelWidth
+]
+
+{ #category : #accessing }
+GtRrExecutionHorizontalChartStencil >> createPlotterScrollableElementForTimeScale: timeScale andWidthScale: barWidthScale [
+	| scrollableContent |
+	scrollableContent := GtPlotterSingleScaleScrollElement new.
+	scrollableContent stencil: [ :anExecutionDetails |
+		| rowContainer rowLabel horizontalBars |
+		
+		rowContainer := self createRow.
+		
+		hideRowLabels ifFalse: [
+			rowLabel := self createLabelCell: (rowLabelComputation value: anExecutionDetails).
+			rowContainer addChild: rowLabel ].
+	
+		horizontalBars := GtPlotterHorizontalValueBarsElement new
+			height: self barHeight;
+			valueStyle: [ :anElement :aGtScaleContext |
+				self styleBar: anElement execution: aGtScaleContext originalValue.
+				anElement constraintsDo: [ :c | 
+					c frame horizontal 
+						alignLeftAt: (timeScale 
+							map: (startTimeComputation 
+								value: aGtScaleContext originalValue)) ] ];
+			scale: barWidthScale;
+			scaleData: [ :each | each duration ];
+			values: (rowValuesComputation cull: anExecutionDetails).
+		
+		rowContainer addChild: horizontalBars. ].
+			
+	scrollableContent values: self executions.
+	scrollableContent addChild: (self createGridlines: timeScale). 
+	
+	scrollableContent padding: (BlInsets left: self leftPadding).
+	
+	^ scrollableContent
 ]
 
 { #category : #accessing }
@@ -183,6 +219,13 @@ GtRrExecutionHorizontalChartStencil >> gridlineWidth [
 GtRrExecutionHorizontalChartStencil >> initialize [
 	super initialize.
 	
+	barHeight := 15.
+	rowHeight := 20.
+	labelWidth := 250.
+	hideRowLabels := false.
+	hideAxisLabels := false.
+	leftPadding := 0.
+	
 	startTimeComputation := [ :anExecution | anExecution startTime ].
 	endTimeComputation :=  [ :anExecution | anExecution endTime ].
 	rowLabelComputation := [ :anExecution | anExecution gtDisplayString ].
@@ -197,7 +240,9 @@ GtRrExecutionHorizontalChartStencil >> labelColor [
 
 { #category : #accessing }
 GtRrExecutionHorizontalChartStencil >> labelWidth [
-	^ 250
+	^ hideRowLabels 
+		ifTrue: [ 0 ] 
+		ifFalse: [ labelWidth ]
 ]
 
 { #category : #accessing }
@@ -209,8 +254,20 @@ GtRrExecutionHorizontalChartStencil >> lastEndDate [
 ]
 
 { #category : #accessing }
+GtRrExecutionHorizontalChartStencil >> leftPadding [
+
+	^ leftPadding
+]
+
+{ #category : #accessing }
+GtRrExecutionHorizontalChartStencil >> leftPadding: anObject [
+
+	leftPadding := anObject
+]
+
+{ #category : #accessing }
 GtRrExecutionHorizontalChartStencil >> rowHeight [
-	^ 20
+	^ rowHeight
 ]
 
 { #category : #accessing }
