@@ -62,11 +62,16 @@ PlpoGtRrWorkersExamplesReport >> gtViewTasksExecutionTimelineListFor: aView [
 	
 	^ aView explicit
 		title: 'Tasks Timeline';
-		priority: 25;
+		priority: 20;
 		stencil: [ 
 			GtRrExecutionHorizontalChartStencil new 
-				executions: self workersTasksExecutionChartItemsGroup;
-				rowLabelComputation: [ :anItem | anItem label ] ]
+				executions: self workersTasksExecutionChartItemsGroupWithScheduling;
+				rowLabelComputation: [ :anItem | anItem label ];
+				colorComputation: [ :anItem |
+					(anItem propertyAt: #correctScheduling ifAbsent: [ false ])
+						ifFalse: [ Color red ] 
+						ifTrue: [ Color gray ] ];
+				enabledGroupsInRow ]
 ]
 
 { #category : #accessing }

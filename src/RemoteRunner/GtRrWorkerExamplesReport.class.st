@@ -83,7 +83,7 @@ GtRrWorkerExamplesReport >> isTaskCorrectlyScheduledAtIndex: taskIndex inGroup: 
 	targetTask := aTasksGroup at: taskIndex.
 	targetDuration := targetTask durationOnRunner.
 	aTasksGroup from: 1 to: taskIndex - 1 do: [ :aTask |
-		targetDuration > aTask durationOnRunner ifTrue: [ ^ false ] ].
+		(targetDuration - aTask durationOnRunner > 10 seconds) ifTrue: [ ^ false ] ].
 	^ true
 ]
 
