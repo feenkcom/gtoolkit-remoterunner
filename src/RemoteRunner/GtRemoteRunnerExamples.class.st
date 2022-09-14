@@ -107,7 +107,8 @@ GtRemoteRunnerExamples >> controlChannelPing [
 	remoteRunner := GtRemoteRunner new.
 	remoteRunner managerStartupAndShutdown 
 		poolSize: 1;
-		connectionStrategyId: #single.
+		connectionStrategyId: #single;
+		autoRestart: false.
 	"Worker processes can be slow to start up if the machine is busy or the image is large (multi GB).
 	Wait for the worker to register before proceeding with tests."
 	remoteRunner when: GtRrWorkerControlChannelRegisteredAnnouncement do: [ :ann | 
@@ -184,7 +185,9 @@ GtRemoteRunnerExamples >> multipleJobs [
 	jobSemaphore := GtMutualExclusionSemaphore new.
 	workerRegisteredSemaphore := Semaphore new.
 	remoteRunner := GtRemoteRunner new.
-	remoteRunner managerStartupAndShutdown poolSize: 2.
+	remoteRunner managerStartupAndShutdown 
+		autoRestart: false;
+		poolSize: 2.
 	"Worker processes can be slow to start up if the machine is busy or the image is large (multi GB).
 	Wait for the worker to register before proceeding with tests."
 	remoteRunner when: GtRrWorkerRegisteredAnnouncement do: [ :ann | 
@@ -241,6 +244,7 @@ GtRemoteRunnerExamples >> multipleJobsSimultaneously [
 	"This example relies on the control channel, so force a single connection."
 	remoteRunner managerStartupAndShutdown 
 		poolSize: 2;
+		autoRestart: false;
 		connectionStrategyId: #single.
 	"Worker processes can be slow to start up if the machine is busy or the image is large (multi GB).
 	Wait for the worker to register before proceeding with tests."
@@ -286,13 +290,15 @@ GtRemoteRunnerExamples >> simpleJob [
 
 { #category : #examples }
 GtRemoteRunnerExamples >> simpleRunner [
-	"Demonstrate executing a simple task"
-	<gtExample>
+	"Answer a started RemoteRunner.
+	It is up to the caller to stop the runner (and thus the workers)."
 	| remoteRunner  |
 
 	self ignoreWorkerExamples ifTrue: [ ^ self ].
 	remoteRunner := GtRemoteRunner new.
-	remoteRunner managerStartupAndShutdown poolSize: 1.
+	remoteRunner managerStartupAndShutdown 
+		autoRestart: false;
+		poolSize: 1.
 
 	self assert: remoteRunner taskQueue size equals: 0.
 	self assert: remoteRunner currentlyExecutingJobs size equals: 0.
@@ -438,6 +444,7 @@ GtRemoteRunnerExamples >> terminateStartedJobWithControlChannel [
 	"This example relies on the control channel, so force a single connection."
 	remoteRunner managerStartupAndShutdown 
 		poolSize: 1;
+		autoRestart: false;
 		connectionStrategyId: #single.
 	"Worker processes can be slow to start up if the machine is busy or the image is large (multi GB).
 	Wait for the worker to register before proceeding with tests."
@@ -523,7 +530,9 @@ GtRemoteRunnerExamples >> terminateStartedJobWithoutControlChannel [
 	semaphore := GtMutualExclusionSemaphore new.
 	workerRegisteredSemaphore := Semaphore new.
 	remoteRunner := GtRemoteRunner new startLogging.
-	remoteRunner managerStartupAndShutdown poolSize: 1.
+	remoteRunner managerStartupAndShutdown 
+		autoRestart: false;
+		poolSize: 1.
 	"Worker processes can be slow to start up if the machine is busy or the image is large (multi GB).
 	Wait for the worker to register before proceeding with tests."
 	remoteRunner when: GtRrWorkerRegisteredAnnouncement do: [ :ann | 
@@ -598,7 +607,9 @@ GtRemoteRunnerExamples >> timeoutJob [
 	jobSemaphore := GtMutualExclusionSemaphore new.
 	workerRegisteredSemaphore := Semaphore new.
 	remoteRunner := GtRemoteRunner new.
-	remoteRunner managerStartupAndShutdown poolSize: 1.
+	remoteRunner managerStartupAndShutdown 
+		autoRestart: false;
+		poolSize: 1.
 	"Worker processes can be slow to start up if the machine is busy or the image is large (multi GB).
 	Wait for the worker to register before proceeding with tests."
 	remoteRunner when: GtRrWorkerRegisteredAnnouncement do: [ :ann | 
@@ -660,7 +671,9 @@ GtRemoteRunnerExamples >> timeoutTask [
 	workerRegisteredSemaphore := Semaphore new.
 	times := OrderedCollection new.
 	remoteRunner := GtRemoteRunner new.
-	remoteRunner managerStartupAndShutdown poolSize: 1.
+	remoteRunner managerStartupAndShutdown 
+		autoRestart: false;
+		poolSize: 1.
 	self assert: remoteRunner workerTimeout > 1 minute.
 	remoteRunner startLogging.
 	"Worker processes can be slow to start up if the machine is busy or the image is large (multi GB).
@@ -736,7 +749,9 @@ GtRemoteRunnerExamples >> timeoutWorker [
 	taskFailedSemaphore := Semaphore new.
 	times := OrderedCollection new.
 	remoteRunner := GtRemoteRunner new.
-	remoteRunner managerStartupAndShutdown poolSize: 1.
+	remoteRunner managerStartupAndShutdown 
+		autoRestart: false;
+		poolSize: 1.
 	remoteRunner workerTimeout: 3 seconds.
 	remoteRunner startLogging.
 	"Worker processes can be slow to start up if the machine is busy or the image is large (multi GB).
@@ -800,7 +815,9 @@ GtRemoteRunnerExamples >> workerDetails [
 	self ignoreWorkerExamples ifTrue: [ ^ self ].
 	registeredSemaphore := GtMutualExclusionSemaphore new.
 	remoteRunner := GtRemoteRunner new.
-	remoteRunner managerStartupAndShutdown poolSize: 1.
+	remoteRunner managerStartupAndShutdown 
+		autoRestart: false;
+		poolSize: 1.
 	remoteRunner when: GtRrWorkerRegisteredAnnouncement do: [ :ann | 
 		worker := ann worker.
 		registeredSemaphore signal ].
