@@ -73,5 +73,5 @@ GtRrManagerStartupAndShutdown >> startup [
 		yourself.
 	server globals at: #GtAssignedRemoteRunner put: remoteRunner.
 	remoteRunner server: server.
-	"self startHeartbeatContext."
+	self startHeartbeatContext.
 ]
