@@ -4,6 +4,7 @@ Class {
 	#traits : 'TGtGroup + TGtGroupItems',
 	#classTraits : 'TGtGroup classTrait + TGtGroupItems classTrait',
 	#instVars : [
+		'identifier',
 		'label'
 	],
 	#category : #'RemoteRunner-UI'
@@ -14,12 +15,14 @@ GtRrExecutionChartDataItemsGroup class >> fromDictionary: aDictionary [
 	^ (self withAll: 
 		((aDictionary at: 'items') collect: [ :each | 
 			GtRrExecutionChartDataItem fromDictionary: each]))
-			label: (aDictionary at: 'label' ifAbsent: [ nil ])
+				identifier: (aDictionary at: 'identifier' ifAbsent: [ nil ]);
+				label: (aDictionary at: 'label' ifAbsent: [ nil ])
 ]
 
 { #category : #accessing }
 GtRrExecutionChartDataItemsGroup >> asDictionary [ 
 	^ Dictionary new 
+		at: 'identifier' put: self identifier;
 		at: 'label' put: self label;
 		at: 'items' put: (self items collect: #asDictionary as: Array);
 		yourself
@@ -39,6 +42,18 @@ GtRrExecutionChartDataItemsGroup >> endTime [
 			anItem endTime > endTime
 				ifTrue: [ anItem endTime ]
 				ifFalse: [ endTime ] ]
+]
+
+{ #category : #accessing }
+GtRrExecutionChartDataItemsGroup >> identifier [
+
+	^ identifier
+]
+
+{ #category : #accessing }
+GtRrExecutionChartDataItemsGroup >> identifier: anObject [
+
+	identifier := anObject
 ]
 
 { #category : #accessing }

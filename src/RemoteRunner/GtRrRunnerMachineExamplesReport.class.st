@@ -110,11 +110,6 @@ GtRrRunnerMachineExamplesReport >> tasksStartTime [
 ]
 
 { #category : #accessing }
-GtRrRunnerMachineExamplesReport >> workersExecutionChartItemsData [
-	^ self workersReport workersExecutionChartItemsData
-]
-
-{ #category : #accessing }
 GtRrRunnerMachineExamplesReport >> workersReport [
 
 	^ workersReport

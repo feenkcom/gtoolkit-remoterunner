@@ -9,7 +9,7 @@ PlpoGtRrClusterExamplesReport class >> remoteClassName [
 	^ #GtRrClusterExamplesReport
 ]
 
-{ #category : #accessing }
+{ #category : #'gt - extensions' }
 PlpoGtRrClusterExamplesReport >> gtViewCondensedExecutionTimelineFor:aView [
 	<gtView>
 	
@@ -20,7 +20,7 @@ PlpoGtRrClusterExamplesReport >> gtViewCondensedExecutionTimelineFor:aView [
 		view: #gtViewCondensedExecutionTimelineFor:
 ]
 
-{ #category : #accessing }
+{ #category : #'gt - extensions' }
 PlpoGtRrClusterExamplesReport >> gtViewCondensedTasksTimelineFor:  aView [
 	<gtView>
 	
@@ -41,7 +41,16 @@ PlpoGtRrClusterExamplesReport >> gtViewExecutionTimelineListFor: aView [
 		stencil: [ 
 			GtRrExecutionHorizontalChartStencil new 
 				executions: self machinesExecutionChartItems;
-				rowLabelComputation: [ :anItem | anItem label ] ]
+				rowLabelComputation: [ :anItem | anItem label ];
+				selectionTransformation: [ :anItem |
+					self machineWithIpAddress:  anItem identifier ] ]
+]
+
+{ #category : #accessing }
+PlpoGtRrClusterExamplesReport >> machineWithIpAddress: anIpAddress [ 
+	^ self 
+		proxyPerform:  #machineWithIpAddress: 
+		withPrimitiveArguments: {anIpAddress}
 ]
 
 { #category : #accessing }

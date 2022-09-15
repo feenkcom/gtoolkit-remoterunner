@@ -13,7 +13,8 @@ Class {
 		'hideRowLabels',
 		'hideAxisLabels',
 		'labelWidth',
-		'leftPadding'
+		'leftPadding',
+		'selectionTransformation'
 	],
 	#category : #'RemoteRunner-UI'
 }
@@ -117,38 +118,53 @@ GtRrExecutionHorizontalChartStencil >> createLabelCell: aString [
 
 { #category : #accessing }
 GtRrExecutionHorizontalChartStencil >> createPlotterScrollableElementForTimeScale: timeScale andWidthScale: barWidthScale [
-	| scrollableContent |
-	scrollableContent := GtPlotterSingleScaleScrollElement new.
-	scrollableContent stencil: [ :anExecutionDetails |
-		| rowContainer rowLabel horizontalBars |
-		
-		rowContainer := self createRow.
-		
-		hideRowLabels ifFalse: [
-			rowLabel := self createLabelCell: (rowLabelComputation value: anExecutionDetails).
-			rowContainer addChild: rowLabel ].
+	| scrollableContainer scrollableContent |
+	scrollableContainer := BrFrame new 
+		matchParent.
+	scrollableContent := BrSimpleList new.
+	scrollableContent matchParent.
+	scrollableContent addEventHandler: (GtPhlowListToSelectHandler new
+		transformation: selectionTransformation).
 	
-		horizontalBars := GtPlotterHorizontalValueBarsElement new
-			height: self barHeight;
-			valueStyle: [ :anElement :aGtScaleContext |
-				self styleBar: anElement execution: aGtScaleContext originalValue.
-				anElement constraintsDo: [ :c | 
-					c frame horizontal 
-						alignLeftAt: (timeScale 
-							map: (startTimeComputation 
-								value: aGtScaleContext originalValue)) ] ];
-			scale: barWidthScale;
-			scaleData: [ :each | each duration ];
-			values: (rowValuesComputation cull: anExecutionDetails).
-		
-		rowContainer addChild: horizontalBars. ].
+	scrollableContent 
+		itemStencil: [
+			| rowElement |
+			rowElement := self createRow.
+			hideRowLabels ifFalse: [
+				rowElement
+					addAptitude: BrGlamorousListItemAptitude new  ].
+			rowElement ];
+		itemDataBinder: [ :rowContainer  :anExecutionDetails |
+			| rowLabel horizontalBars |
+			rowContainer removeChildren.
 			
-	scrollableContent values: self executions.
-	scrollableContent addChild: (self createGridlines: timeScale). 
+			hideRowLabels ifFalse: [
+				rowLabel := self createLabelCell: (rowLabelComputation 
+					value: anExecutionDetails).
+				rowContainer addChild: rowLabel ].
 	
-	scrollableContent padding: (BlInsets left: self leftPadding).
+			horizontalBars := GtPlotterHorizontalValueBarsElement new
+				height: self barHeight;
+				valueStyle: [ :anElement :aGtScaleContext |
+					self styleBar: anElement execution: aGtScaleContext originalValue.
+					anElement constraintsDo: [ :c | 
+						c frame horizontal 
+							alignLeftAt: (timeScale 
+								map: (startTimeComputation 
+									value: aGtScaleContext originalValue)) ] ];
+				scale: barWidthScale;
+				scaleData: [ :each | each duration ];
+				values: (rowValuesComputation cull: anExecutionDetails).
+		
+			rowContainer addChild: horizontalBars. ].
+			
+	scrollableContent items: self executions.
 	
-	^ scrollableContent
+	scrollableContainer addChild: scrollableContent.
+	scrollableContainer addChild: (self createGridlines: timeScale). 
+	scrollableContainer padding: (BlInsets left: self leftPadding).
+	
+	^ scrollableContainer
 ]
 
 { #category : #accessing }
@@ -231,6 +247,7 @@ GtRrExecutionHorizontalChartStencil >> initialize [
 	rowLabelComputation := [ :anExecution | anExecution gtDisplayString ].
 	colorComputation := [ self defaultBarColor ].
 	rowValuesComputation := [ :anExecution | {anExecution} ].
+	selectionTransformation := [ :each | each ]
 ]
 
 { #category : #accessing }
@@ -286,6 +303,18 @@ GtRrExecutionHorizontalChartStencil >> rowLabelComputation: anObject [
 GtRrExecutionHorizontalChartStencil >> rowValuesComputation: anObject [
 
 	rowValuesComputation := anObject
+]
+
+{ #category : #accessing }
+GtRrExecutionHorizontalChartStencil >> selectionTransformation [
+
+	^ selectionTransformation
+]
+
+{ #category : #accessing }
+GtRrExecutionHorizontalChartStencil >> selectionTransformation: anObject [
+
+	selectionTransformation := anObject
 ]
 
 { #category : #accessing }

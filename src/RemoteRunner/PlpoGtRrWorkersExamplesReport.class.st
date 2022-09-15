@@ -9,7 +9,7 @@ PlpoGtRrWorkersExamplesReport class >> remoteClassName [
 	^ #GtRrWorkersExamplesReport
 ]
 
-{ #category : #accessing }
+{ #category : #'gt - extensions' }
 PlpoGtRrWorkersExamplesReport >> gtViewCondensedExecutionTimelineFor: aView [
 	<gtView>
 	
@@ -24,7 +24,7 @@ PlpoGtRrWorkersExamplesReport >> gtViewCondensedExecutionTimelineFor: aView [
 				configureWithMinimalDetails ]
 ]
 
-{ #category : #accessing }
+{ #category : #'gt - extensions' }
 PlpoGtRrWorkersExamplesReport >> gtViewCondensedTasksTimelineFor: aView [
 	<gtView>
 	
@@ -43,7 +43,7 @@ PlpoGtRrWorkersExamplesReport >> gtViewCondensedTasksTimelineFor: aView [
 				configureWithMinimalDetails ]
 ]
 
-{ #category : #accessing }
+{ #category : #'gt - extensions' }
 PlpoGtRrWorkersExamplesReport >> gtViewExecutionTimelineListFor: aView [
 	<gtView>
 	
@@ -53,10 +53,12 @@ PlpoGtRrWorkersExamplesReport >> gtViewExecutionTimelineListFor: aView [
 		stencil: [ 
 			GtRrExecutionHorizontalChartStencil new 
 				executions: self workersExecutionChartItems;
-				rowLabelComputation: [ :anItem | anItem label ] ]
+				rowLabelComputation: [ :anItem | anItem label ];
+				selectionTransformation: [ :anItem |
+					self workerWithId:  anItem identifier ] ]
 ]
 
-{ #category : #accessing }
+{ #category : #'gt - extensions' }
 PlpoGtRrWorkersExamplesReport >> gtViewTasksExecutionTimelineListFor: aView [
 	<gtView>
 	
@@ -71,7 +73,16 @@ PlpoGtRrWorkersExamplesReport >> gtViewTasksExecutionTimelineListFor: aView [
 					(anItem propertyAt: #correctScheduling ifAbsent: [ false ])
 						ifFalse: [ Color red ] 
 						ifTrue: [ Color gray ] ];
-				enabledGroupsInRow ]
+				enabledGroupsInRow;
+				selectionTransformation: [ :anItem |
+					self workerWithId:  anItem identifier ] ]
+]
+
+{ #category : #accessing }
+PlpoGtRrWorkersExamplesReport >> workerWithId: aWorkerId [
+	^ self 
+		proxyPerform:  #workerWithId: 
+		withPrimitiveArguments: {aWorkerId} 
 ]
 
 { #category : #accessing }
