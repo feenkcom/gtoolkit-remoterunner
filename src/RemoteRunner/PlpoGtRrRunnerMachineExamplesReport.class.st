@@ -44,6 +44,17 @@ PlpoGtRrRunnerMachineExamplesReport >> gtViewExecutionTimelineListFor: aView [
 				rowLabelComputation: [ :anItem | anItem label ] ]
 ]
 
+{ #category : #'gt - extensions' }
+PlpoGtRrRunnerMachineExamplesReport >> gtViewTasksExecutionTimelineListFor: aView [
+	<gtView>
+	
+	^ aView forward
+		title: 'Tasks Timeline';
+		priority: 25;
+		object: [ self workersReport];
+		view: #gtViewTasksExecutionTimelineListFor:
+]
+
 { #category : #accessing }
 PlpoGtRrRunnerMachineExamplesReport >> workersExecutionChartItems [
 	^ self workersExecutionChartItemsData collect: [ :aDictionary |
