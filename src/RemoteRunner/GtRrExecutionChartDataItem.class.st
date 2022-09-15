@@ -111,7 +111,7 @@ GtRrExecutionChartDataItem >> properties [
 { #category : #'accessing - properties' }
 GtRrExecutionChartDataItem >> properties: anObject [
 
-	^ properties := anObject
+	properties := anObject
 ]
 
 { #category : #'accessing - properties' }
