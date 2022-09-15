@@ -68,10 +68,8 @@ GtRrDataGroupState >> items [
 
 { #category : #accessing }
 GtRrDataGroupState >> items: aCollection [
-
 	cachedItems := aCollection.
-	self itemCount ifNil: [
-		self itemCount: aCollection size ]
+	self itemCount: aCollection size
 ]
 
 { #category : #accessing }

@@ -33,7 +33,8 @@ GtRrDataGroupStateElement >> initialize [
 { #category : #initialization }
 GtRrDataGroupStateElement >> initializeContent [
 	| icon nameLabel amountLabel |
-	
+	self removeChildren.
+
 	icon := GtPharoTestCaseUtility newColoredIcon: self state color.
 	nameLabel := BrLabel new
 			aptitude: BrGlamorousLabelAptitude;
@@ -44,10 +45,9 @@ GtRrDataGroupStateElement >> initializeContent [
 			text: self state itemCount asString.
 
 	self
-		addChildren: {
-			icon.
-			nameLabel.
-			amountLabel}.
+		addChildren: {icon.
+				nameLabel.
+				amountLabel}
 ]
 
 { #category : #initialization }
@@ -66,9 +66,7 @@ GtRrDataGroupStateElement >> state [
 ]
 
 { #category : #accessing }
-GtRrDataGroupStateElement >> state: aState [ 
-	self assert: [ state isNil ].
-	
+GtRrDataGroupStateElement >> state: aState [
 	state := aState.
-	self initializeContent.
+	self initializeContent
 ]
