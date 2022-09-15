@@ -122,6 +122,13 @@ GtRrWorkerExamplesReport >> taskGapsDuration [
 ]
 
 { #category : #accessing }
+GtRrWorkerExamplesReport >> taskWithId: aTaskId [
+	^ self tasks 
+		detect: [ :aTask |
+			aTask taskId = aTaskId ]
+]
+
+{ #category : #accessing }
 GtRrWorkerExamplesReport >> tasks [
 	^ tasks
 ]
