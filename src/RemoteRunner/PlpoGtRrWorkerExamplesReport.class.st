@@ -44,7 +44,9 @@ PlpoGtRrWorkerExamplesReport >> gtViewExecutionTimelineListFor: aView [
 		stencil: [ 
 			GtRrExecutionHorizontalChartStencil new 
 				executions: self tasksExecutionChartItems;
-				rowLabelComputation: [ :anItem | anItem label ]]
+				rowLabelComputation: [ :anItem | anItem label ];
+				selectionTransformation: [ :anItem |
+					self taskWithId:  anItem identifier ] ]
 ]
 
 { #category : #'gt - extensions' }
@@ -61,7 +63,16 @@ PlpoGtRrWorkerExamplesReport >> gtViewExecutionTimelineWithSchedulingFor: aView 
 				colorComputation: [ :anItem |
 					(anItem propertyAt: #correctScheduling ifAbsent: [ false ])
 						ifFalse: [ Color red ] 
-						ifTrue: [ Color gray ] ]]
+						ifTrue: [ Color gray ] ];
+				selectionTransformation: [ :anItem |
+					self taskWithId:  anItem identifier ] ]
+]
+
+{ #category : #accessing }
+PlpoGtRrWorkerExamplesReport >> taskWithId: aTaskId [ 
+	^ self 
+		proxyPerform:  #taskWithId: 
+		withPrimitiveArguments: {aTaskId}
 ]
 
 { #category : #accessing }

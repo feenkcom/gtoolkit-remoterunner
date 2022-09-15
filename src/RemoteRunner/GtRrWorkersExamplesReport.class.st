@@ -159,6 +159,13 @@ GtRrWorkersExamplesReport >> tasksStartTime [
 ]
 
 { #category : #accessing }
+GtRrWorkersExamplesReport >> workerWithId: aWorkerId [
+	^ self workers 
+		detect: [ :aWorker |
+			aWorker workerId = aWorkerId ]
+]
+
+{ #category : #accessing }
 GtRrWorkersExamplesReport >> workers [
 
 	^ workers

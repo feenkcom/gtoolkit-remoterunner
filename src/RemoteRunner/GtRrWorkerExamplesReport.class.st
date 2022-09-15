@@ -83,7 +83,7 @@ GtRrWorkerExamplesReport >> isTaskCorrectlyScheduledAtIndex: taskIndex inGroup: 
 	targetTask := aTasksGroup at: taskIndex.
 	targetDuration := targetTask durationOnRunner.
 	aTasksGroup from: 1 to: taskIndex - 1 do: [ :aTask |
-		(targetDuration - aTask durationOnRunner > 10 seconds) ifTrue: [ ^ false ] ].
+		(targetDuration - aTask durationOnRunner > 5 seconds) ifTrue: [ ^ false ] ].
 	^ true
 ]
 
@@ -119,6 +119,13 @@ GtRrWorkerExamplesReport >> taskGapsDuration [
 			ifTrue: [ gapDuration := gapDuration + (anotherTask startTime - aTask endTime) ].
 		gapDuration ].
 	^ gapDuration
+]
+
+{ #category : #accessing }
+GtRrWorkerExamplesReport >> taskWithId: aTaskId [
+	^ self tasks 
+		detect: [ :aTask |
+			aTask taskId = aTaskId ]
 ]
 
 { #category : #accessing }
@@ -170,6 +177,7 @@ GtRrWorkerExamplesReport >> tasksExecutionChartItemsGroupWithScheduling [
 						isTaskCorrectlyScheduledAtIndex: anIndex
 						inGroup: completedTasks).
 				dataItem ]))
+		identifier: self workerId;
 		label: self workerId
 ]
 

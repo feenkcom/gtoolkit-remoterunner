@@ -84,6 +84,13 @@ GtRrClusterExamplesReport >> machineReports: aCollectionOfReports [
 ]
 
 { #category : #accessing }
+GtRrClusterExamplesReport >> machineWithIpAddress: anIpAddress [
+	^ self machineReports 
+		detect: [ :aMachine |
+			aMachine ipAddress = anIpAddress ]
+]
+
+{ #category : #accessing }
 GtRrClusterExamplesReport >> machinesExecutionChartItemsData [
 	^ self machineReports
 		collect: [ :aMachineReport |

@@ -35,13 +35,11 @@ PlpoGtRrRunnerMachineExamplesReport >> gtViewCondensedTasksTimelineFor:  aView [
 PlpoGtRrRunnerMachineExamplesReport >> gtViewExecutionTimelineListFor: aView [
 	<gtView>
 	
-	^ aView explicit
+	^ aView forward
 		title: 'Execution Timeline';
 		priority: 25;
-		stencil: [ 
-			GtRrExecutionHorizontalChartStencil new 
-				executions: self workersExecutionChartItems;
-				rowLabelComputation: [ :anItem | anItem label ] ]
+		object: [ self workersReport];
+		view: #gtViewExecutionTimelineListFor: 
 ]
 
 { #category : #'gt - extensions' }
@@ -53,17 +51,6 @@ PlpoGtRrRunnerMachineExamplesReport >> gtViewTasksExecutionTimelineListFor: aVie
 		priority: 25;
 		object: [ self workersReport];
 		view: #gtViewTasksExecutionTimelineListFor:
-]
-
-{ #category : #accessing }
-PlpoGtRrRunnerMachineExamplesReport >> workersExecutionChartItems [
-	^ self workersExecutionChartItemsData collect: [ :aDictionary |
-		GtRrExecutionChartDataItem fromDictionary: aDictionary]
-]
-
-{ #category : #accessing }
-PlpoGtRrRunnerMachineExamplesReport >> workersExecutionChartItemsData [
-	^ (self proxyPerform: #workersExecutionChartItemsData) getSerialized
 ]
 
 { #category : #accessing }

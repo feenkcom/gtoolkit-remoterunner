@@ -7,10 +7,11 @@ Class {
 	#name : #GtRrExecutionChartDataItem,
 	#superclass : #Object,
 	#instVars : [
+		'identifier',
+		'label',
 		'startTime',
 		'endTime',
 		'duration',
-		'label',
 		'properties'
 	],
 	#category : #'RemoteRunner-UI'
@@ -19,6 +20,7 @@ Class {
 { #category : #'instance - creation' }
 GtRrExecutionChartDataItem class >> fromDictionary: aDictionary [
 	^ self new 
+		identifier: (aDictionary at: 'identifier' ifAbsent: [ nil ]);
 		startTime: (aDictionary at: 'startTime');
 		endTime: (aDictionary at: 'endTime');
 		label: (aDictionary at: 'label' ifAbsent: [ nil ]);
@@ -28,6 +30,7 @@ GtRrExecutionChartDataItem class >> fromDictionary: aDictionary [
 { #category : #'instance - creation' }
 GtRrExecutionChartDataItem class >> fromMachine: aMachine [
 	^ self new 
+		identifier: aMachine ipAddress;
 		startTime: aMachine tasksFirstHandoveTime;
 		endTime: aMachine tasksLastResultReceivedTime;
 		label:  aMachine description
@@ -36,6 +39,7 @@ GtRrExecutionChartDataItem class >> fromMachine: aMachine [
 { #category : #'instance - creation' }
 GtRrExecutionChartDataItem class >> fromTask: aTask [
 	^ self new 
+		identifier: aTask taskId;
 		startTime: aTask handoverTime;
 		endTime: aTask resultReceivedTime;
 		label:  aTask description
@@ -44,6 +48,7 @@ GtRrExecutionChartDataItem class >> fromTask: aTask [
 { #category : #'instance - creation' }
 GtRrExecutionChartDataItem class >> fromWorker: aWorker [
 	^ self new 
+		identifier: aWorker workerId;
 		startTime: aWorker tasksFirstHandoveTime;
 		endTime: aWorker tasksLastResultReceivedTime;
 		label:  aWorker description
@@ -66,6 +71,7 @@ GtRrExecutionChartDataItem >> appendDurationToLabel [
 { #category : #converting }
 GtRrExecutionChartDataItem >> asDictionary [ 
 	^ Dictionary new 
+		at: 'identifier' put: self identifier;
 		at: 'startTime' put: self startTime;
 		at: 'endTime' put: self endTime;
 		at: 'label' put: self label;
@@ -88,6 +94,18 @@ GtRrExecutionChartDataItem >> endTime [
 GtRrExecutionChartDataItem >> endTime: anObject [
 
 	endTime := anObject
+]
+
+{ #category : #accessing }
+GtRrExecutionChartDataItem >> identifier [
+
+	^ identifier
+]
+
+{ #category : #accessing }
+GtRrExecutionChartDataItem >> identifier: anObject [
+
+	identifier := anObject
 ]
 
 { #category : #accessing }
