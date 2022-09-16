@@ -4,6 +4,12 @@ Class {
 	#category : #'RemoteRunner-TaskScheduling'
 }
 
+{ #category : #accessing }
+GtRrTestSchedulingTimeMovingAverageStrategy class >> leJsonV4Name [ 
+
+	^ #gtRrTestSchedulingTimeMovingAverageStrategy
+]
+
 { #category : #method }
 GtRrTestSchedulingTimeMovingAverageStrategy >> timeFor: aGtRrTestSchedulingTestTimes [
 	| times |

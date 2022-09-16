@@ -11,7 +11,7 @@ Class {
 { #category : #accessing }
 GtRrTestSchedulingClassTimes class >> leJsonV4Name [
 
-	^ #lwGtPersistentClassTimes
+	^ #lwGtTestSchedulingClassTimes
 ]
 
 { #category : #'instance creation' }

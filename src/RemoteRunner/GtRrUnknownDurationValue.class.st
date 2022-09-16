@@ -12,6 +12,12 @@ Class {
 }
 
 { #category : #accessing }
+GtRrUnknownDurationValue class >> leJsonV4Name [ 
+
+	^ #gtRrUnknownDurationValue
+]
+
+{ #category : #accessing }
 GtRrUnknownDurationValue >> value [
 
 	^ GtRrTestScheduler defaultTaskDuration 

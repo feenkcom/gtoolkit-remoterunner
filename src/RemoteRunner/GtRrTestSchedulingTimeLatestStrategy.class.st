@@ -4,6 +4,12 @@ Class {
 	#category : #'RemoteRunner-TaskScheduling'
 }
 
+{ #category : #accessing }
+GtRrTestSchedulingTimeLatestStrategy class >> leJsonV4Name [
+
+	^ #gtRrTestSchedulingTimeLatestStrategy
+]
+
 { #category : #method }
 GtRrTestSchedulingTimeLatestStrategy >> timeFor: aGtRrTestSchedulingTestTimes [
 
