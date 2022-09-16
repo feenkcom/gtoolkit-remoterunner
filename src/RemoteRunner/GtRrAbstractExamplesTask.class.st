@@ -65,6 +65,12 @@ GtRrAbstractExamplesTask >> failedExamples [
 	^ self subclassResponsibility
 ]
 
+{ #category : #accessing }
+GtRrAbstractExamplesTask >> isEmpty [
+
+	^ self totalCount = 0
+]
+
 { #category : #testing }
 GtRrAbstractExamplesTask >> isExamplesTask [
 	"Answer a boolean indicating whether the receiver is for running Gt examples"
