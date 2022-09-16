@@ -14,7 +14,7 @@ Class {
 	#classVars : [
 		'AverageTime'
 	],
-	#category : #'RemoteRunner-Tasks'
+	#category : #'RemoteRunner-TaskScheduling'
 }
 
 { #category : #accessing }

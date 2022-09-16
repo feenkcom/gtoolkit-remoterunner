@@ -109,6 +109,19 @@ GtRrExampleTestFactory >> initialize [
 	ignoreNoTest := false.
 ]
 
+{ #category : #accessing }
+GtRrExampleTestFactory >> lwFilterOutGtNoTest [
+	| oldContents filteredTests newTask |
+
+	oldContents := stream contents.
+	filteredTests := OrderedCollection new: oldContents size.
+	oldContents do: [ :task |
+		newTask := task filterOutGtNoTest.
+		newTask isEmpty ifFalse: 
+			[ filteredTests add: newTask ] ].
+	stream := filteredTests readStream.
+]
+
 { #category : #initialization }
 GtRrExampleTestFactory >> setIgnoreNoTest [ 
 
