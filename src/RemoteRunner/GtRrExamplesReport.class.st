@@ -19,20 +19,20 @@ GtRrExamplesReport >> allExamples [
 ]
 
 { #category : #'accessing - dynamic' }
-GtRrExamplesReport >> erroredExamples [
-
-	^ self tasks flatCollect: [ :task |
-			task erroredExamples ].
-]
-
-{ #category : #'accessing - dynamic' }
-GtRrExamplesReport >> erroredExamplesWithTask [
+GtRrExamplesReport >> erroredExampleResultsWithTask [
 
 	^ self tasks flatCollect: [ :task |
 			task erroredExamples collect: [ :aResult |
 				GtRrExampleResultWithTask new 
 					exampleResult:  aResult;
 					task: task ] ]
+]
+
+{ #category : #'accessing - dynamic' }
+GtRrExamplesReport >> erroredExamples [
+
+	^ self tasks flatCollect: [ :task |
+			task erroredExamples ].
 ]
 
 { #category : #'accessing - dynamic' }
