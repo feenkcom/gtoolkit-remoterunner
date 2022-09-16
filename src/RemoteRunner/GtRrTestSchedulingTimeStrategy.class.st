@@ -1,5 +1,5 @@
 "
-GtTestSchedulingTimeStrategy specifies how to calculate the expected test execution time for the supplied {{gtClass:GtTestSchedulingTestTimes}}.
+GtTestSchedulingTimeStrategy specifies how to calculate the expected test execution time for the supplied {{gtClass:GtRrTestSchedulingTestTimes}}.
 
 Strategies include:
 

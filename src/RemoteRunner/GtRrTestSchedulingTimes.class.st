@@ -10,7 +10,8 @@ Class {
 		'times',
 		'accessMutex',
 		'unknownDurationValue',
-		'timeStrategy'
+		'timeStrategy',
+		'remoteRunner'
 	],
 	#category : #'RemoteRunner-TaskScheduling'
 }
@@ -26,13 +27,15 @@ GtRrTestSchedulingTimes class >> emaWeight [
 GtRrTestSchedulingTimes class >> leJsonV4AttributeMapping [ 
 
 	^ { 
-		#times -> #times. }
+		#times -> #times.
+		#unknownDurationValue -> #unknownDurationValue.
+		#timeStrategy -> #timeStrategy. }
 ]
 
 { #category : #accessing }
 GtRrTestSchedulingTimes class >> leJsonV4Name [
 
-	^ #lwGtPersistentTimes
+	^ #gtRrTestSchedulingTimes
 ]
 
 { #category : #accessing }
@@ -119,11 +122,26 @@ GtRrTestSchedulingTimes >> initialize [
 	timeStrategy := GtRrTestSchedulingTimeMovingAverageStrategy new.
 ]
 
+{ #category : #accessing }
+GtRrTestSchedulingTimes >> remoteRunner [
+
+	^ remoteRunner
+]
+
+{ #category : #accessing }
+GtRrTestSchedulingTimes >> remoteRunner: aGtRemoteRunner [
+
+	remoteRunner ifNotNil:
+		[ remoteRunner unsubscribe: self ].
+	remoteRunner := aGtRemoteRunner.
+	self subscribeToRemoteRunner: aGtRemoteRunner.
+]
+
 { #category : #persistence }
 GtRrTestSchedulingTimes >> save [
 	"Save the receiver to the default file"
 
-	self saveToFile: 'LwGtPersistentTimes.json'.
+	self saveToFile: self class name asString, '.json'.
 ]
 
 { #category : #persistence }
@@ -140,6 +158,13 @@ GtRrTestSchedulingTimes >> saveToFile: aFileReference [
 
 	fileReference writeStreamDo: [ :stream |
 		stream << (LeJsonV4 uniqueInstance serialize: self) ]
+]
+
+{ #category : #accessing }
+GtRrTestSchedulingTimes >> subscribeToRemoteRunner: aGtRemoteRunner [ 
+
+	aGtRemoteRunner
+		
 ]
 
 { #category : #api }

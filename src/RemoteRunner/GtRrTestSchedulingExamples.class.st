@@ -23,6 +23,7 @@ GtRrTestSchedulingExamples >> emptyTimes [
 GtRrTestSchedulingExamples >> timesUpdatedFromJob [
 	"Demonstrate updating the persistent times from a {{gtClass:GtRrTasksJob}}"
 	<gtExample>
+	<noTest>
 	| persistentTimes task job now initialTime newTime |
 
 	persistentTimes := self emptyTimes.
