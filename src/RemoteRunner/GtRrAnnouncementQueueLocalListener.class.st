@@ -58,28 +58,28 @@ GtRrAnnouncementQueueLocalListener >> doPoll [
 
 { #category : #accessing }
 GtRrAnnouncementQueueLocalListener >> emitAnnouncementQueueDeliveryCompletedFor: aCollectionOfAnnouncements [ 
-	GtRrAnnouncementQueueDeliveryCompletedAnnouncement new 
+	GtRrAnnouncementQueueDeliveryCompletedSignal new 
 		announcementsCount: aCollectionOfAnnouncements size;
 		emit
 ]
 
 { #category : #signaling }
 GtRrAnnouncementQueueLocalListener >> emitAnnouncementQueueDeliveryInitiatedFor: aCollectionOfAnnouncements [
-	GtRrAnnouncementQueueDeliveryInitiatedAnnouncement new 
+	GtRrAnnouncementQueueDeliveryInitiatedSignal new 
 		announcementsCount: aCollectionOfAnnouncements size;
 		emit
 ]
 
 { #category : #signaling }
 GtRrAnnouncementQueueLocalListener >> emitAnnouncementQueuePullCompletedWithCount: anInteger [
-	GtRrAnnouncementQueuePullCompletedAnnouncement new 
+	GtRrAnnouncementQueuePullCompletedSignal new 
 		retrivedAnnouncementCount:  anInteger;
 		emit. 
 ]
 
 { #category : #signaling }
 GtRrAnnouncementQueueLocalListener >> emitAnnouncementQueuePullInitiated [
-	GtRrAnnouncementQueuePullInitiatedAnnouncement new emit.
+	GtRrAnnouncementQueuePullInitiatedSignal new emit.
 ]
 
 { #category : #initialization }
