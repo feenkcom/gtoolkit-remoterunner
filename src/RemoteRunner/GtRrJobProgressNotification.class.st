@@ -25,7 +25,7 @@ Class {
 		'job',
 		'taskResults'
 	],
-	#category : #'RemoteRunner-UI'
+	#category : #'RemoteRunner-Jobs-Notifications'
 }
 
 { #category : #'instance creation' }
