@@ -56,8 +56,15 @@ PlpoGtRemoteRunner >> port [
 PlpoGtRemoteRunner >> registerAndStartAnnouncementsQueue [
 	"A manual way to start collecting announcements in the remote object and delivering them locally."
 
-	self registerAnnouncementsQueue.
+	self registerAnnouncementsQueueForJobsAndWorkers.
 	self startAnnouncementsListener.
+]
+
+{ #category : #'announcements - queue' }
+PlpoGtRemoteRunner >> registerAnnouncementsQueueForJobsAndWorkers [
+	"Start the announcements queue only for announcements for job and workers."
+	
+	^ self proxyPerform: #registerAnnouncementsQueueForJobsAndWorkers
 ]
 
 { #category : #'code sync' }

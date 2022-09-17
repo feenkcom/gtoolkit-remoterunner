@@ -17,15 +17,16 @@ Class {
 }
 
 { #category : #accessing }
-GtRemoteAnnouncementQueue class >> onAnnouncer: anAnnouncingObject [
+GtRemoteAnnouncementQueue class >> onAnnouncingObject: anAnnouncingObject [
 	^ self new
 		initializeForAnnouncingObject: anAnnouncingObject
 ]
 
 { #category : #accessing }
-GtRemoteAnnouncementQueue class >> onAnnouncingObject: anAnnouncingObject [
+GtRemoteAnnouncementQueue class >> onAnnouncingObject: anAnnouncingObject withAnnouncementType: anAnnouncementType [
 	^ self new
 		initializeForAnnouncingObject: anAnnouncingObject
+		andAnnouncementTypes: anAnnouncementType 
 ]
 
 { #category : #'gt - extensions' }
@@ -45,7 +46,16 @@ GtRemoteAnnouncementQueue >> initialize [
 
 { #category : #accessing }
 GtRemoteAnnouncementQueue >> initializeForAnnouncingObject: anAnnouncingObject [ 
-	self subscribeAnnouncingObject: anAnnouncingObject 
+	self 
+		subscribeAnnouncingObject: anAnnouncingObject 
+		andAnnouncementType: Announcement 
+]
+
+{ #category : #accessing }
+GtRemoteAnnouncementQueue >> initializeForAnnouncingObject: anAnnouncingObject  andAnnouncementTypes: anAnnouncementType [ 
+	self 
+		subscribeAnnouncingObject: anAnnouncingObject 
+		andAnnouncementType: anAnnouncementType 
 ]
 
 { #category : #accessing }
@@ -70,9 +80,9 @@ GtRemoteAnnouncementQueue >> pollSerialized [
 ]
 
 { #category : #accessing }
-GtRemoteAnnouncementQueue >> subscribeAnnouncingObject: anAnnouncingObject [
+GtRemoteAnnouncementQueue >> subscribeAnnouncingObject: anAnnouncingObject andAnnouncementType: anAnnouncementType [ 
 	"For now this only subscribes strongly to the object."
 	
 	anAnnouncingObject 
-		when: Announcement send: #onAnnouncement: to: self
+		when: anAnnouncementType send: #onAnnouncement: to: self
 ]
