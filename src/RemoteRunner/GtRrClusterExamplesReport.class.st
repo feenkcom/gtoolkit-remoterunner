@@ -1,6 +1,8 @@
 Class {
 	#name : #GtRrClusterExamplesReport,
 	#superclass : #Object,
+	#traits : 'TGtRrClusterExamplesReportViews',
+	#classTraits : 'TGtRrClusterExamplesReportViews classTrait',
 	#instVars : [
 		'machineReports'
 	],
