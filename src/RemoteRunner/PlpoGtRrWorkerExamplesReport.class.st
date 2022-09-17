@@ -59,11 +59,8 @@ PlpoGtRrWorkerExamplesReport >> gtViewExecutionTimelineWithSchedulingFor: aView 
 		stencil: [ 
 			GtRrExecutionHorizontalChartStencil new 
 				withDescriptionAsLabel;
+				withColorBasedOnScheduling;
 				executions: self tasksExecutionChartItemsGroupWithScheduling;
-				colorComputation: [ :anItem |
-					(anItem propertyAt: #correctScheduling ifAbsent: [ false ])
-						ifFalse: [ Color red ] 
-						ifTrue: [ Color gray ] ];
 				selectionTransformation: [ :anItem |
 					self taskWithId:  anItem identifier ] ]
 ]

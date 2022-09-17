@@ -19,9 +19,9 @@ PlpoGtRrWorkersExamplesReport >> gtViewCondensedExecutionTimelineFor: aView [
 		stencil: [ 
 			GtRrExecutionHorizontalChartStencil new 
 				withDescriptionAsLabel;
-				executions: self workersExecutionChartItems;
 				colorComputation: [ Color darkGray ];
-				configureWithMinimalDetails ]
+				configureWithMinimalDetails;
+				executions: self workersExecutionChartItems ]
 ]
 
 { #category : #'gt - extensions' }
@@ -34,13 +34,10 @@ PlpoGtRrWorkersExamplesReport >> gtViewCondensedTasksTimelineFor: aView [
 		stencil: [ 
 			GtRrExecutionHorizontalChartStencil new 
 				withDescriptionAsLabel;
-				enabledGroupsInRow;
+				withColorBasedOnScheduling;
 				configureWithMinimalDetails;
-				executions: self workersTasksExecutionChartItemsGroupWithScheduling;
-				colorComputation: [ :anItem |
-					(anItem propertyAt: #correctScheduling ifAbsent: [ false ])
-						ifFalse: [ Color red ] 
-						ifTrue: [ Color gray ] ] ]
+				enabledGroupsInRow;
+				executions: self workersTasksExecutionChartItemsGroupWithScheduling ]
 ]
 
 { #category : #'gt - extensions' }
@@ -68,12 +65,9 @@ PlpoGtRrWorkersExamplesReport >> gtViewTasksExecutionTimelineListFor: aView [
 		stencil: [ 
 			GtRrExecutionHorizontalChartStencil new 
 				withDescriptionAsLabel;
-				executions: self workersTasksExecutionChartItemsGroupWithScheduling;
-				colorComputation: [ :anItem |
-					(anItem propertyAt: #correctScheduling ifAbsent: [ false ])
-						ifFalse: [ Color red ] 
-						ifTrue: [ Color gray ] ];
+				withColorBasedOnScheduling;
 				enabledGroupsInRow;
+				executions: self workersTasksExecutionChartItemsGroupWithScheduling;
 				selectionTransformation: [ :anItem |
 					self workerWithId:  anItem identifier ] ]
 ]

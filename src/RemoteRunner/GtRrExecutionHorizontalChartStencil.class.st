@@ -332,6 +332,14 @@ GtRrExecutionHorizontalChartStencil >> styleBar: anElement execution: anObject [
 ]
 
 { #category : #initialization }
+GtRrExecutionHorizontalChartStencil >> withColorBasedOnScheduling [
+	self colorComputation: [ :anItem |
+					(anItem propertyAt: #correctScheduling ifAbsent: [ false ])
+						ifFalse: [ Color red ] 
+						ifTrue: [ Color gray ] ]
+]
+
+{ #category : #initialization }
 GtRrExecutionHorizontalChartStencil >> withDescriptionAsLabel [
 	rowLabelComputation := [ :anExecution | anExecution label ]
 ]
