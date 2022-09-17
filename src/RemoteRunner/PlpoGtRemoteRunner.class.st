@@ -52,6 +52,14 @@ PlpoGtRemoteRunner >> port [
 	^ self proxyPerform: #port.
 ]
 
+{ #category : #accessing }
+PlpoGtRemoteRunner >> registerAndStartAnnouncementsQueue [
+	"A manual way to start collecting announcements in the remote object and delivering them locally."
+
+	self registerAnnouncementsQueue.
+	self startAnnouncementsListener.
+]
+
 { #category : #'code sync' }
 PlpoGtRemoteRunner >> startCodeSync [
 	"Start the code sync listener, submitting changes to the receiver"
