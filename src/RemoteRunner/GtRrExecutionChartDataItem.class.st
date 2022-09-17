@@ -117,6 +117,15 @@ GtRrExecutionChartDataItem >> label: anObject [
 	label := anObject
 ]
 
+{ #category : #printing }
+GtRrExecutionChartDataItem >> printOn: aStream [ 
+	super printOn: aStream .
+	
+	aStream parenthesize: [
+		{ self identifier . self label . self duration } 
+			asStringOn: aStream delimiter: ', ' ]
+]
+
 { #category : #'accessing - properties' }
 GtRrExecutionChartDataItem >> properties [
 

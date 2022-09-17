@@ -32,6 +32,16 @@ GtRrExecutionChartDataItemsGroup >> endTime [
 				ifFalse: [ endTime ] ]
 ]
 
+{ #category : #'gt - extensions' }
+GtRrExecutionChartDataItemsGroup >> gtItemsFor: aView [ 
+	<gtView>
+	
+	^ aView forward 
+		title: 'Items';
+		object: [ self items ];
+		view: #gtItemsFor:
+]
+
 { #category : #accessing }
 GtRrExecutionChartDataItemsGroup >> identifier [
 
