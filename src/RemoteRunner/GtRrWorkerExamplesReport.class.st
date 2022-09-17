@@ -151,8 +151,8 @@ GtRrWorkerExamplesReport >> tasksEndTime [
 
 { #category : #'accessing - chart data' }
 GtRrWorkerExamplesReport >> tasksExecutionChartItems [
-	^ self tasksExecutionChartItemsGroup 
-		collect: [ :anItem | anItem asDictionary ] 
+	^ self tasksExecutionChartItemsGroup
+		collect: [ :anItem | anItem ] 
 		as: Array
 ]
 

@@ -61,6 +61,11 @@ GtRrExecutionChartDataItemsGroup >> inject: thisValue into: binaryBlock [
 ]
 
 { #category : #accessing }
+GtRrExecutionChartDataItemsGroup >> items: anArray [ 
+	self initializeWith: anArray
+]
+
+{ #category : #accessing }
 GtRrExecutionChartDataItemsGroup >> label [
 
 	^ label
