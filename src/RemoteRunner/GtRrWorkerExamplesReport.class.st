@@ -44,6 +44,7 @@ GtRrWorkerExamplesReport >> gtViewExecutionTimelineListFor: aView [
 		priority: 25;
 		stencil: [ 
 			GtRrExecutionHorizontalChartStencil new 
+				withDescriptionAsLabel;
 				executions: self tasks ]
 ]
 

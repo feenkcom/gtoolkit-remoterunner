@@ -330,3 +330,8 @@ GtRrExecutionHorizontalChartStencil >> styleBar: anElement execution: anObject [
 		background: ((colorComputation cull: anObject) ifNil: [
 			self defaultBarColor ]) 
 ]
+
+{ #category : #initialization }
+GtRrExecutionHorizontalChartStencil >> withDescriptionAsLabel [
+	rowLabelComputation := [ :anExecution | anExecution label ]
+]
