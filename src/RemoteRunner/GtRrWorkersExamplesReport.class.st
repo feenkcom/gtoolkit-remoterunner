@@ -177,23 +177,18 @@ GtRrWorkersExamplesReport >> workers: anObject [
 	workers := anObject
 ]
 
-{ #category : #'accessing - charts data' }
-GtRrWorkersExamplesReport >> workersExecutionChartItemsData [
+{ #category : #'accessing - chart data' }
+GtRrWorkersExamplesReport >> workersExecutionChartItems [
 	^ self workers
 		collect: [ :aWorker |
-			(GtRrExecutionChartDataItem fromWorker: aWorker) asDictionary ] 
+			GtRrExecutionChartDataItem fromWorker: aWorker ] 
+		as: Array
 ]
 
-{ #category : #'accessing - charts data' }
-GtRrWorkersExamplesReport >> workersTasksExecutionChartItemsData [
+{ #category : #'accessing - chart data' }
+GtRrWorkersExamplesReport >> workersTasksExecutionChartItemsGroupWithScheduling [
 	^ self workers
 		collect: [ :aWorker |
-			aWorker tasksExecutionChartItemsGroup asDictionary ] 
-]
-
-{ #category : #'accessing - charts data' }
-GtRrWorkersExamplesReport >> workersTasksExecutionChartItemsGroupWithSchedulingData [
-	^ self workers
-		collect: [ :aWorker |
-			aWorker tasksExecutionChartItemsGroupWithScheduling asDictionary ] 
+			aWorker tasksExecutionChartItemsGroupWithScheduling ] 
+		as: Array
 ]

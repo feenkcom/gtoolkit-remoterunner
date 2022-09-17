@@ -53,15 +53,9 @@ PlpoGtRrClusterExamplesReport >> machineWithIpAddress: anIpAddress [
 		withPrimitiveArguments: {anIpAddress}
 ]
 
-{ #category : #accessing }
+{ #category : #'accessing - chart data' }
 PlpoGtRrClusterExamplesReport >> machinesExecutionChartItems [
-	^ self machinesExecutionChartItemsData collect: [ :aDictionary |
-		GtRrExecutionChartDataItem fromDictionary: aDictionary]
-]
-
-{ #category : #accessing }
-PlpoGtRrClusterExamplesReport >> machinesExecutionChartItemsData [
-	^ (self proxyPerform: #machinesExecutionChartItemsData) getSerialized
+	^ self proxyPerformSerialized: #machinesExecutionChartItems
 ]
 
 { #category : #accessing }

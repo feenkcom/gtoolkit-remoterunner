@@ -72,24 +72,12 @@ PlpoGtRrWorkerExamplesReport >> taskWithId: aTaskId [
 		withPrimitiveArguments: {aTaskId}
 ]
 
-{ #category : #accessing }
+{ #category : #'accessing - chart data' }
 PlpoGtRrWorkerExamplesReport >> tasksExecutionChartItems [
-	^ self tasksExecutionChartItemsData collect: [ :aDictionary |
-		GtRrExecutionChartDataItem fromDictionary: aDictionary]
+	^ self proxyPerformSerialized: #tasksExecutionChartItems
 ]
 
-{ #category : #accessing }
-PlpoGtRrWorkerExamplesReport >> tasksExecutionChartItemsData [
-	^ (self proxyPerform: #tasksExecutionChartItemsData) getSerialized
-]
-
-{ #category : #accessing }
+{ #category : #'accessing - chart data' }
 PlpoGtRrWorkerExamplesReport >> tasksExecutionChartItemsGroupWithScheduling [
-	^  GtRrExecutionChartDataItemsGroup 
-		fromDictionary: self tasksExecutionChartItemsGroupWithSchedulingData
-]
-
-{ #category : #accessing }
-PlpoGtRrWorkerExamplesReport >> tasksExecutionChartItemsGroupWithSchedulingData [
-	^ (self proxyPerform: #tasksExecutionChartItemsGroupWithSchedulingData) getSerialized
+	^ self proxyPerformSerialized: #tasksExecutionChartItemsGroupWithScheduling
 ]

@@ -10,22 +10,10 @@ Class {
 	#category : #'RemoteRunner-UI'
 }
 
-{ #category : #accessing }
-GtRrExecutionChartDataItemsGroup class >> fromDictionary: aDictionary [
-	^ (self withAll: 
-		((aDictionary at: 'items') collect: [ :each | 
-			GtRrExecutionChartDataItem fromDictionary: each]))
-				identifier: (aDictionary at: 'identifier' ifAbsent: [ nil ]);
-				label: (aDictionary at: 'label' ifAbsent: [ nil ])
-]
+{ #category : #serialization }
+GtRrExecutionChartDataItemsGroup class >> leJsonV4Name [
 
-{ #category : #accessing }
-GtRrExecutionChartDataItemsGroup >> asDictionary [ 
-	^ Dictionary new 
-		at: 'identifier' put: self identifier;
-		at: 'label' put: self label;
-		at: 'items' put: (self items collect: #asDictionary as: Array);
-		yourself
+	^ #gtRrExecutionChartDataItemsGroup
 ]
 
 { #category : #accessing }

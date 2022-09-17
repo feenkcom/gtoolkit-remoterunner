@@ -79,35 +79,13 @@ PlpoGtRrWorkersExamplesReport >> workerWithId: aWorkerId [
 		withPrimitiveArguments: {aWorkerId} 
 ]
 
-{ #category : #accessing }
+{ #category : #'accessing - chart data' }
 PlpoGtRrWorkersExamplesReport >> workersExecutionChartItems [
-	^ self workersExecutionChartItemsData collect: [ :aDictionary |
-		GtRrExecutionChartDataItem fromDictionary: aDictionary]
+	^ self proxyPerformSerialized: #workersExecutionChartItems
 ]
 
-{ #category : #accessing }
-PlpoGtRrWorkersExamplesReport >> workersExecutionChartItemsData [
-	^ (self proxyPerform: #workersExecutionChartItemsData) getSerialized
-]
-
-{ #category : #accessing }
-PlpoGtRrWorkersExamplesReport >> workersTasksExecutionChartItemsData [
-	^ (self proxyPerform: #workersTasksExecutionChartItemsData) getSerialized
-]
-
-{ #category : #accessing }
-PlpoGtRrWorkersExamplesReport >> workersTasksExecutionChartItemsGroup [
-	^ self workersTasksExecutionChartItemsData collect: [ :aDictionary |
-		GtRrExecutionChartDataItemsGroup fromDictionary: aDictionary]
-]
-
-{ #category : #accessing }
+{ #category : #'accessing - chart data' }
 PlpoGtRrWorkersExamplesReport >> workersTasksExecutionChartItemsGroupWithScheduling [
-	^ self workersTasksExecutionChartItemsGroupWithSchedulingData collect: [ :aDictionary |
-		GtRrExecutionChartDataItemsGroup fromDictionary: aDictionary]
-]
-
-{ #category : #accessing }
-PlpoGtRrWorkersExamplesReport >> workersTasksExecutionChartItemsGroupWithSchedulingData [
-	^ (self proxyPerform: #workersTasksExecutionChartItemsGroupWithSchedulingData) getSerialized
+	^ self 
+		proxyPerformSerialized: #workersTasksExecutionChartItemsGroupWithScheduling
 ]

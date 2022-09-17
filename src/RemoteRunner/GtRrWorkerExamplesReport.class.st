@@ -150,9 +150,10 @@ GtRrWorkerExamplesReport >> tasksEndTime [
 ]
 
 { #category : #'accessing - chart data' }
-GtRrWorkerExamplesReport >> tasksExecutionChartItemsData [
+GtRrWorkerExamplesReport >> tasksExecutionChartItems [
 	^ self tasksExecutionChartItemsGroup 
 		collect: [ :anItem | anItem asDictionary ] 
+		as: Array
 ]
 
 { #category : #'accessing - chart data' }
@@ -180,11 +181,6 @@ GtRrWorkerExamplesReport >> tasksExecutionChartItemsGroupWithScheduling [
 				dataItem ]))
 		identifier: self workerId;
 		label: self workerId
-]
-
-{ #category : #'accessing - chart data' }
-GtRrWorkerExamplesReport >> tasksExecutionChartItemsGroupWithSchedulingData [
-	^ self tasksExecutionChartItemsGroupWithScheduling asDictionary
 ]
 
 { #category : #accessing }
