@@ -34,7 +34,6 @@ TGtRrClusterExamplesReportViews >> gtViewExecutionTimelineListFor: aView [
 		priority: 30;
 		stencil: [ 
 			GtRrExecutionHorizontalChartStencil new 
-				withDescriptionAsLabel;
 				executions: self machinesExecutionChartItems;
 				selectionTransformation: [ :anItem |
 					self machineWithIpAddress:  anItem identifier ] ]

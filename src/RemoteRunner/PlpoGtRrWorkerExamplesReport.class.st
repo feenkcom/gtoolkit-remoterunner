@@ -43,7 +43,6 @@ PlpoGtRrWorkerExamplesReport >> gtViewExecutionTimelineListFor: aView [
 		priority: 25;
 		stencil: [ 
 			GtRrExecutionHorizontalChartStencil new 
-				withDescriptionAsLabel;
 				executions: self tasksExecutionChartItems;
 				selectionTransformation: [ :anItem |
 					self taskWithId:  anItem identifier ] ]
@@ -58,7 +57,6 @@ PlpoGtRrWorkerExamplesReport >> gtViewExecutionTimelineWithSchedulingFor: aView 
 		priority: 45;
 		stencil: [ 
 			GtRrExecutionHorizontalChartStencil new 
-				withDescriptionAsLabel;
 				withColorBasedOnScheduling;
 				executions: self tasksExecutionChartItemsGroupWithScheduling;
 				selectionTransformation: [ :anItem |

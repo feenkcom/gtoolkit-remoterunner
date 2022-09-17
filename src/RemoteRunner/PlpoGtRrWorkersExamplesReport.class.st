@@ -18,7 +18,6 @@ PlpoGtRrWorkersExamplesReport >> gtViewCondensedExecutionTimelineFor: aView [
 		priority: 35;
 		stencil: [ 
 			GtRrExecutionHorizontalChartStencil new 
-				withDescriptionAsLabel;
 				colorComputation: [ Color darkGray ];
 				configureWithMinimalDetails;
 				executions: self workersExecutionChartItems ]
@@ -33,7 +32,6 @@ PlpoGtRrWorkersExamplesReport >> gtViewCondensedTasksTimelineFor: aView [
 		priority: 45;
 		stencil: [ 
 			GtRrExecutionHorizontalChartStencil new 
-				withDescriptionAsLabel;
 				withColorBasedOnScheduling;
 				configureWithMinimalDetails;
 				enabledGroupsInRow;
@@ -49,7 +47,6 @@ PlpoGtRrWorkersExamplesReport >> gtViewExecutionTimelineListFor: aView [
 		priority: 25;
 		stencil: [ 
 			GtRrExecutionHorizontalChartStencil new 
-				withDescriptionAsLabel;
 				executions: self workersExecutionChartItems;
 				selectionTransformation: [ :anItem |
 					self workerWithId:  anItem identifier ] ]
@@ -64,7 +61,6 @@ PlpoGtRrWorkersExamplesReport >> gtViewTasksExecutionTimelineListFor: aView [
 		priority: 20;
 		stencil: [ 
 			GtRrExecutionHorizontalChartStencil new 
-				withDescriptionAsLabel;
 				withColorBasedOnScheduling;
 				enabledGroupsInRow;
 				executions: self workersTasksExecutionChartItemsGroupWithScheduling;
