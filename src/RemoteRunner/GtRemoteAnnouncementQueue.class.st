@@ -1,7 +1,7 @@
 "
 {{gtClass:name=GtRemoteAnnouncementQueue}} records announcements raised by an announcer-like object and stores them in a queue from where they can be retreived.
 
-To work with the queue objects to be announcers or have a method similar to {{gtMethod:Announcer>>#when:send:to:}}, used in {{gtMethod:name=GtRemoteAnnouncementQueue>>subscribeAnnouncingObject:|label=#selector}}.
+To work with the queue objects to be announcers or have a method similar to {{gtMethod:Announcer>>#when:send:to:}}, used in {{gtMethod:name=GtRemoteAnnouncementQueue>>subscribeAnnouncingObject:andAnnouncementType:|label=#selector}}.
 Polling announcements from the queue can be done using: 
 	- {{gtMethod:GtRemoteAnnouncementQueue>>poll}} or
 	- {{gtMethod:GtRemoteAnnouncementQueue>>pollSerialized}} 
