@@ -631,6 +631,15 @@ GtRemoteRunner >> queueTasks: retryTasks jobContext: anObject [
 			jobContext: anObject) ]
 ]
 
+{ #category : #accessing }
+GtRemoteRunner >> registerAnnouncementsQueueForJobsAndWorkers [
+	"Register a queue only for certaint types of announcements. This exists as now announcements for tasks are also delivered to the the remote announcements."
+	self assert: [ announcementQueue isNil ].
+	
+	self 
+		registerAnnouncementsQueueForAnnouncementType: GtRrJobAnnouncement, GtRrWorkerAnnouncement
+]
+
 { #category : #'api - worker' }
 GtRemoteRunner >> registerWorkerWithDetails: aDictionary [
 	"Register the supplied worker and connection details.

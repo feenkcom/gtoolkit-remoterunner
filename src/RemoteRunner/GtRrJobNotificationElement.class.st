@@ -17,7 +17,7 @@ Class {
 		'updater',
 		'statesPane'
 	],
-	#category : #'RemoteRunner-UI'
+	#category : #'RemoteRunner-Jobs-Notifications'
 }
 
 { #category : #accessing }

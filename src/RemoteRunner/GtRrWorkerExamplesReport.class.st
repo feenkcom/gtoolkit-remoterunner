@@ -44,6 +44,7 @@ GtRrWorkerExamplesReport >> gtViewExecutionTimelineListFor: aView [
 		priority: 25;
 		stencil: [ 
 			GtRrExecutionHorizontalChartStencil new 
+				withDescriptionAsLabel;
 				executions: self tasks ]
 ]
 
@@ -149,9 +150,10 @@ GtRrWorkerExamplesReport >> tasksEndTime [
 ]
 
 { #category : #'accessing - chart data' }
-GtRrWorkerExamplesReport >> tasksExecutionChartItemsData [
-	^ self tasksExecutionChartItemsGroup 
-		collect: [ :anItem | anItem asDictionary ] 
+GtRrWorkerExamplesReport >> tasksExecutionChartItems [
+	^ self tasksExecutionChartItemsGroup
+		collect: [ :anItem | anItem ] 
+		as: Array
 ]
 
 { #category : #'accessing - chart data' }
@@ -179,11 +181,6 @@ GtRrWorkerExamplesReport >> tasksExecutionChartItemsGroupWithScheduling [
 				dataItem ]))
 		identifier: self workerId;
 		label: self workerId
-]
-
-{ #category : #'accessing - chart data' }
-GtRrWorkerExamplesReport >> tasksExecutionChartItemsGroupWithSchedulingData [
-	^ self tasksExecutionChartItemsGroupWithScheduling asDictionary
 ]
 
 { #category : #accessing }

@@ -13,7 +13,7 @@ GtRemoteAnnouncementQueueExamples >> simpleQueue [
 	| runner queue |
 	runner := GtRemoteRunnerExamples new simpleRunner.
 	
-	queue := GtRemoteAnnouncementQueue onAnnouncer: runner.
+	queue := GtRemoteAnnouncementQueue onAnnouncingObject: runner.
 	
 	self assert: queue poll size equals: 0.
 	

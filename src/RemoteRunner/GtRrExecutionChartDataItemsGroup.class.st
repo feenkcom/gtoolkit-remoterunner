@@ -10,22 +10,10 @@ Class {
 	#category : #'RemoteRunner-UI'
 }
 
-{ #category : #accessing }
-GtRrExecutionChartDataItemsGroup class >> fromDictionary: aDictionary [
-	^ (self withAll: 
-		((aDictionary at: 'items') collect: [ :each | 
-			GtRrExecutionChartDataItem fromDictionary: each]))
-				identifier: (aDictionary at: 'identifier' ifAbsent: [ nil ]);
-				label: (aDictionary at: 'label' ifAbsent: [ nil ])
-]
+{ #category : #serialization }
+GtRrExecutionChartDataItemsGroup class >> leJsonV4Name [
 
-{ #category : #accessing }
-GtRrExecutionChartDataItemsGroup >> asDictionary [ 
-	^ Dictionary new 
-		at: 'identifier' put: self identifier;
-		at: 'label' put: self label;
-		at: 'items' put: (self items collect: #asDictionary as: Array);
-		yourself
+	^ #gtRrExecutionChartDataItemsGroup
 ]
 
 { #category : #accessing }
@@ -44,6 +32,16 @@ GtRrExecutionChartDataItemsGroup >> endTime [
 				ifFalse: [ endTime ] ]
 ]
 
+{ #category : #'gt - extensions' }
+GtRrExecutionChartDataItemsGroup >> gtItemsFor: aView [ 
+	<gtView>
+	
+	^ aView forward 
+		title: 'Items';
+		object: [ self items ];
+		view: #gtItemsFor:
+]
+
 { #category : #accessing }
 GtRrExecutionChartDataItemsGroup >> identifier [
 
@@ -60,6 +58,11 @@ GtRrExecutionChartDataItemsGroup >> identifier: anObject [
 GtRrExecutionChartDataItemsGroup >> inject: thisValue into: binaryBlock [ 
 	^ self items 
 		inject: thisValue into: binaryBlock 
+]
+
+{ #category : #accessing }
+GtRrExecutionChartDataItemsGroup >> items: anArray [ 
+	self initializeWith: anArray
 ]
 
 { #category : #accessing }

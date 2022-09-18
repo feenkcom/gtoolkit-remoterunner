@@ -244,7 +244,7 @@ GtRrExecutionHorizontalChartStencil >> initialize [
 	
 	startTimeComputation := [ :anExecution | anExecution startTime ].
 	endTimeComputation :=  [ :anExecution | anExecution endTime ].
-	rowLabelComputation := [ :anExecution | anExecution gtDisplayString ].
+	rowLabelComputation := [ :anExecution | anExecution label ].
 	colorComputation := [ self defaultBarColor ].
 	rowValuesComputation := [ :anExecution | {anExecution} ].
 	selectionTransformation := [ :each | each ]
@@ -329,4 +329,22 @@ GtRrExecutionHorizontalChartStencil >> styleBar: anElement execution: anObject [
 		geometry: BlStadium new;
 		background: ((colorComputation cull: anObject) ifNil: [
 			self defaultBarColor ]) 
+]
+
+{ #category : #initialization }
+GtRrExecutionHorizontalChartStencil >> withColorBasedOnScheduling [
+	self colorComputation: [ :anItem |
+					(anItem propertyAt: #correctScheduling ifAbsent: [ false ])
+						ifFalse: [ Color red ] 
+						ifTrue: [ Color gray ] ]
+]
+
+{ #category : #initialization }
+GtRrExecutionHorizontalChartStencil >> withDescriptionAsLabel [
+	rowLabelComputation := [ :anExecution | anExecution description ]
+]
+
+{ #category : #initialization }
+GtRrExecutionHorizontalChartStencil >> withDissplayStringAsLabel [
+	rowLabelComputation := [ :anExecution | anExecution gtDisplayString ]
 ]

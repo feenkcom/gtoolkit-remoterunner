@@ -20,7 +20,8 @@ Class {
 		'timeout',
 		'isPolling',
 		'proxy',
-		'requestTermination'
+		'requestTermination',
+		'poolingProcess'
 	],
 	#category : #'RemoteRunner-AnnouncementQueue'
 }
@@ -49,37 +50,40 @@ GtRrAnnouncementQueueLocalListener >> doPoll [
 			self pollAndDeliverAnnouncements.
 			count := count - 1.
 			duration < 10 ifTrue: [ duration := duration + 1 ] ].
+	
 	"Ensure there is at least one check of the completed tasks,
 	but only if termination was not requested."
 	requestTermination ifFalse: [
 		self pollAndDeliverAnnouncements ].
+		
 	isPolling := false.
+	poolingProcess := nil.
 ]
 
 { #category : #accessing }
 GtRrAnnouncementQueueLocalListener >> emitAnnouncementQueueDeliveryCompletedFor: aCollectionOfAnnouncements [ 
-	GtRrAnnouncementQueueDeliveryCompletedAnnouncement new 
+	GtRrAnnouncementQueueDeliveryCompletedSignal new 
 		announcementsCount: aCollectionOfAnnouncements size;
 		emit
 ]
 
 { #category : #signaling }
 GtRrAnnouncementQueueLocalListener >> emitAnnouncementQueueDeliveryInitiatedFor: aCollectionOfAnnouncements [
-	GtRrAnnouncementQueueDeliveryInitiatedAnnouncement new 
+	GtRrAnnouncementQueueDeliveryInitiatedSignal new 
 		announcementsCount: aCollectionOfAnnouncements size;
 		emit
 ]
 
 { #category : #signaling }
 GtRrAnnouncementQueueLocalListener >> emitAnnouncementQueuePullCompletedWithCount: anInteger [
-	GtRrAnnouncementQueuePullCompletedAnnouncement new 
+	GtRrAnnouncementQueuePullCompletedSignal new 
 		retrivedAnnouncementCount:  anInteger;
 		emit. 
 ]
 
 { #category : #signaling }
 GtRrAnnouncementQueueLocalListener >> emitAnnouncementQueuePullInitiated [
-	GtRrAnnouncementQueuePullInitiatedAnnouncement new emit.
+	GtRrAnnouncementQueuePullInitiatedSignal new emit.
 ]
 
 { #category : #initialization }
@@ -96,6 +100,7 @@ GtRrAnnouncementQueueLocalListener >> isPolling [
 { #category : #accessing }
 GtRrAnnouncementQueueLocalListener >> pollAndDeliverAnnouncements [
 	| newAnnouncements |
+	
 	newAnnouncements := self pollAnnouncementQueue.
 	
 	self emitAnnouncementQueueDeliveryInitiatedFor: newAnnouncements.
@@ -146,7 +151,7 @@ GtRrAnnouncementQueueLocalListener >> startPoll [
 	isPolling := true.
 	requestTermination := false.
 	
-	[
+	poolingProcess := [
 		[ self doPoll ]
 			on: LanguageLinkServerNotRunningError
 			do: [ :ex |

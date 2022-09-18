@@ -7,7 +7,7 @@ Class {
 		'successfulLabel',
 		'failedLabel'
 	],
-	#category : #'RemoteRunner-UI'
+	#category : #'RemoteRunner-Jobs-Notifications'
 }
 
 { #category : #initialization }
