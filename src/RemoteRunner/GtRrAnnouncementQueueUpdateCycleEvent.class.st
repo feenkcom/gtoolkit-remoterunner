@@ -40,7 +40,7 @@ GtRrAnnouncementQueueUpdateCycleEvent >> deliveryDuration [
 
 { #category : #accessing }
 GtRrAnnouncementQueueUpdateCycleEvent >> duration [
-	^ self completedEvent timestamp - self startedEvent timestamp
+	^ self completedEvent endTimestamp - self startedEvent startTimestamp
 ]
 
 { #category : #'gt - extensions' }

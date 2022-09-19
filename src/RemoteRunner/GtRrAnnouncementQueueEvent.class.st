@@ -23,6 +23,11 @@ GtRrAnnouncementQueueEvent >> duration [
 	^ self signalCompletedEvent timestamp - self signalStartedEvent timestamp
 ]
 
+{ #category : #accessing }
+GtRrAnnouncementQueueEvent >> endTimestamp [
+	^ self signalCompletedEvent timestamp
+]
+
 { #category : #'gt - extensions' }
 GtRrAnnouncementQueueEvent >> gtViewLocalSignalsFor: aView [
 	<gtView>
