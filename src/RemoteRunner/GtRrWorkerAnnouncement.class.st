@@ -24,6 +24,17 @@ GtRrWorkerAnnouncement >> asDataForRemoteSerialize [
 		yourself.
 ]
 
+{ #category : #'gt - extensions' }
+GtRrWorkerAnnouncement >> gtViewWorkerAttributesFor: aView [ 
+	<gtView>	
+	self workerAttributes ifNil: [ ^ aView empty ].
+	
+	^ aView forward 
+		title: 'Worker Attributes';
+		object: [ self workerAttributes ];
+		view: #gtItemsFor:
+]
+
 { #category : #serialization }
 GtRrWorkerAnnouncement >> initializeFromSlotData: aDictionary [
 	super initializeFromSlotData: aDictionary.
