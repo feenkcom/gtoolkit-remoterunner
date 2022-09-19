@@ -24,6 +24,19 @@ GtRrAnnouncementQueueCycleEventsGrouper >> announcer [
 ]
 
 { #category : #'gt - extensions' }
+GtRrAnnouncementQueueCycleEventsGrouper >> gtOverviewFor: aView [
+	<gtView>
+	
+	^ aView columnedList
+		title: 'Overview';
+		priority: 5;
+		items: [ self overviewData ];
+		updateWhen: Announcement in: [ self announcer ];
+		column: 'Property' text: [ :assoc | assoc key ];
+		column: 'Value' text: [ :assoc | assoc value ]
+]
+
+{ #category : #'gt - extensions' }
 GtRrAnnouncementQueueCycleEventsGrouper >> gtViewUpdateCycleEventsFor: aView [
 	<gtView>
 	
@@ -31,6 +44,7 @@ GtRrAnnouncementQueueCycleEventsGrouper >> gtViewUpdateCycleEventsFor: aView [
 		title: 'Events';
 		priority: 10;
 		items: [ self queueUpdateEvents ];
+		updateWhen: Announcement in: [ self announcer ];
 		children: #subEvents;
 		column: 'Event Type' text: [ :anEvent | anEvent class eventLabel ];
 		column: 'Timestamp' text: #timestamp;
@@ -61,7 +75,29 @@ GtRrAnnouncementQueueCycleEventsGrouper >> notifyUpdates [
 	shouldNotifyUpdates := true
 ]
 
-{ #category : #adding }
+{ #category : #accessing }
+GtRrAnnouncementQueueCycleEventsGrouper >> numberOfAnnouncements [
+	^ self queueUpdateEvents 
+		sumNumbers: [ :anEvent | anEvent numberOfAnnouncements ] 
+]
+
+{ #category : #accessing }
+GtRrAnnouncementQueueCycleEventsGrouper >> numberOfUpdateEvents [
+	^ self queueUpdateEvents size
+]
+
+{ #category : #'accessing - overview' }
+GtRrAnnouncementQueueCycleEventsGrouper >> overviewData [
+	^ {
+		'Number of Updates' -> self numberOfUpdateEvents.
+		'Number of Announcements' -> self numberOfAnnouncements.
+		'Total Duration' -> self totalDuration.
+		'Announcements Pool Duration' -> self totalPollDuration.
+		'Announcements Delivery Duration' -> self totalDeliveryDuration
+	} 
+]
+
+{ #category : #actions }
 GtRrAnnouncementQueueCycleEventsGrouper >> processQueueEvent: anEvent [
 	anEvent class = GtRrAnnouncementQueueDeliveryEvent ifTrue: [
 		self addQueueUpdateEvent: (GtRrAnnouncementQueueUpdateCycleEvent new
@@ -109,4 +145,31 @@ GtRrAnnouncementQueueCycleEventsGrouper >> queueUpdateEvents [
 { #category : #accessing }
 GtRrAnnouncementQueueCycleEventsGrouper >> shouldNotifyUpdates [
 	^ shouldNotifyUpdates
+]
+
+{ #category : #accessing }
+GtRrAnnouncementQueueCycleEventsGrouper >> shouldNotifyUpdates: aBoolean [
+
+	shouldNotifyUpdates := aBoolean
+]
+
+{ #category : #accessing }
+GtRrAnnouncementQueueCycleEventsGrouper >> totalDeliveryDuration [
+	^ self queueUpdateEvents
+		inject: 0 seconds 
+		into: [ :total  :anEvent | total + anEvent deliveryDuration ]
+]
+
+{ #category : #accessing }
+GtRrAnnouncementQueueCycleEventsGrouper >> totalDuration [
+	^ self queueUpdateEvents
+		inject: 0 seconds 
+		into: [ :total  :anEvent | total + anEvent duration ]
+]
+
+{ #category : #accessing }
+GtRrAnnouncementQueueCycleEventsGrouper >> totalPollDuration [
+	^ self queueUpdateEvents
+		inject: 0 seconds 
+		into: [ :total  :anEvent | total + anEvent pollDuration ]
 ]

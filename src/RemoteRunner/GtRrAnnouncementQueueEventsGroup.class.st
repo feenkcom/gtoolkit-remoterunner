@@ -7,6 +7,11 @@ Class {
 }
 
 { #category : #accessing }
+GtRrAnnouncementQueueEventsGroup >> addAll: aCollection [
+	self items addAll: aCollection
+]
+
+{ #category : #accessing }
 GtRrAnnouncementQueueEventsGroup >> allSignals [
 	^ GtRrAnnouncementQueueSignalsGroup 
 		withAll: (self  items  flatCollect: #signals)
