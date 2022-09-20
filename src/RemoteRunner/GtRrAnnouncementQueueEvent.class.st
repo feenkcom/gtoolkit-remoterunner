@@ -32,5 +32,5 @@ GtRrAnnouncementQueueEvent >> descriptionOn: aStream [
 
 { #category : #accessing }
 GtRrAnnouncementQueueEvent >> numberOfAnnouncements [
-	^ self signalCompletedEvent announcementsCount
+	^ self eventCompletedSignal announcementsCount
 ]
