@@ -56,6 +56,8 @@ GtRrAnnouncementQueueCycleEventsGrouper >> processEvent: anEvent [
 
 { #category : #actions }
 GtRrAnnouncementQueueCycleEventsGrouper >> reset [ 
+	super reset.
+	
 	rootEventsStack := OrderedCollection new.
 ]
 
