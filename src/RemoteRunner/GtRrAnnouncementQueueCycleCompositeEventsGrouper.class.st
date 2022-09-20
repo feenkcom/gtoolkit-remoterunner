@@ -66,7 +66,7 @@ GtRrAnnouncementQueueCycleCompositeEventsGrouper >> gtViewQueuesListFor: aView [
 ]
 
 { #category : #'gt - extensions' }
-GtRrAnnouncementQueueCycleCompositeEventsGrouper >> gtViewUpdateCycleEventsFor: aView [
+GtRrAnnouncementQueueCycleCompositeEventsGrouper >> gtViewRootEventsFor: aView [
 	<gtView>
 	
 	^ aView columnedTree
@@ -124,15 +124,15 @@ GtRrAnnouncementQueueCycleCompositeEventsGrouper >> overviewData [
 ]
 
 { #category : #accessing }
-GtRrAnnouncementQueueCycleCompositeEventsGrouper >> processQueueSignalFor: aSignal [
+GtRrAnnouncementQueueCycleCompositeEventsGrouper >> processEventSignalFor: aSignal [
 	(self eventsGrouperForSignal: aSignal)
-		processQueueSignalFor: aSignal
+		processEventSignalFor: aSignal
 ]
 
 { #category : #accessing }
-GtRrAnnouncementQueueCycleCompositeEventsGrouper >> processQueueSignalsFor: aCollectionfSignals [
+GtRrAnnouncementQueueCycleCompositeEventsGrouper >> processEventSignalsFor: aCollectionfSignals [
 	aCollectionfSignals do: [ :aSignal |
-		self processQueueSignalFor: aSignal ]
+		self processEventSignalFor: aSignal ]
 ]
 
 { #category : #accessing }

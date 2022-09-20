@@ -1,21 +1,8 @@
 Class {
 	#name : #GtRrAnnouncementQueueEventsGroup,
-	#superclass : #Object,
-	#traits : 'TGtGroup + TGtGroupItems',
-	#classTraits : 'TGtGroup classTrait + TGtGroupItems classTrait',
+	#superclass : #GtBeaconLogEventsGroup,
 	#category : #'RemoteRunner-Logging-Events'
 }
-
-{ #category : #accessing }
-GtRrAnnouncementQueueEventsGroup >> addAll: aCollection [
-	self items addAll: aCollection
-]
-
-{ #category : #accessing }
-GtRrAnnouncementQueueEventsGroup >> allSignals [
-	^ GtRrAnnouncementQueueSignalsGroup 
-		withAll: (self  items  flatCollect: #signals)
-]
 
 { #category : #'gt - extensions' }
 GtRrAnnouncementQueueEventsGroup >> gtItemsFor: aView [
@@ -32,15 +19,4 @@ GtRrAnnouncementQueueEventsGroup >> gtItemsFor: aView [
 			text: [ :anEvent | anEvent duration ];
 		column: 'Announcements' 
 			text: [ :anEvent | anEvent numberOfAnnouncements ]
-]
-
-{ #category : #enumerating }
-GtRrAnnouncementQueueEventsGroup >> inject: thisValue into: binaryBlock [
-	^ self items 
-		inject: thisValue into: binaryBlock
-]
-
-{ #category : #'math functions' }
-GtRrAnnouncementQueueEventsGroup >> sumNumbers: aBlock [
-	^ self items sumNumbers: aBlock
 ]

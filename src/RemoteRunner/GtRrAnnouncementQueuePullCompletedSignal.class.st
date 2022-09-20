@@ -7,14 +7,14 @@ Class {
 	#category : #'RemoteRunner-Logging-Signals'
 }
 
-{ #category : #testing }
-GtRrAnnouncementQueuePullCompletedSignal class >> isEndSignalType [
-	^ true
-]
-
 { #category : #accessing }
 GtRrAnnouncementQueuePullCompletedSignal >> announcementsCount [
 	^ self retrivedAnnouncementCount
+]
+
+{ #category : #testing }
+GtRrAnnouncementQueuePullCompletedSignal >> isEndSignalType [
+	^ true
 ]
 
 { #category : #accessing }

@@ -15,12 +15,12 @@ GtRrAnnouncementQueueSignal class >> forLocalListener: aQueueListener [
 ]
 
 { #category : #testing }
-GtRrAnnouncementQueueSignal class >> isEndSignalType [
+GtRrAnnouncementQueueSignal >> isEndSignalType [
 	^ false
 ]
 
 { #category : #testing }
-GtRrAnnouncementQueueSignal class >> isStartSignalType [
+GtRrAnnouncementQueueSignal >> isStartSignalType [
 	^ false
 ]
 

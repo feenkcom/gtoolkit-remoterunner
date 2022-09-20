@@ -5,6 +5,6 @@ Class {
 }
 
 { #category : #testing }
-GtRrAnnouncementQueuePullInitiatedSignal class >> isStartSignalType [
+GtRrAnnouncementQueuePullInitiatedSignal >> isStartSignalType [
 	^ true
 ]
