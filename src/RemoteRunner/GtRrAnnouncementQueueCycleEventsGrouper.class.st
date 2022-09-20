@@ -16,7 +16,7 @@ GtRrAnnouncementQueueCycleEventsGrouper >> createDefaultEventsGroup [
 GtRrAnnouncementQueueCycleEventsGrouper >> initialize [
 	super initialize.
 	
-	rootEventsStack := OrderedCollection new.
+	self reset.
 ]
 
 { #category : #accessing }
@@ -52,6 +52,11 @@ GtRrAnnouncementQueueCycleEventsGrouper >> processEvent: anEvent [
 		^ self ].
 	
 	rootEventsStack add: anEvent
+]
+
+{ #category : #actions }
+GtRrAnnouncementQueueCycleEventsGrouper >> reset [ 
+	rootEventsStack := OrderedCollection new.
 ]
 
 { #category : #accessing }

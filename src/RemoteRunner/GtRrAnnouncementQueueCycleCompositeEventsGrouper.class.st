@@ -86,7 +86,7 @@ GtRrAnnouncementQueueCycleCompositeEventsGrouper >> gtViewRootEventsFor: aView [
 GtRrAnnouncementQueueCycleCompositeEventsGrouper >> initialize [ 
 	super initialize.
 	
-	eventsGrouperByQueueId := OrderedDictionary new.
+	self reset.
 	announcer := Announcer new.
 	shouldNotifyUpdates := false.
 ]
@@ -122,16 +122,21 @@ GtRrAnnouncementQueueCycleCompositeEventsGrouper >> overviewData [
 	} 
 ]
 
-{ #category : #accessing }
+{ #category : #actions }
 GtRrAnnouncementQueueCycleCompositeEventsGrouper >> processEventSignalFor: aSignal [
 	(self eventsGrouperForSignal: aSignal)
 		processEventSignalFor: aSignal
 ]
 
-{ #category : #accessing }
+{ #category : #actions }
 GtRrAnnouncementQueueCycleCompositeEventsGrouper >> processEventSignalsFor: aCollectionfSignals [
 	aCollectionfSignals do: [ :aSignal |
 		self processEventSignalFor: aSignal ]
+]
+
+{ #category : #actions }
+GtRrAnnouncementQueueCycleCompositeEventsGrouper >> reset [
+	eventsGrouperByQueueId := OrderedDictionary new.
 ]
 
 { #category : #accessing }
