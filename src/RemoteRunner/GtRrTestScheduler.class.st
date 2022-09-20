@@ -4,7 +4,7 @@ Class {
 	#category : #'RemoteRunner-TaskScheduling'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 GtRrTestScheduler class >> defaultTaskDuration [
 	"Answer the target task duration in which tests will be grouped"
 

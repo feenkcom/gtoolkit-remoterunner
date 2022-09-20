@@ -36,8 +36,8 @@ GtRrJobStartupAndShutdown >> startupJob: aGtRrJobContext [
 	Must be called within sharedAccess."
 
 	aGtRrJobContext 
-		submitTasks;
-		markJobStarted.
+		markJobStarted;
+		submitTasks.
 	remoteRunner timeoutManager addContext: aGtRrJobContext.
 
 ]

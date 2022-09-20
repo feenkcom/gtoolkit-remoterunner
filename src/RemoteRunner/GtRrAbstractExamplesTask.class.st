@@ -32,6 +32,13 @@ GtRrAbstractExamplesTask >> asExplicitTask [
 ]
 
 { #category : #accessing }
+GtRrAbstractExamplesTask >> asJob [
+	"Answer a GtRrChecksJob with the receiver as its single task"
+
+	^ GtRrChecksJob tasks: { self }
+]
+
+{ #category : #accessing }
 GtRrAbstractExamplesTask >> description [
 	^ (String streamContents: [ :aStream |
 		aStream 

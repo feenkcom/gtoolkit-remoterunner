@@ -612,7 +612,7 @@ GtRemoteRunner >> privateTaskFailed: aTaskContextId started: startTime completed
 		endTime: endTime;
 		errorDetails: anGtRrTaskErrorDetails.
 	taskContext markTaskCompleted.
-	self announceAndLog: (GtRrTaskCompletedAnnouncement task: taskContext).
+	self announceAndLog: (GtRrTaskFailedAnnouncement task: taskContext).
 	retryTasks := taskContext task retryTasks.
 	retryTasks ifNotEmpty:
 		[ self queueTasks: retryTasks jobContext: taskContext jobContext ].
@@ -743,6 +743,7 @@ GtRemoteRunner >> startJob: aGtRrJob [
 		at: aGtRrJob id
 		put: context.
 	jobStartupAndShutdown startupJob: context.
+	self announceAndLog: (GtRrJobStartedAnnouncement job: aGtRrJob).
 	self assignTasksToWorkers.
 
 ]
@@ -797,7 +798,6 @@ GtRemoteRunner >> submitJob: aGtRrJob [
 	Start execution as soon as possible"
 
 	sharedAccess critical: [ self startJob: aGtRrJob ].
-	self announceAndLog: (GtRrJobSubmittedAnnouncement job: aGtRrJob).
 	^ aGtRrJob
 ]
 

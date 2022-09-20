@@ -15,5 +15,6 @@ GtRrTestSchedulingTimeMovingAverageStrategy >> timeFor: aGtRrTestSchedulingTestT
 	| times |
 
 	times := aGtRrTestSchedulingTestTimes times.
-	^ (times last: (times size max: 5)) average
+	^ ((times last: (times size min: 5))
+		collect: #expectedTime) average
 ]

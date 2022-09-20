@@ -120,13 +120,23 @@ GtRrExamplesTask >> numberOfSuccesses [
 
 { #category : #running }
 GtRrExamplesTask >> run [
-	| group |
+	| group exampleStartTime exampleEndTime announcement |
 
 	group := self group.
-	group examples do: [ :exampleWithResult |
-		(ignoreNoTest or: [ exampleWithResult ignoreTest not ]) ifTrue:
-			[ exampleWithResult run ] ].
-	^ group
+	^ group examples collect: [ :exampleWithResult |
+		exampleStartTime := DateAndTime now.
+		exampleWithResult run.
+		exampleEndTime := DateAndTime now.
+		announcement := exampleWithResult result basicReturnValue gtRrResultHolderClass new.
+		announcement
+			initializeTestCaseClassName: exampleWithResult methodClass name
+				selector: exampleWithResult selector;
+			testCaseStartTimestamp: exampleStartTime;
+			testCaseEndTimestamp: exampleEndTime;
+			shouldPass: true.
+		exampleWithResult isSuccess ifFalse:
+			[ announcement halt ].
+		announcement ].
 ]
 
 { #category : #initialization }
