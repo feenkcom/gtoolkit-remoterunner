@@ -9,7 +9,7 @@ Class {
 	#category : #'RemoteRunner-Logging-Events'
 }
 
-{ #category : #accessing }
+{ #category : #callbacks }
 GtRrAnnouncementQueueCycleCompositeEventsGrouper >> actOnAnnouncementFromGrouperFor: anAnnouncement [
 	self shouldNotifyUpdates ifTrue: [
 		announcer announce: anAnnouncement ]
@@ -72,9 +72,8 @@ GtRrAnnouncementQueueCycleCompositeEventsGrouper >> gtViewRootEventsFor: aView [
 	^ aView columnedTree
 		title: 'Events';
 		priority: 15;
-		items: [ self queueUpdateEvents ];
+		items: [ self rootEvents ];
 		children: #subEvents;
-		updateWhen: Announcement in: [ self announcer ];
 		column: 'Event Type' text: [ :anEvent | anEvent class eventLabel ];
 		column: 'Timestamp' text: #timestamp;
 		column: 'Duration' 
@@ -136,12 +135,12 @@ GtRrAnnouncementQueueCycleCompositeEventsGrouper >> processEventSignalsFor: aCol
 ]
 
 { #category : #accessing }
-GtRrAnnouncementQueueCycleCompositeEventsGrouper >> queueUpdateEvents [ 
+GtRrAnnouncementQueueCycleCompositeEventsGrouper >> rootEvents [ 
 	| updateEvents  | 
 	updateEvents := GtRrAnnouncementQueueEventsGroup new.
 	
 	eventsGrouperByQueueId valuesDo: [ :anEventsGrouper |
-		updateEvents addAll: anEventsGrouper queueUpdateEvents ].
+		updateEvents addAll: anEventsGrouper rootEvents ].
 	
 	^ updateEvents
 ]

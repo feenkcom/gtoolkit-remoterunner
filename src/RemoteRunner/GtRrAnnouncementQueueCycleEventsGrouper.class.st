@@ -12,24 +12,6 @@ GtRrAnnouncementQueueCycleEventsGrouper >> createDefaultEventsGroup [
 	^ GtRrAnnouncementQueueEventsGroup new
 ]
 
-{ #category : #'gt - extensions' }
-GtRrAnnouncementQueueCycleEventsGrouper >> gtViewRootEventsFor: aView [
-	<gtView>
-	
-	^ aView columnedTree
-		title: 'Events';
-		priority: 10;
-		items: [ self rootEvents ];
-		updateWhen: Announcement in: [ self announcer ];
-		children: #subEvents;
-		column: 'Event Type' text: [ :anEvent | anEvent class eventLabel ];
-		column: 'Timestamp' text: #timestamp;
-		column: 'Duration' 
-			text: [ :anEvent | anEvent duration ];
-		column: 'Announcements' 
-			text: [ :anEvent | anEvent numberOfAnnouncements ]
-]
-
 { #category : #initialization }
 GtRrAnnouncementQueueCycleEventsGrouper >> initialize [
 	super initialize.
@@ -39,7 +21,7 @@ GtRrAnnouncementQueueCycleEventsGrouper >> initialize [
 
 { #category : #accessing }
 GtRrAnnouncementQueueCycleEventsGrouper >> numberOfAnnouncements [
-	^ self queueUpdateEvents 
+	^ self rootEvents 
 		sumNumbers: [ :anEvent | anEvent numberOfAnnouncements ] 
 ]
 
@@ -73,20 +55,13 @@ GtRrAnnouncementQueueCycleEventsGrouper >> processEvent: anEvent [
 ]
 
 { #category : #accessing }
-GtRrAnnouncementQueueCycleEventsGrouper >> queueUpdateEvents [
-	^ self rootEvents
-]
-
-{ #category : #accessing }
 GtRrAnnouncementQueueCycleEventsGrouper >> totalDeliveryDuration [
-	^ self queueUpdateEvents
-		inject: 0 seconds 
-		into: [ :total  :anEvent | total + anEvent deliveryDuration ]
+	^ self rootEvents
+		sumDurations: [ :anEvent | anEvent deliveryDuration ]
 ]
 
 { #category : #accessing }
 GtRrAnnouncementQueueCycleEventsGrouper >> totalPollDuration [
-	^ self queueUpdateEvents
-		inject: 0 seconds 
-		into: [ :total  :anEvent | total + anEvent pollDuration ]
+	^ self rootEvents 
+		sumDurations: [ :anEvent | anEvent pollDuration ]
 ]
