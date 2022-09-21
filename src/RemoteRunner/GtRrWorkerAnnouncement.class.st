@@ -2,7 +2,9 @@ Class {
 	#name : #GtRrWorkerAnnouncement,
 	#superclass : #GtRemoteRunnerAnnouncement,
 	#instVars : [
-		'worker'
+		'worker',
+		'remoteAddressString',
+		'workerAttributes'
 	],
 	#category : #'RemoteRunner-Announcements'
 }
@@ -10,48 +12,57 @@ Class {
 { #category : #accessing }
 GtRrWorkerAnnouncement class >> worker: aGtRrWorkerRemote [
 
-	^ self new worker: aGtRrWorkerRemote
+	^ self new 
+		worker: aGtRrWorkerRemote
 ]
 
-{ #category : #accessing }
+{ #category : #serialization }
 GtRrWorkerAnnouncement >> asDataForRemoteSerialize [
 	^ super asDataForRemoteSerialize
 		at: #remoteAddressString put: self remoteAddressString;
+		at: #workerAttributes put: self workerAttributes;
 		yourself.
 ]
 
-{ #category : #accessing }
-GtRrWorkerAnnouncement >> computeRemoteAddressString [
-	^ worker remoteAddressString
+{ #category : #'gt - extensions' }
+GtRrWorkerAnnouncement >> gtViewWorkerAttributesFor: aView [ 
+	<gtView>	
+	self workerAttributes ifNil: [ ^ aView empty ].
+	
+	^ aView forward 
+		title: 'Worker Attributes';
+		object: [ self workerAttributes ];
+		view: #gtItemsFor:
 ]
 
-{ #category : #accessing }
+{ #category : #serialization }
 GtRrWorkerAnnouncement >> initializeFromSlotData: aDictionary [
 	super initializeFromSlotData: aDictionary.
 	
-	self remoteAddressString: (aDictionary at: #remoteAddressString)
+	self remoteAddressString: (aDictionary at: #remoteAddressString).
+	self workerAttributes: (aDictionary at: #workerAttributes).
 ]
 
 { #category : #printing }
 GtRrWorkerAnnouncement >> printOneLineContentsOn: stream [
 
-	worker ifNil: [ ^ self ].
+	(self worker isNil and: [
+		self remoteAddressString isNil ]) ifTrue: [ ^ self ].
+		
 	stream 
-		<< (worker remoteAddressString);
+		<< self remoteAddressString;
 		space;
-		<< (worker details at: #workingDirectory ifAbsent: [ '<unknown directory>' ])
+		<< self workingDirectory
 ]
 
 { #category : #accessing }
 GtRrWorkerAnnouncement >> remoteAddressString [
-	^ self properties 
-		at: #remoteAddressString 
-		ifAbsent: [ self computeRemoteAddressString ]
+	^ remoteAddressString
 ]
 
 { #category : #accessing }
-GtRrWorkerAnnouncement >> remoteAddressString: anObject [ 
-	self properties at: #remoteAddressString put: anObject
+GtRrWorkerAnnouncement >> remoteAddressString: anAddressString [ 
+	remoteAddressString := anAddressString
 ]
 
 { #category : #accessing }
@@ -64,5 +75,23 @@ GtRrWorkerAnnouncement >> worker [
 GtRrWorkerAnnouncement >> worker: anObject [
 
 	worker := anObject.
-	self remoteAddressString:  self computeRemoteAddressString
+	self remoteAddressString:  worker remoteAddressString.
+	self workerAttributes:  (worker details ifNil: [ Dictionary new])
+]
+
+{ #category : #accessing }
+GtRrWorkerAnnouncement >> workerAttributes [
+	^ workerAttributes
+]
+
+{ #category : #accessing }
+GtRrWorkerAnnouncement >> workerAttributes: aDictionary [ 
+	workerAttributes := aDictionary
+]
+
+{ #category : #accessing }
+GtRrWorkerAnnouncement >> workingDirectory [
+	^ self workerAttributes
+		at: #workingDirectory 
+		ifAbsent: [ '<unknown directory>' ]
 ]

@@ -24,5 +24,16 @@ TGtWithAnnouncementsQueue >> registerAnnouncementsQueue [
 	"Register a queue that stores announcements."
 	self assert: [ announcementQueue isNil ].
 	
-	announcementQueue := GtRemoteAnnouncementQueue onAnnouncer: self
+	self 
+		registerAnnouncementsQueueForAnnouncementType: Announcement
+]
+
+{ #category : #'announcements - queue' }
+TGtWithAnnouncementsQueue >> registerAnnouncementsQueueForAnnouncementType: anAnnouncementType [
+	"Register a queue that stores announcements."
+	self assert: [ announcementQueue isNil ].
+	
+	announcementQueue := GtRemoteAnnouncementQueue 
+		onAnnouncingObject: self
+		withAnnouncementType: anAnnouncementType
 ]

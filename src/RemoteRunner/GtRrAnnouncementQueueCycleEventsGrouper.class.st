@@ -1,112 +1,74 @@
 Class {
 	#name : #GtRrAnnouncementQueueCycleEventsGrouper,
-	#superclass : #Object,
+	#superclass : #GtBeaconEventsGrouper,
 	#instVars : [
-		'queueUpdateEvents',
-		'eventsStack',
-		'shouldNotifyUpdates',
-		'rootEvents',
-		'announcer'
+		'rootEventsStack'
 	],
 	#category : #'RemoteRunner-Logging-Events'
 }
 
-{ #category : #adding }
-GtRrAnnouncementQueueCycleEventsGrouper >> addQueueUpdateEvent: anEvent [
-	self queueUpdateEvents add: anEvent.
-	self shouldNotifyUpdates ifTrue: [
-		self notifyUpdateEventAdded]
-]
-
-{ #category : #accessing }
-GtRrAnnouncementQueueCycleEventsGrouper >> announcer [
-	^ announcer
-]
-
-{ #category : #'gt - extensions' }
-GtRrAnnouncementQueueCycleEventsGrouper >> gtViewUpdateCycleEventsFor: aView [
-	<gtView>
-	
-	^ aView columnedTree
-		title: 'Events';
-		priority: 10;
-		items: [ self queueUpdateEvents ];
-		children: #subEvents;
-		column: 'Event Type' text: [ :anEvent | anEvent class eventLabel ];
-		column: 'Timestamp' text: #timestamp;
-		column: 'Duration' 
-			text: [ :anEvent | anEvent duration ];
-		column: 'Announcements' 
-			text: [ :anEvent | anEvent numberOfAnnouncements ]
+{ #category : #initialization }
+GtRrAnnouncementQueueCycleEventsGrouper >> createDefaultEventsGroup [
+	^ GtRrAnnouncementQueueEventsGroup new
 ]
 
 { #category : #initialization }
 GtRrAnnouncementQueueCycleEventsGrouper >> initialize [
 	super initialize.
 	
-	queueUpdateEvents := GtRrAnnouncementQueueEventsGroup new.
-	eventsStack := Stack new.
-	rootEvents := OrderedCollection new.
-	shouldNotifyUpdates := false.
-	announcer := Announcer new.
+	self reset.
 ]
 
-{ #category : #notifications }
-GtRrAnnouncementQueueCycleEventsGrouper >> notifyUpdateEventAdded [
-	announcer announce: Announcement
+{ #category : #accessing }
+GtRrAnnouncementQueueCycleEventsGrouper >> numberOfAnnouncements [
+	^ self rootEvents 
+		sumNumbers: [ :anEvent | anEvent numberOfAnnouncements ] 
 ]
 
-{ #category : #initialization }
-GtRrAnnouncementQueueCycleEventsGrouper >> notifyUpdates [
-	shouldNotifyUpdates := true
+{ #category : #accessing }
+GtRrAnnouncementQueueCycleEventsGrouper >> numberOfUpdateEvents [
+	^ self numberOfRootEvents
 ]
 
-{ #category : #adding }
-GtRrAnnouncementQueueCycleEventsGrouper >> processQueueEvent: anEvent [
+{ #category : #'accessing - overview' }
+GtRrAnnouncementQueueCycleEventsGrouper >> overviewData [
+	^ {
+		'Number of Updates' -> self numberOfRootEvents.
+		'Number of Announcements' -> self numberOfAnnouncements.
+		'Total Duration' -> self totalDuration.
+		'Announcements Pool Duration' -> self totalPollDuration.
+		'Announcements Delivery Duration' -> self totalDeliveryDuration
+	} 
+]
+
+{ #category : #actions }
+GtRrAnnouncementQueueCycleEventsGrouper >> processEvent: anEvent [
+	
 	anEvent class = GtRrAnnouncementQueueDeliveryEvent ifTrue: [
-		self addQueueUpdateEvent: (GtRrAnnouncementQueueUpdateCycleEvent new
-			addSubEvents: rootEvents ;
+		self addRootEvent: (GtRrAnnouncementQueueUpdateCycleEvent new
+			addSubEvents: rootEventsStack;
 			addSubEvent: anEvent).
-		rootEvents removeAll.
+		rootEventsStack removeAll.
 		^ self ].
 	
-	rootEvents add: anEvent
+	rootEventsStack add: anEvent
 ]
 
 { #category : #actions }
-GtRrAnnouncementQueueCycleEventsGrouper >> processQueueSignalFor: aSignal [
-	| latestEvent |
+GtRrAnnouncementQueueCycleEventsGrouper >> reset [ 
+	super reset.
 	
-	aSignal class isStartSignalType ifTrue: [ 
-		| newEvent topEvent |
-		newEvent := aSignal class eventType new.
-		topEvent := eventsStack size > 0 
-			ifTrue: [ eventsStack top ]
-			ifFalse: [ nil ] .
-		topEvent ifNotNil: [ 
-			topEvent addSubEvent: newEvent ].
-		newEvent addSignal: aSignal.
-		eventsStack push: newEvent.
-		^ self ].
-		
-	aSignal class isEndSignalType ifTrue: [ 
-		eventsStack top addSignal: aSignal.
-		latestEvent := eventsStack pop.
-		self processQueueEvent: latestEvent ] 
-]
-
-{ #category : #actions }
-GtRrAnnouncementQueueCycleEventsGrouper >> processQueueSignalsFor: aCollectionfSignals [
-	aCollectionfSignals do: [ :aSignal |
-		self processQueueSignalFor: aSignal ]
+	rootEventsStack := OrderedCollection new.
 ]
 
 { #category : #accessing }
-GtRrAnnouncementQueueCycleEventsGrouper >> queueUpdateEvents [
-	^ queueUpdateEvents
+GtRrAnnouncementQueueCycleEventsGrouper >> totalDeliveryDuration [
+	^ self rootEvents
+		sumDurations: [ :anEvent | anEvent deliveryDuration ]
 ]
 
 { #category : #accessing }
-GtRrAnnouncementQueueCycleEventsGrouper >> shouldNotifyUpdates [
-	^ shouldNotifyUpdates
+GtRrAnnouncementQueueCycleEventsGrouper >> totalPollDuration [
+	^ self rootEvents 
+		sumDurations: [ :anEvent | anEvent pollDuration ]
 ]

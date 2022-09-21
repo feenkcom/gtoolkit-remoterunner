@@ -44,7 +44,6 @@ PlpoGtRrWorkerExamplesReport >> gtViewExecutionTimelineListFor: aView [
 		stencil: [ 
 			GtRrExecutionHorizontalChartStencil new 
 				executions: self tasksExecutionChartItems;
-				rowLabelComputation: [ :anItem | anItem label ];
 				selectionTransformation: [ :anItem |
 					self taskWithId:  anItem identifier ] ]
 ]
@@ -58,12 +57,8 @@ PlpoGtRrWorkerExamplesReport >> gtViewExecutionTimelineWithSchedulingFor: aView 
 		priority: 45;
 		stencil: [ 
 			GtRrExecutionHorizontalChartStencil new 
+				withColorBasedOnScheduling;
 				executions: self tasksExecutionChartItemsGroupWithScheduling;
-				rowLabelComputation: [ :anItem | anItem label ];
-				colorComputation: [ :anItem |
-					(anItem propertyAt: #correctScheduling ifAbsent: [ false ])
-						ifFalse: [ Color red ] 
-						ifTrue: [ Color gray ] ];
 				selectionTransformation: [ :anItem |
 					self taskWithId:  anItem identifier ] ]
 ]
@@ -75,24 +70,12 @@ PlpoGtRrWorkerExamplesReport >> taskWithId: aTaskId [
 		withPrimitiveArguments: {aTaskId}
 ]
 
-{ #category : #accessing }
+{ #category : #'accessing - chart data' }
 PlpoGtRrWorkerExamplesReport >> tasksExecutionChartItems [
-	^ self tasksExecutionChartItemsData collect: [ :aDictionary |
-		GtRrExecutionChartDataItem fromDictionary: aDictionary]
+	^ self proxyPerformSerialized: #tasksExecutionChartItems
 ]
 
-{ #category : #accessing }
-PlpoGtRrWorkerExamplesReport >> tasksExecutionChartItemsData [
-	^ (self proxyPerform: #tasksExecutionChartItemsData) getSerialized
-]
-
-{ #category : #accessing }
+{ #category : #'accessing - chart data' }
 PlpoGtRrWorkerExamplesReport >> tasksExecutionChartItemsGroupWithScheduling [
-	^  GtRrExecutionChartDataItemsGroup 
-		fromDictionary: self tasksExecutionChartItemsGroupWithSchedulingData
-]
-
-{ #category : #accessing }
-PlpoGtRrWorkerExamplesReport >> tasksExecutionChartItemsGroupWithSchedulingData [
-	^ (self proxyPerform: #tasksExecutionChartItemsGroupWithSchedulingData) getSerialized
+	^ self proxyPerformSerialized: #tasksExecutionChartItemsGroupWithScheduling
 ]

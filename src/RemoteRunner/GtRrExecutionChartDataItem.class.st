@@ -11,21 +11,11 @@ Class {
 		'label',
 		'startTime',
 		'endTime',
-		'duration',
-		'properties'
+		'properties',
+		'cachedDuration'
 	],
 	#category : #'RemoteRunner-UI'
 }
-
-{ #category : #'instance - creation' }
-GtRrExecutionChartDataItem class >> fromDictionary: aDictionary [
-	^ self new 
-		identifier: (aDictionary at: 'identifier' ifAbsent: [ nil ]);
-		startTime: (aDictionary at: 'startTime');
-		endTime: (aDictionary at: 'endTime');
-		label: (aDictionary at: 'label' ifAbsent: [ nil ]);
-		properties: (aDictionary at: 'properties' ifAbsent: [ nil ])
-]
 
 { #category : #'instance - creation' }
 GtRrExecutionChartDataItem class >> fromMachine: aMachine [
@@ -54,6 +44,24 @@ GtRrExecutionChartDataItem class >> fromWorker: aWorker [
 		label:  aWorker description
 ]
 
+{ #category : #serialization }
+GtRrExecutionChartDataItem class >> leJsonV4AttributeMapping [
+
+	^ OrderedCollection new
+		add: #identifier -> #identifier;
+		add: #label -> #label;
+		add: #startTime -> #startTime;
+		add: #endTime -> #endTime;
+		add: #properties -> #properties;
+		yourself.
+]
+
+{ #category : #serialization }
+GtRrExecutionChartDataItem class >> leJsonV4Name [
+
+	^ #gtRrExecutionChartDataItem
+]
+
 { #category : #accessing }
 GtRrExecutionChartDataItem >> appendDurationToLabel [
 	| newLabel |
@@ -68,21 +76,10 @@ GtRrExecutionChartDataItem >> appendDurationToLabel [
 	self label: newLabel
 ]
 
-{ #category : #converting }
-GtRrExecutionChartDataItem >> asDictionary [ 
-	^ Dictionary new 
-		at: 'identifier' put: self identifier;
-		at: 'startTime' put: self startTime;
-		at: 'endTime' put: self endTime;
-		at: 'label' put: self label;
-		at: 'properties' put: self properties;
-		yourself
-]
-
 { #category : #accessing }
 GtRrExecutionChartDataItem >> duration [
-	^ duration ifNil: [
-		duration := self endTime - startTime ]
+	^ cachedDuration ifNil: [
+		cachedDuration := self endTime - self startTime ]
 ]
 
 { #category : #accessing }
@@ -118,6 +115,15 @@ GtRrExecutionChartDataItem >> label [
 GtRrExecutionChartDataItem >> label: anObject [
 
 	label := anObject
+]
+
+{ #category : #printing }
+GtRrExecutionChartDataItem >> printOn: aStream [ 
+	super printOn: aStream .
+	
+	aStream parenthesize: [
+		{ self identifier . self label . self duration } 
+			asStringOn: aStream delimiter: ', ' ]
 ]
 
 { #category : #'accessing - properties' }

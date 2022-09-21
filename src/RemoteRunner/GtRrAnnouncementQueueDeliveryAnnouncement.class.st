@@ -1,10 +1,10 @@
 Class {
 	#name : #GtRrAnnouncementQueueDeliveryAnnouncement,
-	#superclass : #GtRrAnnouncementQueueAnnouncement,
+	#superclass : #GtRrAnnouncementQueueSignal,
 	#instVars : [
 		'announcementsCount'
 	],
-	#category : #'RemoteRunner-Announcements'
+	#category : #'RemoteRunner-Logging-Signals'
 }
 
 { #category : #accessing }

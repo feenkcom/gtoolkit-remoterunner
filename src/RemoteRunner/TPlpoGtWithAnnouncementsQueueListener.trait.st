@@ -36,10 +36,14 @@ TPlpoGtWithAnnouncementsQueueListener >> initializeAnnouncementsQueueListener [
 
 { #category : #'announcements - queue' }
 TPlpoGtWithAnnouncementsQueueListener >> pollSerializedAnnouncementQueue [
-	^ self newCommandFactory
-		setBySerialized;
-		<< ('self ', #pollSerializedAnnouncementQueue asString);
-		sendAndWait
+	^ self proxyPerformSerialized: #pollSerializedAnnouncementQueue
+]
+
+{ #category : #'announcements - queue' }
+TPlpoGtWithAnnouncementsQueueListener >> registerAnnouncementsQueue [
+	"Provides a manual way to start the collection of announcements in the remote object. Can be used in case the queue is not registered when creating the initial object, before returning a proxy to it."
+	
+	^ self proxyPerform: #registerAnnouncementsQueue
 ]
 
 { #category : #'announcements - queue' }

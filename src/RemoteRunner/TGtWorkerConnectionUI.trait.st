@@ -7,6 +7,7 @@ Trait {
 TGtWorkerConnectionUI >> gtPlaygroundActionFor: anAction [
 	<gtAction>
 
-	^ anAction explicit stencil:
-		[ GtRrWorkerPortNumberStencil new workerConnection: self ]
+	^ anAction explicit 
+		stencil:[ 
+			GtRrWorkerPortNumberStencil new workerConnection: self ]
 ]

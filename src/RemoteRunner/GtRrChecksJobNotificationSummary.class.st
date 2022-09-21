@@ -1,7 +1,7 @@
 Class {
 	#name : #GtRrChecksJobNotificationSummary,
 	#superclass : #GtRrJobNotificationSummary,
-	#category : #'RemoteRunner-UI'
+	#category : #'RemoteRunner-Jobs-Notifications'
 }
 
 { #category : #updating }

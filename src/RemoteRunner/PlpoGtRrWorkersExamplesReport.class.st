@@ -18,10 +18,9 @@ PlpoGtRrWorkersExamplesReport >> gtViewCondensedExecutionTimelineFor: aView [
 		priority: 35;
 		stencil: [ 
 			GtRrExecutionHorizontalChartStencil new 
-				executions: self workersExecutionChartItems;
-				rowLabelComputation: [ :anItem | anItem label ];
 				colorComputation: [ Color darkGray ];
-				configureWithMinimalDetails ]
+				configureWithMinimalDetails;
+				executions: self workersExecutionChartItems ]
 ]
 
 { #category : #'gt - extensions' }
@@ -33,14 +32,10 @@ PlpoGtRrWorkersExamplesReport >> gtViewCondensedTasksTimelineFor: aView [
 		priority: 45;
 		stencil: [ 
 			GtRrExecutionHorizontalChartStencil new 
-				executions: self workersTasksExecutionChartItemsGroupWithScheduling;
-				rowLabelComputation: [ :anItem | anItem label ];
-				colorComputation: [ :anItem |
-					(anItem propertyAt: #correctScheduling ifAbsent: [ false ])
-						ifFalse: [ Color red ] 
-						ifTrue: [ Color gray ] ];
+				withColorBasedOnScheduling;
+				configureWithMinimalDetails;
 				enabledGroupsInRow;
-				configureWithMinimalDetails ]
+				executions: self workersTasksExecutionChartItemsGroupWithScheduling ]
 ]
 
 { #category : #'gt - extensions' }
@@ -53,7 +48,6 @@ PlpoGtRrWorkersExamplesReport >> gtViewExecutionTimelineListFor: aView [
 		stencil: [ 
 			GtRrExecutionHorizontalChartStencil new 
 				executions: self workersExecutionChartItems;
-				rowLabelComputation: [ :anItem | anItem label ];
 				selectionTransformation: [ :anItem |
 					self workerWithId:  anItem identifier ] ]
 ]
@@ -67,13 +61,9 @@ PlpoGtRrWorkersExamplesReport >> gtViewTasksExecutionTimelineListFor: aView [
 		priority: 20;
 		stencil: [ 
 			GtRrExecutionHorizontalChartStencil new 
-				executions: self workersTasksExecutionChartItemsGroupWithScheduling;
-				rowLabelComputation: [ :anItem | anItem label ];
-				colorComputation: [ :anItem |
-					(anItem propertyAt: #correctScheduling ifAbsent: [ false ])
-						ifFalse: [ Color red ] 
-						ifTrue: [ Color gray ] ];
+				withColorBasedOnScheduling;
 				enabledGroupsInRow;
+				executions: self workersTasksExecutionChartItemsGroupWithScheduling;
 				selectionTransformation: [ :anItem |
 					self workerWithId:  anItem identifier ] ]
 ]
@@ -85,35 +75,13 @@ PlpoGtRrWorkersExamplesReport >> workerWithId: aWorkerId [
 		withPrimitiveArguments: {aWorkerId} 
 ]
 
-{ #category : #accessing }
+{ #category : #'accessing - chart data' }
 PlpoGtRrWorkersExamplesReport >> workersExecutionChartItems [
-	^ self workersExecutionChartItemsData collect: [ :aDictionary |
-		GtRrExecutionChartDataItem fromDictionary: aDictionary]
+	^ self proxyPerformSerialized: #workersExecutionChartItems
 ]
 
-{ #category : #accessing }
-PlpoGtRrWorkersExamplesReport >> workersExecutionChartItemsData [
-	^ (self proxyPerform: #workersExecutionChartItemsData) getSerialized
-]
-
-{ #category : #accessing }
-PlpoGtRrWorkersExamplesReport >> workersTasksExecutionChartItemsData [
-	^ (self proxyPerform: #workersTasksExecutionChartItemsData) getSerialized
-]
-
-{ #category : #accessing }
-PlpoGtRrWorkersExamplesReport >> workersTasksExecutionChartItemsGroup [
-	^ self workersTasksExecutionChartItemsData collect: [ :aDictionary |
-		GtRrExecutionChartDataItemsGroup fromDictionary: aDictionary]
-]
-
-{ #category : #accessing }
+{ #category : #'accessing - chart data' }
 PlpoGtRrWorkersExamplesReport >> workersTasksExecutionChartItemsGroupWithScheduling [
-	^ self workersTasksExecutionChartItemsGroupWithSchedulingData collect: [ :aDictionary |
-		GtRrExecutionChartDataItemsGroup fromDictionary: aDictionary]
-]
-
-{ #category : #accessing }
-PlpoGtRrWorkersExamplesReport >> workersTasksExecutionChartItemsGroupWithSchedulingData [
-	^ (self proxyPerform: #workersTasksExecutionChartItemsGroupWithSchedulingData) getSerialized
+	^ self 
+		proxyPerformSerialized: #workersTasksExecutionChartItemsGroupWithScheduling
 ]

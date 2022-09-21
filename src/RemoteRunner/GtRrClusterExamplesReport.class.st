@@ -1,6 +1,8 @@
 Class {
 	#name : #GtRrClusterExamplesReport,
 	#superclass : #Object,
+	#traits : 'TGtRrClusterExamplesReportViews',
+	#classTraits : 'TGtRrClusterExamplesReportViews classTrait',
 	#instVars : [
 		'machineReports'
 	],
@@ -90,11 +92,12 @@ GtRrClusterExamplesReport >> machineWithIpAddress: anIpAddress [
 			aMachine ipAddress = anIpAddress ]
 ]
 
-{ #category : #accessing }
-GtRrClusterExamplesReport >> machinesExecutionChartItemsData [
+{ #category : #'accessing - chart data' }
+GtRrClusterExamplesReport >> machinesExecutionChartItems [
 	^ self machineReports
 		collect: [ :aMachineReport |
-			(GtRrExecutionChartDataItem fromMachine: aMachineReport) asDictionary ] 
+			GtRrExecutionChartDataItem fromMachine: aMachineReport ] 
+		as: Array
 ]
 
 { #category : #printing }

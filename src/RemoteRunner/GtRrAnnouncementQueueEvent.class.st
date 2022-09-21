@@ -1,10 +1,6 @@
 Class {
 	#name : #GtRrAnnouncementQueueEvent,
-	#superclass : #Object,
-	#instVars : [
-		'signals',
-		'subEvents'
-	],
+	#superclass : #GtBeaconLogEvent,
 	#category : #'RemoteRunner-Logging-Events'
 }
 
@@ -13,78 +9,28 @@ GtRrAnnouncementQueueEvent class >> eventLabel [
 	^ 'Announcement Queue'
 ]
 
-{ #category : #adding }
-GtRrAnnouncementQueueEvent >> addSignal: aSignal [
-	self signals add: aSignal
-]
-
-{ #category : #accessing }
-GtRrAnnouncementQueueEvent >> duration [
-	^ self signalCompletedEvent timestamp - self signalStartedEvent timestamp
-]
-
-{ #category : #'gt - extensions' }
-GtRrAnnouncementQueueEvent >> gtViewLocalSignalsFor: aView [
-	<gtView>
-	
-	^ aView forward
-	 	title: 'Signals (local)';
-	 	priority: 30;
-	 	object: [ self signals ];
-	 	view: #gtItemsFor:
+{ #category : #testing }
+GtRrAnnouncementQueueEvent class >> needComposition [
+	^ false
 ]
 
 { #category : #initialization }
-GtRrAnnouncementQueueEvent >> initialize [ 
-	super initialize.
-	signals := GtRrAnnouncementQueueSignalsGroup new. 
-	subEvents := GtRrAnnouncementQueueEventsGroup new. 
+GtRrAnnouncementQueueEvent >> createDefaultEventsGroup [
+	^ GtRrAnnouncementQueueEventsGroup new
+]
+
+{ #category : #printing }
+GtRrAnnouncementQueueEvent >> descriptionOn: aStream [
+	
+	aStream 
+		print: self timestamp;
+		<< ', ';
+		print: self numberOfAnnouncements;
+		<< ' announcements,';
+		print: self duration
 ]
 
 { #category : #accessing }
 GtRrAnnouncementQueueEvent >> numberOfAnnouncements [
-	^ self signalCompletedEvent announcementsCount
-]
-
-{ #category : #printing }
-GtRrAnnouncementQueueEvent >> printOn: aStream [
-	super printOn: aStream.
-	aStream parenthesize: [
-		aStream 
-			print: self timestamp;
-			<< ', ';
-			print: self numberOfAnnouncements;
-			<< ' announcements,';
-			print: self duration]
-]
-
-{ #category : #accessing }
-GtRrAnnouncementQueueEvent >> signalCompletedEvent [
-	^ self signals last
-]
-
-{ #category : #accessing }
-GtRrAnnouncementQueueEvent >> signalStartedEvent [
-	^ self signals first
-]
-
-{ #category : #accessing }
-GtRrAnnouncementQueueEvent >> signals [
-
-	^ signals
-]
-
-{ #category : #accessing }
-GtRrAnnouncementQueueEvent >> startTimestamp [
-	^ self signalStartedEvent timestamp
-]
-
-{ #category : #accessing }
-GtRrAnnouncementQueueEvent >> subEvents [
-	^ subEvents
-]
-
-{ #category : #accessing }
-GtRrAnnouncementQueueEvent >> timestamp [
-	^ self startTimestamp
+	^ self eventCompletedSignal announcementsCount
 ]
