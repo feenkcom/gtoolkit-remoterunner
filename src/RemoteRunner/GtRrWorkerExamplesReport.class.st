@@ -145,6 +145,11 @@ GtRrWorkerExamplesReport >> tasksDuration [
 ]
 
 { #category : #accessing }
+GtRrWorkerExamplesReport >> tasksDurationOnRunner [
+	^ self tasks durationOnRunner
+]
+
+{ #category : #accessing }
 GtRrWorkerExamplesReport >> tasksEndTime [ 
 	^ self tasks endTime
 ]
