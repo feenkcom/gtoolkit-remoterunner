@@ -50,44 +50,10 @@ self halt.
 			each class name -> each selector ])
 ]
 
-{ #category : #enumerating }
-GtRrSUnitTask >> count: aBlockClosure [
-
-	result ifNil: [ ^ 0 ].
-	^ result 
-		count: aBlockClosure
-]
-
-{ #category : #'accessing - dynamic' }
-GtRrSUnitTask >> erroredExamples [
-	^ self select: [ :pharoLinkTestCaseAnnouncement | 
-		self isErrorResult: pharoLinkTestCaseAnnouncement ]
-]
-
 { #category : #accessing }
 GtRrSUnitTask >> examples [
 
 	^ self allExamples
-]
-
-{ #category : #'accessing - dynamic' }
-GtRrSUnitTask >> executedExamples [
-
-	result ifNil: [ ^ #() ].
-	^ result
-]
-
-{ #category : #'accessing - dynamic' }
-GtRrSUnitTask >> failedExamples [
-
-	^ self select: [ :pharoLinkTestCaseAnnouncement | 
-		pharoLinkTestCaseAnnouncement isFailure ]
-]
-
-{ #category : #'accessing - dynamic' }
-GtRrSUnitTask >> isErrorResult: aPharoLinkTestCaseResult [
-	^ aPharoLinkTestCaseResult isError or: [
-		aPharoLinkTestCaseResult isWarning ]
 ]
 
 { #category : #testing }
@@ -95,36 +61,6 @@ GtRrSUnitTask >> isSUnitTask [
 	"Answer a boolean indicating whether the receiver is for running SUnit tests"
 
 	^ true
-]
-
-{ #category : #'accessing - dynamic' }
-GtRrSUnitTask >> isSuccessResult: aPharoLinkTestCaseResult [
-	^ aPharoLinkTestCaseResult isSuccess "or: [ 
-		aPharoLinkTestCaseResult isSkipped ]"
-]
-
-{ #category : #'accessing - dynamic' }
-GtRrSUnitTask >> numberOfErrors [
-	^ self count: [ :pharoLinkTestCaseAnnouncement | 
-		self isErrorResult: pharoLinkTestCaseAnnouncement ]
-]
-
-{ #category : #'accessing - dynamic' }
-GtRrSUnitTask >> numberOfFailures [
-	^ self count: [ :pharoLinkTestCaseAnnouncement | 
-		pharoLinkTestCaseAnnouncement isFailure ]
-]
-
-{ #category : #'accessing - dynamic' }
-GtRrSUnitTask >> numberOfSkipps [
-	^ self count: [ :pharoLinkTestCaseAnnouncement | 
-		pharoLinkTestCaseAnnouncement isSkipped ]
-]
-
-{ #category : #'accessing - dynamic' }
-GtRrSUnitTask >> numberOfSuccesses [
-	^ self count: [ :pharoLinkTestCaseAnnouncement | 
-		self isSuccessResult: pharoLinkTestCaseAnnouncement ]
 ]
 
 { #category : #running }
@@ -146,20 +82,6 @@ GtRrSUnitTask >> runSuite: suite [
 	^ events asArray
 ]
 
-{ #category : #enumerating }
-GtRrSUnitTask >> select: aBlockClosure [
-
-	result ifNil: [ ^ #() ].
-	^ result select: aBlockClosure
-]
-
-{ #category : #'accessing - dynamic' }
-GtRrSUnitTask >> skippedExamples [
-
-	^ self select: [ :pharoLinkTestCaseAnnouncement | 
-		pharoLinkTestCaseAnnouncement isSkipped ]
-]
-
 { #category : #accessing }
 GtRrSUnitTask >> splitTests [
 	"Answer a collection of tasks in which each task has only 1 test from the receiver.
@@ -173,13 +95,6 @@ GtRrSUnitTask >> splitTests [
 			{ testCase class name -> testCase selector })
 				constraint: self constraint;
 				taskTimeout: self taskTimeout ].
-]
-
-{ #category : #'accessing - dynamic' }
-GtRrSUnitTask >> successfulExamples [
-
-	^ self select: [ :pharoLinkTestCaseAnnouncement | 
-		self isSuccessResult: pharoLinkTestCaseAnnouncement ]
 ]
 
 { #category : #accessing }

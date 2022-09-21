@@ -32,30 +32,9 @@ GtRrExamplesTask >> asExplicitTask [
 			each methodClass name -> each selector ])
 ]
 
-{ #category : #'accessing - dynamic' }
-GtRrExamplesTask >> erroredExamples [
-
-	result ifNil: [ ^ #() ].
-	^ result erroredExamples
-]
-
 { #category : #accessing }
 GtRrExamplesTask >> examples [
 	^ self group examples
-]
-
-{ #category : #'accessing - dynamic' }
-GtRrExamplesTask >> executedExamples [
-
-	result ifNil: [ ^ #() ].
-	^ result executedExamples
-]
-
-{ #category : #'accessing - dynamic' }
-GtRrExamplesTask >> failedExamples [
-
-	result ifNil: [ ^ #() ].
-	^ result failedExamples
 ]
 
 { #category : #'private - running' }
@@ -88,34 +67,6 @@ GtRrExamplesTask >> isExamplesTask [
 	"Answer a boolean indicating whether the receiver is for running Gt examples"
 
 	^ true
-]
-
-{ #category : #'accessing - dynamic' }
-GtRrExamplesTask >> numberOfErrors [
-
-	result ifNil: [ ^ 0 ].
-	^ result numberOfErrors
-]
-
-{ #category : #'accessing - dynamic' }
-GtRrExamplesTask >> numberOfFailures [
-
-	result ifNil: [ ^ 0 ].
-	^ result numberOfFailures
-]
-
-{ #category : #'accessing - dynamic' }
-GtRrExamplesTask >> numberOfSkipps [
-
-	result ifNil: [ ^ 0 ].
-	^ result numberOfSkipps
-]
-
-{ #category : #'accessing - dynamic' }
-GtRrExamplesTask >> numberOfSuccesses [
-
-	result ifNil: [ ^ 0 ].
-	^ result numberOfSuccesses
 ]
 
 { #category : #running }
@@ -153,13 +104,6 @@ GtRrExamplesTask >> setIgnoreNoTest [
 	ignoreNoTest := true.
 ]
 
-{ #category : #'accessing - dynamic' }
-GtRrExamplesTask >> skippedExamples [
-
-	result ifNil: [ ^ #() ].
-	^ result skippedExamples
-]
-
 { #category : #accessing }
 GtRrExamplesTask >> splitTests [
 	"Answer a collection of tasks in which each task has only 1 test from the receiver.
@@ -173,13 +117,6 @@ GtRrExamplesTask >> splitTests [
 			{ example methodClass name -> example selector })
 				constraint: self constraint;
 				taskTimeout: self taskTimeout ].
-]
-
-{ #category : #'accessing - dynamic' }
-GtRrExamplesTask >> successfulExamples [
-
-	result ifNil: [ ^ #() ].
-	^ result successfulExamples
 ]
 
 { #category : #ui }
