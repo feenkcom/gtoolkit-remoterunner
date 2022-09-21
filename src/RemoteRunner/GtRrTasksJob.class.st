@@ -161,7 +161,7 @@ GtRrTasksJob >> numberOfFailedExamples [
 
 { #category : #'accessing - examples' }
 GtRrTasksJob >> numberOfSkippedExamples [ 
-	^ tasks sumNumbers: [ :aTask | aTask numberOfSkipps ]
+	^ tasks sumNumbers: [ :aTask | aTask numberOfSkips ]
 ]
 
 { #category : #'accessing - examples' }

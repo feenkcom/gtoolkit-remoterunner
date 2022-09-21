@@ -38,6 +38,14 @@ GtRrAbstractExamplesTask >> asJob [
 	^ GtRrChecksJob tasks: { self }
 ]
 
+{ #category : #enumerating }
+GtRrAbstractExamplesTask >> count: aBlockClosure [
+
+	result ifNil: [ ^ 0 ].
+	^ result 
+		count: aBlockClosure
+]
+
 { #category : #accessing }
 GtRrAbstractExamplesTask >> description [
 	^ (String streamContents: [ :aStream |
@@ -51,31 +59,36 @@ GtRrAbstractExamplesTask >> description [
 			<< ')  ' ])
 ]
 
-{ #category : #accessing }
+{ #category : #'accessing - dynamic' }
 GtRrAbstractExamplesTask >> erroredExamples [
-	"Answer the examples / tests that finished with an error"
-
-	^ self subclassResponsibility
+	^ self select: [ :pharoLinkTestCaseAnnouncement | 
+		self isErrorResult: pharoLinkTestCaseAnnouncement ]
 ]
 
-{ #category : #accessing }
+{ #category : #'accessing - dynamic' }
 GtRrAbstractExamplesTask >> executedExamples [
-	"Answer the examples / tests that have been executed"
 
-	^ self subclassResponsibility
+	result ifNil: [ ^ #() ].
+	^ result
 ]
 
-{ #category : #accessing }
+{ #category : #'accessing - dynamic' }
 GtRrAbstractExamplesTask >> failedExamples [
-	"Answer the examples / tests that have an assertion failure"
 
-	^ self subclassResponsibility
+	^ self select: [ :pharoLinkTestCaseAnnouncement | 
+		pharoLinkTestCaseAnnouncement isFailure ]
 ]
 
 { #category : #accessing }
 GtRrAbstractExamplesTask >> isEmpty [
 
 	^ self totalCount = 0
+]
+
+{ #category : #'accessing - dynamic' }
+GtRrAbstractExamplesTask >> isErrorResult: aPharoLinkTestCaseResult [
+	^ aPharoLinkTestCaseResult isError or: [
+		aPharoLinkTestCaseResult isWarning ]
 ]
 
 { #category : #testing }
@@ -92,15 +105,52 @@ GtRrAbstractExamplesTask >> isSUnitTask [
 	^ false
 ]
 
+{ #category : #'accessing - dynamic' }
+GtRrAbstractExamplesTask >> isSuccessResult: aPharoLinkTestCaseResult [
+	^ aPharoLinkTestCaseResult isSuccess "or: [ 
+		aPharoLinkTestCaseResult isSkipped ]"
+]
+
+{ #category : #'accessing - dynamic' }
+GtRrAbstractExamplesTask >> numberOfErrors [
+	^ self count: [ :pharoLinkTestCaseAnnouncement | 
+		self isErrorResult: pharoLinkTestCaseAnnouncement ]
+]
+
+{ #category : #'accessing - dynamic' }
+GtRrAbstractExamplesTask >> numberOfFailures [
+	^ self count: [ :pharoLinkTestCaseAnnouncement | 
+		pharoLinkTestCaseAnnouncement isFailure ]
+]
+
+{ #category : #'accessing - dynamic' }
+GtRrAbstractExamplesTask >> numberOfSkips [
+	^ self count: [ :pharoLinkTestCaseAnnouncement | 
+		pharoLinkTestCaseAnnouncement isSkipped ]
+]
+
+{ #category : #'accessing - dynamic' }
+GtRrAbstractExamplesTask >> numberOfSuccesses [
+	^ self count: [ :pharoLinkTestCaseAnnouncement | 
+		self isSuccessResult: pharoLinkTestCaseAnnouncement ]
+]
+
+{ #category : #enumerating }
+GtRrAbstractExamplesTask >> select: aBlockClosure [
+
+	result ifNil: [ ^ #() ].
+	^ result select: aBlockClosure
+]
+
 { #category : #accessing }
 GtRrAbstractExamplesTask >> setIgnoreNoTest [
 ]
 
-{ #category : #accessing }
+{ #category : #'accessing - dynamic' }
 GtRrAbstractExamplesTask >> skippedExamples [
-	"Answer the examples / tests that were skipped"
 
-	^ self subclassResponsibility
+	^ self select: [ :pharoLinkTestCaseAnnouncement | 
+		pharoLinkTestCaseAnnouncement isSkipped ]
 ]
 
 { #category : #accessing }
