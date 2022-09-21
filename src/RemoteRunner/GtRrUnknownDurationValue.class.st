@@ -18,7 +18,15 @@ GtRrUnknownDurationValue class >> leJsonV4Name [
 ]
 
 { #category : #accessing }
-GtRrUnknownDurationValue >> value [
+GtRrUnknownDurationValue >> defaultValue [
 
-	^ GtRrTestScheduler defaultTaskDuration 
+	^ GtRrCheckScheduler defaultTaskDuration 
+]
+
+{ #category : #accessing }
+GtRrUnknownDurationValue >> timeForClassName: classNameSymbol selector: selectorSymbol [
+	"Answer a fixed value.
+	Other implementations may use some other technique, e.g. a separate database"
+
+	^ self defaultValue
 ]

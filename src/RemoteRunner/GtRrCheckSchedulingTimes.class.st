@@ -9,9 +9,9 @@ Class {
 	#instVars : [
 		'times',
 		'accessMutex',
-		'unknownDurationValue',
 		'timeStrategy',
-		'remoteRunner'
+		'remoteRunner',
+		'unknownDuration'
 	],
 	#category : #'RemoteRunner-TaskScheduling'
 }
@@ -21,7 +21,7 @@ GtRrCheckSchedulingTimes class >> leJsonV4AttributeMapping [
 
 	^ { 
 		#times -> #times.
-		#unknownDurationValue -> #unknownDurationValue.
+		#unknownDuration -> #unknownDuration.
 		#timeStrategy -> #timeStrategy. }
 ]
 
@@ -77,13 +77,13 @@ GtRrCheckSchedulingTimes >> atClassName: classNameSymbol selector: selectorSymbo
 ]
 
 { #category : #api }
-GtRrCheckSchedulingTimes >> atClassName: classNameSymbol selector: selectorSymbol add: timeInMilliseconds endTime: aDateAndTime [
+GtRrCheckSchedulingTimes >> atClassName: classNameSymbol selector: selectorSymbol add: duration endTime: aDateAndTime [
 	| className |
 
 	className := classNameSymbol asSymbol.
 	self critical:
 		[ (times at: className ifAbsentPut: [ GtRrCheckSchedulingClassTimes className: className ]) 
-			atSelector: selectorSymbol add: timeInMilliseconds endTime: aDateAndTime ].
+			atSelector: selectorSymbol add: duration endTime: aDateAndTime ].
 ]
 
 { #category : #api }
@@ -121,7 +121,7 @@ GtRrCheckSchedulingTimes >> initialize [
 	super initialize.
 	times := Dictionary new.
 	accessMutex := Monitor new.
-	unknownDurationValue := GtRrUnknownDurationValue new.
+	unknownDuration := GtRrUnknownDurationValue new.
 	timeStrategy := GtRrTestSchedulingTimeMovingAverageStrategy new.
 ]
 
@@ -219,13 +219,20 @@ GtRrCheckSchedulingTimes >> subscribeToRemoteRunner: aGtRemoteRunner [
 { #category : #api }
 GtRrCheckSchedulingTimes >> timeForClass: aClass selector: selectorSymbol [ 
 
-	^ self critical: 
-		[ ((times at: aClass name) atSelector: selectorSymbol)
-			timeWithStrategy: timeStrategy ifAbsent: unknownDurationValue ].
+	^ self timeForClassName: aClass name selector: selectorSymbol.
 ]
 
 { #category : #api }
 GtRrCheckSchedulingTimes >> timeForClassName: classNameSymbol selector: selectorSymbol [ 
+
+	^ self 
+		timeForClassName: classNameSymbol
+		selector: selectorSymbol
+		ifAbsent: [ (unknownDuration timeForClassName: classNameSymbol selector: selectorSymbol) ].
+]
+
+{ #category : #api }
+GtRrCheckSchedulingTimes >> timeForClassName: classNameSymbol selector: selectorSymbol ifAbsent: absentBlock [
 
 	^ self critical: 
 		[ times at: classNameSymbol
@@ -234,17 +241,9 @@ GtRrCheckSchedulingTimes >> timeForClassName: classNameSymbol selector: selector
 					atSelector: selectorSymbol
 					ifPresent: [ :selectorTimes | selectorTimes 
 						timeWithStrategy: timeStrategy 
-						ifAbsent: unknownDurationValue ]
-					ifAbsent: unknownDurationValue ]
-			ifAbsent: unknownDurationValue ]
-]
-
-{ #category : #api }
-GtRrCheckSchedulingTimes >> timeForClassName: classNameSymbol selector: selectorSymbol ifAbsent: absentValue [
-
-	^ self critical: 
-		[ ((times at: classNameSymbol) atSelector: selectorSymbol)
-			timeWithStrategy: timeStrategy ifAbsent: absentValue ].
+						ifAbsent: absentBlock ]
+					ifAbsent: absentBlock ]
+			ifAbsent: absentBlock ]
 ]
 
 { #category : #accessing }
@@ -288,15 +287,15 @@ GtRrCheckSchedulingTimes >> timesForClassName: aSymbol [
 ]
 
 { #category : #accessing }
-GtRrCheckSchedulingTimes >> unknownDurationValue [
+GtRrCheckSchedulingTimes >> unknownDuration [
 
-	^ unknownDurationValue
+	^ unknownDuration
 ]
 
 { #category : #accessing }
-GtRrCheckSchedulingTimes >> unknownDurationValue: anObject [
+GtRrCheckSchedulingTimes >> unknownDuration: anObject [
 
-	unknownDurationValue := anObject
+	unknownDuration := anObject
 ]
 
 { #category : #updating }

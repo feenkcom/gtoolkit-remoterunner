@@ -22,7 +22,7 @@ GtRrTestSchedulingFailedTestTime >> errorDetails: anObject [
 { #category : #accessing }
 GtRrTestSchedulingFailedTestTime >> expectedTime [
 
-	^ GtRrTestScheduler defaultTaskDuration
+	^ GtRrCheckScheduler defaultTaskDuration
 ]
 
 { #category : #printing }

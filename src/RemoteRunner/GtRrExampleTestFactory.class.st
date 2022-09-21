@@ -47,9 +47,11 @@ GtRrExampleTestFactory >> addExamplePackages: aCollectionOfPackages [
 ]
 
 { #category : #adding }
-GtRrExampleTestFactory >> addExampleTestNames: aCollectionOfGtExample [
+GtRrExampleTestFactory >> addExampleTestNames: aCollection [
+	"Add the supplied collection of:
+		#ClassName -> #selector"
 
-	self addTask: (GtRrExplicitExampleTask examples: aCollectionOfGtExample)
+	self addTask: (GtRrExplicitExampleTask exampleNames: aCollection)
 ]
 
 { #category : #adding }
@@ -85,6 +87,8 @@ GtRrExampleTestFactory >> addSUnitPackages: aCollectionOfPackages [
 
 { #category : #adding }
 GtRrExampleTestFactory >> addSUnitTestNames: aCollection [
+	"Add the supplied collection of:
+		#ClassName -> #selector"
 
 	self addTask: (GtRrExplicitSUnitTask sunitTestNames: aCollection)
 ]
