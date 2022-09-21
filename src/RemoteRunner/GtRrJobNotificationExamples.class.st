@@ -12,6 +12,7 @@ Class {
 { #category : #accessing }
 GtRrJobNotificationExamples >> completedNotificationForExamplesClassJob [
 	<gtExample>
+	<noTest>
 	| jobSemaphore remoteRunner job notification |
 	
 	jobSemaphore := GtMutualExclusionSemaphore new.
