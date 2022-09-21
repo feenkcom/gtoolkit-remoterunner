@@ -77,7 +77,7 @@ GtRrTasksJob >> executionTimelineChartItems [
 			startTime: lastResultReceivedTime;
 			endTime: self endTime;
 			label:  'Finishing execution';
-			appendDurationToLabel } collect: #asDictionary
+			appendDurationToLabel }
 ]
 
 { #category : #'accessing - examples' }
