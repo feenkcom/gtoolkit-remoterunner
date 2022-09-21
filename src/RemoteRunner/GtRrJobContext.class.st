@@ -267,8 +267,7 @@ GtRrJobContext >> runInImage [
 		taskContext := GtRrTaskContext new
 			task: task;
 			jobContext: self.
-		taskContext runInImage.
-		job addResult: task. ].
+		taskContext runInImage ].
 	self markJobCompleted.
 ]
 

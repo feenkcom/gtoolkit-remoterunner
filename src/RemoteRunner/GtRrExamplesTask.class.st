@@ -120,22 +120,26 @@ GtRrExamplesTask >> numberOfSuccesses [
 
 { #category : #running }
 GtRrExamplesTask >> run [
-	| group exampleStartTime exampleEndTime announcement exception |
+	| group exampleStartTime exampleEndTime announcement exception exampleResult |
 
 	group := self group.
 	^ group examples collect: [ :exampleWithResult |
-		exampleStartTime := DateAndTime now.
-		exampleWithResult run.
-		exampleEndTime := DateAndTime now.
-		announcement := exampleWithResult result basicReturnValue gtRrResultHolderClass new.
+		(ignoreNoTest or: [ exampleWithResult ignoreTest not ]) ifTrue:
+			[ exampleStartTime := DateAndTime now.
+			exampleWithResult run.
+			exampleEndTime := DateAndTime now ].
+		exampleResult := exampleWithResult result.
+		announcement := exampleResult
+			ifNil: [ PharoLinkTestCaseSkip new ]
+			ifNotNil: [ exampleResult basicReturnValue gtRrResultHolderClass new ].
 		announcement
 			initializeTestCaseClassName: exampleWithResult methodClass name
 				selector: exampleWithResult selector;
 			testCaseStartTimestamp: exampleStartTime;
 			testCaseEndTimestamp: exampleEndTime;
 			shouldPass: true.
-		exampleWithResult isSuccess ifFalse:
-			[ exception := exampleWithResult result basicReturnValue value.
+		(exampleWithResult isSuccess or: [ exampleResult isNil ]) ifFalse:
+			[ exception := exampleResult basicReturnValue value.
 			announcement 
 				initializeExceptionClass: exception class
 				messageText: (exception messageText ifEmpty: [ exception class name ])
