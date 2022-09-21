@@ -69,7 +69,7 @@ GtRrWorkerExamplesReport >> gtViewTasksOverviewFor: aView [
 		items: [ self tasks  ];
 		column: 'Checks' text: [ :aTask | aTask totalCount ];
 		column: 'Success' text: [ :aTask | aTask numberOfSuccesses ];
-		column: 'Skipped' text: [ :aTask | aTask numberOfSkipps ];
+		column: 'Skipped' text: [ :aTask | aTask numberOfSkips ];
 		column: 'Failures' text: [ :aTask | aTask numberOfFailures ];
 		column: 'Errors' text: [ :aTask | aTask numberOfErrors ];
 		column: 'Duration (runner)' text: [ :aTask | 
