@@ -38,7 +38,8 @@ GtRrHeartbeatExamples >> waitOn: aSemaphore for: anInteger description: descript
 
 { #category : #examples }
 GtRrHeartbeatExamples >> workerHeartbeatTimeout [
-	"Demonstrate executing a simple task"
+	"Demonstrate the worker heartbeat failing.
+	Note this example takes approximately 1 minute to execute"
 	<gtExample>
 	<noTest>
 	| remoteRunner job successTask timeoutTask jobSemaphore workerRegisteredSemaphore timeout |

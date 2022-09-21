@@ -120,7 +120,7 @@ GtRrExamplesTask >> numberOfSuccesses [
 
 { #category : #running }
 GtRrExamplesTask >> run [
-	| group exampleStartTime exampleEndTime announcement |
+	| group exampleStartTime exampleEndTime announcement exception |
 
 	group := self group.
 	^ group examples collect: [ :exampleWithResult |
@@ -135,7 +135,11 @@ GtRrExamplesTask >> run [
 			testCaseEndTimestamp: exampleEndTime;
 			shouldPass: true.
 		exampleWithResult isSuccess ifFalse:
-			[ announcement halt ].
+			[ exception := exampleWithResult result basicReturnValue value.
+			announcement 
+				initializeExceptionClass: exception class
+				messageText: (exception messageText ifEmpty: [ exception class name ])
+				trace: exception stackString ].
 		announcement ].
 ]
 
