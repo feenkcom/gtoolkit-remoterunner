@@ -8,7 +8,19 @@ Class {
 }
 
 { #category : #accessing }
+GtRrChecksJob class >> exampleNames: anArray [
+
+	^ self new tasks: { (GtRrExplicitExampleTask exampleNames: anArray) }
+]
+
+{ #category : #accessing }
 GtRrChecksJob class >> leJsonV4Name [
 
 	^ nil
+]
+
+{ #category : #accessing }
+GtRrChecksJob class >> sunitTestNames: anArray [
+
+	^ self new tasks: { (GtRrExplicitSUnitTask sunitTestNames: anArray) }
 ]

@@ -13,5 +13,5 @@ GtRrTestSchedulingTimeLatestStrategy class >> leJsonV4Name [
 { #category : #method }
 GtRrTestSchedulingTimeLatestStrategy >> timeFor: aGtRrTestSchedulingTestTimes [
 
-	^ aGtRrTestSchedulingTestTimes times last
+	^ aGtRrTestSchedulingTestTimes times last expectedTime
 ]

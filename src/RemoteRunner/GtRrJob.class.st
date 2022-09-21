@@ -29,6 +29,13 @@ Class {
 	#category : #'RemoteRunner-Jobs'
 }
 
+{ #category : #'job submission' }
+GtRrJob class >> exampleNames: anArray [
+	"Answer a job with the supplied test names"
+
+	^ GtRrChecksJob exampleNames: anArray
+]
+
 { #category : #'instance creation' }
 GtRrJob class >> fromSton: stonReader [
 
@@ -79,6 +86,13 @@ GtRrJob class >> script: aString [
 	"Answer a job with a single script task"
 
 	^ GtRrTasksJob tasks: { (GtRrScriptTask script: aString) }
+]
+
+{ #category : #'job submission' }
+GtRrJob class >> sunitTestNames: anArray [
+	"Answer a job with the supplied test names"
+
+	^ GtRrChecksJob sunitTestNames: anArray
 ]
 
 { #category : #accessing }
@@ -419,12 +433,9 @@ GtRrJob >> resultsWithErrors [
 { #category : #'private - running' }
 GtRrJob >> runInImage [
 
-	self markJobStarted.
-	results := OrderedCollection new.
-	self tasks do: [ :task |
-		task runInImage.
-		self addResult: task. ].
-	self markJobCompleted.
+	^ (GtRrJobContext new 
+		job: self;
+		remoteRunner: GtRemoteRunner new) runInImage.
 ]
 
 { #category : #ui }

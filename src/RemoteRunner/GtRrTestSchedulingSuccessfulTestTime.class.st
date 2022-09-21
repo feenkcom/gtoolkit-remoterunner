@@ -24,3 +24,9 @@ GtRrTestSchedulingSuccessfulTestTime >> expectedTime [
 
 	^ duration
 ]
+
+{ #category : #printing }
+GtRrTestSchedulingSuccessfulTestTime >> gtDisplayOn: aStream [
+
+	aStream print: duration
+]

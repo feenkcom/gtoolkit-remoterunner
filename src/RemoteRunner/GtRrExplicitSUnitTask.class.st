@@ -49,9 +49,9 @@ GtRrExplicitSUnitTask >> sunitTestNames [
 ]
 
 { #category : #accessing }
-GtRrExplicitSUnitTask >> sunitTestNames: anObject [
+GtRrExplicitSUnitTask >> sunitTestNames: aCollection [
 
-	sunitTestNames := anObject
+	sunitTestNames := aCollection asArray
 ]
 
 { #category : #accessing }

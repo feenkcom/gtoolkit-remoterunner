@@ -258,6 +258,19 @@ GtRrJobContext >> results [
 	^ job results
 ]
 
+{ #category : #accessing }
+GtRrJobContext >> runInImage [
+	| taskContext |
+
+	self markJobStarted.
+	job tasks do: [ :task |
+		taskContext := GtRrTaskContext new
+			task: task;
+			jobContext: self.
+		taskContext runInImage ].
+	self markJobCompleted.
+]
+
 { #category : #private }
 GtRrJobContext >> submitTasks [
 	"Submit the tasks to the receiver's runner"

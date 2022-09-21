@@ -8,6 +8,14 @@ Class {
 }
 
 { #category : #'instance creation' }
+GtRrExplicitExampleTask class >> exampleNames: aCollectionOfGtExample [
+	"aCollection is a collection of examples to run, in the form:
+		ClassNameSymbol -> SelectorSymbol"
+
+	^ self new examples: aCollectionOfGtExample 
+]
+
+{ #category : #'instance creation' }
 GtRrExplicitExampleTask class >> examples: aCollectionOfGtExample [
 	"aCollection is a collection of examples to run, in the form:
 		ClassNameSymbol -> SelectorSymbol"
@@ -45,7 +53,7 @@ GtRrExplicitExampleTask >> examples: aCollection [
 	"aCollection is a collection of examples to run, in the form:
 		ClassNameSymbol -> SelectorSymbol"
 
-	examples := aCollection
+	examples := aCollection asArray
 ]
 
 { #category : #'private - running' }

@@ -211,6 +211,14 @@ GtRrTaskContext >> run [
 ]
 
 { #category : #accessing }
+GtRrTaskContext >> runInImage [
+
+	self markTaskStarted.
+	task runInImage.
+	self markTaskCompleted.
+]
+
+{ #category : #accessing }
 GtRrTaskContext >> startTime: aDuration [
 
 	task startTime: aDuration

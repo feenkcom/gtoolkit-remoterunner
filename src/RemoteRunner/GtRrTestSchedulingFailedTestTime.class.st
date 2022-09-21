@@ -8,7 +8,27 @@ Class {
 }
 
 { #category : #accessing }
+GtRrTestSchedulingFailedTestTime >> errorDetails [
+
+	^ errorDetails
+]
+
+{ #category : #accessing }
+GtRrTestSchedulingFailedTestTime >> errorDetails: anObject [
+
+	errorDetails := anObject
+]
+
+{ #category : #accessing }
 GtRrTestSchedulingFailedTestTime >> expectedTime [
 
 	^ GtRrTestScheduler defaultTaskDuration
+]
+
+{ #category : #printing }
+GtRrTestSchedulingFailedTestTime >> gtDisplayOn: aStream [
+
+	aStream << (errorDetails 
+		ifNil: [ 'error during execution' ]
+		ifNotNil: [ errorDetails errorMessage ])
 ]

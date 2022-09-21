@@ -22,13 +22,13 @@ GtRrJobNotificationExamples >> completedNotificationForExamplesClassJob [
 		when: GtRrJobCompletedAnnouncement do: [ jobSemaphore signal ].
 			
 	notification := GtRrExamplesProgressNotification new job: job.
-		
+	
 	remoteRunner submitJob: job.
 	self waitOn: jobSemaphore for: 10 description: 'Job didn''t complete in time'.
 	
 	self assert: notification totalChecksCount equals: 3.
 	self assert: notification successfulChecksCount equals: 1.
-	self assert: notification skippedChecksCount equals: 02.
+	self assert: notification skippedChecksCount equals: 2.
 	self assert: notification failedChecksCount equals: 0.
 	self assert: notification erroredChecksCount equals: 0.
 	
