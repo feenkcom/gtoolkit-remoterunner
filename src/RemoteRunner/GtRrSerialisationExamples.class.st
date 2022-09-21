@@ -25,35 +25,31 @@ GtRrSerialisationExamples >> gtRrClassExampleTask [
 	result := task run.
 	serializedResult := LeJsonV4 uniqueInstance serialize: result.
 	deserializedResult := LeJsonV4 uniqueInstance deserialize: serializedResult readStream.
-	self assert: deserializedResult class = GtClassExampleGroup
-		description: 'deserializedResult class incorrect: ', deserializedResult class name.
-	self assert: deserializedResult exampleClass = GtRrWorkerExamples
-		description: 'deserializedResult exampleClass incorrect: ', deserializedResult exampleClass printString.
+	self assert: (deserializedResult allSatisfy: [ :each | each isKindOf: PharoLinkTestCaseEndAnnouncement ])
+		description: [ 'deserializedResult class incorrect: ', (deserializedResult collect: [ :each | each class name ] ) printString ].
+	self assert: (deserializedResult allSatisfy: [ :each | each testCaseClassName = #GtRrWorkerExamples ])
+		description: [ 'deserializedResult exampleClass incorrect: ', (deserializedResult collect: [ :each | each testCaseClassName ] as: Set) printString ].
 	
-	example := deserializedResult examples detect:
-		           [ :anExample | anExample selector = #commandLineWithAttributes ].
+	example := deserializedResult detect:
+		           [ :exampleResult | exampleResult testCaseSelector = #commandLineWithAttributes ].
 	self
 		assert: example isSuccess
-		description:
-		'deserializedResult commandLineWithAttributes example isSuccess failed'.
+		description: 'deserializedResult commandLineWithAttributes example isSuccess failed'.
 
-	example := deserializedResult examples detect:
-		           [ :anExample | anExample selector = #commandLineWithoutAttributes ].
+	example := deserializedResult detect:
+		           [ :anExample | anExample testCaseSelector = #commandLineWithoutAttributes ].
 	self
 		assert: example isSuccess
-		description:
-		'deserializedResult commandLineWithoutAttributes example isSuccess failed'.
+		description: 'deserializedResult commandLineWithoutAttributes example isSuccess failed'.
 
-	example := deserializedResult examples detect:
-		           [ :anExample | anExample selector = #workerControlChannelCommandTimeout ].
+	example := deserializedResult detect:
+		           [ :anExample | anExample testCaseSelector = #workerControlChannelCommandTimeout ].
 	self
-		assert: example hasNoTestPragma
-		description:
-		'deserializedResult workerControlChannelCommandTimeout example hasNoTestPragma failed'.
+		assert: (example method hasPragmaNamed: #noTest)
+		description: 'deserializedResult workerControlChannelCommandTimeout example hasNoTestPragma failed'.
 	self
-		assert: example hasResult not
-		description:
-		'deserializedResult workerControlChannelCommandTimeout example hasResult not failed'.
+		assert: example isSkipped
+		description: 'deserializedResult workerControlChannelCommandTimeout example isSkipped failed'.
 
 	^ result.
 ]
