@@ -26,6 +26,16 @@ GtRrTasksGroup >> duration [
 ]
 
 { #category : #accessing }
+GtRrTasksGroup >> durationOnRunner [
+	^ self items  
+		inject: 0 seconds 
+		into: [ :totalDuration :aTask |
+			aTask durationOnRunner 
+				ifNil: [ totalDuration ]
+				ifNotNil: [ :aDuration | totalDuration + aDuration ] ]
+]
+
+{ #category : #accessing }
 GtRrTasksGroup >> endTime [ 
 	| time |
 	time := self items first endTime.
