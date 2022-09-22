@@ -2,10 +2,26 @@ Class {
 	#name : #GtRrCheckSchedulingCheckTime,
 	#superclass : #Object,
 	#instVars : [
-		'endTime'
+		'endTime',
+		'duration'
 	],
 	#category : #'RemoteRunner-CheckScheduling'
 }
+
+{ #category : #accessing }
+GtRrCheckSchedulingCheckTime >> duration [
+
+	^ duration
+]
+
+{ #category : #accessing }
+GtRrCheckSchedulingCheckTime >> duration: anObject [
+
+	self assert: [ anObject isNotNil ]
+		description: [ 'duration must be non-nil' ].
+
+	duration := anObject
+]
 
 { #category : #accessing }
 GtRrCheckSchedulingCheckTime >> endTime [
@@ -20,7 +36,13 @@ GtRrCheckSchedulingCheckTime >> endTime: anObject [
 ]
 
 { #category : #accessing }
-GtRrCheckSchedulingCheckTime >> expectedTime [ 
+GtRrCheckSchedulingCheckTime >> expectedTime [
 
-	^ self subclassResponsibility 
+	^ duration
+]
+
+{ #category : #printing }
+GtRrCheckSchedulingCheckTime >> gtDisplayOn: aStream [
+
+	aStream print: duration
 ]

@@ -96,13 +96,13 @@ GtRrCheckSchedulingTimes >> atClassName: classNameSymbol selector: selectorSymbo
 ]
 
 { #category : #api }
-GtRrCheckSchedulingTimes >> atClassName: classNameSymbol selector: selectorSymbol addErrorDetails: aGtRrErrorDetails endTime: aDateAndTime [
+GtRrCheckSchedulingTimes >> atClassName: classNameSymbol selector: selectorSymbol add: duration errorDetails: aGtRrErrorDetails endTime: aDateAndTime [
 	| className |
 
 	className := classNameSymbol asSymbol.
 	self critical:
 		[ (times at: className ifAbsentPut: [ GtRrCheckSchedulingClassTimes className: className ]) 
-			atSelector: selectorSymbol addErrorDetails: aGtRrErrorDetails endTime: aDateAndTime ].
+			atSelector: selectorSymbol add: duration errorDetails: aGtRrErrorDetails endTime: aDateAndTime ].
 ]
 
 { #category : #'mutual exclusion' }
@@ -170,13 +170,14 @@ GtRrCheckSchedulingTimes >> onTaskFinished: aGtRrTaskAnnouncement [
 				selector: aPharoLinkTestCaseEndAnnouncement testCaseSelector 
 				add: aPharoLinkTestCaseEndAnnouncement duration
 				endTime: aPharoLinkTestCaseEndAnnouncement testCaseEndTimestamp ]
-			ifFalse: [ self
+			ifFalse: [ aPharoLinkTestCaseEndAnnouncement isSkipped ifFalse: [ self
 				atClassName: aPharoLinkTestCaseEndAnnouncement testCaseClassName 
 				selector: aPharoLinkTestCaseEndAnnouncement testCaseSelector 
-				addErrorDetails: (GtRrErrorDetails new
+				add: aPharoLinkTestCaseEndAnnouncement duration
+				errorDetails: (GtRrErrorDetails new
 					errorMessage: aPharoLinkTestCaseEndAnnouncement exceptionMessageText;
 					trace: aPharoLinkTestCaseEndAnnouncement exceptionTrace)
-				endTime: aPharoLinkTestCaseEndAnnouncement testCaseEndTimestamp ] ]
+				endTime: aPharoLinkTestCaseEndAnnouncement testCaseEndTimestamp ] ] ]
 ]
 
 { #category : #accessing }

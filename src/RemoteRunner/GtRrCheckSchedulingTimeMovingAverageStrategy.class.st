@@ -15,6 +15,7 @@ GtRrCheckSchedulingTimeMovingAverageStrategy >> timeFor: aGtRrTestSchedulingTest
 	| times |
 
 	times := aGtRrTestSchedulingTestTimes times.
+	(times isNil or: [ times isEmpty ]) ifTrue: [ ^ Duration zero ].
 	^ ((times last: (times size min: 5))
 		collect: #expectedTime) average
 ]

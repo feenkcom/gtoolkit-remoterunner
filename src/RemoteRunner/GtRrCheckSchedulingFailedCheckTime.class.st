@@ -25,16 +25,25 @@ GtRrCheckSchedulingFailedCheckTime >> errorDetails: anObject [
 	errorDetails := anObject
 ]
 
-{ #category : #accessing }
-GtRrCheckSchedulingFailedCheckTime >> expectedTime [
-
-	^ GtRrCheckScheduler defaultTaskDuration
-]
-
 { #category : #printing }
 GtRrCheckSchedulingFailedCheckTime >> gtDisplayOn: aStream [
 
 	aStream << (errorDetails 
 		ifNil: [ 'error during execution' ]
-		ifNotNil: [ errorDetails errorMessage ])
+		ifNotNil: [ errorDetails errorMessage ]).
+	aStream
+		<< ' in ';
+		print: duration
+]
+
+{ #category : #accessing }
+GtRrCheckSchedulingFailedCheckTime >> gtTraceFor: aView [
+	<gtView>
+
+	errorDetails ifNil: [ ^ aView empty ].
+	^ aView forward
+		title: 'Trace';
+		priority: 20;
+		object: [ errorDetails ];
+		view: #gtTraceFor:
 ]

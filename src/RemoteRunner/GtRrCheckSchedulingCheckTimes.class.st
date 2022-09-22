@@ -26,17 +26,18 @@ GtRrCheckSchedulingCheckTimes class >> selector: aSymbol [
 { #category : #adding }
 GtRrCheckSchedulingCheckTimes >> add: duration endTime: aDateAndTime [
 
-	times size > 20 ifTrue: [ times removeFirst ].
+	[ times size > 20 ] whileTrue: [ times removeFirst ].
 	times add: (GtRrCheckSchedulingSuccessfulCheckTime new
 		duration: duration;
 		endTime: aDateAndTime).
 ]
 
 { #category : #adding }
-GtRrCheckSchedulingCheckTimes >> addErrorDetails: aGtRrErrorDetails endTime: aDateAndTime [
+GtRrCheckSchedulingCheckTimes >> add: duration errorDetails: aGtRrErrorDetails endTime: aDateAndTime [
 
-	times size > 20 ifTrue: [ times removeFirst ].
+	[ times size > 20 ] whileTrue: [ times removeFirst ].
 	times add: (GtRrCheckSchedulingFailedCheckTime new
+		duration: duration;
 		errorDetails: aGtRrErrorDetails;
 		endTime: aDateAndTime).
 ]

@@ -46,7 +46,7 @@ GtRrCheckSchedulingClassTimes >> atSelector: aSymbol add: duration endTime: aDat
 ]
 
 { #category : #accessing }
-GtRrCheckSchedulingClassTimes >> atSelector: selectorSymbol addErrorDetails: aGtRrErrorDetails endTime: aDateAndTime [
+GtRrCheckSchedulingClassTimes >> atSelector: selectorSymbol add: duration errorDetails: aGtRrErrorDetails endTime: aDateAndTime [
 	"Add the supplied error details for the specified selector"
 	| selector |
 
@@ -54,7 +54,7 @@ GtRrCheckSchedulingClassTimes >> atSelector: selectorSymbol addErrorDetails: aGt
 	((GtRrCheckSchedulingTimes classWithName: className) canUnderstand: selector) ifFalse: [ ^ self ].
 
 	(times at: selectorSymbol ifAbsentPut: [ GtRrCheckSchedulingCheckTimes selector: selectorSymbol ])
-		addErrorDetails: aGtRrErrorDetails endTime: aDateAndTime.
+		add: duration errorDetails: aGtRrErrorDetails endTime: aDateAndTime.
 
 ]
 
