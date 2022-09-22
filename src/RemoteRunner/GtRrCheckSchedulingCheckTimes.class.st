@@ -11,6 +11,12 @@ Class {
 	#category : #'RemoteRunner-CheckScheduling'
 }
 
+{ #category : #lejsonv4 }
+GtRrCheckSchedulingCheckTimes class >> leJsonV4Name [
+
+	^ #gtRrCheckSchedulingCheckTimes
+]
+
 { #category : #'instance creation' }
 GtRrCheckSchedulingCheckTimes class >> selector: aSymbol [
 

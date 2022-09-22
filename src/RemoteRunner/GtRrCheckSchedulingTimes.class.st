@@ -43,13 +43,13 @@ GtRrCheckSchedulingTimes class >> leJsonV4Name [
 { #category : #accessing }
 GtRrCheckSchedulingTimes class >> load [
 
-	^ self loadFromFile: 'LwGtPersistentTimes.json'.
+	^ self loadFromFile: self name asString, '.json'.
 ]
 
 { #category : #accessing }
 GtRrCheckSchedulingTimes class >> loadDefaultInstance [
 
-	self setUniqueInstance: (self loadFromFile: 'LwGtPersistentTimes.json').
+	self setUniqueInstance: self load.
 	^ uniqueInstance
 ]
 
@@ -121,7 +121,7 @@ GtRrCheckSchedulingTimes >> gtClassesFor: aView [
 		priority: 10;
 		items: [ times associations sorted: #key ascending ];
 		column: 'Class' text: #key;
-		column: 'Times' text: [ :item | item value gtDisplayString ];
+		column: 'Times' text: [ :item | item value totalAverageTime gtDisplayString ];
 		send: #value;
 		actionUpdateButton 
 ]

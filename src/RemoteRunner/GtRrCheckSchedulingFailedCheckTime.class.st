@@ -7,6 +7,12 @@ Class {
 	#category : #'RemoteRunner-CheckScheduling'
 }
 
+{ #category : #lejsonv4 }
+GtRrCheckSchedulingFailedCheckTime class >> leJsonV4Name [
+
+	^ #gtRrCheckSchedulingFailedCheckTime
+]
+
 { #category : #accessing }
 GtRrCheckSchedulingFailedCheckTime >> errorDetails [
 
