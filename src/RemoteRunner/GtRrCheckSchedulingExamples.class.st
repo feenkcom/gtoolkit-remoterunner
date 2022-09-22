@@ -14,7 +14,7 @@ GtRrCheckSchedulingExamples >> emptyTimes [
 	| testSchedulingTimes |
 
 	testSchedulingTimes := GtRrCheckSchedulingTimes new.
-	testSchedulingTimes timeStrategy: GtRrTestSchedulingTimeLatestStrategy new.
+	testSchedulingTimes timeStrategy: GtRrCheckSchedulingTimeLatestStrategy new.
 	self assert: testSchedulingTimes times isEmpty.
 	self assert: testSchedulingTimes unknownDuration defaultValue 
 		equals: GtRrCheckScheduler defaultTaskDuration.

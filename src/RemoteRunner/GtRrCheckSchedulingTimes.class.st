@@ -13,8 +13,17 @@ Class {
 		'remoteRunner',
 		'unknownDuration'
 	],
-	#category : #'RemoteRunner-TaskScheduling'
+	#category : #'RemoteRunner-CheckScheduling'
 }
+
+{ #category : #accessing }
+GtRrCheckSchedulingTimes class >> classWithName: aString [
+	"Answer the class with the given name"
+
+	^ (aString endsWith: ' class')
+			ifTrue: [ (self environment at: (aString copyFrom: 1 to: aString size - 6) asSymbol) class ]
+			ifFalse: [ self environment at: aString asSymbol ].
+]
 
 { #category : #accessing }
 GtRrCheckSchedulingTimes class >> leJsonV4AttributeMapping [ 
@@ -107,11 +116,13 @@ GtRrCheckSchedulingTimes >> gtClassesFor: aView [
 	<gtView>
 
 	times ifNil: [ ^ aView empty ].
-	^ aView forward
+	^ aView columnedList
 		title: 'Classes';
 		priority: 10;
-		object: [ times ];
-		view: #gtItemsFor:;
+		items: [ times associations sorted: #key ascending ];
+		column: 'Class' text: #key;
+		column: 'Times' text: [ :item | item value gtDisplayString ];
+		send: #value;
 		actionUpdateButton 
 ]
 
@@ -122,7 +133,7 @@ GtRrCheckSchedulingTimes >> initialize [
 	times := Dictionary new.
 	accessMutex := Monitor new.
 	unknownDuration := GtRrUnknownDurationValue new.
-	timeStrategy := GtRrTestSchedulingTimeMovingAverageStrategy new.
+	timeStrategy := GtRrCheckSchedulingTimeMovingAverageStrategy new.
 ]
 
 { #category : #'private - events' }

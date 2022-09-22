@@ -80,7 +80,7 @@ GtRrExplicitExampleTask >> examples: aCollection [
 GtRrExplicitExampleTask >> group [
 
 	^ GtExplicitExampleGroup new examples: (checkNames collect: [ :each | 
-		(each key asSymbol asClass >> each value asSymbol) gtExample asExampleWithResult ]).
+		((self classWithName: each key) >> each value asSymbol) gtExample asExampleWithResult ]).
 ]
 
 { #category : #accessing }

@@ -165,7 +165,8 @@ GtRrAbstractExamplesTask >> splitTests [
 GtRrAbstractExamplesTask >> successfulExamples [
 	"Answer the examples / tests that completed successfully"
 
-	^ self subclassResponsibility
+	^ self select: [ :pharoLinkTestCaseAnnouncement | 
+		self isSuccessResult: pharoLinkTestCaseAnnouncement ]
 ]
 
 { #category : #accessing }

@@ -106,11 +106,25 @@ GtRrExampleTestFactory >> clearInImage [
 	inImageOnly := nil.
 ]
 
+{ #category : #accessing }
+GtRrExampleTestFactory >> groupTasksByTime [
+
+	stream := (GtRrCheckScheduler new 
+		schedulingTimes: GtRrCheckSchedulingTimes default;
+		allocateTasks: stream contents) readStream.
+]
+
 { #category : #initialization }
 GtRrExampleTestFactory >> initialize [
 
 	super initialize.
 	ignoreNoTest := false.
+]
+
+{ #category : #accessing }
+GtRrExampleTestFactory >> job [
+
+	^ GtRrChecksJob new tasks: self tasks.
 ]
 
 { #category : #initialization }

@@ -6,7 +6,7 @@ Class {
 		'taskClassName',
 		'expectedTime'
 	],
-	#category : #'RemoteRunner-TaskScheduling'
+	#category : #'RemoteRunner-CheckScheduling'
 }
 
 { #category : #accessing }

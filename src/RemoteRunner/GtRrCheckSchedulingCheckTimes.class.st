@@ -8,7 +8,7 @@ Class {
 		'selector',
 		'times'
 	],
-	#category : #'RemoteRunner-TaskScheduling'
+	#category : #'RemoteRunner-CheckScheduling'
 }
 
 { #category : #'instance creation' }
@@ -21,7 +21,7 @@ GtRrCheckSchedulingCheckTimes class >> selector: aSymbol [
 GtRrCheckSchedulingCheckTimes >> add: duration endTime: aDateAndTime [
 
 	times size > 20 ifTrue: [ times removeFirst ].
-	times add: (GtRrTestSchedulingSuccessfulTestTime new
+	times add: (GtRrCheckSchedulingSuccessfulCheckTime new
 		duration: duration;
 		endTime: aDateAndTime).
 ]
@@ -30,7 +30,7 @@ GtRrCheckSchedulingCheckTimes >> add: duration endTime: aDateAndTime [
 GtRrCheckSchedulingCheckTimes >> addErrorDetails: aGtRrErrorDetails endTime: aDateAndTime [
 
 	times size > 20 ifTrue: [ times removeFirst ].
-	times add: (GtRrTestSchedulingFailedTestTime new
+	times add: (GtRrCheckSchedulingFailedCheckTime new
 		errorDetails: aGtRrErrorDetails;
 		endTime: aDateAndTime).
 ]
@@ -60,7 +60,7 @@ GtRrCheckSchedulingCheckTimes >> printOn: aStream [
 
 	times 
 		ifEmpty: [ aStream << 'No recorded times' ]
-		ifNotEmpty: [ aStream print: (GtRrTestSchedulingTimeMovingAverageStrategy new
+		ifNotEmpty: [ aStream print: (GtRrCheckSchedulingTimeMovingAverageStrategy new
 			timeFor: self) ]
 ]
 
