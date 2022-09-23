@@ -97,7 +97,7 @@ GtRrCheckSchedulingCheckTimes >> times [
 ]
 
 { #category : #accessing }
-GtRrCheckSchedulingCheckTimes >> times: anObject [
+GtRrCheckSchedulingCheckTimes >> times: aSequenceableCollection [
 
-	times := anObject
+	times := aSequenceableCollection asOrderedCollection
 ]

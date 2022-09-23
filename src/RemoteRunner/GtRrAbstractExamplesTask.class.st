@@ -38,6 +38,12 @@ GtRrAbstractExamplesTask >> asJob [
 	^ GtRrChecksJob tasks: { self }
 ]
 
+{ #category : #tests }
+GtRrAbstractExamplesTask >> checkNamesAndTimes [
+	
+	^ self subclassResponsibility
+]
+
 { #category : #enumerating }
 GtRrAbstractExamplesTask >> count: aBlockClosure [
 
@@ -77,6 +83,19 @@ GtRrAbstractExamplesTask >> failedExamples [
 
 	^ self select: [ :pharoLinkTestCaseAnnouncement | 
 		pharoLinkTestCaseAnnouncement isFailure ]
+]
+
+{ #category : #ui }
+GtRrAbstractExamplesTask >> gtChecksFor: aView [
+	<gtView>
+
+	^ aView columnedList
+		title: 'Checks';
+		priority: 25;
+		items: [ self checkNamesAndTimes ];
+		column: 'Test' text: #first;
+		column: 'Persistent Time' text: #second;
+		send: #third.
 ]
 
 { #category : #accessing }

@@ -50,6 +50,7 @@ GtRrCheckSchedulingTimes class >> load [
 GtRrCheckSchedulingTimes class >> loadDefaultInstance [
 
 	self setUniqueInstance: self load.
+	self uniqueInstance remoteRunner: GtRemoteRunner default.
 	^ uniqueInstance
 ]
 

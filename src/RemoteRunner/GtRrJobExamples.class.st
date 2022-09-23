@@ -68,7 +68,7 @@ GtRrJobExamples >> testJobClassNames [
 	<gtExample>
 	| factory job task |
 
-	factory := GtRrExampleTestFactory new.
+	factory := GtRrChecksFactory new.
 	factory addSUnitClass: GtRrSampleTest.
 	job := factory job.
 
@@ -84,7 +84,7 @@ GtRrJobExamples >> testJobExamplesClassNames [
 	<gtExample>
 	| factory job task |
 
-	factory := GtRrExampleTestFactory new.
+	factory := GtRrChecksFactory new.
 	factory addExampleClass: GtRrSampleExample.
 	job := factory job.
 
@@ -101,7 +101,7 @@ GtRrJobExamples >> testJobPackageNames [
 	<gtExample>
 	| factory job task |
 
-	factory := GtRrExampleTestFactory new.
+	factory := GtRrChecksFactory new.
 	factory addSUnitPackages: { #RemoteRunner asPackage }.
 	job := factory job.
 
@@ -118,7 +118,7 @@ GtRrJobExamples >> testJobTestNames [
 	<gtExample>
 	| factory testNames job task |
 
-	factory := GtRrExampleTestFactory new.
+	factory := GtRrChecksFactory new.
 	testNames := {
 			#GtRrSampleTest->#testPass.
 			#GtRrSampleTest->#testFail.
