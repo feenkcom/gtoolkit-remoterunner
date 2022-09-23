@@ -8,7 +8,7 @@ Class {
 		'times',
 		'className'
 	],
-	#category : #'RemoteRunner-TaskScheduling'
+	#category : #'RemoteRunner-CheckScheduling'
 }
 
 { #category : #'instance creation' }
@@ -35,7 +35,7 @@ GtRrCheckSchedulingClassTimes >> atSelector: aSymbol add: duration endTime: aDat
 	| selector |
 
 	selector := aSymbol asSymbol.
-	((self class environment at: className) canUnderstand: selector) ifFalse: [ ^ self ].
+	((GtRrCheckSchedulingTimes classWithName: className) canUnderstand: selector) ifFalse: [ ^ self ].
 
 	self assert: [ duration class == Duration ]
 		description: 'The supplied time must be a Duration'.
@@ -46,16 +46,15 @@ GtRrCheckSchedulingClassTimes >> atSelector: aSymbol add: duration endTime: aDat
 ]
 
 { #category : #accessing }
-GtRrCheckSchedulingClassTimes >> atSelector: selectorSymbol addErrorDetails: aGtRrErrorDetails endTime: aDateAndTime [
+GtRrCheckSchedulingClassTimes >> atSelector: selectorSymbol add: duration errorDetails: aGtRrErrorDetails endTime: aDateAndTime [
 	"Add the supplied error details for the specified selector"
 	| selector |
 
 	selector := selectorSymbol asSymbol.
-	((self class environment at: className) canUnderstand: selector) ifFalse: [ ^ self ].
-
+	((GtRrCheckSchedulingTimes classWithName: className) canUnderstand: selector) ifFalse: [ ^ self ].
 
 	(times at: selectorSymbol ifAbsentPut: [ GtRrCheckSchedulingCheckTimes selector: selectorSymbol ])
-		addErrorDetails: aGtRrErrorDetails endTime: aDateAndTime.
+		add: duration errorDetails: aGtRrErrorDetails endTime: aDateAndTime.
 
 ]
 
@@ -109,15 +108,13 @@ GtRrCheckSchedulingClassTimes >> initialize [
 ]
 
 { #category : #accessing }
-GtRrCheckSchedulingClassTimes >> testClassName [
+GtRrCheckSchedulingClassTimes >> printOn: aStream [
 
-	^ testClassName
-]
-
-{ #category : #accessing }
-GtRrCheckSchedulingClassTimes >> testClassName: aSymbol [
-
-	testClassName := aSymbol asSymbol
+	className ifNil: [ ^ super printOn: aStream ].
+	aStream
+		print: className;
+		<< ': ';
+		print: self totalAverageTime
 ]
 
 { #category : #'private - accessing' }
@@ -130,4 +127,13 @@ GtRrCheckSchedulingClassTimes >> times [
 GtRrCheckSchedulingClassTimes >> times: anObject [
 
 	times := anObject
+]
+
+{ #category : #accessing }
+GtRrCheckSchedulingClassTimes >> totalAverageTime [
+	| strategy |
+
+	times ifEmpty: [ ^ Duration zero ].
+	strategy := GtRrCheckSchedulingTimeMovingAverageStrategy new.
+	^ (times collect: [ :each | strategy timeFor: each ]) sum.
 ]

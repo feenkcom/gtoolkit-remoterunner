@@ -17,7 +17,7 @@ GtRrErrorDetails class >> leJsonV4Name [
 { #category : #accessing }
 GtRrErrorDetails >> errorMessage [
 
-	^ errorMessage
+	^ errorMessage ifNil: [ '' ]
 ]
 
 { #category : #accessing }

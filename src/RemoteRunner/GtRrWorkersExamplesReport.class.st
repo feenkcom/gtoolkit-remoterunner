@@ -33,6 +33,14 @@ GtRrWorkersExamplesReport >> cummulativeTasksDuration [
 			totalDuration + aWorker tasksDuration ]
 ]
 
+{ #category : #accessing }
+GtRrWorkersExamplesReport >> cummulativeTasksDurationOnRunner [
+	^ self workers  
+		inject: 0 seconds 
+		into: [ :totalDuration :aWorker |
+			totalDuration + aWorker tasksDurationOnRunner ]
+]
+
 { #category : #'gt - extensions' }
 GtRrWorkersExamplesReport >> gtViewWorkersFor: aView [
 	<gtView>
@@ -73,6 +81,11 @@ GtRrWorkersExamplesReport >> numberOfExamples [
 ]
 
 { #category : #accessing }
+GtRrWorkersExamplesReport >> numberOfTasks [
+	^ self workers sumNumbers: [ :aWorker | aWorker numberOfTasks ]
+]
+
+{ #category : #accessing }
 GtRrWorkersExamplesReport >> numberOfWorkers [
 	^ self workers size
 ]
@@ -85,6 +98,24 @@ GtRrWorkersExamplesReport >> printOn: aStream [
 		aStream 
 			print: self workers size;
 			<< ' workers' ]
+]
+
+{ #category : #accessing }
+GtRrWorkersExamplesReport >> taskGapsDuration [
+	^ self workers 
+		inject: 0 seconds 
+		into: [ :total  :aWorker | 
+			total + aWorker taskGapsDuration ]
+]
+
+{ #category : #accessing }
+GtRrWorkersExamplesReport >> tasksExecutionInterval [
+	^ self tasksLastEndTime - self tasksFirstStartTime
+]
+
+{ #category : #accessing }
+GtRrWorkersExamplesReport >> tasksExecutionIntervalOnRunner [
+	^ self tasksLastResultReceivedTime - self tasksFirstHandoveTime
 ]
 
 { #category : #accessing }

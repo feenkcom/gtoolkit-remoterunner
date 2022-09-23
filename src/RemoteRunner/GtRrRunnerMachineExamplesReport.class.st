@@ -14,6 +14,11 @@ GtRrRunnerMachineExamplesReport >> cummulativeTasksDuration [
 ]
 
 { #category : #accessing }
+GtRrRunnerMachineExamplesReport >> cummulativeTasksDurationOnRunner [
+	^ self workersReport cummulativeTasksDurationOnRunner
+]
+
+{ #category : #accessing }
 GtRrRunnerMachineExamplesReport >> description [
 	^ self ipAddress
 ]
@@ -58,6 +63,11 @@ GtRrRunnerMachineExamplesReport >> numberOfExamples [
 ]
 
 { #category : #accessing }
+GtRrRunnerMachineExamplesReport >> numberOfTasks [
+	^ self workersReport numberOfTasks
+]
+
+{ #category : #accessing }
 GtRrRunnerMachineExamplesReport >> numberOfWorkers [
 	^ self workersReport workers size
 ]
@@ -75,8 +85,23 @@ GtRrRunnerMachineExamplesReport >> printOn: aStream [
 ]
 
 { #category : #accessing }
+GtRrRunnerMachineExamplesReport >> taskGapsDuration [
+	^ self workersReport taskGapsDuration
+]
+
+{ #category : #accessing }
 GtRrRunnerMachineExamplesReport >> tasksEndTime [
 	^ self tasksLastEndTime
+]
+
+{ #category : #accessing }
+GtRrRunnerMachineExamplesReport >> tasksExecutionInterval [
+	^ self workersReport tasksExecutionInterval
+]
+
+{ #category : #accessing }
+GtRrRunnerMachineExamplesReport >> tasksExecutionIntervalOnRunner [
+	^ self workersReport tasksExecutionIntervalOnRunner
 ]
 
 { #category : #accessing }

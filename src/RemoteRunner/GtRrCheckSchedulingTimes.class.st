@@ -9,19 +9,28 @@ Class {
 	#instVars : [
 		'times',
 		'accessMutex',
-		'unknownDurationValue',
 		'timeStrategy',
-		'remoteRunner'
+		'remoteRunner',
+		'unknownDuration'
 	],
-	#category : #'RemoteRunner-TaskScheduling'
+	#category : #'RemoteRunner-CheckScheduling'
 }
+
+{ #category : #accessing }
+GtRrCheckSchedulingTimes class >> classWithName: aString [
+	"Answer the class with the given name"
+
+	^ (aString endsWith: ' class')
+			ifTrue: [ (self environment at: (aString copyFrom: 1 to: aString size - 6) asSymbol) class ]
+			ifFalse: [ self environment at: aString asSymbol ].
+]
 
 { #category : #accessing }
 GtRrCheckSchedulingTimes class >> leJsonV4AttributeMapping [ 
 
 	^ { 
 		#times -> #times.
-		#unknownDurationValue -> #unknownDurationValue.
+		#unknownDuration -> #unknownDuration.
 		#timeStrategy -> #timeStrategy. }
 ]
 
@@ -34,13 +43,13 @@ GtRrCheckSchedulingTimes class >> leJsonV4Name [
 { #category : #accessing }
 GtRrCheckSchedulingTimes class >> load [
 
-	^ self loadFromFile: 'LwGtPersistentTimes.json'.
+	^ self loadFromFile: self name asString, '.json'.
 ]
 
 { #category : #accessing }
 GtRrCheckSchedulingTimes class >> loadDefaultInstance [
 
-	self setUniqueInstance: (self loadFromFile: 'LwGtPersistentTimes.json').
+	self setUniqueInstance: self load.
 	^ uniqueInstance
 ]
 
@@ -77,23 +86,23 @@ GtRrCheckSchedulingTimes >> atClassName: classNameSymbol selector: selectorSymbo
 ]
 
 { #category : #api }
-GtRrCheckSchedulingTimes >> atClassName: classNameSymbol selector: selectorSymbol add: timeInMilliseconds endTime: aDateAndTime [
+GtRrCheckSchedulingTimes >> atClassName: classNameSymbol selector: selectorSymbol add: duration endTime: aDateAndTime [
 	| className |
 
 	className := classNameSymbol asSymbol.
 	self critical:
 		[ (times at: className ifAbsentPut: [ GtRrCheckSchedulingClassTimes className: className ]) 
-			atSelector: selectorSymbol add: timeInMilliseconds endTime: aDateAndTime ].
+			atSelector: selectorSymbol add: duration endTime: aDateAndTime ].
 ]
 
 { #category : #api }
-GtRrCheckSchedulingTimes >> atClassName: classNameSymbol selector: selectorSymbol addErrorDetails: aGtRrErrorDetails endTime: aDateAndTime [
+GtRrCheckSchedulingTimes >> atClassName: classNameSymbol selector: selectorSymbol add: duration errorDetails: aGtRrErrorDetails endTime: aDateAndTime [
 	| className |
 
 	className := classNameSymbol asSymbol.
 	self critical:
 		[ (times at: className ifAbsentPut: [ GtRrCheckSchedulingClassTimes className: className ]) 
-			atSelector: selectorSymbol addErrorDetails: aGtRrErrorDetails endTime: aDateAndTime ].
+			atSelector: selectorSymbol add: duration errorDetails: aGtRrErrorDetails endTime: aDateAndTime ].
 ]
 
 { #category : #'mutual exclusion' }
@@ -107,11 +116,13 @@ GtRrCheckSchedulingTimes >> gtClassesFor: aView [
 	<gtView>
 
 	times ifNil: [ ^ aView empty ].
-	^ aView forward
+	^ aView columnedList
 		title: 'Classes';
 		priority: 10;
-		object: [ times ];
-		view: #gtItemsFor:;
+		items: [ times associations sorted: #key ascending ];
+		column: 'Class' text: #key;
+		column: 'Times' text: [ :item | item value totalAverageTime gtDisplayString ];
+		send: #value;
 		actionUpdateButton 
 ]
 
@@ -121,8 +132,8 @@ GtRrCheckSchedulingTimes >> initialize [
 	super initialize.
 	times := Dictionary new.
 	accessMutex := Monitor new.
-	unknownDurationValue := GtRrUnknownDurationValue new.
-	timeStrategy := GtRrTestSchedulingTimeMovingAverageStrategy new.
+	unknownDuration := GtRrUnknownDurationValue new.
+	timeStrategy := GtRrCheckSchedulingTimeMovingAverageStrategy new.
 ]
 
 { #category : #'private - events' }
@@ -159,13 +170,14 @@ GtRrCheckSchedulingTimes >> onTaskFinished: aGtRrTaskAnnouncement [
 				selector: aPharoLinkTestCaseEndAnnouncement testCaseSelector 
 				add: aPharoLinkTestCaseEndAnnouncement duration
 				endTime: aPharoLinkTestCaseEndAnnouncement testCaseEndTimestamp ]
-			ifFalse: [ self
+			ifFalse: [ aPharoLinkTestCaseEndAnnouncement isSkipped ifFalse: [ self
 				atClassName: aPharoLinkTestCaseEndAnnouncement testCaseClassName 
 				selector: aPharoLinkTestCaseEndAnnouncement testCaseSelector 
-				addErrorDetails: (GtRrErrorDetails new
+				add: aPharoLinkTestCaseEndAnnouncement duration
+				errorDetails: (GtRrErrorDetails new
 					errorMessage: aPharoLinkTestCaseEndAnnouncement exceptionMessageText;
 					trace: aPharoLinkTestCaseEndAnnouncement exceptionTrace)
-				endTime: aPharoLinkTestCaseEndAnnouncement testCaseEndTimestamp ] ]
+				endTime: aPharoLinkTestCaseEndAnnouncement testCaseEndTimestamp ] ] ]
 ]
 
 { #category : #accessing }
@@ -219,13 +231,20 @@ GtRrCheckSchedulingTimes >> subscribeToRemoteRunner: aGtRemoteRunner [
 { #category : #api }
 GtRrCheckSchedulingTimes >> timeForClass: aClass selector: selectorSymbol [ 
 
-	^ self critical: 
-		[ ((times at: aClass name) atSelector: selectorSymbol)
-			timeWithStrategy: timeStrategy ifAbsent: unknownDurationValue ].
+	^ self timeForClassName: aClass name selector: selectorSymbol.
 ]
 
 { #category : #api }
 GtRrCheckSchedulingTimes >> timeForClassName: classNameSymbol selector: selectorSymbol [ 
+
+	^ self 
+		timeForClassName: classNameSymbol
+		selector: selectorSymbol
+		ifAbsent: [ (unknownDuration timeForClassName: classNameSymbol selector: selectorSymbol) ].
+]
+
+{ #category : #api }
+GtRrCheckSchedulingTimes >> timeForClassName: classNameSymbol selector: selectorSymbol ifAbsent: absentBlock [
 
 	^ self critical: 
 		[ times at: classNameSymbol
@@ -234,17 +253,9 @@ GtRrCheckSchedulingTimes >> timeForClassName: classNameSymbol selector: selector
 					atSelector: selectorSymbol
 					ifPresent: [ :selectorTimes | selectorTimes 
 						timeWithStrategy: timeStrategy 
-						ifAbsent: unknownDurationValue ]
-					ifAbsent: unknownDurationValue ]
-			ifAbsent: unknownDurationValue ]
-]
-
-{ #category : #api }
-GtRrCheckSchedulingTimes >> timeForClassName: classNameSymbol selector: selectorSymbol ifAbsent: absentValue [
-
-	^ self critical: 
-		[ ((times at: classNameSymbol) atSelector: selectorSymbol)
-			timeWithStrategy: timeStrategy ifAbsent: absentValue ].
+						ifAbsent: absentBlock ]
+					ifAbsent: absentBlock ]
+			ifAbsent: absentBlock ]
 ]
 
 { #category : #accessing }
@@ -288,15 +299,15 @@ GtRrCheckSchedulingTimes >> timesForClassName: aSymbol [
 ]
 
 { #category : #accessing }
-GtRrCheckSchedulingTimes >> unknownDurationValue [
+GtRrCheckSchedulingTimes >> unknownDuration [
 
-	^ unknownDurationValue
+	^ unknownDuration
 ]
 
 { #category : #accessing }
-GtRrCheckSchedulingTimes >> unknownDurationValue: anObject [
+GtRrCheckSchedulingTimes >> unknownDuration: anObject [
 
-	unknownDurationValue := anObject
+	unknownDuration := anObject
 ]
 
 { #category : #updating }

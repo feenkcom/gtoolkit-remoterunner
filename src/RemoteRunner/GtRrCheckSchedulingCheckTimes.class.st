@@ -8,8 +8,14 @@ Class {
 		'selector',
 		'times'
 	],
-	#category : #'RemoteRunner-TaskScheduling'
+	#category : #'RemoteRunner-CheckScheduling'
 }
+
+{ #category : #lejsonv4 }
+GtRrCheckSchedulingCheckTimes class >> leJsonV4Name [
+
+	^ #gtRrCheckSchedulingCheckTimes
+]
 
 { #category : #'instance creation' }
 GtRrCheckSchedulingCheckTimes class >> selector: aSymbol [
@@ -20,17 +26,18 @@ GtRrCheckSchedulingCheckTimes class >> selector: aSymbol [
 { #category : #adding }
 GtRrCheckSchedulingCheckTimes >> add: duration endTime: aDateAndTime [
 
-	times size > 20 ifTrue: [ times removeFirst ].
-	times add: (GtRrTestSchedulingSuccessfulTestTime new
+	[ times size > 20 ] whileTrue: [ times removeFirst ].
+	times add: (GtRrCheckSchedulingSuccessfulCheckTime new
 		duration: duration;
 		endTime: aDateAndTime).
 ]
 
 { #category : #adding }
-GtRrCheckSchedulingCheckTimes >> addErrorDetails: aGtRrErrorDetails endTime: aDateAndTime [
+GtRrCheckSchedulingCheckTimes >> add: duration errorDetails: aGtRrErrorDetails endTime: aDateAndTime [
 
-	times size > 20 ifTrue: [ times removeFirst ].
-	times add: (GtRrTestSchedulingFailedTestTime new
+	[ times size > 20 ] whileTrue: [ times removeFirst ].
+	times add: (GtRrCheckSchedulingFailedCheckTime new
+		duration: duration;
 		errorDetails: aGtRrErrorDetails;
 		endTime: aDateAndTime).
 ]
@@ -60,7 +67,7 @@ GtRrCheckSchedulingCheckTimes >> printOn: aStream [
 
 	times 
 		ifEmpty: [ aStream << 'No recorded times' ]
-		ifNotEmpty: [ aStream print: (GtRrTestSchedulingTimeMovingAverageStrategy new
+		ifNotEmpty: [ aStream print: (GtRrCheckSchedulingTimeMovingAverageStrategy new
 			timeFor: self) ]
 ]
 

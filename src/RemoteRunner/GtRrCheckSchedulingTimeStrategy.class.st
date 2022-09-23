@@ -7,13 +7,13 @@ Strategies include:
 - Use a moving average
 "
 Class {
-	#name : #GtRrTestSchedulingTimeStrategy,
+	#name : #GtRrCheckSchedulingTimeStrategy,
 	#superclass : #Object,
-	#category : #'RemoteRunner-TaskScheduling'
+	#category : #'RemoteRunner-CheckScheduling'
 }
 
 { #category : #method }
-GtRrTestSchedulingTimeStrategy >> timeFor: aGtTestSchedulingTestTimes [
+GtRrCheckSchedulingTimeStrategy >> timeFor: aGtTestSchedulingTestTimes [
 
 	^ self subclassResponsibility 
 ]

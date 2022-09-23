@@ -2,10 +2,18 @@ Class {
 	#name : #GtRrExplicitSUnitTask,
 	#superclass : #GtRrSUnitTask,
 	#instVars : [
-		'sunitTestNames'
+		'checkNames'
 	],
 	#category : #'RemoteRunner-Tests'
 }
+
+{ #category : #'instance creation' }
+GtRrExplicitSUnitTask class >> checkNames: aCollection [
+	"aCollection is a collection of examples to run, in the form:
+		ClassNameSymbol -> SelectorSymbol"
+
+	^ self new checkNames: aCollection
+]
 
 { #category : #accessing }
 GtRrExplicitSUnitTask class >> leJsonV4Name [
@@ -33,25 +41,37 @@ GtRrExplicitSUnitTask >> asExplicitTask [
 ]
 
 { #category : #accessing }
+GtRrExplicitSUnitTask >> checkNames [
+
+	^ checkNames
+]
+
+{ #category : #accessing }
+GtRrExplicitSUnitTask >> checkNames: anObject [
+
+	checkNames := anObject
+]
+
+{ #category : #accessing }
 GtRrExplicitSUnitTask >> splitTests [
 	"Answer a collection of tasks in which each task has only 1 test from the receiver.
 	If the receiver only has 1 test, answer the receiver."
 
-	sunitTestNames size = 1 ifTrue: [ ^ { self copy } ].
-	^ sunitTestNames collect: [ :testName |
+	checkNames size = 1 ifTrue: [ ^ { self copy } ].
+	^ checkNames collect: [ :testName |
 		self copy sunitTestNames: { testName } ].
 ]
 
 { #category : #accessing }
 GtRrExplicitSUnitTask >> sunitTestNames [
 
-	^ sunitTestNames
+	^ checkNames
 ]
 
 { #category : #accessing }
 GtRrExplicitSUnitTask >> sunitTestNames: aCollection [
 
-	sunitTestNames := aCollection asArray
+	checkNames := aCollection asArray
 ]
 
 { #category : #accessing }
@@ -59,7 +79,7 @@ GtRrExplicitSUnitTask >> testSuite [
 	| suite |
 
 	suite := TestSuite named: taskId.
-	sunitTestNames do: [ :assoc | | class |
+	checkNames do: [ :assoc | | class |
 		class := self class environment at: assoc key asSymbol.
 		suite addTest: (class new setTestSelector: assoc value asSymbol) ].
 	^ suite.
@@ -68,5 +88,5 @@ GtRrExplicitSUnitTask >> testSuite [
 { #category : #accessing }
 GtRrExplicitSUnitTask >> totalCount [
 
-	^ sunitTestNames size
+	^ checkNames size
 ]
