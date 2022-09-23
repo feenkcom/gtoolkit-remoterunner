@@ -53,21 +53,29 @@ GtRrSUnitTask >> asExplicitTask [
 ]
 
 { #category : #accessing }
+GtRrSUnitTask >> checkNamesAndTimes [
+	| times |
+
+	times := OrderedCollection new.
+	self testSuite testCasesDo: [ :testCase |
+		times add: {
+			(testCase class name asString, '>>', testCase selector).
+			(GtRrCheckSchedulingTimes hasUniqueInstance ifTrue:
+					[ GtRrCheckSchedulingTimes uniqueInstance
+						timeForClassName: testCase class name
+						selector: testCase selector
+						ifAbsent: [ '<none>' ]]
+				ifFalse:
+					[ '<no times>' ]).
+			testCase. } ].
+	^ times sorted: #first descending.
+
+]
+
+{ #category : #accessing }
 GtRrSUnitTask >> examples [
 
 	^ self allExamples
-]
-
-{ #category : #ui }
-GtRrSUnitTask >> gtTestCasesFor: aView [
-	<gtView>
-
-	^ aView columnedList
-		title: 'Test Cases';
-		priority: 25;
-		items: [ self testNamesAndTimes ];
-		column: 'Test' text: [ :item | item key ];
-		column: 'Persistent Time' text: [ :item | item value ].
 ]
 
 { #category : #testing }
@@ -115,25 +123,6 @@ GtRrSUnitTask >> splitTests [
 GtRrSUnitTask >> testCasesDo: aBlock [
 
 	^ self testSuite testCasesDo: aBlock
-]
-
-{ #category : #tests }
-GtRrSUnitTask >> testNamesAndTimes [
-	| times |
-
-	times := OrderedCollection new.
-	self testSuite testCasesDo: [ :testCase |
-		times add:
-			((testCase class name asString, '>>', testCase selector) ->
-				(GtRrCheckSchedulingTimes hasUniqueInstance ifTrue:
-					[ GtRrCheckSchedulingTimes uniqueInstance
-						timeForClassName: testCase class name
-						selector: testCase selector
-						ifAbsent: [ '<none>' ]]
-				ifFalse:
-					[ '<no times>' ]))].
-	^ times sorted: #key ascending.
-
 ]
 
 { #category : #accessing }

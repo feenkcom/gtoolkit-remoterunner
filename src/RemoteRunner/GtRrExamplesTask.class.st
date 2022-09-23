@@ -33,6 +33,27 @@ GtRrExamplesTask >> asExplicitTask [
 ]
 
 { #category : #accessing }
+GtRrExamplesTask >> checkNamesAndTimes [
+	| times exampleClassName |
+
+	times := OrderedCollection new.
+	self allExamples do: [ :example |
+		exampleClassName := example methodClass name.
+		times add: {
+			(example methodClass name asString, '>>', example selector).
+			(GtRrCheckSchedulingTimes hasUniqueInstance ifTrue:
+					[ GtRrCheckSchedulingTimes uniqueInstance
+						timeForClassName: exampleClassName
+						selector: example selector
+						ifAbsent: [ '<none>' ]]
+				ifFalse:
+					[ '<no times>' ]).
+			example } ].
+	^ times sorted: #first descending.
+
+]
+
+{ #category : #accessing }
 GtRrExamplesTask >> examples [
 	^ self group examples
 ]

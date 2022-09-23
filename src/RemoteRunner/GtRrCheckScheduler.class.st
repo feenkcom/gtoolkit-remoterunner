@@ -61,20 +61,24 @@ GtRrCheckScheduler >> allocateEntries: entries to: taskAssociations [
 { #category : #api }
 GtRrCheckScheduler >> allocateTasks: aCollectionOfTasks [
 	"Answer the collection of tasks to be submitted to the runner"
-	| typedEntries entries explicitTask |
+	| typedEntries entries explicitTask expectedTime totalTime |
 
 	typedEntries := Dictionary new.
+	totalTime := Duration zero.
 	aCollectionOfTasks do: [ :task |
 		explicitTask := task asExplicitTask.
 		explicitTask checkNames do: [ :name |
+			expectedTime := schedulingTimes
+						timeForClassName: name key
+						selector: name value.
+			totalTime := totalTime + expectedTime.
 			(typedEntries at: explicitTask class name ifAbsentPut: [ OrderedCollection new ])
 				add: (GtRrCheckSchedulerEntry new
 					name: name;
 					taskClassName: explicitTask class name;
-					expectedTime: (schedulingTimes
-						timeForClassName: name key
-						selector: name value)) ] ].
+					expectedTime: expectedTime) ] ].
 	entries := OrderedCollection new.
+	maxDuration := totalTime / 30 min: self class defaultTaskDuration.
 	typedEntries do: [ :anOC |
 		self allocateEntries: (anOC sorted: [ :a :b | a hasLongerExpectedTimeThan: b ])
 		to: entries ].
@@ -87,7 +91,6 @@ GtRrCheckScheduler >> initialize [
 	super initialize.
 	"Don't use the default scheduling times yet so it doesn't subscribe to the default runner"
 	"schedulingTimes := GtRrCheckSchedulingTimes default."
-	maxDuration := self class defaultTaskDuration. 
 ]
 
 { #category : #accessing }

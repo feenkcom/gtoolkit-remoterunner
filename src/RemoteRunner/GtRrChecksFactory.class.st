@@ -1,5 +1,5 @@
 Class {
-	#name : #GtRrExampleTestFactory,
+	#name : #GtRrChecksFactory,
 	#superclass : #GtRrTaskFactory,
 	#instVars : [
 		'ignoreNoTest',
@@ -9,7 +9,7 @@ Class {
 }
 
 { #category : #adding }
-GtRrExampleTestFactory >> addExampleClass: aClass [
+GtRrChecksFactory >> addExampleClass: aClass [
 	| task |
 	
 	(aClass isAbstract or: [ aClass isTrait ]) ifTrue: [ ^ self ].
@@ -21,7 +21,7 @@ GtRrExampleTestFactory >> addExampleClass: aClass [
 ]
 
 { #category : #adding }
-GtRrExampleTestFactory >> addExampleClassNames: aCollectionOfClassNames [
+GtRrChecksFactory >> addExampleClassNames: aCollectionOfClassNames [
 	| cls task |
 
 	aCollectionOfClassNames do: [ :className |
@@ -33,21 +33,21 @@ GtRrExampleTestFactory >> addExampleClassNames: aCollectionOfClassNames [
 ]
 
 { #category : #adding }
-GtRrExampleTestFactory >> addExampleClasses: aCollectionOfClasses [
+GtRrChecksFactory >> addExampleClasses: aCollectionOfClasses [
 
 	aCollectionOfClasses do: [ :cls |
 		self addExampleClass: cls ].
 ]
 
 { #category : #adding }
-GtRrExampleTestFactory >> addExamplePackages: aCollectionOfPackages [
+GtRrChecksFactory >> addExamplePackages: aCollectionOfPackages [
 
 	aCollectionOfPackages do: [ :package |
 		self addExampleClasses: package classes ]
 ]
 
 { #category : #adding }
-GtRrExampleTestFactory >> addExampleTestNames: aCollection [
+GtRrChecksFactory >> addExampleTestNames: aCollection [
 	"Add the supplied collection of:
 		#ClassName -> #selector"
 
@@ -55,7 +55,7 @@ GtRrExampleTestFactory >> addExampleTestNames: aCollection [
 ]
 
 { #category : #adding }
-GtRrExampleTestFactory >> addSUnitClass: aClass [
+GtRrChecksFactory >> addSUnitClass: aClass [
 	| task |
 
 	((aClass inheritsFrom: TestCase) and: [ aClass isAbstract not ]) ifFalse: [ ^ self ].
@@ -65,28 +65,28 @@ GtRrExampleTestFactory >> addSUnitClass: aClass [
 ]
 
 { #category : #adding }
-GtRrExampleTestFactory >> addSUnitClassNames: aCollectionOfClassNames [
+GtRrChecksFactory >> addSUnitClassNames: aCollectionOfClassNames [
 
 	aCollectionOfClassNames do: [ :className |
 		self addSUnitClass: (self classWithName: className) ].
 ]
 
 { #category : #adding }
-GtRrExampleTestFactory >> addSUnitClasses: aCollectionOfClasses [
+GtRrChecksFactory >> addSUnitClasses: aCollectionOfClasses [
 
 	aCollectionOfClasses do: [ :cls |
 		self addSUnitClass: cls ].
 ]
 
 { #category : #adding }
-GtRrExampleTestFactory >> addSUnitPackages: aCollectionOfPackages [
+GtRrChecksFactory >> addSUnitPackages: aCollectionOfPackages [
 
 	aCollectionOfPackages do: [ :package |
 		self addSUnitClasses: package classes ]
 ]
 
 { #category : #adding }
-GtRrExampleTestFactory >> addSUnitTestNames: aCollection [
+GtRrChecksFactory >> addSUnitTestNames: aCollection [
 	"Add the supplied collection of:
 		#ClassName -> #selector"
 
@@ -94,20 +94,20 @@ GtRrExampleTestFactory >> addSUnitTestNames: aCollection [
 ]
 
 { #category : #adding }
-GtRrExampleTestFactory >> addTask: aTask [
+GtRrChecksFactory >> addTask: aTask [
 
 	stream nextPut: aTask
 ]
 
 { #category : #initialization }
-GtRrExampleTestFactory >> clearInImage [
+GtRrChecksFactory >> clearInImage [
 	"Set the flag to indicate that the job may be run in any worker"
 
 	inImageOnly := nil.
 ]
 
 { #category : #accessing }
-GtRrExampleTestFactory >> groupTasksByTime [
+GtRrChecksFactory >> groupTasksByTime [
 
 	stream := (GtRrCheckScheduler new 
 		schedulingTimes: GtRrCheckSchedulingTimes default;
@@ -115,40 +115,40 @@ GtRrExampleTestFactory >> groupTasksByTime [
 ]
 
 { #category : #initialization }
-GtRrExampleTestFactory >> initialize [
+GtRrChecksFactory >> initialize [
 
 	super initialize.
 	ignoreNoTest := false.
 ]
 
 { #category : #accessing }
-GtRrExampleTestFactory >> job [
+GtRrChecksFactory >> job [
 
 	^ GtRrChecksJob new tasks: self tasks.
 ]
 
 { #category : #initialization }
-GtRrExampleTestFactory >> setIgnoreNoTest [ 
+GtRrChecksFactory >> setIgnoreNoTest [ 
 
 	ignoreNoTest := true.
 ]
 
 { #category : #initialization }
-GtRrExampleTestFactory >> setInImage [
+GtRrChecksFactory >> setInImage [
 	"Set the flag to indicate that the job should be run in image only"
 
 	inImageOnly := true.
 ]
 
 { #category : #initialization }
-GtRrExampleTestFactory >> setNotInImage [
+GtRrChecksFactory >> setNotInImage [
 	"Set the flag to indicate that the job should be run in remote workers only"
 
 	inImageOnly := false.
 ]
 
 { #category : #accessing }
-GtRrExampleTestFactory >> tasks [
+GtRrChecksFactory >> tasks [
 	| tasks |
 
 	tasks := super tasks.

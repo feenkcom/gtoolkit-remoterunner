@@ -386,7 +386,7 @@ GtRemoteRunnerExamples >> simpleTestTask [
 	remoteRunner start.
 	[ self waitOn: workerRegisteredSemaphore for: 20
 		description: 'Worker didn''t register in time'.
-	factory := GtRrExampleTestFactory new.
+	factory := GtRrChecksFactory new.
 	factory addSUnitTestNames: { #GtRrSampleTest -> #testPass }.
 	job := factory job.
 	job

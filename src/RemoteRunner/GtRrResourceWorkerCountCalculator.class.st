@@ -13,7 +13,8 @@ Class {
 	#instVars : [
 		'minWorkers',
 		'maxWorkers',
-		'memorySizeMultiplier'
+		'memorySizeMultiplier',
+		'spareCapacityMultiplier'
 	],
 	#category : #'RemoteRunner-Runner'
 }
@@ -45,6 +46,7 @@ GtRrResourceWorkerCountCalculator >> initialize [
 	minWorkers := 1.
 	maxWorkers := SmallInteger maxVal. 
 	memorySizeMultiplier := 2.
+	spareCapacityMultiplier := 2.
 ]
 
 { #category : #accessing }
@@ -84,6 +86,18 @@ GtRrResourceWorkerCountCalculator >> minWorkers: anObject [
 ]
 
 { #category : #accessing }
+GtRrResourceWorkerCountCalculator >> spareCapacityMultiplier [
+
+	^ spareCapacityMultiplier
+]
+
+{ #category : #accessing }
+GtRrResourceWorkerCountCalculator >> spareCapacityMultiplier: anObject [
+
+	spareCapacityMultiplier := anObject
+]
+
+{ #category : #accessing }
 GtRrResourceWorkerCountCalculator >> workerCount [
 	"Answer the number of workers to start"
 	| systemInfo cpuCores freeMem memorySize |
@@ -102,7 +116,7 @@ GtRrResourceWorkerCountCalculator >> workerCount [
 GtRrResourceWorkerCountCalculator >> workerCountFromVmMemory: vmMemorySize cpuCores: cpuCores freeMemory: freeMem [
 	| freeMemCount |
 
-	freeMemCount := (freeMem / vmMemorySize / memorySizeMultiplier) truncated.
+	freeMemCount := (freeMem / vmMemorySize / memorySizeMultiplier / spareCapacityMultiplier) truncated.
 	minWorkers <= maxWorkers ifFalse: [ 
 		self error: 'minWorkers must be <= maxWorkers' ].
 	^ ((cpuCores min: freeMemCount) min: maxWorkers) max: minWorkers
