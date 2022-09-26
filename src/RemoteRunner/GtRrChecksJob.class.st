@@ -16,7 +16,7 @@ GtRrChecksJob class >> exampleNames: anArray [
 { #category : #accessing }
 GtRrChecksJob class >> leJsonV4Name [
 
-	^ nil
+	^ #gtRrChecksJob
 ]
 
 { #category : #accessing }
