@@ -60,7 +60,7 @@ GtRrAnnouncementQueueCycleCompositeEventsGrouper >> gtViewQueuesListFor: aView [
 		column: 'Id' text: [ :assoc | assoc key ];
 		column: 'Cycle Update Events' text: [ :assoc | 
 			assoc value numberOfUpdateEvents ];
-		column: 'Announcemmets Count' text: [ :assoc | 
+		column: 'Announcements Count' text: [ :assoc | 
 			assoc value numberOfAnnouncements ];
 		send: [ :assoc | assoc value ]
 ]
