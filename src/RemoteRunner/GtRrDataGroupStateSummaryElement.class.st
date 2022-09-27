@@ -6,6 +6,7 @@ Class {
 
 { #category : #accessing }
 GtRrDataGroupStateSummaryElement >> initializeContent [
+	self removeChildren.
 	self
 		addChild: (BrLabel new
 				aptitude: BrGlamorousLabelAptitude;
