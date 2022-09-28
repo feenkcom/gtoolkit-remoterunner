@@ -50,7 +50,7 @@ GtRrTaskExamples >> sunitTask [
 	job := remoteRunner submitJob: task asJob.
 	self
 		waitOn: semaphore
-		for: 20
+		for: 30
 		description: 'Job didn''t complete in time'.
 	self assert: task executionData resourceReport isNotNil.
 	task result do: [ :each |

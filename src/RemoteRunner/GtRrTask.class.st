@@ -452,9 +452,7 @@ GtRrTask >> summaryAttributes [
 	(self handoverTime isNotNil and: [ self resultReceivedTime isNotNil ]) ifTrue: 
 		[ attributes add: #ReceivedResultTime -> self resultReceivedTime ].
 	taskTimeout ifNotNil: [ attributes add: #Timeout -> taskTimeout ].
-	attributes
-		add: #ID -> taskId;
-		add: 'Worker Attributes' -> self workerAttributes.
+	attributes add: #ID -> taskId.
 	^ attributes
 ]
 
