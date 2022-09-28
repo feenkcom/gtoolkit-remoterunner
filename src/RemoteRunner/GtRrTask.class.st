@@ -440,17 +440,18 @@ GtRrTask >> summaryAttributes [
 	duration := self duration.
 	attributes add: #State -> self state.
 	self hasErrors ifTrue: [ attributes add: #Error -> self errorDetails ].
-	result ifNotNil: [ 
-		attributes add: #Result -> (result isCollection
-				 ifTrue: [ 
-				 result class name , '(' , result size printString , ')' ]
-				 ifFalse: [ result ]) ].
-	self handoverTime ifNotNil: [ attributes add: #HandedToWorker -> self handoverTime ].
+	result ifNotNil: 
+		[ attributes add: #Result -> (result isCollection
+			ifTrue: [ result class name , '(' , result size printString , ')' ]
+			ifFalse: [ result ]) ].
 	self startTime ifNotNil: [ attributes add: #Started -> self startTime ].
 	self endTime ifNotNil: [ attributes add: #Ended -> self endTime ].
 	duration ifNotNil: [ attributes add: #Duration -> duration ].
+	self handoverTime ifNotNil: [ attributes add: #HandedToWorker -> self handoverTime ].
 	(self handoverTime isNotNil and: [ self resultReceivedTime isNotNil ]) ifTrue: 
 		[ attributes add: #ReceivedResultTime -> self resultReceivedTime ].
+	self executionData resourceReport ifNotNil:
+		[ :report | attributes add: #ResourceReport -> report ].
 	taskTimeout ifNotNil: [ attributes add: #Timeout -> taskTimeout ].
 	attributes add: #ID -> taskId.
 	^ attributes
