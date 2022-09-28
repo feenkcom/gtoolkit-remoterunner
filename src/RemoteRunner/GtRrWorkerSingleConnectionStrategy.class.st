@@ -36,6 +36,8 @@ GtRrWorkerSingleConnectionStrategy >> start [
 { #category : #'start-stop' }
 GtRrWorkerSingleConnectionStrategy >> stop [
 
-	worker unregisterWith: application.
+	[ worker unregisterWith: application ]
+		on: LanguageLinkServerNotRunningError
+		do: [ :ex | ].
 	application stop.
 ]

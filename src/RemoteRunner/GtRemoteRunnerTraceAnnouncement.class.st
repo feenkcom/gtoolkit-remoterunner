@@ -5,6 +5,12 @@ Class {
 }
 
 { #category : #accessing }
+GtRemoteRunnerTraceAnnouncement >> emit [
+	"Disable during normal operation.  Enable during debugging."
+
+]
+
+{ #category : #accessing }
 GtRemoteRunnerTraceAnnouncement >> message [
 
 	^ message

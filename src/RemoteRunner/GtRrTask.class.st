@@ -3,17 +3,11 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'constraint',
-		'handoverTime',
-		'startTime',
-		'endTime',
-		'resultReceivedTime',
-		'workerAttributes',
 		'result',
 		'taskId',
-		'errorDetails',
-		'state',
 		'taskTimeout',
-		'retryStrategy'
+		'retryStrategy',
+		'executionData'
 	],
 	#category : #'RemoteRunner-Tasks'
 }
@@ -59,15 +53,15 @@ GtRrTask >> constraint: anObject [
 
 { #category : #accessing }
 GtRrTask >> duration [
-	^ (startTime isNotNil and: [ endTime isNotNil ]) 
-		ifTrue: [ endTime - startTime ]
+	^ (self startTime isNotNil and: [ self endTime isNotNil ]) 
+		ifTrue: [ self endTime - self startTime ]
 		ifFalse: [ nil ]
 ]
 
 { #category : #accessing }
 GtRrTask >> durationOnRunner [
-	^ (handoverTime isNotNil and: [ resultReceivedTime isNotNil ]) 
-		ifTrue: [ resultReceivedTime - handoverTime ]
+	^ (self handoverTime isNotNil and: [ self resultReceivedTime isNotNil ]) 
+		ifTrue: [ self resultReceivedTime - self handoverTime ]
 		ifFalse: [ nil ]
 ]
 
@@ -76,19 +70,20 @@ GtRrTask >> endTime [
 	"Answer the time at which the task was completed on the worker"
 	<return: #Duration>
 
-	^ endTime
+	^ self executionData endTime
 ]
 
 { #category : #accessing }
-GtRrTask >> endTime: anObject [
+GtRrTask >> endTime: aDuration [
 
-	endTime := anObject
+	self executionData endTime: aDuration
 ]
 
 { #category : #accessing }
 GtRrTask >> errorDetails [
+	<return: #GtRrErrorDetails>
 
-	^ errorDetails
+	^ self executionData errorDetails
 ]
 
 { #category : #accessing }
@@ -96,8 +91,20 @@ GtRrTask >> errorDetails: aGtErrorDetails [
 	"Set the error details of the receiver.
 	Asynchronous events may cause multiple attempts at setting the details, use the first one"
 
-	errorDetails ifNotNil: [ ^ self ].
-	errorDetails := aGtErrorDetails
+	self executionData errorDetails: aGtErrorDetails
+]
+
+{ #category : #accessing }
+GtRrTask >> executionData [
+
+	^ executionData ifNil: [ executionData := GtRrTaskExecutionData new ].
+]
+
+{ #category : #'private - accessing' }
+GtRrTask >> executionData: aGtRrTaskExecutionData [
+	"Only used for serialisation"
+
+	executionData := aGtRrTaskExecutionData 
 ]
 
 { #category : #'accessing - pharolink' }
@@ -139,7 +146,7 @@ GtRrTask >> gtResultFor: aView [
 	^ aView forward
 		  title: 'Result';
 		  priority: 20;
-		  object: [ result ifNil: [ errorDetails ifNil: [ '<No Result>' ] ] ];
+		  object: [ result ifNil: [ self errorDetails ifNil: [ '<No Result>' ] ] ];
 		  view: view;
 		  actionUpdateButton
 ]
@@ -162,11 +169,11 @@ GtRrTask >> gtSummaryFor: aView [
 GtRrTask >> gtTraceFor: aView [
 	<gtView>
 
-	errorDetails ifNil: [ ^ aView empty ].
+	self errorDetails ifNil: [ ^ aView empty ].
 	^ aView forward
 		title: 'Trace';
 		priority: 20;
-		object: [ errorDetails ];
+		object: [ self errorDetails ];
 		view: #gtTraceFor:
 ]
 
@@ -174,11 +181,11 @@ GtRrTask >> gtTraceFor: aView [
 GtRrTask >> gtWorkerAttributesFor: aView [
 	<gtView>
 
-	workerAttributes ifNil: [ ^ aView empty ].
+	self workerAttributes ifNil: [ ^ aView empty ].
 	^ aView columnedList
 		  title: 'Worker Attributes';
 		  priority: 40;
-		  items: [ workerAttributes associations sorted: [ :a :b | a key < b key ] ];
+		  items: [ self workerAttributes associations sorted: [ :a :b | a key < b key ] ];
 		  column: #Attribute text: [ :item | item key ];
 		  column: #Value text: [ :item | item value ];
 		  send: [ :item | item value ];
@@ -188,26 +195,26 @@ GtRrTask >> gtWorkerAttributesFor: aView [
 { #category : #accessing }
 GtRrTask >> handoverTime [
 
-	^ handoverTime
+	^ self executionData handoverTime
 ]
 
 { #category : #accessing }
 GtRrTask >> handoverTime: anObject [
 
-	handoverTime := anObject
+	self executionData handoverTime: anObject
 ]
 
 { #category : #testing }
 GtRrTask >> hasCompleted [
 
-	^ state = #completed or: [ state = #terminated ]
+	^ self state = #completed or: [ self state = #terminated ]
 ]
 
 { #category : #testing }
 GtRrTask >> hasErrors [
 	"Answer a boolean indicating if the receiver failed to execute successfully"
 
-	^ errorDetails isNotNil
+	^ self errorDetails isNotNil
 ]
 
 { #category : #accessing }
@@ -223,56 +230,64 @@ GtRrTask >> initialize [
 { #category : #testing }
 GtRrTask >> isFinished [
 
-	^ endTime isNotNil
+	^ self endTime isNotNil
 ]
 
 { #category : #testing }
 GtRrTask >> isNotStarted [
 
-	^ state = #notStarted
+	^ self state = #notStarted
 ]
 
 { #category : #running }
 GtRrTask >> markTaskCancelled [
 	"Mark the receiver cancelled.
 	Cancellation is specifically terminating the task before it was started."
+	| now |
 
-	endTime 
-		ifNil: [ endTime := resultReceivedTime := DateAndTime now ]
-		ifNotNil: [ resultReceivedTime := DateAndTime now ].
-	errorDetails := (GtRrErrorDetails new
+	now := DateAndTime now.
+	self endTime ifNil: 
+		[ self endTime: now.
+		self resultReceivedTime: now ]
+	ifNotNil: 
+		[ self resultReceivedTime: now ].
+	self errorDetails: (GtRrErrorDetails new
 		errorMessage: 'Task cancelled before execution';
 		setTrace).
-	state := #cancelled.
+	self state: #cancelled.
 ]
 
 { #category : #running }
 GtRrTask >> markTaskCompleted [
 
-	resultReceivedTime := DateAndTime now.
-	state := #completed.
+	self resultReceivedTime: DateAndTime now.
+	self state: #completed.
 ]
 
 { #category : #running }
 GtRrTask >> markTaskStarted [
 
-	handoverTime := DateAndTime now.
-	state := #started.
+	self handoverTime: DateAndTime now.
+	self state: #started.
 ]
 
 { #category : #running }
 GtRrTask >> markTaskTerminated [
+	| now |
 
-	endTime 
-		ifNil: [ endTime := resultReceivedTime := DateAndTime now ]
-		ifNotNil: [ resultReceivedTime := DateAndTime now ].
-	state := #terminated.
+	now := DateAndTime now.
+	self endTime ifNil: 
+		[ self endTime: now.
+		self resultReceivedTime: DateAndTime now ]
+	ifNotNil: 
+		[ self resultReceivedTime: DateAndTime now ].
+	self state: #terminated.
 ]
 
 { #category : #running }
 GtRrTask >> markTaskTerminating [
 
-	state := #terminating.
+	self state: #terminating.
 ]
 
 { #category : #copying }
@@ -283,6 +298,7 @@ GtRrTask >> postCopy [
 	self reset.
 	taskId := UUID new asString.
 	retryStrategy := retryStrategy copy.
+	executionData := executionData copy.
 ]
 
 { #category : #printing }
@@ -308,14 +324,8 @@ GtRrTask >> printSupplementalOn: aStream [
 { #category : #accessing }
 GtRrTask >> reset [
 
-	state := #notStarted.
-	handoverTime := nil.
-	startTime := nil.
-	endTime := nil.
-	resultReceivedTime := nil.
-	workerAttributes := nil.
 	result := nil.
-	errorDetails := nil.
+
 ]
 
 { #category : #accessing }
@@ -333,13 +343,13 @@ GtRrTask >> result: anObject [
 { #category : #accessing }
 GtRrTask >> resultReceivedTime [
 
-	^ resultReceivedTime
+	^ self executionData resultReceivedTime
 ]
 
 { #category : #accessing }
 GtRrTask >> resultReceivedTime: anObject [
 
-	^ resultReceivedTime := anObject
+	self executionData resultReceivedTime: anObject
 ]
 
 { #category : #accessing }
@@ -378,8 +388,9 @@ GtRrTask >> runInImage [
 
 { #category : #accessing }
 GtRrTask >> serverDuration [
-	^ (handoverTime isNotNil and: [ resultReceivedTime isNotNil ]) 
-		ifTrue: [ resultReceivedTime - handoverTime ]
+
+	^ (self handoverTime isNotNil and: [ self resultReceivedTime isNotNil ]) 
+		ifTrue: [ self resultReceivedTime - self handoverTime ]
 		ifFalse: [ nil ]
 ]
 
@@ -388,13 +399,13 @@ GtRrTask >> startTime [
 	"Answer the time at which the task was started on the worker"
 	<return: #Duration>
 
-	^ startTime
+	^ self executionData startTime
 ]
 
 { #category : #accessing }
 GtRrTask >> startTime: anObject [
 
-	startTime := anObject
+	self executionData startTime: anObject
 ]
 
 { #category : #accessing }
@@ -403,15 +414,14 @@ GtRrTask >> state [
 	One of: #notStarted, #started, #cancelled, #terminating, #terminated, #completed.
 	The errorDetails are used to determine if the task completed successfully, why and where it was terminated, etc."
 
-	^ state
+	^ self executionData state
 ]
 
 { #category : #private }
 GtRrTask >> state: aSymbol [
-	"Set the state.
-	Only used by object serialisation"
-	
-	state := aSymbol
+	"Set the state"
+
+	self executionData state: aSymbol
 ]
 
 { #category : #printing }
@@ -429,22 +439,21 @@ GtRrTask >> summaryAttributes [
 	attributes := OrderedCollection new.
 	duration := self duration.
 	attributes add: #State -> self state.
-	self hasErrors ifTrue: [ attributes add: #Error -> errorDetails ].
-	result ifNotNil: [ 
-		attributes add: #Result -> (result isCollection
-				 ifTrue: [ 
-				 result class name , '(' , result size printString , ')' ]
-				 ifFalse: [ result ]) ].
-	handoverTime ifNotNil: [ attributes add: #HandedToWorker -> handoverTime ].
-	startTime ifNotNil: [ attributes add: #Started -> startTime ].
-	endTime ifNotNil: [ attributes add: #Ended -> endTime ].
+	self hasErrors ifTrue: [ attributes add: #Error -> self errorDetails ].
+	result ifNotNil: 
+		[ attributes add: #Result -> (result isCollection
+			ifTrue: [ result class name , '(' , result size printString , ')' ]
+			ifFalse: [ result ]) ].
+	self startTime ifNotNil: [ attributes add: #Started -> self startTime ].
+	self endTime ifNotNil: [ attributes add: #Ended -> self endTime ].
 	duration ifNotNil: [ attributes add: #Duration -> duration ].
-	(handoverTime isNotNil and: [ resultReceivedTime isNotNil ]) ifTrue: 
-		[ attributes add: #ReceivedResultTime -> resultReceivedTime ].
+	self handoverTime ifNotNil: [ attributes add: #HandedToWorker -> self handoverTime ].
+	(self handoverTime isNotNil and: [ self resultReceivedTime isNotNil ]) ifTrue: 
+		[ attributes add: #ReceivedResultTime -> self resultReceivedTime ].
+	self executionData resourceReport ifNotNil:
+		[ :report | attributes add: #ResourceReport -> report ].
 	taskTimeout ifNotNil: [ attributes add: #Timeout -> taskTimeout ].
-	attributes
-		add: #ID -> taskId;
-		add: 'Worker Attributes' -> workerAttributes.
+	attributes add: #ID -> taskId.
 	^ attributes
 ]
 
@@ -493,24 +502,30 @@ GtRrTask >> taskTimeout: aDuration [
 
 { #category : #running }
 GtRrTask >> timedRun [
-	| runResult |
+	| runResult resourceStart resourceEnd |
 
-	startTime := DateAndTime now.
-	runResult := self run.
-	endTime := DateAndTime now.
+	resourceStart := GtVmStatisticsReport new recordReportStatistics.
+	self startTime: DateAndTime now.
+	runResult := [ self run ] ensure:
+		[ self endTime: DateAndTime now.
+		resourceEnd := GtVmStatisticsReport new recordReportStatistics.
+		self executionData resourceReport: (GtVmStatisticsReportsDiff new
+			sourceReport: resourceStart;
+			targetReport: resourceEnd;
+			yourself) ].
 	^ runResult.
 ]
 
 { #category : #accessing }
 GtRrTask >> workerAttributes [
 
-	^ workerAttributes
+	^ self executionData workerAttributes
 ]
 
 { #category : #accessing }
 GtRrTask >> workerAttributes: anObject [
 
-	workerAttributes := anObject
+	self executionData workerAttributes: anObject
 ]
 
 { #category : #accessing }

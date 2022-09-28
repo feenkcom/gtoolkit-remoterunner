@@ -8,6 +8,10 @@ Class {
 	#superclass : #Object,
 	#traits : 'TAssertable + TGtRrExampleHelp',
 	#classTraits : 'TAssertable classTrait + TGtRrExampleHelp classTrait',
+	#instVars : [
+		'remoteRunner',
+		'workers'
+	],
 	#category : #'RemoteRunner-Examples'
 }
 
@@ -15,7 +19,8 @@ Class {
 GtRemoteRunnerExamples >> assignTasksToWorkersTaskFirst [
 	"Demonstrate assigning tasks to workers, with the tasks queued before the workers connect"
 	<gtExample>
-	| remoteRunner workers job tasks taskCompletedCount taskFailedCount jobCompletedCount semaphore |
+	<after: #stopRunnersAndWorkers>
+	| job tasks taskCompletedCount taskFailedCount jobCompletedCount semaphore |
 
 	jobCompletedCount := taskCompletedCount := taskFailedCount := 0.
 	semaphore := GtMutualExclusionSemaphore new.
@@ -49,7 +54,6 @@ GtRemoteRunnerExamples >> assignTasksToWorkersTaskFirst [
 	self assert: taskFailedCount equals: 1.
 	self assert: jobCompletedCount equals: 1.
 
-	workers do: #stop.
 	^ job
 ]
 
@@ -426,6 +430,17 @@ GtRemoteRunnerExamples >> simpleTestTask [
 	] ensure: [ remoteRunner stop ].
 
 	^ job
+]
+
+{ #category : #private }
+GtRemoteRunnerExamples >> stopRunnersAndWorkers [
+
+	remoteRunner ifNotNil:
+		[ remoteRunner stop.
+		remoteRunner := nil ].
+	workers ifNotNil:
+		[ workers do: #stop.
+		workers := nil ].
 ]
 
 { #category : #examples }

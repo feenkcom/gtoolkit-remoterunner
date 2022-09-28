@@ -87,7 +87,7 @@ GtRrHeartbeatContext >> stopWorkerConnection: aGtRrWorkerConnection [
 { #category : #accessing }
 GtRrHeartbeatContext >> timeoutContext [
 	"Check all the worker heartbeats and stop any that have timed out"
-	| now maxDuration registeredWorkers |
+	| now maxDuration registeredWorkers isInImage |
 
 	"maxDuration needs to be large enough to allow for delivery delays"
 	maxDuration := GtRrWorker heartbeatDelay * 1.5.
@@ -95,7 +95,8 @@ GtRrHeartbeatContext >> timeoutContext [
 		[ remoteRunner registeredWorkers ].
 	now := DateAndTime now.
 	registeredWorkers do: [ :workerConnection |
-		(now - workerConnection lastHeartbeat) > maxDuration ifTrue:
+		isInImage := workerConnection detailAt: #workerInImage ifAbsent: [ false ].
+		(isInImage not and: [ (now - workerConnection lastHeartbeat) > maxDuration ]) ifTrue:
 			[ self stopWorkerConnection: workerConnection ] ].
 	nextRunTime := DateAndTime now + GtRrWorker heartbeatDelay.
 	remoteRunner timeoutManager addContext: self.

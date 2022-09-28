@@ -243,8 +243,13 @@ GtRrJob >> gtSummaryFor: aView [
 
 { #category : #ui }
 GtRrJob >> gtTasksFor: aView [
-
 	<gtView>
+	| tasks |
+
+	tasks := [ self tasks ]
+		on: ShouldNotImplement
+		do: [ :ex | #() ].
+	tasks ifEmpty: [ ^ aView empty ].
 	^ aView list
 		  title: 'Tasks';
 		  priority: 50;
@@ -499,7 +504,9 @@ GtRrJob >> summaryAttributes [
 	attributes := OrderedCollection new.
 	attributes 
 		add: #State -> self state;
-		add: #Tasks -> self tasks size;
+		add: #Tasks -> ([ self tasks size ]
+			on: ShouldNotImplement
+			do: [ :ex | 'N/A' ]);
 		add: #Results -> results size;
 		add: #Errors -> errorCount;
 		add: 'Start Time' -> startTime;
