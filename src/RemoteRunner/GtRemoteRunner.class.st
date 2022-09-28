@@ -288,6 +288,16 @@ GtRemoteRunner >> checkJobCompleted: aGtRrContext [
 
 ]
 
+{ #category : #'private - debugging' }
+GtRemoteRunner >> checkRunningJobsCompleted [
+	"Check if the currently executing jobs have completed.
+	Mostly for debugging."
+
+	sharedAccess critical:
+		[ currentlyExecutingJobs do: [ :jobContext |
+			self checkJobCompleted: jobContext ] ].
+]
+
 { #category : #'private - accessing' }
 GtRemoteRunner >> critical: aBlock [
 	"Evaluate the supplied block within sharedAccess.
