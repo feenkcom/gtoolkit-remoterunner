@@ -51,6 +51,11 @@ GtRrTask >> constraint: anObject [
 	constraint := anObject
 ]
 
+{ #category : #initialization }
+GtRrTask >> createResourceReport [
+	^ GtVmStatisticsReportsDiff new
+]
+
 { #category : #accessing }
 GtRrTask >> duration [
 	^ (self startTime isNotNil and: [ self endTime isNotNil ]) 
@@ -502,17 +507,15 @@ GtRrTask >> taskTimeout: aDuration [
 
 { #category : #running }
 GtRrTask >> timedRun [
-	| runResult resourceStart resourceEnd |
+	| runResult resourceReport |
 
-	resourceStart := GtVmStatisticsReport new recordReportStatistics.
+	resourceReport := self createResourceReport.
+	resourceReport recordSourceReport.
 	self startTime: DateAndTime now.
 	runResult := [ self run ] ensure:
 		[ self endTime: DateAndTime now.
-		resourceEnd := GtVmStatisticsReport new recordReportStatistics.
-		self executionData resourceReport: (GtVmStatisticsReportsDiff new
-			sourceReport: resourceStart;
-			targetReport: resourceEnd;
-			yourself) ].
+		resourceReport recordTargetReport.
+		self executionData resourceReport: resourceReport ].
 	^ runResult.
 ]
 
