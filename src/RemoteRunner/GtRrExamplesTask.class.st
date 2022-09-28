@@ -92,14 +92,21 @@ GtRrExamplesTask >> isExamplesTask [
 
 { #category : #running }
 GtRrExamplesTask >> run [
-	| group exampleStartTime exampleEndTime announcement exception exampleResult |
+	| group exampleStartTime exampleEndTime announcement resourceReport exception exampleResult |
 
 	group := self group.
 	^ group examples collect: [ :exampleWithResult |
+		resourceReport := nil.
+		
 		(ignoreNoTest or: [ exampleWithResult ignoreTest not ]) ifTrue:
-			[ exampleStartTime := DateAndTime now.
+			[ 
+			resourceReport := GtVmStatisticsReportsDiff new.
+			exampleStartTime := DateAndTime now.
+			resourceReport recordSourceReport.
 			exampleWithResult run.
+			resourceReport recordTargetReport.
 			exampleEndTime := DateAndTime now ].
+			
 		exampleResult := exampleWithResult result.
 		announcement := exampleResult
 			ifNil: [ PharoLinkTestCaseSkip new ]
@@ -110,13 +117,15 @@ GtRrExamplesTask >> run [
 			testCaseStartTimestamp: exampleStartTime;
 			testCaseEndTimestamp: exampleEndTime;
 			shouldPass: true.
+		announcement resourceReport: resourceReport.
+		
 		(exampleWithResult isSuccess or: [ exampleResult isNil ]) ifFalse:
 			[ exception := exampleResult basicReturnValue value.
 			announcement 
 				initializeExceptionClass: exception class
 				messageText: (exception messageText ifEmpty: [ exception class name ])
 				trace: exception stackString ].
-		announcement ].
+		announcement ] as: Array.
 ]
 
 { #category : #initialization }
