@@ -600,17 +600,14 @@ GtRemoteRunner >> printOn: aStream [
 ]
 
 { #category : #private }
-GtRemoteRunner >> privateTaskFailed: aTaskContextId started: startTime completed: endTime with: anGtRrTaskErrorDetails [
+GtRemoteRunner >> privateTaskFailed: aTaskContextId executionData: aGtRrWorkerExecutionData [
 	"Mark the specified task as failed and retry if required.
 	Must be called within sharedAccess"
 	| taskContext retryTasks |
 
 	taskContext := currentlyExecutingTasks removeKey: aTaskContextId ifAbsent: [ nil ].
 	taskContext ifNil: [ ^ self ].
-	taskContext
-		startTime: startTime;
-		endTime: endTime;
-		errorDetails: anGtRrTaskErrorDetails.
+	taskContext task executionData updateFromWorker: aGtRrWorkerExecutionData.
 	taskContext markTaskCompleted.
 	self announceAndLog: (GtRrTaskFailedAnnouncement task: taskContext).
 	retryTasks := taskContext task retryTasks.
@@ -859,11 +856,11 @@ GtRemoteRunner >> summaryString [
 ]
 
 { #category : #'api - worker' }
-GtRemoteRunner >> taskDone: aTaskContextId started: startTime completed: endTime with: anObject [
+GtRemoteRunner >> taskDone: aTaskContextId executionData: aGtRrWorkerExecutionData result: aResult [
 	| taskContext |
 
 	GtRrWorkerTraceAnnouncement new
-		message: 'taskDone: ', aTaskContextId asString, ' result: ', anObject asString;
+		message: 'taskDone: ', aTaskContextId asString, ' result: ', aResult asString;
 		emit.
 
 	sharedAccess critical: 
@@ -871,10 +868,8 @@ GtRemoteRunner >> taskDone: aTaskContextId started: startTime completed: endTime
 		"If the task hasn't been found, assumed that it was terminated and move on"
 		taskContext ifNotNil:
 			[ taskContext workerConnection registerHeartbeat.
-			taskContext
-				startTime: startTime;
-				endTime: endTime;
-				result: anObject.
+			taskContext task executionData updateFromWorker: aGtRrWorkerExecutionData.
+			taskContext result: aResult.
 			taskContext markTaskCompleted.
 			self announceAndLog: (GtRrTaskCompletedAnnouncement task: taskContext).
 			self checkJobCompleted: taskContext ].
@@ -895,14 +890,14 @@ GtRemoteRunner >> taskDone: aTaskContextId started: startTime completed: endTime
 ]
 
 { #category : #'api - worker' }
-GtRemoteRunner >> taskFailed: aTaskContextId started: startTime completed: endTime with: anGtRrTaskErrorDetails [
+GtRemoteRunner >> taskFailed: aTaskContextId executionData: aGtRrWorkerExecutionData [
 	"Mark the specified task as failed"
 
 	GtRrWorkerTraceAnnouncement new
 		message: 'taskFailed:with: pre ', aTaskContextId asString;
 		emit.
 	sharedAccess critical: 
-		[ self privateTaskFailed: aTaskContextId started: startTime completed: endTime with: anGtRrTaskErrorDetails ].
+		[ self privateTaskFailed: aTaskContextId executionData: aGtRrWorkerExecutionData ].
 	GtRrWorkerTraceAnnouncement new
 		message: 'taskFailed:with: post ', aTaskContextId asString;
 		emit.
@@ -996,9 +991,7 @@ GtRemoteRunner >> unregisterWorkerId: aUidString reason: aString [
 					setTrace.
 			self 
 				privateTaskFailed: taskContext taskContextId 
-				started: nil
-				completed: nil
-				with: errorDetails ]. ].
+				executionData: (GtRrWorkerExecutionData new errorDetails: errorDetails) ]. ].
 	workerConnection ifNotNil:
 		[ self announceAndLog: (GtRrWorkerUnregisteredAnnouncement new
 			worker: workerConnection;
@@ -1061,6 +1054,22 @@ GtRemoteRunner >> when: anAnnouncementClass send: aSelector to: anObject for: aS
 	"Declare that when anAnnouncementClass is raised, anObject should receive the message aSelector."
 
 	^ (self when: anAnnouncementClass send: aSelector to: anObject) subscriber: aSubscriber.
+]
+
+{ #category : #accessing }
+GtRemoteRunner >> workerResultProcessingError: errorDetails workerId: workerId taskContextId: taskContextId [
+	"The worker received an error while the receiver was processing results.
+	Log the error."
+
+	GtRrResultProcessingErrorAnnouncement new
+		workerId: workerId;
+		errorDetails: errorDetails;
+		emit.
+	currentlyExecutingTasks
+		at: taskContextId
+		ifPresent: [ :taskContext |
+			self taskFailed: taskContextId executionData: (GtRrWorkerExecutionData new
+				errorDetails: errorDetails) ].
 ]
 
 { #category : #accessing }

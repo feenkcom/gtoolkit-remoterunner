@@ -70,20 +70,20 @@ GtRrTask >> endTime [
 	"Answer the time at which the task was completed on the worker"
 	<return: #Duration>
 
-	^ executionData endTime
+	^ self executionData endTime
 ]
 
 { #category : #accessing }
 GtRrTask >> endTime: aDuration [
 
-	executionData endTime: aDuration
+	self executionData endTime: aDuration
 ]
 
 { #category : #accessing }
 GtRrTask >> errorDetails [
 	<return: #GtRrErrorDetails>
 
-	^ executionData errorDetails
+	^ self executionData errorDetails
 ]
 
 { #category : #accessing }
@@ -91,13 +91,13 @@ GtRrTask >> errorDetails: aGtErrorDetails [
 	"Set the error details of the receiver.
 	Asynchronous events may cause multiple attempts at setting the details, use the first one"
 
-	executionData errorDetails: aGtErrorDetails
+	self executionData errorDetails: aGtErrorDetails
 ]
 
 { #category : #accessing }
 GtRrTask >> executionData [
 
-	^ executionData
+	^ executionData ifNil: [ executionData := GtRrTaskExecutionData new ].
 ]
 
 { #category : #'private - accessing' }
@@ -195,13 +195,13 @@ GtRrTask >> gtWorkerAttributesFor: aView [
 { #category : #accessing }
 GtRrTask >> handoverTime [
 
-	^ executionData handoverTime
+	^ self executionData handoverTime
 ]
 
 { #category : #accessing }
 GtRrTask >> handoverTime: anObject [
 
-	executionData handoverTime: anObject
+	self executionData handoverTime: anObject
 ]
 
 { #category : #testing }
@@ -298,6 +298,7 @@ GtRrTask >> postCopy [
 	self reset.
 	taskId := UUID new asString.
 	retryStrategy := retryStrategy copy.
+	executionData := executionData copy.
 ]
 
 { #category : #printing }
@@ -323,7 +324,6 @@ GtRrTask >> printSupplementalOn: aStream [
 { #category : #accessing }
 GtRrTask >> reset [
 
-	executionData := GtRrTaskExecutionData new.
 	result := nil.
 
 ]
@@ -343,13 +343,13 @@ GtRrTask >> result: anObject [
 { #category : #accessing }
 GtRrTask >> resultReceivedTime [
 
-	^ executionData resultReceivedTime
+	^ self executionData resultReceivedTime
 ]
 
 { #category : #accessing }
 GtRrTask >> resultReceivedTime: anObject [
 
-	^ executionData resultReceivedTime: anObject
+	self executionData resultReceivedTime: anObject
 ]
 
 { #category : #accessing }
@@ -399,13 +399,13 @@ GtRrTask >> startTime [
 	"Answer the time at which the task was started on the worker"
 	<return: #Duration>
 
-	^ executionData startTime
+	^ self executionData startTime
 ]
 
 { #category : #accessing }
 GtRrTask >> startTime: anObject [
 
-	executionData startTime: anObject
+	self executionData startTime: anObject
 ]
 
 { #category : #accessing }
@@ -414,15 +414,14 @@ GtRrTask >> state [
 	One of: #notStarted, #started, #cancelled, #terminating, #terminated, #completed.
 	The errorDetails are used to determine if the task completed successfully, why and where it was terminated, etc."
 
-	^ executionData state
+	^ self executionData state
 ]
 
 { #category : #private }
 GtRrTask >> state: aSymbol [
-	"Set the state.
-	Only used by object serialisation"
-	
-	executionData state: aSymbol
+	"Set the state"
+
+	self executionData state: aSymbol
 ]
 
 { #category : #printing }
@@ -504,24 +503,30 @@ GtRrTask >> taskTimeout: aDuration [
 
 { #category : #running }
 GtRrTask >> timedRun [
-	| runResult |
+	| runResult resourceStart resourceEnd |
 
+	resourceStart := GtVmStatisticsReport new recordReportStatistics.
 	self startTime: DateAndTime now.
-	runResult := self run.
-	self endTime: DateAndTime now.
+	runResult := [ self run ] ensure:
+		[ self endTime: DateAndTime now.
+		resourceEnd := GtVmStatisticsReport new recordReportStatistics.
+		self executionData resourceReport: (GtVmStatisticsReportsDiff new
+			sourceReport: resourceStart;
+			targetReport: resourceEnd;
+			yourself) ].
 	^ runResult.
 ]
 
 { #category : #accessing }
 GtRrTask >> workerAttributes [
 
-	^ executionData workerAttributes
+	^ self executionData workerAttributes
 ]
 
 { #category : #accessing }
 GtRrTask >> workerAttributes: anObject [
 
-	executionData workerAttributes: anObject
+	self executionData workerAttributes: anObject
 ]
 
 { #category : #accessing }

@@ -30,9 +30,24 @@ GtRrWorkerTaskContext >> evaluateOn: anExecution [
 	^ self value
 ]
 
+{ #category : #accessing }
+GtRrWorkerTaskContext >> executionData [
+
+	^ task executionData
+]
+
 { #category : #executing }
 GtRrWorkerTaskContext >> futureTaskExecutionFor: aRunner [
 	^ self configureTaskExecution: GtRrFutureTimeoutableTaskExecution new with: aRunner
+]
+
+{ #category : #accessing }
+GtRrWorkerTaskContext >> postCopy [
+	"The task context is copied by the in-image worker to get a copy of the task.
+	Don't generate a new UID."
+
+	super postCopy.
+	task := task copy.
 ]
 
 { #category : #accessing }

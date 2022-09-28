@@ -473,44 +473,55 @@ GtRrWorker >> stopHeartbeat [
 
 { #category : #accessing }
 GtRrWorker >> taskDone: aTask with: anObject [
-	| serializedResult |
+	| serializedResult executionData serializedExecutionData|
 
+	executionData := GtRrWorkerExecutionData new
+		startTime: aTask startTime;
+		endTime: aTask endTime;
+		resourceReport: aTask executionData resourceReport;
+		additionalData: aTask executionData additionalData.
+	serializedExecutionData := [ LeJsonV4 uniqueInstance serialize: executionData ]
+		on: Error 
+		do: [ :ex | ^ self taskFailed: aTask with: ex ].
 	serializedResult := [ LeJsonV4 uniqueInstance serialize: anObject ]
 		on: Error 
 		do: [ :ex | ^ self taskFailed: aTask with: ex ].
 	resultQueue nextPut: (GtRrWorkerResultEntry
+		worker: self
 		task: aTask
 		bindings: { 
 			#taskContextId -> aTask taskContextId.
-			#startTime -> aTask startTime.
-			#endTime -> aTask endTime.
+			#executionData -> serializedExecutionData.
 			#result -> serializedResult. }
 		command: 'GtAssignedRemoteRunner 
 			taskDone: taskContextId 
-			started: startTime
-			completed: endTime
-			with: (LeJsonV4 uniqueInstance deserialize: result readStream). true').
+			executionData: (LeJsonV4 uniqueInstance deserialize: executionData readStream)
+			result: (LeJsonV4 uniqueInstance deserialize: result readStream). true').
 
 ]
 
 { #category : #accessing }
 GtRrWorker >> taskFailed: aTask with: anError [
+	| executionData serializedExecutionData |
 
+	executionData := GtRrWorkerExecutionData new
+		startTime: aTask startTime;
+		endTime: aTask endTime;
+		resourceReport: aTask executionData resourceReport;
+		errorDetails: (GtRrErrorDetails new
+						errorMessage: anError messageText;
+						trace: anError stackString);
+		additionalData: aTask executionData additionalData.
+	serializedExecutionData := LeJsonV4 uniqueInstance serialize: executionData.
 	resultQueue nextPut: (GtRrWorkerResultEntry
+		worker: self
 		task: aTask
 		bindings: { 
 			#taskContextId -> aTask taskContextId.
-			#startTime -> aTask startTime.
-			#endTime -> aTask endTime.
-			#errorDetails -> (LeJsonV4 uniqueInstance serialize: 
-					(GtRrErrorDetails new
-						errorMessage: anError messageText;
-						trace: anError stackString)) }
+			#executionData -> serializedExecutionData. }
 		command: 'GtAssignedRemoteRunner 
 				taskFailed: taskContextId 
-				started: startTime
-				completed: endTime
-				with: (LeJsonV4 uniqueInstance deserialize: errorDetails readStream). true').
+				executionData: (LeJsonV4 uniqueInstance deserialize: executionData readStream). true').
 
 ]
 

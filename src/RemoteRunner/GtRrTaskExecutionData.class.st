@@ -12,7 +12,8 @@ Class {
 		'endTime',
 		'workerAttributes',
 		'errorDetails',
-		'additionalData'
+		'additionalData',
+		'resourceReport'
 	],
 	#category : #'RemoteRunner-Tasks'
 }
@@ -33,6 +34,24 @@ GtRrTaskExecutionData >> additionalData [
 GtRrTaskExecutionData >> additionalData: anObject [
 
 	additionalData := anObject
+]
+
+{ #category : #accessing }
+GtRrTaskExecutionData >> additionalDataAt: key [
+
+	^ additionalData at: key
+]
+
+{ #category : #accessing }
+GtRrTaskExecutionData >> additionalDataAt: key ifAbsent: absentBlock [
+
+	^ additionalData at: key ifAbsent: absentBlock
+]
+
+{ #category : #accessing }
+GtRrTaskExecutionData >> additionalDataAt: key put: value [
+
+	^ self additionalData at: key put: value.
 ]
 
 { #category : #accessing }
@@ -82,6 +101,18 @@ GtRrTaskExecutionData >> initialize [
 ]
 
 { #category : #accessing }
+GtRrTaskExecutionData >> resourceReport [
+
+	^ resourceReport
+]
+
+{ #category : #accessing }
+GtRrTaskExecutionData >> resourceReport: anObject [
+
+	resourceReport := anObject
+]
+
+{ #category : #accessing }
 GtRrTaskExecutionData >> resultReceivedTime [
 
 	^ resultReceivedTime
@@ -118,6 +149,18 @@ GtRrTaskExecutionData >> state [
 GtRrTaskExecutionData >> state: anObject [
 
 	state := anObject
+]
+
+{ #category : #accessing }
+GtRrTaskExecutionData >> updateFromWorker: aGtRrWorkerExecutionData [
+	"Update the receiver based on the supplied data"
+
+	startTime := aGtRrWorkerExecutionData startTime.
+	endTime := aGtRrWorkerExecutionData endTime.
+	self errorDetails: aGtRrWorkerExecutionData errorDetails.
+	resourceReport := aGtRrWorkerExecutionData resourceReport.
+	aGtRrWorkerExecutionData additionalData ifNotNil: [ :data |
+		self additionalData addAll: data ].
 ]
 
 { #category : #accessing }

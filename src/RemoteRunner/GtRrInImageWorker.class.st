@@ -5,13 +5,10 @@ The worker process runs at low priority to not interfere with user operations (s
 "
 Class {
 	#name : #GtRrInImageWorker,
-	#superclass : #Object,
+	#superclass : #GtRrWorker,
 	#instVars : [
-		'process',
 		'remoteRunner',
-		'connection',
-		'details',
-		'uid'
+		'connection'
 	],
 	#category : #'RemoteRunner-Worker'
 }
@@ -29,45 +26,38 @@ GtRrInImageWorker >> connection: aPharoLinkServerConnection [
 	connection := aPharoLinkServerConnection
 ]
 
-{ #category : #accessing }
-GtRrInImageWorker >> currentProcessId [
-	"Answer the PID of this OS process"
-
-	^ GtOsSystemInfo current currentProcessId
-]
-
-{ #category : #accessing }
-GtRrInImageWorker >> details [
-
-	^ details
-]
-
-{ #category : #accessing }
-GtRrInImageWorker >> details: anObject [
-
-	details := anObject
-]
-
 { #category : #initialization }
 GtRrInImageWorker >> initialize [
 
 	super initialize.
-	uid := UUID new asString.
-	details := Dictionary new
-		at: #workingDirectory put: FileLocator workingDirectory resolve fullName;
-		at: #id put: uid;
-		at: #pid put: self currentProcessId;
-		at: #platform put: OSPlatform current name;
+	attributes
 		at: #workerPriority put: 10;
-		at: #workerInImage put: true;
-		yourself.
+		at: #workerInImage put: true.
 	connection := GtRrPseudoPharoLinkServerConnection new.
+	self connectionStrategy: GtRrWorkerInImageConnectionStrategy new.
+	self serviceName: 'GtRrInImageWorker-', uid.
 ]
 
-{ #category : #accessing }
-GtRrInImageWorker >> process [
+{ #category : #private }
+GtRrInImageWorker >> nextTask [
+	"Send any queued results and get the next task"
+	| nextTask |
 
-	^ process
+	"Normally the task has been serialised and deserialised,
+	so is a different instance.  Manually ensure that for the in-image worker."
+	nextTask := (remoteRunner nextTaskForWorkerId: uid) copy.
+	lastHeartbeat := DateAndTime now.
+	^ nextTask
+]
+
+{ #category : #running }
+GtRrInImageWorker >> registerWith: ignored [
+	"Register the receiver with the remote runner associated with the supplied PharoLinkApplication"
+
+	PharoLinkServerCurrentConnection 
+		value: connection
+		during: [ remoteRunner registerWorkerWithDetails: attributes ].
+
 ]
 
 { #category : #accessing }
@@ -82,75 +72,47 @@ GtRrInImageWorker >> remoteRunner: anObject [
 	remoteRunner := anObject
 ]
 
-{ #category : #running }
-GtRrInImageWorker >> start [
+{ #category : #private }
+GtRrInImageWorker >> sendHeartbeat [
 
-	process ifNotNil: [ ^ self error: 'Worker already started' ].
-	self assert: remoteRunner isNotNil
-		description: 'The worker''s remote runner must be set before starting'.
-	PharoLinkServerCurrentConnection 
-		value: connection
-		during: [ remoteRunner registerWorkerWithDetails: details ].
-	process := [ self taskPollForever ] forkAt: Processor userBackgroundPriority.
-]
-
-{ #category : #accessing }
-GtRrInImageWorker >> stop [
-
-	process ifNil: [ ^ self ].
-	process terminate.
-	process := nil.
+	lastHeartbeat := DateAndTime now.
+	remoteRunner heartbeatForWorkerId: uid.
 ]
 
 { #category : #running }
 GtRrInImageWorker >> taskDone: aTaskContext with: anObject [
+	| executionData |
 
-	remoteRunner 
-		taskDone: aTaskContext taskContextId 
-		started: aTaskContext startTime
-		completed: aTaskContext endTime
-		with: anObject.
+	executionData := GtRrWorkerExecutionData new
+		startTime: aTaskContext startTime;
+		endTime: aTaskContext endTime;
+		resourceReport: aTaskContext executionData resourceReport;
+		additionalData: aTaskContext executionData additionalData.
+	remoteRunner
+		taskDone: aTaskContext taskContextId
+		executionData: executionData
+		result: anObject.
 ]
 
 { #category : #running }
 GtRrInImageWorker >> taskFailed: aTaskContext with: anError [
+	| executionData |
 
-	remoteRunner 
-		taskFailed: aTaskContext taskContextId 
-		started: aTaskContext startTime
-		completed: aTaskContext endTime
-		with: (GtRrErrorDetails new
-			errorMessage: anError messageText;
-			trace: anError stackString).
+	executionData := GtRrWorkerExecutionData new
+		startTime: aTaskContext startTime;
+		endTime: aTaskContext endTime;
+		resourceReport: aTaskContext executionData resourceReport;
+		errorDetails: (GtRrErrorDetails new
+						errorMessage: anError messageText;
+						trace: anError stackString);
+		additionalData: aTaskContext executionData additionalData.
+	remoteRunner
+		taskFailed: aTaskContext taskContextId
+		executionData: executionData.
 ]
 
-{ #category : #running }
-GtRrInImageWorker >> taskPoll [
-	| serialisedTask |
+{ #category : #private }
+GtRrInImageWorker >> unregisterWith: ignored [
+	"Register the receiver with the remote runner associated with the supplied PharoLinkApplication"
 
-	PharoLinkServerCurrentConnection 
-		value: connection
-		during: [ serialisedTask := remoteRunner nextTaskSerializedForWorkerId: 
-			(details at: #id) ].
-	^ LeJsonV4 uniqueInstance deserialize: serialisedTask readStream.
-]
-
-{ #category : #running }
-GtRrInImageWorker >> taskPollForever [
-
-	[ self taskRun: self taskPoll ] repeat
-]
-
-{ #category : #running }
-GtRrInImageWorker >> taskRun: aTaskContext [
-	| result error |
-
-	[ result := aTaskContext value ]
-		on: Error 
-		do: [ :ex |
-			ex freeze.
-			error := ex ].
-	error
-		ifNil: [ self taskDone: aTaskContext with: result ]
-		ifNotNil: [ self taskFailed: aTaskContext with: error ]
 ]

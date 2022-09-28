@@ -1,8 +1,12 @@
 Class {
 	#name : #GtRrTaskExamples,
 	#superclass : #Object,
-	#traits : 'TAssertable',
-	#classTraits : 'TAssertable classTrait',
+	#traits : 'TAssertable + TGtRrExampleHelp',
+	#classTraits : 'TAssertable classTrait + TGtRrExampleHelp classTrait',
+	#instVars : [
+		'remoteRunner',
+		'worker'
+	],
 	#category : #'RemoteRunner-Examples'
 }
 
@@ -25,6 +29,63 @@ GtRrTaskExamples >> compoundTask [
 	visitor visitNode: compoundTask.
 	self assert: results asArray equals: #(1 2 3 4 5).
 	^ compoundTask.
+]
+
+{ #category : #accessing }
+GtRrTaskExamples >> sunitTask [
+	"Demonstrate running an SUnit test in a task"
+	<gtExample>
+	| task job semaphore |
+
+
+	remoteRunner := GtRemoteRunner new.
+	worker := GtRrInImageWorker new
+		remoteRunner: remoteRunner;
+		start.
+	semaphore := Semaphore new.
+	remoteRunner
+		when: GtRrJobCompletedAnnouncement
+		do: [ :ann | semaphore signal ].
+	task := GtRrClassSUnitTask sunitClassName: #GtRrSampleTest.
+	job := remoteRunner submitJob: task asJob.
+	self
+		waitOn: semaphore
+		for: 20
+		description: 'Job didn''t complete in time'.
+	self assert: task executionData resourceReport isNotNil.
+	task result do: [ :each |
+		self assert: each resourceReport isNotNil ].
+	^ task.
+]
+
+{ #category : #examples }
+GtRrTaskExamples >> taskResourceReport [
+	"Confirm that tasks collect GC data on the execution"
+	<gtExample>
+	| task job semaphore |
+
+	remoteRunner := GtRemoteRunner new.
+	worker := GtRrInImageWorker new
+		remoteRunner: remoteRunner;
+		start.
+	semaphore := Semaphore new.
+	remoteRunner
+		when: GtRrJobCompletedAnnouncement
+		do: [ :ann | semaphore signal ].
+	task := GtRrScriptTask script: 
+'| times |
+times := OrderedCollection new.
+times add: GtVirtualMachine instance totalGCTimeMicroseconds.
+[ times add: GtVirtualMachine instance totalGCTimeMicroseconds.
+times last = times first ] whileTrue.
+{ times first. times last. times size. }'.
+	job := remoteRunner submitJob: task asJob.
+	self
+		waitOn: semaphore
+		for: 10
+		description: 'Job didn''t complete in time'.
+	self assert: task executionData resourceReport isNotNil.
+	^ task.
 ]
 
 { #category : #examples }
