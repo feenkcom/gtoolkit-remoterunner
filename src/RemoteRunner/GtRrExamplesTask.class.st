@@ -98,8 +98,7 @@ GtRrExamplesTask >> run [
 	^ group examples collect: [ :exampleWithResult |
 		resourceReport := nil.
 		
-		(ignoreNoTest or: [ exampleWithResult ignoreTest not ]) ifTrue:
-			[ 
+		(ignoreNoTest or: [ exampleWithResult ignoreTest not ]) ifTrue: [ 
 			resourceReport := GtVmStatisticsReportsDiff new.
 			exampleStartTime := DateAndTime now.
 			resourceReport recordSourceReport.
@@ -119,8 +118,8 @@ GtRrExamplesTask >> run [
 			shouldPass: true.
 		announcement resourceReport: resourceReport.
 		
-		(exampleWithResult isSuccess or: [ exampleResult isNil ]) ifFalse:
-			[ exception := exampleResult basicReturnValue value.
+		(exampleWithResult isSuccess or: [ exampleResult isNil ]) ifFalse: [ 
+			exception := exampleResult basicReturnValue value.
 			announcement 
 				initializeExceptionClass: exception class
 				messageText: (exception messageText ifEmpty: [ exception class name ])

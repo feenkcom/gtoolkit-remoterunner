@@ -48,6 +48,7 @@ GtRrWorkersExamplesReport >> gtViewWorkersFor: aView [
 	^ aView columnedList 
 		title: 'Workers Stats';
 		items: [ self workers ];
+		priority: 10;
 		column: 'Id' text: [ :aWorker | aWorker workerId ];
 		column: 'Tasks' text: [ :aWorker | aWorker numberOfTasks ];
 		column: 'Checks' text: [ :aWorker | aWorker numberOfExamples ];
@@ -72,7 +73,11 @@ GtRrWorkersExamplesReport >> gtViewWorkersTimingFor: aView [
 				ifNil: [ '-'] 
 				ifNotNil: [ :aTimestamp | aTimestamp printToSeconds ]  ];
 		column: 'Tasks Duration' text: [ :aWorker | aWorker tasksDuration ];
-		column: 'Task Gap' text: [ :aWorker | aWorker taskGapsDuration ]
+		column: 'Task Gap' text: [ :aWorker | aWorker taskGapsDuration ];
+		column: 'GC Duration' text: [ :aWorker | 
+			aWorker totalGCTime 
+				ifNil: [ '-' ] 
+				ifNotNil: [ :aGCTime | Duration milliSeconds: aGCTime ]]
 ]
 
 { #category : #accessing }
@@ -187,6 +192,15 @@ GtRrWorkersExamplesReport >> tasksStartInterval [
 { #category : #accessing }
 GtRrWorkersExamplesReport >> tasksStartTime [ 
 	^ self tasksFirstStartTime
+]
+
+{ #category : #accessing }
+GtRrWorkersExamplesReport >> totalGCTime [ 
+	^ (((self workers 
+		collect: [ :aWorker | aWorker totalGCTime ]) 
+		reject: #isNil)
+			ifEmpty: [ nil ]
+			ifNotEmpty: [ :aCollection | aCollection sumNumbers ])
 ]
 
 { #category : #accessing }

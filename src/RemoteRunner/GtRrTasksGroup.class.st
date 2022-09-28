@@ -174,6 +174,11 @@ GtRrTasksGroup >> initializeWith: aCollection [
 	items := aCollection
 ]
 
+{ #category : #enumerating }
+GtRrTasksGroup >> inject: thisValue into: binaryBlock [ 
+	^ self items inject: thisValue into: binaryBlock 
+]
+
 { #category : #accessing }
 GtRrTasksGroup >> items [
 	^ items

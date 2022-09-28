@@ -135,6 +135,11 @@ GtRrRunnerMachineExamplesReport >> tasksStartTime [
 ]
 
 { #category : #accessing }
+GtRrRunnerMachineExamplesReport >> totalGCTime [
+	^ self workersReport totalGCTime
+]
+
+{ #category : #accessing }
 GtRrRunnerMachineExamplesReport >> workersReport [
 
 	^ workersReport
