@@ -217,6 +217,24 @@ GtRrWorkerExamplesReport >> totalGCTime [
 ]
 
 { #category : #accessing }
+GtRrWorkerExamplesReport >> vmStatisticsAtCompletion [
+	^ self tasks vmStatisticsAtCompletion
+]
+
+{ #category : #accessing }
+GtRrWorkerExamplesReport >> vmStatisticsAtStart [
+	^ self tasks vmStatisticsAtStart
+]
+
+{ #category : #accessing }
+GtRrWorkerExamplesReport >> vmStatisticsReportsDiff [ 
+	^ GtVmStatisticsReportsDiff new
+		sourceReport: self vmStatisticsAtStart;
+		targetReport: self vmStatisticsAtCompletion;
+		yourself
+]
+
+{ #category : #accessing }
 GtRrWorkerExamplesReport >> workerAttributes [
 
 	^ workerAttributes
