@@ -334,6 +334,13 @@ GtRrTask >> reset [
 ]
 
 { #category : #accessing }
+GtRrTask >> resourceReportIfPresent: aPresentBlock ifAbsent: anAbsentBlock [
+	^ self executionData resourceReport 
+		ifNil: [ anAbsentBlock value ]
+		ifNotNil: [ :report | aPresentBlock cull: report ]
+]
+
+{ #category : #accessing }
 GtRrTask >> result [
 
 	^ result
@@ -517,6 +524,13 @@ GtRrTask >> timedRun [
 		resourceReport recordTargetReport.
 		self executionData resourceReport: resourceReport ].
 	^ runResult.
+]
+
+{ #category : #accessing }
+GtRrTask >> totalGCTime [
+	^ self 
+		resourceReportIfPresent: [ :aReport | aReport totalGcTimeDiff ] 
+		ifAbsent: [ nil ]
 ]
 
 { #category : #accessing }

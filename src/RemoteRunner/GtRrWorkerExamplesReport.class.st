@@ -204,6 +204,19 @@ GtRrWorkerExamplesReport >> tasksStartTime [
 ]
 
 { #category : #accessing }
+GtRrWorkerExamplesReport >> totalGCTime [ 
+	^ self tasks 
+		inject: nil "nil indicates there is no value. Can happen if the GC report is missing"
+		into: [ :totalGCTime :aTask |
+			totalGCTime
+				ifNil: [ aTask totalGCTime ] 
+				ifNotNil: [
+					aTask totalGCTime 
+						ifNil: [ totalGCTime ]
+						ifNotNil: [ :aTime | totalGCTime + aTime ] ] ]
+]
+
+{ #category : #accessing }
 GtRrWorkerExamplesReport >> workerAttributes [
 
 	^ workerAttributes

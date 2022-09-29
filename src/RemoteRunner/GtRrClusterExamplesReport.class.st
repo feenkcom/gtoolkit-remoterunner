@@ -60,7 +60,11 @@ GtRrClusterExamplesReport >> gtViewMachinesFor: aView [
 			aMachineReport numberOfExamples ];
 		column: 'Cummulative Duration' text: [ :aMachineReport |
 			aMachineReport cummulativeTasksDuration ];
-		 column: 'Cummulative Task Gaps' text: [ :aMachineReport | aMachineReport taskGapsDuration ]
+		 column: 'Cummulative Task Gaps' text: [ :aMachineReport | aMachineReport taskGapsDuration ];
+		 column: 'GC Duration' text: [ :aMachineReport | 
+			aMachineReport totalGCTime 
+				ifNil: [ '-' ] 
+				ifNotNil: [ :aGCTime | Duration milliSeconds: aGCTime ]]
 ]
 
 { #category : #'gt - extensions' }
@@ -89,7 +93,11 @@ GtRrClusterExamplesReport >> gtViewMachinesFullDetailsFor: aView [
 			aMachineReport cummulativeTasksDuration ];
 		column: 'Cummulative Duration (runner)' text: [ :aMachineReport |
 			aMachineReport cummulativeTasksDurationOnRunner ];
-		column: 'Cummulative Task Gaps' text: [ :aMachineReport | aMachineReport taskGapsDuration ]
+		column: 'Cummulative Task Gaps' text: [ :aMachineReport | aMachineReport taskGapsDuration ];
+		column: 'GC Duration' text: [ :aMachineReport | 
+			aMachineReport totalGCTime 
+				ifNil: [ '-' ] 
+				ifNotNil: [ :aGCTime | Duration milliSeconds: aGCTime ]]
 ]
 
 { #category : #'gt - extensions' }
@@ -109,7 +117,11 @@ GtRrClusterExamplesReport >> gtViewMachinesTimingFor: aView [
 		column: 'Tasks Last End Time' text: [ :aMachineReport |
 			aMachineReport tasksEndTime printToSeconds ];
 		column: 'Workers Start Interval' text: [ :aMachineReport |
-			aMachineReport tasksStartInterval ]
+			aMachineReport tasksStartInterval ];
+		column: 'GC Duration' text: [ :aMachineReport | 
+			aMachineReport totalGCTime 
+				ifNil: [ '-' ] 
+				ifNotNil: [ :aGCTime | Duration milliSeconds: aGCTime ]]
 ]
 
 { #category : #'gt - extensions' }
