@@ -58,6 +58,17 @@ GtRrTasksGroup >> firstHandoverTime [
 ]
 
 { #category : #accessing }
+GtRrTasksGroup >> firstTask [ 
+	| firstTask |
+	firstTask := self items first.
+	self do: [ :aTask | 
+		(aTask handoverTime notNil and: [ aTask handoverTime < firstTask handoverTime ])
+			ifTrue: [
+				firstTask := aTask ] ].
+	^ firstTask
+]
+
+{ #category : #accessing }
 GtRrTasksGroup >> from: start to: stop do: aBlock [
 	^ self items from: start to: stop do: aBlock
 ]
@@ -196,6 +207,18 @@ GtRrTasksGroup >> lastResultReceivedTime [
 ]
 
 { #category : #accessing }
+GtRrTasksGroup >> lastTask [ 
+	| lastTask |
+	lastTask := self items first.
+	self do: [ :aTask | 
+		(aTask lastResultReceivedTime notNil and: [ 
+			aTask lastResultReceivedTime > lastTask lastResultReceivedTime ])
+				ifTrue: [
+					lastTask := aTask ] ].
+	^ lastTask
+]
+
+{ #category : #accessing }
 GtRrTasksGroup >> maxValue: aBlock [
 	^ self items maxValue: aBlock
 ]
@@ -237,4 +260,14 @@ GtRrTasksGroup >> startTime [
 { #category : #'math functions' }
 GtRrTasksGroup >> sumNumbers: aBlock [
 	^ self items sumNumbers: aBlock
+]
+
+{ #category : #accessing }
+GtRrTasksGroup >> vmStatisticsAtCompletion [
+	^ self firstTask vmStatisticsAtCompletion
+]
+
+{ #category : #accessing }
+GtRrTasksGroup >> vmStatisticsAtStart [
+	^ self firstTask vmStatisticsAtStart
 ]

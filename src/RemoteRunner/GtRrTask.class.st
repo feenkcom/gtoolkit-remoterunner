@@ -534,6 +534,29 @@ GtRrTask >> totalGCTime [
 ]
 
 { #category : #accessing }
+GtRrTask >> vmMemorySizeAtCompletion [
+	^ self 
+		resourceReportIfPresent: [ :aReport | aReport vmMemorySizeAtEnd ] 
+		ifAbsent: [ nil ]
+]
+
+{ #category : #accessing }
+GtRrTask >> vmStatisticsAtCompletion [  
+	^ self
+		resourceReportIfPresent: [ :aReport | 
+			aReport targetReport ] 
+		ifAbsent: [ nil ]
+]
+
+{ #category : #accessing }
+GtRrTask >> vmStatisticsAtStart [
+	^ self
+		resourceReportIfPresent: [ :aReport | 
+			aReport sourceReport ] 
+		ifAbsent: [ nil ]
+]
+
+{ #category : #accessing }
 GtRrTask >> workerAttributes [
 
 	^ self executionData workerAttributes
