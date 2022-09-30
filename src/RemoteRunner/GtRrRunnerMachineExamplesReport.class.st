@@ -23,6 +23,11 @@ GtRrRunnerMachineExamplesReport >> description [
 	^ self ipAddress
 ]
 
+{ #category : #'accessing - gc details' }
+GtRrRunnerMachineExamplesReport >> fullGcTime [
+	^ self workersReport fullGcTime
+]
+
 { #category : #'gt - extensions' }
 GtRrRunnerMachineExamplesReport >> gtViewWorkersFor: aView [
 	<gtView>
@@ -43,6 +48,11 @@ GtRrRunnerMachineExamplesReport >> gtViewWorkersTimingFor: aView [
 		priority: 20;
 		object: [ self workersReport ];
 		view: #gtViewWorkersTimingFor:
+]
+
+{ #category : #'accessing - gc details' }
+GtRrRunnerMachineExamplesReport >> incrGcTime [
+	^ self workersReport incrGcTime
 ]
 
 { #category : #accessing }
@@ -109,6 +119,16 @@ GtRrRunnerMachineExamplesReport >> tasksFirstHandoveTime [
 	^ self workersReport tasksFirstHandoveTime
 ]
 
+{ #category : #'accessing - gc details' }
+GtRrRunnerMachineExamplesReport >> tasksFullGcTime [
+	^ self workersReport tasksFullGcTime
+]
+
+{ #category : #'accessing - gc details' }
+GtRrRunnerMachineExamplesReport >> tasksIncrGcTime [
+	^ self workersReport tasksIncrGcTime
+]
+
 { #category : #accessing }
 GtRrRunnerMachineExamplesReport >> tasksLastEndTime [
 	^ self workersReport tasksLastEndTime
@@ -134,7 +154,12 @@ GtRrRunnerMachineExamplesReport >> tasksStartTime [
 	^ self workersReport tasksStartTime
 ]
 
-{ #category : #accessing }
+{ #category : #'accessing - gc details' }
+GtRrRunnerMachineExamplesReport >> tasksTotalGCTime [
+	^ self workersReport tasksTotalGCTime
+]
+
+{ #category : #'accessing - gc details' }
 GtRrRunnerMachineExamplesReport >> totalGCTime [
 	^ self workersReport totalGCTime
 ]

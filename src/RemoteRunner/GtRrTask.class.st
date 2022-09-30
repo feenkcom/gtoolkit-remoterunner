@@ -112,6 +112,13 @@ GtRrTask >> executionData: aGtRrTaskExecutionData [
 	executionData := aGtRrTaskExecutionData 
 ]
 
+{ #category : #'accessing - gc details' }
+GtRrTask >> fullGcTime [
+	^ self 
+		resourceReportIfPresent: [ :aReport | aReport fullGcTimeDiff ] 
+		ifAbsent: [ nil ]
+]
+
 { #category : #'accessing - pharolink' }
 GtRrTask >> getSerialized [
 	"Anser the receiver as a local value.
@@ -220,6 +227,18 @@ GtRrTask >> hasErrors [
 	"Answer a boolean indicating if the receiver failed to execute successfully"
 
 	^ self errorDetails isNotNil
+]
+
+{ #category : #testing }
+GtRrTask >> hasResourceReport [
+	^ self executionData resourceReport notNil
+]
+
+{ #category : #'accessing - gc details' }
+GtRrTask >> incrGcTime [
+	^ self 
+		resourceReportIfPresent: [ :aReport | aReport incrGcTimeDiff ] 
+		ifAbsent: [ nil ]
 ]
 
 { #category : #accessing }
@@ -526,10 +545,17 @@ GtRrTask >> timedRun [
 	^ runResult.
 ]
 
-{ #category : #accessing }
+{ #category : #'accessing - gc details' }
 GtRrTask >> totalGCTime [
 	^ self 
 		resourceReportIfPresent: [ :aReport | aReport totalGcTimeDiff ] 
+		ifAbsent: [ nil ]
+]
+
+{ #category : #accessing }
+GtRrTask >> vmFreeMemoryAtCompletion [
+	^ self 
+		resourceReportIfPresent: [ :aReport | aReport vmFreeMemory ] 
 		ifAbsent: [ nil ]
 ]
 

@@ -31,7 +31,7 @@ GtRrTaskExamples >> compoundTask [
 	^ compoundTask.
 ]
 
-{ #category : #accessing }
+{ #category : #examples }
 GtRrTaskExamples >> sunitTask [
 	"Demonstrate running an SUnit test in a task"
 	<gtExample>
