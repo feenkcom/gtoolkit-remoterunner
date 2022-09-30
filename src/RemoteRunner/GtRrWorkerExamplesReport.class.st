@@ -13,6 +13,11 @@ GtRrWorkerExamplesReport >> description [
 	^ self workerId 
 ]
 
+{ #category : #'accessing - gc details' }
+GtRrWorkerExamplesReport >> fullGcTime [
+	^ self vmStatisticsReportsDiff fullGcTimeDiff
+]
+
 { #category : #'gt - extensions' }
 GtRrWorkerExamplesReport >> gtViewDurationExecutionChartListFor: aView [
 	<gtView>
@@ -49,6 +54,17 @@ GtRrWorkerExamplesReport >> gtViewExecutionTimelineListFor: aView [
 ]
 
 { #category : #'gt - extensions' }
+GtRrWorkerExamplesReport >> gtViewMemoryStatisticsDiffFor: aView [
+	<gtView>
+	
+	^ aView forward
+		title: 'Memory Statistics Diff';
+		priority: 50;
+		object: [ self vmStatisticsReportsDiff ];
+		view: #gtViewTextualDiffFor: 
+]
+
+{ #category : #'gt - extensions' }
 GtRrWorkerExamplesReport >> gtViewTasksListFor: aView [
 	<gtView>
 	
@@ -76,6 +92,11 @@ GtRrWorkerExamplesReport >> gtViewTasksOverviewFor: aView [
 			aTask durationOnRunner ifNil: [ '-' ] ];
 		column: 'Duration (worker)' text: [ :aTask | 
 			aTask duration ifNil: [ '-' ] ] "width: 150"
+]
+
+{ #category : #'accessing - gc details' }
+GtRrWorkerExamplesReport >> incrGcTime [
+	^ self vmStatisticsReportsDiff incrGcTimeDiff
 ]
 
 { #category : #'accessing - chart data' }
@@ -193,6 +214,16 @@ GtRrWorkerExamplesReport >> tasksFirstHandoveTime [
 	^ self tasks firstHandoverTime
 ]
 
+{ #category : #'accessing - gc details' }
+GtRrWorkerExamplesReport >> tasksFullGcTime [
+	^ self tasks fullGcTime
+]
+
+{ #category : #'accessing - gc details' }
+GtRrWorkerExamplesReport >> tasksIncrGcTime [
+	^ self tasks incrGcTime
+]
+
 { #category : #accessing }
 GtRrWorkerExamplesReport >> tasksLastResultReceivedTime [ 
 	^ self tasks lastResultReceivedTime
@@ -203,17 +234,14 @@ GtRrWorkerExamplesReport >> tasksStartTime [
 	^ self tasks startTime
 ]
 
-{ #category : #accessing }
+{ #category : #'accessing - gc details' }
+GtRrWorkerExamplesReport >> tasksTotalGCTime [ 
+	^ self tasks totalGCTime
+]
+
+{ #category : #'accessing - gc details' }
 GtRrWorkerExamplesReport >> totalGCTime [ 
-	^ self tasks 
-		inject: nil "nil indicates there is no value. Can happen if the GC report is missing"
-		into: [ :totalGCTime :aTask |
-			totalGCTime
-				ifNil: [ aTask totalGCTime ] 
-				ifNotNil: [
-					aTask totalGCTime 
-						ifNil: [ totalGCTime ]
-						ifNotNil: [ :aTime | totalGCTime + aTime ] ] ]
+	^ self vmStatisticsReportsDiff totalGcTimeDiff
 ]
 
 { #category : #accessing }

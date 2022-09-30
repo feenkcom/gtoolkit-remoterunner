@@ -41,6 +41,11 @@ GtRrWorkersExamplesReport >> cummulativeTasksDurationOnRunner [
 			totalDuration + aWorker tasksDurationOnRunner ]
 ]
 
+{ #category : #'accessing - gc details' }
+GtRrWorkersExamplesReport >> fullGcTime [
+	^ self sumWorkerValueWithNil: [ :aWorker | aWorker fullGcTime ]
+]
+
 { #category : #'gt - extensions' }
 GtRrWorkersExamplesReport >> gtViewWorkersFor: aView [
 	<gtView>
@@ -80,6 +85,11 @@ GtRrWorkersExamplesReport >> gtViewWorkersTimingFor: aView [
 				ifNotNil: [ :aGCTime | Duration milliSeconds: aGCTime ]]
 ]
 
+{ #category : #'accessing - gc details' }
+GtRrWorkersExamplesReport >> incrGcTime [
+	^ self sumWorkerValueWithNil: [ :aWorker | aWorker incrGcTime ]
+]
+
 { #category : #accessing }
 GtRrWorkersExamplesReport >> numberOfExamples [
 	^ self workers sumNumbers: [ :aWorker | aWorker numberOfExamples ]
@@ -105,12 +115,26 @@ GtRrWorkersExamplesReport >> printOn: aStream [
 			<< ' workers' ]
 ]
 
+{ #category : #'math functions' }
+GtRrWorkersExamplesReport >> sumWorkerValueWithNil: aBlock [
+	^ self workers gtSumWithNilValues: aBlock
+]
+
 { #category : #accessing }
 GtRrWorkersExamplesReport >> taskGapsDuration [
 	^ self workers 
 		inject: 0 seconds 
 		into: [ :total  :aWorker | 
 			total + aWorker taskGapsDuration ]
+]
+
+{ #category : #accessing }
+GtRrWorkersExamplesReport >> tasksCompletionDelay [
+	| tasksEndTime|
+	
+	tasksEndTime := self workers 
+		collect: [  :aWorker | aWorker tasksLastResultReceivedTime ].
+	^ tasksEndTime max - tasksEndTime min
 ]
 
 { #category : #accessing }
@@ -149,6 +173,16 @@ GtRrWorkersExamplesReport >> tasksFirstTimeFor: aBlock [
 							workerStartTime < startTime 
 								ifTrue: [ workerStartTime ]
 								ifFalse: [ startTime ] ] ] ]
+]
+
+{ #category : #'accessing - gc details' }
+GtRrWorkersExamplesReport >> tasksFullGcTime [
+	^ self sumWorkerValueWithNil: [ :aWorker | aWorker tasksFullGcTime ]
+]
+
+{ #category : #'accessing - gc details' }
+GtRrWorkersExamplesReport >> tasksIncrGcTime [
+	^ self sumWorkerValueWithNil: [ :aWorker | aWorker tasksIncrGcTime ]
 ]
 
 { #category : #accessing }
@@ -194,13 +228,14 @@ GtRrWorkersExamplesReport >> tasksStartTime [
 	^ self tasksFirstStartTime
 ]
 
-{ #category : #accessing }
+{ #category : #'accessing - gc details' }
+GtRrWorkersExamplesReport >> tasksTotalGCTime [
+	^ self sumWorkerValueWithNil: [ :aWorker | aWorker tasksTotalGCTime ]
+]
+
+{ #category : #'accessing - gc details' }
 GtRrWorkersExamplesReport >> totalGCTime [ 
-	^ (((self workers 
-		collect: [ :aWorker | aWorker totalGCTime ]) 
-		reject: #isNil)
-			ifEmpty: [ nil ]
-			ifNotEmpty: [ :aCollection | aCollection sumNumbers ])
+	^ self sumWorkerValueWithNil: [ :aWorker | aWorker totalGCTime ]
 ]
 
 { #category : #accessing }
