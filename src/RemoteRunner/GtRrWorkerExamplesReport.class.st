@@ -239,6 +239,22 @@ GtRrWorkerExamplesReport >> tasksTotalGCTime [
 	^ self tasks totalGCTime
 ]
 
+{ #category : #'accessing - chart data' }
+GtRrWorkerExamplesReport >> tasksVmMemoryChartItems [
+	^ (self tasks 	
+		inject: OrderedCollection new
+		into: [ :memoryValues :aTask |
+			aTask 
+				resourceReportIfPresent: [ :aReport |
+					memoryValues add: (GtRrTimestampedChartDataItem new
+						timestamp: aReport targetReport timestamp;
+						data: {
+							aReport vmMemorySizeAtEnd.
+							aReport vmFreeMemoryAtEnd}) ] 
+				ifAbsent: [].
+			memoryValues ]) asArray
+]
+
 { #category : #'accessing - gc details' }
 GtRrWorkerExamplesReport >> totalGCTime [ 
 	^ self vmStatisticsReportsDiff totalGcTimeDiff

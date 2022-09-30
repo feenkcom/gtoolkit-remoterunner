@@ -229,6 +229,11 @@ GtRrTask >> hasErrors [
 	^ self errorDetails isNotNil
 ]
 
+{ #category : #testing }
+GtRrTask >> hasResourceReport [
+	^ self executionData resourceReport notNil
+]
+
 { #category : #'accessing - gc details' }
 GtRrTask >> incrGcTime [
 	^ self 
@@ -544,6 +549,13 @@ GtRrTask >> timedRun [
 GtRrTask >> totalGCTime [
 	^ self 
 		resourceReportIfPresent: [ :aReport | aReport totalGcTimeDiff ] 
+		ifAbsent: [ nil ]
+]
+
+{ #category : #accessing }
+GtRrTask >> vmFreeMemoryAtCompletion [
+	^ self 
+		resourceReportIfPresent: [ :aReport | aReport vmFreeMemory ] 
 		ifAbsent: [ nil ]
 ]
 
