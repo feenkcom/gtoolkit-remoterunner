@@ -47,11 +47,17 @@ GtRrCheckSchedulingTimes class >> load [
 ]
 
 { #category : #accessing }
+GtRrCheckSchedulingTimes class >> loadDefaultFromFile: aFileReference [
+
+	uniqueInstance := self loadFromFile: aFileReference.
+	uniqueInstance remoteRunner: GtRemoteRunner default.
+	^ uniqueInstance.
+]
+
+{ #category : #accessing }
 GtRrCheckSchedulingTimes class >> loadDefaultInstance [
 
-	self setUniqueInstance: self load.
-	self uniqueInstance remoteRunner: GtRemoteRunner default.
-	^ uniqueInstance
+	^ self loadDefaultFromFile: self name asString, '.json'.
 ]
 
 { #category : #accessing }

@@ -87,8 +87,11 @@ GtRrSUnitTask >> isSUnitTask [
 
 { #category : #running }
 GtRrSUnitTask >> run [
+	| testResult |
 
-	^ self runSuite: self testSuite
+	TestExecutionEnvironment new beActiveDuring:
+		[ testResult :=  self runSuite: self testSuite ].
+	^ testResult
 ]
 
 { #category : #running }
