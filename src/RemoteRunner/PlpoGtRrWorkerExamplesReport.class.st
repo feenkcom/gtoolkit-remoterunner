@@ -63,6 +63,54 @@ PlpoGtRrWorkerExamplesReport >> gtViewExecutionTimelineWithSchedulingFor: aView 
 					self taskWithId:  anItem identifier ] ]
 ]
 
+{ #category : #'gt - extensions' }
+PlpoGtRrWorkerExamplesReport >> gtViewVmMemoryEvolutionFor: aView [
+	<gtView>
+	
+	^ aView explicit
+		title: 'VM Memory';
+		priority: 45;
+		stencil: [ 
+			| values vmMemory freeMemory data |
+				
+			values := self tasksVmMemoryChartItems.
+			vmMemory := GtPlotterDataGroup new 
+				values: OrderedCollection new.
+			freeMemory := GtPlotterDataGroup new 
+				values: OrderedCollection new.
+				
+			values do: [ :aSignal |
+				vmMemory values 
+					add: (GtRrTimestampedChartDataItem new 
+						timestamp: aSignal timestamp;
+						data: aSignal data first).
+				freeMemory  values 
+					add: (GtRrTimestampedChartDataItem new 
+						timestamp: aSignal timestamp;
+						data: aSignal data second) ].
+			data := GtPlotterDataLogicalGroups new 
+				entities: {
+					GtPlotterDataGroupWithColor new
+						color: Color blue;
+						entity: vmMemory.
+					GtPlotterDataGroupWithColor new
+						color: Color green muchDarker;
+						entity: freeMemory }.
+				
+			GtPlotterLineChart new
+				with: data;
+				valueX: [ :e | e timestamp ];
+				scaleX: GtPlotterTimeScale new;
+				labelFormatX: [ :e | e asTime ];
+				titleX: 'Time';
+				ticksX: 5;
+				valueY: [ :e | e data ];
+				scaleY: GtPlotterLinearScale new;
+				labelFormatY: [ :e | e humanReadableIsqByteSize ];
+				titleY: 'VM Memory';
+				ticksY: 10. ]
+]
+
 { #category : #accessing }
 PlpoGtRrWorkerExamplesReport >> taskWithId: aTaskId [ 
 	^ self 
@@ -78,4 +126,9 @@ PlpoGtRrWorkerExamplesReport >> tasksExecutionChartItems [
 { #category : #'accessing - chart data' }
 PlpoGtRrWorkerExamplesReport >> tasksExecutionChartItemsGroupWithScheduling [
 	^ self proxyPerformSerialized: #tasksExecutionChartItemsGroupWithScheduling
+]
+
+{ #category : #'accessing - chart data' }
+PlpoGtRrWorkerExamplesReport >> tasksVmMemoryChartItems [
+	^ self proxyPerformSerialized: #tasksVmMemoryChartItems
 ]

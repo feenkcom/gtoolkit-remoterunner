@@ -48,13 +48,7 @@ GtRrTasksGroup >> endTime [
 
 { #category : #accessing }
 GtRrTasksGroup >> firstHandoverTime [ 
-	| time |
-	time := self items first handoverTime.
-	self do: [ :aTask | 
-		(aTask handoverTime notNil and: [ aTask handoverTime < time ])
-			ifTrue: [
-				time := aTask handoverTime ] ].
-	^ time
+	^ self firstTask handoverTime
 ]
 
 { #category : #accessing }
@@ -71,6 +65,11 @@ GtRrTasksGroup >> firstTask [
 { #category : #accessing }
 GtRrTasksGroup >> from: start to: stop do: aBlock [
 	^ self items from: start to: stop do: aBlock
+]
+
+{ #category : #'accessing - gc details' }
+GtRrTasksGroup >> fullGcTime [
+	^ self items gtSumWithNilValues: [ :aTask | aTask fullGcTime ] 
 ]
 
 { #category : #'gt - extensions' }
@@ -174,6 +173,11 @@ GtRrTasksGroup >> gtViewTimelineV4For: aView [
 					select: #isFinished) ]
 ]
 
+{ #category : #'accessing - gc details' }
+GtRrTasksGroup >> incrGcTime [
+	^ self items gtSumWithNilValues: [ :aTask | aTask incrGcTime ] 
+]
+
 { #category : #initialization }
 GtRrTasksGroup >> initialize [
 	super initialize.
@@ -211,10 +215,25 @@ GtRrTasksGroup >> lastTask [
 	| lastTask |
 	lastTask := self items first.
 	self do: [ :aTask | 
-		(aTask lastResultReceivedTime notNil and: [ 
-			aTask lastResultReceivedTime > lastTask lastResultReceivedTime ])
+		(aTask resultReceivedTime notNil and: [ 
+			aTask resultReceivedTime > lastTask resultReceivedTime ])
 				ifTrue: [
 					lastTask := aTask ] ].
+	^ lastTask
+]
+
+{ #category : #accessing }
+GtRrTasksGroup >> lastTaskWithResourceReport [ 
+	| lastTask |
+	lastTask := nil .
+	self do: [ :aTask | 
+		aTask executionData resourceReport ifNotNil: [
+			lastTask ifNil: [ 
+				lastTask := aTask ].
+			(aTask resultReceivedTime notNil and: [ 
+				aTask resultReceivedTime > lastTask resultReceivedTime ])
+					ifTrue: [
+						lastTask := aTask ] ] ].
 	^ lastTask
 ]
 
@@ -262,9 +281,14 @@ GtRrTasksGroup >> sumNumbers: aBlock [
 	^ self items sumNumbers: aBlock
 ]
 
+{ #category : #'accessing - gc details' }
+GtRrTasksGroup >> totalGCTime [ 
+	^ self items gtSumWithNilValues: [ :aTask | aTask totalGCTime ] 
+]
+
 { #category : #accessing }
 GtRrTasksGroup >> vmStatisticsAtCompletion [
-	^ self firstTask vmStatisticsAtCompletion
+	^ self lastTaskWithResourceReport vmStatisticsAtCompletion
 ]
 
 { #category : #accessing }

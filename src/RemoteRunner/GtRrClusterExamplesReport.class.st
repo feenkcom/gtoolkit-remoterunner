@@ -44,6 +44,17 @@ GtRrClusterExamplesReport >> cummulativeTasksDurationOnRunner [
 			total + aMachineReport cummulativeTasksDurationOnRunner ]
 ]
 
+{ #category : #'accessing - gc details' }
+GtRrClusterExamplesReport >> fullGcDuration [
+	^ self fullGcTime ifNotNil: [ :aTimeInMilliseconds |
+		aTimeInMilliseconds milliSeconds ]
+]
+
+{ #category : #'accessing - gc details' }
+GtRrClusterExamplesReport >> fullGcTime [
+	^ self sumMachineValueWithNil: [ :aMachine | aMachine fullGcTime ]
+]
+
 { #category : #'gt - extensions' }
 GtRrClusterExamplesReport >> gtViewMachinesFor: aView [
 	<gtView>
@@ -136,6 +147,28 @@ GtRrClusterExamplesReport >> gtViewOverviewFor: aView [
 		column: 'Value' text: [ :assoc | assoc value ]
 ]
 
+{ #category : #'gt - extensions' }
+GtRrClusterExamplesReport >> gtViewWorkersStatusFor: aView [
+	<gtView>
+	
+	^ aView forward 
+		title: 'Workers Stats';
+		priority: 65;
+		object: [ self workersReport ];
+		view: #gtViewWorkersFor:
+]
+
+{ #category : #'accessing - gc details' }
+GtRrClusterExamplesReport >> incrGcDuration [
+	^ self incrGcTime ifNotNil: [ :aTimeInMilliseconds |
+		aTimeInMilliseconds milliSeconds ]
+]
+
+{ #category : #'accessing - gc details' }
+GtRrClusterExamplesReport >> incrGcTime [
+	^ self sumMachineValueWithNil: [ :aMachine | aMachine incrGcTime ]
+]
+
 { #category : #initialization }
 GtRrClusterExamplesReport >> initialize [ 
 	super initialize.
@@ -215,8 +248,16 @@ GtRrClusterExamplesReport >> overviewData [
 		'Cummulative Tasks Duration (on runner)' -> self cummulativeTasksDurationOnRunner.
 		'Tasks Duration Runner - Worker Difference' -> (self cummulativeTasksDurationOnRunner - self cummulativeTasksDuration).
 		'Cummulative Task Gaps' -> self taskGapsDuration.
+		'Average Task Gap' -> (self taskGapsDuration / self numberOfTasks).
+		'Total GC Time (workers)' -> self totalGCDuration.
+		'Full GC Time (workers)' -> self fullGcDuration.
+		'Incremental GC Time (workers)' -> self incrGcDuration.
+		'Total GC Time (tasks)' -> self tasksTotalGCTime milliSeconds.
+		'Full GC Time (tasks)' -> self tasksFullGcTime milliSeconds.
+		'Incremental GC Time (tasks)' -> self tasksIncrGcTime milliSeconds.
 		'Maximum Worker Tasks Start Delay' -> self workersTasksStartMaximumDelay.
-		'Maximum Workers Tasks Start Delay per Machine' -> self maximumWorkersTasksStartIntervalPerMachine }
+		'Maximum Workers Tasks Start Delay per Machine' -> self maximumWorkersTasksStartIntervalPerMachine.
+		'Workers Tasks Competion Delay' -> self workersTasksCompletionDelay}
 ]
 
 { #category : #printing }
@@ -230,6 +271,11 @@ GtRrClusterExamplesReport >> printOn: aStream [
 ]
 
 { #category : #accessing }
+GtRrClusterExamplesReport >> sumMachineValueWithNil: aBlock [
+	^ self machineReports gtSumWithNilValues: aBlock
+]
+
+{ #category : #accessing }
 GtRrClusterExamplesReport >> taskGapsDuration [
 	^ self machineReports 
 		inject: 0 seconds 
@@ -237,11 +283,42 @@ GtRrClusterExamplesReport >> taskGapsDuration [
 			total + aMachineReport taskGapsDuration ]
 ]
 
+{ #category : #'accessing - gc details' }
+GtRrClusterExamplesReport >> tasksFullGcTime [
+	^ self sumMachineValueWithNil: [ :aMachine | aMachine tasksFullGcTime ]
+]
+
+{ #category : #'accessing - gc details' }
+GtRrClusterExamplesReport >> tasksIncrGcTime [
+	^ self sumMachineValueWithNil: [ :aMachine | aMachine tasksIncrGcTime ]
+]
+
+{ #category : #'accessing - gc details' }
+GtRrClusterExamplesReport >> tasksTotalGCTime [
+	^ self sumMachineValueWithNil: [ :aMachine | aMachine tasksTotalGCTime ]
+]
+
+{ #category : #'accessing - gc details' }
+GtRrClusterExamplesReport >> totalGCDuration [
+	^ self totalGCTime ifNotNil: [ :aTimeInMilliseconds |
+		aTimeInMilliseconds milliSeconds ]
+]
+
+{ #category : #'accessing - gc details' }
+GtRrClusterExamplesReport >> totalGCTime [ 
+	^ self sumMachineValueWithNil: [ :aMachine | aMachine totalGCTime ]
+]
+
 { #category : #accessing }
 GtRrClusterExamplesReport >> workersReport [
 	^ GtRrWorkersExamplesReport new 
 		workers: (self machineReports flatCollect: [ :aMachineReport |
 			aMachineReport workersReport workers ])
+]
+
+{ #category : #accessing }
+GtRrClusterExamplesReport >> workersTasksCompletionDelay [
+	^ self workersReport  tasksCompletionDelay
 ]
 
 { #category : #accessing }
