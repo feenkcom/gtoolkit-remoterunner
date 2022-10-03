@@ -55,6 +55,17 @@ GtRrCheckResourcesReport >> textualStatistics [
 ]
 
 { #category : #accessing }
+GtRrCheckResourcesReport >> totalGcTime [
+	^ totalGcTime
+]
+
+{ #category : #accessing }
+GtRrCheckResourcesReport >> totalGcTime: anObject [
+
+	totalGcTime := anObject
+]
+
+{ #category : #accessing }
 GtRrCheckResourcesReport >> totalGcTimeDiff [
 	^ totalGcTime
 ]
