@@ -352,7 +352,7 @@ GtRrTask >> reset [
 
 ]
 
-{ #category : #accessing }
+{ #category : #'accessing - resource report' }
 GtRrTask >> resourceReportIfPresent: aPresentBlock ifAbsent: anAbsentBlock [
 	^ self executionData resourceReport 
 		ifNil: [ anAbsentBlock value ]
@@ -552,21 +552,23 @@ GtRrTask >> totalGCTime [
 		ifAbsent: [ nil ]
 ]
 
-{ #category : #accessing }
-GtRrTask >> vmFreeMemoryAtCompletion [
-	^ self 
-		resourceReportIfPresent: [ :aReport | aReport vmFreeMemory ] 
+{ #category : #'accessing - resource report' }
+GtRrTask >> vmMaximumMemorySize [  
+	^ self
+		resourceReportIfPresent: [ :aReport | 
+			aReport vmMaximumMemorySize ] 
 		ifAbsent: [ nil ]
 ]
 
-{ #category : #accessing }
-GtRrTask >> vmMemorySizeAtCompletion [
-	^ self 
-		resourceReportIfPresent: [ :aReport | aReport vmMemorySizeAtEnd ] 
+{ #category : #'accessing - resource report' }
+GtRrTask >> vmMinimumMemorySize [  
+	^ self
+		resourceReportIfPresent: [ :aReport | 
+			aReport vmMinimumMemorySize ] 
 		ifAbsent: [ nil ]
 ]
 
-{ #category : #accessing }
+{ #category : #'accessing - resource report' }
 GtRrTask >> vmStatisticsAtCompletion [  
 	^ self
 		resourceReportIfPresent: [ :aReport | 
@@ -574,7 +576,7 @@ GtRrTask >> vmStatisticsAtCompletion [
 		ifAbsent: [ nil ]
 ]
 
-{ #category : #accessing }
+{ #category : #'accessing - resource report' }
 GtRrTask >> vmStatisticsAtStart [
 	^ self
 		resourceReportIfPresent: [ :aReport | 

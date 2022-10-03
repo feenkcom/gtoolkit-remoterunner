@@ -114,6 +114,16 @@ GtRrWorkerExamplesReport >> numberOfExamples [
 	^ tasks sumNumbers: #totalCount
 ]
 
+{ #category : #'accessing - gc details' }
+GtRrWorkerExamplesReport >> numberOfFullGCs [
+	^ self vmStatisticsReportsDiff fullGCsDiff
+]
+
+{ #category : #'accessing - gc details' }
+GtRrWorkerExamplesReport >> numberOfIncrementalGCs [
+	^ self vmStatisticsReportsDiff incrGCsDiff
+]
+
 { #category : #accessing }
 GtRrWorkerExamplesReport >> numberOfTasks [ 
 	^ tasks size
@@ -260,17 +270,27 @@ GtRrWorkerExamplesReport >> totalGCTime [
 	^ self vmStatisticsReportsDiff totalGcTimeDiff
 ]
 
-{ #category : #accessing }
+{ #category : #'accessing - resource report' }
+GtRrWorkerExamplesReport >> vmMaximumMemorySize [
+	^ self tasks vmMaximumMemorySize
+]
+
+{ #category : #'accessing - resource report' }
+GtRrWorkerExamplesReport >> vmMinimumMemorySize [
+	^ self tasks vmMinimumMemorySize
+]
+
+{ #category : #'accessing - resource report' }
 GtRrWorkerExamplesReport >> vmStatisticsAtCompletion [
 	^ self tasks vmStatisticsAtCompletion
 ]
 
-{ #category : #accessing }
+{ #category : #'accessing - resource report' }
 GtRrWorkerExamplesReport >> vmStatisticsAtStart [
 	^ self tasks vmStatisticsAtStart
 ]
 
-{ #category : #accessing }
+{ #category : #'accessing - resource report' }
 GtRrWorkerExamplesReport >> vmStatisticsReportsDiff [ 
 	^ GtVmStatisticsReportsDiff new
 		sourceReport: self vmStatisticsAtStart;

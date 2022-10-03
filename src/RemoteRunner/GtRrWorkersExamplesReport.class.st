@@ -95,6 +95,16 @@ GtRrWorkersExamplesReport >> numberOfExamples [
 	^ self workers sumNumbers: [ :aWorker | aWorker numberOfExamples ]
 ]
 
+{ #category : #'accessing - gc details' }
+GtRrWorkersExamplesReport >> numberOfFullGCs [
+	^ self sumWorkerValueWithNil: [ :aWorker | aWorker numberOfFullGCs ]
+]
+
+{ #category : #'accessing - gc details' }
+GtRrWorkersExamplesReport >> numberOfIncrementalGCs [
+	^ self sumWorkerValueWithNil: [ :aWorker | aWorker numberOfIncrementalGCs ]
+]
+
 { #category : #accessing }
 GtRrWorkersExamplesReport >> numberOfTasks [
 	^ self workers sumNumbers: [ :aWorker | aWorker numberOfTasks ]
@@ -113,6 +123,11 @@ GtRrWorkersExamplesReport >> printOn: aStream [
 		aStream 
 			print: self workers size;
 			<< ' workers' ]
+]
+
+{ #category : #'math functions' }
+GtRrWorkersExamplesReport >> sumWorkerNumbers: aBlock [
+	^ self workers sumNumbers: aBlock
 ]
 
 { #category : #'math functions' }
@@ -236,6 +251,22 @@ GtRrWorkersExamplesReport >> tasksTotalGCTime [
 { #category : #'accessing - gc details' }
 GtRrWorkersExamplesReport >> totalGCTime [ 
 	^ self sumWorkerValueWithNil: [ :aWorker | aWorker totalGCTime ]
+]
+
+{ #category : #'accessing - resource report' }
+GtRrWorkersExamplesReport >> vmAverageMemorySize [
+	^ ((self workers 
+		gtSumWithNilValues: [ :aWorker | aWorker vmMaximumMemorySize]) / self workers size ) asInteger
+]
+
+{ #category : #'accessing - resource report' }
+GtRrWorkersExamplesReport >> vmMaximumMemorySize [
+	^ self workers gtMaxWithNilValues: [ :aTask | aTask vmMaximumMemorySize ]
+]
+
+{ #category : #'accessing - resource report' }
+GtRrWorkersExamplesReport >> vmMinimumMemorySize [
+	^ self workers gtMinWithNilValues: [ :aTask | aTask vmMinimumMemorySize ]
 ]
 
 { #category : #accessing }
