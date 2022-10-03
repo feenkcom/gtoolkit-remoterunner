@@ -45,7 +45,7 @@ GtRrJobContext >> contextTimeoutTime [
 
 { #category : #accessing }
 GtRrJobContext >> gtActionCancelFor: anAction [
-
+	"Terminate the receiver's job"
 	<gtAction>
 	(self job state = #started) ifFalse: [ 
 		^ anAction noAction ].
