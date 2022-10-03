@@ -761,6 +761,8 @@ GtRemoteRunner >> startJob: aGtRrJob [
 	jobStartupAndShutdown startupJob: context.
 	self announceAndLog: (GtRrJobStartedAnnouncement job: aGtRrJob).
 	self assignTasksToWorkers.
+	"If there are problems during submission the job will be marked with an error and the context should show isFinished."
+	self checkJobCompleted: context.
 
 ]
 
