@@ -35,7 +35,6 @@ GtRrTaskExamples >> compoundTask [
 GtRrTaskExamples >> sunitTask [
 	"Demonstrate running an SUnit test in a task"
 	<gtExample>
-	<noTest>
 	| task job semaphore |
 
 	remoteRunner := GtRemoteRunner new.

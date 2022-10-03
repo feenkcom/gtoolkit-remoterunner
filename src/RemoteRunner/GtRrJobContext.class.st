@@ -48,12 +48,13 @@ GtRrJobContext >> gtActionCancelFor: anAction [
 
 	<gtAction>
 	(self job state = #started) ifFalse: [ 
-		^ anAction ].
+		^ anAction noAction ].
 	^ anAction button
-		  label: 'Cancel';
+		  tooltip: 'Cancel';
+		  icon: BrGlamorousVectorIcons cancel;
 		  priority: 3;
 		  action: [ :aButton | 
-		  	remoteRunner terminateJobId: job id.
+		  	self terminate.
 			  aButton phlow fireUpdateWish ]
 ]
 
@@ -62,7 +63,7 @@ GtRrJobContext >> gtActionStartFor: anAction [
 
 	<gtAction>
 	(self job state = #notStarted) ifFalse: [ 
-		^ anAction ].
+		^ anAction noAction].
 	^ anAction button
 		  label: 'Start';
 		  priority: 2;
@@ -159,6 +160,12 @@ GtRrJobContext >> isFinished [
 GtRrJobContext >> isJobContext [
 
 	^ true
+]
+
+{ #category : #testing }
+GtRrJobContext >> isStarted [
+
+	^ job isStarted
 ]
 
 { #category : #accessing }
@@ -271,6 +278,12 @@ GtRrJobContext >> runInImage [
 	self markJobCompleted.
 ]
 
+{ #category : #accessing }
+GtRrJobContext >> state [
+
+	^ job state
+]
+
 { #category : #private }
 GtRrJobContext >> submitTasks [
 	"Submit the tasks to the receiver's runner"
@@ -314,9 +327,17 @@ GtRrJobContext >> taskTimeout [
 ]
 
 { #category : #'api - running' }
+GtRrJobContext >> terminate [
+	"Terminate the receiver's job."
+
+	remoteRunner terminateJobId: job id.
+]
+
+{ #category : #private }
 GtRrJobContext >> terminateJob [
 	"Start the process of terminating the receiver.
-	This may be completed at a later time, after all the workers have terminated their tasks."
+	This may be completed at a later time, after all the workers have terminated their tasks.
+	This is normally called by the remoteRunner.  To terminate the job from the job context use #terminate."
 
 	job isFinished ifFalse:
 		[ job markJobTerminating.
