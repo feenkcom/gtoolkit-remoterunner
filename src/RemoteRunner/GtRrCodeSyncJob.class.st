@@ -70,5 +70,11 @@ GtRrCodeSyncJob >> tasksFor: aRemoteRunner [
 			[ tasks add: (GtRrCodeSyncTask
 				serializedChanges: serializedChanges
 				workerId: (aWorkerConnection details at: #id)) ] ].
+	"If there were no tasks generated, there are no code-sync workers available, register the error.
+	The job will be marked completed at the end of job startup."
+	tasks ifEmpty:
+		[ self errorDetails: (GtRrErrorDetails new
+			errorMessage: 'No code-sync workers available';
+			setTrace) ].
 	^ tasks
 ]

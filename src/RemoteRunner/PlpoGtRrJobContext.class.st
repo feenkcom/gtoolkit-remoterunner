@@ -5,7 +5,15 @@ Class {
 }
 
 { #category : #accessing }
+PlpoGtRrJobContext class >> remoteClassName [
+
+	^ #GtRrJobContext
+]
+
+{ #category : #accessing }
 PlpoGtRrJobContext >> gtActionCancelFor: anAction [
+	"Terminate the receiver's job.
+	Note that this will kill the worker."
 	<gtAction>
 
 	self isStarted ifFalse: [ 
@@ -23,12 +31,6 @@ PlpoGtRrJobContext >> gtActionCancelFor: anAction [
 PlpoGtRrJobContext >> isStarted [
 
 	^ self proxyPerform: #isStarted
-]
-
-{ #category : #accessing }
-PlpoGtRrJobContext >> remoteClassName [
-
-	^ #GtRrJobContext
 ]
 
 { #category : #accessing }
