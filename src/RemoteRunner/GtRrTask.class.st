@@ -53,7 +53,7 @@ GtRrTask >> constraint: anObject [
 
 { #category : #initialization }
 GtRrTask >> createResourceReport [
-	^ GtVmStatisticsReportsDiff new
+	^ GtVmRuntimeStatisticsDiffReport new
 ]
 
 { #category : #accessing }

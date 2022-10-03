@@ -15,7 +15,7 @@ GtRrWorkerExamplesReport >> description [
 
 { #category : #'accessing - gc details' }
 GtRrWorkerExamplesReport >> fullGcTime [
-	^ self vmStatisticsReportsDiff fullGcTimeDiff
+	^ self vmStatisticsDiffReport fullGcTimeDiff
 ]
 
 { #category : #'gt - extensions' }
@@ -60,7 +60,7 @@ GtRrWorkerExamplesReport >> gtViewMemoryStatisticsDiffFor: aView [
 	^ aView forward
 		title: 'Memory Statistics Diff';
 		priority: 50;
-		object: [ self vmStatisticsReportsDiff ];
+		object: [ self vmStatisticsDiffReport ];
 		view: #gtViewTextualDiffFor: 
 ]
 
@@ -96,7 +96,7 @@ GtRrWorkerExamplesReport >> gtViewTasksOverviewFor: aView [
 
 { #category : #'accessing - gc details' }
 GtRrWorkerExamplesReport >> incrGcTime [
-	^ self vmStatisticsReportsDiff incrGcTimeDiff
+	^ self vmStatisticsDiffReport incrGcTimeDiff
 ]
 
 { #category : #'accessing - chart data' }
@@ -116,12 +116,12 @@ GtRrWorkerExamplesReport >> numberOfExamples [
 
 { #category : #'accessing - gc details' }
 GtRrWorkerExamplesReport >> numberOfFullGCs [
-	^ self vmStatisticsReportsDiff fullGCsDiff
+	^ self vmStatisticsDiffReport fullGCsDiff
 ]
 
 { #category : #'accessing - gc details' }
 GtRrWorkerExamplesReport >> numberOfIncrementalGCs [
-	^ self vmStatisticsReportsDiff incrGCsDiff
+	^ self vmStatisticsDiffReport incrGCsDiff
 ]
 
 { #category : #accessing }
@@ -267,7 +267,7 @@ GtRrWorkerExamplesReport >> tasksVmMemoryChartItems [
 
 { #category : #'accessing - gc details' }
 GtRrWorkerExamplesReport >> totalGCTime [ 
-	^ self vmStatisticsReportsDiff totalGcTimeDiff
+	^ self vmStatisticsDiffReport totalGcTimeDiff
 ]
 
 { #category : #'accessing - resource report' }
@@ -291,8 +291,8 @@ GtRrWorkerExamplesReport >> vmStatisticsAtStart [
 ]
 
 { #category : #'accessing - resource report' }
-GtRrWorkerExamplesReport >> vmStatisticsReportsDiff [ 
-	^ GtVmStatisticsReportsDiff new
+GtRrWorkerExamplesReport >> vmStatisticsDiffReport [ 
+	^ GtVmRuntimeStatisticsDiffReport new
 		sourceReport: self vmStatisticsAtStart;
 		targetReport: self vmStatisticsAtCompletion;
 		yourself
