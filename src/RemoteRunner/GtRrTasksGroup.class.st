@@ -286,12 +286,22 @@ GtRrTasksGroup >> totalGCTime [
 	^ self items gtSumWithNilValues: [ :aTask | aTask totalGCTime ] 
 ]
 
-{ #category : #accessing }
+{ #category : #'accessing - resource report' }
+GtRrTasksGroup >> vmMaximumMemorySize [
+	^ self items gtMaxWithNilValues: [ :aTask | aTask vmMaximumMemorySize ]
+]
+
+{ #category : #'accessing - resource report' }
+GtRrTasksGroup >> vmMinimumMemorySize [
+	^ self items gtMaxWithNilValues: [ :aTask | aTask vmMinimumMemorySize ]
+]
+
+{ #category : #'accessing - resource report' }
 GtRrTasksGroup >> vmStatisticsAtCompletion [
 	^ self lastTaskWithResourceReport vmStatisticsAtCompletion
 ]
 
-{ #category : #accessing }
+{ #category : #'accessing - resource report' }
 GtRrTasksGroup >> vmStatisticsAtStart [
 	^ self firstTask vmStatisticsAtStart
 ]

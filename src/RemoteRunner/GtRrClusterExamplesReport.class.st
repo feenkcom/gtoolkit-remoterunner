@@ -28,6 +28,16 @@ GtRrClusterExamplesReport >> addRunnerMachineReport: aReport [
 	self machineReports add: aReport
 ]
 
+{ #category : #'accessing - gc details' }
+GtRrClusterExamplesReport >> avegareFullGcDuration [
+	^ self fullGcDuration / self numberOfFullGCs
+]
+
+{ #category : #'accessing - gc details' }
+GtRrClusterExamplesReport >> avegareIncrementalGcDuration [
+	^ self incrGcDuration / self numberOfIncrementalGCs
+]
+
 { #category : #accessing }
 GtRrClusterExamplesReport >> cummulativeTasksDuration [
 	^ self machineReports 
@@ -221,9 +231,19 @@ GtRrClusterExamplesReport >> numberOfExamples [
 		sumNumbers: [ :aWorkerReport | aWorkerReport numberOfExamples ]
 ]
 
+{ #category : #'accessing - gc details' }
+GtRrClusterExamplesReport >> numberOfFullGCs [
+	^ self sumMachineValueWithNil: [ :aMachine | aMachine numberOfFullGCs ]
+]
+
 { #category : #accessing }
 GtRrClusterExamplesReport >> numberOfIdAddresses [
 	^ self machineReports size
+]
+
+{ #category : #'accessing - gc details' }
+GtRrClusterExamplesReport >> numberOfIncrementalGCs [
+	^ self sumMachineValueWithNil: [ :aMachine | aMachine numberOfIncrementalGCs ]
 ]
 
 { #category : #accessing }
@@ -249,12 +269,20 @@ GtRrClusterExamplesReport >> overviewData [
 		'Tasks Duration Runner - Worker Difference' -> (self cummulativeTasksDurationOnRunner - self cummulativeTasksDuration).
 		'Cummulative Task Gaps' -> self taskGapsDuration.
 		'Average Task Gap' -> (self taskGapsDuration / self numberOfTasks).
+		'Number of Full GCs' -> self numberOfFullGCs.
+		'Number of Incremental GCs' -> self numberOfIncrementalGCs.
+		'Average Full GC Duration' -> self avegareFullGcDuration.
+		'Average Incremental GC Duration' -> self avegareIncrementalGcDuration.
 		'Total GC Time (workers)' -> self totalGCDuration.
 		'Full GC Time (workers)' -> self fullGcDuration.
 		'Incremental GC Time (workers)' -> self incrGcDuration.
 		'Total GC Time (tasks)' -> self tasksTotalGCTime milliSeconds.
 		'Full GC Time (tasks)' -> self tasksFullGcTime milliSeconds.
 		'Incremental GC Time (tasks)' -> self tasksIncrGcTime milliSeconds.
+		'Maximum VM Memory Size' -> self vmMaximumMemorySize humanReadableIsqByteSize.
+		'Minimum VM Memory Size' -> self vmMinimumMemorySize humanReadableIsqByteSize.
+		'Average VM Memory Size' -> self vmAverageMemorySize humanReadableIsqByteSize .
+		'Maximum VM Memory Size Increase' -> (self vmMaximumMemorySize- self vmMinimumMemorySize) humanReadableIsqByteSize.
 		'Maximum Worker Tasks Start Delay' -> self workersTasksStartMaximumDelay.
 		'Maximum Workers Tasks Start Delay per Machine' -> self maximumWorkersTasksStartIntervalPerMachine.
 		'Workers Tasks Competion Delay' -> self workersTasksCompletionDelay}
@@ -307,6 +335,21 @@ GtRrClusterExamplesReport >> totalGCDuration [
 { #category : #'accessing - gc details' }
 GtRrClusterExamplesReport >> totalGCTime [ 
 	^ self sumMachineValueWithNil: [ :aMachine | aMachine totalGCTime ]
+]
+
+{ #category : #'accessing - resource report' }
+GtRrClusterExamplesReport >> vmAverageMemorySize [
+	^ self workersReport vmAverageMemorySize
+]
+
+{ #category : #'accessing - resource report' }
+GtRrClusterExamplesReport >> vmMaximumMemorySize [
+	^ self workersReport vmMaximumMemorySize
+]
+
+{ #category : #'accessing - resource report' }
+GtRrClusterExamplesReport >> vmMinimumMemorySize [
+	^ self workersReport vmMinimumMemorySize
 ]
 
 { #category : #accessing }

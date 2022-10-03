@@ -72,6 +72,16 @@ GtRrRunnerMachineExamplesReport >> numberOfExamples [
 	^ self workersReport numberOfExamples
 ]
 
+{ #category : #'accessing - gc details' }
+GtRrRunnerMachineExamplesReport >> numberOfFullGCs [
+	^ self workersReport numberOfFullGCs
+]
+
+{ #category : #'accessing - gc details' }
+GtRrRunnerMachineExamplesReport >> numberOfIncrementalGCs [
+	^ self workersReport numberOfIncrementalGCs
+]
+
 { #category : #accessing }
 GtRrRunnerMachineExamplesReport >> numberOfTasks [
 	^ self workersReport numberOfTasks
@@ -88,7 +98,7 @@ GtRrRunnerMachineExamplesReport >> printOn: aStream [
 	
 	aStream parenthesize: [ 
 		aStream 
-			<< self ipAddress;
+			print: self ipAddress;
 			<< ', ';
 			print: self numberOfWorkers;
 			<< ' workers'].
