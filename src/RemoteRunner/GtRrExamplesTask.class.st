@@ -99,7 +99,7 @@ GtRrExamplesTask >> run [
 		resourceReport := nil.
 		
 		(ignoreNoTest or: [ exampleWithResult ignoreTest not ]) ifTrue: [ 
-			resourceReport := GtVmStatisticsReportsDiff new.
+			resourceReport := GtVmRuntimeStatisticsDiffReport new.
 			exampleStartTime := DateAndTime now.
 			resourceReport recordSourceReport.
 			exampleWithResult run.
