@@ -52,8 +52,8 @@ GtRrTask >> constraint: anObject [
 ]
 
 { #category : #initialization }
-GtRrTask >> createResourceReport [
-	^ GtVmRuntimeStatisticsDiffReport new
+GtRrTask >> createResourceReportForTask [
+	^ GtRrTaskResourcesReport new
 ]
 
 { #category : #accessing }
@@ -261,6 +261,14 @@ GtRrTask >> isFinished [
 GtRrTask >> isNotStarted [
 
 	^ self state = #notStarted
+]
+
+{ #category : #'accessing - resource report' }
+GtRrTask >> machineFreeMemory [  
+	^ self
+		resourceReportIfPresent: [ :aReport | 
+			aReport machineFreeMemory ] 
+		ifAbsent: [ nil ]
 ]
 
 { #category : #running }
@@ -535,7 +543,7 @@ GtRrTask >> taskTimeout: aDuration [
 GtRrTask >> timedRun [
 	| runResult resourceReport |
 
-	resourceReport := self createResourceReport.
+	resourceReport := self createResourceReportForTask.
 	resourceReport recordSourceReport.
 	self startTime: DateAndTime now.
 	runResult := [ self run ] ensure:

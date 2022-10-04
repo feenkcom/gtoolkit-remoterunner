@@ -64,6 +64,60 @@ PlpoGtRrWorkerExamplesReport >> gtViewExecutionTimelineWithSchedulingFor: aView 
 ]
 
 { #category : #'gt - extensions' }
+PlpoGtRrWorkerExamplesReport >> gtViewMachineAvailableMemoryEvolutionFor:  aView [
+	<gtView>
+	
+	^ aView explicit
+		title: 'Machine Available Memory';
+		priority: 50;
+		stencil: [ 
+			| data |
+				
+			data := GtPlotterDataGroup new 
+				values:self tasksMachineAvailableMemoryChartItems.
+				
+			GtPlotterLineChart new
+				with: data;
+				valueX: [ :e | e timestamp ];
+				scaleX: GtPlotterTimeScale new;
+				labelFormatX: [ :e | e asTime ];
+				titleX: 'Time';
+				ticksX: 5;
+				valueY: [ :e | e data ];
+				scaleY: GtPlotterLinearScale new;
+				labelFormatY: [ :e | e humanReadableIsqByteSize ];
+				titleY: 'Machine Available Memory';
+				ticksY: 10. ]
+]
+
+{ #category : #'gt - extensions' }
+PlpoGtRrWorkerExamplesReport >> gtViewMachineFreeMemoryEvolutionFor: aView [
+	<gtView>
+	
+	^ aView explicit
+		title: 'Machine Free Memory';
+		priority: 50;
+		stencil: [ 
+			| data |
+				
+			data := GtPlotterDataGroup new 
+				values:self tasksMachineFreeMemoryChartItems.
+				
+			GtPlotterLineChart new
+				with: data;
+				valueX: [ :e | e timestamp ];
+				scaleX: GtPlotterTimeScale new;
+				labelFormatX: [ :e | e asTime ];
+				titleX: 'Time';
+				ticksX: 5;
+				valueY: [ :e | e data ];
+				scaleY: GtPlotterLinearScale new;
+				labelFormatY: [ :e | e humanReadableIsqByteSize ];
+				titleY: 'Machine Free Memory';
+				ticksY: 10. ]
+]
+
+{ #category : #'gt - extensions' }
 PlpoGtRrWorkerExamplesReport >> gtViewVmMemoryEvolutionFor: aView [
 	<gtView>
 	
@@ -126,6 +180,16 @@ PlpoGtRrWorkerExamplesReport >> tasksExecutionChartItems [
 { #category : #'accessing - chart data' }
 PlpoGtRrWorkerExamplesReport >> tasksExecutionChartItemsGroupWithScheduling [
 	^ self proxyPerformSerialized: #tasksExecutionChartItemsGroupWithScheduling
+]
+
+{ #category : #'accessing - chart data' }
+PlpoGtRrWorkerExamplesReport >> tasksMachineAvailableMemoryChartItems [
+	^ self proxyPerformSerialized: #tasksMachineAvailableMemoryChartItems
+]
+
+{ #category : #'accessing - chart data' }
+PlpoGtRrWorkerExamplesReport >> tasksMachineFreeMemoryChartItems [
+	^ self proxyPerformSerialized: #tasksMachineFreeMemoryChartItems
 ]
 
 { #category : #'accessing - chart data' }
