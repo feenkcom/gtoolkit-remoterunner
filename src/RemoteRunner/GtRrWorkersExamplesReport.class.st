@@ -303,3 +303,15 @@ GtRrWorkersExamplesReport >> workersTasksExecutionChartItemsGroupWithScheduling 
 			aWorker tasksExecutionChartItemsGroupWithScheduling ] 
 		as: Array
 ]
+
+{ #category : #'accessing - chart data' }
+GtRrWorkersExamplesReport >> workersTasksMachineAvailableMemoryChartItems [
+	^ (self workers flatCollect: [ :aWorker | 
+		aWorker tasksMachineAvailableMemoryChartItems ]) sorted: [ :each | each timestamp ] ascending
+]
+
+{ #category : #'accessing - chart data' }
+GtRrWorkersExamplesReport >> workersTasksMachineFreeMemoryChartItems [
+	^ self workers flatCollect: [ :aWorker | 
+		aWorker tasksMachineFreeMemoryChartItems ]
+]

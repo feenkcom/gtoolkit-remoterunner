@@ -298,10 +298,12 @@ GtRrTasksGroup >> vmMinimumMemorySize [
 
 { #category : #'accessing - resource report' }
 GtRrTasksGroup >> vmStatisticsAtCompletion [
-	^ self lastTaskWithResourceReport vmStatisticsAtCompletion
+	^ self lastTaskWithResourceReport 
+		ifNotNil: [ :aTask | aTask vmStatisticsAtCompletion ]
 ]
 
 { #category : #'accessing - resource report' }
 GtRrTasksGroup >> vmStatisticsAtStart [
-	^ self firstTask vmStatisticsAtStart
+	^ self firstTask 
+		ifNotNil: [ :aTask | aTask vmStatisticsAtStart ]
 ]

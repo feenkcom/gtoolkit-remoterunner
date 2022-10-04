@@ -37,6 +37,14 @@ GtRrCheckResourcesReport >> gtViewTextualStatisticsFor: aView [
 		text: [ self textualStatistics ]
 ]
 
+{ #category : #printing }
+GtRrCheckResourcesReport >> printOn: aStream [
+	
+	aStream
+		print: self totalGcTimeDiff;
+		<< 'ms in GC'
+]
+
 { #category : #profiling }
 GtRrCheckResourcesReport >> recordSourceReport [
 	initialGcDuration := self currentTotalGcTime
@@ -50,8 +58,9 @@ GtRrCheckResourcesReport >> recordTargetReport [
 { #category : #accessing }
 GtRrCheckResourcesReport >> textualStatistics [
 	^ String streamContents: [ :aStream  |
-		aStream >> 'Total GC Time: '.
-		totalGcTime printWithCommasOn: aStream ]
+		aStream << 'Total GC Time: '.
+		totalGcTime printWithCommasOn: aStream.
+		aStream << ' ms' ]
 ]
 
 { #category : #accessing }

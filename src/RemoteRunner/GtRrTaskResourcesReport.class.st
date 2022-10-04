@@ -13,6 +13,16 @@ GtRrTaskResourcesReport class >> leJsonV4Name [
 ]
 
 { #category : #accessing }
+GtRrTaskResourcesReport >> machineAvailableMemory [
+	^ self meminfoReport memAvailable
+]
+
+{ #category : #accessing }
+GtRrTaskResourcesReport >> machineFreeMemory [
+	^ self meminfoReport memFree
+]
+
+{ #category : #accessing }
 GtRrTaskResourcesReport >> meminfoReport [
 
 	^ meminfoReport
@@ -27,6 +37,8 @@ GtRrTaskResourcesReport >> meminfoReport: anObject [
 { #category : #profiling }
 GtRrTaskResourcesReport >> recordTargetReport [
 	super recordTargetReport.
+	
+	OSPlatform current isUnix ifFalse: [ ^ self ].
 	
 	meminfoReport := GtRrMachineMeminfoReport new 
 		recordReportStatistics

@@ -43,6 +43,28 @@ PlpoGtRrRunnerMachineExamplesReport >> gtViewExecutionTimelineListFor: aView [
 ]
 
 { #category : #'gt - extensions' }
+PlpoGtRrRunnerMachineExamplesReport >> gtViewMachineAvailableMemoryEvolutionFor:  aView [
+	<gtView>
+	
+	^ aView forward
+		title: 'Machine Available Memory';
+		priority: 55;
+		object: [ self workersReport];
+		view: #gtViewMachineAvailableMemoryEvolutionFor: 
+]
+
+{ #category : #'gt - extensions' }
+PlpoGtRrRunnerMachineExamplesReport >> gtViewMachineFreeMemoryEvolutionFor:  aView [
+	<gtView>
+	
+	^ aView forward
+		title: 'Machine Free Memory';
+		priority: 55;
+		object: [ self workersReport];
+		view: #gtViewMachineFreeMemoryEvolutionFor: 
+]
+
+{ #category : #'gt - extensions' }
 PlpoGtRrRunnerMachineExamplesReport >> gtViewTasksExecutionTimelineListFor: aView [
 	<gtView>
 	

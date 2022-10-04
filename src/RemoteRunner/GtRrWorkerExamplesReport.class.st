@@ -15,7 +15,7 @@ GtRrWorkerExamplesReport >> description [
 
 { #category : #'accessing - gc details' }
 GtRrWorkerExamplesReport >> fullGcTime [
-	^ self vmStatisticsDiffReport fullGcTimeDiff
+	^ self vmStatisticsDiffReport ifNotNil: [ :aReport | aReport fullGcTimeDiff ]
 ]
 
 { #category : #'gt - extensions' }
@@ -96,7 +96,7 @@ GtRrWorkerExamplesReport >> gtViewTasksOverviewFor: aView [
 
 { #category : #'accessing - gc details' }
 GtRrWorkerExamplesReport >> incrGcTime [
-	^ self vmStatisticsDiffReport incrGcTimeDiff
+	^ self vmStatisticsDiffReport ifNotNil: [ :aReport | aReport incrGcTimeDiff ]
 ]
 
 { #category : #'accessing - chart data' }
@@ -116,12 +116,12 @@ GtRrWorkerExamplesReport >> numberOfExamples [
 
 { #category : #'accessing - gc details' }
 GtRrWorkerExamplesReport >> numberOfFullGCs [
-	^ self vmStatisticsDiffReport fullGCsDiff
+	^ self vmStatisticsDiffReport ifNotNil: [ :aReport | aReport fullGCsDiff ]
 ]
 
 { #category : #'accessing - gc details' }
 GtRrWorkerExamplesReport >> numberOfIncrementalGCs [
-	^ self vmStatisticsDiffReport incrGCsDiff
+	^ self vmStatisticsDiffReport ifNotNil: [ :aReport | aReport incrGCsDiff ]
 ]
 
 { #category : #accessing }
@@ -239,6 +239,50 @@ GtRrWorkerExamplesReport >> tasksLastResultReceivedTime [
 	^ self tasks lastResultReceivedTime
 ]
 
+{ #category : #'accessing - chart data' }
+GtRrWorkerExamplesReport >> tasksMachineAvailableMemoryChartItems [
+	^ (self tasks 	
+		inject: OrderedCollection new
+		into: [ :memoryValues :aTask |
+			aTask 
+				resourceReportIfPresent: [ :aReport |
+					memoryValues add: (GtRrTimestampedChartDataItem new
+						timestamp: aReport targetReport timestamp;
+						data: aReport machineAvailableMemory) ] 
+				ifAbsent: [].
+			memoryValues ]) asArray
+]
+
+{ #category : #'accessing - chart data' }
+GtRrWorkerExamplesReport >> tasksMachineFreeMemoryChartItems [
+	^ (self tasks 	
+		inject: OrderedCollection new
+		into: [ :memoryValues :aTask |
+			aTask 
+				resourceReportIfPresent: [ :aReport |
+					memoryValues add: (GtRrTimestampedChartDataItem new
+						timestamp: aReport targetReport timestamp;
+						data: aReport machineFreeMemory) ] 
+				ifAbsent: [].
+			memoryValues ]) asArray
+]
+
+{ #category : #'accessing - chart data' }
+GtRrWorkerExamplesReport >> tasksMachineMemoryChartItems [
+	^ (self tasks 	
+		inject: OrderedCollection new
+		into: [ :memoryValues :aTask |
+			aTask 
+				resourceReportIfPresent: [ :aReport |
+					memoryValues add: (GtRrTimestampedChartDataItem new
+						timestamp: aReport targetReport timestamp;
+						data: { 
+							aReport machineAvailableMemory.
+							aReport machineFreeMemory }) ] 
+				ifAbsent: [].
+			memoryValues ]) asArray
+]
+
 { #category : #accessing }
 GtRrWorkerExamplesReport >> tasksStartTime [ 
 	^ self tasks startTime
@@ -267,7 +311,7 @@ GtRrWorkerExamplesReport >> tasksVmMemoryChartItems [
 
 { #category : #'accessing - gc details' }
 GtRrWorkerExamplesReport >> totalGCTime [ 
-	^ self vmStatisticsDiffReport totalGcTimeDiff
+	^ self vmStatisticsDiffReport ifNotNil: [ :aReport | aReport totalGcTimeDiff ]
 ]
 
 { #category : #'accessing - resource report' }
@@ -292,9 +336,15 @@ GtRrWorkerExamplesReport >> vmStatisticsAtStart [
 
 { #category : #'accessing - resource report' }
 GtRrWorkerExamplesReport >> vmStatisticsDiffReport [ 
+	| sourceReport  targetReport |
+	sourceReport := self vmStatisticsAtStart.
+	targetReport := self vmStatisticsAtCompletion.
+	(sourceReport isNil or: [ targetReport isNil ])
+		ifTrue: [ ^ nil ].
+		
 	^ GtVmRuntimeStatisticsDiffReport new
-		sourceReport: self vmStatisticsAtStart;
-		targetReport: self vmStatisticsAtCompletion;
+		sourceReport: sourceReport;
+		targetReport: targetReport;
 		yourself
 ]
 

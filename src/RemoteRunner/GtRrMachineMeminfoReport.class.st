@@ -6,7 +6,9 @@ Class {
 		'buffers',
 		'cached',
 		'swapTotal',
-		'swapFree'
+		'swapFree',
+		'memAvailable',
+		'memTotal'
 	],
 	#category : #'RemoteRunner-Worker'
 }
@@ -41,6 +43,18 @@ GtRrMachineMeminfoReport >> cached: anObject [
 ]
 
 { #category : #accessing }
+GtRrMachineMeminfoReport >> memAvailable [
+
+	^ memAvailable
+]
+
+{ #category : #accessing }
+GtRrMachineMeminfoReport >> memAvailable: anObject [
+
+	memAvailable := anObject
+]
+
+{ #category : #accessing }
 GtRrMachineMeminfoReport >> memFree [
 
 	^ memFree
@@ -52,24 +66,37 @@ GtRrMachineMeminfoReport >> memFree: anObject [
 	memFree := anObject
 ]
 
+{ #category : #accessing }
+GtRrMachineMeminfoReport >> memTotal [
+
+	^ memTotal
+]
+
+{ #category : #accessing }
+GtRrMachineMeminfoReport >> memTotal: anObject [
+
+	memTotal := anObject
+]
+
 { #category : #profiling }
 GtRrMachineMeminfoReport >> recordReportStatistics [
 	| keys missingCount|
 	
-	keys := #('MemFree' 'Buffers' 'Cached' 'SwapTotal' 'SwapFree').
+	keys := #('MemTotal' 'MemAvailable' 'MemFree' "'Buffers' 'Cached' 'SwapTotal' 'SwapFree'").
 	missingCount := keys size.
 	
 	'/proc/meminfo' asFileReference readStreamDo: [ :stream |
-		[ stream atEnd ] whileFalse:[ 
+		[ stream atEnd or: [missingCount = 0 ] ] whileFalse:[ 
 			| line fields currentKey keyIndex |
 			line := stream nextLine.
 			fields := $: split: line. 
 			currentKey := fields first trimBoth.
 			keyIndex := keys indexOf: currentKey.
 			keyIndex > 0 ifTrue: [
+				missingCount := missingCount - 1.
 				self 
-					perform: currentKey uncapitalized asMutator
-					with: fields second trimBoth ] ] ]
+					perform: currentKey uncapitalized asSymbol asMutator
+					with: fields second trimBoth asNumber * 1024 ] ] ]
 ]
 
 { #category : #accessing }
