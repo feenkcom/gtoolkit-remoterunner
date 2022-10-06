@@ -264,6 +264,14 @@ GtRrTask >> isNotStarted [
 ]
 
 { #category : #'accessing - resource report' }
+GtRrTask >> machineAvailableMemory [  
+	^ self
+		resourceReportIfPresent: [ :aReport | 
+			aReport machineAvailableMemory ] 
+		ifAbsent: [ nil ]
+]
+
+{ #category : #'accessing - resource report' }
 GtRrTask >> machineFreeMemory [  
 	^ self
 		resourceReportIfPresent: [ :aReport | 
