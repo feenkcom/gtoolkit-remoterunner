@@ -74,7 +74,8 @@ PlpoGtRrWorkerExamplesReport >> gtViewMachineAvailableMemoryEvolutionFor:  aView
 			| data |
 				
 			data := GtPlotterDataGroup new 
-				values:self tasksMachineAvailableMemoryChartItems.
+				values:(self tasksMachineAvailableMemoryChartItems
+					sorted: [ :anItem | anItem timestamp ] ascending).
 				
 			GtPlotterLineChart new
 				with: data;
@@ -101,7 +102,8 @@ PlpoGtRrWorkerExamplesReport >> gtViewMachineFreeMemoryEvolutionFor: aView [
 			| data |
 				
 			data := GtPlotterDataGroup new 
-				values:self tasksMachineFreeMemoryChartItems.
+				values:(self tasksMachineFreeMemoryChartItems
+					sorted: [ :anItem | anItem timestamp ] ascending).
 				
 			GtPlotterLineChart new
 				with: data;
