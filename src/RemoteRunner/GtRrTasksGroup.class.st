@@ -63,6 +63,21 @@ GtRrTasksGroup >> firstTask [
 ]
 
 { #category : #accessing }
+GtRrTasksGroup >> firstTaskWithResourceReport [ 
+	| lastTask |
+	lastTask := nil .
+	self do: [ :aTask | 
+		aTask executionData resourceReport ifNotNil: [
+			lastTask ifNil: [ 
+				lastTask := aTask ].
+			(aTask handoverTime notNil and: [ 
+				aTask handoverTime < lastTask handoverTime ])
+					ifTrue: [
+						lastTask := aTask ] ] ].
+	^ lastTask
+]
+
+{ #category : #accessing }
 GtRrTasksGroup >> from: start to: stop do: aBlock [
 	^ self items from: start to: stop do: aBlock
 ]
@@ -70,6 +85,16 @@ GtRrTasksGroup >> from: start to: stop do: aBlock [
 { #category : #'accessing - gc details' }
 GtRrTasksGroup >> fullGcTime [
 	^ self items gtSumWithNilValues: [ :aTask | aTask fullGcTime ] 
+]
+
+{ #category : #accessing }
+GtRrTasksGroup >> gtMaxWithNilValues:  aBlock [
+	^ self items gtMaxWithNilValues: aBlock
+]
+
+{ #category : #accessing }
+GtRrTasksGroup >> gtMinWithNilValues: aBlock [
+	^ self items gtMinWithNilValues: aBlock
 ]
 
 { #category : #'gt - extensions' }

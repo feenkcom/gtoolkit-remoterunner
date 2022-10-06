@@ -66,6 +66,31 @@ GtRrClusterExamplesReport >> fullGcTime [
 ]
 
 { #category : #'gt - extensions' }
+GtRrClusterExamplesReport >> gtViewMachineMemoryStatsFor: aView [
+	<gtView>
+	
+	^ aView columnedList 
+		title: 'Machines Memory';
+		priority: 25;
+		items: [ self machineReports ];
+		column: 'Ip Address' text: [ :aMachineReport |
+			aMachineReport ipAddress ];
+		column: 'Workers Count' text: [ :aMachineReport |
+			aMachineReport numberOfWorkers ];
+		column: 'Total Memory' text: [ :aMachineReport |
+			aMachineReport machineTotalMemory humanReadableIsqByteSize ];
+		column: 'Minimum Available Memory' text: [ :aMachineReport |
+			aMachineReport machineMinimumAvailableMemory humanReadableIsqByteSize ];
+		column: 'Maximum (initial) Available Memory' text: [ :aMachineReport |
+			aMachineReport machineMaximumAvailableMemory humanReadableIsqByteSize ];
+		column: 'Total Consumed Memory' text: [ :aMachineReport |
+			aMachineReport machineTotalConsumedMemory humanReadableIsqByteSize ];
+		column: 'Avegare Consumed Memory per Worker' text: [ :aMachineReport |
+			aMachineReport machineTotalConsumedMemoryPerWorker humanReadableIsqByteSize ]
+			
+]
+
+{ #category : #'gt - extensions' }
 GtRrClusterExamplesReport >> gtViewMachinesFor: aView [
 	<gtView>
 	

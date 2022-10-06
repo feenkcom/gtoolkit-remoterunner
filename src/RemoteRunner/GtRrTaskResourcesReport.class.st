@@ -23,6 +23,11 @@ GtRrTaskResourcesReport >> machineFreeMemory [
 ]
 
 { #category : #accessing }
+GtRrTaskResourcesReport >> machineTotalMemory [
+	^ self meminfoReport memTotal
+]
+
+{ #category : #accessing }
 GtRrTaskResourcesReport >> meminfoReport [
 
 	^ meminfoReport

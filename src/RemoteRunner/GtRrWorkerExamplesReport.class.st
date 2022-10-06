@@ -110,6 +110,22 @@ GtRrWorkerExamplesReport >> isTaskCorrectlyScheduledAtIndex: taskIndex inGroup: 
 ]
 
 { #category : #accessing }
+GtRrWorkerExamplesReport >> machineMaximumAvailableMemory [
+	^ self tasks gtMaxWithNilValues: [ :aTask | aTask machineAvailableMemory ]
+]
+
+{ #category : #'accessing - resource report' }
+GtRrWorkerExamplesReport >> machineMinimumAvailableMemory [
+	^ self tasks gtMinWithNilValues: [ :aTask | aTask machineAvailableMemory ]
+]
+
+{ #category : #accessing }
+GtRrWorkerExamplesReport >> machineTotalMemory [
+	^ self tasks firstTaskWithResourceReport ifNotNil: [ :aTask |
+		aTask executionData resourceReport machineTotalMemory ]
+]
+
+{ #category : #accessing }
 GtRrWorkerExamplesReport >> numberOfExamples [ 
 	^ tasks sumNumbers: #totalCount
 ]

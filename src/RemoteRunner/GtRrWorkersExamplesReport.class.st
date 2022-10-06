@@ -90,6 +90,24 @@ GtRrWorkersExamplesReport >> incrGcTime [
 	^ self sumWorkerValueWithNil: [ :aWorker | aWorker incrGcTime ]
 ]
 
+{ #category : #'accessing - resource report' }
+GtRrWorkersExamplesReport >> machineMaximumAvailableMemory [
+	^ self workers gtMinWithNilValues: [ :aWorker | aWorker machineMaximumAvailableMemory ]
+]
+
+{ #category : #'accessing - resource report' }
+GtRrWorkersExamplesReport >> machineMinimumAvailableMemory [
+	^ self workers gtMinWithNilValues: [ :aWorker | aWorker machineMinimumAvailableMemory ]
+]
+
+{ #category : #accessing }
+GtRrWorkersExamplesReport >> machineTotalMemory [
+	^ self workers 
+		detect: [ :aWorker | aWorker machineTotalMemory notNil ]
+		ifFound: [ :aWorker | aWorker machineTotalMemory ] 
+		ifNone: [ nil ]
+]
+
 { #category : #accessing }
 GtRrWorkersExamplesReport >> numberOfExamples [
 	^ self workers sumNumbers: [ :aWorker | aWorker numberOfExamples ]
@@ -261,12 +279,12 @@ GtRrWorkersExamplesReport >> vmAverageMemorySize [
 
 { #category : #'accessing - resource report' }
 GtRrWorkersExamplesReport >> vmMaximumMemorySize [
-	^ self workers gtMaxWithNilValues: [ :aTask | aTask vmMaximumMemorySize ]
+	^ self workers gtMaxWithNilValues: [ :aWorker | aWorker vmMaximumMemorySize ]
 ]
 
 { #category : #'accessing - resource report' }
 GtRrWorkersExamplesReport >> vmMinimumMemorySize [
-	^ self workers gtMinWithNilValues: [ :aTask | aTask vmMinimumMemorySize ]
+	^ self workers gtMinWithNilValues: [ :aWorker | aWorker vmMinimumMemorySize ]
 ]
 
 { #category : #accessing }

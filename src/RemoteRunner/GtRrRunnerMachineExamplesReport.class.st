@@ -67,6 +67,31 @@ GtRrRunnerMachineExamplesReport >> ipAddress: anIpAddressString [
 	ipAddress := anIpAddressString
 ]
 
+{ #category : #'accessing - resource report' }
+GtRrRunnerMachineExamplesReport >> machineMaximumAvailableMemory [
+	^ self workersReport machineMaximumAvailableMemory
+]
+
+{ #category : #'accessing - resource report' }
+GtRrRunnerMachineExamplesReport >> machineMinimumAvailableMemory [
+	^ self workersReport machineMinimumAvailableMemory
+]
+
+{ #category : #'accessing - resource report' }
+GtRrRunnerMachineExamplesReport >> machineTotalConsumedMemory [
+	^ self machineTotalMemory - self machineMinimumAvailableMemory
+]
+
+{ #category : #'accessing - resource report' }
+GtRrRunnerMachineExamplesReport >> machineTotalConsumedMemoryPerWorker [
+	^ ((self machineTotalMemory - self machineMinimumAvailableMemory) / self numberOfWorkers) asInteger
+]
+
+{ #category : #'accessing - resource report' }
+GtRrRunnerMachineExamplesReport >> machineTotalMemory [
+	^ self workersReport machineTotalMemory
+]
+
 { #category : #accessing }
 GtRrRunnerMachineExamplesReport >> numberOfExamples [
 	^ self workersReport numberOfExamples
