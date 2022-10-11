@@ -29,10 +29,11 @@ GtRrScriptTask >> acceptVisitor: aVisitor [
 GtRrScriptTask >> gtScriptFor: aView [
 	<gtView>
 	
-	^ aView explicit
+	script ifNil: [ ^ aView empty ].
+	^ aView text
 		title: 'Script';
-		priority: 1;
-		stencil: [ GtPharoSnippetCoder forSource: self script]
+		priority: 10;
+		text: [ script asRopedText glamorousCodeFont ]
 ]
 
 { #category : #printing }
