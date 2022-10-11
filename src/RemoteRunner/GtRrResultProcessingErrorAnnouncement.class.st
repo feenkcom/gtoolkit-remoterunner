@@ -26,7 +26,10 @@ GtRrResultProcessingErrorAnnouncement >> printOneLineContentsOn: aStream [
 	(workerId isNil and: [ errorDetails isNil ]) ifTrue: [ ^ super printOneLineContentsOn: aStream ].
 	workerId ifNotNil: [ aStream << workerId asString ].
 	aStream << ': '.
-	errorDetails ifNotNil: [ aStream << errorDetails errorMessage asString ].
+	errorDetails ifNotNil: 
+		[ aStream 
+			<< errorDetails errorMessage asString; cr;
+			<< errorDetails trace asString ].
 ]
 
 { #category : #accessing }

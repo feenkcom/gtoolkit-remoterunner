@@ -260,7 +260,10 @@ GtRemoteRunner >> assignTasksToWorkers [
 			busyWorkers add: workerFuture.
 			timeoutManager addContext: taskContext.
 			self announceAndLog: (GtRrTaskStartedAnnouncement task: taskContext) ] ].
-	availableWorkers removeAll: busyWorkers.
+	busyWorkers do: [ :each |
+		availableWorkers 
+			remove: each
+			ifAbsent: [ StringSignal emit: 'Unable to mark unavailable: ', each printString ] ].
 ]
 
 { #category : #accessing }
@@ -990,7 +993,11 @@ GtRemoteRunner >> unregisterWorkerId: aUidString reason: aString [
 	| terminatedWorkers failedTasks errorDetails workerConnection |
 
 	sharedAccess critical:
-		[ workerConnection := registeredWorkers removeKey: aUidString ifAbsent: [].
+		[ workerConnection := registeredWorkers 
+			removeKey: aUidString 
+			ifAbsent: 
+				[ StringSignal emit: 'Unable to properly unregister: ', aUidString asString. 
+				nil. ].
 		terminatedWorkers := availableWorkers select: [ :workerFuture | 
 			workerFuture connection = workerConnection ].
 		terminatedWorkers	do: [ :workerFuture | workerFuture terminateProcess ].
