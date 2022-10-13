@@ -79,7 +79,9 @@ PlpoGtRemoteRunner >> startCodeSync [
 { #category : #accessing }
 PlpoGtRemoteRunner >> state [
 
-	^ self proxyPerform: #state
+	^ [ self proxyPerform: #state ]
+		on: LanguageLinkServerNotRunningError
+		do: [ :ex | #disconnected ].
 ]
 
 { #category : #accessing }
