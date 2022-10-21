@@ -343,6 +343,14 @@ GtRemoteRunner >> defaultWorkerTimeout [
 	^ self taskTimeout + 1 minute
 ]
 
+{ #category : #accessing }
+GtRemoteRunner >> executingJobCount [
+	"Answer the number of jobs that are currently being executed."
+	
+	^ sharedAccess critical:
+		[ currentlyExecutingJobs size ].
+]
+
 { #category : #private }
 GtRemoteRunner >> getNextTaskFor: aWorkerFuture [
 	"Answer the next task for the supplied worker, or nil.
@@ -597,9 +605,9 @@ GtRemoteRunner >> port [
 ]
 
 { #category : #accessing }
-GtRemoteRunner >> port: anObject [
+GtRemoteRunner >> port: aPortNumber [
 
-	port := anObject
+	port := aPortNumber asNumber
 ]
 
 { #category : #printing }
