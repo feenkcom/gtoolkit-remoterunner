@@ -251,11 +251,11 @@ GtRrJobNotificationElement >> updateContent [
 	an updated already happened after completion"
 	isFinished ifTrue: [ ^ self ].
 	
+	"Update the label and the states."
+	self updateLabelContent.
+	self updateStates.
+	
 	self notificationDo: [ :aNotification | 
-		"Update the label and the states."
-		self updateLabelContent.
-		self updateStates.
-		
 		"If the job is finished update the icon and stop further updates."
 		aNotification job isFinished ifTrue: [ 
 			self updateLabelStatusIcon.
