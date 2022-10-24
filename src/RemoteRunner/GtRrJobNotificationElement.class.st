@@ -158,6 +158,7 @@ GtRrJobNotificationElement >> initialize [
 	updater := BrElementUpdater new
 		element: self
 		selector: #updateContent.
+	updater postponedDuration: 1 seconds.
 ]
 
 { #category : #initialization }
