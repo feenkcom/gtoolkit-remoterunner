@@ -247,22 +247,19 @@ GtRrJobNotificationElement >> unsubscribeFromNotification [
 { #category : #'private - updating' }
 GtRrJobNotificationElement >> updateContent [
 	
-	self updateLabelContent.
- 
-	"Do not update the state if the job is finished"
+	"Do not update the state if the job is finished and 
+	an updated already happened after completion"
 	isFinished ifTrue: [ ^ self ].
 	
-	self jobDo: [ :aJob | 
-		"If the job is finished do a final update of the states."
-		aJob isFinished ifTrue: [ 
-			self updateStates.
-			self updateLabelStatusIcon.
-			isFinished := true.
-			
-			^ self ].
+	self notificationDo: [ :aNotification | 
+		"Update the label and the states."
+		self updateLabelContent.
+		self updateStates.
 		
-		"If the job is not finished yet we update the state."
-		self updateStates ]
+		"If the job is finished update the icon and stop further updates."
+		aNotification job isFinished ifTrue: [ 
+			self updateLabelStatusIcon.
+			isFinished := true  ]  ]
 ]
 
 { #category : #'private - updating' }
