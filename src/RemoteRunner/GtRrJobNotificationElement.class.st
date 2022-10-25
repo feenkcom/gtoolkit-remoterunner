@@ -175,6 +175,15 @@ GtRrJobNotificationElement >> inspectJob [
 		aNotification spawnInspectToolFromSource: self ]
 ]
 
+{ #category : #testing }
+GtRrJobNotificationElement >> isJobActive [
+	self notificationDo: [ :aNotification | 
+		[ ^ aNotification job isFinished not ]
+			on: LanguageLinkServerNotRunningError
+			do: [ :ex | ^ false ]. ].
+	^ false
+]
+
 { #category : #accessing }
 GtRrJobNotificationElement >> jobDo: aBlock [
 	self notificationDo: [ :anEvent | anEvent job ifNotNil: aBlock ]
@@ -182,8 +191,13 @@ GtRrJobNotificationElement >> jobDo: aBlock [
 
 { #category : #'private - accessing' }
 GtRrJobNotificationElement >> name [
-	self notificationDo: [ :aNotification | 
-		^ aNotification notificationLabel ].
+	[
+		self notificationDo: [ :aNotification | 
+			^ aNotification notificationLabel ] 
+	] 
+		on: LanguageLinkServerNotRunningError
+		do: [ :ex | ^ '<runner disconnected>' ].
+			.
 	^ '<missing job>'
 ]
 
@@ -246,7 +260,6 @@ GtRrJobNotificationElement >> unsubscribeFromNotification [
 
 { #category : #'private - updating' }
 GtRrJobNotificationElement >> updateContent [
-	
 	"Do not update the state if the job is finished and 
 	an updated already happened after completion"
 	isFinished ifTrue: [ ^ self ].
@@ -255,11 +268,10 @@ GtRrJobNotificationElement >> updateContent [
 	self updateLabelContent.
 	self updateStates.
 	
-	self notificationDo: [ :aNotification | 
-		"If the job is finished update the icon and stop further updates."
-		aNotification job isFinished ifTrue: [ 
-			self updateLabelStatusIcon.
-			isFinished := true  ]  ]
+	"If the job is finished update the icon and stop further updates."
+	self isJobActive ifFalse: [ 
+		self updateLabelStatusIcon.
+		isFinished := true  ]
 ]
 
 { #category : #'private - updating' }
