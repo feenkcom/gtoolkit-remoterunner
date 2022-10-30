@@ -466,6 +466,14 @@ GtRemoteRunner >> heartbeatForWorkerId: aUidString [
 		ifPresent: [ :worker | worker registerHeartbeat ].
 ]
 
+{ #category : #accessing }
+GtRemoteRunner >> imageSyncEventsFrom: aSerializedOmReference [
+	"Answer a collection of encoded EpEvents that will take the worker from the supplied OmReference to the current image."
+
+	^ GtRrImageSync uniqueInstance encodedChangesFrom: 
+		(STON fromString: aSerializedOmReference).
+]
+
 { #category : #initialization }
 GtRemoteRunner >> initialize [
 

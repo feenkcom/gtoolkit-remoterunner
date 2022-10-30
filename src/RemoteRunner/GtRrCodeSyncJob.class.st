@@ -46,13 +46,6 @@ GtRrCodeSyncJob >> serializedChanges: anObject [
 	serializedChanges := anObject
 ]
 
-{ #category : #ui }
-GtRrCodeSyncJob >> showExamplesProgressNotification [
-	"Open a global notification showing the progress of the receiver assuming all tasks are exemples / test related"
-
-	^ GtRrExamplesProgressNotification job: self.
-]
-
 { #category : #accessing }
 GtRrCodeSyncJob >> tasks [
 	"This shouldn't be called as #tasksFor: has been overwritten"
