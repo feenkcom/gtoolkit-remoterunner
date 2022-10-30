@@ -666,6 +666,28 @@ GtRemoteRunner >> registerAnnouncementsQueueForJobsAndWorkers [
 		registerAnnouncementsQueueForAnnouncementType: GtRrJobAnnouncement, GtRrWorkerAnnouncement
 ]
 
+{ #category : #accessing }
+GtRemoteRunner >> registeredWorkerCount [
+
+	^ sharedAccess critical: [ registeredWorkers size ]
+]
+
+{ #category : #'private - debugging' }
+GtRemoteRunner >> registeredWorkers [
+	"Answer the registeredWorkers.
+	WARNING: This is outside sharedAccess and is for debugging purposes only."
+
+	^ registeredWorkers
+]
+
+{ #category : #enumerating }
+GtRemoteRunner >> registeredWorkersDo: aBlock [
+	"Evaluate aBlock for each of the receiver's registered workers.
+	Must be called within sharedAccess."
+
+	registeredWorkers do: aBlock
+]
+
 { #category : #'api - worker' }
 GtRemoteRunner >> registerWorkerWithDetails: aDictionary [
 	"Register the supplied worker and connection details.
@@ -687,28 +709,6 @@ GtRemoteRunner >> registerWorkerWithDetails: aDictionary [
 			worker: workerConnection).
 	"Answer a PharoLink primitive so that a proxy isn't created for the runner (which is a global, anyway)"
 	^ nil
-]
-
-{ #category : #accessing }
-GtRemoteRunner >> registeredWorkerCount [
-
-	^ sharedAccess critical: [ registeredWorkers size ]
-]
-
-{ #category : #'private - debugging' }
-GtRemoteRunner >> registeredWorkers [
-	"Answer the registeredWorkers.
-	WARNING: This is outside sharedAccess and is for debugging purposes only."
-
-	^ registeredWorkers
-]
-
-{ #category : #enumerating }
-GtRemoteRunner >> registeredWorkersDo: aBlock [
-	"Evaluate aBlock for each of the receiver's registered workers.
-	Must be called within sharedAccess."
-
-	registeredWorkers do: aBlock
 ]
 
 { #category : #'private - accessing' }
@@ -1105,6 +1105,13 @@ GtRemoteRunner >> workerResultProcessingError: errorDetails workerId: workerId t
 		ifPresent: [ :taskContext |
 			self taskFailed: taskContextId executionData: (GtRrWorkerExecutionData new
 				errorDetails: errorDetails) ].
+]
+
+{ #category : #accessing }
+GtRemoteRunner >> workersStateDescription [
+	^ '{1} registered workers [{2} busy]' format: {
+		registeredWorkers size. 
+		registeredWorkers size - availableWorkers size }
 ]
 
 { #category : #accessing }
