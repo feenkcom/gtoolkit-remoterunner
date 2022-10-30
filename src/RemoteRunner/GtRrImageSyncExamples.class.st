@@ -19,6 +19,7 @@ GtRrImageSyncExamples >> imageSync [
 GtRrImageSyncExamples >> recentSessionsFromFirst [
 	"Demonstrate getting missing sessions when the first one is the most recent common session"
 	<gtExample>
+	<noTest>
 	| imageSync missingSessions |
 
 	imageSync := self imageSync.
@@ -31,6 +32,7 @@ GtRrImageSyncExamples >> recentSessionsFromFirst [
 GtRrImageSyncExamples >> recentSessionsFromLast [
 	"Demonstrate getting missing sessions when the last one is the most recent common session"
 	<gtExample>
+	<noTest>
 	| imageSync missingSessions |
 
 	imageSync := self imageSync.
@@ -43,6 +45,7 @@ GtRrImageSyncExamples >> recentSessionsFromLast [
 GtRrImageSyncExamples >> recentSessionsNoCommon [
 	"Demonstrate getting missing sessions when the last one is the most recent common session"
 	<gtExample>
+	<noTest>
 	| imageSync missingSessions |
 
 	imageSync := self imageSync.
