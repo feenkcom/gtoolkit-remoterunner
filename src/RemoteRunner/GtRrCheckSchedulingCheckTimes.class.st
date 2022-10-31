@@ -84,6 +84,13 @@ GtRrCheckSchedulingCheckTimes >> selector: anObject [
 ]
 
 { #category : #accessing }
+GtRrCheckSchedulingCheckTimes >> timeWithStrategy: aTimeStrategy ifAbsent: absentBlock [
+
+	times ifEmpty: [ ^ absentBlock value ].
+	^ aTimeStrategy timeFor: self.
+]
+
+{ #category : #accessing }
 GtRrCheckSchedulingCheckTimes >> times [
 
 	^ times
@@ -93,11 +100,4 @@ GtRrCheckSchedulingCheckTimes >> times [
 GtRrCheckSchedulingCheckTimes >> times: aSequenceableCollection [
 
 	times := aSequenceableCollection asOrderedCollection
-]
-
-{ #category : #accessing }
-GtRrCheckSchedulingCheckTimes >> timeWithStrategy: aTimeStrategy ifAbsent: absentBlock [
-
-	times ifEmpty: [ ^ absentBlock value ].
-	^ aTimeStrategy timeFor: self.
 ]
