@@ -1118,3 +1118,10 @@ GtRemoteRunner >> workerTimeout: anObject [
 
 	workerTimeout := anObject
 ]
+
+{ #category : #accessing }
+GtRemoteRunner >> workersStateDescription [
+	^ '{1} registered workers [{2} busy]' format: {
+		registeredWorkers size. 
+		registeredWorkers size - availableWorkers size }
+]
