@@ -79,7 +79,9 @@ GtRrImageSync >> encodedChangesFrom: anOmReference [
 	enumerator := GtEpLogEnumerator new latestLog: EpMonitor current log.
 	workerOmReference := anOmReference.
 	latestOmReference := EpMonitor current log headReference.
-	entries := enumerator entriesFrom: workerOmReference to: latestOmReference.
+	entries := GtEpEventSequencer uniqueInstance
+		sequence: (enumerator entriesFrom: workerOmReference to: latestOmReference)
+		withCurrent: true.
 	encodedEvents := entries collect: [ :entry |
 		LanguageLinkUtils base64Encode: entry content ].
 	^ encodedEvents
