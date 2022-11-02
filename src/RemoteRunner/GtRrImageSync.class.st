@@ -1,9 +1,5 @@
 "
-GtRrImageSync is responsible for listening to the Epicea Monitor (gtClass:EpMonitor) and storing a history of the sessions that a part of this image.
-
-This allows a quick check to be made whether a requested event chain can be formed from a given starting point (since the starting point must be in the sessionHistory.  Otherwise log files would have to be parsed until either the requested {{gtClass:OmReference}} had been found, or all files have been parsed (and parsing is slow).
-
-Note that saving an image and then quitting will produce duplicate entries in the session history.  This is required in case the saved image is used separately from the current image.
+nil
 "
 Class {
 	#name : #GtRrImageSync,
@@ -15,7 +11,9 @@ Class {
 		'subscription',
 		'workerOmReference',
 		'encodedEvents',
-		'latestOmReference'
+		'latestOmReference',
+		'mutex',
+		'epLog'
 	],
 	#category : #'RemoteRunner-Runner-ImageSync'
 }
@@ -71,20 +69,40 @@ GtRrImageSync >> encodedChangesFrom: anOmReference [
 	Cache the latest request on the assumption that all workers will start from the same image."
 	| enumerator entries haveLatest |
 
-	haveLatest := latestOmReference = EpMonitor current log headReference.
+	haveLatest := latestOmReference = self epLog headReference.
 	(haveLatest and: [ workerOmReference = anOmReference ]) ifTrue: [ ^ encodedEvents ].
 	(self includesReference: anOmReference) ifFalse:
 		[ self error: 'Unknown OmReference: ', anOmReference gtDisplayString ].
 
-	enumerator := GtEpLogEnumerator new latestLog: EpMonitor current log.
-	workerOmReference := anOmReference.
-	latestOmReference := EpMonitor current log headReference.
-	entries := GtEpEventSequencer uniqueInstance
-		sequence: (enumerator entriesFrom: workerOmReference to: latestOmReference)
-		withCurrent: true.
-	encodedEvents := entries collect: [ :entry |
-		LanguageLinkUtils base64Encode: entry content ].
-	^ encodedEvents
+	^ mutex critical: 
+		[ haveLatest := latestOmReference = EpMonitor current log headReference.
+		(haveLatest and: [ workerOmReference = anOmReference ]) ifFalse:
+			[ enumerator := GtEpLogEnumerator new latestLog: self epLog.
+			workerOmReference := anOmReference.
+			latestOmReference := self epLog headReference.
+			entries := GtEpEventSequencer uniqueInstance
+				sequence: (enumerator entriesFrom: workerOmReference to: latestOmReference)
+				withCurrent: true.
+			encodedEvents := entries collect: [ :entry |
+				LanguageLinkUtils base64Encode: entry content ] ].
+		encodedEvents ]
+]
+
+{ #category : #accessing }
+GtRrImageSync >> epLog [
+	"Answer the EpLog to use for building the event list.
+	This should normally be the default, but may be set for testing purposes."
+	<Return: #EpLog>
+
+	^ epLog ifNil: [ EpMonitor current log ].
+]
+
+{ #category : #accessing }
+GtRrImageSync >> epLog: anEpLog [
+	"Set the receiver's EpLog.
+	Note that the sessionHistory must be updated to match."
+
+	epLog := anEpLog
 ]
 
 { #category : #finalization }
@@ -117,7 +135,7 @@ GtRrImageSync >> initialize [
 
 	super initialize.
 	sessionHistory := OrderedCollection new.
-	self addReference: EpMonitor current log headReference.
+	mutex := Mutex new.
 ]
 
 { #category : #'hooks - session' }
