@@ -16,6 +16,9 @@ GtRrImageSyncExamples >> entriesFromStartTo [
 	| imageSync entries enumerator start |
 
 	enumerator := GtEpLogEnumerator fromFile: GtEpLogEnumeratorExamples testDataRoot / 'testClass01' / 'Pharo10-SNAPSHOT-64bit-fec28a6.em8gtmjvf6qouoyjm5tk4q4dm.ombu'.
+	self 
+		assert: enumerator latestEntriesCount = 1
+		description: [ 'Expected latestEntriesCount = 1, got: ', enumerator latestEntriesCount asString ].
 	start := (enumerator priorEntriesFromHead reversed at: 2) tagAt: #self.
 	imageSync := GtRrImageSync new.
 	imageSync 
