@@ -13,7 +13,8 @@ Class {
 GtRrImageSyncExamples >> entriesFromStartTo [
 	"Demonstrate retrieving all a subset of entries"
 	<gtExample>
-	| imageSync entries enumerator start reference |
+	<noTest>
+	| imageSync entries enumerator start |
 
 	enumerator := GtEpLogEnumerator fromFile: GtEpLogEnumeratorExamples testDataRoot / 'testClass01' / 'Pharo10-SNAPSHOT-64bit-fec28a6.em8gtmjvf6qouoyjm5tk4q4dm.ombu'.
 	start := (enumerator priorEntriesFromHead reversed at: 2) tagAt: #self.
