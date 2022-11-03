@@ -3,7 +3,6 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'name',
-		'color',
 		'itemCount',
 		'progressNotification',
 		'itemsComputation',
@@ -28,15 +27,13 @@ GtRrDataGroupState >> actOnClickFrom: anElement [
 ]
 
 { #category : #accessing }
-GtRrDataGroupState >> color [
-
-	^ color
+GtRrDataGroupState >> border [
+	^ testCaseState ifNil: [ Color transparent ] ifNotNil: [ testCaseState border ]
 ]
 
 { #category : #accessing }
-GtRrDataGroupState >> color: anObject [
-
-	color := anObject
+GtRrDataGroupState >> color [
+	^ testCaseState ifNil: [ Color transparent ] ifNotNil: [ testCaseState color ]
 ]
 
 { #category : #callbacks }

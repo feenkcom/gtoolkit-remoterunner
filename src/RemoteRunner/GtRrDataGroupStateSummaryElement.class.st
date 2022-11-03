@@ -12,6 +12,7 @@ GtRrDataGroupStateSummaryElement >> initializeContent [
 				aptitude: BrGlamorousLabelAptitude;
 				text: self state itemCount asString;
 				background: self state color;
+				border: self state border;
 				hFitContent;
 				vExact: 18;
 				padding: (BlInsets all: 2);
