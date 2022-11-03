@@ -35,7 +35,7 @@ GtRrDataGroupStateElement >> initializeContent [
 	| icon nameLabel amountLabel |
 	self removeChildren.
 
-	icon := GtPharoTestCaseUtility newColoredIcon: self state color.
+	icon := GtPharoTestCaseUtility newColoredIconFor: self state.
 	nameLabel := BrLabel new
 			aptitude: BrGlamorousLabelAptitude;
 			text: self state name , ':'.
