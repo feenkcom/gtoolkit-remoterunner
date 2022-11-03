@@ -42,36 +42,30 @@ GtRrChecksJobProgressNotification >> constructStates [
 	^ {
 		(GtRrDataGroupState forNotification: self)
 			name: 'All';
-			color: Color transparent;
 			itemCount: self totalChecksCount;
 			itemsComputation: [ self job allExamples ].
 		(GtRrDataGroupState forNotification: self)
 			name: 'Success';
-			color: BrGlamorousColors successBackgroundColor;
 			testCaseState: GtPharoMethodTestCasePassedState;
 			itemCount: self successfulChecksCount;
 			itemsComputation: [ self successfulChecks ].
 		(GtRrDataGroupState forNotification: self)
 			name: 'Skipped';
-			color: BrGlamorousColors neutralBackgroundColor;
 			testCaseState: GtPharoMethodTestCaseSkippedState;
 			itemCount: self skippedChecksCount;
 			itemsComputation: [ self job skippedExamples ].
 		(GtRrDataGroupState forNotification: self)
 			name: 'Failure';
-			color: BrGlamorousColors failureBackgroundColor;
 			testCaseState: GtPharoMethodTestCaseFailureState;
 			itemCount: self failedChecksCount;
 			itemsComputation: [ self failedChecks ].
 		(GtRrDataGroupState forNotification: self)
 			name: 'Error';
-			color: BrGlamorousColors errorBackgroundColor;
 			testCaseState: GtPharoMethodTestCaseErrorState;
 			itemCount: self erroredChecksCount;
 			itemsComputation: [ self erroredChecks ].
 		(GtRrDataGroupState forNotification: self)
 			name: 'Not executed';
-			color: BrGlamorousColors neutralBackgroundColor;
 			testCaseState: GtPharoMethodNotExecutedState;
 			itemCount: self notExecutedChecksCount;
 			itemsComputation: [ self job notExecutedExamples ]} 

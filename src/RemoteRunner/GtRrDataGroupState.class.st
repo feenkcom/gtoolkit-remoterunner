@@ -26,6 +26,16 @@ GtRrDataGroupState >> actOnClickFrom: anElement [
 			aNotification spawnState:  self fromSource: anElement ]
 ]
 
+{ #category : #accessing }
+GtRrDataGroupState >> border [
+	^ testCaseState ifNil: [ Color transparent ] ifNotNil: [ testCaseState border ]
+]
+
+{ #category : #accessing }
+GtRrDataGroupState >> color [
+	^ testCaseState ifNil: [ Color transparent ] ifNotNil: [ testCaseState color ]
+]
+
 { #category : #callbacks }
 GtRrDataGroupState >> defaultActOnClickFrom: anElement [ 
 	GtInspectorTool
