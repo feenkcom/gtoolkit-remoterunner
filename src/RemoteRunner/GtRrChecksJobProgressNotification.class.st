@@ -50,11 +50,6 @@ GtRrChecksJobProgressNotification >> constructStates [
 			itemCount: self successfulChecksCount;
 			itemsComputation: [ self successfulChecks ].
 		(GtRrDataGroupState forNotification: self)
-			name: 'Skipped';
-			testCaseState: GtPharoMethodTestCaseSkippedState;
-			itemCount: self skippedChecksCount;
-			itemsComputation: [ self job skippedExamples ].
-		(GtRrDataGroupState forNotification: self)
 			name: 'Failure';
 			testCaseState: GtPharoMethodTestCaseFailureState;
 			itemCount: self failedChecksCount;
@@ -65,8 +60,13 @@ GtRrChecksJobProgressNotification >> constructStates [
 			itemCount: self erroredChecksCount;
 			itemsComputation: [ self erroredChecks ].
 		(GtRrDataGroupState forNotification: self)
-			name: 'Not executed';
-			testCaseState: GtPharoMethodNotExecutedState;
+			name: 'Skipped';
+			testCaseState: GtPharoMethodTestCaseSkippedState;
+			itemCount: self skippedChecksCount;
+			itemsComputation: [ self job skippedExamples ].
+		(GtRrDataGroupState forNotification: self)
+			name: 'Executing';
+			testCaseState: GtPharoMethodExecutingState;
 			itemCount: self notExecutedChecksCount;
 			itemsComputation: [ self job notExecutedExamples ]} 
 ]

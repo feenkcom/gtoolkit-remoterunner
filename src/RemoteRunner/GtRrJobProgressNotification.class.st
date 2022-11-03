@@ -61,8 +61,8 @@ GtRrJobProgressNotification >> constructStates [
 			testCaseState: GtPharoMethodTestCasePassedState;
 			items: self job resultsWithErrors.
 		GtRrDataGroupState new
-			name: 'Not executed';
-			testCaseState: GtPharoMethodTestCasePassedState;
+			name: 'Executing';
+			testCaseState: GtPharoMethodExecutingState;
 			items: (self job tasks reject: #isFinished) }
 ]
 
