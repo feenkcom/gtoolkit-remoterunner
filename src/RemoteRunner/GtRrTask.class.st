@@ -610,12 +610,10 @@ GtRrTask >> workerAttributes: anObject [
 
 { #category : #accessing }
 GtRrTask >> workerId [
-	^ self workerAttributes ifNotNil: [ :attributes |
-		attributes at: 'id' ifAbsent: [ nil ] ]
+	^ self executionData workerId
 ]
 
 { #category : #accessing }
 GtRrTask >> workerIpAddress [
-	^ self workerAttributes ifNotNil: [ :attributes |
-		attributes at: 'workerIpAddress' ifAbsent: [ nil ] ]
+	^ self executionData workerIpAddress
 ]
