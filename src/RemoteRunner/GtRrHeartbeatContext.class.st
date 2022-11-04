@@ -91,8 +91,7 @@ GtRrHeartbeatContext >> timeoutContext [
 
 	"maxDuration needs to be large enough to allow for delivery delays"
 	maxDuration := GtRrWorker heartbeatDelay * 1.5.
-	registeredWorkers := remoteRunner critical:
-		[ remoteRunner registeredWorkers ].
+	registeredWorkers := remoteRunner registeredWorkers.
 	now := DateAndTime now.
 	registeredWorkers do: [ :workerConnection |
 		isInImage := workerConnection detailAt: #workerInImage ifAbsent: [ false ].

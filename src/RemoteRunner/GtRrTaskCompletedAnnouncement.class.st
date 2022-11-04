@@ -4,11 +4,17 @@ Class {
 	#category : #'RemoteRunner-Announcements'
 }
 
-{ #category : #accessing }
+{ #category : #converting }
 GtRrTaskCompletedAnnouncement >> asDataForRemoteSerialize [
 	^ super asDataForRemoteSerialize
-		at: #taskResult put: task result;
+		at: #taskResult put: self computeTaskResult;
+		at: #executionData put: self computeExecutionData;
 		yourself.
+]
+
+{ #category : #accessing }
+GtRrTaskCompletedAnnouncement >> computeExecutionData [
+	^ task executionData
 ]
 
 { #category : #accessing }
@@ -17,10 +23,25 @@ GtRrTaskCompletedAnnouncement >> computeTaskResult [
 ]
 
 { #category : #accessing }
+GtRrTaskCompletedAnnouncement >> executionData [
+
+	^ task
+		ifNil: [ self properties at: #executionData ]
+		ifNotNil: [ self computeExecutionData ].
+]
+
+{ #category : #accessing }
+GtRrTaskCompletedAnnouncement >> executionData: anExecutionData [
+
+	self properties at: #executionData put: anExecutionData
+]
+
+{ #category : #initialization }
 GtRrTaskCompletedAnnouncement >> initializeFromSlotData: aDictionary [
 	super initializeFromSlotData: aDictionary.
 	
-	self taskResult: (aDictionary at: #taskResult)
+	self taskResult: (aDictionary at: #taskResult).
+	self executionData: (aDictionary at: #executionData)
 ]
 
 { #category : #accessing }

@@ -55,6 +55,20 @@ GtRrTaskExecutionData >> additionalDataAt: key put: value [
 ]
 
 { #category : #accessing }
+GtRrTaskExecutionData >> duration [
+	^ (self startTime isNotNil and: [ self endTime isNotNil ]) 
+		ifTrue: [ self endTime - self startTime ]
+		ifFalse: [ nil ]
+]
+
+{ #category : #accessing }
+GtRrTaskExecutionData >> durationOnRunner [
+	^ (self handoverTime isNotNil and: [ self resultReceivedTime isNotNil ]) 
+		ifTrue: [ self resultReceivedTime - self handoverTime ]
+		ifFalse: [ nil ]
+]
+
+{ #category : #accessing }
 GtRrTaskExecutionData >> endTime [
 
 	^ endTime
@@ -91,6 +105,12 @@ GtRrTaskExecutionData >> handoverTime [
 GtRrTaskExecutionData >> handoverTime: anObject [
 
 	handoverTime := anObject
+]
+
+{ #category : #testing }
+GtRrTaskExecutionData >> hasCompleted [
+
+	^ self state = #completed or: [ self state = #terminated ]
 ]
 
 { #category : #initialization }
@@ -173,4 +193,16 @@ GtRrTaskExecutionData >> workerAttributes [
 GtRrTaskExecutionData >> workerAttributes: anObject [
 
 	workerAttributes := anObject
+]
+
+{ #category : #accessing }
+GtRrTaskExecutionData >> workerId [
+	^ self workerAttributes ifNotNil: [ :attributes |
+		attributes at: 'id' ifAbsent: [ nil ] ]
+]
+
+{ #category : #accessing }
+GtRrTaskExecutionData >> workerIpAddress [
+	^ self workerAttributes ifNotNil: [ :attributes |
+		attributes at: 'workerIpAddress' ifAbsent: [ nil ] ]
 ]
