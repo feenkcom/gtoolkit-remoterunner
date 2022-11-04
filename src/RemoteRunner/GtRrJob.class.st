@@ -170,6 +170,14 @@ GtRrJob >> errorCount [
 	^ errorCount
 ]
 
+{ #category : #'private - serialization' }
+GtRrJob >> errorCount: aNumber [
+	"Set the receiver's errorCount.
+	This should only be used as part of deserialization."
+
+	errorCount := aNumber
+]
+
 { #category : #accessing }
 GtRrJob >> errorDetails [
 	"If set, the error details will contain the overall reason for the failure of the job.
