@@ -483,6 +483,18 @@ GtRrJob >> state: anObject [
 	state := anObject
 ]
 
+{ #category : #printing }
+GtRrJob >> stateDescription [
+
+	^ String streamContents: [ :aStream |
+		 self state 
+		 	ifNil: [ aStream << '<not initialized>' ] 
+		 	ifNotNil: [ aStream << self state ].
+		
+		self hasErrors ifTrue: [
+			aStream << ' with errors' ] ]
+]
+
 { #category : #'ston persistence' }
 GtRrJob >> stonOn: stonWriter [
 
@@ -555,19 +567,6 @@ GtRrJob >> taskExecutionTime [
 ]
 
 { #category : #accessing }
-GtRrJob >> taskTimeout [
-	<return: #Duration>
-
-	^ taskTimeout
-]
-
-{ #category : #accessing }
-GtRrJob >> taskTimeout: aDuration [
-
-	taskTimeout := aDuration
-]
-
-{ #category : #accessing }
 GtRrJob >> tasks [
 	"Answer the collection of tasks to be executed"
 	<return: #SequenceableCollection>
@@ -582,6 +581,19 @@ GtRrJob >> tasksFor: aGtRemoteRunner [
 	Such subclasses can override this method."
 
 	^ self tasks.
+]
+
+{ #category : #accessing }
+GtRrJob >> taskTimeout [
+	<return: #Duration>
+
+	^ taskTimeout
+]
+
+{ #category : #accessing }
+GtRrJob >> taskTimeout: aDuration [
+
+	taskTimeout := aDuration
 ]
 
 { #category : #'announcer - subscription' }

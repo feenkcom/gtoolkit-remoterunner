@@ -78,6 +78,12 @@ PlpoGtRrJob >> state [
 ]
 
 { #category : #accessing }
+PlpoGtRrJob >> stateDescription [
+	
+	^ self proxyPerform: #stateDescription
+]
+
+{ #category : #accessing }
 PlpoGtRrJob >> tasks [
 
 	^ self newCommandFactory 
