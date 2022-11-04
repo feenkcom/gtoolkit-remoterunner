@@ -14,7 +14,8 @@ GtRrTaskResourcesReport class >> leJsonV4Name [
 
 { #category : #accessing }
 GtRrTaskResourcesReport >> machineAvailableMemory [
-	^ self meminfoReport memAvailable
+	^ self meminfoReport ifNotNil: [ :aMemInfoReport |
+		aMemInfoReport memAvailable ]
 ]
 
 { #category : #accessing }
@@ -24,7 +25,8 @@ GtRrTaskResourcesReport >> machineFreeMemory [
 
 { #category : #accessing }
 GtRrTaskResourcesReport >> machineTotalMemory [
-	^ self meminfoReport memTotal
+	^ self meminfoReport ifNotNil: [ :aMemInfoReport |
+		aMemInfoReport memTotal ]
 ]
 
 { #category : #accessing }
