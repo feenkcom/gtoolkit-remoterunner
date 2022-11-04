@@ -23,11 +23,30 @@ GtRrTaskAnnouncement class >> task: aGtRrTask [
 ]
 
 { #category : #converting }
+GtRrTaskAnnouncement >> asDataForRemoteSerialize [
+	^ super asDataForRemoteSerialize
+		at: #taskId put: self computeTaskId;
+		yourself.
+]
+
+{ #category : #converting }
 GtRrTaskAnnouncement >> asDictionary [
 
 	^ super asDictionary
 		at: #task put: task;
 		yourself.
+]
+
+{ #category : #accessing }
+GtRrTaskAnnouncement >> computeTaskId [
+	^ task taskId
+]
+
+{ #category : #accessing }
+GtRrTaskAnnouncement >> initializeFromSlotData: aDictionary [
+	super initializeFromSlotData: aDictionary.
+	
+	self taskId: (aDictionary at: #taskId).
 ]
 
 { #category : #printing }
@@ -53,5 +72,13 @@ GtRrTaskAnnouncement >> task: anObject [
 { #category : #accessing }
 GtRrTaskAnnouncement >> taskId [
 
-	^ task taskId
+	^ task
+		ifNil: [ self properties at: #taskId ]
+		ifNotNil: [ self computeTaskId ].
+]
+
+{ #category : #accessing }
+GtRrTaskAnnouncement >> taskId: anId [
+
+	self properties at: #taskId put: anId
 ]
