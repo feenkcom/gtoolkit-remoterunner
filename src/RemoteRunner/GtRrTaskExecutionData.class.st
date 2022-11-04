@@ -198,7 +198,7 @@ GtRrTaskExecutionData >> workerAttributes: anObject [
 { #category : #accessing }
 GtRrTaskExecutionData >> workerId [
 	^ self workerAttributes ifNotNil: [ :attributes |
-		attributes at: 'workerId' ifAbsent: [ nil ] ]
+		attributes at: 'id' ifAbsent: [ nil ] ]
 ]
 
 { #category : #accessing }
