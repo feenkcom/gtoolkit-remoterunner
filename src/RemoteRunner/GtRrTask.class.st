@@ -58,16 +58,12 @@ GtRrTask >> createResourceReportForTask [
 
 { #category : #accessing }
 GtRrTask >> duration [
-	^ (self startTime isNotNil and: [ self endTime isNotNil ]) 
-		ifTrue: [ self endTime - self startTime ]
-		ifFalse: [ nil ]
+	^ self executionData duration
 ]
 
 { #category : #accessing }
 GtRrTask >> durationOnRunner [
-	^ (self handoverTime isNotNil and: [ self resultReceivedTime isNotNil ]) 
-		ifTrue: [ self resultReceivedTime - self handoverTime ]
-		ifFalse: [ nil ]
+	^ self executionData durationOnRunner
 ]
 
 { #category : #accessing }
@@ -219,7 +215,7 @@ GtRrTask >> handoverTime: anObject [
 { #category : #testing }
 GtRrTask >> hasCompleted [
 
-	^ self state = #completed or: [ self state = #terminated ]
+	^ self executionData hasCompleted
 ]
 
 { #category : #testing }

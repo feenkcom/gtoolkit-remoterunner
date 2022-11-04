@@ -117,7 +117,7 @@ GtRrAbstractExamplesTask >> isExamplesTask [
 	^ false
 ]
 
-{ #category : #'accessing - dynamic' }
+{ #category : #testing }
 GtRrAbstractExamplesTask >> isSuccessResult: aPharoLinkTestCaseResult [
 	^ aPharoLinkTestCaseResult isSuccess "or: [ 
 		aPharoLinkTestCaseResult isSkipped ]"
