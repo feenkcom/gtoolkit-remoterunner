@@ -79,12 +79,22 @@ GtRrRunnerMachineExamplesReport >> machineMinimumAvailableMemory [
 
 { #category : #'accessing - resource report' }
 GtRrRunnerMachineExamplesReport >> machineTotalConsumedMemory [
-	^ self machineTotalMemory - self machineMinimumAvailableMemory
+	| totalMemory minimumAvailableMemory|
+	totalMemory := self machineTotalMemory.
+	minimumAvailableMemory := self machineMinimumAvailableMemory.
+	(totalMemory isNil or: [minimumAvailableMemory isNil]) ifTrue: [ ^ nil ].
+	
+	^ totalMemory - minimumAvailableMemory
 ]
 
 { #category : #'accessing - resource report' }
 GtRrRunnerMachineExamplesReport >> machineTotalConsumedMemoryPerWorker [
-	^ ((self machineTotalMemory - self machineMinimumAvailableMemory) / self numberOfWorkers) asInteger
+	| totalMemory minimumAvailableMemory|
+	totalMemory := self machineTotalMemory.
+	minimumAvailableMemory := self machineMinimumAvailableMemory.
+	(totalMemory isNil or: [minimumAvailableMemory isNil]) ifTrue: [ ^ nil ].
+	
+	^ ((totalMemory - minimumAvailableMemory) / self numberOfWorkers) asInteger
 ]
 
 { #category : #'accessing - resource report' }
