@@ -1,6 +1,8 @@
 Class {
 	#name : #GtRrRunnerMachineExamplesReport,
 	#superclass : #Object,
+	#traits : 'TGtRrRunnerMachineExamplesReportViews',
+	#classTraits : 'TGtRrRunnerMachineExamplesReportViews classTrait',
 	#instVars : [
 		'ipAddress',
 		'workersReport'
