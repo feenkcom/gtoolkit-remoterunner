@@ -278,6 +278,14 @@ GtRemoteRunner >> availableWorkers [
 	^ availableWorkers 
 ]
 
+{ #category : #'private - debugging' }
+GtRemoteRunner >> basicRegisteredWorkers [
+	"Answer the registeredWorkers.
+	WARNING: This is outside sharedAccess and is for debugging purposes only."
+
+	^ registeredWorkers
+]
+
 { #category : #private }
 GtRemoteRunner >> checkJobCompleted: aGtRrContext [
 	"After each task has been completed, check if the job has finished, and if so, signal it.
@@ -674,10 +682,9 @@ GtRemoteRunner >> registeredWorkerCount [
 
 { #category : #'private - debugging' }
 GtRemoteRunner >> registeredWorkers [
-	"Answer the registeredWorkers.
-	WARNING: This is outside sharedAccess and is for debugging purposes only."
+	"Answer the registeredWorkers."
 
-	^ registeredWorkers
+	^ sharedAccess critical: [ registeredWorkers copy ].
 ]
 
 { #category : #enumerating }

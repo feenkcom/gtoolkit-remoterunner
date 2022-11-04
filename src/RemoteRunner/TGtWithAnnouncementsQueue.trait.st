@@ -14,6 +14,14 @@ TGtWithAnnouncementsQueue >> announcementQueue [
 	^ announcementQueue
 ]
 
+{ #category : #'private - serialization' }
+TGtWithAnnouncementsQueue >> announcementQueue: aQueue [
+	"Set the receiver's announcementQueue.
+	This should only be done as part of deserialization."
+
+	announcementQueue := aQueue
+]
+
 { #category : #'announcements - queue' }
 TGtWithAnnouncementsQueue >> pollSerializedAnnouncementQueue [
 	^ self announcementQueue pollSerialized
