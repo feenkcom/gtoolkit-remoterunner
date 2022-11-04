@@ -483,6 +483,18 @@ GtRrJob >> state: anObject [
 	state := anObject
 ]
 
+{ #category : #printing }
+GtRrJob >> stateDescription [
+
+	^ String streamContents: [ :aStream |
+		 self state 
+		 	ifNil: [ aStream << '<not initialized>' ] 
+		 	ifNotNil: [ aStream << self state ].
+		
+		self hasErrors ifTrue: [
+			aStream << ' with errors' ] ]
+]
+
 { #category : #'ston persistence' }
 GtRrJob >> stonOn: stonWriter [
 

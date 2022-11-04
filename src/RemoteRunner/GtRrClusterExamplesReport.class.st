@@ -30,7 +30,12 @@ GtRrClusterExamplesReport >> addRunnerMachineReport: aReport [
 
 { #category : #'accessing - gc details' }
 GtRrClusterExamplesReport >> avegareFullGcDuration [
-	^ self fullGcDuration / self numberOfFullGCs
+	| numberOfFullGCs |
+	numberOfFullGCs := self numberOfFullGCs.
+	(numberOfFullGCs isNil or: [
+		numberOfFullGCs = 0]) ifTrue: [ ^ nil].
+		
+	^ self fullGcDuration / numberOfFullGCs
 ]
 
 { #category : #'accessing - gc details' }
@@ -78,15 +83,20 @@ GtRrClusterExamplesReport >> gtViewMachineMemoryStatsFor: aView [
 		column: 'Workers Count' text: [ :aMachineReport |
 			aMachineReport numberOfWorkers ];
 		column: 'Total Memory' text: [ :aMachineReport |
-			aMachineReport machineTotalMemory humanReadableIsqByteSize ];
+			aMachineReport machineTotalMemory 
+				ifNotNil: [ :aValue | aValue humanReadableIsqByteSize ] ];
 		column: 'Minimum Available Memory' text: [ :aMachineReport |
-			aMachineReport machineMinimumAvailableMemory humanReadableIsqByteSize ];
+			aMachineReport machineMinimumAvailableMemory 
+				ifNotNil: [ :aValue | aValue humanReadableIsqByteSize ] ];
 		column: 'Maximum (initial) Available Memory' text: [ :aMachineReport |
-			aMachineReport machineMaximumAvailableMemory humanReadableIsqByteSize ];
+			aMachineReport machineMaximumAvailableMemory 
+				ifNotNil: [ :aValue | aValue humanReadableIsqByteSize ] ];
 		column: 'Total Consumed Memory' text: [ :aMachineReport |
-			aMachineReport machineTotalConsumedMemory humanReadableIsqByteSize ];
+			aMachineReport machineTotalConsumedMemory
+				ifNotNil: [ :aValue | aValue humanReadableIsqByteSize ] ];
 		column: 'Avegare Consumed Memory per Worker' text: [ :aMachineReport |
-			aMachineReport machineTotalConsumedMemoryPerWorker humanReadableIsqByteSize ]
+			aMachineReport machineTotalConsumedMemoryPerWorker 
+				ifNotNil: [ :aValue | aValue humanReadableIsqByteSize ] ]
 			
 ]
 

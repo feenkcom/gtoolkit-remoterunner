@@ -1,6 +1,8 @@
 Class {
 	#name : #GtRrWorkerExamplesReport,
 	#superclass : #Object,
+	#traits : 'TGtRrWorkerExamplesReportViews',
+	#classTraits : 'TGtRrWorkerExamplesReportViews classTrait',
 	#instVars : [
 		'workerAttributes',
 		'tasks'
