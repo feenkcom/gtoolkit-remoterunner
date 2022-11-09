@@ -15,6 +15,12 @@ Class {
 }
 
 { #category : #accessing }
+GtRrFutureWorkerTask >> attributes [
+
+	^ connection attributes.
+]
+
+{ #category : #accessing }
 GtRrFutureWorkerTask >> connection [
 	<return: #GtRrWorkerConnection>
 

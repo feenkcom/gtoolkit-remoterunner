@@ -484,9 +484,14 @@ GtRrWorker >> stopHeartbeat [
 
 { #category : #private }
 GtRrWorker >> syncImageIfRequiredWith: aPharoLinkApplication [ 
-	| encodedEvents omReference |
+	| encodedEvents omReference events remoteAddressString |
 
 	(attributes at: #imageSync ifAbsent: [ false ]) ifFalse: [ ^ self ].
+	remoteAddressString := aPharoLinkApplication remoteAddressString.
+	GtRrWorkerImageSyncStartAnnouncement new 
+		remoteAddressString: remoteAddressString;
+		worker: self;
+		emit.
 	omReference := EpMonitor current log headReference.
 	"If this is the null reference and we've been started with detachChangesFromFileSystem use the latest recorded session"
 	(omReference isNull and: [ Smalltalk argumentsInclude: '--detachChangesFromFileSystem' ]) ifTrue:
@@ -497,8 +502,18 @@ GtRrWorker >> syncImageIfRequiredWith: aPharoLinkApplication [
 			(STON toString: omReference);
 		<< 'GtAssignedRemoteRunner imageSyncEventsFrom: anOmReference';
 		sendAndWait.
-	encodedEvents do: [ :each |
-		(LanguageLinkUtils base64Decode: each readStream) applyCodeChange ].
+	GtRrWorkerImageSyncHaveEventsAnnouncement new 
+		remoteAddressString: remoteAddressString;
+		worker: self;
+		emit.
+	events  := encodedEvents collect: [ :each |
+		(LanguageLinkUtils base64Decode: each readStream) ].
+	events do: #applyCodeChange.
+	GtRrWorkerImageSyncedAnnouncement new
+		remoteAddressString: remoteAddressString;
+		worker: self;
+		events: events;
+		emit.
 ]
 
 { #category : #accessing }

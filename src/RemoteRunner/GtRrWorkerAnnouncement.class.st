@@ -75,8 +75,9 @@ GtRrWorkerAnnouncement >> worker [
 GtRrWorkerAnnouncement >> worker: anObject [
 
 	worker := anObject.
-	self remoteAddressString:  worker remoteAddressString.
-	self workerAttributes:  (worker details ifNil: [ Dictionary new])
+	remoteAddressString ifNil:
+		[ self remoteAddressString:  worker remoteAddressString ].
+	self workerAttributes:  (worker attributes ifNil: [ Dictionary new])
 ]
 
 { #category : #accessing }

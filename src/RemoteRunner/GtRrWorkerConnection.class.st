@@ -11,11 +11,11 @@ Class {
 		'workerPriority',
 		'remoteRunner',
 		'remoteAddress',
-		'details',
 		'observer',
 		'observerProcess',
 		'observerSemaphore',
-		'lastHeartbeat'
+		'lastHeartbeat',
+		'attributes'
 	],
 	#category : #'RemoteRunner-Runner'
 }
@@ -39,6 +39,18 @@ GtRrWorkerConnection >> addObserver: aBlock [
 	observerProcess := Processor activeProcess.
 	observerSemaphore := Semaphore new.
 	^ true
+]
+
+{ #category : #accessing }
+GtRrWorkerConnection >> attributes [
+
+	^ attributes
+]
+
+{ #category : #accessing }
+GtRrWorkerConnection >> attributes: aDictionary [
+
+	attributes := aDictionary
 ]
 
 { #category : #commands }
@@ -118,19 +130,19 @@ GtRrWorkerConnection >> connection: aPharoLinkServerConnection [
 { #category : #accessing }
 GtRrWorkerConnection >> detailAt: aString ifAbsent: absentBlock [
 
-	^ details at: aString ifAbsent: absentBlock
+	^ attributes at: aString ifAbsent: absentBlock
 ]
 
 { #category : #accessing }
 GtRrWorkerConnection >> details [
 
-	^ details
+	^ attributes
 ]
 
 { #category : #accessing }
 GtRrWorkerConnection >> details: anObject [
 
-	details := anObject.
+	attributes := anObject.
 
 ]
 
@@ -158,7 +170,7 @@ GtRrWorkerConnection >> hasObserver [
 GtRrWorkerConnection >> initialize [
 
 	super initialize.
-	details := Dictionary new.
+	attributes := Dictionary new.
 	lastHeartbeat := DateAndTime now.
 ]
 
@@ -187,7 +199,7 @@ GtRrWorkerConnection >> onConnectionLost [
 	"Handle the worker disconnection.
 	Ignored if not a single connection"
 
-	(details at: #workerConnectionStrategy) = GtRrWorkerSingleConnectionStrategy strategyName ifFalse:
+	(attributes at: #workerConnectionStrategy) = GtRrWorkerSingleConnectionStrategy strategyName ifFalse:
 		[ ^ self ].
 
 	self hasObserver ifTrue: [ self removeObserver ].
@@ -221,13 +233,13 @@ GtRrWorkerConnection >> pharoLinkServerOnPort: anInteger [
 { #category : #printing }
 GtRrWorkerConnection >> printOn: aStream [
 
-	(remoteAddress isNil and: [ (details includesKey: #workingDirectory) not ]) ifTrue: 
+	(remoteAddress isNil and: [ (attributes includesKey: #workingDirectory) not ]) ifTrue: 
 		[ ^ super printOn: aStream ].
 
 	aStream
 		<< (GtRemoteRunner printIpAddress: remoteAddress);
 		<< ':';
-		<< (details at: #workingDirectory ifAbsent: [ '' ]).
+		<< (attributes at: #workingDirectory ifAbsent: [ '' ]).
 ]
 
 { #category : #accessing }
@@ -304,8 +316,8 @@ GtRrWorkerConnection >> summaryAttributes [
 
 	^ Array streamContents: [ :stream |
 		stream nextPut: { #Connected. self isConnected. connection. }.
-		details ifNotNil:
-			[ details associationsDo: [ :assoc |
+		attributes ifNotNil:
+			[ attributes associationsDo: [ :assoc |
 				stream nextPut: { assoc key. assoc value. self. } ] ] ].
 ]
 
@@ -318,7 +330,7 @@ GtRrWorkerConnection >> timeoutManager [
 { #category : #accessing }
 GtRrWorkerConnection >> workerId [
 
-	^ details at: #id
+	^ attributes at: #id
 ]
 
 { #category : #accessing }
@@ -329,5 +341,5 @@ GtRrWorkerConnection >> workerPriority [
 	Cache the priority in an instance variable since it is frequently accessed as part of the availableWorkers"
 
 	^ workerPriority ifNil:
-		[ workerPriority := details at: #workerPriority ifAbsent: [ 50 ] ].
+		[ workerPriority := attributes at: #workerPriority ifAbsent: [ 50 ] ].
 ]
