@@ -64,6 +64,20 @@ GtRrImageSync >> addReference: anOmReference [
 ]
 
 { #category : #'api - remoterunner' }
+GtRrImageSync >> changesFrom: anOmReference [
+	"Answer the encoded collection of EpEvents from anOmReference up to the image's current state."
+	| enumerator |
+
+	(self includesReference: anOmReference) ifFalse:
+		[ self error: 'Unknown OmReference: ', anOmReference gtDisplayString ].
+
+	enumerator := GtEpLogEnumerator new latestLog: self epLog.
+	^ GtEpEventSequencer uniqueInstance
+		sequence: (enumerator entriesFrom: anOmReference to: self epLog headReference)
+		withCurrent: true.
+]
+
+{ #category : #'api - remoterunner' }
 GtRrImageSync >> encodedChangesFrom: anOmReference [
 	"Answer the encoded collection of EpEvents from anOmReference up to the image's current state.
 	Cache the latest request on the assumption that all workers will start from the same image."
