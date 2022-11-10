@@ -9,7 +9,8 @@ Class {
 		'watchdogSemaphore',
 		'processes',
 		'workerCountCalculator',
-		'connectionStrategyId'
+		'connectionStrategyId',
+		'imageSync'
 	],
 	#category : #'RemoteRunner-Runner'
 }
@@ -90,16 +91,19 @@ GtRrLocalManagerStartupAndShutdown >> gtSummaryFor: aView [
 		  actionUpdateButton
 ]
 
-{ #category : #initialization }
-GtRrLocalManagerStartupAndShutdown >> initialize [
+{ #category : #accessing }
+GtRrLocalManagerStartupAndShutdown >> imageSync [
+	"Answer a boolean indicating whether workers should be started with imageSync enabled."
+	<return: #Boolean>
 
-	super initialize.
-	inMemoryLog := false.
-	workerIndex := 0.
-	autoRestart := true.
-	workerCountCalculator := GtRrResourceWorkerCountCalculator new.
-	processes := OrderedCollection new.
-	watchdogSemaphore := Semaphore new.
+	^ imageSync
+]
+
+{ #category : #accessing }
+GtRrLocalManagerStartupAndShutdown >> imageSync: aBoolean [
+	"Set the flag indicating whether workers should be started with imageSync enabled."
+
+	imageSync := aBoolean
 ]
 
 { #category : #accessing }
@@ -113,6 +117,19 @@ GtRrLocalManagerStartupAndShutdown >> inMemoryLog [
 GtRrLocalManagerStartupAndShutdown >> inMemoryLog: aBoolean [
 
 	inMemoryLog := aBoolean
+]
+
+{ #category : #initialization }
+GtRrLocalManagerStartupAndShutdown >> initialize [
+
+	super initialize.
+	inMemoryLog := false.
+	workerIndex := 0.
+	autoRestart := true.
+	imageSync := false.
+	workerCountCalculator := GtRrResourceWorkerCountCalculator new.
+	processes := OrderedCollection new.
+	watchdogSemaphore := Semaphore new.
 ]
 
 { #category : #testing }
@@ -179,6 +196,8 @@ GtRrLocalManagerStartupAndShutdown >> newWorkerLocalProcessArgumentsFor: someSet
 		[ args
 			add: '--connectionStrategy';
 			add: connectionStrategyId asString ].
+	imageSync ifTrue:
+		[ args add: '--imageSync' ].
 	args
 		add: '--detachChangesFromFileSystem';
 		add: '--noGtImageUpdate'.
@@ -249,25 +268,6 @@ GtRrLocalManagerStartupAndShutdown >> signalWatchdog [
 	watchdogSemaphore signal.
 ]
 
-{ #category : #'startup - shutdown' }
-GtRrLocalManagerStartupAndShutdown >> startup [ 
-	| isWindows |
-
-	self assert: processes isEmpty.
-	self assert: self isRunning not.
-	super startup.
-
-	isWindows := OSPlatform current isWin32.
-	self poolSize timesRepeat: 
-		[ processes add: self newWorkerLocalProcess.
-		"Pharo writes a number of files during startup.
-		Windows locks these files causing the workers to fail during startup,
-		give each worker a fighting chance to get going."
-		isWindows ifTrue: [ 1 second wait ] ].
-	self startWatchDog.
-
-]
-
 { #category : #private }
 GtRrLocalManagerStartupAndShutdown >> startWatchDog [
 
@@ -285,6 +285,25 @@ GtRrLocalManagerStartupAndShutdown >> startWatchDog [
 				newProcess: process) ].
 		 ] ] forkNamed:
 			'GtRemoteRunner local watch dog'
+]
+
+{ #category : #'startup - shutdown' }
+GtRrLocalManagerStartupAndShutdown >> startup [ 
+	| isWindows |
+
+	self assert: processes isEmpty.
+	self assert: self isRunning not.
+	super startup.
+
+	isWindows := OSPlatform current isWin32.
+	self poolSize timesRepeat: 
+		[ processes add: self newWorkerLocalProcess.
+		"Pharo writes a number of files during startup.
+		Windows locks these files causing the workers to fail during startup,
+		give each worker a fighting chance to get going."
+		isWindows ifTrue: [ 1 second wait ] ].
+	self startWatchDog.
+
 ]
 
 { #category : #ui }
