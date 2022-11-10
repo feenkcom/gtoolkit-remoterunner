@@ -9,7 +9,8 @@ Class {
 		'watchdogSemaphore',
 		'processes',
 		'workerCountCalculator',
-		'connectionStrategyId'
+		'connectionStrategyId',
+		'imageSync'
 	],
 	#category : #'RemoteRunner-Runner'
 }
@@ -91,6 +92,21 @@ GtRrLocalManagerStartupAndShutdown >> gtSummaryFor: aView [
 ]
 
 { #category : #accessing }
+GtRrLocalManagerStartupAndShutdown >> imageSync [
+	"Answer a boolean indicating whether workers should be started with imageSync enabled."
+	<return: #Boolean>
+
+	^ imageSync
+]
+
+{ #category : #accessing }
+GtRrLocalManagerStartupAndShutdown >> imageSync: aBoolean [
+	"Set the flag indicating whether workers should be started with imageSync enabled."
+
+	imageSync := aBoolean
+]
+
+{ #category : #accessing }
 GtRrLocalManagerStartupAndShutdown >> inMemoryLog [
 	"Answer a boolean indicating whether worker output should be stored in memory or not"
 
@@ -110,6 +126,7 @@ GtRrLocalManagerStartupAndShutdown >> initialize [
 	inMemoryLog := false.
 	workerIndex := 0.
 	autoRestart := true.
+	imageSync := false.
 	workerCountCalculator := GtRrResourceWorkerCountCalculator new.
 	processes := OrderedCollection new.
 	watchdogSemaphore := Semaphore new.
@@ -179,6 +196,8 @@ GtRrLocalManagerStartupAndShutdown >> newWorkerLocalProcessArgumentsFor: someSet
 		[ args
 			add: '--connectionStrategy';
 			add: connectionStrategyId asString ].
+	imageSync ifTrue:
+		[ args add: '--imageSync' ].
 	args
 		add: '--detachChangesFromFileSystem';
 		add: '--noGtImageUpdate'.
