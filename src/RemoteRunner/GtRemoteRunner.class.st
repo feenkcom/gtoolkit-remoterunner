@@ -807,14 +807,14 @@ GtRemoteRunner >> state [
 	| availableWorkerCount taskQueueCount currentJobCount currentTaskCount registeredWorkerCount |
 
 	(server isNil or: [ server isRunning not ]) ifTrue: [ ^ #stopped ].
-	sharedAccess size > 0 ifTrue: [ ^ #waiting ].
+	sharedAccess size > 0 ifTrue: [ ^ #waitingForSharedAccess ].
 	availableWorkerCount := availableWorkers size.
 	taskQueueCount := taskQueue size.
 	currentJobCount := currentlyExecutingJobs size.
 	currentTaskCount := currentlyExecutingTasks size.
 	registeredWorkerCount := registeredWorkers size.
 	(registeredWorkerCount = 0 and:
-		[ taskQueueCount > 0 or: [ currentJobCount > 0 ] ]) ifTrue: [ ^ #stuck ].
+		[ taskQueueCount > 0 or: [ currentJobCount > 0 ] ]) ifTrue: [ ^ #waitingForWorkers ].
 	(taskQueueCount = 0 and: [ currentJobCount = 0 ]) ifTrue: [ ^ #idle ].
 	(taskQueueCount > 0 or: [ currentJobCount > 0 ]) ifTrue: [ ^ #busy ].
 	self error: 'Unknown state'.
