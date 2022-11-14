@@ -200,6 +200,7 @@ GtRrLocalManagerStartupAndShutdown >> newWorkerLocalProcessArgumentsFor: someSet
 		[ args add: '--imageSync' ].
 	args
 		add: '--detachChangesFromFileSystem';
+		add: '--noLepiterReload';
 		add: '--noGtImageUpdate'.
 	^ args
 ]
