@@ -36,6 +36,14 @@ GtRrJobContext >> asDictionary [
 ]
 
 { #category : #accessing }
+GtRrJobContext >> checkJobCompleted [
+	"Ask the RemoteRunner to check whether the receiver is complete.
+	Convenience method for debugging."
+	
+	self remoteRunner checkJobCompleted: self.
+]
+
+{ #category : #accessing }
 GtRrJobContext >> contextTimeoutTime [
 	"Answer the absolute time this context will time out"
 	<return: #DateAndTime>

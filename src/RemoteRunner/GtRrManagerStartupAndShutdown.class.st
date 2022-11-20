@@ -39,7 +39,8 @@ GtRrManagerStartupAndShutdown >> shutdown [
 	- Stop the PharoLinkWorkerServer
 	Subclasses can perform additional actions"
 
-	remoteRunner server stop.
+	remoteRunner server ifNotNil:
+		[ :server | server stop ].
 ]
 
 { #category : #'startup - shutdown' }
@@ -63,15 +64,17 @@ GtRrManagerStartupAndShutdown >> startup [
 	"Perform any actions associated with starting the RemoteRunner:
 	- Start the PharoLinkWorkerServer
 	Subclasses can perform additional actions"
-	| server |
+	| server port |
 
-	server := PharoLinkServer new
-		listenPort: remoteRunner port;
-		setDebugMode;
-		start;
-		setCloseOnExec: true;
-		yourself.
-	server globals at: #GtAssignedRemoteRunner put: remoteRunner.
-	remoteRunner server: server.
+	port := remoteRunner port.
+	port = #none ifFalse:
+		[ server := PharoLinkServer new
+			listenPort: port;
+			setDebugMode;
+			start;
+			setCloseOnExec: true;
+			yourself.
+		server globals at: #GtAssignedRemoteRunner put: remoteRunner.
+		remoteRunner server: server ].
 	self startHeartbeatContext.
 ]

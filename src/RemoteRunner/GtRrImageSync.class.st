@@ -81,7 +81,7 @@ GtRrImageSync >> changesFrom: anOmReference [
 GtRrImageSync >> encodedChangesFrom: anOmReference [
 	"Answer the encoded collection of EpEvents from anOmReference up to the image's current state.
 	Cache the latest request on the assumption that all workers will start from the same image."
-	| enumerator entries haveLatest |
+	| enumerator entries haveLatest headReference |
 
 	haveLatest := latestOmReference = self epLog headReference.
 	(haveLatest and: [ workerOmReference = anOmReference ]) ifTrue: [ ^ encodedEvents ].
@@ -89,14 +89,15 @@ GtRrImageSync >> encodedChangesFrom: anOmReference [
 		[ self error: 'Unknown OmReference: ', anOmReference gtDisplayString ].
 
 	^ mutex critical: 
-		[ haveLatest := latestOmReference = EpMonitor current log headReference.
+		[ haveLatest := latestOmReference = self epLog headReference.
 		(haveLatest and: [ workerOmReference = anOmReference ]) ifFalse:
 			[ enumerator := GtEpLogEnumerator new latestLog: self epLog.
-			workerOmReference := anOmReference.
-			latestOmReference := self epLog headReference.
+			headReference := self epLog headReference.
 			entries := GtEpEventSequencer uniqueInstance
-				sequence: (enumerator entriesFrom: workerOmReference to: latestOmReference)
+				sequence: (enumerator entriesFrom: anOmReference to: headReference)
 				withCurrent: true.
+			workerOmReference := anOmReference.
+			latestOmReference := headReference.
 			encodedEvents := entries collect: [ :entry |
 				LanguageLinkUtils base64Encode: entry content ] ].
 		encodedEvents ]
@@ -186,4 +187,11 @@ GtRrImageSync >> stop [
 	subscription ifNotNil: [ 
 		subscription announcer removeSubscription: subscription.
 		subscription := nil ]
+]
+
+{ #category : #'private - debugging' }
+GtRrImageSync >> workerChanges [
+	"Convenience method to regenerate the encodedChanges unencoded."
+
+	^ self changesFrom: workerOmReference.
 ]
