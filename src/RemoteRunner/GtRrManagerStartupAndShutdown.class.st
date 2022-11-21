@@ -54,7 +54,7 @@ GtRrManagerStartupAndShutdown >> startHeartbeatContext [
 GtRrManagerStartupAndShutdown >> startInImageWorker [
 	"Start a worker in the same image as the runner"
 
-	inImageWorker := GtRrInImageWorker new
+	^ inImageWorker := GtRrInImageWorker new
 		remoteRunner: remoteRunner;
 		start.
 ]
