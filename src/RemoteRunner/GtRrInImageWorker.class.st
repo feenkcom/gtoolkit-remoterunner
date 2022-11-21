@@ -29,12 +29,13 @@ GtRrInImageWorker >> connection: aPharoLinkServerConnection [
 GtRrInImageWorker >> initialize [
 
 	super initialize.
+	"The default strategy for a in-image worker is to allow the debugger to open"
+	exceptionStrategy := GtRrTaskDebuggerExceptionStrategy new.
 	attributes
 		at: #workerPriority put: 10;
 		at: #workerInImage put: true.
 	connection := GtRrPseudoPharoLinkServerConnection new.
 	self connectionStrategy: GtRrWorkerInImageConnectionStrategy new.
-	self serviceName: 'GtRrInImageWorker-', uid.
 ]
 
 { #category : #private }

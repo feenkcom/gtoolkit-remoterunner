@@ -103,7 +103,7 @@ GtRrWorkerTaskContext >> value [
 	| result |
 
 	"Lower the priority of the receiver so that commands get priority."
-	"Processor activeProcess priority: Processor userBackgroundPriority."
+	Processor activeProcess priority: Processor userBackgroundPriority.
 	result := task timedRun.
 	^ result.
 ]

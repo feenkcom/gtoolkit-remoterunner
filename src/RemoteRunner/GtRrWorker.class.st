@@ -1,20 +1,21 @@
 "
-GtRrWorker runs on the worker machines as a PharoLink client, requesting tasks from the runner ({{gtClass:GtRemoteRunner}}).
+nil
 "
 Class {
 	#name : #GtRrWorker,
-	#superclass : #TKTService,
+	#superclass : #Object,
 	#instVars : [
 		'uid',
 		'attributes',
-		'taskRunner',
-		'currentTaskExecution',
-		'serviceName',
 		'connectionStrategy',
 		'resultQueue',
 		'lastHeartbeat',
 		'heartbeatProcess',
-		'heartbeatDelay'
+		'heartbeatDelay',
+		'stopFlag',
+		'executionContext',
+		'readProcess',
+		'exceptionStrategy'
 	],
 	#category : #'RemoteRunner-Worker'
 }
@@ -190,7 +191,7 @@ GtRrWorker >> command: anArray [
 GtRrWorker >> commandCurrentTaskContextId [
 	"Answer the current task context id, or nil if nothing is being currently executed"
 
-	^ currentTaskExecution ifNotNil: [ currentTaskExecution task taskContextId ]
+	^ executionContext ifNotNil: [ executionContext task taskContextId ]
 ]
 
 { #category : #commands }
@@ -252,23 +253,23 @@ GtRrWorker >> commandTerminateTaskContextId: taskContextId [
 	priority := Processor activeProcess priority.
 	[ Processor activeProcess priority: priority + 1.
 	canTerminate := true.
-	currentTaskExecution ifNil:
+	executionContext ifNil:
 		[ GtRrWorkerCommandAnnouncement new
 			message: taskContextId printString, ': can''t terminate: currentTaskExecution isNil';
 			emit.
 		canTerminate := false. ]
 	ifNotNil:
-		[ currentTaskExecution task taskContextId = taskContextId ifFalse:
+		[ executionContext task taskContextId = taskContextId ifFalse:
 			[ GtRrWorkerCommandAnnouncement new
 				message: (String streamContents: [ :stream |
 					stream
 						print: taskContextId;
 						<< ': can''t terminate: current taskContextId = ';
-						print: currentTaskExecution task taskContextId ]);
+						print: executionContext task taskContextId ]);
 				emit.
 			canTerminate := false. ] ].
 	canTerminate ifTrue: 
-		[ currentTaskExecution cancelWithReason: 'received TerminateCurrentTask from RemoteRunner' ] ]
+		[ executionContext cancelWithReason: 'received TerminateCurrentTask from RemoteRunner' ] ]
 			ensure: [ Processor activeProcess priority: priority ].
 	^ canTerminate
 ]
@@ -302,17 +303,29 @@ GtRrWorker >> currentProcessId [
 ]
 
 { #category : #accessing }
+GtRrWorker >> exceptionStrategy [
+
+	^ exceptionStrategy
+]
+
+{ #category : #accessing }
+GtRrWorker >> exceptionStrategy: anObject [
+
+	exceptionStrategy := anObject
+]
+
+{ #category : #accessing }
 GtRrWorker >> initialize [
 
 	super initialize.
 	uid := UUID new asString.
-	taskRunner := TKTNewProcessTaskRunner new.
-	"WaitfreeQueues should have only one process reading - which is the #stepService"
+	"WaitfreeQueues should have only one process reading - which is the taskProcess"
 	resultQueue := WaitfreeQueue new.
+	"The default strategy for a remote worker is to fail the task with the error"
+	exceptionStrategy := GtRrTaskHeadlessExceptionStrategy new.
 	"Attributes is a dictionary of information can be json encoded.
 	Additional values can be provided, or existing values overwritten, by the command line.
-	This is used by the remote runner to determine which workers can run a given task (the constraints).
-	Naming is inconsistent at the moment - 'attributes' are called 'details' GtRemoteRunner."
+	This is used by the remote runner to determine which workers can run a given task (the constraints)."
 	attributes := Dictionary new
 		at: #workingDirectory put: FileLocator workingDirectory resolve fullName;
 		at: #id put: uid;
@@ -326,29 +339,29 @@ GtRrWorker >> initialize [
 	self connectionStrategy: (OSPlatform current isWindows
 		ifTrue: [ GtRrWorkerConnectionPerMessageStrategy new ]
 		ifFalse: [ GtRrWorkerSingleConnectionStrategy new ]).
-
-
-]
-
-{ #category : #stepping }
-GtRrWorker >> iterateService [
-
-	self stepService.
-	Processor yield.
-]
-
-{ #category : #private }
-GtRrWorker >> kill [
-
-	super kill.
-	connectionStrategy stop.
-	taskRunner stop
 ]
 
 { #category : #accessing }
-GtRrWorker >> name [
+GtRrWorker >> isRunning [
 
-	^ serviceName ifNil: [ 'GtRrWorker poll service' ]
+	^ connectionStrategy isNotNil and: [ 
+		readProcess isNotNil and: [ 
+		readProcess isTerminated not ] ]
+]
+
+{ #category : #accessing }
+GtRrWorker >> newTaskProcess [
+
+	^ [ [ stopFlag ] whileFalse:
+		[ [ [ self stepService ] repeat ]
+			on: Error
+			do: [ :ex |
+				GtRrWorkerTaskProcessErrorAnnouncement new
+					taskContext: executionContext;
+					exception: ex;
+					emit.
+				5 seconds wait ] ].
+	] forkNamed: 'Worker Process: ', uid.
 ]
 
 { #category : #private }
@@ -388,12 +401,6 @@ GtRrWorker >> sendHeartbeat [
 			'GtAssignedRemoteRunner heartbeatForWorkerId: ''', uid, '''' ].
 ]
 
-{ #category : #accessing }
-GtRrWorker >> serviceName: aString [
-
-	serviceName := aString
-]
-
 { #category : #private }
 GtRrWorker >> stackString [
 
@@ -405,8 +412,9 @@ GtRrWorker >> stackString [
 { #category : #starting }
 GtRrWorker >> start [
 
+	stopFlag := false.
 	connectionStrategy start.
-	super start.
+	readProcess := self newTaskProcess.
 	self startHeartbeat.
 ]
 
@@ -433,43 +441,27 @@ GtRrWorker >> stepService [
 	- get the next task
 	- evaluate the task
 	- queue the result (success or failure)"
-	| task semaphore |
+	| taskContext |
 
-	semaphore := Semaphore new.
 	GtRrWorkerWaitForTaskAnnouncement new emit.
-	task := self nextTask.
+	taskContext := self nextTask.
 	GtRrWorkerTaskStartingAnnouncement new
-		task: task;
+		task: taskContext;
 		emit.
-	currentTaskExecution := task asTask
-		configureTaskExecution: GtRrFutureTimeoutableTaskExecution new
-		with: taskRunner.
-	currentTaskExecution timeout: task taskTimeout.
-	taskRunner scheduleTaskExecution: currentTaskExecution.
-	currentTaskExecution future
-		onSuccessDo: [ :result | 
-			GtRrWorkerTaskCompletedAnnouncement new
-				task: task;
-				message: 'Success: ' , result printString;
-				emit.
-			self taskDone: task with: result.
-			semaphore signal. ];
-		onFailureDo: [ :error | 
-			GtRrWorkerTaskCompletedAnnouncement new
-				task: task;
-				message: 'ERROR: ' , error printString;
-				emit.
-			self taskFailed: task with: error.
-			semaphore signal. ].
-	semaphore wait.
-	currentTaskExecution := nil
+	executionContext := GtRrWorkerExecutionContext new
+		taskContext: taskContext;
+		timeout: taskContext taskTimeout;
+		worker: self.
+	executionContext forkAndRun.
+	executionContext waitForTaskCompletion.
+	executionContext := nil.
 ]
 
 { #category : #stopping }
 GtRrWorker >> stop [
 
+	stopFlag := true.
 	self stopHeartbeat.
-	super stop.
 	connectionStrategy stop.
 
 ]
@@ -517,25 +509,29 @@ GtRrWorker >> syncImageIfRequiredWith: aPharoLinkApplication [
 ]
 
 { #category : #accessing }
-GtRrWorker >> taskDone: aTask with: anObject [
+GtRrWorker >> taskDone: aTaskContext with: anObject [
 	| serializedResult executionData serializedExecutionData|
 
+	GtRrWorkerTaskCompletedAnnouncement new
+		task: aTaskContext;
+		message: 'Success: ' , anObject printString;
+		emit.
 	executionData := GtRrWorkerExecutionData new
-		startTime: aTask startTime;
-		endTime: aTask endTime;
-		resourceReport: aTask executionData resourceReport;
-		additionalData: aTask executionData additionalData.
+		startTime: aTaskContext startTime;
+		endTime: aTaskContext endTime;
+		resourceReport: aTaskContext executionData resourceReport;
+		additionalData: aTaskContext executionData additionalData.
 	serializedExecutionData := [ LeJsonV4 uniqueInstance serialize: executionData ]
 		on: Error 
-		do: [ :ex | ^ self taskFailed: aTask with: ex ].
+		do: [ :ex | ^ self taskFailed: aTaskContext with: ex ].
 	serializedResult := [ LeJsonV4 uniqueInstance serialize: anObject ]
 		on: Error 
-		do: [ :ex | ^ self taskFailed: aTask with: ex ].
+		do: [ :ex | ^ self taskFailed: aTaskContext with: ex ].
 	resultQueue nextPut: (GtRrWorkerResultEntry
 		worker: self
-		task: aTask
+		task: aTaskContext
 		bindings: { 
-			#taskContextId -> aTask taskContextId.
+			#taskContextId -> aTaskContext taskContextId.
 			#executionData -> serializedExecutionData.
 			#result -> serializedResult. }
 		command: 'GtAssignedRemoteRunner 
@@ -546,23 +542,28 @@ GtRrWorker >> taskDone: aTask with: anObject [
 ]
 
 { #category : #accessing }
-GtRrWorker >> taskFailed: aTask with: anError [
+GtRrWorker >> taskFailed: aTaskContext with: anError [
 	| executionData serializedExecutionData |
 
+	Stdio stdout lf; << 'ensured3'; lf; flush.
+	GtRrWorkerTaskCompletedAnnouncement new
+		task: aTaskContext;
+		message: 'ERROR: ' , anError printString;
+		emit.
 	executionData := GtRrWorkerExecutionData new
-		startTime: aTask startTime;
-		endTime: aTask endTime;
-		resourceReport: aTask executionData resourceReport;
+		startTime: aTaskContext startTime;
+		endTime: aTaskContext endTime;
+		resourceReport: aTaskContext executionData resourceReport;
 		errorDetails: (GtRrErrorDetails new
 						errorMessage: anError messageText;
 						trace: anError stackString);
-		additionalData: aTask executionData additionalData.
+		additionalData: aTaskContext executionData additionalData.
 	serializedExecutionData := LeJsonV4 uniqueInstance serialize: executionData.
 	resultQueue nextPut: (GtRrWorkerResultEntry
 		worker: self
-		task: aTask
+		task: aTaskContext
 		bindings: { 
-			#taskContextId -> aTask taskContextId.
+			#taskContextId -> aTaskContext taskContextId.
 			#executionData -> serializedExecutionData. }
 		command: 'GtAssignedRemoteRunner 
 				taskFailed: taskContextId 

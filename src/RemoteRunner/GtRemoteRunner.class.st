@@ -609,21 +609,28 @@ GtRemoteRunner >> pingAllWorkers [
 
 { #category : #accessing }
 GtRemoteRunner >> port [
+	<return: #Number or: #Symbol>
 
-	^ port ifNil: 
+	port = #none ifTrue: [ ^ port ].
+	(port isNil or: [ port = 0 ]) ifTrue: 
 		[ | socket |
 		[ socket := Socket newTCP listenOn: 0.
 		port := socket localPort ]
 			ensure: [ socket closeAndDestroy ].
 		self assert: port > 0
-			description: 'Failed to get an unallocated port'.
-		port ]
+			description: 'Failed to get an unallocated port' ].
+	^ port
 ]
 
 { #category : #accessing }
-GtRemoteRunner >> port: aPortNumber [
+GtRemoteRunner >> port: aPortNumberOrSymbol [
+	"Set the port number.
+	0 = find a free port.
+	#none = don't listen on the port (in-image workers only)."
 
-	port := aPortNumber asNumber
+	port := aPortNumberOrSymbol isSymbol 
+		ifTrue: [ aPortNumberOrSymbol ]
+		ifFalse: [ aPortNumberOrSymbol asNumber ].
 ]
 
 { #category : #printing }
