@@ -37,10 +37,11 @@ GtRrTaskExamples >> sunitTask [
 	<gtExample>
 	| task job semaphore |
 
-	remoteRunner := GtRemoteRunner new.
-	worker := GtRrInImageWorker new
-		remoteRunner: remoteRunner;
+	remoteRunner := GtRemoteRunner new
+		port: #none;
 		start.
+	worker := remoteRunner managerStartupAndShutdown startInImageWorker.
+	worker exceptionStrategy: GtRrTaskHeadlessExceptionStrategy new.
 	semaphore := Semaphore new.
 	remoteRunner
 		when: GtRrJobCompletedAnnouncement

@@ -7,6 +7,13 @@ Class {
 	#category : #'RemoteRunner-ExceptionHandling'
 }
 
+{ #category : #testing }
+GtRrTaskExceptionStrategy >> allowDebugger [
+	"Answer a boolean indicating whether the debugger should be opened as the result of an exception"
+
+	^ false
+]
+
 { #category : #accessing }
 GtRrTaskExceptionStrategy >> notifyTaskDidntComplete: taskContext inContext: aGtRrWorkerExecutionContext [
 	"Notify the runner that the task failed to complete for unknown reasons."

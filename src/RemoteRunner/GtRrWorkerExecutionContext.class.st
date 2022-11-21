@@ -15,6 +15,13 @@ Class {
 	#category : #'RemoteRunner-Worker'
 }
 
+{ #category : #testing }
+GtRrWorkerExecutionContext >> allowDebugger [
+	"Answer a boolean indicating whether the debugger should be opened as the result of an exception"
+	
+	^ self exceptionStrategy allowDebugger
+]
+
 { #category : #accessing }
 GtRrWorkerExecutionContext >> exceptionStrategy [
 
@@ -25,12 +32,13 @@ GtRrWorkerExecutionContext >> exceptionStrategy [
 GtRrWorkerExecutionContext >> forkAndRun [
 	"Run the task in a separate Process."
 
-	executionProcess := [ self exceptionStrategy
-		runTask: taskContext
-		inContext: self ]
-			forkAt: Processor userBackgroundPriority named: taskContext taskId, ' execution'.
+	executionProcess := [ self runTask]
+		forkAt: Processor userBackgroundPriority  - 2
+			named: taskContext taskId, ' execution'.
 	timeout ifNotNil:
-		[ timeoutProcess := [ self timeoutTask ] forkAt: Processor lowIOPriority named: taskContext taskId, ' timeout' ].
+		[ timeoutProcess := [ self timeoutTask ] 
+			forkAt: Processor lowIOPriority 
+				named: taskContext taskId, ' timeout' ].
 ]
 
 { #category : #accessing }
@@ -38,6 +46,16 @@ GtRrWorkerExecutionContext >> initialize [
 
 	super initialize.
 	semaphore := Semaphore new.
+]
+
+{ #category : #accessing }
+GtRrWorkerExecutionContext >> runTask [
+	"Run the task with the receiver's environment set up."
+
+	GtRrCurrentWorkerExecutionContext value: self.
+	self exceptionStrategy
+		runTask: taskContext
+		inContext: self.
 ]
 
 { #category : #accessing }
