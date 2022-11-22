@@ -100,10 +100,8 @@ GtRrSUnitTask >> runSuite: suite [
 
 	events := OrderedCollection new.
 	testResult := PharoLinkTestResult new.
-	(GtRrCurrentWorkerExecutionContext value 
-		ifNil: [ false ]
-		ifNotNil: [ :context | context allowDebugger ]) ifTrue:
-			[ testResult setDebugMode ].
+	self allowDebugger ifTrue:
+		[ testResult setDebugMode ].
 	testResult announcer
 		when: PharoLinkTestCaseEndAnnouncement
 		do: [ :e | self addEndAnnouncement: e to: events ].

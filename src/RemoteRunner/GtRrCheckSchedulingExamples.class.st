@@ -47,7 +47,7 @@ GtRrCheckSchedulingExamples >> scheduleSampleExamples [
 	tasks := scheduler allocateTasks:
 		{ GtRrClassExampleTask exampleClassName: #GtRrSampleExample }.
 
-	self assert: tasks size equals: 3.
+	self assert: tasks size equals: 4.
 	tasks do: [ :task |
 		self assert: task checkNames size equals: 1 ].
 

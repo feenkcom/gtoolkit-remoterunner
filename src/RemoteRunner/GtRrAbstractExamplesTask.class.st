@@ -24,6 +24,14 @@ GtRrAbstractExamplesTask >> allMethods [
 	^ self subclassResponsibility 
 ]
 
+{ #category : #accessing }
+GtRrAbstractExamplesTask >> allowDebugger [
+
+	^ GtRrCurrentWorkerExecutionContext value 
+		ifNil: [ false ]
+		ifNotNil: [ :context | context allowDebugger ]
+]
+
 { #category : #converting }
 GtRrAbstractExamplesTask >> asExplicitTask [
 	"Answer the receiver as a list of explicit examples / tasks"
