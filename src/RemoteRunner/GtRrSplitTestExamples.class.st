@@ -19,7 +19,7 @@ GtRrSplitTestExamples >> splitClassExamples [
 		collect: [ :example | example methodClass name -> example selector ]
 		as: Set.
 
-	self assert: splitTasks size equals: 3.
+	self assert: splitTasks size equals: 4.
 	splitTasks do: [ :splitTask |
 		self assert: splitTask constraint identicalTo: compoundTask constraint.
 		self assert: splitTask taskTimeout identicalTo: compoundTask taskTimeout.

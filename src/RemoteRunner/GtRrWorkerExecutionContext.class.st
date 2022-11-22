@@ -1,5 +1,5 @@
 "
-A GtRrWorkerExecutionContext is held in a {{gtClass:GtRrCurrentWorkerExecutionContext}}.
+nil
 "
 Class {
 	#name : #GtRrWorkerExecutionContext,
@@ -10,7 +10,8 @@ Class {
 		'taskContext',
 		'timeout',
 		'semaphore',
-		'timeoutProcess'
+		'timeoutProcess',
+		'exceptionStrategy'
 	],
 	#category : #'RemoteRunner-Worker'
 }
@@ -25,7 +26,14 @@ GtRrWorkerExecutionContext >> allowDebugger [
 { #category : #accessing }
 GtRrWorkerExecutionContext >> exceptionStrategy [
 
-	^ worker exceptionStrategy
+	^ exceptionStrategy ifNil:
+		[ exceptionStrategy := worker exceptionStrategy ]
+]
+
+{ #category : #accessing }
+GtRrWorkerExecutionContext >> exceptionStrategy: anObject [
+
+	exceptionStrategy := anObject
 ]
 
 { #category : #accessing }

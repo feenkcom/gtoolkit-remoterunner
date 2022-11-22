@@ -25,6 +25,15 @@ GtRrSampleExample >> failExample [
 ]
 
 { #category : #accessing }
+GtRrSampleExample >> haltExample [
+	<gtExample>
+	<noTest>
+
+	self halt.
+
+]
+
+{ #category : #accessing }
 GtRrSampleExample >> passExample [
 	<gtExample>
 	"<noTest>"

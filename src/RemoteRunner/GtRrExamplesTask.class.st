@@ -102,7 +102,9 @@ GtRrExamplesTask >> run [
 			resourceReport := GtRrCheckResourcesReport new.
 			exampleStartTime := DateAndTime now.
 			resourceReport recordSourceReport.
-			exampleWithResult run.
+			self allowDebugger
+				ifTrue: [ exampleWithResult debug ]
+				ifFalse: [ exampleWithResult run ].
 			resourceReport recordTargetReport.
 			exampleEndTime := DateAndTime now ].
 			
