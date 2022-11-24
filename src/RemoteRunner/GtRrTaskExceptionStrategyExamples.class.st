@@ -98,7 +98,7 @@ GtRrTaskExceptionStrategyExamples >> gtExampleDebuggerStrategyHandleHalt [
 	self
 		should: [ executionContext runTask ]
 		raise: Halt 
-		description: 'Halt signalled'.
+		description: 'Halt expected'.
 	self assert: worker messages isEmpty.
 ]
 
@@ -143,7 +143,7 @@ GtRrTaskExceptionStrategyExamples >> headlessStrategyHandleHalt [
 	self
 		shouldnt: [ executionContext runTask ]
 		raise: Halt
-		description: 'Halt expected'.
+		description: 'Halt signalled'.
 	self assert: worker messages first selector
 		equals: #taskFailed:with:.
 ]
@@ -196,7 +196,7 @@ GtRrTaskExceptionStrategyExamples >> sunitDebuggerStrategyHandleHalt [
 		self
 			should: [ executionContext runTask ]
 			raise: Halt 
-			description: 'Halt signalled'.
+			description: 'Halt expected'.
 		GtRrSampleTest removeSelector: #testHalt. ].
 	self assert: worker messages first selector
 		equals: #taskFailed:with:.
