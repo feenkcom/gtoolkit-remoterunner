@@ -198,6 +198,7 @@ GtRrTaskExceptionStrategyExamples >> sunitDebuggerStrategyHandleHalt [
 			raise: Halt 
 			description: 'Halt expected'.
 		GtRrSampleTest removeSelector: #testHalt. ].
+	Processor yield.
 	self assert: worker messages first selector
 		equals: #taskFailed:with:.
 ]
