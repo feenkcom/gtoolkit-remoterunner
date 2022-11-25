@@ -72,7 +72,7 @@ GtRrImageSync >> changesFrom: anOmReference [
 		[ self error: 'Unknown OmReference: ', anOmReference gtDisplayString ].
 
 	enumerator := GtEpLogEnumerator new latestLog: self epLog.
-	^ GtEpEventSequencer uniqueInstance
+	^ GtEpEventSequencer
 		sequence: (enumerator entriesFrom: anOmReference to: self epLog headReference)
 		withCurrent: true.
 ]
@@ -93,7 +93,7 @@ GtRrImageSync >> encodedChangesFrom: anOmReference [
 		(haveLatest and: [ workerOmReference = anOmReference ]) ifFalse:
 			[ enumerator := GtEpLogEnumerator new latestLog: self epLog.
 			headReference := self epLog headReference.
-			entries := GtEpEventSequencer uniqueInstance
+			entries := GtEpEventSequencer
 				sequence: (enumerator entriesFrom: anOmReference to: headReference)
 				withCurrent: true.
 			workerOmReference := anOmReference.
