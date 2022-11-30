@@ -104,3 +104,18 @@ GtRrSerialisationExamples >> gtRrPackageSUnitTask [
 
 	^ task
 ]
+
+{ #category : #examples }
+GtRrSerialisationExamples >> nilSerialisation [
+	"Instance variables with nil value should not be sent across the wire."
+	<gtExample>
+	| job serializedJob |
+
+	LeJsonV4 cleanUp.
+	job := (GtRrScriptTask script: '1+1') asJob.
+
+	serializedJob := LeJsonV4 uniqueInstance serializePretty: job.
+	self assert: (serializedJob indexOfSubCollection: 'exceptionHandlingStrategy') equals: 0.
+
+	^ job
+]

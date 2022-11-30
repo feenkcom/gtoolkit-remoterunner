@@ -15,7 +15,7 @@ Class {
 		'stopFlag',
 		'executionContext',
 		'readProcess',
-		'exceptionStrategy'
+		'exceptionHandlingStrategy'
 	],
 	#category : #'RemoteRunner-Worker'
 }
@@ -303,15 +303,15 @@ GtRrWorker >> currentProcessId [
 ]
 
 { #category : #accessing }
-GtRrWorker >> exceptionStrategy [
+GtRrWorker >> exceptionHandlingStrategy [
 
-	^ exceptionStrategy
+	^ exceptionHandlingStrategy
 ]
 
 { #category : #accessing }
-GtRrWorker >> exceptionStrategy: anObject [
+GtRrWorker >> exceptionHandlingStrategy: anObject [
 
-	exceptionStrategy := anObject
+	exceptionHandlingStrategy := anObject
 ]
 
 { #category : #accessing }
@@ -322,7 +322,7 @@ GtRrWorker >> initialize [
 	"WaitfreeQueues should have only one process reading - which is the taskProcess"
 	resultQueue := WaitfreeQueue new.
 	"The default strategy for a remote worker is to fail the task with the error"
-	exceptionStrategy := GtRrTaskHeadlessExceptionStrategy new.
+	exceptionHandlingStrategy := GtRrTaskHeadlessExceptionStrategy new.
 	"Attributes is a dictionary of information can be json encoded.
 	Additional values can be provided, or existing values overwritten, by the command line.
 	This is used by the remote runner to determine which workers can run a given task (the constraints)."
@@ -555,7 +555,8 @@ GtRrWorker >> taskFailed: aTaskContext with: anError [
 		endTime: aTaskContext endTime;
 		resourceReport: aTaskContext executionData resourceReport;
 		errorDetails: (GtRrErrorDetails new
-						errorMessage: anError messageText;
+						errorMessage: (anError messageText ifEmpty:
+							[ anError printString ]);
 						trace: anError stackString);
 		additionalData: aTaskContext executionData additionalData.
 	serializedExecutionData := LeJsonV4 uniqueInstance serialize: executionData.

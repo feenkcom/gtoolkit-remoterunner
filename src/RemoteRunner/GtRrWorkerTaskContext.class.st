@@ -7,7 +7,8 @@ Class {
 	#instVars : [
 		'taskContextId',
 		'task',
-		'taskTimeout'
+		'taskTimeout',
+		'exceptionHandlingStrategy'
 	],
 	#category : #'RemoteRunner-Worker'
 }
@@ -28,6 +29,18 @@ GtRrWorkerTaskContext >> endTime [
 GtRrWorkerTaskContext >> evaluateOn: anExecution [
 
 	^ self value
+]
+
+{ #category : #accessing }
+GtRrWorkerTaskContext >> exceptionHandlingStrategy [
+
+	^ exceptionHandlingStrategy
+]
+
+{ #category : #accessing }
+GtRrWorkerTaskContext >> exceptionHandlingStrategy: anObject [
+
+	exceptionHandlingStrategy := anObject
 ]
 
 { #category : #accessing }

@@ -11,7 +11,7 @@ Class {
 		'timeout',
 		'semaphore',
 		'timeoutProcess',
-		'exceptionStrategy'
+		'exceptionHandlingStrategy'
 	],
 	#category : #'RemoteRunner-Worker'
 }
@@ -20,20 +20,21 @@ Class {
 GtRrWorkerExecutionContext >> allowDebugger [
 	"Answer a boolean indicating whether the debugger should be opened as the result of an exception"
 	
-	^ self exceptionStrategy allowDebugger
+	^ self exceptionHandlingStrategy allowDebugger
 ]
 
 { #category : #accessing }
-GtRrWorkerExecutionContext >> exceptionStrategy [
+GtRrWorkerExecutionContext >> exceptionHandlingStrategy [
 
-	^ exceptionStrategy ifNil:
-		[ exceptionStrategy := worker exceptionStrategy ]
+	^ exceptionHandlingStrategy ifNil:
+		[ taskContext exceptionHandlingStrategy ifNil:
+			[ worker exceptionHandlingStrategy ] ]
 ]
 
 { #category : #accessing }
-GtRrWorkerExecutionContext >> exceptionStrategy: anObject [
+GtRrWorkerExecutionContext >> exceptionHandlingStrategy: anObject [
 
-	exceptionStrategy := anObject
+	exceptionHandlingStrategy := anObject
 ]
 
 { #category : #accessing }
@@ -61,7 +62,7 @@ GtRrWorkerExecutionContext >> runTask [
 	"Run the task with the receiver's environment set up."
 
 	GtRrCurrentWorkerExecutionContext value: self.
-	self exceptionStrategy
+	self exceptionHandlingStrategy
 		runTask: taskContext
 		inContext: self.
 ]

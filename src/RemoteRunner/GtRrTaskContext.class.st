@@ -43,7 +43,8 @@ GtRrTaskContext >> asWorkerTaskContext [
 	^ GtRrWorkerTaskContext new
 		taskContextId: taskContextId;
 		task: task;
-		taskTimeout: self taskTimeout.
+		taskTimeout: self taskTimeout;
+		exceptionHandlingStrategy: self jobContext exceptionHandlingStrategy.
 ]
 
 { #category : #accessing }
