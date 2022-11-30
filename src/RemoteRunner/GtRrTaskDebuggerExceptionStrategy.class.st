@@ -7,6 +7,12 @@ Class {
 	#category : #'RemoteRunner-ExceptionHandling'
 }
 
+{ #category : #accessing }
+GtRrTaskDebuggerExceptionStrategy class >> leJsonV4Name [
+
+	^ #gtRrTaskDebuggerExceptionStrategy
+]
+
 { #category : #testing }
 GtRrTaskDebuggerExceptionStrategy >> allowDebugger [
 	"Answer a boolean indicating whether the debugger should be opened as the result of an exception"

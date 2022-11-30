@@ -8,6 +8,12 @@ Class {
 }
 
 { #category : #accessing }
+GtRrTaskHeadlessExceptionStrategy class >> leJsonV4Name [
+
+	^ #gtRrTaskHeadlessExceptionStrategy
+]
+
+{ #category : #accessing }
 GtRrTaskHeadlessExceptionStrategy >> handleException: anException workerContext: aGtRrWorkerContext [
 
 	aGtRrWorkerContext worker 
