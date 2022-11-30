@@ -45,7 +45,7 @@ GtRemoteRunnerExamples >> assignTasksToWorkersTaskFirst [
 	workers := (1 to: 2) collect: [ :i |
 		GtRrInImageWorker new
 			remoteRunner: remoteRunner;
-			exceptionStrategy: GtRrTaskHeadlessExceptionStrategy new;
+			exceptionHandlingStrategy: GtRrTaskHeadlessExceptionStrategy new;
 			start ].
 
 	self waitOn: semaphore for: 10 
@@ -71,7 +71,7 @@ GtRemoteRunnerExamples >> assignTasksToWorkersWorkerFirst [
 	workers := (1 to: 2) collect: [ :i |
 		GtRrInImageWorker new
 			remoteRunner: remoteRunner;
-			exceptionStrategy: GtRrTaskHeadlessExceptionStrategy new;
+			exceptionHandlingStrategy: GtRrTaskHeadlessExceptionStrategy new;
 			start ].
 
 	tasks := (1 to: 5) collect: [ :i |

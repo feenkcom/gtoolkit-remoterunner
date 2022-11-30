@@ -31,6 +31,15 @@ GtRrTaskExamples >> compoundTask [
 	^ compoundTask.
 ]
 
+{ #category : #private }
+GtRrTaskExamples >> stopRunner [
+
+	worker ifNotNil: [ worker stop ].
+	worker := nil.
+	remoteRunner ifNotNil: [ remoteRunner stop ].
+	remoteRunner := nil.
+]
+
 { #category : #examples }
 GtRrTaskExamples >> sunitTask [
 	"Demonstrate running an SUnit test in a task"
@@ -41,7 +50,7 @@ GtRrTaskExamples >> sunitTask [
 		port: #none;
 		start.
 	worker := remoteRunner managerStartupAndShutdown startInImageWorker.
-	worker exceptionStrategy: GtRrTaskHeadlessExceptionStrategy new.
+	worker exceptionHandlingStrategy: GtRrTaskHeadlessExceptionStrategy new.
 	semaphore := Semaphore new.
 	remoteRunner
 		when: GtRrJobCompletedAnnouncement

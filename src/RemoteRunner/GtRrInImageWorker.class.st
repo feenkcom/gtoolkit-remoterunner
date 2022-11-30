@@ -29,8 +29,6 @@ GtRrInImageWorker >> connection: aPharoLinkServerConnection [
 GtRrInImageWorker >> initialize [
 
 	super initialize.
-	"The default strategy for a in-image worker is to allow the debugger to open"
-	exceptionStrategy := GtRrTaskDebuggerExceptionStrategy new.
 	attributes
 		at: #workerPriority put: 10;
 		at: #workerInImage put: true.
@@ -103,7 +101,8 @@ GtRrInImageWorker >> taskFailed: aTaskContext with: anError [
 		endTime: aTaskContext endTime;
 		resourceReport: aTaskContext executionData resourceReport;
 		errorDetails: (GtRrErrorDetails new
-						errorMessage: anError messageText;
+						errorMessage: (anError messageText ifEmpty:
+							[ anError printString ]);
 						trace: anError stackString);
 		additionalData: aTaskContext executionData additionalData.
 	remoteRunner

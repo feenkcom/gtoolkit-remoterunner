@@ -24,7 +24,8 @@ Class {
 		'errorDetails',
 		'errorCount',
 		'name',
-		'creationTime'
+		'creationTime',
+		'exceptionHandlingStrategy'
 	],
 	#category : #'RemoteRunner-Jobs'
 }
@@ -72,6 +73,7 @@ GtRrJob class >> leJsonV4AttributeMapping [
 		#jobTimeout -> #jobTimeout.
 		#taskTimeout -> #taskTimeout.
 		#errorDetails -> #errorDetails.
+		#exceptionHandlingStrategy -> #exceptionHandlingStrategy.
 	 } asOrderedCollection.
 ]
 
@@ -194,6 +196,21 @@ GtRrJob >> errorDetails: aGtErrorDetails [
 
 	errorDetails ifNotNil: [ ^ self ].
 	errorDetails := aGtErrorDetails
+]
+
+{ #category : #accessing }
+GtRrJob >> exceptionHandlingStrategy [
+	"Answer the exception handling strategy to be used.
+	nil = worker default (normally headless)"
+	<return: #GtRrTaskExceptionStrategy or: nil>
+
+	^ exceptionHandlingStrategy
+]
+
+{ #category : #accessing }
+GtRrJob >> exceptionHandlingStrategy: aGtRrTaskExceptionStrategyOrNil [
+
+	exceptionHandlingStrategy := aGtRrTaskExceptionStrategyOrNil
 ]
 
 { #category : #'accessing - pharolink' }

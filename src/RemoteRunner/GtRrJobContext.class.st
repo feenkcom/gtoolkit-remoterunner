@@ -52,6 +52,12 @@ GtRrJobContext >> contextTimeoutTime [
 ]
 
 { #category : #accessing }
+GtRrJobContext >> exceptionHandlingStrategy [
+
+	^ job exceptionHandlingStrategy
+]
+
+{ #category : #accessing }
 GtRrJobContext >> gtActionCancelFor: anAction [
 	"Terminate the receiver's job"
 	<gtAction>

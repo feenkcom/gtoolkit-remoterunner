@@ -4,8 +4,12 @@ Demonstrate behaviour of the various exception handling strategies used by the R
 Class {
 	#name : #GtRrTaskExceptionStrategyExamples,
 	#superclass : #Object,
-	#traits : 'TAssertable',
-	#classTraits : 'TAssertable classTrait',
+	#traits : 'TAssertable + TGtRrExampleHelp',
+	#classTraits : 'TAssertable classTrait + TGtRrExampleHelp classTrait',
+	#instVars : [
+		'remoteRunner',
+		'worker'
+	],
 	#category : #'RemoteRunner-Examples'
 }
 
@@ -23,7 +27,7 @@ GtRrTaskExceptionStrategyExamples >> debuggerStrategyHandleError [
 	strategy := GtRrTaskDebuggerExceptionStrategy new.
 	executionContext := GtRrWorkerExecutionContext new
 		taskContext: taskContext;
-		exceptionStrategy: strategy;
+		exceptionHandlingStrategy: strategy;
 		worker: worker.
 	self
 		should: [ executionContext runTask ]
@@ -46,7 +50,7 @@ GtRrTaskExceptionStrategyExamples >> debuggerStrategyHandleHalt [
 	strategy := GtRrTaskDebuggerExceptionStrategy new.
 	executionContext := GtRrWorkerExecutionContext new
 		taskContext: taskContext;
-		exceptionStrategy: strategy;
+		exceptionHandlingStrategy: strategy;
 		worker: worker.
 	self
 		should: [ executionContext runTask ]
@@ -68,7 +72,7 @@ GtRrTaskExceptionStrategyExamples >> gtExampleDebuggerStrategyHandleError [
 	strategy := GtRrTaskDebuggerExceptionStrategy new.
 	executionContext := GtRrWorkerExecutionContext new
 		taskContext: taskContext;
-		exceptionStrategy: strategy;
+		exceptionHandlingStrategy: strategy;
 		worker: worker.
 	self
 		shouldnt: [ executionContext runTask ]
@@ -93,7 +97,7 @@ GtRrTaskExceptionStrategyExamples >> gtExampleDebuggerStrategyHandleHalt [
 	strategy := GtRrTaskDebuggerExceptionStrategy new.
 	executionContext := GtRrWorkerExecutionContext new
 		taskContext: taskContext;
-		exceptionStrategy: strategy;
+		exceptionHandlingStrategy: strategy;
 		worker: worker.
 	self
 		should: [ executionContext runTask ]
@@ -116,7 +120,7 @@ GtRrTaskExceptionStrategyExamples >> headlessStrategyHandleError [
 	strategy := GtRrTaskHeadlessExceptionStrategy new.
 	executionContext := GtRrWorkerExecutionContext new
 		taskContext: taskContext;
-		exceptionStrategy: strategy;
+		exceptionHandlingStrategy: strategy;
 		worker: worker.
 	self
 		shouldnt: [ executionContext runTask ]
@@ -138,7 +142,7 @@ GtRrTaskExceptionStrategyExamples >> headlessStrategyHandleHalt [
 	strategy := GtRrTaskHeadlessExceptionStrategy new.
 	executionContext := GtRrWorkerExecutionContext new
 		taskContext: taskContext;
-		exceptionStrategy: strategy;
+		exceptionHandlingStrategy: strategy;
 		worker: worker.
 	self
 		shouldnt: [ executionContext runTask ]
@@ -146,6 +150,15 @@ GtRrTaskExceptionStrategyExamples >> headlessStrategyHandleHalt [
 		description: 'Halt signalled'.
 	self assert: worker messages first selector
 		equals: #taskFailed:with:.
+]
+
+{ #category : #private }
+GtRrTaskExceptionStrategyExamples >> stopRunner [
+
+	worker ifNotNil: [ worker stop ].
+	worker := nil.
+	remoteRunner ifNotNil: [ remoteRunner stop ].
+	remoteRunner := nil.
 ]
 
 { #category : #examples }
@@ -186,7 +199,7 @@ GtRrTaskExceptionStrategyExamples >> sunitDebuggerStrategyHandleHalt [
 	strategy := GtRrTaskDebuggerExceptionStrategy new.
 	executionContext := GtRrWorkerExecutionContext new
 		taskContext: taskContext;
-		exceptionStrategy: strategy;
+		exceptionHandlingStrategy: strategy;
 		worker: worker.
 	EpMonitor disableDuring:
 		[ GtRrSampleTest compile:
@@ -216,7 +229,7 @@ GtRrTaskExceptionStrategyExamples >> sunitHeadlessStrategyHandleError [
 	strategy := GtRrTaskHeadlessExceptionStrategy new.
 	executionContext := GtRrWorkerExecutionContext new
 		taskContext: taskContext;
-		exceptionStrategy: strategy;
+		exceptionHandlingStrategy: strategy;
 		worker: worker.
 	self
 		shouldnt: [ executionContext runTask ]
@@ -240,7 +253,7 @@ GtRrTaskExceptionStrategyExamples >> sunitHeadlessStrategyHandleHalt [
 	strategy := GtRrTaskHeadlessExceptionStrategy new.
 	executionContext := GtRrWorkerExecutionContext new
 		taskContext: taskContext;
-		exceptionStrategy: strategy;
+		exceptionHandlingStrategy: strategy;
 		worker: worker.
 	EpMonitor disableDuring:
 		[ GtRrSampleTest compile:
@@ -256,4 +269,69 @@ GtRrTaskExceptionStrategyExamples >> sunitHeadlessStrategyHandleHalt [
 	it is caught by the task exeception handling, so the task fails."
 	self assert: worker messages first selector
 		equals: #taskFailed:with:.
+]
+
+{ #category : #examples }
+GtRrTaskExceptionStrategyExamples >> taskWithDebuggerExceptionHandling [
+	"Demonstrate running an SUnit test in a task"
+	<gtExample>
+	<after: #stopRunner>
+	| task job semaphore |
+
+	remoteRunner := GtRemoteRunner new
+		port: #none;
+		start.
+	worker := remoteRunner managerStartupAndShutdown startInImageWorker.
+	semaphore := Semaphore new.
+	remoteRunner
+		when: GtRrJobCompletedAnnouncement
+		do: [ :ann | semaphore signal ].
+	task := GtRrScriptTask script:
+'[ 1 / 0 ]
+	on: UnhandledException
+	do: [ :ex | #handled ]'.
+	job := task asJob.
+	job exceptionHandlingStrategy: GtRrTaskDebuggerExceptionStrategy new.
+	remoteRunner submitJob: job.
+	self
+		waitOn: semaphore
+		for: 30
+		description: 'Job didn''t complete in time'.
+	self deny: job hasErrors.
+	self assert: task result equals: #handled.
+	remoteRunner stop.
+	^ task.
+]
+
+{ #category : #examples }
+GtRrTaskExceptionStrategyExamples >> taskWithHeadlessExceptionHandling [
+	"Demonstrate running an SUnit test in a task"
+	<gtExample>
+	<after: #stopRunner>
+	| task job semaphore |
+
+	remoteRunner := GtRemoteRunner new
+		port: #none;
+		start.
+	worker := remoteRunner managerStartupAndShutdown startInImageWorker.
+	worker exceptionHandlingStrategy: GtRrTaskHeadlessExceptionStrategy new.
+	semaphore := Semaphore new.
+	remoteRunner
+		when: GtRrJobCompletedAnnouncement
+		do: [ :ann | semaphore signal ].
+	task := GtRrScriptTask script:
+'[ 1 / 0 ]
+	on: UnhandledException
+	do: [ :ex | #handled ]'.
+	job := remoteRunner submitJob: task asJob.
+	self
+		waitOn: semaphore
+		for: 30
+		description: 'Job didn''t complete in time'.
+	self assert: job hasErrors.
+	self assert: task hasErrors.
+	self assert: task result isNil.
+	self assert: task errorDetails errorMessage equals: 'ZeroDivide'.
+	remoteRunner stop.
+	^ task.
 ]
