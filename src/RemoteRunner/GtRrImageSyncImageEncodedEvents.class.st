@@ -8,6 +8,12 @@ Class {
 }
 
 { #category : #accessing }
+GtRrImageSyncImageEncodedEvents class >> leJsonV4Name [
+
+	^ #gtRrImageSyncImageEncodedEvents
+]
+
+{ #category : #accessing }
 GtRrImageSyncImageEncodedEvents >> updateEncodedEvents [
 	"Update the receiver's encoded events."
 	| newLatestOmReference imageSyncManager |
