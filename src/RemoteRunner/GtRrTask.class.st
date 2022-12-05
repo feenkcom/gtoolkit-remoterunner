@@ -334,7 +334,6 @@ GtRrTask >> postCopy [
 	self reset.
 	taskId := UUID new asString.
 	retryStrategy := retryStrategy copy.
-	executionData := executionData copy.
 ]
 
 { #category : #printing }
@@ -361,7 +360,7 @@ GtRrTask >> printSupplementalOn: aStream [
 GtRrTask >> reset [
 
 	result := nil.
-
+	executionData := nil.
 ]
 
 { #category : #'accessing - resource report' }
