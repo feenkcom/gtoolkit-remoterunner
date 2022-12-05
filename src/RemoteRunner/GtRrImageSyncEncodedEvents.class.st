@@ -1,3 +1,6 @@
+"
+GtRrImageSyncEncodedEvents holds a pre-serialised collection of Epicea events ready for replay on a worker machine.
+"
 Class {
 	#name : #GtRrImageSyncEncodedEvents,
 	#superclass : #Object,
@@ -65,4 +68,11 @@ GtRrImageSyncEncodedEvents >> sessionHistory [
 GtRrImageSyncEncodedEvents >> sessionHistory: aSequencableCollection [
 
 	sessionHistory := aSequencableCollection asArray
+]
+
+{ #category : #accessing }
+GtRrImageSyncEncodedEvents >> updateEncodedEvents [
+	"Update the receiver's encoded events.
+	By default the collection of events is considered fixed and no update is required.
+	Subclasses may overwrite with appropriate behaviour."
 ]

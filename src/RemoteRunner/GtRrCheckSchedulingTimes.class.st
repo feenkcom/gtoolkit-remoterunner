@@ -169,8 +169,11 @@ GtRrCheckSchedulingTimes >> onJobStarted: aGtRrJobStartedAnnouncement [
 GtRrCheckSchedulingTimes >> onTaskFinished: aGtRrTaskAnnouncement [
 	"Process the completed task.
 	Gt examples aren't yet handled."
+	| result |
 
-	aGtRrTaskAnnouncement task result do: [ :aPharoLinkTestCaseEndAnnouncement |
+	result := aGtRrTaskAnnouncement task result .
+	result isCollection ifFalse: [ ^ self ].
+	result do: [ :aPharoLinkTestCaseEndAnnouncement |
 		aPharoLinkTestCaseEndAnnouncement isSuccess
 			ifTrue: [ self
 				atClassName: aPharoLinkTestCaseEndAnnouncement testCaseClassName 
