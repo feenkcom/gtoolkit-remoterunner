@@ -63,6 +63,12 @@ GtRrImageSync >> addReference: anOmReference [
 		[ sessionHistory add: anOmReference ].
 ]
 
+{ #category : #accessing }
+GtRrImageSync >> allEncodedChanges [
+
+	^ self encodedChangesFrom: sessionHistory first.
+]
+
 { #category : #'api - remoterunner' }
 GtRrImageSync >> changesFrom: anOmReference [
 	"Answer the encoded collection of EpEvents from anOmReference up to the image's current state."
@@ -98,8 +104,10 @@ GtRrImageSync >> encodedChangesFrom: anOmReference [
 				withCurrent: true.
 			workerOmReference := anOmReference.
 			latestOmReference := headReference.
-			encodedEvents := entries collect: [ :entry |
-				LanguageLinkUtils base64Encode: entry content ] ].
+			encodedEvents := entries 
+				collect: [ :entry |
+					LanguageLinkUtils base64Encode: entry content ]
+				as: Array ].
 		encodedEvents ]
 ]
 
