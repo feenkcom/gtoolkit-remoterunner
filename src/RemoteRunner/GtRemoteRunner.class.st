@@ -68,7 +68,8 @@ Class {
 		'announcer',
 		'runnerStats',
 		'log',
-		'taskQueue'
+		'taskQueue',
+		'imageSyncEvents'
 	],
 	#classInstVars : [
 		'uniqueInstance'
@@ -475,11 +476,40 @@ GtRemoteRunner >> heartbeatForWorkerId: aUidString [
 ]
 
 { #category : #accessing }
-GtRemoteRunner >> imageSyncEventsFrom: aSerializedOmReference [
-	"Answer a collection of encoded EpEvents that will take the worker from the supplied OmReference to the current image."
+GtRemoteRunner >> imageSyncEvents [
 
-	^ (GtRrImageSync uniqueInstance encodedChangesFrom: 
-		(STON fromString: aSerializedOmReference)) asArray.
+	^ imageSyncEvents
+]
+
+{ #category : #accessing }
+GtRemoteRunner >> imageSyncEvents: anObject [
+
+	imageSyncEvents := anObject
+]
+
+{ #category : #accessing }
+GtRemoteRunner >> imageSyncEventsFrom: aSerializedOmReference [
+	"Answer a collection of encoded EpEvents that will take the worker from the supplied OmReference to the state ready for testing.
+	If a collection of events is supplied, use that, otherwise synchronise with the current image.
+	Ensure that the supplied OmReference is in the receiver's history"
+	| workerOmReference |
+
+	workerOmReference := STON fromString: aSerializedOmReference.
+	^ imageSyncEvents
+		ifNil: [ GtRrImageSync uniqueInstance encodedChangesFrom: workerOmReference ]
+		ifNotNil: [ imageSyncEvents encodedChangesFrom: workerOmReference ]
+]
+
+{ #category : #'api - jobs' }
+GtRemoteRunner >> imageSyncEventsSerialized: anEncodedGtRrImageSyncEncodedEvents [
+	"Submit the supplied job after deserialising it, and enable a queue for it"
+	| deserializedImageSyncEvents |
+
+	deserializedImageSyncEvents := LeJsonV4 uniqueInstance 
+		deserialize: anEncodedGtRrImageSyncEncodedEvents readStream.
+		
+	self imageSyncEvents: deserializedImageSyncEvents.
+	^ nil
 ]
 
 { #category : #initialization }

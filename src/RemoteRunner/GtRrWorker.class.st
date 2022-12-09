@@ -333,12 +333,7 @@ GtRrWorker >> initialize [
 		at: #platform put: OSPlatform current name;
 		yourself.
 	heartbeatDelay := self class heartbeatDelay.
-
-	"Windows socket event delivery seems brittle, events seem to get swallowed by other subsystems such as the JVM or GUI.
-	Avoid the issue by only connecting to the server while not running tasks."
-	self connectionStrategy: (OSPlatform current isWindows
-		ifTrue: [ GtRrWorkerConnectionPerMessageStrategy new ]
-		ifFalse: [ GtRrWorkerSingleConnectionStrategy new ]).
+	self connectionStrategy: GtRrWorkerSingleConnectionStrategy new.
 ]
 
 { #category : #accessing }
