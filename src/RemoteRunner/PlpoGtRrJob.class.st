@@ -40,6 +40,11 @@ PlpoGtRrJob >> isFinished [
 ]
 
 { #category : #accessing }
+PlpoGtRrJob >> jobId [
+	^ self proxyPerform: #jobId
+]
+
+{ #category : #accessing }
 PlpoGtRrJob >> jobName [
 	
 	^ self proxyPerform: #jobName
