@@ -122,6 +122,14 @@ PlpoGtRemoteRunner >> submitJob: aGtRrJob [
 	^ jobProxy
 ]
 
+{ #category : #'api - jobs' }
+PlpoGtRemoteRunner >> terminateJobId: anId [
+
+	self 
+		proxyPerform: #terminateJobId: 
+		withPrimitiveArguments: {anId}
+]
+
 { #category : #accessing }
 PlpoGtRemoteRunner >> unsubscribe: anObject [
 	"Unsubscribe all subscriptions of anObject from the receiver"

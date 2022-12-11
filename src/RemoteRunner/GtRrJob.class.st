@@ -328,6 +328,11 @@ GtRrJob >> isStarted [
 ]
 
 { #category : #accessing }
+GtRrJob >> jobId [
+	^ self id
+]
+
+{ #category : #accessing }
 GtRrJob >> jobName [
 	^ self name
 ]
