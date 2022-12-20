@@ -1,6 +1,9 @@
 Class {
 	#name : #GtRemoteRunnerTraceAnnouncement,
 	#superclass : #GtRemoteRunnerAnnouncement,
+	#instVars : [
+		'message'
+	],
 	#category : #'RemoteRunner-Announcements'
 }
 

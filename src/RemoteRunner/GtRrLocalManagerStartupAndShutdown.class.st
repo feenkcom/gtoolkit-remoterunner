@@ -10,7 +10,7 @@ Class {
 		'processes',
 		'workerCountCalculator',
 		'connectionStrategyId',
-		'imageSync'
+		'changesSync'
 	],
 	#category : #'RemoteRunner-Runner'
 }
@@ -48,6 +48,21 @@ GtRrLocalManagerStartupAndShutdown >> autoRestart [
 GtRrLocalManagerStartupAndShutdown >> autoRestart: aBoolean [
 
 	autoRestart := aBoolean
+]
+
+{ #category : #accessing }
+GtRrLocalManagerStartupAndShutdown >> changesSync [
+	"Answer a boolean indicating whether workers should be started with changesSync enabled."
+	<return: #Boolean>
+
+	^ changesSync
+]
+
+{ #category : #accessing }
+GtRrLocalManagerStartupAndShutdown >> changesSync: aBoolean [
+	"Set the flag indicating whether workers should be started with changesSync enabled."
+
+	changesSync := aBoolean
 ]
 
 { #category : #accessing }
@@ -93,17 +108,17 @@ GtRrLocalManagerStartupAndShutdown >> gtSummaryFor: aView [
 
 { #category : #accessing }
 GtRrLocalManagerStartupAndShutdown >> imageSync [
-	"Answer a boolean indicating whether workers should be started with imageSync enabled."
+	"Answer a boolean indicating whether workers should be started with changesSync enabled."
 	<return: #Boolean>
 
-	^ imageSync
+	^ changesSync
 ]
 
 { #category : #accessing }
 GtRrLocalManagerStartupAndShutdown >> imageSync: aBoolean [
-	"Set the flag indicating whether workers should be started with imageSync enabled."
+	"Set the flag indicating whether workers should be started with changesSync enabled."
 
-	imageSync := aBoolean
+	changesSync := aBoolean
 ]
 
 { #category : #accessing }
@@ -126,7 +141,7 @@ GtRrLocalManagerStartupAndShutdown >> initialize [
 	inMemoryLog := false.
 	workerIndex := 0.
 	autoRestart := true.
-	imageSync := false.
+	changesSync := false.
 	workerCountCalculator := GtRrResourceWorkerCountCalculator new.
 	processes := OrderedCollection new.
 	watchdogSemaphore := Semaphore new.
@@ -196,8 +211,8 @@ GtRrLocalManagerStartupAndShutdown >> newWorkerLocalProcessArgumentsFor: someSet
 		[ args
 			add: '--connectionStrategy';
 			add: connectionStrategyId asString ].
-	imageSync ifTrue:
-		[ args add: '--imageSync' ].
+	changesSync ifTrue:
+		[ args add: '--changesSync' ].
 	args
 		add: '--detachChangesFromFileSystem';
 		add: '--noLepiterReload';

@@ -45,6 +45,8 @@ GtRrWorker class >> commandLineCommand [
 					   'The connection strategy, e.g. #perMessage, #single';
 				   add: (ClapPositional id: #strategyId);
 				   yourself);
+		add: ((ClapFlag id: #changesSync) description:
+			'Synchronise the changes with the remote runner on startup');
 		add: ((ClapFlag id: #imageSync) description:
 			'Synchronise the image with the remote runner on startup');
 		  add: ((ClapFlag id: #attribute)
@@ -116,8 +118,10 @@ GtRrWorker class >> processCommandLineArgs: args [
 				ifAbsent: [ self error: 'Invalid connectionStrategy: ', connectionStrategyId printString ]) value.
 		worker connectionStrategy: connectionStrategy ].
 	worker connectionStrategy socketAddress: serverSocketAddress.
+	args at: #changesSync ifPresent:
+		[ worker attributes at: #changesSync put: true ].
 	args at: #imageSync ifPresent:
-		[ worker attributes at: #imageSync put: true ].
+		[ worker attributes at: #changesSync put: true ].
 	args occurrencesOf: #attribute do: [ :arg | 
 		worker attributes
 			at: (arg at: #key) value
@@ -380,7 +384,7 @@ GtRrWorker >> nextTask [
 GtRrWorker >> registerWith: aPharoLinkApplication [
 	"Register the receiver with the remote runner associated with the supplied PharoLinkApplication"
 
-	self syncImageIfRequiredWith: aPharoLinkApplication.
+	self syncChangesIfRequiredWith: aPharoLinkApplication.
 	^ aPharoLinkApplication newCommandFactory 
 			bindingAt: #attributes put: attributes;
 			sendAndWait: 'GtAssignedRemoteRunner registerWorkerWithDetails: attributes'.
@@ -470,33 +474,33 @@ GtRrWorker >> stopHeartbeat [
 ]
 
 { #category : #private }
-GtRrWorker >> syncImageIfRequiredWith: aPharoLinkApplication [ 
+GtRrWorker >> syncChangesIfRequiredWith: aPharoLinkApplication [ 
 	| encodedEvents omReference events remoteAddressString |
 
-	(attributes at: #imageSync ifAbsent: [ false ]) ifFalse: [ ^ self ].
+	(attributes at: #changesSync ifAbsent: [ false ]) ifFalse: [ ^ self ].
 	remoteAddressString := aPharoLinkApplication remoteAddressString.
-	GtRrWorkerImageSyncStartAnnouncement new 
+	GtRrWorkerChangesSyncStartAnnouncement new
 		remoteAddressString: remoteAddressString;
 		worker: self;
 		emit.
 	omReference := EpMonitor current log headReference.
 	"If this is the null reference and we've been started with detachChangesFromFileSystem use the latest recorded session"
 	(omReference isNull and: [ Smalltalk argumentsInclude: '--detachChangesFromFileSystem' ]) ifTrue:
-		[ omReference := GtRrImageSync uniqueInstance sessionHistory last ].
+		[ omReference := GtRrChangesSync uniqueInstance sessionHistory last ].
 	encodedEvents := aPharoLinkApplication newCommandFactory
 		setByValue;
 		bindingAt: #anOmReference put: 
 			(STON toString: omReference);
-		<< 'GtAssignedRemoteRunner imageSyncEventsFrom: anOmReference';
+		<< 'GtAssignedRemoteRunner changesSyncEventsFrom: anOmReference';
 		sendAndWait.
-	GtRrWorkerImageSyncHaveEventsAnnouncement new 
+	GtRrWorkerChangesSyncHaveEventsAnnouncement new
 		remoteAddressString: remoteAddressString;
 		worker: self;
 		emit.
 	events  := encodedEvents collect: [ :each |
 		(LanguageLinkUtils base64Decode: each readStream) ].
 	events do: #applyCodeChange.
-	GtRrWorkerImageSyncedAnnouncement new
+	GtRrWorkerChangesSyncedAnnouncement new
 		remoteAddressString: remoteAddressString;
 		worker: self;
 		events: events;

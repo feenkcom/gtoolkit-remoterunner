@@ -14,19 +14,19 @@ GtRrImageSyncExamples >> entriesFromStartTo [
 	"Demonstrate retrieving all a subset of entries"
 	<gtExample>
 	<noTest>
-	| imageSync entries enumerator start |
+	| changesSync entries enumerator start |
 
 	enumerator := GtEpLogEnumerator fromFile: GtEpLogEnumeratorExamples testDataRoot / 'testClass01' / 'Pharo10-SNAPSHOT-64bit-fec28a6.em8gtmjvf6qouoyjm5tk4q4dm.ombu'.
 	self 
 		assert: enumerator latestEntriesCount = 1
 		description: [ 'Expected latestEntriesCount = 1, got: ', enumerator latestEntriesCount asString ].
 	start := (enumerator priorEntriesFromHead reversed at: 2) tagAt: #self.
-	imageSync := GtRrImageSync new.
-	imageSync 
+	changesSync := GtRrChangesSync new.
+	changesSync 
 		epLog: enumerator latestLog;
 		sessionHistory: { start }.
 	
-	entries := imageSync encodedChangesFrom: start.
+	entries := changesSync encodedChangesFrom: start.
 	self assert: entries size equals: 4.
 	entries := entries collect: [ :each |
 		LanguageLinkUtils base64Decode: each readStream ].
