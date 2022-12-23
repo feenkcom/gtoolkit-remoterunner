@@ -15,7 +15,7 @@ Class {
 { #category : #accessing }
 GtRrImageSyncEncodedEvents class >> leJsonV4Name [
 
-	^ #gtRrImageSyncEncodedEvents
+	^ #gtRrChangesSyncEncodedEvents
 ]
 
 { #category : #accessing }
