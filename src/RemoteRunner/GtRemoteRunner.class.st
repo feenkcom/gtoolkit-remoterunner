@@ -524,6 +524,15 @@ GtRemoteRunner >> imageSyncEvents: anObject [
 	changesSyncEvents := anObject
 ]
 
+{ #category : #accessing }
+GtRemoteRunner >> imageSyncEventsFrom: aSerializedOmReference [
+	"Answer a collection of encoded EpEvents that will take the worker from the supplied OmReference to the state ready for testing.
+	If a collection of events is supplied, use that, otherwise synchronise with the current image.
+	Ensure that the supplied OmReference is in the receiver's history"
+
+	^ self changesSyncEventsFrom: aSerializedOmReference.
+]
+
 { #category : #'api - jobs' }
 GtRemoteRunner >> imageSyncEventsSerialized: anEncodedGtRrImageSyncEncodedEvents [
 	"Submit the supplied job after deserialising it, and enable a queue for it"
