@@ -69,7 +69,7 @@ Class {
 		'runnerStats',
 		'log',
 		'taskQueue',
-		'imageSyncEvents'
+		'changesSyncEvents'
 	],
 	#classInstVars : [
 		'uniqueInstance'
@@ -287,6 +287,43 @@ GtRemoteRunner >> basicRegisteredWorkers [
 	^ registeredWorkers
 ]
 
+{ #category : #accessing }
+GtRemoteRunner >> changesSyncEvents [
+
+	^ changesSyncEvents
+]
+
+{ #category : #accessing }
+GtRemoteRunner >> changesSyncEvents: anObject [
+
+	changesSyncEvents := anObject
+]
+
+{ #category : #accessing }
+GtRemoteRunner >> changesSyncEventsFrom: aSerializedOmReference [
+	"Answer a collection of encoded EpEvents that will take the worker from the supplied OmReference to the state ready for testing.
+	If a collection of events is supplied, use that, otherwise synchronise with the current image.
+	Ensure that the supplied OmReference is in the receiver's history"
+	| workerOmReference |
+
+	workerOmReference := STON fromString: aSerializedOmReference.
+	^ changesSyncEvents
+		ifNil: [ GtRrChangesSync uniqueInstance encodedChangesFrom: workerOmReference ]
+		ifNotNil: [ changesSyncEvents encodedChangesFrom: workerOmReference ]
+]
+
+{ #category : #'api - jobs' }
+GtRemoteRunner >> changesSyncEventsSerialized: anEncodedGtRrChangesSyncEncodedEvents [
+	"Submit the supplied job after deserialising it, and enable a queue for it"
+	| deserializedChangesSyncEvents |
+
+	deserializedChangesSyncEvents := LeJsonV4 uniqueInstance 
+		deserialize: anEncodedGtRrChangesSyncEncodedEvents readStream.
+		
+	self changesSyncEvents: deserializedChangesSyncEvents.
+	^ nil
+]
+
 { #category : #private }
 GtRemoteRunner >> checkJobCompleted: aGtRrContext [
 	"After each task has been completed, check if the job has finished, and if so, signal it.
@@ -478,26 +515,13 @@ GtRemoteRunner >> heartbeatForWorkerId: aUidString [
 { #category : #accessing }
 GtRemoteRunner >> imageSyncEvents [
 
-	^ imageSyncEvents
+	^ changesSyncEvents
 ]
 
 { #category : #accessing }
 GtRemoteRunner >> imageSyncEvents: anObject [
 
-	imageSyncEvents := anObject
-]
-
-{ #category : #accessing }
-GtRemoteRunner >> imageSyncEventsFrom: aSerializedOmReference [
-	"Answer a collection of encoded EpEvents that will take the worker from the supplied OmReference to the state ready for testing.
-	If a collection of events is supplied, use that, otherwise synchronise with the current image.
-	Ensure that the supplied OmReference is in the receiver's history"
-	| workerOmReference |
-
-	workerOmReference := STON fromString: aSerializedOmReference.
-	^ imageSyncEvents
-		ifNil: [ GtRrImageSync uniqueInstance encodedChangesFrom: workerOmReference ]
-		ifNotNil: [ imageSyncEvents encodedChangesFrom: workerOmReference ]
+	changesSyncEvents := anObject
 ]
 
 { #category : #'api - jobs' }

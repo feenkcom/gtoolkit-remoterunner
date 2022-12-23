@@ -21,6 +21,14 @@ PlpoGtRemoteRunner >> actOnProxyObjectCreated [
 	self initializeAnnouncementsQueueListener.
 ]
 
+{ #category : #accessing }
+PlpoGtRemoteRunner >> changesSyncEvents: aGtRrChangesSyncEncodedEvents [
+
+	self 
+		proxyPerform: #changesSyncEventsSerialized: 
+		withPrimitiveArguments: { LeJsonV4 uniqueInstance serialize:  aGtRrChangesSyncEncodedEvents }
+]
+
 { #category : #'announcements - queue' }
 PlpoGtRemoteRunner >> configureAnnouncementsQueueListener: aListener [
 	aListener
@@ -29,11 +37,11 @@ PlpoGtRemoteRunner >> configureAnnouncementsQueueListener: aListener [
 ]
 
 { #category : #accessing }
-PlpoGtRemoteRunner >> imageSyncEvents: aGtRrImageSyncEncodedEvents [
+PlpoGtRemoteRunner >> imageSyncEvents: aGtRrChangesSyncEncodedEvents [
 
 	self 
-		proxyPerform: #imageSyncEventsSerialized: 
-		withPrimitiveArguments: { LeJsonV4 uniqueInstance serialize:  aGtRrImageSyncEncodedEvents }
+		proxyPerform: #changesSyncEventsSerialized: 
+		withPrimitiveArguments: { LeJsonV4 uniqueInstance serialize:  aGtRrChangesSyncEncodedEvents }
 ]
 
 { #category : #testing }

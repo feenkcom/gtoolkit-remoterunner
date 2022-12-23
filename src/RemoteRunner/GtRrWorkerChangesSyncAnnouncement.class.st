@@ -1,5 +1,5 @@
 Class {
-	#name : #GtRrWorkerImageSyncAnnouncement,
+	#name : #GtRrWorkerChangesSyncAnnouncement,
 	#superclass : #GtRrWorkerAnnouncement,
 	#category : #'RemoteRunner-Announcements'
 }

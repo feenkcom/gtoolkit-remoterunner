@@ -2,7 +2,7 @@
 nil
 "
 Class {
-	#name : #GtRrImageSync,
+	#name : #GtRrChangesSync,
 	#superclass : #Object,
 	#traits : 'TGtUniqueInstance',
 	#classTraits : 'TGtUniqueInstance classTrait',
@@ -19,26 +19,26 @@ Class {
 }
 
 { #category : #initialization }
-GtRrImageSync class >> initialize [
+GtRrChangesSync class >> initialize [
 	"Create the uniqueInstance to collect the session history"
 
 	self uniqueInstance.
 ]
 
 { #category : #'private - hooks' }
-GtRrImageSync class >> onRemoveUniqueInstance: anInstance [
+GtRrChangesSync class >> onRemoveUniqueInstance: anInstance [
 	"Classes may perform some activities on a singleton that is about to be released"
 
 	anInstance stop.
 ]
 
 { #category : #accessing }
-GtRrImageSync class >> uniqueInstance [
+GtRrChangesSync class >> uniqueInstance [
 	^ uniqueInstance ifNil: [ uniqueInstance := self new start ]
 ]
 
 { #category : #private }
-GtRrImageSync >> addEntry: anOmEntry [
+GtRrChangesSync >> addEntry: anOmEntry [
 	"Update the session history based on the supplied entry.
 	If it is a snapshot we need to ensure that the current localName is in the history."
 
@@ -51,7 +51,7 @@ GtRrImageSync >> addEntry: anOmEntry [
 ]
 
 { #category : #private }
-GtRrImageSync >> addReference: anOmReference [
+GtRrChangesSync >> addReference: anOmReference [
 	"Add the supplied reference.
 	If it is in the same file as the most recent entry, just update the localName."
 
@@ -64,13 +64,13 @@ GtRrImageSync >> addReference: anOmReference [
 ]
 
 { #category : #accessing }
-GtRrImageSync >> allEncodedChanges [
+GtRrChangesSync >> allEncodedChanges [
 
 	^ self encodedChangesFrom: sessionHistory first.
 ]
 
 { #category : #'api - remoterunner' }
-GtRrImageSync >> changesFrom: anOmReference [
+GtRrChangesSync >> changesFrom: anOmReference [
 	"Answer the encoded collection of EpEvents from anOmReference up to the image's current state."
 	| enumerator |
 
@@ -84,7 +84,7 @@ GtRrImageSync >> changesFrom: anOmReference [
 ]
 
 { #category : #'api - remoterunner' }
-GtRrImageSync >> encodedChangesFrom: anOmReference [
+GtRrChangesSync >> encodedChangesFrom: anOmReference [
 	"Answer the encoded collection of EpEvents from anOmReference up to the image's current state.
 	Cache the latest request on the assumption that all workers will start from the same image."
 	| enumerator entries haveLatest headReference |
@@ -112,7 +112,7 @@ GtRrImageSync >> encodedChangesFrom: anOmReference [
 ]
 
 { #category : #accessing }
-GtRrImageSync >> epLog [
+GtRrChangesSync >> epLog [
 	"Answer the EpLog to use for building the event list.
 	This should normally be the default, but may be set for testing purposes."
 	<Return: #EpLog>
@@ -121,7 +121,7 @@ GtRrImageSync >> epLog [
 ]
 
 { #category : #accessing }
-GtRrImageSync >> epLog: anEpLog [
+GtRrChangesSync >> epLog: anEpLog [
 	"Set the receiver's EpLog.
 	Note that the sessionHistory must be updated to match."
 
@@ -129,14 +129,14 @@ GtRrImageSync >> epLog: anEpLog [
 ]
 
 { #category : #finalization }
-GtRrImageSync >> finalize [
+GtRrChangesSync >> finalize [
 
 	self stop.
 	super finalize
 ]
 
 { #category : #ui }
-GtRrImageSync >> gtSessionHistoryFor: aView [
+GtRrChangesSync >> gtSessionHistoryFor: aView [
 	<gtView>
 
 	^ aView list
@@ -147,14 +147,14 @@ GtRrImageSync >> gtSessionHistoryFor: aView [
 ]
 
 { #category : #testing }
-GtRrImageSync >> includesReference: anOmReference [
+GtRrChangesSync >> includesReference: anOmReference [
 	"Answer a boolean indicating whether anOmReference is part of the receiver's session history"
 
 	^ sessionHistory includes: anOmReference
 ]
 
 { #category : #initialization }
-GtRrImageSync >> initialize [
+GtRrChangesSync >> initialize [
 
 	super initialize.
 	sessionHistory := OrderedCollection new.
@@ -162,25 +162,25 @@ GtRrImageSync >> initialize [
 ]
 
 { #category : #'hooks - session' }
-GtRrImageSync >> onEntryAdded: anAnnouncement [
+GtRrChangesSync >> onEntryAdded: anAnnouncement [
 
 	self addEntry: anAnnouncement entry.
 ]
 
 { #category : #private }
-GtRrImageSync >> sessionHistory [
+GtRrChangesSync >> sessionHistory [
 
 	^ sessionHistory
 ]
 
 { #category : #private }
-GtRrImageSync >> sessionHistory: anOrderedCollection [
+GtRrChangesSync >> sessionHistory: anOrderedCollection [
 
 	sessionHistory := anOrderedCollection 
 ]
 
 { #category : #'start - stop' }
-GtRrImageSync >> start [
+GtRrChangesSync >> start [
 
 	subscription ifNil: 
 		[ subscription := EpMonitor current log announcer
@@ -190,7 +190,7 @@ GtRrImageSync >> start [
 ]
 
 { #category : #'start - stop' }
-GtRrImageSync >> stop [
+GtRrChangesSync >> stop [
 
 	subscription ifNotNil: [ 
 		subscription announcer removeSubscription: subscription.
@@ -198,7 +198,7 @@ GtRrImageSync >> stop [
 ]
 
 { #category : #'private - debugging' }
-GtRrImageSync >> workerChanges [
+GtRrChangesSync >> workerChanges [
 	"Convenience method to regenerate the encodedChanges unencoded."
 
 	^ self changesFrom: workerOmReference.
