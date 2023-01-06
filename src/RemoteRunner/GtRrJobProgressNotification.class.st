@@ -23,10 +23,10 @@ Class {
 	#superclass : #GtNotificationEvent,
 	#instVars : [
 		'job',
-		'taskResults',
 		'taskCount',
 		'succeededCount',
-		'erroredCount'
+		'erroredCount',
+		'taskExecutionResults'
 	],
 	#category : #'RemoteRunner-Jobs-Notifications'
 }
@@ -49,7 +49,7 @@ GtRrJobProgressNotification >> actOnTaskCompletedFor: anAnnouncement [
 { #category : #accessing }
 GtRrJobProgressNotification >> addTaskAnnouncement: anAnnouncement [
 
-	taskResults add: anAnnouncement taskExecutionResult.
+	taskExecutionResults add: anAnnouncement taskExecutionResult.
 	anAnnouncement executionData hasErrors
 		ifTrue: [ erroredCount := erroredCount + 1 ]
 		ifFalse: [ succeededCount := succeededCount + 1 ]
@@ -126,7 +126,7 @@ GtRrJobProgressNotification >> job: aGtRrJob [
 		self unsubscribeFromJob ].
 	
 	job := aGtRrJob.
-	taskResults := OrderedCollection new.
+	taskExecutionResults := OrderedCollection new.
 	taskCount := job taskCount.
 	succeededCount := 0.
 	erroredCount := 0.
@@ -215,7 +215,7 @@ GtRrJobProgressNotification >> taskCount [
 
 { #category : #accessing }
 GtRrJobProgressNotification >> taskResults [
-	^ taskResults
+	^ taskExecutionResults collect: #taskResult
 ]
 
 { #category : #accessing }
