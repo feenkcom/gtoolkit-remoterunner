@@ -93,11 +93,10 @@ GtRrJobNotificationSummary >> updateSummaryContent [
 	
 	self notifications
 		do: [ :aNotification | 
-			successfulCounter := successfulCounter
-					+ (aNotification job results reject: #hasErrors) size.
+			successfulCounter := successfulCounter + aNotification succeededCount.
 			notStartedCounter := notStartedCounter
-					+ (aNotification job tasks reject: #isFinished) size.
-			failedCounter := failedCounter + aNotification job resultsWithErrors size ].
+					+ (aNotification taskCount - aNotification succeededCount - aNotification erroredCount).
+			failedCounter := failedCounter + aNotification erroredCount ].
 	
 	self updateLabel: failedLabel withCount: failedCounter.
 	self updateLabel: successfulLabel withCount: successfulCounter.

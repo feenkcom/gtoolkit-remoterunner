@@ -237,7 +237,8 @@ GtRrJob >> gtErrorsFor: aView [
 		title: 'Errors';
 		priority: 16;
 		items: [ self resultsWithErrors ];
-		updateWhen: GtRemoteRunnerAnnouncement in: [ self announcer ]
+		updateWhen: GtRemoteRunnerAnnouncement in: [ self announcer ];
+		actionUpdateButton
 ]
 
 { #category : #ui }
@@ -249,7 +250,8 @@ GtRrJob >> gtResultsFor: aView [
 		priority: 15;
 		items: [ results ];
 		itemText: [ :item | item result ifNil: [ item errorDetails ] ];
-		updateWhen: GtRrJobAnnouncement in: [ self announcer ]
+		updateWhen: GtRrJobAnnouncement in: [ self announcer ];
+		actionUpdateButton
 ]
 
 { #category : #ui }
@@ -313,6 +315,12 @@ GtRrJob >> initialize [
 
 	super initialize.
 	self reset.
+]
+
+{ #category : #testing }
+GtRrJob >> isChecksJob [
+
+	^ false
 ]
 
 { #category : #testing }

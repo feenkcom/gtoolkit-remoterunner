@@ -485,7 +485,7 @@ GtRrWorker >> syncChangesIfRequiredWith: aPharoLinkApplication [
 		emit.
 	omReference := EpMonitor current log headReference.
 	"If this is the null reference and we've been started with detachChangesFromFileSystem use the latest recorded session"
-	(omReference isNull and: [ Smalltalk argumentsInclude: '--detachChangesFromFileSystem' ]) ifTrue:
+	(omReference isNull and: [ Smalltalk argumentsInclude: '--epiceaMemoryStore' ]) ifTrue:
 		[ omReference := GtRrChangesSync uniqueInstance sessionHistory last ].
 	encodedEvents := aPharoLinkApplication newCommandFactory
 		setByValue;
