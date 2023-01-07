@@ -215,6 +215,7 @@ GtRrLocalManagerStartupAndShutdown >> newWorkerLocalProcessArgumentsFor: someSet
 		[ args add: '--changesSync' ].
 	args
 		add: '--detachChangesFromFileSystem';
+		add: '--epiceaMemoryStore';
 		add: '--noLepiterReload';
 		add: '--noGtImageUpdate'.
 	^ args

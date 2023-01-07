@@ -23,7 +23,10 @@ Class {
 	#superclass : #GtNotificationEvent,
 	#instVars : [
 		'job',
-		'taskResults'
+		'taskCount',
+		'succeededCount',
+		'erroredCount',
+		'taskExecutionResults'
 	],
 	#category : #'RemoteRunner-Jobs-Notifications'
 }
@@ -38,32 +41,40 @@ GtRrJobProgressNotification class >> job: aGtRrJob [
 
 { #category : #callbacks }
 GtRrJobProgressNotification >> actOnTaskCompletedFor: anAnnouncement [
-	self addTaskResult: anAnnouncement taskResult
+
+	self addTaskAnnouncement: anAnnouncement.
+	self notifyNotificationDataChanged.
 ]
 
 { #category : #accessing }
-GtRrJobProgressNotification >> addTaskResult: aTaskResult [
-	taskResults add: aTaskResult
+GtRrJobProgressNotification >> addTaskAnnouncement: anAnnouncement [
+
+	taskExecutionResults add: anAnnouncement taskExecutionResult.
+	anAnnouncement executionData hasErrors
+		ifTrue: [ erroredCount := erroredCount + 1 ]
+		ifFalse: [ succeededCount := succeededCount + 1 ]
 ]
 
 { #category : #accessing }
 GtRrJobProgressNotification >> constructStates [
+
 	^ {
-		GtRrDataGroupState new
+		(GtRrDataGroupState forNotification: self)
 			name: 'All';
-			items: self job tasks.
-		GtRrDataGroupState new
+			itemCount: taskCount;
+			itemsComputation: [ self job tasks ].
+		(GtRrDataGroupState forNotification: self)
 			name: 'Success';
-			testCaseState: GtPharoMethodTestCasePassedState;
-			items: (self job results reject: #hasErrors).
-		GtRrDataGroupState new
-			name: 'Failure';
-			testCaseState: GtPharoMethodTestCasePassedState;
-			items: self job resultsWithErrors.
-		GtRrDataGroupState new
+			itemCount: succeededCount;
+			itemsComputation: [ self successfulChecks ].
+		(GtRrDataGroupState forNotification: self)
+			name: 'Error';
+			itemCount: erroredCount;
+			itemsComputation: [ self erroredChecks ].
+		(GtRrDataGroupState forNotification: self)
 			name: 'Executing';
-			testCaseState: GtPharoMethodExecutingState;
-			items: (self job tasks reject: #isFinished) }
+			itemCount: taskCount - succeededCount - erroredCount;
+			itemsComputation: [ self job notExecutedExamples ]} 
 ]
 
 { #category : #accessing }
@@ -72,6 +83,12 @@ GtRrJobProgressNotification >> elementClass [
 	<return: #GtNotificationEventElement>
 	
 	^ GtRrJobNotificationElement 
+]
+
+{ #category : #accessing }
+GtRrJobProgressNotification >> erroredCount [
+
+	^ erroredCount
 ]
 
 { #category : #'gt - extensions' }
@@ -109,7 +126,10 @@ GtRrJobProgressNotification >> job: aGtRrJob [
 		self unsubscribeFromJob ].
 	
 	job := aGtRrJob.
-	taskResults := OrderedCollection new.
+	taskExecutionResults := OrderedCollection new.
+	taskCount := job taskCount.
+	succeededCount := 0.
+	erroredCount := 0.
 	
 	self subscribeToJob.
 ]
@@ -176,14 +196,26 @@ GtRrJobProgressNotification >> subscribeToJob [
 ]
 
 { #category : #accessing }
+GtRrJobProgressNotification >> succeededCount [
+
+	^ succeededCount
+]
+
+{ #category : #accessing }
 GtRrJobProgressNotification >> summaryClass [
 	"Return a class that when instantiated displays the notification summary to the user"
 	^ GtRrJobNotificationSummary
 ]
 
 { #category : #accessing }
+GtRrJobProgressNotification >> taskCount [
+
+	^ taskCount
+]
+
+{ #category : #accessing }
 GtRrJobProgressNotification >> taskResults [
-	^ taskResults
+	^ taskExecutionResults collect: #taskResult
 ]
 
 { #category : #accessing }

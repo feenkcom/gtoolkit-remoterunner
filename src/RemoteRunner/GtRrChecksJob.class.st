@@ -24,3 +24,9 @@ GtRrChecksJob class >> sunitTestNames: anArray [
 
 	^ self new tasks: { (GtRrExplicitSUnitTask sunitTestNames: anArray) }
 ]
+
+{ #category : #testing }
+GtRrChecksJob >> isChecksJob [
+
+	^ true
+]

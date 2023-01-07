@@ -113,6 +113,12 @@ GtRrTaskExecutionData >> hasCompleted [
 	^ self state = #completed or: [ self state = #terminated ]
 ]
 
+{ #category : #testing }
+GtRrTaskExecutionData >> hasErrors [
+
+	^ errorDetails isNotNil
+]
+
 { #category : #initialization }
 GtRrTaskExecutionData >> initialize [
 

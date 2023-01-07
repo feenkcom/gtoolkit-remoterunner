@@ -29,6 +29,12 @@ GtRrWorkerConnection class >> connection: aConnection runner: aGtRemoteRunner [
 ]
 
 { #category : #accessing }
+GtRrWorkerConnection class >> connectionLostMessage [
+
+	^ 'Worker connection lost'
+]
+
+{ #category : #accessing }
 GtRrWorkerConnection >> addObserver: aBlock [
 
 	"Waits until semaphore of observer is signalled to keep request alive, as observers live in the request-response life-cycle."

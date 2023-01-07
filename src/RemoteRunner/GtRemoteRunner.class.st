@@ -1099,7 +1099,7 @@ GtRemoteRunner >> unregisterWorkerId: aUidString reason: aString [
 			each connection = workerConnection ].
 		failedTasks valuesDo: [ :taskContext |
 			errorDetails := GtRrErrorDetails new
-					errorMessage: 'Worker Unregistered:', aString printString;
+					errorMessage: 'Worker Unregistered: ', aString printString;
 					setTrace.
 			self 
 				privateTaskFailed: taskContext taskContextId 

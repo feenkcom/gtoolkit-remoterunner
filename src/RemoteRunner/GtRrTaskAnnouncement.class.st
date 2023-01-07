@@ -25,7 +25,7 @@ GtRrTaskAnnouncement class >> task: aGtRrTask [
 { #category : #converting }
 GtRrTaskAnnouncement >> asDataForRemoteSerialize [
 	^ super asDataForRemoteSerialize
-		at: #taskId put: self computeTaskId;
+		at: #taskExecutionResult put: self taskExecutionResult;
 		yourself.
 ]
 
@@ -38,15 +38,44 @@ GtRrTaskAnnouncement >> asDictionary [
 ]
 
 { #category : #accessing }
-GtRrTaskAnnouncement >> computeTaskId [
-	^ task taskId
+GtRrTaskAnnouncement >> computeTaskExecutionResult [
+
+	^ GtRrTaskExecutionResult new
+		taskId: task taskId;
+		executionData: task executionData.
+]
+
+{ #category : #accessing }
+GtRrTaskAnnouncement >> executionData [
+
+	^ task
+		ifNil: [ (self properties at: #taskExecutionResult) executionData ]
+		ifNotNil: [ task executionData ].
 ]
 
 { #category : #accessing }
 GtRrTaskAnnouncement >> initializeFromSlotData: aDictionary [
 	super initializeFromSlotData: aDictionary.
-	
-	self taskId: (aDictionary at: #taskId).
+
+	self properties at: #taskExecutionResult put: (aDictionary at: #taskExecutionResult).
+]
+
+{ #category : #testing }
+GtRrTaskAnnouncement >> isTaskCompleted [
+
+	^ false
+]
+
+{ #category : #testing }
+GtRrTaskAnnouncement >> isTaskFailed [
+
+	^ false
+]
+
+{ #category : #testing }
+GtRrTaskAnnouncement >> isTaskStarted [
+
+	^ false
 ]
 
 { #category : #printing }
@@ -70,15 +99,17 @@ GtRrTaskAnnouncement >> task: anObject [
 ]
 
 { #category : #accessing }
-GtRrTaskAnnouncement >> taskId [
+GtRrTaskAnnouncement >> taskExecutionResult [
 
 	^ task
-		ifNil: [ self properties at: #taskId ]
-		ifNotNil: [ self computeTaskId ].
+		ifNil: [ self properties at: #taskExecutionResult ]
+		ifNotNil: [ self computeTaskExecutionResult ]
 ]
 
 { #category : #accessing }
-GtRrTaskAnnouncement >> taskId: anId [
+GtRrTaskAnnouncement >> taskId [
 
-	self properties at: #taskId put: anId
+	^ task
+		ifNil: [ (self properties at: #taskExecutionResult) taskId ]
+		ifNotNil: [ task taskId ].
 ]

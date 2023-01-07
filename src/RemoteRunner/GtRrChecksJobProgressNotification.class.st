@@ -12,10 +12,10 @@ Class {
 }
 
 { #category : #adding }
-GtRrChecksJobProgressNotification >> addTaskResult: aTaskResult [
-	self updateSummaryWithTaskResult: aTaskResult.
-	
-	super addTaskResult: aTaskResult.
+GtRrChecksJobProgressNotification >> addTaskAnnouncement: anAnnouncement [
+
+	self updateSummaryWithTaskResult: anAnnouncement taskResult.	
+	super addTaskAnnouncement: anAnnouncement.
 ]
 
 { #category : #accessing }
@@ -233,6 +233,7 @@ GtRrChecksJobProgressNotification >> totalChecksCount: anInteger [
 
 { #category : #'updating - summary' }
 GtRrChecksJobProgressNotification >> updateSummaryWithTaskResult: aTaskResult [
+
 	self incrementSuccessfulChecksCountWith: (aTaskResult count: [ :aResult | 
 		aResult isSuccess ]).
 	self incrementSkippedChecksCountWith: (aTaskResult count: [ :aResult | 
@@ -241,6 +242,4 @@ GtRrChecksJobProgressNotification >> updateSummaryWithTaskResult: aTaskResult [
 		aResult isFailure ]).
 	self incrementErrorChecksCountWith: (aTaskResult count: [ :aResult | 
 		aResult isError or: [ aResult isWarning ] ]).
-	
-	self notifyNotificationDataChanged.
 ]

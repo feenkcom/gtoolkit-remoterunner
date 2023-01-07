@@ -3,6 +3,9 @@ Class {
 	#superclass : #PharoLinkProxyObject,
 	#traits : 'TPlpoGtWithAnnouncementsQueueListener',
 	#classTraits : 'TPlpoGtWithAnnouncementsQueueListener classTrait',
+	#instVars : [
+		'taskCount'
+	],
 	#category : #'RemoteRunner-Jobs'
 }
 
@@ -31,6 +34,12 @@ PlpoGtRrJob >> configureAnnouncementsQueueListener: aListener [
 	aListener
 		"timeout: self jobTimeout;"
 		terminationCondition: [ self isFinished]
+]
+
+{ #category : #accessing }
+PlpoGtRrJob >> endTime [
+	
+	^ self proxyPerformSerialized: #endTime
 ]
 
 { #category : #accessing }
@@ -77,6 +86,12 @@ PlpoGtRrJob >> showProgressNotification [
 ]
 
 { #category : #accessing }
+PlpoGtRrJob >> startTime [
+	
+	^ self proxyPerformSerialized: #startTime
+]
+
+{ #category : #accessing }
 PlpoGtRrJob >> state [
 	
 	^ self proxyPerform: #state
@@ -86,6 +101,12 @@ PlpoGtRrJob >> state [
 PlpoGtRrJob >> stateDescription [
 	
 	^ self proxyPerform: #stateDescription
+]
+
+{ #category : #accessing }
+PlpoGtRrJob >> taskCount [
+
+	^ taskCount ifNil: [ taskCount := self proxyPerform: #taskCount ].
 ]
 
 { #category : #accessing }
