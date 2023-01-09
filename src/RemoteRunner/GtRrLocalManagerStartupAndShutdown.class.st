@@ -107,21 +107,6 @@ GtRrLocalManagerStartupAndShutdown >> gtSummaryFor: aView [
 ]
 
 { #category : #accessing }
-GtRrLocalManagerStartupAndShutdown >> imageSync [
-	"Answer a boolean indicating whether workers should be started with changesSync enabled."
-	<return: #Boolean>
-
-	^ changesSync
-]
-
-{ #category : #accessing }
-GtRrLocalManagerStartupAndShutdown >> imageSync: aBoolean [
-	"Set the flag indicating whether workers should be started with changesSync enabled."
-
-	changesSync := aBoolean
-]
-
-{ #category : #accessing }
 GtRrLocalManagerStartupAndShutdown >> inMemoryLog [
 	"Answer a boolean indicating whether worker output should be stored in memory or not"
 

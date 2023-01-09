@@ -47,8 +47,6 @@ GtRrWorker class >> commandLineCommand [
 				   yourself);
 		add: ((ClapFlag id: #changesSync) description:
 			'Synchronise the changes with the remote runner on startup');
-		add: ((ClapFlag id: #imageSync) description:
-			'Synchronise the image with the remote runner on startup');
 		  add: ((ClapFlag id: #attribute)
 				   description: 'add key/value pairs to attributes';
 				   multiple: true;
@@ -119,8 +117,6 @@ GtRrWorker class >> processCommandLineArgs: args [
 		worker connectionStrategy: connectionStrategy ].
 	worker connectionStrategy socketAddress: serverSocketAddress.
 	args at: #changesSync ifPresent:
-		[ worker attributes at: #changesSync put: true ].
-	args at: #imageSync ifPresent:
 		[ worker attributes at: #changesSync put: true ].
 	args occurrencesOf: #attribute do: [ :arg | 
 		worker attributes
