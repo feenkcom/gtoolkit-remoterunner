@@ -834,7 +834,7 @@ GtRemoteRunner >> startLogging [
 	"Start the receiver's in-memory log"
 
 	log ifNotNil: [ ^ self ].
-	log := CircularMemoryLogger new startFor: GtRemoteRunnerAnnouncement.
+	log := CircularMemoryLogger new startFor: GtRemoteRunnerAnnouncement, StringSignal.
 ]
 
 { #category : #ui }
