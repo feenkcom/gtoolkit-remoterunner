@@ -42,6 +42,12 @@ PlpoGtRrJob >> endTime [
 	^ self proxyPerformSerialized: #endTime
 ]
 
+{ #category : #testing }
+PlpoGtRrJob >> isChecksJob [
+
+	^ false
+]
+
 { #category : #accessing }
 PlpoGtRrJob >> isFinished [
 

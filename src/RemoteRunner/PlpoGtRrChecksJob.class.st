@@ -9,3 +9,9 @@ PlpoGtRrChecksJob class >> remoteClassName [
 
 	^ #GtRrChecksJob
 ]
+
+{ #category : #testing }
+PlpoGtRrChecksJob >> isChecksJob [
+
+	^ true
+]

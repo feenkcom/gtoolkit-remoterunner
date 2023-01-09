@@ -36,14 +36,6 @@ PlpoGtRemoteRunner >> configureAnnouncementsQueueListener: aListener [
 		terminationCondition: [ self isRunning not ]
 ]
 
-{ #category : #accessing }
-PlpoGtRemoteRunner >> imageSyncEvents: aGtRrChangesSyncEncodedEvents [
-
-	self 
-		proxyPerform: #changesSyncEventsSerialized: 
-		withPrimitiveArguments: { LeJsonV4 uniqueInstance serialize:  aGtRrChangesSyncEncodedEvents }
-]
-
 { #category : #testing }
 PlpoGtRemoteRunner >> isIdle [
 
