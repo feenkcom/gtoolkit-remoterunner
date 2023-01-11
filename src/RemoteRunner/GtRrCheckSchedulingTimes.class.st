@@ -305,7 +305,7 @@ GtRrCheckSchedulingTimes >> timesForClassName: aSymbol [
 	className := aSymbol asSymbol.
 	^ self critical:
 		[ times at: className ifAbsentPut: 
-			[ LwGtPersistentClassTimes testClassName: className ] ].
+			[ GtRrCheckSchedulingClassTimes testClassName: className ] ].
 ]
 
 { #category : #accessing }
