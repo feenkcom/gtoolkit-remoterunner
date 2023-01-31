@@ -17,7 +17,7 @@ GtRrAnnouncementQueuePullCompletedSignal >> isEndSignalType [
 	^ true
 ]
 
-{ #category : #accessing }
+{ #category : #printing }
 GtRrAnnouncementQueuePullCompletedSignal >> printOneLineContentsOn: stream [
 
 	stream 

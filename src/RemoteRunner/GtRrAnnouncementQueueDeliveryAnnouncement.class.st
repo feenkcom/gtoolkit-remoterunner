@@ -22,7 +22,7 @@ GtRrAnnouncementQueueDeliveryAnnouncement >> announcementsCount: anInteger [
 	announcementsCount := anInteger
 ]
 
-{ #category : #accessing }
+{ #category : #printing }
 GtRrAnnouncementQueueDeliveryAnnouncement >> printOneLineContentsOn: stream [
 
 	stream 
