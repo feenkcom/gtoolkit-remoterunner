@@ -32,6 +32,12 @@ GtRrPseudoPharoLinkServerConnection >> remoteAddress [
 	^ #[127 0 0 1]
 ]
 
+{ #category : #accessing }
+GtRrPseudoPharoLinkServerConnection >> remoteAddressString [
+
+	^ GtRemoteRunner printIpAddress: self remoteAddress
+]
+
 { #category : #initialization }
 GtRrPseudoPharoLinkServerConnection >> setCloseOnExec: aBoolean [
 
