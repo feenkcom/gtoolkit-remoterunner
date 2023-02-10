@@ -88,10 +88,12 @@ GtRrLogNotifierListener >> onNotificationClosed [
 
 { #category : #private }
 GtRrLogNotifierListener >> openNotification [
+	| count |
 
+	count := self notificationCount.
 	notification := GtObjectNotificationMessage new
 		object: self;
-		message: self notificationCount asString, ' Remote Runner User Notifications';
+		message: count asString, (' Remote Runner User Notification' asPluralBasedOn: count);
 		registerNotifications.
 	notification
 		onRemovalRequestSend: #onNotificationClosed
