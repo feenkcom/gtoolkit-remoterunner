@@ -69,7 +69,8 @@ Class {
 		'runnerStats',
 		'log',
 		'taskQueue',
-		'changesSyncEvents'
+		'changesSyncEvents',
+		'logNotifier'
 	],
 	#classInstVars : [
 		'uniqueInstance'
@@ -307,9 +308,16 @@ GtRemoteRunner >> changesSyncEventsFrom: aSerializedOmReference [
 	| workerOmReference |
 
 	workerOmReference := STON fromString: aSerializedOmReference.
-	^ changesSyncEvents
+	^ [ changesSyncEvents
 		ifNil: [ GtRrChangesSync uniqueInstance encodedChangesFrom: workerOmReference ]
-		ifNotNil: [ changesSyncEvents encodedChangesFrom: workerOmReference ]
+		ifNotNil: [ changesSyncEvents encodedChangesFrom: workerOmReference ] ]
+			on: Error
+			do: [ :ex |
+				GtRrWorkerChangesSyncErrorAnnouncement new
+					ipAddress: PharoLinkServerCurrentConnection value remoteAddressString;
+					exception: ex copy freeze;
+					emit.
+				ex pass ].
 ]
 
 { #category : #'api - jobs' }
@@ -576,6 +584,12 @@ GtRemoteRunner >> log [
 	^ log
 ]
 
+{ #category : #'private - accessing' }
+GtRemoteRunner >> logNotifier [
+
+	^ logNotifier
+]
+
 { #category : #accessing }
 GtRemoteRunner >> managerStartupAndShutdown [
 
@@ -835,6 +849,7 @@ GtRemoteRunner >> startLogging [
 
 	log ifNotNil: [ ^ self ].
 	log := CircularMemoryLogger new startFor: GtRemoteRunnerAnnouncement, StringSignal.
+	logNotifier := GtRrLogNotifierListener new runner: self.
 ]
 
 { #category : #ui }
@@ -870,7 +885,9 @@ GtRemoteRunner >> stopLogging [
 
 	log ifNil: [ ^ self ].
 	log stop.
+	logNotifier stop.
 	log := nil.
+	logNotifier := nil.
 ]
 
 { #category : #'api - jobs' }
