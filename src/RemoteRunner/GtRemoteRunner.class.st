@@ -313,10 +313,9 @@ GtRemoteRunner >> changesSyncEventsFrom: aSerializedOmReference [
 		ifNotNil: [ changesSyncEvents encodedChangesFrom: workerOmReference ] ]
 			on: Error
 			do: [ :ex |
-				GtRrWorkerChangesSyncErrorAnnouncement new
+				self announceAndLog: (GtRrWorkerChangesSyncErrorAnnouncement new
 					ipAddress: PharoLinkServerCurrentConnection value remoteAddressString;
-					exception: ex copy freeze;
-					emit.
+					exception: ex copy freeze).
 				ex pass ].
 ]
 
@@ -849,7 +848,10 @@ GtRemoteRunner >> startLogging [
 
 	log ifNotNil: [ ^ self ].
 	log := CircularMemoryLogger new startFor: GtRemoteRunnerAnnouncement, StringSignal.
-	logNotifier := GtRrLogNotifierListener new runner: self.
+	logNotifier := GtAnnouncementNotifier new
+		addAnnouncer: self announcer;
+		addWatching: GtRrResultProcessingErrorAnnouncement;
+		addWatching: GtRrWorkerChangesSyncErrorAnnouncement.
 ]
 
 { #category : #ui }
@@ -1157,10 +1159,9 @@ GtRemoteRunner >> workerResultProcessingError: errorDetails workerId: workerId t
 	"The worker received an error while the receiver was processing results.
 	Log the error."
 
-	GtRrResultProcessingErrorAnnouncement new
+	self announceAndLog: (GtRrResultProcessingErrorAnnouncement new
 		workerId: workerId;
-		errorDetails: errorDetails;
-		emit.
+		errorDetails: errorDetails).
 	currentlyExecutingTasks
 		at: taskContextId
 		ifPresent: [ :taskContext |
