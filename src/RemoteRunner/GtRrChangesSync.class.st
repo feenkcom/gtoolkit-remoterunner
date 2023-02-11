@@ -92,7 +92,7 @@ GtRrChangesSync >> encodedChangesFrom: anOmReference [
 	haveLatest := latestOmReference = self epLog headReference.
 	(haveLatest and: [ workerOmReference = anOmReference ]) ifTrue: [ ^ encodedEvents ].
 	(self includesReference: anOmReference) ifFalse:
-		[ self error: 'Unknown OmReference: ', anOmReference gtDisplayString ].
+		[ (GtRrUnknownOmReference omReference: anOmReference source: self) signal ].
 
 	^ mutex critical: 
 		[ haveLatest := latestOmReference = self epLog headReference.
