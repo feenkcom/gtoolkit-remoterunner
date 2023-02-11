@@ -22,7 +22,7 @@ GtRrImageSyncEncodedEvents class >> leJsonV4Name [
 GtRrImageSyncEncodedEvents >> encodedChangesFrom: anOmReference [
 
 	(sessionHistory includes: anOmReference) ifFalse:
-		[ self error: 'Unknown OmReference: ', anOmReference gtDisplayString ].
+		[ (GtRrUnknownOmReference omReference: anOmReference source: self) signal ].
 	^ encodedEvents.
 ]
 
@@ -44,6 +44,17 @@ GtRrImageSyncEncodedEvents >> events [
 
 	^ encodedEvents collect: [ :each |
 		(LanguageLinkUtils base64Decode: each readStream) ].
+]
+
+{ #category : #ui }
+GtRrImageSyncEncodedEvents >> gtSessionHistoryFor: aView [
+	<gtView>
+
+	sessionHistory ifNil: [ ^ aView empty ].
+	^ aView list
+		title: 'Session History';
+		priority: 20;
+		items: [ sessionHistory ].
 ]
 
 { #category : #accessing }
