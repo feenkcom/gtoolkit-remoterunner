@@ -23,6 +23,14 @@ TGtWithAnnouncementsQueue >> announcementQueue: aQueue [
 ]
 
 { #category : #'announcements - queue' }
+TGtWithAnnouncementsQueue >> ensureAnnouncementsQueue [
+	"Ensure the announcements queue has been registered"
+
+	announcementQueue ifNil:
+		[ self registerAnnouncementsQueueForAnnouncementType: Announcement ]
+]
+
+{ #category : #'announcements - queue' }
 TGtWithAnnouncementsQueue >> pollSerializedAnnouncementQueue [
 	^ self announcementQueue pollSerialized
 ]

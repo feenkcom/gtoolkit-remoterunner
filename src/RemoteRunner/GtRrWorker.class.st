@@ -96,8 +96,7 @@ GtRrWorker class >> processCommandLineArgs: args [
 			announcements := AnnouncementSetWithExclusions withAll:
 				{ GtRemoteRunnerAnnouncement, 
 				PharoLinkSignal,
-				StringSignal,
-				ContextStackSignal }.
+				StringSignal }.
 			announcements addExclusions: ContextStackSignal allSubclasses.
 			logger startFor: announcements ].
 	serverSocketAddress := ((args at: #serverSocketAddress) at:

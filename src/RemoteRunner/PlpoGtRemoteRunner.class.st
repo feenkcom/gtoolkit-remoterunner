@@ -67,23 +67,23 @@ PlpoGtRemoteRunner >> port [
 PlpoGtRemoteRunner >> registerAndStartAnnouncementsQueue [
 	"A manual way to start collecting announcements in the remote object and delivering them locally."
 
-	self registerAnnouncementsQueueForJobsAndWorkers.
+	self registerAnnouncementsQueueForHeadlessRunner.
 	self startAnnouncementsListener.
 ]
 
 { #category : #'announcements - queue' }
-PlpoGtRemoteRunner >> registerAnnouncementsQueueForJobsAndWorkers [
+PlpoGtRemoteRunner >> registerAnnouncementsQueueForHeadlessRunner [
 	"Start the announcements queue only for announcements for job and workers."
 	
-	^ self proxyPerform: #registerAnnouncementsQueueForJobsAndWorkers
+	^ self proxyPerform: #registerAnnouncementsQueueForHeadlessRunner
 ]
 
 { #category : #initialize }
 PlpoGtRemoteRunner >> startAnnouncementsNotifier [
 
 	announcementNotifier ifNotNil: [ ^ self ].
-	self proxyPerform: #registerAnnouncementsQueue.
-	self startAnnouncementsListener.
+	self proxyPerform: #ensureAnnouncementsQueue.
+	self ensureAnnouncementsListener.
 	announcementNotifier := GtAnnouncementNotifier new
 		addAnnouncer: self announcer;
 		addAllWatching: GtRemoteRunner defaultWatchedAnnouncements.
