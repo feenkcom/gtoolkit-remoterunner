@@ -60,7 +60,7 @@ GtRemoteAnnouncementQueue >> initializeForAnnouncingObject: anAnnouncingObject  
 
 { #category : #accessing }
 GtRemoteAnnouncementQueue >> onAnnouncement: anAnnouncement [
-	queue add: anAnnouncement
+	queue add: anAnnouncement.
 ]
 
 { #category : #accessing }

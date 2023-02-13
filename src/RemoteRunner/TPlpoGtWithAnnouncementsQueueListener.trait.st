@@ -26,6 +26,14 @@ TPlpoGtWithAnnouncementsQueueListener >> configureAnnouncementsQueueListener: aL
 ]
 
 { #category : #'announcements - queue' }
+TPlpoGtWithAnnouncementsQueueListener >> ensureAnnouncementsListener [
+	"Ensure annoucnements are being propagated."
+
+	announcementQueueListener isPolling ifFalse:
+		[ announcementQueueListener startPoll ].
+]
+
+{ #category : #'announcements - queue' }
 TPlpoGtWithAnnouncementsQueueListener >> initializeAnnouncementsQueueListener [
 	"Initialize and configure the queue listener. 
 	Should be called only after the proxy object has been fully initialize, and there should be no calls to the remote object."

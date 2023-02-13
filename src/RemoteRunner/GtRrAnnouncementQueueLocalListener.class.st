@@ -101,7 +101,7 @@ GtRrAnnouncementQueueLocalListener >> isPolling [
 { #category : #accessing }
 GtRrAnnouncementQueueLocalListener >> pollAndDeliverAnnouncements [
 	| newAnnouncements |
-	
+
 	newAnnouncements := self pollAnnouncementQueue.
 	
 	self emitAnnouncementQueueDeliveryInitiatedFor: newAnnouncements.
