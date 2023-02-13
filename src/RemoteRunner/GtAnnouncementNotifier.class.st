@@ -11,6 +11,14 @@ Class {
 }
 
 { #category : #accessing }
+GtAnnouncementNotifier >> addAllWatching: anAnnouncementClassCollection [
+	"Add the supplied classes to the list of announcements that the user is notified of"
+
+	anAnnouncementClassCollection do: [ :each |
+		self addWatching: each ].
+]
+
+{ #category : #accessing }
 GtAnnouncementNotifier >> addAnnouncer: anAnnouncer [
 	"Add the supplied announcer to the collection that are listend to for user notifications"
 
@@ -98,6 +106,7 @@ GtAnnouncementNotifier >> onAnnouncement: anAnnouncement [
 GtAnnouncementNotifier >> onNotificationClosed [
 
 	notification := nil.
+	announcements := OrderedCollection new.
 ]
 
 { #category : #private }

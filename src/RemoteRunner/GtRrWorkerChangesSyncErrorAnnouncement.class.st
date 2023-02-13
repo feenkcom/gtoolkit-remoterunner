@@ -9,6 +9,14 @@ Class {
 }
 
 { #category : #accessing }
+GtRrWorkerChangesSyncErrorAnnouncement >> asDataForRemoteSerialize [
+	^ super asDataForRemoteSerialize
+		at: #ipAddress put: ipAddress;
+		at: #exception put: (GtRrErrorDetails fromException: exception);
+		yourself.
+]
+
+{ #category : #accessing }
 GtRrWorkerChangesSyncErrorAnnouncement >> exception [
 	^ exception
 ]
@@ -16,6 +24,14 @@ GtRrWorkerChangesSyncErrorAnnouncement >> exception [
 { #category : #accessing }
 GtRrWorkerChangesSyncErrorAnnouncement >> exception: anObject [
 	exception := anObject
+]
+
+{ #category : #accessing }
+GtRrWorkerChangesSyncErrorAnnouncement >> initializeFromSlotData: aDictionary [
+	super initializeFromSlotData: aDictionary.
+
+	exception := (aDictionary at: #exception).
+	ipAddress := (aDictionary at: #ipAddress).
 ]
 
 { #category : #accessing }

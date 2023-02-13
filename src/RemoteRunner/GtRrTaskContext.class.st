@@ -80,6 +80,12 @@ GtRrTaskContext >> errorDetails: anObject [
 	task errorDetails: anObject
 ]
 
+{ #category : #accessing }
+GtRrTaskContext >> executionData [
+
+	^ task executionData
+]
+
 { #category : #ui }
 GtRrTaskContext >> gtResultFor: aView [
 	<gtView>
@@ -196,6 +202,12 @@ GtRrTaskContext >> printOn: aStream [
 GtRrTaskContext >> remoteRunner [
 
 	^ jobContext remoteRunner
+]
+
+{ #category : #accessing }
+GtRrTaskContext >> result [
+
+	^ task result
 ]
 
 { #category : #accessing }
