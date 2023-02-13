@@ -650,7 +650,7 @@ GtRemoteRunner >> log [
 { #category : #'private - accessing' }
 GtRemoteRunner >> logNotifier [
 
-	^ logNotifier
+	^ announcementNotifier
 ]
 
 { #category : #accessing }
