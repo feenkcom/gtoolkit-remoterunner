@@ -65,9 +65,12 @@ GtRemoteAnnouncementQueue >> onAnnouncement: anAnnouncement [
 
 { #category : #accessing }
 GtRemoteAnnouncementQueue >> poll [
-	| results |
+	| results newQueue |
+
+	"Pre-creating the new queue allows the two assignments to be atomic, removing the possibility of multiple processes accessing the collection simultaneously."
+	newQueue := OrderedCollection new.
 	results := queue.
-	queue := OrderedCollection new.
+	queue := newQueue.
 	^ results
 ]
 

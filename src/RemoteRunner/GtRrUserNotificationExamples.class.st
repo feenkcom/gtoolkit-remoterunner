@@ -17,7 +17,7 @@ GtRrUserNotificationExamples >> notifyOnChangesSyncError [
 	| omReference |
 
 	runner := GtRemoteRunner new.
-	runner startLogging.
+	runner startAnnouncementsNotifier.
 	omReference := OmReference
 		globalName: 'nonexistent'
 		localName: '-1'.
@@ -37,7 +37,7 @@ GtRrUserNotificationExamples >> notifyOnChangesSyncSuccess [
 	| omReference |
 
 	runner := GtRemoteRunner new.
-	runner startLogging.
+	runner startAnnouncementsNotifier.
 	omReference := EpMonitor current log headReference.
 	"If this is the null reference and we've been started with detachChangesFromFileSystem use the latest recorded session"
 	(omReference isNull and: [ Smalltalk argumentsInclude: '--epiceaMemoryStore' ]) ifTrue:

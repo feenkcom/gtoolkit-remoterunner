@@ -3,6 +3,9 @@ Class {
 	#superclass : #PharoLinkProxyObject,
 	#traits : 'TPlpoGtWithAnnouncementsQueueListener',
 	#classTraits : 'TPlpoGtWithAnnouncementsQueueListener classTrait',
+	#instVars : [
+		'announcementNotifier'
+	],
 	#category : #'RemoteRunner-Runner'
 }
 
@@ -75,6 +78,17 @@ PlpoGtRemoteRunner >> registerAnnouncementsQueueForJobsAndWorkers [
 	^ self proxyPerform: #registerAnnouncementsQueueForJobsAndWorkers
 ]
 
+{ #category : #initialize }
+PlpoGtRemoteRunner >> startAnnouncementsNotifier [
+
+	announcementNotifier ifNotNil: [ ^ self ].
+	self proxyPerform: #registerAnnouncementsQueue.
+	self startAnnouncementsListener.
+	announcementNotifier := GtAnnouncementNotifier new
+		addAnnouncer: self announcer;
+		addAllWatching: GtRemoteRunner defaultWatchedAnnouncements.
+]
+
 { #category : #'code sync' }
 PlpoGtRemoteRunner >> startCodeSync [
 	"Start the code sync listener, submitting changes to the receiver"
@@ -99,12 +113,21 @@ PlpoGtRemoteRunner >> stop [
 	For now just shut down the application.
 	TODO"
 
+	self stopAnnouncementNotifier.
 	application stop.
 	"[ self newCommandFactory
 		<< 'self stop';
 		send ]
 			on: Error
 			do: [ :ex | ]"
+]
+
+{ #category : #accessing }
+PlpoGtRemoteRunner >> stopAnnouncementNotifier [
+
+	announcementNotifier ifNil: [ ^ self ].
+	announcementNotifier stop.
+	announcementNotifier := nil.
 ]
 
 { #category : #'api - jobs' }

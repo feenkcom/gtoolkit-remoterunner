@@ -70,7 +70,7 @@ Class {
 		'log',
 		'taskQueue',
 		'changesSyncEvents',
-		'logNotifier'
+		'announcementNotifier'
 	],
 	#classInstVars : [
 		'uniqueInstance'
@@ -92,10 +92,42 @@ GtRemoteRunner class >> cleanUp [
 	self cleanUniqueInstance
 ]
 
+{ #category : #clap }
+GtRemoteRunner class >> commandLine [
+	<commandline>
+
+	^ self commandLineCommand meaning: [ :args | 
+		self processCommandLineArgs: args ].
+]
+
+{ #category : #clap }
+GtRemoteRunner class >> commandLineCommand [
+
+	^ (ClapCommand id: #remoteRunnerServer)
+		  description: 'Run the RemoteRunner server';
+		  add: ClapFlag forHelp;
+		  add: ((ClapFlag id: #log) description: 'Enable logging to stdout');
+		  add: ((ClapFlag id: #listenOn)
+				   description:
+					   'The port number to listen on.  Should also be able to specify an interface (TDB)';
+				   add: (ClapPositional id: #address);
+				   yourself);
+		  yourself
+]
+
 { #category : #accessing }
 GtRemoteRunner class >> default [
 
 	^ self uniqueInstance
+]
+
+{ #category : #accessing }
+GtRemoteRunner class >> defaultWatchedAnnouncements [
+	"Start the receiver's in-memory log"
+
+	^ { GtRrResultProcessingErrorAnnouncement.
+		GtRrWorkerChangesSyncErrorAnnouncement.
+	}
 ]
 
 { #category : #testing }
@@ -153,6 +185,38 @@ GtRemoteRunner class >> printIpAddress: aByteArray [
 
 	^ String streamContents: [ :stream |
 		aByteArray printOn: stream delimiter: '.' ]
+]
+
+{ #category : #clap }
+GtRemoteRunner class >> processCommandLineArgs: args [
+	| runner logger address announcements |
+
+	args
+		at: #help ifPresent: [ :help | 
+			help value.
+			help context exitSuccess ];
+		at: #log ifPresent: [ 
+			SignalLogger resetAllInstances.
+			logger := RestartingStreamLogger stdout.
+			announcements := AnnouncementSetWithExclusions withAll:
+				{ GtRemoteRunnerAnnouncement, 
+				PharoLinkSignal,
+				StringSignal,
+				ContextStackSignal }.
+			announcements 
+				addExclusions: ContextStackSignal allSubclasses;
+				addExclusion: PharoLinkEvalSignal.
+			logger startFor: announcements ].
+	address := ((args at: #listenOn) at: #address) value.
+	runner := self new.
+	runner 
+		port: address asNumber;
+		managerStartupAndShutdown: GtRrManualManagerStartupAndShutdown new.
+	StringSignal emit: 'Server address: ' , runner port asString.
+	runner start.
+	StringSignal emit: 'Running'.
+	"Hibernate until the process exits"
+	Semaphore new wait.
 ]
 
 { #category : #'headless remote runner' }
@@ -586,7 +650,7 @@ GtRemoteRunner >> log [
 { #category : #'private - accessing' }
 GtRemoteRunner >> logNotifier [
 
-	^ logNotifier
+	^ announcementNotifier
 ]
 
 { #category : #accessing }
@@ -821,6 +885,16 @@ GtRemoteRunner >> start [
 	self runManagerStartup
 ]
 
+{ #category : #'api - logger' }
+GtRemoteRunner >> startAnnouncementsNotifier [
+	"Start the receiver's in-memory log"
+
+	announcementNotifier ifNotNil: [ ^ self ].
+	announcementNotifier := GtAnnouncementNotifier new
+		addAnnouncer: self announcer;
+		addAllWatching: self class defaultWatchedAnnouncements.
+]
+
 { #category : #private }
 GtRemoteRunner >> startJob: aGtRrJob [
 	"Start the supplied job.
@@ -848,10 +922,6 @@ GtRemoteRunner >> startLogging [
 
 	log ifNotNil: [ ^ self ].
 	log := CircularMemoryLogger new startFor: GtRemoteRunnerAnnouncement, StringSignal.
-	logNotifier := GtAnnouncementNotifier new
-		addAnnouncer: self announcer;
-		addWatching: GtRrResultProcessingErrorAnnouncement;
-		addWatching: GtRrWorkerChangesSyncErrorAnnouncement.
 ]
 
 { #category : #ui }
@@ -879,6 +949,15 @@ GtRemoteRunner >> stop [
 
 	self runManagerShutdown.
 	self stopLogging.
+	self stopAnnouncementNotifier.
+]
+
+{ #category : #'api - logger' }
+GtRemoteRunner >> stopAnnouncementNotifier [
+
+	announcementNotifier ifNil: [ ^ self ].
+	announcementNotifier stop.
+	announcementNotifier := nil.
 ]
 
 { #category : #'api - logger' }
@@ -887,9 +966,7 @@ GtRemoteRunner >> stopLogging [
 
 	log ifNil: [ ^ self ].
 	log stop.
-	logNotifier stop.
 	log := nil.
-	logNotifier := nil.
 ]
 
 { #category : #'api - jobs' }

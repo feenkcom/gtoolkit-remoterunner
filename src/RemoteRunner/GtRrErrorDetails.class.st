@@ -8,6 +8,15 @@ Class {
 	#category : #'RemoteRunner-Runner'
 }
 
+{ #category : #'instance creation' }
+GtRrErrorDetails class >> fromException: anException [
+
+	anException ifNil: [ ^ nil ].
+	^ self new
+		errorMessage: anException messageText;
+		trace: anException stackString.
+]
+
 { #category : #accessing }
 GtRrErrorDetails class >> leJsonV4Name [
 
