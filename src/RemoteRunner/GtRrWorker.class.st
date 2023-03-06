@@ -470,7 +470,7 @@ GtRrWorker >> stopHeartbeat [
 
 { #category : #private }
 GtRrWorker >> syncChangesIfRequiredWith: aPharoLinkApplication [ 
-	| encodedEvents omReference events remoteAddressString |
+	| encodedEvents events remoteAddressString |
 
 	(attributes at: #changesSync ifAbsent: [ false ]) ifFalse: [ ^ self ].
 	remoteAddressString := aPharoLinkApplication remoteAddressString.
@@ -478,14 +478,10 @@ GtRrWorker >> syncChangesIfRequiredWith: aPharoLinkApplication [
 		remoteAddressString: remoteAddressString;
 		worker: self;
 		emit.
-	omReference := EpMonitor current log headReference.
-	"If this is the null reference and we've been started with detachChangesFromFileSystem use the latest recorded session"
-	(omReference isNull and: [ Smalltalk argumentsInclude: '--epiceaMemoryStore' ]) ifTrue:
-		[ omReference := GtRrChangesSync uniqueInstance sessionHistory last ].
 	encodedEvents := aPharoLinkApplication newCommandFactory
 		setByValue;
 		bindingAt: #anOmReference put: 
-			(STON toString: omReference);
+			(STON toString: GtRrChangesSync headReference);
 		<< 'GtAssignedRemoteRunner changesSyncEventsFrom: anOmReference';
 		sendAndWait.
 	GtRrWorkerChangesSyncHaveEventsAnnouncement new

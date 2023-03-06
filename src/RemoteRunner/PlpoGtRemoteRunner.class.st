@@ -145,6 +145,21 @@ PlpoGtRemoteRunner >> submitJob: aGtRrJob [
 	^ jobProxy
 ]
 
+{ #category : #'code sync' }
+PlpoGtRemoteRunner >> syncChanges [
+	"Send changes from the current image to the remote runner"
+	| omReference encodedChanges |
+
+	omReference := STON fromString: (self newCommandFactory
+		<< 'STON toString: GtRrChangesSync headReference';
+		sendAndWait).
+	encodedChanges := GtRrChangesSync uniqueInstance encodedChangesFrom: omReference.
+	self newCommandFactory
+		bindingAt: #encodedChanges put: encodedChanges;
+		<< 'GtRrChangesSync applyChanges: encodedChanges';
+		sendAndWait.
+]
+
 { #category : #'api - jobs' }
 PlpoGtRemoteRunner >> terminateJobId: anId [
 
