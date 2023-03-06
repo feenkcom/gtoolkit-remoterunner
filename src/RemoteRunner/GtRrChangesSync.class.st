@@ -18,6 +18,28 @@ Class {
 	#category : #'RemoteRunner-Runner-ImageSync'
 }
 
+{ #category : #accessing }
+GtRrChangesSync class >> applyChanges: encodedEvents [
+	"Apply the supplied encodedEvents"
+	| events |
+
+	events  := encodedEvents collect: [ :each |
+		(LanguageLinkUtils base64Decode: each readStream) ].
+	events do: #applyCodeChange.
+]
+
+{ #category : #accessing }
+GtRrChangesSync class >> headReference [
+	"Answer the current headReference, using the latest recorded session if a memory store is being used"
+	| omReference |
+
+	omReference := EpMonitor current log headReference.
+	"If this is the null reference and we've been started with epiceaMemoryStore use the latest recorded session"
+	(omReference isNull and: [ Smalltalk argumentsInclude: '--epiceaMemoryStore' ]) ifTrue:
+		[ omReference := self uniqueInstance sessionHistory last ].
+	^ omReference.
+]
+
 { #category : #initialization }
 GtRrChangesSync class >> initialize [
 	"Create the uniqueInstance to collect the session history"

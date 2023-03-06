@@ -1026,6 +1026,14 @@ GtRemoteRunner >> summaryString [
 				cr ] ]
 ]
 
+{ #category : #'code sync' }
+GtRemoteRunner >> syncChanges [
+	"Send changes from the current image to the remote runner.
+	Provided for compatibility with {{gtClass:PlpoGtRemoteRunner}}.
+	In this case the remote runner is in the same image as the user, so no sync required."
+
+]
+
 { #category : #'api - worker' }
 GtRemoteRunner >> taskDone: aTaskContextId executionData: aGtRrWorkerExecutionData result: aResult [
 	| taskContext |
