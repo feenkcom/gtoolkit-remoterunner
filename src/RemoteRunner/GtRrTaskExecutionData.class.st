@@ -95,6 +95,17 @@ GtRrTaskExecutionData >> errorDetails: aGtErrorDetails [
 	errorDetails := aGtErrorDetails
 ]
 
+{ #category : #'gt - extensions' }
+GtRrTaskExecutionData >> gtViewWorkerAttributesFor: aView [
+	<gtView>
+	
+	workerAttributes ifNil: [ ^ aView empty ].
+	^ aView forward 
+		title: 'Worker Attributes';
+		object: [ workerAttributes ];
+		view: #gtItemsFor:
+]
+
 { #category : #accessing }
 GtRrTaskExecutionData >> handoverTime [
 
