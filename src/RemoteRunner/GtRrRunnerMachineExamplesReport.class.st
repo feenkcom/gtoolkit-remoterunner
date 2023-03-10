@@ -5,7 +5,9 @@ Class {
 	#classTraits : 'TGtRrRunnerMachineExamplesReportViews classTrait',
 	#instVars : [
 		'ipAddress',
-		'workersReport'
+		'workersReport',
+		'machineId',
+		'machineType'
 	],
 	#category : #'RemoteRunner-Reports'
 }
@@ -69,6 +71,16 @@ GtRrRunnerMachineExamplesReport >> ipAddress: anIpAddressString [
 	ipAddress := anIpAddressString
 ]
 
+{ #category : #accessing }
+GtRrRunnerMachineExamplesReport >> machineId [
+	^ machineId
+]
+
+{ #category : #accessing }
+GtRrRunnerMachineExamplesReport >> machineId: anObject [
+	machineId := anObject
+]
+
 { #category : #'accessing - resource report' }
 GtRrRunnerMachineExamplesReport >> machineMaximumAvailableMemory [
 	^ self workersReport machineMaximumAvailableMemory
@@ -102,6 +114,16 @@ GtRrRunnerMachineExamplesReport >> machineTotalConsumedMemoryPerWorker [
 { #category : #'accessing - resource report' }
 GtRrRunnerMachineExamplesReport >> machineTotalMemory [
 	^ self workersReport machineTotalMemory
+]
+
+{ #category : #accessing }
+GtRrRunnerMachineExamplesReport >> machineType [
+	^ machineType
+]
+
+{ #category : #accessing }
+GtRrRunnerMachineExamplesReport >> machineType: anObject [
+	machineType := anObject
 ]
 
 { #category : #accessing }
