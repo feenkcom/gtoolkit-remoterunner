@@ -13,9 +13,11 @@ Class {
 GtRrClusterExamplesReport class >> forJob: aJob [
 	| runnerMachineReports |
 	runnerMachineReports := (aJob tasks groupedBy: [ :aTask |
-		aTask workerIpAddress ]) associations collect: [ :assoc |
+		aTask workerMachineId ]) associations collect: [ :assoc |
 			GtRrRunnerMachineExamplesReport new
-				ipAddress: assoc key ;
+				machineId: assoc key ;
+				machineType: assoc value first workerMachineType;
+				ipAddress: assoc value first workerIpAddress;
 				workersReport: (GtRrWorkersExamplesReport 
 					forTasks: assoc value);
 				yourself ].
@@ -78,6 +80,8 @@ GtRrClusterExamplesReport >> gtViewMachineMemoryStatsFor: aView [
 		title: 'Machines Memory';
 		priority: 25;
 		items: [ self machineReports ];
+		column: 'Type' text: [ :aMachineReport |
+			aMachineReport machineType ];
 		column: 'Ip Address' text: [ :aMachineReport |
 			aMachineReport ipAddress ];
 		column: 'Workers Count' text: [ :aMachineReport |
@@ -108,6 +112,10 @@ GtRrClusterExamplesReport >> gtViewMachinesFor: aView [
 		title: 'Machines Stats';
 		priority: 10;
 		items: [ self machineReports ];
+		column: 'Id' text: [ :aMachineReport |
+			aMachineReport machineId ];
+		column: 'Type' text: [ :aMachineReport |
+			aMachineReport machineType ];
 		column: 'Ip Address' text: [ :aMachineReport |
 			aMachineReport ipAddress ];
 		column: 'Workers Count' text: [ :aMachineReport |
@@ -131,6 +139,10 @@ GtRrClusterExamplesReport >> gtViewMachinesFullDetailsFor: aView [
 		title: 'Machines Full Details';
 		priority: 50;
 		items: [ self machineReports ];
+		column: 'Id' text: [ :aMachineReport |
+			aMachineReport machineId ];
+		column: 'Type' text: [ :aMachineReport |
+			aMachineReport machineType ];
 		column: 'Ip Address' text: [ :aMachineReport |
 			aMachineReport ipAddress ] width: 100;
 		column: 'Workers Count' text: [ :aMachineReport |
@@ -164,6 +176,8 @@ GtRrClusterExamplesReport >> gtViewMachinesTimingFor: aView [
 		title: 'Machines Timing';
 		priority: 20;
 		items: [ self machineReports ];
+		column: 'Type' text: [ :aMachineReport |
+			aMachineReport machineType ];
 		column: 'Ip Address' text: [ :aMachineReport |
 			aMachineReport ipAddress ];
 		column: 'Workers Count' text: [ :aMachineReport |

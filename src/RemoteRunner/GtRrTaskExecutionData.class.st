@@ -223,3 +223,15 @@ GtRrTaskExecutionData >> workerIpAddress [
 	^ self workerAttributes ifNotNil: [ :attributes |
 		attributes at: 'workerIpAddress' ifAbsent: [ nil ] ]
 ]
+
+{ #category : #accessing }
+GtRrTaskExecutionData >> workerMachineId [
+	^ self workerAttributes ifNotNil: [ :attributes |
+		attributes at: 'awsInstanceId' ifAbsent: [ nil ] ]
+]
+
+{ #category : #accessing }
+GtRrTaskExecutionData >> workerMachineType [
+	^ self workerAttributes ifNotNil: [ :attributes |
+		attributes at: 'awsInstanceType' ifAbsent: [ nil ] ]
+]

@@ -32,28 +32,32 @@ GtRrWorker class >> commandLine [
 GtRrWorker class >> commandLineCommand [
 
 	^ (ClapCommand id: #remoteRunnerWorker)
-		  description: 'Run the RemoteRunner worker';
-		  add: ClapFlag forHelp;
-		  add: ((ClapFlag id: #log) description: 'Enable logging to stdout');
-		  add: ((ClapFlag id: #serverSocketAddress)
+		description: 'Run the RemoteRunner worker';
+		add: ClapFlag forHelp;
+		add: ((ClapFlag id: #log) description: 'Enable logging to stdout');
+		add: ((ClapFlag id: #serverSocketAddress)
 				   description:
 					   'The server socket address on which to connect for requests';
 				   add: (ClapPositional id: #address);
 				   yourself);
-		  add: ((ClapFlag id: #connectionStrategy)
+		add: ((ClapFlag id: #connectionStrategy)
 				   description:
 					   'The connection strategy, e.g. #perMessage, #single';
 				   add: (ClapPositional id: #strategyId);
 				   yourself);
 		add: ((ClapFlag id: #changesSync) description:
 			'Synchronise the changes with the remote runner on startup');
-		  add: ((ClapFlag id: #attribute)
+		add: ((ClapFlag id: #attribute)
 				   description: 'add key/value pairs to attributes';
 				   multiple: true;
 				   add: (ClapPositional id: #key);
 				   add: (ClapPositional id: #value);
 				   yourself);
-		  yourself
+		add: ((ClapFlag id: #workerClass) 
+				description: 'Specify the class of the worker (GtRrWorker)';
+				add: (ClapPositional id: #workerClassName);
+				yourself);
+		yourself
 ]
 
 { #category : #accessing }
@@ -84,7 +88,7 @@ GtRrWorker class >> newPharoLinkServer: aString [
 
 { #category : #accessing }
 GtRrWorker class >> processCommandLineArgs: args [
-	| worker connectionStrategyId connectionStrategy logger serverSocketAddress announcements |
+	| worker connectionStrategyId connectionStrategy logger serverSocketAddress announcements workerClass |
 
 	args
 		at: #help ifPresent: [ :help | 
@@ -102,7 +106,12 @@ GtRrWorker class >> processCommandLineArgs: args [
 	serverSocketAddress := ((args at: #serverSocketAddress) at:
 			                          #address) value.
 	StringSignal emit: 'Server address: ' , serverSocketAddress.
-	worker := self new.
+	workerClass := self environment at: (args
+		at: #workerClass
+		ifPresent: [ :arg | (arg at: #workerClassName) value asSymbol ]
+		ifAbsent: [ #GtRrWorker ]).
+	StringSignal emit: 'WorkerClass: ' , workerClass name.
+	worker := workerClass new.
 	connectionStrategyId := args
 		at: #connectionStrategy
 		ifPresent: [ :arg | (arg at: #strategyId) value ]

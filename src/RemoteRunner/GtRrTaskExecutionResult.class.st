@@ -305,3 +305,13 @@ GtRrTaskExecutionResult >> workerId [
 GtRrTaskExecutionResult >> workerIpAddress [
 	^ self executionData workerIpAddress
 ]
+
+{ #category : #accessing }
+GtRrTaskExecutionResult >> workerMachineId [
+	^ self executionData workerMachineId
+]
+
+{ #category : #accessing }
+GtRrTaskExecutionResult >> workerMachineType [
+	^ self executionData workerMachineType
+]

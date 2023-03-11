@@ -616,3 +616,13 @@ GtRrTask >> workerId [
 GtRrTask >> workerIpAddress [
 	^ self executionData workerIpAddress
 ]
+
+{ #category : #accessing }
+GtRrTask >> workerMachineId [
+	^ self executionData workerMachineId
+]
+
+{ #category : #accessing }
+GtRrTask >> workerMachineType [
+	^ self executionData workerMachineType
+]
