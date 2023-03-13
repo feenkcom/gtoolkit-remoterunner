@@ -44,8 +44,7 @@ GtRrTasksJob >> erroredExamples [
 
 { #category : #'accessing - reports' }
 GtRrTasksJob >> examplesReport [
-	^ GtRrExamplesReport new
-		job: self 
+	^ GtRrExamplesReport forJob:  self 
 ]
 
 { #category : #accessing }
@@ -108,9 +107,7 @@ GtRrTasksJob >> gtViewTestsActionFor: anAction [
 		tooltip: 'View Test Results';
 		icon: BrGlamorousVectorIcons eg;
 		action: [ :button | 
-			button phlow spawnObject:
-				(GtRrExamplesReport new 
-					job: self) ].
+			button phlow spawnObject: self examplesReport ].
 ]
 
 { #category : #'gt - extensions' }

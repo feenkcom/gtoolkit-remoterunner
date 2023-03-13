@@ -5,11 +5,23 @@ Class {
 	#name : #GtRrExamplesReport,
 	#superclass : #Object,
 	#instVars : [
-		'job',
-		'tasks'
+		'jobName',
+		'tasksOrResults'
 	],
 	#category : #'RemoteRunner-Reports'
 }
+
+{ #category : #'instance creation' }
+GtRrExamplesReport class >> forJob: aTaskExecutionResults [
+	^ self new	  
+		initializeForJob: aTaskExecutionResults
+]
+
+{ #category : #'instance creation' }
+GtRrExamplesReport class >> forTaskExecutionResults: aTaskExecutionResults [
+	^ self new	  
+		initializeForTaskExecutionResults: aTaskExecutionResults
+]
 
 { #category : #accessing }
 GtRrExamplesReport >> allExamples [
@@ -149,42 +161,27 @@ GtRrExamplesReport >> gtView: aView forExamples: examplesCollection title: title
 		items: examplesCollection
 ]
 
-{ #category : #accessing }
-GtRrExamplesReport >> job [
-	<return: #GtRrJob>
-
-	^ job
+{ #category : #initialization }
+GtRrExamplesReport >> initializeForJob: aGtRrJob [
+	jobName := aGtRrJob name. 
+	tasksOrResults := aGtRrJob tasks.
 ]
 
-{ #category : #accessing }
-GtRrExamplesReport >> job: aGtRrJob [
-
-	job := aGtRrJob
+{ #category : #initialization }
+GtRrExamplesReport >> initializeForTaskExecutionResults: aTaskExecutionResults [ 
+	tasksOrResults := aTaskExecutionResults
 ]
 
 { #category : #'accessing - job' }
 GtRrExamplesReport >> name [
 
-	^ job name
+	^ jobName 
 ]
 
 { #category : #'accessing - dynamic' }
 GtRrExamplesReport >> notExecutedExamples [
 
 	^ (self tasks reject: #isFinished) flatCollect: #examples
-]
-
-{ #category : #copying }
-GtRrExamplesReport >> postCopy [
-
-	job := job copy.
-	tasks := nil.
-]
-
-{ #category : #accessing }
-GtRrExamplesReport >> results [
-
-	^ job results
 ]
 
 { #category : #'accessing - dynamic' }
@@ -260,11 +257,5 @@ GtRrExamplesReport >> summaryString [
 { #category : #accessing }
 GtRrExamplesReport >> tasks [
 
-	^ tasks ifNil: [ tasks := job tasks ]
-]
-
-{ #category : #accessing }
-GtRrExamplesReport >> tasks: aCollection [
-
-	tasks := aCollection
+	^ tasksOrResults
 ]
