@@ -12,6 +12,12 @@ Class {
 }
 
 { #category : #'instance creation' }
+GtRrExamplesReport class >> forJob: aTaskExecutionResults [
+	^ self new	  
+		initializeForJob: aTaskExecutionResults
+]
+
+{ #category : #'instance creation' }
 GtRrExamplesReport class >> forTaskExecutionResults: aTaskExecutionResults [
 	^ self new	  
 		initializeForTaskExecutionResults: aTaskExecutionResults
@@ -156,15 +162,14 @@ GtRrExamplesReport >> gtView: aView forExamples: examplesCollection title: title
 ]
 
 { #category : #initialization }
-GtRrExamplesReport >> initializeForTaskExecutionResults: aTaskExecutionResults [ 
-	tasksOrResults := aTaskExecutionResults
-]
-
-{ #category : #accessing }
-GtRrExamplesReport >> job: aGtRrJob [
-
+GtRrExamplesReport >> initializeForJob: aGtRrJob [
 	jobName := aGtRrJob name. 
 	tasksOrResults := aGtRrJob tasks.
+]
+
+{ #category : #initialization }
+GtRrExamplesReport >> initializeForTaskExecutionResults: aTaskExecutionResults [ 
+	tasksOrResults := aTaskExecutionResults
 ]
 
 { #category : #'accessing - job' }
