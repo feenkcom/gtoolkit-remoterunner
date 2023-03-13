@@ -8,7 +8,7 @@ Class {
 
 { #category : #'accessing - grouping' }
 GtRrExampleResultWithTasksGroup >> groupedByMachine [
-	^ self items groupedBy: [ :each | each task workerIpAddress ]
+	^ self items groupedBy: [ :each | each task workerMachineId ]
 ]
 
 { #category : #'accessing - grouping' }
@@ -35,7 +35,7 @@ GtRrExampleResultWithTasksGroup >> gtViewItemsByMachinesFor: aView [
 		priority: 15;
 		items: [ self groupedByMachine associations
 			 sorted: [ :assoc | assoc value size ] descending ];
-		column: 'Machine Ip' text: [ :assoc | assoc key ];
+		column: 'Machine Id' text: [ :assoc | assoc key ];
 		column: 'Examples Count' text: [ :assoc | assoc value size ];
 		send: [ :assoc | assoc value ]
 ]
