@@ -26,39 +26,65 @@ GtRrExamplesReport class >> forTaskExecutionResults: aTaskExecutionResults [
 { #category : #accessing }
 GtRrExamplesReport >> allExamples [
 
-	^ self tasks flatCollect: [ :task |
-			task allExamples ].
+	^ self wrapPlainExamples: (self tasks 
+		flatCollect: [ :task |
+			task allExamples ])
 ]
 
-{ #category : #'accessing - dynamic' }
-GtRrExamplesReport >> erroredExampleResultsWithTask [
+{ #category : #utils }
+GtRrExamplesReport >> collectExecutedExamplesWithOriginFor: aBlock [
 
-	^ self tasks flatCollect: [ :task |
-			task erroredExamples collect: [ :aResult |
+	^ self tasks 
+		flatCollect: [ :aTask |
+			(aBlock cull: aTask) collect: [ :aResult |
 				GtRrExampleResultWithTask new 
 					exampleResult:  aResult;
-					task: task ] ]
+					task: aTask ] ]
 ]
 
 { #category : #'accessing - dynamic' }
 GtRrExamplesReport >> erroredExamples [
 
-	^ self tasks flatCollect: [ :task |
-			task erroredExamples ].
+	^ self wrapPlainExamples: (self tasks flatCollect: [ :aTask |
+		aTask erroredExamples ])
+]
+
+{ #category : #'accessing - dynamic' }
+GtRrExamplesReport >> erroredExampleWithRunOrigin [
+
+	^ GtRrFailingExampleResultWithTasksGroup withAll: (
+		self collectExecutedExamplesWithOriginFor: [ :aTask |
+			aTask erroredExamples ])
 ]
 
 { #category : #'accessing - dynamic' }
 GtRrExamplesReport >> executedExamples [
 
-	^ self tasks flatCollect: [ :task |
-			task executedExamples ].
+	^ self wrapPlainExamples: (self tasks flatCollect: [ :task |
+			task executedExamples ])
+]
+
+{ #category : #'accessing - dynamic' }
+GtRrExamplesReport >> executedExampleWithOrigin [
+
+	^ GtRrExampleResultWithTasksGroup withAll: (
+		self collectExecutedExamplesWithOriginFor: [ :aTask |
+			aTask executedExamples ])
 ]
 
 { #category : #'accessing - dynamic' }
 GtRrExamplesReport >> failedExamples [
 
-	^ self tasks flatCollect: [ :task |
-			task failedExamples ].
+	^ self wrapPlainExamples: (self tasks flatCollect: [ :aTask |
+			aTask failedExamples ])
+]
+
+{ #category : #'accessing - dynamic' }
+GtRrExamplesReport >> failedExamplesWithOrigin [
+
+	^ GtRrFailingExampleResultWithTasksGroup withAll: (
+		self collectExecutedExamplesWithOriginFor: [ :aTask |
+			aTask failedExamples ])
 ]
 
 { #category : #ui }
@@ -146,7 +172,7 @@ GtRrExamplesReport >> gtSummaryFor: aView [
 		  items: [ self summaryAttributes ];
 		  column: #Attribute text: [ :item | item first ];
 		  column: #Value text: [ :item | item second ];
-		  send: [ :item | GtExampleGroup  withAll: item third ]
+		  send: [ :item | item third value ]
 ]
 
 { #category : #ui }
@@ -181,42 +207,103 @@ GtRrExamplesReport >> name [
 { #category : #'accessing - dynamic' }
 GtRrExamplesReport >> notExecutedExamples [
 
-	^ (self tasks reject: #isFinished) flatCollect: #examples
+	^ self wrapPlainExamples: ((self tasks 
+		reject: #isFinished) flatCollect: #examples)
+]
+
+{ #category : #'accessing - counts' }
+GtRrExamplesReport >> numberOfErrors [
+	^ self tasks sumNumbers: [ :task |
+		task numberOfErrors ] 
+]
+
+{ #category : #'accessing - counts' }
+GtRrExamplesReport >> numberOfExecutedChecks [
+	^ self tasks sumNumbers: [ :aTask |
+		aTask numberOfExecutedChecks ] 
+]
+
+{ #category : #'accessing - counts' }
+GtRrExamplesReport >> numberOfFailures [
+	^ self tasks sumNumbers: [ :task |
+		task numberOfFailures ] 
+]
+
+{ #category : #'accessing - counts' }
+GtRrExamplesReport >> numberOfSkips [
+	^ self tasks sumNumbers: [ :task |
+		task numberOfSkips ] 
+]
+
+{ #category : #'accessing - counts' }
+GtRrExamplesReport >> numberOfSuccesses [
+	^ self tasks sumNumbers: [ :task |
+		task numberOfSuccesses ] 
 ]
 
 { #category : #'accessing - dynamic' }
 GtRrExamplesReport >> skippedExamples [
 
-	^ self tasks flatCollect: [ :task |
-			task skippedExamples ].
+	^self wrapPlainExamples:  (self tasks flatCollect: [ :aTask |
+			aTask skippedExamples ])
+]
+
+{ #category : #'accessing - dynamic' }
+GtRrExamplesReport >> skippedExamplesWithOrigin [
+
+	^ GtRrExampleResultWithTasksGroup withAll:( 
+		self collectExecutedExamplesWithOriginFor: [ :aTask |
+			aTask skippedExamples ])
 ]
 
 { #category : #'accessing - dynamic' }
 GtRrExamplesReport >> successfulExamples [
 
-	^ self tasks flatCollect: [ :task |
-			task successfulExamples ].
+	^ self wrapPlainExamples: (self tasks flatCollect: [ :task |
+			task successfulExamples ])
+]
+
+{ #category : #'accessing - dynamic' }
+GtRrExamplesReport >> successfulExamplesWithOrigin [
+
+	^ GtRrExampleResultWithTasksGroup withAll: (
+		self collectExecutedExamplesWithOriginFor: [ :aTask |
+			aTask successfulExamples ])
 ]
 
 { #category : #ui }
 GtRrExamplesReport >> summaryAttributes [
 
 	^ Array streamContents: [ :stream | 
-		| all executed successful failed errored skipped notExecuted |
-		all := self allExamples.
-		executed := self executedExamples.
-		errored := self erroredExamples.
-		failed := self failedExamples.
-		skipped := self skippedExamples.
-		successful := self successfulExamples.
+		| notExecuted |
 		notExecuted := self notExecutedExamples.
+		
 		stream 
-			nextPut: { #All. all size. all. };
-			nextPut: { #Executed. executed size. executed. };
-			nextPut: { #Successful. successful size. successful. };
-			nextPut: { #Failed. failed size. failed. };
-			nextPut: { #Errored. errored size. errored. };
-			nextPut: { #Skipped. skipped size. skipped. };
+			nextPut: { 
+				#All. 
+				self totalCount. 
+				[ self allExamples ] };
+			nextPut: { 
+				#Executed. 
+				self numberOfExecutedChecks. 
+				[ self executedExampleWithOrigin ]. };
+			nextPut: { 
+				#Successful. 
+				self numberOfSuccesses. 
+				[ self successfulExamplesWithOrigin ] };
+			nextPut: { 
+				#Failed. 
+				self numberOfFailures. 
+				[ self failedExamplesWithOrigin ] };
+			nextPut: { 
+				#Errored. 
+				self numberOfErrors. 
+				[ self erroredExampleWithRunOrigin ] };
+			nextPut: { 
+				#Skipped.
+				self numberOfSkips. 
+				[ self skippedExamplesWithOrigin ] };
+				
 			nextPut: { #NotExecuted. notExecuted size. notExecuted. } ]
 ]
 
@@ -258,4 +345,15 @@ GtRrExamplesReport >> summaryString [
 GtRrExamplesReport >> tasks [
 
 	^ tasksOrResults
+]
+
+{ #category : #'accessing - counts' }
+GtRrExamplesReport >> totalCount [
+	^ self tasks sumNumbers: [ :task |
+		task totalCount ] 
+]
+
+{ #category : #utils }
+GtRrExamplesReport >> wrapPlainExamples: aCollection [
+	^ aCollection
 ]

@@ -145,6 +145,13 @@ GtRrAbstractExamplesTask >> numberOfErrors [
 ]
 
 { #category : #'accessing - dynamic' }
+GtRrAbstractExamplesTask >> numberOfExecutedChecks [
+	
+	result ifNil: [ ^ 0 ].
+	^ result size
+]
+
+{ #category : #'accessing - dynamic' }
 GtRrAbstractExamplesTask >> numberOfFailures [
 	^ self count: [ :pharoLinkTestCaseAnnouncement | 
 		pharoLinkTestCaseAnnouncement isFailure ]
