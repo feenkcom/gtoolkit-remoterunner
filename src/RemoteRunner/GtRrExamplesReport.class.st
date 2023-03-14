@@ -208,7 +208,7 @@ GtRrExamplesReport >> name [
 GtRrExamplesReport >> notExecutedExamples [
 
 	^ self wrapPlainExamples: ((self tasks 
-		reject: #isFinished) flatCollect: #examples)
+		reject: #isFinished) flatCollect: #allExamples)
 ]
 
 { #category : #'accessing - counts' }
@@ -279,10 +279,10 @@ GtRrExamplesReport >> summaryAttributes [
 		notExecuted := self notExecutedExamples.
 		
 		stream 
-			nextPut: { 
+			"nextPut: { 
 				#All. 
 				self totalCount. 
-				[ self allExamples ] };
+				[ self allExamples ] };"
 			nextPut: { 
 				#Executed. 
 				self numberOfExecutedChecks. 
@@ -302,9 +302,9 @@ GtRrExamplesReport >> summaryAttributes [
 			nextPut: { 
 				#Skipped.
 				self numberOfSkips. 
-				[ self skippedExamplesWithOrigin ] };
+				[ self skippedExamplesWithOrigin ] }
 				
-			nextPut: { #NotExecuted. notExecuted size. notExecuted. } ]
+			"nextPut: { #NotExecuted. notExecuted size. notExecuted. }" ]
 ]
 
 { #category : #accessing }
