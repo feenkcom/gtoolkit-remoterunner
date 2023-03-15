@@ -57,6 +57,13 @@ GtRrImageSyncEncodedEvents >> gtSessionHistoryFor: aView [
 		items: [ sessionHistory ].
 ]
 
+{ #category : #testing }
+GtRrImageSyncEncodedEvents >> includesReference: anOmReference [
+	"Answer a boolean indicating whether anOmReference is part of the receiver's session history"
+
+	^ sessionHistory includes: anOmReference
+]
+
 { #category : #accessing }
 GtRrImageSyncEncodedEvents >> latestOmReference [
 
