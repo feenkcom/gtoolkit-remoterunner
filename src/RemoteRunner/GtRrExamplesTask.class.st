@@ -125,7 +125,8 @@ GtRrExamplesTask >> run [
 			announcement 
 				initializeExceptionClass: exception class
 				messageText: (exception messageText ifEmpty: [ exception class name ])
-				trace: exception stackString ].
+				trace: exception stackString
+				additionalData: exception pharoLinkAdditionalData ].
 		announcement ] as: Array.
 ]
 

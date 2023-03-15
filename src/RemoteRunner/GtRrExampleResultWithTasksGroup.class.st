@@ -1,19 +1,19 @@
 Class {
 	#name : #GtRrExampleResultWithTasksGroup,
 	#superclass : #Object,
-	#traits : 'TGtGroupItems + TGtGroup',
-	#classTraits : 'TGtGroupItems classTrait + TGtGroup classTrait',
+	#traits : 'TGtGroupWithItems',
+	#classTraits : 'TGtGroupWithItems classTrait',
 	#category : #'RemoteRunner-Reports'
 }
 
 { #category : #'accessing - grouping' }
 GtRrExampleResultWithTasksGroup >> groupedByMachine [
-	^ self items groupedBy: [ :each | each task workerMachineId ]
+	^ self groupedBy: [ :each | each task workerMachineId ]
 ]
 
 { #category : #'accessing - grouping' }
 GtRrExampleResultWithTasksGroup >> groupedByWorker [
-	^ self items groupedBy: [ :each | each task workerId ]
+	^ self groupedBy: [ :each | each task workerId ]
 ]
 
 { #category : #'gt - extensions' }
@@ -36,7 +36,9 @@ GtRrExampleResultWithTasksGroup >> gtViewItemsByMachinesFor: aView [
 		items: [ self groupedByMachine associations
 			 sorted: [ :assoc | assoc value size ] descending ];
 		column: 'Machine Id' text: [ :assoc | assoc key ];
-		column: 'Examples Count' text: [ :assoc | assoc value size ];
+		column: 'Machine Type' text: [ :assoc | 
+			assoc value first workerMachineType ];
+		column: 'Checks Count' text: [ :assoc | assoc value size ];
 		send: [ :assoc | assoc value ]
 ]
 
@@ -50,6 +52,6 @@ GtRrExampleResultWithTasksGroup >> gtViewItemsByWorkerFor: aView [
 		items: [ self groupedByWorker associations
 			 sorted: [ :assoc | assoc value size ] descending ];
 		column: 'Worker Id' text: [ :assoc | assoc key ];
-		column: 'Examples Count' text: [ :assoc | assoc value size ];
+		column: 'Checks Count' text: [ :assoc | assoc value size ];
 		send: [ :assoc | assoc value ]
 ]

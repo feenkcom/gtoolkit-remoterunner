@@ -116,6 +116,7 @@ GtRrWorker class >> processCommandLineArgs: args [
 		at: #connectionStrategy
 		ifPresent: [ :arg | (arg at: #strategyId) value ]
 		ifAbsent: [ ].
+	StringSignal emit: 'ConnectionStrategy: ', (connectionStrategyId ifNil: [ '<none>' ]).
 	connectionStrategyId ifNotNil: [ 
 		connectionStrategy := ({ 
 			(#perMessage -> [ GtRrWorkerConnectionPerMessageStrategy new ]).
@@ -125,12 +126,14 @@ GtRrWorker class >> processCommandLineArgs: args [
 		worker connectionStrategy: connectionStrategy ].
 	worker connectionStrategy socketAddress: serverSocketAddress.
 	args at: #changesSync ifPresent:
-		[ worker attributes at: #changesSync put: true ].
+		[ StringSignal emit: 'changesSync: true'.
+		worker attributes at: #changesSync put: true ].
 	args occurrencesOf: #attribute do: [ :arg | 
+		StringSignal emit: 'key: ', (arg at: #key) value, ', value: ', (arg at: #value) value.
 		worker attributes
 			at: (arg at: #key) value
 			put: (arg at: #value) value ].
-	StringSignal emit: 'Running'.
+	StringSignal emit: 'Starting worker...'.
 	worker start.
 	"Hibernate until the process exits"
 	Semaphore new wait.

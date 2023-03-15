@@ -96,6 +96,18 @@ GtRrTaskExecutionData >> errorDetails: aGtErrorDetails [
 ]
 
 { #category : #'gt - extensions' }
+GtRrTaskExecutionData >> gtViewErrorTraceFor: aView [
+	<gtView>
+	
+	self hasErrors ifFalse: [ ^ aView empty ].
+	
+	^ aView forward 
+		title: 'Error Trace';
+		object: [ self errorDetails ];
+		view: #gtTraceFor:
+]
+
+{ #category : #'gt - extensions' }
 GtRrTaskExecutionData >> gtViewWorkerAttributesFor: aView [
 	<gtView>
 	
