@@ -312,6 +312,8 @@ GtRemoteRunner >> assignTasksToWorkers [
 
 	busyWorkers := OrderedCollection new.
 	"Loop around assigning tasks to workers until there either no more workers or no more tasks available"
+	sharedAccess assertIsOwner.
+	"availableWorkers reverseSelect: #notNil thenDo: [ :workerFuture |"
 	availableWorkers reverseDo: [ :workerFuture |
 		taskContext := self getNextTaskFor: workerFuture.
 		taskContext ifNotNil:
@@ -325,10 +327,12 @@ GtRemoteRunner >> assignTasksToWorkers [
 			busyWorkers add: workerFuture.
 			timeoutManager addContext: taskContext.
 			self announceAndLog: (GtRrTaskStartedAnnouncement task: taskContext) ] ].
+	sharedAccess assertIsOwner.
 	busyWorkers do: [ :each |
 		availableWorkers 
 			remove: each
-			ifAbsent: [ StringSignal emit: 'Unable to mark unavailable: ', each printString ] ].
+			ifAbsent: [ StringSignal emit: 'Unable to mark unavailable: ', each printString.
+				self error: 'Unable to mark unavailable' ] ].
 ]
 
 { #category : #accessing }
@@ -339,7 +343,10 @@ GtRemoteRunner >> availableWorkerCount [
 
 { #category : #'private - accessing' }
 GtRemoteRunner >> availableWorkers [
+	"Answer the availableWorkers.
+	Generally, this shouldn't be used, and subsequent access must be within sharedAccess."
 
+	sharedAccess assertIsOwner.
 	^ availableWorkers 
 ]
 
@@ -593,7 +600,7 @@ GtRemoteRunner >> initialize [
 	currentlyExecutingJobs := Dictionary new.
 	"currentlyExecutingTasks is a dictionary of GtRrTaskContext keyed by task context id"
 	currentlyExecutingTasks := Dictionary new.
-	sharedAccess := Monitor new.
+	sharedAccess := Mutex new.
 	"availableWorkers is a SortedCollection of GtRrFutureWorkerTask, sorted by #workerPriority.
 	The worker is represented by a GtRrWorkerConnection and is waiting on the semaphore held by the GtRrFutureWorkerTask.
 	Sort the collection ascending and remove the last item to minimise the need for repacking the collection."
@@ -680,7 +687,8 @@ GtRemoteRunner >> nextTaskForWorkerId: aUidString [
 		message: 'nextTaskForWorkerId: pre';
 		emit.
 	sharedAccess critical:
-		[ availableWorkers add: taskFuture.
+		[ sharedAccess assertIsOwner.
+		availableWorkers add: taskFuture.
 		self assignTasksToWorkers ].
 	taskFuture wait.
 	GtRrWorkerTraceAnnouncement new
@@ -1162,6 +1170,7 @@ GtRemoteRunner >> unregisterWorkerId: aUidString reason: aString [
 			ifAbsent: 
 				[ StringSignal emit: 'Unable to properly unregister: ', aUidString asString. 
 				nil. ].
+		sharedAccess assertIsOwner.
 		terminatedWorkers := availableWorkers select: [ :workerFuture | 
 			workerFuture connection = workerConnection ].
 		terminatedWorkers	do: [ :workerFuture | workerFuture terminateProcess ].

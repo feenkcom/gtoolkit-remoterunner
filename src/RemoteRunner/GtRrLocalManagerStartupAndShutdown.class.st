@@ -20,12 +20,13 @@ GtRrLocalManagerStartupAndShutdown >> addOrRemoveWorkers [
 	"Add or remove workers in the remote runner to reach the current pool size"
 	 | poolSize currentSize |
 
-	poolSize := self poolSize.
-	currentSize := processes size.
-	currentSize = poolSize ifTrue: [ ^ self ].
-	poolSize > currentSize 
-		ifTrue: [ self addWorkers: poolSize - currentSize ]
-		ifFalse: [ self removeWorkers: currentSize - poolSize ].
+	remoteRunner critical:
+		[ poolSize := self poolSize.
+		currentSize := processes size.
+		currentSize = poolSize ifTrue: [ ^ self ].
+		poolSize > currentSize 
+			ifTrue: [ self addWorkers: poolSize - currentSize ]
+			ifFalse: [ self removeWorkers: currentSize - poolSize ] ].
 ]
 
 { #category : #private }
