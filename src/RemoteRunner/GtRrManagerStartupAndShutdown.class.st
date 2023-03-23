@@ -39,6 +39,8 @@ GtRrManagerStartupAndShutdown >> shutdown [
 	- Stop the PharoLinkWorkerServer
 	Subclasses can perform additional actions"
 
+	inImageWorker ifNotNil:
+		[ inImageWorker stop ].
 	remoteRunner server ifNotNil:
 		[ :server | server stop ].
 ]

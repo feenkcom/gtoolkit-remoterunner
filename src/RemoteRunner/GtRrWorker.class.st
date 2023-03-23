@@ -431,12 +431,12 @@ GtRrWorker >> startHeartbeat [
 	lastHeartbeat := DateAndTime now.
 	expiry := lastHeartbeat + heartbeatDelay.
 	zero := Duration zero.
-	heartbeatProcess := [ [
+	heartbeatProcess := [ [ stopFlag ] whileFalse: [
 		waitDuration := expiry - DateAndTime now.
 		waitDuration > zero ifTrue: [ waitDuration wait ].
 		(DateAndTime now - lastHeartbeat) >= heartbeatDelay ifTrue:
 			[ self sendHeartbeat ].
-		expiry := lastHeartbeat + heartbeatDelay. ] repeat.
+		expiry := lastHeartbeat + heartbeatDelay. ].
 				] forkAt: Processor lowIOPriority named: 'Worker Heartbeat'.
 ]
 
@@ -468,6 +468,7 @@ GtRrWorker >> stop [
 
 	stopFlag := true.
 	self stopHeartbeat.
+	self stopReadProcess.
 	connectionStrategy stop.
 
 ]
@@ -478,6 +479,14 @@ GtRrWorker >> stopHeartbeat [
 
 	heartbeatProcess ifNotNil:
 		[ heartbeatProcess terminate ].
+]
+
+{ #category : #stopping }
+GtRrWorker >> stopReadProcess [
+	"Stop the read process from running"
+
+	readProcess ifNotNil:
+		[ readProcess terminate ].
 ]
 
 { #category : #private }
