@@ -5,9 +5,9 @@ Class {
 }
 
 { #category : #accessing }
-GtRrWorkerConnectionExceptionHandler >> handleExceptionsDuring: aBlock [
+GtRrWorkerConnectionExceptionHandler >> handleExceptionsDuring: aBlock for: msgBroker [
 
-	[ super handleExceptionsDuring: aBlock ]
+	[ super handleExceptionsDuring: aBlock for: msgBroker ]
 		on: ConnectionClosed
 		do: [ :ex |
 			"Announce that we're exiting"
