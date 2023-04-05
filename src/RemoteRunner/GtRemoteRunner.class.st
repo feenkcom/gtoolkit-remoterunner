@@ -621,8 +621,12 @@ GtRemoteRunner >> isIdle [
 
 { #category : #testing }
 GtRemoteRunner >> isRunning [
+	"Answer a boolean indicating whether the receiver is considered to be running, i.e.:
+	There is a server listening for workers, or
+	The port is set to #none and there is at least one worker connected"
 
-	^ server isNotNil and: [ server isRunning ]
+	^ (server isNotNil and: [ server isRunning ]) or:
+		[ port = #none and: [ registeredWorkers isNotEmpty ] ]
 ]
 
 { #category : #accessing }
@@ -938,7 +942,7 @@ GtRemoteRunner >> state [
 	Must be called within sharedAccess"
 	| availableWorkerCount taskQueueCount currentJobCount currentTaskCount registeredWorkerCount |
 
-	(server isNil or: [ server isRunning not ]) ifTrue: [ ^ #stopped ].
+	self isRunning ifFalse: [ ^ #stopped ].
 	sharedAccess size > 0 ifTrue: [ ^ #waitingForSharedAccess ].
 	availableWorkerCount := availableWorkers size.
 	taskQueueCount := taskQueue size.
