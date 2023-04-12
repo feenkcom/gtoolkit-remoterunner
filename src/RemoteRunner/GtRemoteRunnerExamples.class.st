@@ -103,6 +103,20 @@ GtRemoteRunnerExamples >> assignTasksToWorkersWorkerFirst [
 ]
 
 { #category : #examples }
+GtRemoteRunnerExamples >> commandLineRemoteRunnerServer [
+	<gtExample>
+	| commandLine |
+
+	commandLine := GtRemoteRunner commandLineCommand match:
+		{ 'remoteRunnerServer'.
+		'--listenOn'.
+		'7042'. }.
+
+	self assert: (commandLine at: #log) value equals: false.
+	self assert: ((commandLine at: #listenOn) at: #address) value isNotNil.
+]
+
+{ #category : #examples }
 GtRemoteRunnerExamples >> controlChannelPing [
 	"Demonstrate the ping operation using the worker's control channel"
 	<gtExample>
@@ -284,6 +298,41 @@ GtRemoteRunnerExamples >> multipleJobsSimultaneously [
 	] ensure: [ remoteRunner stop ].
 
 	^ job
+]
+
+{ #category : #examples }
+GtRemoteRunnerExamples >> registerObject [
+	"Demonstrate registering a job and getting back the appropriate proxy."
+	<gtExample>
+	<noTest>
+	| runner job proxy proc semaphore result |
+
+	job := GtRrJob script: '42'.
+
+	runner := GtRemoteRunner new port: #none.
+	proxy := runner registerJob: job.
+	self assert: proxy identicalTo: job.
+	semaphore := Semaphore new.
+
+	[ proc := GtRemoteRunner newHeadlessRunnerProcess run.
+	runner := GtRemoteRunner headlessOnPort: 7042 codeSync: false.
+	runner managerStartupAndShutdown startInImageWorker.
+	proxy := runner registerJob: job.
+	proxy announcer
+		when: GtRrTaskCompletedAnnouncement
+		do: [ semaphore signal ].
+	self assert: proxy isLanguageLinkProxyObject
+		description: 'Expected a proxy object back'.
+	runner submitJob: proxy.
+	self waitOn: semaphore for: 10 description:
+		'Task didn''t complete'.
+	result := proxy newCommandFactory
+		<< 'self tasks first result';
+		sendAndWait.
+	self assert: result equals: 42. ]
+			ensure: 
+				[ runner ifNotNil: [ runner stop ].
+				proc ifNotNil: [ proc clearErrorBlock kill ] ].
 ]
 
 { #category : #examples }

@@ -168,6 +168,33 @@ GtRemoteRunner class >> instance [
 	^ self uniqueInstance
 ]
 
+{ #category : #accessing }
+GtRemoteRunner class >> newHeadlessRunnerProcess [
+	"Start a default headless runner on the local machine.
+	It is up to the caller to start the process (i.e. whether to just run, signal, wait, etc.).
+	Mainly used for testing."
+	| proc vm |
+
+	vm := Smalltalk vmDirectory asFileReference / 'GlamorousToolkit-cli'.
+	proc := GtSubprocessWithInMemoryOutput
+		command: vm fullName
+		arguments: {
+			FileLocator image resolve fullName.
+			'clap'.
+			'remoteRunnerServer'.
+			'--listenOn'.
+			'7042'.
+			'--log'.
+			'--detachChangesFromFileSystem'.
+			'--noLepiterReload'.
+			'--noGtImageUpdate'. }.
+	proc
+		addAllEnvVariablesFromParentWithoutOverride;
+		setDefaultErrorBlock;
+		terminateOnShutdown.
+	^ proc.
+]
+
 { #category : #'private - hooks' }
 GtRemoteRunner class >> onRemoveUniqueInstance: anInstance [
 	"Classes may perform some activities on a singleton that is about to be released"
@@ -244,7 +271,7 @@ GtRemoteRunner class >> setUniqueInstance: aGtRemoteRunner [
 	uniqueInstance := aGtRemoteRunner.
 ]
 
-{ #category : #'class initialization' }
+{ #category : #'headless remote runner' }
 GtRemoteRunner class >> startUp: resuming [
 	resuming ifTrue: [ self cleanUp ]
 ]
@@ -800,6 +827,13 @@ GtRemoteRunner >> registerAnnouncementsQueueForHeadlessRunner [
 			GtRrWorkerChangesSyncErrorAnnouncement, GtRrResultProcessingErrorAnnouncement.
 ]
 
+{ #category : #accessing }
+GtRemoteRunner >> registerJob: aGtRrJob [
+	"Answer the proxy for the job when using a headless runner."
+
+	^ aGtRrJob
+]
+
 { #category : #'api - worker' }
 GtRemoteRunner >> registerWorkerWithDetails: aDictionary [
 	"Register the supplied worker and connection details.
@@ -988,6 +1022,16 @@ GtRemoteRunner >> submitJob: aGtRrJob [
 
 	sharedAccess critical: [ self startJob: aGtRrJob ].
 	^ aGtRrJob
+]
+
+{ #category : #'api - jobs' }
+GtRemoteRunner >> submitJobFromProxy: aGtRrJob [
+	"Add the supplied job to the queue.
+	Start execution as soon as possible.
+	Register the announcement queue for the job."
+
+	aGtRrJob registerAnnouncementsQueue.
+	^ self submitJob: aGtRrJob.
 ]
 
 { #category : #'api - jobs' }

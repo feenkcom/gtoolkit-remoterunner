@@ -58,6 +58,12 @@ PlpoGtRemoteRunner >> jobStartupAndShutdown [
 ]
 
 { #category : #accessing }
+PlpoGtRemoteRunner >> managerStartupAndShutdown [
+
+	^ self proxyPerform: #managerStartupAndShutdown.
+]
+
+{ #category : #accessing }
 PlpoGtRemoteRunner >> port [
 
 	^ self proxyPerform: #port.
@@ -76,6 +82,13 @@ PlpoGtRemoteRunner >> registerAnnouncementsQueueForHeadlessRunner [
 	"Start the announcements queue only for announcements for job and workers."
 	
 	^ self proxyPerform: #registerAnnouncementsQueueForHeadlessRunner
+]
+
+{ #category : #accessing }
+PlpoGtRemoteRunner >> registerJob: aGtRrJob [
+	"Answer the proxy for the job when using a headless runner."
+
+	^ application proxyForObject: aGtRrJob
 ]
 
 { #category : #initialize }
@@ -135,9 +148,13 @@ PlpoGtRemoteRunner >> submitJob: aGtRrJob [
 	| jobProxy |
 	"Submit the supplied job to the runner"
 
-	jobProxy := self
+	jobProxy := aGtRrJob isLanguageLinkProxyObject ifTrue:
+		[ self
+			proxyPerform: #submitJobFromProxy:
+			withPrimitiveArguments: { aGtRrJob } ]
+	ifFalse: [ self
 		proxyPerform: #submitSerializedJob:
-		withPrimitiveArguments: { LeJsonV4 uniqueInstance serialize: aGtRrJob }.
+		withPrimitiveArguments: { LeJsonV4 uniqueInstance serialize: aGtRrJob } ].
 		
 	"Start manually here the listening for announcements, in tandem with #submitSerializedJob:, that registers the announcements queue."
 	jobProxy startAnnouncementsListener.
