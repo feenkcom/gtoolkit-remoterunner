@@ -43,12 +43,24 @@ PlpoGtRrJob >> endTime [
 ]
 
 { #category : #testing }
+PlpoGtRrJob >> exceptionHandlingStrategyAllowDebugger [
+
+	^ self proxyPerform: #exceptionHandlingStrategyAllowDebugger
+]
+
+{ #category : #testing }
+PlpoGtRrJob >> hasExceptionHandlingStrategy [
+
+	^ self proxyPerform: #hasExceptionHandlingStrategy
+]
+
+{ #category : #testing }
 PlpoGtRrJob >> isChecksJob [
 
 	^ false
 ]
 
-{ #category : #accessing }
+{ #category : #testing }
 PlpoGtRrJob >> isFinished [
 
 	^ self proxyPerform: #isFinished
@@ -113,6 +125,22 @@ PlpoGtRrJob >> stateDescription [
 PlpoGtRrJob >> taskCount [
 
 	^ taskCount ifNil: [ taskCount := self proxyPerform: #taskCount ].
+]
+
+{ #category : #accessing }
+PlpoGtRrJob >> taskTimeout [
+	
+	^ self proxyPerformSerialized: #taskTimeout
+]
+
+{ #category : #accessing }
+PlpoGtRrJob >> taskTimeoutSeconds: aNumber [
+	
+	self assert: aNumber isNumber
+		description: 'Timeout must be a number'.
+
+	^ self proxyPerform: #taskTimeoutSeconds: 
+		withPrimitiveArguments: { aNumber }.
 ]
 
 { #category : #accessing }

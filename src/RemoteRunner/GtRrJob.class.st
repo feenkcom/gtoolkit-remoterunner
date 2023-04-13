@@ -213,6 +213,12 @@ GtRrJob >> exceptionHandlingStrategy: aGtRrTaskExceptionStrategyOrNil [
 	exceptionHandlingStrategy := aGtRrTaskExceptionStrategyOrNil
 ]
 
+{ #category : #testing }
+GtRrJob >> exceptionHandlingStrategyAllowDebugger [
+
+	^ exceptionHandlingStrategy allowDebugger
+]
+
 { #category : #'accessing - pharolink' }
 GtRrJob >> getSerialized [
 	"Anser the receiver as a local value.
@@ -290,6 +296,12 @@ GtRrJob >> hasErrors [
 	"Answer a boolean indicating whether the receiver has tasks that failed"
 
 	^ errorCount > 0
+]
+
+{ #category : #testing }
+GtRrJob >> hasExceptionHandlingStrategy [
+
+	^ exceptionHandlingStrategy isNotNil
 ]
 
 { #category : #announcer }
@@ -615,6 +627,15 @@ GtRrJob >> taskTimeout [
 GtRrJob >> taskTimeout: aDuration [
 
 	taskTimeout := aDuration
+]
+
+{ #category : #accessing }
+GtRrJob >> taskTimeoutSeconds: aNumber [
+
+	self assert: aNumber isNumber
+		description: 'Timeout must be a number'.
+
+	taskTimeout := aNumber seconds
 ]
 
 { #category : #accessing }
