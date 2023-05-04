@@ -169,7 +169,6 @@ GtRrTasksGroup >> gtViewTimelineV2For: aView [
 						 #stop -> aTask }  ]).
 			BrFrame new
 				matchParent;
-				alignCenter;
 				addChild: markers;
 				yourself  ]
 ]
