@@ -127,7 +127,7 @@ GtRrLocalManagerStartupAndShutdown >> initialize [
 	inMemoryLog := false.
 	workerIndex := 0.
 	autoRestart := true.
-	changesSync := false.
+	changesSync := true.
 	workerCountCalculator := GtRrResourceWorkerCountCalculator new.
 	processes := OrderedCollection new.
 	watchdogSemaphore := Semaphore new.
