@@ -20,6 +20,13 @@ GtRrJobStartupAndShutdown >> remoteRunner: anObject [
 ]
 
 { #category : #'api - shutdown' }
+GtRrJobStartupAndShutdown >> shutdown [ 
+	"Perform any actions associated with stopping the DTS cluster:
+	Subclasses can perform additional actions"
+
+]
+
+{ #category : #'api - shutdown' }
 GtRrJobStartupAndShutdown >> shutdownJob: aJobContext [
 	| job |
 
@@ -27,6 +34,12 @@ GtRrJobStartupAndShutdown >> shutdownJob: aJobContext [
 	job := aJobContext job.
 	job markJobCompleted.
 	remoteRunner announceAndLog: (GtRrJobCompletedAnnouncement job: job).
+]
+
+{ #category : #'api - startup' }
+GtRrJobStartupAndShutdown >> startup [ 
+	"Perform any actions associated with starting the RemoteRunner:
+	Subclasses can perform additional actions"
 ]
 
 { #category : #'api - startup' }

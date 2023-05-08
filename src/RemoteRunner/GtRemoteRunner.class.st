@@ -894,6 +894,21 @@ GtRemoteRunner >> removeSubscription: subscription [
 ]
 
 { #category : #phases }
+GtRemoteRunner >> runJobShutdown [
+	"Perform any actions associated with stopping the job manager"
+
+	self terminateAllJobs.
+	jobStartupAndShutdown shutdown
+]
+
+{ #category : #phases }
+GtRemoteRunner >> runJobStartup [
+	"Perform any actions associated with starting the job manager"
+
+	jobStartupAndShutdown startup
+]
+
+{ #category : #phases }
 GtRemoteRunner >> runManagerShutdown [
 	"Perform any actions associated with stopping the DTS cluster"
 
@@ -928,7 +943,8 @@ GtRemoteRunner >> sharedAccess [
 { #category : #'api - runner' }
 GtRemoteRunner >> start [
 
-	self runManagerStartup
+	self runManagerStartup.
+	self runJobStartup.
 ]
 
 { #category : #'api - logger' }
@@ -993,9 +1009,20 @@ GtRemoteRunner >> state [
 { #category : #'api - runner' }
 GtRemoteRunner >> stop [
 
+	self runJobShutdown.
 	self runManagerShutdown.
 	self stopLogging.
 	self stopAnnouncementNotifier.
+]
+
+{ #category : #'api - runner' }
+GtRemoteRunner >> stopAndQuit [
+	"This is called by the remote runner proxy as part of a two step shut down sequence"
+
+	self runManagerShutdown.
+	self stopLogging.
+	self stopAnnouncementNotifier.
+	SmalltalkImage current snapshot: false andQuit: true.
 ]
 
 { #category : #'api - logger' }
