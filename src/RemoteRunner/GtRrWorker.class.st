@@ -347,7 +347,7 @@ GtRrWorker >> initialize [
 	self connectionStrategy: GtRrWorkerSingleConnectionStrategy new.
 ]
 
-{ #category : #accessing }
+{ #category : #testing }
 GtRrWorker >> isRunning [
 
 	^ connectionStrategy isNotNil and: [ 
