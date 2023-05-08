@@ -11,13 +11,6 @@ PlpoGtRrWorkerExamplesReport class >> remoteClassName [
 	^ #GtRrWorkerExamplesReport
 ]
 
-{ #category : #accessing }
-PlpoGtRrWorkerExamplesReport >> taskWithId: aTaskId [ 
-	^ self 
-		proxyPerform:  #taskWithId: 
-		withPrimitiveArguments: {aTaskId}
-]
-
 { #category : #'accessing - chart data' }
 PlpoGtRrWorkerExamplesReport >> tasksExecutionChartItems [
 	^ self proxyPerformSerialized: #tasksExecutionChartItems
@@ -41,4 +34,11 @@ PlpoGtRrWorkerExamplesReport >> tasksMachineFreeMemoryChartItems [
 { #category : #'accessing - chart data' }
 PlpoGtRrWorkerExamplesReport >> tasksVmMemoryChartItems [
 	^ self proxyPerformSerialized: #tasksVmMemoryChartItems
+]
+
+{ #category : #accessing }
+PlpoGtRrWorkerExamplesReport >> taskWithId: aTaskId [ 
+	^ self 
+		proxyPerform:  #taskWithId: 
+		withPrimitiveArguments: {aTaskId}
 ]

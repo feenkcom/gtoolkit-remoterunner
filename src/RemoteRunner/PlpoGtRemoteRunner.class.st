@@ -121,18 +121,24 @@ PlpoGtRemoteRunner >> state [
 
 { #category : #accessing }
 PlpoGtRemoteRunner >> stop [
-	"We should be telling the remote to shut down, however in some circumstances it is terminating the listen process and shutting down existing connections, but not getting to the point of shutting down the server socket.
-	Also, we should stop the PharoLinkApplication from listening for incoming messages since the connection is about to be closed.
-	For now just shut down the application.
-	TODO"
+	"Stop the remote runner in a mostly orderly fashion"
 
+	StringSignal emit: 'Shut down proxy remote runner'.
+	"Terminate any running jobs and stop the job manager first to allow completion before the connection is closed."
+	[ self newCommandFactory
+		<< 'self runJobShutdown';
+		sendAndWait ]
+			on: Error
+			do: [ :ex | ].
 	self stopAnnouncementNotifier.
-	application stop.
-	"[ self newCommandFactory
-		<< 'self stop';
+	"Tell the runner to stop.  
+	The connection will be closed by the runner as part of this, so don't wait."
+	[ self newCommandFactory
+		<< 'self stopAndQuit';
 		send ]
 			on: Error
-			do: [ :ex | ]"
+			do: [ :ex | ].
+	application stop.
 ]
 
 { #category : #accessing }
@@ -201,5 +207,7 @@ PlpoGtRemoteRunner >> when: anAnnouncementClass send: aSelector to: anObject [
 { #category : #accessing }
 PlpoGtRemoteRunner >> workersStateDescription [
 
-	^ self proxyPerform: #workersStateDescription.
+	^[ self proxyPerform: #workersStateDescription ]
+		on: LanguageLinkServerNotRunningError
+		do: [ :ex | '<not connected>' ].
 ]

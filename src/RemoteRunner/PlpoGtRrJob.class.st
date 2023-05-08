@@ -128,6 +128,15 @@ PlpoGtRrJob >> taskCount [
 ]
 
 { #category : #accessing }
+PlpoGtRrJob >> tasks [
+
+	^ self newCommandFactory 
+		setByValue;
+		<< 'self tasks asArray';
+		sendAndWait.
+]
+
+{ #category : #accessing }
 PlpoGtRrJob >> taskTimeout [
 	
 	^ self proxyPerformSerialized: #taskTimeout
@@ -141,15 +150,6 @@ PlpoGtRrJob >> taskTimeoutSeconds: aNumber [
 
 	^ self proxyPerform: #taskTimeoutSeconds: 
 		withPrimitiveArguments: { aNumber }.
-]
-
-{ #category : #accessing }
-PlpoGtRrJob >> tasks [
-
-	^ self newCommandFactory 
-		setByValue;
-		<< 'self tasks asArray';
-		sendAndWait.
 ]
 
 { #category : #'announcer - subscription' }

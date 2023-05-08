@@ -40,7 +40,8 @@ PlpoGtRrTasksJob >> failedExamples [
 PlpoGtRrTasksJob >> gtViewTestsActionFor: anAction [
 	<gtAction>
 
-	self hasTests ifFalse: [ ^ anAction noAction ].
+	(application isRunning and: [ self hasTests ]) ifFalse: 
+		[ ^ anAction noAction ].
 
 	^ anAction button
 		tooltip: 'View Test Results';

@@ -828,6 +828,27 @@ GtRemoteRunner >> registerAnnouncementsQueueForHeadlessRunner [
 ]
 
 { #category : #accessing }
+GtRemoteRunner >> registeredWorkerCount [
+
+	^ sharedAccess critical: [ registeredWorkers size ]
+]
+
+{ #category : #'private - debugging' }
+GtRemoteRunner >> registeredWorkers [
+	"Answer the registeredWorkers."
+
+	^ sharedAccess critical: [ registeredWorkers copy ].
+]
+
+{ #category : #enumerating }
+GtRemoteRunner >> registeredWorkersDo: aBlock [
+	"Evaluate aBlock for each of the receiver's registered workers.
+	Must be called within sharedAccess."
+
+	registeredWorkers do: aBlock
+]
+
+{ #category : #accessing }
 GtRemoteRunner >> registerJob: aGtRrJob [
 	"Answer the proxy for the job when using a headless runner."
 
@@ -857,27 +878,6 @@ GtRemoteRunner >> registerWorkerWithDetails: aDictionary [
 	^ nil
 ]
 
-{ #category : #accessing }
-GtRemoteRunner >> registeredWorkerCount [
-
-	^ sharedAccess critical: [ registeredWorkers size ]
-]
-
-{ #category : #'private - debugging' }
-GtRemoteRunner >> registeredWorkers [
-	"Answer the registeredWorkers."
-
-	^ sharedAccess critical: [ registeredWorkers copy ].
-]
-
-{ #category : #enumerating }
-GtRemoteRunner >> registeredWorkersDo: aBlock [
-	"Evaluate aBlock for each of the receiver's registered workers.
-	Must be called within sharedAccess."
-
-	registeredWorkers do: aBlock
-]
-
 { #category : #'private - accessing' }
 GtRemoteRunner >> removeCurrentlyExecutingJob: aJobContextId [
 	"Remove the specified job from the collection of currently executing jobs.
@@ -891,6 +891,21 @@ GtRemoteRunner >> removeSubscription: subscription [
 	"Remove the given subscription from the receiver"
 
 	^ self announcer removeSubscription: subscription
+]
+
+{ #category : #phases }
+GtRemoteRunner >> runJobShutdown [
+	"Perform any actions associated with stopping the job manager"
+
+	self terminateAllJobs.
+	jobStartupAndShutdown shutdown
+]
+
+{ #category : #phases }
+GtRemoteRunner >> runJobStartup [
+	"Perform any actions associated with starting the job manager"
+
+	jobStartupAndShutdown startup
 ]
 
 { #category : #phases }
@@ -928,7 +943,8 @@ GtRemoteRunner >> sharedAccess [
 { #category : #'api - runner' }
 GtRemoteRunner >> start [
 
-	self runManagerStartup
+	self runManagerStartup.
+	self runJobStartup.
 ]
 
 { #category : #'api - logger' }
@@ -993,9 +1009,20 @@ GtRemoteRunner >> state [
 { #category : #'api - runner' }
 GtRemoteRunner >> stop [
 
+	self runJobShutdown.
 	self runManagerShutdown.
 	self stopLogging.
 	self stopAnnouncementNotifier.
+]
+
+{ #category : #'api - runner' }
+GtRemoteRunner >> stopAndQuit [
+	"This is called by the remote runner proxy as part of a two step shut down sequence"
+
+	self runManagerShutdown.
+	self stopLogging.
+	self stopAnnouncementNotifier.
+	SmalltalkImage current snapshot: false andQuit: true.
 ]
 
 { #category : #'api - logger' }
@@ -1312,6 +1339,13 @@ GtRemoteRunner >> workerResultProcessingError: errorDetails workerId: workerId t
 ]
 
 { #category : #accessing }
+GtRemoteRunner >> workersStateDescription [
+	^ '{1} registered workers [{2} busy]' format: {
+		registeredWorkers size. 
+		registeredWorkers size - availableWorkers size }
+]
+
+{ #category : #accessing }
 GtRemoteRunner >> workerTimeout [
 
 	^ workerTimeout ifNil: [ workerTimeout := self defaultWorkerTimeout ]
@@ -1321,11 +1355,4 @@ GtRemoteRunner >> workerTimeout [
 GtRemoteRunner >> workerTimeout: anObject [
 
 	workerTimeout := anObject
-]
-
-{ #category : #accessing }
-GtRemoteRunner >> workersStateDescription [
-	^ '{1} registered workers [{2} busy]' format: {
-		registeredWorkers size. 
-		registeredWorkers size - availableWorkers size }
 ]
