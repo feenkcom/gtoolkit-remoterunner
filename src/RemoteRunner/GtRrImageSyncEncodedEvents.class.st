@@ -42,8 +42,7 @@ GtRrImageSyncEncodedEvents >> encodedEvents: anObject [
 GtRrImageSyncEncodedEvents >> events [
 	"Answer the unencoded events."
 
-	^ encodedEvents collect: [ :each |
-		(LanguageLinkUtils base64Decode: each readStream) ].
+	^ STON fromString: encodedEvents.
 ]
 
 { #category : #ui }
