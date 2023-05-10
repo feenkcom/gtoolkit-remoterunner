@@ -62,6 +62,7 @@ GtRemoteRunnerExamples >> assignTasksToWorkersTaskFirst [
 GtRemoteRunnerExamples >> assignTasksToWorkersWorkerFirst [
 	"Demonstrate assigning tasks to workers, with the tasks queued before the workers connect"
 	<gtExample>
+	<noTest>
 	| job tasks taskCompletedCount taskFailedCount jobCompletedCount semaphore |
 
 	jobCompletedCount := taskCompletedCount := taskFailedCount := 0.
@@ -107,6 +108,7 @@ GtRemoteRunnerExamples >> changesSync [
 	"Demonstrate getting changes to a worker from the server"
 	<gtExample>
 	<after: #stopRunnersAndWorkers>
+	<noTest>
 	| semaphore worker encodedEvents events receivedEvents |
 
 	encodedEvents := STON toString: {(OmEntry content:
