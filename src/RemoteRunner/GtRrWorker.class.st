@@ -516,6 +516,7 @@ GtRrWorker >> syncChangesIfRequiredWith: aPharoLinkApplication [
 		worker: self;
 		events: events;
 		emit.
+	^ events
 ]
 
 { #category : #accessing }

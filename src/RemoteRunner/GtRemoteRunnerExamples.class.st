@@ -103,6 +103,34 @@ GtRemoteRunnerExamples >> assignTasksToWorkersWorkerFirst [
 ]
 
 { #category : #examples }
+GtRemoteRunnerExamples >> changesSync [
+	"Demonstrate getting changes to a worker from the server"
+	<gtExample>
+	<after: #stopRunnersAndWorkers>
+	| semaphore worker encodedEvents events receivedEvents |
+
+	encodedEvents := STON toString: {(OmEntry content:
+		(EpExpressionEvaluation expression: '4+3'))}.
+	events := GtRrImageSyncEncodedEvents new
+		sessionHistory: GtRrChangesSync default sessionHistory;
+		latestOmReference: GtRrChangesSync headReference;
+		encodedEvents: encodedEvents.
+	semaphore := GtMutualExclusionSemaphore new.
+	remoteRunner := GtRemoteRunner new.
+	remoteRunner
+		changesSyncEvents: events;
+		start.
+
+	worker := GtRrWorker serverSocketAddress: 'localhost:', remoteRunner port asString.
+	worker start.
+	workers := { worker }.
+	worker attributes at: #changesSync put: true.
+	worker connectionStrategy connectDuring: [ :application |
+		receivedEvents := worker syncChangesIfRequiredWith: application ].
+	self assert: (STON toString: receivedEvents) equals: encodedEvents.
+]
+
+{ #category : #examples }
 GtRemoteRunnerExamples >> commandLineRemoteRunnerServer [
 	<gtExample>
 	| commandLine |

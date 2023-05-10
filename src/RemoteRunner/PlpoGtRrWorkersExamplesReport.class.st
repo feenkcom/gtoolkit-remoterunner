@@ -11,6 +11,13 @@ PlpoGtRrWorkersExamplesReport class >> remoteClassName [
 	^ #GtRrWorkersExamplesReport
 ]
 
+{ #category : #accessing }
+PlpoGtRrWorkersExamplesReport >> workerWithId: aWorkerId [
+	^ self 
+		proxyPerform:  #workerWithId: 
+		withPrimitiveArguments: {aWorkerId} 
+]
+
 { #category : #'accessing - chart data' }
 PlpoGtRrWorkersExamplesReport >> workersExecutionChartItems [
 	^ self proxyPerformSerialized: #workersExecutionChartItems
@@ -30,11 +37,4 @@ PlpoGtRrWorkersExamplesReport >> workersTasksMachineAvailableMemoryChartItems [
 { #category : #'accessing - chart data' }
 PlpoGtRrWorkersExamplesReport >> workersTasksMachineFreeMemoryChartItems [
 	^ self proxyPerformSerialized: #workersTasksMachineFreeMemoryChartItems
-]
-
-{ #category : #accessing }
-PlpoGtRrWorkersExamplesReport >> workerWithId: aWorkerId [
-	^ self 
-		proxyPerform:  #workerWithId: 
-		withPrimitiveArguments: {aWorkerId} 
 ]
