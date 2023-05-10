@@ -126,10 +126,7 @@ GtRrChangesSync >> encodedChangesFrom: anOmReference [
 				withCurrent: true.
 			workerOmReference := anOmReference.
 			latestOmReference := headReference.
-			encodedEvents := entries 
-				collect: [ :entry |
-					LanguageLinkUtils base64Encode: entry content ]
-				as: Array ].
+			encodedEvents := STON toString: entries ].
 		encodedEvents ]
 ]
 
@@ -187,6 +184,12 @@ GtRrChangesSync >> initialize [
 GtRrChangesSync >> onEntryAdded: anAnnouncement [
 
 	self addEntry: anAnnouncement entry.
+]
+
+{ #category : #accessing }
+GtRrChangesSync >> reset [
+
+	encodedEvents := nil.
 ]
 
 { #category : #private }
