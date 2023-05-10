@@ -23,9 +23,8 @@ GtRrChangesSync class >> applyChanges: encodedEvents [
 	"Apply the supplied encodedEvents"
 	| events |
 
-	events  := encodedEvents collect: [ :each |
-		(LanguageLinkUtils base64Decode: each readStream) ].
-	events do: #applyCodeChange.
+	events  := STON fromString: encodedEvents.
+	events do: [ :event | event content applyCodeChange ].
 ]
 
 { #category : #accessing }
