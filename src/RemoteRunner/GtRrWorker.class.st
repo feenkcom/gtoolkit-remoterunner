@@ -510,7 +510,7 @@ GtRrWorker >> syncChangesIfRequiredWith: aPharoLinkApplication [
 		worker: self;
 		emit.
 	events  := STON fromString: encodedEvents.
-	events do: #applyCodeChange.
+	events do: [ :entry | entry content applyCodeChange ].
 	GtRrWorkerChangesSyncedAnnouncement new
 		remoteAddressString: remoteAddressString;
 		worker: self;
