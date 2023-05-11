@@ -108,7 +108,6 @@ GtRemoteRunnerExamples >> changesSync [
 	"Demonstrate getting changes to a worker from the server"
 	<gtExample>
 	<after: #stopRunnersAndWorkers>
-	<noTest>
 	| semaphore worker encodedEvents events receivedEvents |
 
 	encodedEvents := STON toString: {(OmEntry content:
@@ -516,12 +515,12 @@ GtRemoteRunnerExamples >> simpleTestTask [
 { #category : #private }
 GtRemoteRunnerExamples >> stopRunnersAndWorkers [
 
-	remoteRunner ifNotNil:
-		[ remoteRunner stop.
-		remoteRunner := nil ].
 	workers ifNotNil:
 		[ workers do: #stop.
 		workers := nil ].
+	remoteRunner ifNotNil:
+		[ remoteRunner stop.
+		remoteRunner := nil ].
 ]
 
 { #category : #examples }

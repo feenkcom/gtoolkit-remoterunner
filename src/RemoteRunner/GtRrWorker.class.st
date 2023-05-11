@@ -594,6 +594,6 @@ GtRrWorker >> unregisterWith: aPharoLinkApplication [
 	"Register the receiver with the remote runner associated with the supplied PharoLinkApplication"
 
 	^ aPharoLinkApplication newCommandFactory sendAndWait: 
-		'GtAssignedRemoteRunner unregisterWorkerId: ', uid, ' reason: ''Worker stopped'''.
+		'GtAssignedRemoteRunner unregisterWorkerId: ''', uid, ''' reason: ''Worker stopped'''.
 
 ]
