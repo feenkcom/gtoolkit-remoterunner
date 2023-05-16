@@ -8,7 +8,7 @@ TGtRrClusterExamplesReportViews >> gtViewCondensedExecutionTimelineFor:aView [
 	<gtView>
 	
 	^ aView forward
-		title: 'Condensed Execution Timeline';
+		title: 'Condensed execution timeline';
 		priority: 35;
 		object: [ self workersReport];
 		view: #gtViewCondensedExecutionTimelineFor:
@@ -19,7 +19,7 @@ TGtRrClusterExamplesReportViews >> gtViewCondensedTasksTimelineFor:  aView [
 	<gtView>
 	
 	^ aView forward
-		title: 'Condensed Tasks Timeline';
+		title: 'Condensed tasks timeline';
 		priority: 45;
 		object: [ self workersReport];
 		view: #gtViewCondensedTasksTimelineFor: 
@@ -30,7 +30,7 @@ TGtRrClusterExamplesReportViews >> gtViewExecutionTimelineListFor: aView [
 	<gtView>
 	
 	^ aView explicit
-		title: 'Execution Timeline';
+		title: 'Execution timeline';
 		priority: 30;
 		stencil: [ 
 			GtRrExecutionHorizontalChartStencil new 

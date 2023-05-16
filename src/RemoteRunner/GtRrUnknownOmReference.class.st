@@ -33,7 +33,7 @@ GtRrUnknownOmReference >> gtSessionHistoryFor: aView [
 
 	source ifNil: [ ^ aView empty ].
 	^ aView forward
-		title: 'Session History';
+		title: 'Session history';
 		priority: 20;
 		object: [ source ];
 		view: #gtSessionHistoryFor:

@@ -71,7 +71,7 @@ GtRrExampleResultWithTask >> gtViewWorkerAttributesFor: aView [
 	self task ifNil: [ ^ aView empty ].
 	
 	^ aView forward 
-		title: 'Worker Attributes';
+		title: 'Worker attributes';
 		priority: 40;
 		object: [ self task ];
 		view: #gtViewWorkerAttributesFor:

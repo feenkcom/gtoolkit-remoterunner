@@ -51,7 +51,7 @@ GtRrImageSyncEncodedEvents >> gtSessionHistoryFor: aView [
 
 	sessionHistory ifNil: [ ^ aView empty ].
 	^ aView list
-		title: 'Session History';
+		title: 'Session history';
 		priority: 20;
 		items: [ sessionHistory ].
 ]

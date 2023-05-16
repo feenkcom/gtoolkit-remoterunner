@@ -11,6 +11,164 @@ PlpoGtRrWorkerExamplesReport class >> remoteClassName [
 	^ #GtRrWorkerExamplesReport
 ]
 
+{ #category : #'gt - extensions' }
+PlpoGtRrWorkerExamplesReport >> gtViewDurationExecutionChartListFor: aView [
+	<gtView>
+	
+	^ aView explicit
+		title: 'Duration chart';
+		priority: 11;
+		stencil: [
+			GtRrTasksExecutionHorizontalChartStencil new 
+				taskItems: self tasksExecutionChartItems ]
+]
+
+{ #category : #'gt - extensions' }
+PlpoGtRrWorkerExamplesReport >> gtViewDurationSortedChartListFor: aView [
+	<gtView>
+	
+	^ aView explicit
+		title: 'Duration chart (sorted)';
+		priority: 10;
+		stencil: [
+			GtRrTasksExecutionHorizontalChartStencil new 
+				taskItems: (self tasksExecutionChartItems
+					sorted: [ :aTaskItem | aTaskItem duration ] descending) ]
+]
+
+{ #category : #'gt - extensions' }
+PlpoGtRrWorkerExamplesReport >> gtViewExecutionTimelineListFor: aView [
+	<gtView>
+	
+	^ aView explicit
+		title: 'Execution timeline';
+		priority: 25;
+		stencil: [ 
+			GtRrExecutionHorizontalChartStencil new 
+				executions: self tasksExecutionChartItems;
+				selectionTransformation: [ :anItem |
+					self taskWithId:  anItem identifier ] ]
+]
+
+{ #category : #'gt - extensions' }
+PlpoGtRrWorkerExamplesReport >> gtViewExecutionTimelineWithSchedulingFor: aView [
+	<gtView>
+	
+	^ aView explicit
+		title: 'Execution timeline (with scheduling)';
+		priority: 45;
+		stencil: [ 
+			GtRrExecutionHorizontalChartStencil new 
+				withColorBasedOnScheduling;
+				executions: self tasksExecutionChartItemsGroupWithScheduling;
+				selectionTransformation: [ :anItem |
+					self taskWithId:  anItem identifier ] ]
+]
+
+{ #category : #'gt - extensions' }
+PlpoGtRrWorkerExamplesReport >> gtViewMachineAvailableMemoryEvolutionFor:  aView [
+	<gtView>
+	
+	^ aView explicit
+		title: 'Machine available memory';
+		priority: 50;
+		stencil: [ 
+			| data |
+				
+			data := GtPlotterDataGroup new 
+				values:(self tasksMachineAvailableMemoryChartItems
+					sorted: [ :anItem | anItem timestamp ] ascending).
+				
+			GtPlotterLineChart new
+				with: data;
+				valueX: [ :e | e timestamp ];
+				scaleX: GtPlotterTimeScale new;
+				labelFormatX: [ :e | e asTime ];
+				titleX: 'Time';
+				ticksX: 5;
+				valueY: [ :e | e data ];
+				scaleY: GtPlotterLinearScale new;
+				labelFormatY: [ :e | e humanReadableIsqByteSize ];
+				titleY: 'Machine Available Memory';
+				ticksY: 10. ]
+]
+
+{ #category : #'gt - extensions' }
+PlpoGtRrWorkerExamplesReport >> gtViewMachineFreeMemoryEvolutionFor: aView [
+	<gtView>
+	
+	^ aView explicit
+		title: 'Machine free memory';
+		priority: 50;
+		stencil: [ 
+			| data |
+				
+			data := GtPlotterDataGroup new 
+				values:(self tasksMachineFreeMemoryChartItems
+					sorted: [ :anItem | anItem timestamp ] ascending).
+				
+			GtPlotterLineChart new
+				with: data;
+				valueX: [ :e | e timestamp ];
+				scaleX: GtPlotterTimeScale new;
+				labelFormatX: [ :e | e asTime ];
+				titleX: 'Time';
+				ticksX: 5;
+				valueY: [ :e | e data ];
+				scaleY: GtPlotterLinearScale new;
+				labelFormatY: [ :e | e humanReadableIsqByteSize ];
+				titleY: 'Machine Free Memory';
+				ticksY: 10. ]
+]
+
+{ #category : #'gt - extensions' }
+PlpoGtRrWorkerExamplesReport >> gtViewVmMemoryEvolutionFor: aView [
+	<gtView>
+	
+	^ aView explicit
+		title: 'VM memory';
+		priority: 45;
+		stencil: [ 
+			| values vmMemory freeMemory data |
+				
+			values := self tasksVmMemoryChartItems.
+			vmMemory := GtPlotterDataGroup new 
+				values: OrderedCollection new.
+			freeMemory := GtPlotterDataGroup new 
+				values: OrderedCollection new.
+				
+			values do: [ :aSignal |
+				vmMemory values 
+					add: (GtRrTimestampedChartDataItem new 
+						timestamp: aSignal timestamp;
+						data: aSignal data first).
+				freeMemory  values 
+					add: (GtRrTimestampedChartDataItem new 
+						timestamp: aSignal timestamp;
+						data: aSignal data second) ].
+			data := GtPlotterDataLogicalGroups new 
+				entities: {
+					GtPlotterDataGroupWithColor new
+						color: Color blue;
+						entity: vmMemory.
+					GtPlotterDataGroupWithColor new
+						color: Color green muchDarker;
+						entity: freeMemory }.
+				
+			GtPlotterLineChart new
+				with: data;
+				valueX: [ :e | e timestamp ];
+				scaleX: GtPlotterTimeScale new;
+				labelFormatX: [ :e | e asTime ];
+				titleX: 'Time';
+				ticksX: 5;
+				valueY: [ :e | e data ];
+				scaleY: GtPlotterLinearScale new;
+				labelFormatY: [ :e | e humanReadableIsqByteSize ];
+				titleY: 'VM Memory';
+				ticksY: 10. ]
+]
+
 { #category : #accessing }
 PlpoGtRrWorkerExamplesReport >> taskWithId: aTaskId [ 
 	^ self 

@@ -102,7 +102,7 @@ GtRrTaskExecutionData >> gtViewErrorTraceFor: aView [
 	self hasErrors ifFalse: [ ^ aView empty ].
 	
 	^ aView forward 
-		title: 'Error Trace';
+		title: 'Error trace';
 		object: [ self errorDetails ];
 		view: #gtTraceFor:
 ]
@@ -113,7 +113,7 @@ GtRrTaskExecutionData >> gtViewWorkerAttributesFor: aView [
 	
 	workerAttributes ifNil: [ ^ aView empty ].
 	^ aView forward 
-		title: 'Worker Attributes';
+		title: 'Worker attributes';
 		object: [ workerAttributes ];
 		view: #gtItemsFor:
 ]

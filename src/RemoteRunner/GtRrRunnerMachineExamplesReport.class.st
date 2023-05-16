@@ -33,11 +33,77 @@ GtRrRunnerMachineExamplesReport >> fullGcTime [
 ]
 
 { #category : #'gt - extensions' }
+GtRrRunnerMachineExamplesReport >> gtViewCondensedExecutionTimelineFor:aView [
+	<gtView>
+	
+	^ aView forward
+		title: 'Condensed execution timeline';
+		priority: 35;
+		object: [ self workersReport];
+		view: #gtViewCondensedExecutionTimelineFor:
+]
+
+{ #category : #'gt - extensions' }
+GtRrRunnerMachineExamplesReport >> gtViewCondensedTasksTimelineFor:  aView [
+	<gtView>
+	
+	^ aView forward
+		title: 'Condensed tasks timeline';
+		priority: 45;
+		object: [ self workersReport];
+		view: #gtViewCondensedTasksTimelineFor: 
+]
+
+{ #category : #'gt - extensions' }
+GtRrRunnerMachineExamplesReport >> gtViewExecutionTimelineListFor: aView [
+	<gtView>
+	
+	^ aView forward
+		title: 'Execution timeline';
+		priority: 25;
+		object: [ self workersReport];
+		view: #gtViewExecutionTimelineListFor: 
+]
+
+{ #category : #'gt - extensions' }
+GtRrRunnerMachineExamplesReport >> gtViewMachineAvailableMemoryEvolutionFor:  aView [
+	<gtView>
+	
+	^ aView forward
+		title: 'Machine available memory';
+		priority: 55;
+		object: [ self workersReport];
+		view: #gtViewMachineAvailableMemoryEvolutionFor: 
+]
+
+{ #category : #'gt - extensions' }
+GtRrRunnerMachineExamplesReport >> gtViewMachineFreeMemoryEvolutionFor:  aView [
+	<gtView>
+	
+	^ aView forward
+		title: 'Machine free memory';
+		priority: 55;
+		object: [ self workersReport];
+		view: #gtViewMachineFreeMemoryEvolutionFor: 
+]
+
+{ #category : #'gt - extensions' }
+GtRrRunnerMachineExamplesReport >> gtViewTasksExecutionTimelineListFor: aView [
+	<gtView>
+	
+	^ aView forward
+		title: 'Tasks timeline';
+		priority: 25;
+		object: [ self workersReport];
+		view: #gtViewTasksExecutionTimelineListFor:
+]
+
+{ #category : #'gt - extensions' }
 GtRrRunnerMachineExamplesReport >> gtViewWorkersFor: aView [
 	<gtView>
 	
 	^ aView forward 
-		title: 'Workers Stats';
+		title: 'Workers stats';
 		priority: 10;
 		object: [ self workersReport ];
 		view: #gtViewWorkersFor:
@@ -48,7 +114,7 @@ GtRrRunnerMachineExamplesReport >> gtViewWorkersTimingFor: aView [
 	<gtView>
 	
 	^ aView forward 
-		title: 'Workers Timing';
+		title: 'Workers timing';
 		priority: 20;
 		object: [ self workersReport ];
 		view: #gtViewWorkersTimingFor:

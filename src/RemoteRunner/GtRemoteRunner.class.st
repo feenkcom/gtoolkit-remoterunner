@@ -519,7 +519,7 @@ GtRemoteRunner >> gtExecutingJobsFor: aView [
 
 	<gtView>
 	^ aView list
-		  title: 'Executing Jobs';
+		  title: 'Executing jobs';
 		  priority: 20;
 		  items: [ sharedAccess critical: [ currentlyExecutingJobs values ] ];
 		  send: [ :item | item ];
@@ -532,7 +532,7 @@ GtRemoteRunner >> gtExecutingTasksFor: aView [
 
 	<gtView>
 	^ aView list
-		  title: 'Executing Tasks';
+		  title: 'Executing tasks';
 		  priority: 20;
 		  items: [ 
 			  sharedAccess critical: [ currentlyExecutingTasks values ] ];
@@ -571,7 +571,7 @@ GtRemoteRunner >> gtTaskQueueFor: aView [
 	<gtView>
 
 	^ aView columnedList
-		  title: 'Task Queue';
+		  title: 'Task queue';
 		  priority: 50;
 		  items: [ taskQueue itemArray ];
 		  column: 'Job' text: [ :item | item jobContext id ];
@@ -585,7 +585,7 @@ GtRemoteRunner >> gtWorkersFor: aView [
 	<gtView>
 
 	^ aView columnedList
-		  title: 'Registered Workers';
+		  title: 'Registered workers';
 		  priority: 50;
 		  items: [ registeredWorkers values ];
 		  column: 'IP Address' text: [ :item | GtRemoteRunner printIpAddress: item remoteAddress ];

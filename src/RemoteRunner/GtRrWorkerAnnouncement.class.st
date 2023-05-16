@@ -30,7 +30,7 @@ GtRrWorkerAnnouncement >> gtViewWorkerAttributesFor: aView [
 	self workerAttributes ifNil: [ ^ aView empty ].
 	
 	^ aView forward 
-		title: 'Worker Attributes';
+		title: 'Worker attributes';
 		object: [ self workerAttributes ];
 		view: #gtItemsFor:
 ]

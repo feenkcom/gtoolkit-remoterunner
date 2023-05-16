@@ -73,11 +73,47 @@ GtRrClusterExamplesReport >> fullGcTime [
 ]
 
 { #category : #'gt - extensions' }
+GtRrClusterExamplesReport >> gtViewCondensedExecutionTimelineFor:aView [
+	<gtView>
+	
+	^ aView forward
+		title: 'Condensed execution timeline';
+		priority: 35;
+		object: [ self workersReport];
+		view: #gtViewCondensedExecutionTimelineFor:
+]
+
+{ #category : #'gt - extensions' }
+GtRrClusterExamplesReport >> gtViewCondensedTasksTimelineFor:  aView [
+	<gtView>
+	
+	^ aView forward
+		title: 'Condensed tasks timeline';
+		priority: 45;
+		object: [ self workersReport];
+		view: #gtViewCondensedTasksTimelineFor: 
+]
+
+{ #category : #'gt - extensions' }
+GtRrClusterExamplesReport >> gtViewExecutionTimelineListFor: aView [
+	<gtView>
+	
+	^ aView explicit
+		title: 'Execution timeline';
+		priority: 30;
+		stencil: [ 
+			GtRrExecutionHorizontalChartStencil new 
+				executions: self machinesExecutionChartItems;
+				selectionTransformation: [ :anItem |
+					self machineWithIpAddress:  anItem identifier ] ]
+]
+
+{ #category : #'gt - extensions' }
 GtRrClusterExamplesReport >> gtViewMachineMemoryStatsFor: aView [
 	<gtView>
 	
 	^ aView columnedList 
-		title: 'Machines Memory';
+		title: 'Machines memory';
 		priority: 25;
 		items: [ self machineReports ];
 		column: 'Type' text: [ :aMachineReport |
@@ -109,7 +145,7 @@ GtRrClusterExamplesReport >> gtViewMachinesFor: aView [
 	<gtView>
 	
 	^ aView columnedList 
-		title: 'Machines Stats';
+		title: 'Machines stats';
 		priority: 10;
 		items: [ self machineReports ];
 		column: 'Id' text: [ :aMachineReport |
@@ -136,7 +172,7 @@ GtRrClusterExamplesReport >> gtViewMachinesFullDetailsFor: aView [
 	<gtView>
 	
 	^ aView columnedList 
-		title: 'Machines Full Details';
+		title: 'Machines full details';
 		priority: 50;
 		items: [ self machineReports ];
 		column: 'Id' text: [ :aMachineReport |
@@ -173,7 +209,7 @@ GtRrClusterExamplesReport >> gtViewMachinesTimingFor: aView [
 	<gtView>
 	
 	^ aView columnedList 
-		title: 'Machines Timing';
+		title: 'Machines timing';
 		priority: 20;
 		items: [ self machineReports ];
 		column: 'Type' text: [ :aMachineReport |
@@ -211,7 +247,7 @@ GtRrClusterExamplesReport >> gtViewWorkersStatusFor: aView [
 	<gtView>
 	
 	^ aView forward 
-		title: 'Workers Stats';
+		title: 'Workers stats';
 		priority: 65;
 		object: [ self workersReport ];
 		view: #gtViewWorkersFor:

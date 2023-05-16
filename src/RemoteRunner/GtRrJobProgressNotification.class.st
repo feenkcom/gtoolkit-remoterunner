@@ -96,7 +96,7 @@ GtRrJobProgressNotification >> gtViewNotificationStatesFor: aView [
 	<gtView>
 	
 	^ aView columnedList
-		title: 'Notification States';
+		title: 'Notification states';
 		items: [ self constructStates];
 		column: 'Color' icon: [ :aState | 
 			GtPharoTestCaseUtility newColoredIcon: aState color ];
@@ -109,7 +109,7 @@ GtRrJobProgressNotification >> gtViewTaskResultsFor: aView [
 	<gtView>
 	
 	^ aView list
-		title: 'Task Results';
+		title: 'Task results';
 		items: [ self taskResults]
 ]
 
