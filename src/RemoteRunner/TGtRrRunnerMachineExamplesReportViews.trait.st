@@ -8,7 +8,7 @@ TGtRrRunnerMachineExamplesReportViews >> gtViewCondensedExecutionTimelineFor:aVi
 	<gtView>
 	
 	^ aView forward
-		title: 'Condensed Execution Timeline';
+		title: 'Condensed execution timeline';
 		priority: 35;
 		object: [ self workersReport];
 		view: #gtViewCondensedExecutionTimelineFor:
@@ -19,7 +19,7 @@ TGtRrRunnerMachineExamplesReportViews >> gtViewCondensedTasksTimelineFor:  aView
 	<gtView>
 	
 	^ aView forward
-		title: 'Condensed Tasks Timeline';
+		title: 'Condensed tasks timeline';
 		priority: 45;
 		object: [ self workersReport];
 		view: #gtViewCondensedTasksTimelineFor: 
@@ -30,7 +30,7 @@ TGtRrRunnerMachineExamplesReportViews >> gtViewExecutionTimelineListFor: aView [
 	<gtView>
 	
 	^ aView forward
-		title: 'Execution Timeline';
+		title: 'Execution timeline';
 		priority: 25;
 		object: [ self workersReport];
 		view: #gtViewExecutionTimelineListFor: 
@@ -41,7 +41,7 @@ TGtRrRunnerMachineExamplesReportViews >> gtViewMachineAvailableMemoryEvolutionFo
 	<gtView>
 	
 	^ aView forward
-		title: 'Machine Available Memory';
+		title: 'Machine available memory';
 		priority: 55;
 		object: [ self workersReport];
 		view: #gtViewMachineAvailableMemoryEvolutionFor: 
@@ -52,7 +52,7 @@ TGtRrRunnerMachineExamplesReportViews >> gtViewMachineFreeMemoryEvolutionFor:  a
 	<gtView>
 	
 	^ aView forward
-		title: 'Machine Free Memory';
+		title: 'Machine free memory';
 		priority: 55;
 		object: [ self workersReport];
 		view: #gtViewMachineFreeMemoryEvolutionFor: 
@@ -63,7 +63,7 @@ TGtRrRunnerMachineExamplesReportViews >> gtViewTasksExecutionTimelineListFor: aV
 	<gtView>
 	
 	^ aView forward
-		title: 'Tasks Timeline';
+		title: 'Tasks timeline';
 		priority: 25;
 		object: [ self workersReport];
 		view: #gtViewTasksExecutionTimelineListFor:

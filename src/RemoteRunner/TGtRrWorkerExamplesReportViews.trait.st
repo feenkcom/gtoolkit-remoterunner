@@ -8,7 +8,7 @@ TGtRrWorkerExamplesReportViews >> gtViewDurationExecutionChartListFor: aView [
 	<gtView>
 	
 	^ aView explicit
-		title: 'Duration Chart';
+		title: 'Duration chart';
 		priority: 11;
 		stencil: [
 			GtRrTasksExecutionHorizontalChartStencil new 
@@ -20,7 +20,7 @@ TGtRrWorkerExamplesReportViews >> gtViewDurationSortedChartListFor: aView [
 	<gtView>
 	
 	^ aView explicit
-		title: 'Duration Chart (sorted)';
+		title: 'Duration chart (sorted)';
 		priority: 10;
 		stencil: [
 			GtRrTasksExecutionHorizontalChartStencil new 
@@ -33,7 +33,7 @@ TGtRrWorkerExamplesReportViews >> gtViewExecutionTimelineListFor: aView [
 	<gtView>
 	
 	^ aView explicit
-		title: 'Execution Timeline';
+		title: 'Execution timeline';
 		priority: 25;
 		stencil: [ 
 			GtRrExecutionHorizontalChartStencil new 
@@ -47,7 +47,7 @@ TGtRrWorkerExamplesReportViews >> gtViewExecutionTimelineWithSchedulingFor: aVie
 	<gtView>
 	
 	^ aView explicit
-		title: 'Execution Timeline (with scheduling)';
+		title: 'Execution timeline (with scheduling)';
 		priority: 45;
 		stencil: [ 
 			GtRrExecutionHorizontalChartStencil new 
@@ -62,7 +62,7 @@ TGtRrWorkerExamplesReportViews >> gtViewMachineAvailableMemoryEvolutionFor:  aVi
 	<gtView>
 	
 	^ aView explicit
-		title: 'Machine Available Memory';
+		title: 'Machine available memory';
 		priority: 50;
 		stencil: [ 
 			| data |
@@ -90,7 +90,7 @@ TGtRrWorkerExamplesReportViews >> gtViewMachineFreeMemoryEvolutionFor: aView [
 	<gtView>
 	
 	^ aView explicit
-		title: 'Machine Free Memory';
+		title: 'Machine free memory';
 		priority: 50;
 		stencil: [ 
 			| data |
@@ -118,7 +118,7 @@ TGtRrWorkerExamplesReportViews >> gtViewVmMemoryEvolutionFor: aView [
 	<gtView>
 	
 	^ aView explicit
-		title: 'VM Memory';
+		title: 'VM memory';
 		priority: 45;
 		stencil: [ 
 			| values vmMemory freeMemory data |

@@ -86,7 +86,7 @@ GtRrTaskExecutionResult >> gtViewChecksListFor: aView [
 	<gtView>
 	
 	^ aView columnedList 
-		title: 'Test Results';
+		title: 'Test results';
 		items: [ self taskResult];
 		column: 'Test' text: [ :aResult |
 			String streamContents: [ :aStream |

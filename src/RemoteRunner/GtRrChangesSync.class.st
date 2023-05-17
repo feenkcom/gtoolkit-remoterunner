@@ -158,7 +158,7 @@ GtRrChangesSync >> gtSessionHistoryFor: aView [
 	<gtView>
 
 	^ aView list
-		title: 'Session History';
+		title: 'Session history';
 		priority: 10;
 		items: [ sessionHistory reversed ];
 		actionUpdateButton

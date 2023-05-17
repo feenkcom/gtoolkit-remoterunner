@@ -60,7 +60,7 @@ GtAnnouncementNotifier >> gtUserNotificationsFor: aView [
 	<gtView>
 
 	^ aView columnedList
-		title: 'User Notifications';
+		title: 'User notifications';
 		priority: 10;
 		items: [ announcements reversed ];
 		column: 'Time' text: [ :item | item timestamp ];

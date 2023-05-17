@@ -191,7 +191,7 @@ GtRrTask >> gtWorkerAttributesFor: aView [
 
 	self workerAttributes ifNil: [ ^ aView empty ].
 	^ aView columnedList
-		  title: 'Worker Attributes';
+		  title: 'Worker attributes';
 		  priority: 40;
 		  items: [ self workerAttributes associations sorted: [ :a :b | a key < b key ] ];
 		  column: #Attribute text: [ :item | item key ];

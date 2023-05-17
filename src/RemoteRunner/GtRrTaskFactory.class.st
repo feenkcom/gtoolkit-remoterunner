@@ -28,7 +28,7 @@ GtRrTaskFactory >> gtViewTasksByWorkerFor: aView [
 	<gtView>
 	
 	^ aView columnedList
-		title: 'Executed Tasks (by Worker)';
+		title: 'Executed tasks (by worker)';
 		priority: 20; 
 		items: [ 
 			self startedTasksGroupedByWorker associations  ];

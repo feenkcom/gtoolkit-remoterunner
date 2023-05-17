@@ -31,7 +31,7 @@ GtRrExampleResultWithTasksGroup >> gtViewItemsByMachinesFor: aView [
 	<gtView>
 
 	^ aView columnedList 
-		title: 'By Machine';
+		title: 'By machine';
 		priority: 15;
 		items: [ self groupedByMachine associations
 			 sorted: [ :assoc | assoc value size ] descending ];
@@ -47,7 +47,7 @@ GtRrExampleResultWithTasksGroup >> gtViewItemsByWorkerFor: aView [
 	<gtView>
 
 	^ aView columnedList 
-		title: 'By Worker';
+		title: 'By worker';
 		priority: 20;
 		items: [ self groupedByWorker associations
 			 sorted: [ :assoc | assoc value size ] descending ];
