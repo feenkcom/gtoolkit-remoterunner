@@ -379,6 +379,7 @@ GtRrWorker >> nextTask [
 		[ result := resultQueue nextOrNil ] whileNotNil:
 			[ result sendThroughApplication: application ].
 
+		GtRrWorkerWaitForTaskAnnouncement new emit.
 		promise := application newCommandFactory send:
 			'GtAssignedRemoteRunner nextTaskSerializedForWorkerId: ''', uid, ''''.
 		serializedTask := promise waitForValue.
@@ -404,7 +405,8 @@ GtRrWorker >> sendHeartbeat [
 	self connectDuring: [ :application |
 		lastHeartbeat := DateAndTime now.
 		application newCommandFactory send:
-			'GtAssignedRemoteRunner heartbeatForWorkerId: ''', uid, '''' ].
+			'GtAssignedRemoteRunner heartbeatForWorkerId: ''', uid, ''''.
+				GtRrWorkerHeartbeatSentAnnouncement new emit ].
 ]
 
 { #category : #private }
@@ -449,7 +451,6 @@ GtRrWorker >> stepService [
 	- queue the result (success or failure)"
 	| taskContext |
 
-	GtRrWorkerWaitForTaskAnnouncement new emit.
 	taskContext := self nextTask.
 	GtRrWorkerTaskStartingAnnouncement new
 		task: taskContext;
