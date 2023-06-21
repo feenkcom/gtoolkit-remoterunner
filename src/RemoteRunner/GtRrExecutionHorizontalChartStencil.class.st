@@ -326,7 +326,7 @@ GtRrExecutionHorizontalChartStencil >> startTimeComputation: anObject [
 { #category : #accessing }
 GtRrExecutionHorizontalChartStencil >> styleBar: anElement execution: anObject [ 
 	^ anElement
-		geometry: BlStadium new;
+		geometry: BlStadiumGeometry new;
 		background: ((colorComputation cull: anObject) ifNil: [
 			self defaultBarColor ]) 
 ]
