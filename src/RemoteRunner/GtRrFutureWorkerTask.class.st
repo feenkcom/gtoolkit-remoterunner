@@ -99,6 +99,16 @@ GtRrFutureWorkerTask >> workerAttributes [
 	^ connection details
 ]
 
+{ #category : #testing }
+GtRrFutureWorkerTask >> workerJobIdMatches: aTaskContext [
+	"Answer a boolean indicating whether the "
+	
+	^ connection attributes
+		at: #workerJobId
+		ifPresent: [ :wJobId | wJobId = aTaskContext jobId ]
+		ifAbsent: [ true ]
+]
+
 { #category : #accessing }
 GtRrFutureWorkerTask >> workerPriority [
 

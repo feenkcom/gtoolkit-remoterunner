@@ -509,8 +509,9 @@ GtRemoteRunner >> getNextTaskFor: aWorkerFuture [
 	| attributes |
 
 	attributes := aWorkerFuture connection details.
-	^ taskQueue nextOrNilSuchThat: [ :task | 
-		task constraint matches: attributes ].
+	^ taskQueue nextOrNilSuchThat: [ :taskContext | 
+		(aWorkerFuture workerJobIdMatches: taskContext) and:
+			[ taskContext constraint matches: attributes ] ].
 
 ]
 
@@ -843,8 +844,7 @@ GtRemoteRunner >> registerWorkerWithDetails: aDictionary [
 	pharoLinkServerConnection := PharoLinkServerCurrentConnection value.
 	pharoLinkServerConnection setCloseOnExec: true.
 
-	"If the worker specifies that it is for a particular job only accept the connection if that job is currently running.
-	Note that the task allocation isn't yet taking the worker job id in to account."
+	"If the worker specifies that it is for a particular job only accept the connection if that job is currently running"
 	aDictionary at: #workerJobId ifPresent: [ :workerJobId |
 		(currentlyExecutingJobs keys includes: workerJobId) ifFalse:
 			[ pharoLinkServerConnection close.

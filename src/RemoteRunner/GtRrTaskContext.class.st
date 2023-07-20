@@ -158,6 +158,12 @@ GtRrTaskContext >> jobContext: anObject [
 ]
 
 { #category : #accessing }
+GtRrTaskContext >> jobId [
+
+	^ jobContext jobId
+]
+
+{ #category : #accessing }
 GtRrTaskContext >> jobTimeout [
 
 	^ jobContext jobTimeout
