@@ -842,6 +842,14 @@ GtRemoteRunner >> registerWorkerWithDetails: aDictionary [
 
 	pharoLinkServerConnection := PharoLinkServerCurrentConnection value.
 	pharoLinkServerConnection setCloseOnExec: true.
+
+	"If the worker specifies that it is for a particular job only accept the connection if that job is currently running.
+	Note that the task allocation isn't yet taking the worker job id in to account."
+	aDictionary at: #workerJobId ifPresent: [ :workerJobId |
+		(currentlyExecutingJobs keys includes: workerJobId) ifFalse:
+			[ pharoLinkServerConnection close.
+			^ self ] ].
+
 	workerConnection := GtRrWorkerConnection 
 		connection: pharoLinkServerConnection
 		runner: self.
