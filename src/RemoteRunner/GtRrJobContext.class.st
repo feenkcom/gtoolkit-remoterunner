@@ -201,6 +201,12 @@ GtRrJobContext >> jobContext [
 ]
 
 { #category : #accessing }
+GtRrJobContext >> jobId [
+
+	^ job id
+]
+
+{ #category : #accessing }
 GtRrJobContext >> jobTimeout [
 	"Answer the job timeout.
 	nil = no timeout"
