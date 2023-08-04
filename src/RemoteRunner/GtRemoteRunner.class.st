@@ -829,27 +829,6 @@ GtRemoteRunner >> registerAnnouncementsQueueForHeadlessRunner [
 ]
 
 { #category : #accessing }
-GtRemoteRunner >> registeredWorkerCount [
-
-	^ sharedAccess critical: [ registeredWorkers size ]
-]
-
-{ #category : #'private - debugging' }
-GtRemoteRunner >> registeredWorkers [
-	"Answer the registeredWorkers."
-
-	^ sharedAccess critical: [ registeredWorkers copy ].
-]
-
-{ #category : #enumerating }
-GtRemoteRunner >> registeredWorkersDo: aBlock [
-	"Evaluate aBlock for each of the receiver's registered workers.
-	Must be called within sharedAccess."
-
-	registeredWorkers do: aBlock
-]
-
-{ #category : #accessing }
 GtRemoteRunner >> registerJob: aGtRrJob [
 	"Answer the proxy for the job when using a headless runner."
 
@@ -884,6 +863,27 @@ GtRemoteRunner >> registerWorkerWithDetails: aDictionary [
 			worker: workerConnection).
 	"Answer a PharoLink primitive so that a proxy isn't created for the runner (which is a global, anyway)"
 	^ nil
+]
+
+{ #category : #accessing }
+GtRemoteRunner >> registeredWorkerCount [
+
+	^ sharedAccess critical: [ registeredWorkers size ]
+]
+
+{ #category : #'private - debugging' }
+GtRemoteRunner >> registeredWorkers [
+	"Answer the registeredWorkers."
+
+	^ sharedAccess critical: [ registeredWorkers copy ].
+]
+
+{ #category : #enumerating }
+GtRemoteRunner >> registeredWorkersDo: aBlock [
+	"Evaluate aBlock for each of the receiver's registered workers.
+	Must be called within sharedAccess."
+
+	registeredWorkers do: aBlock
 ]
 
 { #category : #'private - accessing' }
@@ -1347,13 +1347,6 @@ GtRemoteRunner >> workerResultProcessingError: errorDetails workerId: workerId t
 ]
 
 { #category : #accessing }
-GtRemoteRunner >> workersStateDescription [
-	^ '{1} registered workers [{2} busy]' format: {
-		registeredWorkers size. 
-		registeredWorkers size - availableWorkers size }
-]
-
-{ #category : #accessing }
 GtRemoteRunner >> workerTimeout [
 
 	^ workerTimeout ifNil: [ workerTimeout := self defaultWorkerTimeout ]
@@ -1363,4 +1356,11 @@ GtRemoteRunner >> workerTimeout [
 GtRemoteRunner >> workerTimeout: anObject [
 
 	workerTimeout := anObject
+]
+
+{ #category : #accessing }
+GtRemoteRunner >> workersStateDescription [
+	^ '{1} registered workers [{2} busy]' format: {
+		registeredWorkers size. 
+		registeredWorkers size - availableWorkers size }
 ]
