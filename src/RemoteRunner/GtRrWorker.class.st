@@ -31,7 +31,7 @@ GtRrWorker class >> commandLine [
 { #category : #accessing }
 GtRrWorker class >> commandLineCommand [
 
-	^ (ClapCommand id: #remoteRunnerWorker)
+	^ (ClapCommand id: self commandLineName)
 		description: 'Run the RemoteRunner worker';
 		add: ClapFlag forHelp;
 		add: ((ClapFlag id: #log) description: 'Enable logging to stdout');
@@ -61,10 +61,23 @@ GtRrWorker class >> commandLineCommand [
 ]
 
 { #category : #accessing }
+GtRrWorker class >> commandLineName [
+
+	^ #remoteRunnerWorker
+]
+
+{ #category : #accessing }
 GtRrWorker class >> heartbeatDelay [
 	"Answer the Duration between heartbeats"
 
 	^ 20 seconds
+]
+
+{ #category : #testing }
+GtRrWorker class >> isCommandLineWorker [
+	"Answer a boolean indicating whether a GtRrWorker was started from the command line"
+
+	^ Smalltalk commandLine argumentsInclude: self commandLineName
 ]
 
 { #category : #private }
