@@ -847,7 +847,7 @@ GtRemoteRunner >> registerWorkerWithDetails: aDictionary [
 	"If the worker specifies that it is for a particular job only accept the connection if that job is currently running"
 	aDictionary at: #workerJobId ifPresent: [ :workerJobId |
 		(currentlyExecutingJobs keys includes: workerJobId) ifFalse:
-			[ pharoLinkServerConnection close.
+			[ pharoLinkServerConnection stop.
 			^ self ] ].
 
 	workerConnection := GtRrWorkerConnection 
