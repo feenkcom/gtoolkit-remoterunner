@@ -70,7 +70,8 @@ Class {
 		'log',
 		'taskQueue',
 		'changesSyncEvents',
-		'announcementNotifier'
+		'announcementNotifier',
+		'logEmitter'
 	],
 	#classInstVars : [
 		'uniqueInstance'
@@ -437,8 +438,9 @@ GtRemoteRunner >> checkJobCompleted: aGtRrContext [
 	jobContext := aGtRrContext jobContext.
 	jobContext isFinished ifFalse: [ ^ self ].
 
+	self logEmitter emitJobShutdownStartFor:  jobContext.
 	jobStartupAndShutdown shutdownJob: jobContext.
-
+	self logEmitter emitJobShutdownEndFor:  jobContext.
 ]
 
 { #category : #'private - debugging' }
@@ -635,6 +637,7 @@ GtRemoteRunner >> initialize [
 	availableWorkers := SortedCollection sortUsing: #workerPriority ascending.
 	registeredWorkers := Dictionary new.
 	timeoutManager := GtRrTimeoutManager remoteRunner: self.
+	logEmitter := GtRemoteRunnerBeaconsEmitter new.
 	
 	self 
 		managerStartupAndShutdown: GtRrCodeSyncedLocalManagerStartupAndShutdown new;
@@ -683,6 +686,11 @@ GtRemoteRunner >> log [
 	"Answer the in-memory log"
 
 	^ log
+]
+
+{ #category : #private }
+GtRemoteRunner >> logEmitter [
+	^ logEmitter
 ]
 
 { #category : #'private - accessing' }
@@ -829,43 +837,6 @@ GtRemoteRunner >> registerAnnouncementsQueueForHeadlessRunner [
 ]
 
 { #category : #accessing }
-GtRemoteRunner >> registerJob: aGtRrJob [
-	"Answer the proxy for the job when using a headless runner."
-
-	^ aGtRrJob
-]
-
-{ #category : #'api - worker' }
-GtRemoteRunner >> registerWorkerWithDetails: aDictionary [
-	"Register the supplied worker and connection details.
-	Register the connection for disconnection notification"
-	| pharoLinkServerConnection workerConnection workerId |
-
-	pharoLinkServerConnection := PharoLinkServerCurrentConnection value.
-	pharoLinkServerConnection setCloseOnExec: true.
-
-	"If the worker specifies that it is for a particular job only accept the connection if that job is currently running"
-	aDictionary at: #workerJobId ifPresent: [ :workerJobId |
-		(currentlyExecutingJobs keys includes: workerJobId) ifFalse:
-			[ pharoLinkServerConnection stop.
-			^ self ] ].
-
-	workerConnection := GtRrWorkerConnection 
-		connection: pharoLinkServerConnection
-		runner: self.
-	workerConnection details: aDictionary.
-	workerId := aDictionary at: #id.
-	aDictionary at: #workerIpAddress put: workerConnection remoteAddressString.
-	sharedAccess critical:
-		[ registeredWorkers at: workerId put: workerConnection ].
-	managerStartupAndShutdown registerWorker: workerConnection.
-	self announceAndLog: (GtRrWorkerRegisteredAnnouncement new
-			worker: workerConnection).
-	"Answer a PharoLink primitive so that a proxy isn't created for the runner (which is a global, anyway)"
-	^ nil
-]
-
-{ #category : #accessing }
 GtRemoteRunner >> registeredWorkerCount [
 
 	^ sharedAccess critical: [ registeredWorkers size ]
@@ -884,6 +855,50 @@ GtRemoteRunner >> registeredWorkersDo: aBlock [
 	Must be called within sharedAccess."
 
 	registeredWorkers do: aBlock
+]
+
+{ #category : #accessing }
+GtRemoteRunner >> registerJob: aGtRrJob [
+	"Answer the proxy for the job when using a headless runner."
+
+	^ aGtRrJob
+]
+
+{ #category : #'api - worker' }
+GtRemoteRunner >> registerWorkerWithDetails: aDictionary [
+	"Register the supplied worker and connection details.
+	Register the connection for disconnection notification"
+	| pharoLinkServerConnection workerConnection workerId |
+
+	pharoLinkServerConnection := PharoLinkServerCurrentConnection value.
+	pharoLinkServerConnection setCloseOnExec: true.
+
+	"If the worker specifies that it is for a particular job only accept the connection if that job is currently running"
+	aDictionary at: #workerJobId ifPresent: [ :workerJobId |
+		(currentlyExecutingJobs keys includes: workerJobId) ifFalse:[ 
+		
+			GtRrWorkerRegistrationRefusedAnnouncement new
+				remoteAddressString: pharoLinkServerConnection remoteAddressString;
+				workerAttributes: aDictionary;
+				currentlyExecutingJobIds: currentlyExecutingJobs keys;
+				emit.
+					
+			pharoLinkServerConnection stop.
+			^ self ] ].
+
+	workerConnection := GtRrWorkerConnection 
+		connection: pharoLinkServerConnection
+		runner: self.
+	workerConnection details: aDictionary.
+	workerId := aDictionary at: #id.
+	aDictionary at: #workerIpAddress put: workerConnection remoteAddressString.
+	sharedAccess critical:
+		[ registeredWorkers at: workerId put: workerConnection ].
+	managerStartupAndShutdown registerWorker: workerConnection.
+	self announceAndLog: (GtRrWorkerRegisteredAnnouncement new
+			worker: workerConnection).
+	"Answer a PharoLink primitive so that a proxy isn't created for the runner (which is a global, anyway)"
+	^ nil
 ]
 
 { #category : #'private - accessing' }
@@ -978,12 +993,15 @@ GtRemoteRunner >> startJob: aGtRrJob [
 	currentlyExecutingJobs
 		at: aGtRrJob id
 		put: context.
+		
+	self logEmitter emitJobStartupStartFor: context.
 	jobStartupAndShutdown startupJob: context.
+	self logEmitter emitJobStartupEndFor: context.
+	
 	self announceAndLog: (GtRrJobStartedAnnouncement job: aGtRrJob).
 	self assignTasksToWorkers.
 	"If there are problems during submission the job will be marked with an error and the context should show isFinished."
 	self checkJobCompleted: context.
-
 ]
 
 { #category : #'api - logger' }
@@ -1347,6 +1365,13 @@ GtRemoteRunner >> workerResultProcessingError: errorDetails workerId: workerId t
 ]
 
 { #category : #accessing }
+GtRemoteRunner >> workersStateDescription [
+	^ '{1} registered workers [{2} busy]' format: {
+		registeredWorkers size. 
+		registeredWorkers size - availableWorkers size }
+]
+
+{ #category : #accessing }
 GtRemoteRunner >> workerTimeout [
 
 	^ workerTimeout ifNil: [ workerTimeout := self defaultWorkerTimeout ]
@@ -1356,11 +1381,4 @@ GtRemoteRunner >> workerTimeout [
 GtRemoteRunner >> workerTimeout: anObject [
 
 	workerTimeout := anObject
-]
-
-{ #category : #accessing }
-GtRemoteRunner >> workersStateDescription [
-	^ '{1} registered workers [{2} busy]' format: {
-		registeredWorkers size. 
-		registeredWorkers size - availableWorkers size }
 ]
