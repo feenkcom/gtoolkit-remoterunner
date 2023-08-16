@@ -1269,12 +1269,12 @@ GtRemoteRunner >> unregisterWorkerId: aUidString reason: aString [
 		[ workerConnection := registeredWorkers 
 			removeKey: aUidString 
 			ifAbsent: 
-				[ StringSignal emit: 'Unable to properly unregister: ', aUidString asString. 
+				[ StringSignal emit: 'Unable to properly unregister worker ', aUidString asString, ' due to reason ', aString asString. 
 				nil. ].
 		sharedAccess assertIsOwner.
 		terminatedWorkers := availableWorkers select: [ :workerFuture | 
 			workerFuture connection = workerConnection ].
-		terminatedWorkers	do: [ :workerFuture | workerFuture terminateProcess ].
+		terminatedWorkers do: [ :workerFuture | workerFuture terminateProcess ].
 		availableWorkers removeAll: terminatedWorkers.
 		failedTasks := currentlyExecutingTasks select: [ :each |
 			each connection = workerConnection ].
@@ -1285,8 +1285,8 @@ GtRemoteRunner >> unregisterWorkerId: aUidString reason: aString [
 			self 
 				privateTaskFailed: taskContext taskContextId 
 				executionData: (GtRrWorkerExecutionData new errorDetails: errorDetails) ]. ].
-	workerConnection ifNotNil:
-		[ self announceAndLog: (GtRrWorkerUnregisteredAnnouncement new
+	workerConnection ifNotNil: [ 
+		self announceAndLog: (GtRrWorkerUnregisteredAnnouncement new
 			worker: workerConnection;
 			reason: aString) ].
 ]
