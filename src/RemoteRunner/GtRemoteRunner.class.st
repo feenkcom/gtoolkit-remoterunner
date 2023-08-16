@@ -70,7 +70,8 @@ Class {
 		'log',
 		'taskQueue',
 		'changesSyncEvents',
-		'announcementNotifier'
+		'announcementNotifier',
+		'logEmitter'
 	],
 	#classInstVars : [
 		'uniqueInstance'
@@ -437,8 +438,9 @@ GtRemoteRunner >> checkJobCompleted: aGtRrContext [
 	jobContext := aGtRrContext jobContext.
 	jobContext isFinished ifFalse: [ ^ self ].
 
+	self logEmitter emitJobShutdownStartFor:  jobContext.
 	jobStartupAndShutdown shutdownJob: jobContext.
-
+	self logEmitter emitJobShutdownEndFor:  jobContext.
 ]
 
 { #category : #'private - debugging' }
@@ -635,6 +637,7 @@ GtRemoteRunner >> initialize [
 	availableWorkers := SortedCollection sortUsing: #workerPriority ascending.
 	registeredWorkers := Dictionary new.
 	timeoutManager := GtRrTimeoutManager remoteRunner: self.
+	logEmitter := GtRemoteRunnerBeaconsEmitter new.
 	
 	self 
 		managerStartupAndShutdown: GtRrCodeSyncedLocalManagerStartupAndShutdown new;
@@ -683,6 +686,11 @@ GtRemoteRunner >> log [
 	"Answer the in-memory log"
 
 	^ log
+]
+
+{ #category : #private }
+GtRemoteRunner >> logEmitter [
+	^ logEmitter
 ]
 
 { #category : #'private - accessing' }
@@ -846,8 +854,15 @@ GtRemoteRunner >> registerWorkerWithDetails: aDictionary [
 
 	"If the worker specifies that it is for a particular job only accept the connection if that job is currently running"
 	aDictionary at: #workerJobId ifPresent: [ :workerJobId |
-		(currentlyExecutingJobs keys includes: workerJobId) ifFalse:
-			[ pharoLinkServerConnection stop.
+		(currentlyExecutingJobs keys includes: workerJobId) ifFalse:[ 
+		
+			GtRrWorkerRegistrationRefusedAnnouncement new
+				remoteAddressString: pharoLinkServerConnection remoteAddressString;
+				workerAttributes: aDictionary;
+				currentlyExecutingJobIds: currentlyExecutingJobs keys;
+				emit.
+					
+			pharoLinkServerConnection stop.
 			^ self ] ].
 
 	workerConnection := GtRrWorkerConnection 
@@ -978,12 +993,15 @@ GtRemoteRunner >> startJob: aGtRrJob [
 	currentlyExecutingJobs
 		at: aGtRrJob id
 		put: context.
+		
+	self logEmitter emitJobStartupStartFor: context.
 	jobStartupAndShutdown startupJob: context.
+	self logEmitter emitJobStartupEndFor: context.
+	
 	self announceAndLog: (GtRrJobStartedAnnouncement job: aGtRrJob).
 	self assignTasksToWorkers.
 	"If there are problems during submission the job will be marked with an error and the context should show isFinished."
 	self checkJobCompleted: context.
-
 ]
 
 { #category : #'api - logger' }
