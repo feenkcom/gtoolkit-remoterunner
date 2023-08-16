@@ -18,3 +18,8 @@ GtRrWorkerUnregisteredAnnouncement >> reason: anObject [
 
 	reason := anObject
 ]
+
+{ #category : #accessing }
+GtRrWorkerUnregisteredAnnouncement >> workerDetailsForLog [
+	^ {self reason asString}
+]

@@ -44,15 +44,29 @@ GtRrWorkerAnnouncement >> initializeFromSlotData: aDictionary [
 ]
 
 { #category : #printing }
-GtRrWorkerAnnouncement >> printOneLineContentsOn: stream [
+GtRrWorkerAnnouncement >> printOneLineContentsOn: aStream [
 
 	(self worker isNil and: [
 		self remoteAddressString isNil ]) ifTrue: [ ^ self ].
 		
-	stream 
-		<< self remoteAddressString;
-		space;
-		<< self workingDirectory
+	aStream 
+		nextPut: $|; space;
+		nextPutAll: 'WorkerSignal';
+		space; nextPut: $|; space;
+		nextPutAll: self workerId;
+		space; nextPut: $|; space;
+		nextPutAll: self remoteAddressString;
+		space; nextPut: $|; space;
+		nextPutAll: self workingDirectory;
+		space; nextPut: $|; space.
+	
+	self workerDetailsForLog do: [ :aValue |
+		aStream 
+			nextPutAll: (aValue ifNil: [ '' ]);
+			space; nextPut: $|; space ]. 
+
+	aStream
+		nextPutAll: self processId
 ]
 
 { #category : #accessing }
@@ -88,6 +102,18 @@ GtRrWorkerAnnouncement >> workerAttributes [
 { #category : #accessing }
 GtRrWorkerAnnouncement >> workerAttributes: aDictionary [ 
 	workerAttributes := aDictionary
+]
+
+{ #category : #printing }
+GtRrWorkerAnnouncement >> workerDetailsForLog [
+	^ #()
+]
+
+{ #category : #accessing }
+GtRrWorkerAnnouncement >> workerId [
+	^ self workerAttributes
+		at: #id 
+		ifAbsent: [ '<unknown directory>' ]
 ]
 
 { #category : #accessing }
