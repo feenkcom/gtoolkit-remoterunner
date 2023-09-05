@@ -175,25 +175,24 @@ GtRemoteRunner class >> newHeadlessRunnerProcess [
 	It is up to the caller to start the process (i.e. whether to just run, signal, wait, etc.).
 	Mainly used for testing."
 	| proc vm |
-
 	vm := Smalltalk vmDirectory asFileReference / 'GlamorousToolkit-cli'.
-	proc := GtSubprocessWithInMemoryOutput
-		command: vm fullName
-		arguments: {
-			FileLocator image resolve fullName.
-			'clap'.
-			'remoteRunnerServer'.
-			'--listenOn'.
-			'7042'.
-			'--log'.
-			'--detachChangesFromFileSystem'.
-			'--noLepiterReload'.
-			'--noGtImageUpdate'. }.
+	proc := GtSubprocessWithInMemoryOutput command: vm fullName
+				arguments: 
+					{'--no-error-handling'.
+					FileLocator image resolve fullName.
+					'clap'.
+					'remoteRunnerServer'.
+					'--listenOn'.
+					'7042'.
+					'--log'.
+					'--detachChangesFromFileSystem'.
+					'--noLepiterReload'.
+					'--noGtImageUpdate'}.
 	proc
 		addAllEnvVariablesFromParentWithoutOverride;
 		setDefaultErrorBlock;
 		terminateOnShutdown.
-	^ proc.
+	^proc
 ]
 
 { #category : #'private - hooks' }

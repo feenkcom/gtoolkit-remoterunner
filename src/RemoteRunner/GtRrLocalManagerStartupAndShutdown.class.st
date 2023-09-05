@@ -182,29 +182,29 @@ GtRrLocalManagerStartupAndShutdown >> newWorkerLocalProcess [
 
 { #category : #'instance creation' }
 GtRrLocalManagerStartupAndShutdown >> newWorkerLocalProcessArgumentsFor: someSettings [
-
 	| args |
 	args := OrderedCollection new.
 	args
+		add: '--no-error-handling';
 		add: someSettings serverImage fullName;
 		add: 'clap';
 		add: 'remoteRunnerWorker'.
-	remoteRunner debugMode ifTrue: [ args add: '--log' ].
+	remoteRunner debugMode ifTrue: [args add: '--log'].
 	args
 		add: '--serverSocketAddress';
 		add: remoteRunner port asString.
-	connectionStrategyId ifNotNil:
-		[ args
-			add: '--connectionStrategy';
-			add: connectionStrategyId asString ].
-	changesSync ifTrue:
-		[ args add: '--changesSync' ].
+	connectionStrategyId
+		ifNotNil: 
+			[args
+				add: '--connectionStrategy';
+				add: connectionStrategyId asString].
+	changesSync ifTrue: [args add: '--changesSync'].
 	args
 		add: '--detachChangesFromFileSystem';
 		add: '--epiceaMemoryStore';
 		add: '--noLepiterReload';
 		add: '--noGtImageUpdate'.
-	^ args
+	^args
 ]
 
 { #category : #accessing }
