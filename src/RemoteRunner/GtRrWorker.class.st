@@ -524,7 +524,7 @@ GtRrWorker >> syncChangesIfRequiredWith: aPharoLinkApplication [
 		worker: self;
 		emit.
 	events  := STON fromString: encodedEvents.
-	events do: [ :entry | entry content applyCodeChange ].
+	events do: [ :entry | entry content accept: GtExportedEventApplyVisitor new ].
 	GtRrWorkerChangesSyncedAnnouncement new
 		remoteAddressString: remoteAddressString;
 		worker: self;

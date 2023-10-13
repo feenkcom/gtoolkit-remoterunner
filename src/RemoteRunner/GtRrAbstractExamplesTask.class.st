@@ -126,16 +126,16 @@ GtRrAbstractExamplesTask >> isExamplesTask [
 ]
 
 { #category : #testing }
-GtRrAbstractExamplesTask >> isSuccessResult: aPharoLinkTestCaseResult [
-	^ aPharoLinkTestCaseResult isSuccess "or: [ 
-		aPharoLinkTestCaseResult isSkipped ]"
-]
-
-{ #category : #testing }
 GtRrAbstractExamplesTask >> isSUnitTask [
 	"Answer a boolean indicating whether the receiver is for running SUnit tests"
 
 	^ false
+]
+
+{ #category : #testing }
+GtRrAbstractExamplesTask >> isSuccessResult: aPharoLinkTestCaseResult [
+	^ aPharoLinkTestCaseResult isSuccess "or: [ 
+		aPharoLinkTestCaseResult isSkipped ]"
 ]
 
 { #category : #'accessing - dynamic' }
