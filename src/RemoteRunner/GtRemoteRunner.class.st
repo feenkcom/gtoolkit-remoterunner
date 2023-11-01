@@ -707,6 +707,8 @@ GtRemoteRunner >> managerStartupAndShutdown [
 
 { #category : #accessing }
 GtRemoteRunner >> managerStartupAndShutdown: aGtRrManagerStartupAndShutdown [
+	"Set the receiver's manager.
+	See also the comment in {{gtMethod:GtRemoteRunner>>#port:}}"
 
 	managerStartupAndShutdown := aGtRrManagerStartupAndShutdown.
 	managerStartupAndShutdown remoteRunner: self.
@@ -780,11 +782,16 @@ GtRemoteRunner >> port [
 GtRemoteRunner >> port: aPortNumberOrSymbol [
 	"Set the port number.
 	0 = find a free port.
-	#none = don't listen on the port (in-image workers only)."
+	#none = don't listen on the port (in-image workers only).
+		This should be set prior to changing the manager."
 
 	port := aPortNumberOrSymbol isSymbol 
 		ifTrue: [ aPortNumberOrSymbol ]
 		ifFalse: [ aPortNumberOrSymbol asNumber ].
+
+	"If there is no listening port, ensure that the manager startup and shutdown is manual"
+	port == #none ifTrue:
+		[ self managerStartupAndShutdown: GtRrManualManagerStartupAndShutdown new ].
 ]
 
 { #category : #printing }
