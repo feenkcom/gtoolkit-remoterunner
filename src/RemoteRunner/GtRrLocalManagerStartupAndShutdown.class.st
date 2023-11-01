@@ -182,8 +182,12 @@ GtRrLocalManagerStartupAndShutdown >> newWorkerLocalProcess [
 
 { #category : #'instance creation' }
 GtRrLocalManagerStartupAndShutdown >> newWorkerLocalProcessArgumentsFor: someSettings [
-
 	| args |
+
+	(remoteRunner port isNil or:
+		[ remoteRunner port = #none ]) 
+			ifTrue: [ self error: 'Attempt to start worker without server port' ].
+
 	args := OrderedCollection new.
 	args
 		add: someSettings serverImage fullName;

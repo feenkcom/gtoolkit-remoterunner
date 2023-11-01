@@ -844,9 +844,6 @@ GtRemoteRunnerExamples >> timeoutTaskInImage [
 	remoteRunner := GtRemoteRunner new 
 		startLogging;
 		port: #none.
-	remoteRunner managerStartupAndShutdown 
-		autoRestart: false;
-		poolSize: 0.
 	self assert: remoteRunner workerTimeout > 1 minute.
 	"Worker processes can be slow to start up if the machine is busy or the image is large (multi GB).
 	Wait for the worker to register before proceeding with tests."
