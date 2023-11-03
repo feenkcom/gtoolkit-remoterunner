@@ -1,19 +1,10 @@
 Class {
 	#name : #GtRrTasksGroup,
 	#superclass : #Object,
-	#traits : 'TGtGroup',
-	#classTraits : 'TGtGroup classTrait',
-	#instVars : [
-		'items'
-	],
+	#traits : 'TGtGroupWithItems',
+	#classTraits : 'TGtGroupWithItems classTrait',
 	#category : #'RemoteRunner-Tasks'
 }
-
-{ #category : #'instance creation' }
-GtRrTasksGroup class >> withAll: aCollection [
-	^ self new
-		initializeWith: aCollection
-]
 
 { #category : #accessing }
 GtRrTasksGroup >> duration [
@@ -203,12 +194,6 @@ GtRrTasksGroup >> incrGcTime [
 ]
 
 { #category : #initialization }
-GtRrTasksGroup >> initialize [
-	super initialize.
-	items := OrderedCollection new
-]
-
-{ #category : #initialization }
 GtRrTasksGroup >> initializeWith: aCollection [
 	items := aCollection
 ]
@@ -216,11 +201,6 @@ GtRrTasksGroup >> initializeWith: aCollection [
 { #category : #enumerating }
 GtRrTasksGroup >> inject: thisValue into: binaryBlock [ 
 	^ self items inject: thisValue into: binaryBlock 
-]
-
-{ #category : #accessing }
-GtRrTasksGroup >> items [
-	^ items
 ]
 
 { #category : #accessing }
@@ -269,24 +249,6 @@ GtRrTasksGroup >> maxValue: aBlock [
 { #category : #accessing }
 GtRrTasksGroup >> pairsDo: aBlock [
 	^ self items  pairsDo: aBlock
-]
-
-{ #category : #accessing }
-GtRrTasksGroup >> reject: aBlock [
-	^ self class 
-		withAll: (self items reject: aBlock)
-]
-
-{ #category : #accessing }
-GtRrTasksGroup >> select: aBlock [
-	^ self class 
-		withAll: (self items select: aBlock)
-]
-
-{ #category : #accessing }
-GtRrTasksGroup >> sorted: aBlock [
-	^ self class 
-		withAll: (self items sorted: aBlock)
 ]
 
 { #category : #accessing }

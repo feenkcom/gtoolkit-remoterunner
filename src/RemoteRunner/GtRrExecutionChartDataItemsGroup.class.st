@@ -1,8 +1,8 @@
 Class {
 	#name : #GtRrExecutionChartDataItemsGroup,
 	#superclass : #Object,
-	#traits : 'TGtGroup + TGtGroupItems',
-	#classTraits : 'TGtGroup classTrait + TGtGroupItems classTrait',
+	#traits : 'TGtGroupWithItems',
+	#classTraits : 'TGtGroupWithItems classTrait',
 	#instVars : [
 		'identifier',
 		'label'
