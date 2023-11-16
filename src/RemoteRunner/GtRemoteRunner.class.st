@@ -855,36 +855,36 @@ GtRemoteRunner >> registerWorkerWithDetails: aDictionary [
 	"Register the supplied worker and connection details.
 	Register the connection for disconnection notification"
 	| pharoLinkServerConnection workerConnection workerId |
-
 	pharoLinkServerConnection := PharoLinkServerCurrentConnection value.
 	pharoLinkServerConnection setCloseOnExec: true.
 
 	"If the worker specifies that it is for a particular job only accept the connection if that job is currently running"
-	aDictionary at: #workerJobId ifPresent: [ :workerJobId |
-		(currentlyExecutingJobs keys includes: workerJobId) ifFalse:[ 
-		
-			GtRrWorkerRegistrationRefusedAnnouncement new
-				remoteAddressString: pharoLinkServerConnection remoteAddressString;
-				workerAttributes: aDictionary;
-				currentlyExecutingJobIds: currentlyExecutingJobs keys;
-				emit.
-					
-			pharoLinkServerConnection stop.
-			^ self ] ].
-
-	workerConnection := GtRrWorkerConnection 
-		connection: pharoLinkServerConnection
-		runner: self.
+	aDictionary at: #workerJobId
+		ifPresent: 
+			[:workerJobId |
+			(workerJobId = 'anyJob'
+				or: [currentlyExecutingJobs keys includes: workerJobId])
+					ifFalse: 
+						[(GtRrWorkerRegistrationRefusedAnnouncement new)
+							remoteAddressString: pharoLinkServerConnection remoteAddressString;
+							workerAttributes: aDictionary;
+							currentlyExecutingJobIds: currentlyExecutingJobs keys;
+							emit.
+						pharoLinkServerConnection stop.
+						^self]].
+	workerConnection := GtRrWorkerConnection
+				connection: pharoLinkServerConnection
+				runner: self.
 	workerConnection details: aDictionary.
 	workerId := aDictionary at: #id.
 	aDictionary at: #workerIpAddress put: workerConnection remoteAddressString.
-	sharedAccess critical:
-		[ registeredWorkers at: workerId put: workerConnection ].
+	sharedAccess
+		critical: [registeredWorkers at: workerId put: workerConnection].
 	managerStartupAndShutdown registerWorker: workerConnection.
 	self announceAndLog: (GtRrWorkerRegisteredAnnouncement new
-			worker: workerConnection).
+				worker: workerConnection).
 	"Answer a PharoLink primitive so that a proxy isn't created for the runner (which is a global, anyway)"
-	^ nil
+	^nil
 ]
 
 { #category : #accessing }
@@ -914,6 +914,21 @@ GtRemoteRunner >> removeCurrentlyExecutingJob: aJobContextId [
 	It's possible that the job was cancelled on the server and a worker disappears at the same time, resulting in two attempts to remove the current job.  Do nothing if the job isn't found."
 
 	currentlyExecutingJobs removeKey: aJobContextId ifAbsent: []
+]
+
+{ #category : #private }
+GtRemoteRunner >> removeQueuedTasksForWorkerId: aUidString [
+	"Remove any tasks from the queue that have a single constraint on the worker Id.
+	Must be called within sharedAccess.  2"
+
+	[(taskQueue nextOrNilSuchThat: 
+			[:aTaskContext |
+			| constraint |
+			constraint := aTaskContext task constraint.
+			constraint class = GtRrEqualsConstraint
+				and: [constraint attribute = #id and: [constraint value = aUidString]]])
+		isNotNil]
+			whileTrue
 ]
 
 { #category : #'announcer - subscription' }
@@ -1272,30 +1287,33 @@ GtRemoteRunner >> timeoutManager [
 GtRemoteRunner >> unregisterWorkerId: aUidString reason: aString [
 	| terminatedWorkers failedTasks errorDetails workerConnection |
 
-	sharedAccess critical:
-		[ workerConnection := registeredWorkers 
-			removeKey: aUidString 
-			ifAbsent: 
-				[ StringSignal emit: 'Unable to properly unregister worker ', aUidString asString, ' due to reason ', aString asString. 
-				nil. ].
-		sharedAccess assertIsOwner.
-		terminatedWorkers := availableWorkers select: [ :workerFuture | 
-			workerFuture connection = workerConnection ].
-		terminatedWorkers do: [ :workerFuture | workerFuture terminateProcess ].
-		availableWorkers removeAll: terminatedWorkers.
-		failedTasks := currentlyExecutingTasks select: [ :each |
-			each connection = workerConnection ].
-		failedTasks valuesDo: [ :taskContext |
-			errorDetails := GtRrErrorDetails new
-					errorMessage: 'Worker Unregistered: ', aString printString;
-					setTrace.
-			self 
-				privateTaskFailed: taskContext taskContextId 
-				executionData: (GtRrWorkerExecutionData new errorDetails: errorDetails) ]. ].
-	workerConnection ifNotNil: [ 
-		self announceAndLog: (GtRrWorkerUnregisteredAnnouncement new
-			worker: workerConnection;
-			reason: aString) ].
+	sharedAccess critical: 
+			[workerConnection := registeredWorkers removeKey: aUidString
+						ifAbsent: 
+							[StringSignal
+								emit: 'Unable to properly unregister worker ' , aUidString asString
+										, ' due to reason ' , aString asString.
+							nil].
+			sharedAccess assertIsOwner.
+			terminatedWorkers := availableWorkers
+						select: [:workerFuture | workerFuture connection = workerConnection].
+			terminatedWorkers do: [:workerFuture | workerFuture terminateProcess].
+			availableWorkers removeAll: terminatedWorkers.
+			failedTasks := currentlyExecutingTasks
+						select: [:each | each connection = workerConnection].
+			failedTasks valuesDo: 
+					[:taskContext |
+					errorDetails := (GtRrErrorDetails new)
+								errorMessage: 'Worker Unregistered: ' , aString printString;
+								setTrace.
+					self privateTaskFailed: taskContext taskContextId
+						executionData: (GtRrWorkerExecutionData new errorDetails: errorDetails)].
+			self removeQueuedTasksForWorkerId: aUidString].
+	workerConnection
+		ifNotNil: 
+			[self announceAndLog: ((GtRrWorkerUnregisteredAnnouncement new)
+						worker: workerConnection;
+						reason: aString)]
 ]
 
 { #category : #'announcer - subscription' }
