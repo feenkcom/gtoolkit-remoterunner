@@ -105,7 +105,8 @@ GtRrFutureWorkerTask >> workerJobIdMatches: aTaskContext [
 	
 	^ connection attributes
 		at: #workerJobId
-		ifPresent: [ :wJobId | wJobId = aTaskContext jobId ]
+		ifPresent: [ :wJobId | wJobId = aTaskContext jobId
+			or: [ wJobId = 'anyJob' ] ]
 		ifAbsent: [ true ]
 ]
 
