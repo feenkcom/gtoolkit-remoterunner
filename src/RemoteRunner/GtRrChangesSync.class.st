@@ -99,9 +99,8 @@ GtRrChangesSync >> changesFrom: anOmReference [
 		[ self error: 'Unknown OmReference: ', anOmReference gtDisplayString ].
 
 	enumerator := GtEpLogEnumerator new latestLog: self epLog.
-	^ GtEpEventSequencer
-		sequence: (enumerator entriesFrom: anOmReference to: self epLog headReference)
-		withCurrent: true.
+	^ GtEpForExportEventSequencer sequence: 
+		(enumerator entriesFrom: anOmReference to: self epLog headReference)
 ]
 
 { #category : #'api - remoterunner' }
@@ -120,9 +119,8 @@ GtRrChangesSync >> encodedChangesFrom: anOmReference [
 		(haveLatest and: [ workerOmReference = anOmReference ]) ifFalse:
 			[ enumerator := GtEpLogEnumerator new latestLog: self epLog.
 			headReference := self epLog headReference.
-			entries := GtEpEventSequencer
-				sequence: (enumerator entriesFrom: anOmReference to: headReference)
-				withCurrent: true.
+			entries := GtEpForExportEventSequencer sequence: 
+				(enumerator entriesFrom: anOmReference to: headReference).
 			workerOmReference := anOmReference.
 			latestOmReference := headReference.
 			encodedEvents := STON toString: entries ].
