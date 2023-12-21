@@ -4,7 +4,8 @@ Class {
 	#traits : 'TGtRrClusterExamplesReportViews',
 	#classTraits : 'TGtRrClusterExamplesReportViews classTrait',
 	#instVars : [
-		'machineReports'
+		'machineReports',
+		'jobProperties'
 	],
 	#category : #'RemoteRunner-Reports'
 }
@@ -22,7 +23,8 @@ GtRrClusterExamplesReport class >> forJob: aJob [
 					forTasks: assoc value);
 				yourself ].
 	^ self new 
-		machineReports: runnerMachineReports
+		machineReports: runnerMachineReports;
+		jobProperties: aJob properties
 ]
 
 { #category : #adding }
@@ -269,6 +271,16 @@ GtRrClusterExamplesReport >> initialize [
 	super initialize.
 	
 	machineReports := OrderedCollection new.
+]
+
+{ #category : #accessing }
+GtRrClusterExamplesReport >> jobProperties [
+	^ jobProperties
+]
+
+{ #category : #accessing }
+GtRrClusterExamplesReport >> jobProperties: anObject [
+	jobProperties := anObject
 ]
 
 { #category : #accessing }

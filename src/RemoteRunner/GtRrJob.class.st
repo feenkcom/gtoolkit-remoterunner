@@ -25,7 +25,8 @@ Class {
 		'errorCount',
 		'name',
 		'creationTime',
-		'exceptionHandlingStrategy'
+		'exceptionHandlingStrategy',
+		'properties'
 	],
 	#category : #'RemoteRunner-Jobs'
 }
@@ -74,6 +75,7 @@ GtRrJob class >> leJsonV4AttributeMapping [
 		#taskTimeout -> #taskTimeout.
 		#errorDetails -> #errorDetails.
 		#exceptionHandlingStrategy -> #exceptionHandlingStrategy.
+		#properties -> #properties.
 	 } asOrderedCollection.
 ]
 
@@ -245,6 +247,18 @@ GtRrJob >> gtErrorsFor: aView [
 		items: [ self resultsWithErrors ];
 		updateWhen: GtRemoteRunnerAnnouncement in: [ self announcer ];
 		actionUpdateButton
+]
+
+{ #category : #ui }
+GtRrJob >> gtPropertiesFor: aView [
+	<gtView>
+
+	properties ifNil: [ ^ aView empty ].
+	^ aView forward
+		title: 'Properties';
+		priority: 50;
+		object: [ properties ];
+		view: #gtLiveFor:
 ]
 
 { #category : #ui }
@@ -436,6 +450,52 @@ GtRrJob >> printOn: aStream [
 		[ aStream << ' with errors' ].
 	aStream
 		nextPut: $).
+]
+
+{ #category : #'accessing - properties' }
+GtRrJob >> properties [
+	"Answer the job's properties.
+	This allows user data specific to a job to be kept with the job.
+	All keys and values must be serialisable by LeJson."
+
+	^ properties ifNil: [ properties := Dictionary new ].
+]
+
+{ #category : #'private - serialization' }
+GtRrJob >> properties: aDictionary [
+
+	properties := aDictionary
+]
+
+{ #category : #'accessing - properties' }
+GtRrJob >> propertyAt: aString [
+
+	^ self properties at: aString
+]
+
+{ #category : #'accessing - properties' }
+GtRrJob >> propertyAt: aString ifAbsent: absentBlock [
+
+	^ self properties 
+		at: aString
+		ifAbsent: absentBlock
+]
+
+{ #category : #'accessing - properties' }
+GtRrJob >> propertyAt: aString ifPresent: presentBlock ifAbsent: absentBlock [
+
+	^ self properties 
+		at: aString
+		ifPresent: presentBlock
+		ifAbsent: absentBlock
+]
+
+{ #category : #'accessing - properties' }
+GtRrJob >> propertyAt: aString put: anObject [
+	"Store the supplied property.
+	Note that both the key and value must be serialisable by LeJson."
+
+	^ self properties at: aString put: anObject
 ]
 
 { #category : #'announcer - subscription' }
