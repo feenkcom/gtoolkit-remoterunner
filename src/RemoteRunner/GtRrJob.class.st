@@ -452,11 +452,11 @@ GtRrJob >> printOn: aStream [
 		nextPut: $).
 ]
 
-{ #category : #'accessing - properties' }
+{ #category : #accessing }
 GtRrJob >> properties [
 	"Answer the job's properties.
 	This allows user data specific to a job to be kept with the job.
-	All keys and values must be serialisable by LeJson."
+	All keys and values must be JSON serialisable."
 
 	^ properties ifNil: [ properties := Dictionary new ].
 ]
@@ -677,23 +677,6 @@ GtRrJob >> taskExecutionTime [
 ]
 
 { #category : #accessing }
-GtRrJob >> tasks [
-	"Answer the collection of tasks to be executed"
-	<return: #SequenceableCollection>
-
-	^ self subclassResponsibility 
-]
-
-{ #category : #accessing }
-GtRrJob >> tasksFor: aGtRemoteRunner [
-	"Special jobs may depend on the remote runner to create the tasks,
-	e.g. the code sync wants a task per worker.
-	Such subclasses can override this method."
-
-	^ self tasks.
-]
-
-{ #category : #accessing }
 GtRrJob >> taskTimeout [
 	<return: #Duration>
 
@@ -713,6 +696,23 @@ GtRrJob >> taskTimeoutSeconds: aNumber [
 		description: 'Timeout must be a number'.
 
 	taskTimeout := aNumber seconds
+]
+
+{ #category : #accessing }
+GtRrJob >> tasks [
+	"Answer the collection of tasks to be executed"
+	<return: #SequenceableCollection>
+
+	^ self subclassResponsibility 
+]
+
+{ #category : #accessing }
+GtRrJob >> tasksFor: aGtRemoteRunner [
+	"Special jobs may depend on the remote runner to create the tasks,
+	e.g. the code sync wants a task per worker.
+	Such subclasses can override this method."
+
+	^ self tasks.
 ]
 
 { #category : #'announcer - subscription' }

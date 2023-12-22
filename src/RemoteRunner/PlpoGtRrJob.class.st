@@ -85,6 +85,12 @@ PlpoGtRrJob >> jobTimeout [
 ]
 
 { #category : #accessing }
+PlpoGtRrJob >> properties [
+
+	^ self proxyPerformSerialized: #properties
+]
+
+{ #category : #accessing }
 PlpoGtRrJob >> results [
 	"Answer the results from the job as an Array.
 	Leave the return type as a proxy object as the size may be large."
@@ -128,15 +134,6 @@ PlpoGtRrJob >> taskCount [
 ]
 
 { #category : #accessing }
-PlpoGtRrJob >> tasks [
-
-	^ self newCommandFactory 
-		setByValue;
-		<< 'self tasks asArray';
-		sendAndWait.
-]
-
-{ #category : #accessing }
 PlpoGtRrJob >> taskTimeout [
 	
 	^ self proxyPerformSerialized: #taskTimeout
@@ -150,6 +147,15 @@ PlpoGtRrJob >> taskTimeoutSeconds: aNumber [
 
 	^ self proxyPerform: #taskTimeoutSeconds: 
 		withPrimitiveArguments: { aNumber }.
+]
+
+{ #category : #accessing }
+PlpoGtRrJob >> tasks [
+
+	^ self newCommandFactory 
+		setByValue;
+		<< 'self tasks asArray';
+		sendAndWait.
 ]
 
 { #category : #'announcer - subscription' }
