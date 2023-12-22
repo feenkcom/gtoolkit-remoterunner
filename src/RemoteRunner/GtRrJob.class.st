@@ -452,11 +452,11 @@ GtRrJob >> printOn: aStream [
 		nextPut: $).
 ]
 
-{ #category : #'accessing - properties' }
+{ #category : #accessing }
 GtRrJob >> properties [
 	"Answer the job's properties.
 	This allows user data specific to a job to be kept with the job.
-	All keys and values must be serialisable by LeJson."
+	All keys and values must be JSON serialisable."
 
 	^ properties ifNil: [ properties := Dictionary new ].
 ]

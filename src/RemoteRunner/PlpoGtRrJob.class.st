@@ -85,6 +85,12 @@ PlpoGtRrJob >> jobTimeout [
 ]
 
 { #category : #accessing }
+PlpoGtRrJob >> properties [
+
+	^ self proxyPerformSerialized: #properties
+]
+
+{ #category : #accessing }
 PlpoGtRrJob >> results [
 	"Answer the results from the job as an Array.
 	Leave the return type as a proxy object as the size may be large."
