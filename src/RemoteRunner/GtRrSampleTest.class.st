@@ -5,12 +5,6 @@ Class {
 }
 
 { #category : #tests }
-GtRrSampleTest >> testCrash [
-	"1"
-	Smalltalk snapshot: false andQuit: true.
-]
-
-{ #category : #tests }
 GtRrSampleTest >> testError [
 	<expectedFailure>
 
