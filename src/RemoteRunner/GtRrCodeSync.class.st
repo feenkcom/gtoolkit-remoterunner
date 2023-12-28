@@ -39,6 +39,12 @@ GtRrCodeSync >> initialize [
 	flusher := TKTNewProcessTaskRunner new
 ]
 
+{ #category : #testing }
+GtRrCodeSync >> isEmpty [
+
+	^ events isEmpty
+]
+
 { #category : #accessing }
 GtRrCodeSync >> onEntryAdded: anEntryAddedEvent [
 

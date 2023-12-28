@@ -810,18 +810,18 @@ GtRemoteRunner >> privateTaskFailed: aTaskContextId executionData: aGtRrWorkerEx
 	Must be called within sharedAccess"
 	| taskContext retryTasks |
 
-	taskContext := currentlyExecutingTasks removeKey: aTaskContextId ifAbsent: [ nil ].
-	taskContext ifNil: [ ^ self ].
+	taskContext := currentlyExecutingTasks 
+		removeKey: aTaskContextId 
+		ifAbsent: [ ^ self ].
 	taskContext task executionData updateFromWorker: aGtRrWorkerExecutionData.
-	taskContext markTaskCompleted.
-	self announceAndLog: (GtRrTaskFailedAnnouncement task: taskContext).
 	retryTasks := taskContext task retryTasks.
-	retryTasks ifNotEmpty:
+	retryTasks ifEmpty:
+		[ taskContext markTaskCompleted.
+		self announceAndLog: (GtRrTaskFailedAnnouncement task: taskContext).
+		self checkJobCompleted: taskContext ]
+	ifNotEmpty:
 		[ self queueTasks: retryTasks jobContext: taskContext jobContext ].
 	self assignTasksToWorkers.
-	"If there were retry tasks there's no need to check if the job is completed"
-	retryTasks ifEmpty:
-		[ self checkJobCompleted: taskContext ].
 ]
 
 { #category : #private }

@@ -6,7 +6,7 @@ Class {
 	#category : #'RemoteRunner-Examples'
 }
 
-{ #category : #accessing }
+{ #category : #examples }
 GtRrTaskRetryExamples >> exampleRetry [
 	"Demonstrate the behaviour of {{gtClass:GtRrTaskTestRetry}} on a Gt Example class"
 	<gtExample>
@@ -18,28 +18,27 @@ GtRrTaskRetryExamples >> exampleRetry [
 		#GtRrSampleExample -> #testError. }.
 	task retryStrategy: GtRrTaskTestRetry new.
 
-	"Default is 3 retries, first retry splits the tests out"
+	"Default is 2 retries, first retry splits the tests out"
 	tasks := task retryTasks.
 	self assert: tasks size equals: 3.
 	tasks do: [ :each |
 		self assert: each retryStrategy retryCount equals: 1 ].
 
-	"Each task will be retried twice more"
+	"Each task will be retried once more"
 	tasks do: [ :each |
 		task := each.
-		2 timesRepeat: 
-			[ tasks := task retryTasks.
-			self assert: tasks size equals: 1.
-			task := tasks first.
-			self assert: task isNotStarted ] ].
+		tasks := task retryTasks.
+		self assert: tasks size equals: 1.
+		task := tasks first.
+		self assert: task isNotStarted ].
 
-	"Third attempt should not retry"
+	"Next failure attempt should not retry"
 	tasks do: [ :each |
 		tasks := each retryTasks.
 		self assert: tasks isEmpty ].
 ]
 
-{ #category : #accessing }
+{ #category : #examples }
 GtRrTaskRetryExamples >> fixedRetry [
 	"Demonstrate the behaviour of {{gtClass:GtRrTaskFixedRetry}}"
 	<gtExample>
@@ -47,20 +46,20 @@ GtRrTaskRetryExamples >> fixedRetry [
 
 	task := GtRrExampleValueTask new.
 	task retryStrategy: GtRrTaskFixedRetry new.
-	"Default is 3 retries"
-	3 timesRepeat: 
+	"Default is 2 retries"
+	2 timesRepeat: 
 		[ task runInImage.
 		self assert: task isFinished.
 		tasks := task retryTasks.
 		self assert: tasks size equals: 1.
 		task := tasks first.
 		self assert: task isNotStarted ].
-	"Fourth attempt should not retry"
+	"Next attempt should not retry"
 	tasks := task retryTasks.
 	self assert: tasks isEmpty.
 ]
 
-{ #category : #accessing }
+{ #category : #examples }
 GtRrTaskRetryExamples >> neverRetry [
 	"Demonstrate the behaviour of {{gtClass:GtRrTaskNeverRetry}}"
 	<gtExample>
@@ -72,7 +71,7 @@ GtRrTaskRetryExamples >> neverRetry [
 	self assert: task retryTasks isEmpty.
 ]
 
-{ #category : #accessing }
+{ #category : #examples }
 GtRrTaskRetryExamples >> testRetry [
 	"Demonstrate the behaviour of {{gtClass:GtRrTaskTestRetry}}"
 	<gtExample>
@@ -84,20 +83,19 @@ GtRrTaskRetryExamples >> testRetry [
 		#GtRrSampleTest -> #testError. }.
 	task retryStrategy: GtRrTaskTestRetry new.
 
-	"Default is 3 retries, first retry splits the tests out"
+	"Default is 2 retries, first retry splits the tests out"
 	tasks := task retryTasks.
 	self assert: tasks size equals: 3.
 	tasks do: [ :each |
 		self assert: each retryStrategy retryCount equals: 1 ].
 
-	"Each task will be retried twice more"
+	"Each task will be retried once more"
 	tasks do: [ :each |
 		task := each.
-		2 timesRepeat: 
-			[ tasks := task retryTasks.
-			self assert: tasks size equals: 1.
-			task := tasks first.
-			self assert: task isNotStarted ] ].
+		tasks := task retryTasks.
+		self assert: tasks size equals: 1.
+		task := tasks first.
+		self assert: task isNotStarted ].
 
 	"Third attempt should not retry"
 	tasks do: [ :each |

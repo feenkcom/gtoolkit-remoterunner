@@ -55,7 +55,7 @@ GtRrTaskTestRetry >> retryTask: aGtRrTask [
 	| retryTasks |
 
 	retryCount := retryCount + 1.
-	^ retryCount <= maxRetries ifTrue: 
+	^ retryCount < maxRetries ifTrue: 
 		[ retryTasks := aGtRrTask splitTests.
 		retryTasks do: [ :retryTask |
 			retryTask retryStrategy failedTask: aGtRrTask. ].
