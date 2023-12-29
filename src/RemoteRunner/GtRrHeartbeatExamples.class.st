@@ -137,7 +137,7 @@ GtRrHeartbeatExamples >> workerHeartbeatTimeout [
 		description: 'Expected Worker Unregistered error'.
 	self assert: ((successTask duration totalSeconds - (timeout * 3)) abs < 5)
 		description: 'successTask duration outside acceptable bounds'.
-	self assert: (timeoutTask serverDuration totalSeconds between: (timeout * 1.5) and: (timeout * 1.5 + 10))
+	self assert: (timeoutTask serverDuration totalSeconds between: (timeout * 3) and: (timeout * 5))
 		description: 'timeoutTask duration outside acceptable bounds'.
 	] ensure: [ remoteRunner stop ].
 

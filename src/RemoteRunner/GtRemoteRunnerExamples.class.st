@@ -510,7 +510,9 @@ GtRemoteRunnerExamples >> simpleTestRetryTask [
 	self assert: taskFailedCount equals: 1.
 	self assert: job state equals: #completed.
 	self assert: job hasErrors.
-	] ensure: [ remoteRunner stop ].
+	] ensure: 
+		[ remoteRunner stop.
+		GtRrSampleTest removeSelector: #testCrash. ].
 
 	^ job
 ]
