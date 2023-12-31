@@ -225,9 +225,27 @@ GtRrTaskExecutionData >> workerAttributes: anObject [
 ]
 
 { #category : #accessing }
+GtRrTaskExecutionData >> workerDirectory [
+
+	^ self workerAttributes at: #workingDirectory
+]
+
+{ #category : #accessing }
 GtRrTaskExecutionData >> workerId [
 	^ self workerAttributes ifNotNil: [ :attributes |
 		attributes at: 'id' ifAbsent: [ nil ] ]
+]
+
+{ #category : #accessing }
+GtRrTaskExecutionData >> workerIndex [
+	"Answer the worker index derived from the working directory"
+	| dir indexStart |
+
+	dir := self workerDirectory.
+	indexStart := dir size.
+	[ (dir at: indexStart) isDigit ] whileTrue:
+		[ indexStart := indexStart - 1 ].
+	^ (dir copyFrom: indexStart + 1 to: dir size) asNumber
 ]
 
 { #category : #accessing }
