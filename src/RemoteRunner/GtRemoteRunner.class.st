@@ -1253,15 +1253,15 @@ GtRemoteRunner >> terminateJobId: aJobId [
 	<return: #GtRrJob>
 	| jobContext |
 
-	jobContext := sharedAccess critical:
-		[ currentlyExecutingJobs 
+	sharedAccess critical:
+		[ jobContext := currentlyExecutingJobs 
 			at: aJobId 
 			ifPresent: [ :aJobContext | 
 				currentlyExecutingJobs removeKey: aJobId.
 				aJobContext ]
-			ifAbsent: [ ] ].
-	jobContext ifNil: [ ^ nil ].
-	jobContext terminateJob.
+			ifAbsent: [ ].
+		jobContext ifNil: [ ^ nil ].
+		jobContext terminateJob ].
 	self announceAndLog: (GtRrJobTerminatedAnnouncement job: jobContext job).
 	^ jobContext job
 

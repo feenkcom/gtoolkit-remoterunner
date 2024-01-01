@@ -149,6 +149,20 @@ GtRrTaskExecutionData >> initialize [
 	state := #notStarted.
 ]
 
+{ #category : #testing }
+GtRrTaskExecutionData >> isInImage [
+
+	^ workerAttributes 
+		at: #workerInImage
+		ifAbsent: [ false ]
+]
+
+{ #category : #testing }
+GtRrTaskExecutionData >> isLocalWorker [
+
+	^ (workerAttributes at: #workerIpAddress ifAbsent: [ ]) = '127.0.0.1'
+]
+
 { #category : #accessing }
 GtRrTaskExecutionData >> resourceReport [
 

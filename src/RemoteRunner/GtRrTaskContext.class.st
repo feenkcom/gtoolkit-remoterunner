@@ -311,10 +311,11 @@ GtRrTaskContext >> terminateTask [
 	Despite being in the GtRrTaskContext, this represents a worker timeout"
 	| executionData |
 
-	task state = #started ifFalse: [ ^ self markTaskCancelled ].
+	task state = #started ifFalse: [ self markTaskCancelled ].
 	"If the worker has timed out its state is unknown,
 	simply close the connection."
-	workerFuture connection stop.
+	workerFuture ifNotNil:
+		[ workerFuture connection stop ].
 	task hasCompleted ifTrue: [ ^ self ].
 	"The worker failed to terminate the task, terminate it on the server"
 	executionData := GtRrWorkerExecutionData new
@@ -322,7 +323,7 @@ GtRrTaskContext >> terminateTask [
 		endTime: task endTime;
 		resourceReport: task executionData resourceReport;
 		errorDetails: (GtRrErrorDetails new
-			errorMessage: 'RemoteRunner forced timeout termination';
+			errorMessage: 'RemoteRunner forced termination';
 			setTrace;
 			yourself);
 		additionalData: task executionData additionalData.
