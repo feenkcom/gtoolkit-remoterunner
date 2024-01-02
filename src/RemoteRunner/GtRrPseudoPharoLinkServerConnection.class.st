@@ -7,7 +7,8 @@ Class {
 	#traits : 'TGtAnnouncer',
 	#classTraits : 'TGtAnnouncer classTrait',
 	#instVars : [
-		'announcer'
+		'announcer',
+		'worker'
 	],
 	#category : #'RemoteRunner-Examples'
 }
@@ -50,5 +51,16 @@ GtRrPseudoPharoLinkServerConnection >> start [
 
 { #category : #'start-stop' }
 GtRrPseudoPharoLinkServerConnection >> stop [
-	"Nothing to do"
+
+	worker ifNotNil: [ worker stop ]
+]
+
+{ #category : #accessing }
+GtRrPseudoPharoLinkServerConnection >> worker [
+	^ worker
+]
+
+{ #category : #accessing }
+GtRrPseudoPharoLinkServerConnection >> worker: anObject [
+	worker := anObject
 ]

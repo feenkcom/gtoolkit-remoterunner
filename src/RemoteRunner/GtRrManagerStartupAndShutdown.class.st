@@ -80,3 +80,10 @@ GtRrManagerStartupAndShutdown >> startup [
 		remoteRunner server: server ].
 	self startHeartbeatContext.
 ]
+
+{ #category : #'startup - shutdown' }
+GtRrManagerStartupAndShutdown >> stopInImageWorker [
+
+	inImageWorker ifNotNil: [ inImageWorker stop ].
+	inImageWorker := nil.
+]

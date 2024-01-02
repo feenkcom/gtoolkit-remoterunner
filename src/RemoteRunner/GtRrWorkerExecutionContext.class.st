@@ -73,6 +73,13 @@ GtRrWorkerExecutionContext >> signalTaskCompletion [
 	semaphore signal
 ]
 
+{ #category : #'start-stop' }
+GtRrWorkerExecutionContext >> stop [
+
+	executionProcess signalException:
+		(Error new messageText: 'Worker stopped')
+]
+
 { #category : #accessing }
 GtRrWorkerExecutionContext >> taskContext [
 

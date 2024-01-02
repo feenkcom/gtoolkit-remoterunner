@@ -486,7 +486,13 @@ GtRrWorker >> stop [
 	self stopHeartbeat.
 	self stopReadProcess.
 	connectionStrategy stop.
+	self stopExecutionContext.
+]
 
+{ #category : #stopping }
+GtRrWorker >> stopExecutionContext [
+
+	executionContext ifNotNil: [ executionContext stop ].
 ]
 
 { #category : #stopping }
