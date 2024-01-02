@@ -825,12 +825,13 @@ GtRemoteRunner >> privateTaskFailed: aTaskContextId executionData: aGtRrWorkerEx
 ]
 
 { #category : #private }
-GtRemoteRunner >> queueTasks: retryTasks jobContext: anObject [ 
+GtRemoteRunner >> queueTasks: retryTasks jobContext: aJobContext [ 
 
+	aJobContext isStarted ifFalse: [ ^ self ].
 	retryTasks do: [ :task |
 		self addTaskContext: (GtRrTaskContext new 
 			task: task;
-			jobContext: anObject) ]
+			jobContext: aJobContext) ]
 ]
 
 { #category : #accessing }
