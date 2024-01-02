@@ -149,6 +149,20 @@ GtRrTaskExecutionData >> initialize [
 	state := #notStarted.
 ]
 
+{ #category : #testing }
+GtRrTaskExecutionData >> isInImage [
+
+	^ workerAttributes 
+		at: #workerInImage
+		ifAbsent: [ false ]
+]
+
+{ #category : #testing }
+GtRrTaskExecutionData >> isLocalWorker [
+
+	^ (workerAttributes at: #workerIpAddress ifAbsent: [ ]) = '127.0.0.1'
+]
+
 { #category : #accessing }
 GtRrTaskExecutionData >> resourceReport [
 
@@ -225,9 +239,27 @@ GtRrTaskExecutionData >> workerAttributes: anObject [
 ]
 
 { #category : #accessing }
+GtRrTaskExecutionData >> workerDirectory [
+
+	^ self workerAttributes at: #workingDirectory
+]
+
+{ #category : #accessing }
 GtRrTaskExecutionData >> workerId [
 	^ self workerAttributes ifNotNil: [ :attributes |
 		attributes at: 'id' ifAbsent: [ nil ] ]
+]
+
+{ #category : #accessing }
+GtRrTaskExecutionData >> workerIndex [
+	"Answer the worker index derived from the working directory"
+	| dir indexStart |
+
+	dir := self workerDirectory.
+	indexStart := dir size.
+	[ (dir at: indexStart) isDigit ] whileTrue:
+		[ indexStart := indexStart - 1 ].
+	^ (dir copyFrom: indexStart + 1 to: dir size) asNumber
 ]
 
 { #category : #accessing }

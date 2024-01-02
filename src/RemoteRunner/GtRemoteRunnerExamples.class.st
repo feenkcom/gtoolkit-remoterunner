@@ -451,6 +451,73 @@ GtRemoteRunnerExamples >> simpleTask [
 ]
 
 { #category : #examples }
+GtRemoteRunnerExamples >> simpleTestRetryTask [
+	"Demonstrate executing a simple test task"
+	<gtExample>
+	<noTest>
+	| factory job taskFailedCount taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount workerRegisteredSemaphore |
+
+	self ignoreWorkerExamples ifTrue: [ ^ self ].
+	jobStartedCount := jobCompletedCount := taskStartedCount := taskCompletedCount := taskFailedCount := 0.
+	jobSemaphore := GtMutualExclusionSemaphore new.
+	workerRegisteredSemaphore := Semaphore new.
+	GtRrSampleTest compile: 
+'testCrash
+	"1"
+	Smalltalk snapshot: false andQuit: true.'
+			classified: #tests.
+	remoteRunner := self simpleRunner.
+	"At least 4 workers are needed, 3 will fail on the bad task, the last will run all remaining tests"
+	remoteRunner managerStartupAndShutdown poolSize: 4.
+	"Worker processes can be slow to start up if the machine is busy or the image is large (multi GB).
+	Wait for the worker to register before proceeding with tests."
+	remoteRunner when: GtRrWorkerRegisteredAnnouncement do: [ :ann | 
+		workerRegisteredSemaphore signal ].
+	remoteRunner start.
+	[ 4 timesRepeat:
+			[ self waitOn: workerRegisteredSemaphore for: 20
+				description: 'Worker didn''t register in time' ].
+	factory := GtRrChecksFactory new.
+	factory addSUnitTestNames: 
+		{ #GtRrSampleTest -> #testPass.
+		#GtRrSampleTest -> #testCrash. }.
+	job := factory job.
+	job
+		when: GtRrJobStartedAnnouncement do: 
+			[ jobStartedCount := jobStartedCount + 1. ];
+		when: GtRrJobCompletedAnnouncement do: 
+			[ jobCompletedCount := jobCompletedCount + 1.
+			jobSemaphore signal ];
+		when: GtRrJobCancelledAnnouncement do: 
+			[ jobCompletedCount := jobCompletedCount + 1 ];
+		when: GtRrTaskStartedAnnouncement do: 
+			[ taskStartedCount := taskStartedCount + 1 ];
+		when: GtRrTaskCompletedAnnouncement do: 
+			[ taskCompletedCount := taskCompletedCount + 1 ];
+		when: GtRrTaskFailedAnnouncement do: 
+			[ taskFailedCount := taskFailedCount + 1 ].
+	job tasks do: [ :task |
+		task retryStrategy: GtRrTaskTestRetry new ].
+	remoteRunner submitJob: job.
+	self waitOn: jobSemaphore for: 10 description: 'Job didn''t complete in time'.
+	self assert: remoteRunner taskQueue size equals: 0.
+	self assert: remoteRunner currentlyExecutingJobs size equals: 0.
+	self assert: remoteRunner currentlyExecutingTasks size equals: 0.
+	self assert: jobStartedCount equals: 1.
+	self assert: jobCompletedCount equals: 1.
+	self assert: taskStartedCount equals: 4.
+	self assert: taskCompletedCount equals: 1.
+	self assert: taskFailedCount equals: 1.
+	self assert: job state equals: #completed.
+	self assert: job hasErrors.
+	] ensure: 
+		[ remoteRunner stop.
+		GtRrSampleTest removeSelector: #testCrash. ].
+
+	^ job
+]
+
+{ #category : #examples }
 GtRemoteRunnerExamples >> simpleTestTask [
 	"Demonstrate executing a simple test task"
 	<gtExample>

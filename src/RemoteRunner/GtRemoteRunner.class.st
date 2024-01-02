@@ -495,6 +495,19 @@ GtRemoteRunner >> defaultWorkerTimeout [
 	^ self taskTimeout + 1 minute
 ]
 
+{ #category : #private }
+GtRemoteRunner >> emptyQueuesFor: aJobId [
+
+	sharedAccess critical: [ | toRemove |
+		toRemove := currentlyExecutingTasks values select:
+			[ :taskContext | taskContext jobId = aJobId ].
+		toRemove do: [ :each | 
+			each terminateTask.
+			currentlyExecutingTasks removeKey: each taskId ifAbsent: [] ].
+		[ (taskQueue nextOrNilSuchThat: [ :aTaskContext |
+			aTaskContext jobId = aJobId ]) isNotNil ] whileTrue ]
+]
+
 { #category : #accessing }
 GtRemoteRunner >> executingJobCount [
 	"Answer the number of jobs that are currently being executed."
@@ -810,27 +823,28 @@ GtRemoteRunner >> privateTaskFailed: aTaskContextId executionData: aGtRrWorkerEx
 	Must be called within sharedAccess"
 	| taskContext retryTasks |
 
-	taskContext := currentlyExecutingTasks removeKey: aTaskContextId ifAbsent: [ nil ].
-	taskContext ifNil: [ ^ self ].
+	taskContext := currentlyExecutingTasks 
+		removeKey: aTaskContextId 
+		ifAbsent: [ ^ self ].
 	taskContext task executionData updateFromWorker: aGtRrWorkerExecutionData.
-	taskContext markTaskCompleted.
-	self announceAndLog: (GtRrTaskFailedAnnouncement task: taskContext).
 	retryTasks := taskContext task retryTasks.
-	retryTasks ifNotEmpty:
-		[ self queueTasks: retryTasks jobContext: taskContext jobContext ].
-	self assignTasksToWorkers.
-	"If there were retry tasks there's no need to check if the job is completed"
 	retryTasks ifEmpty:
-		[ self checkJobCompleted: taskContext ].
+		[ taskContext markTaskCompleted.
+		self announceAndLog: (GtRrTaskFailedAnnouncement task: taskContext) ]
+	ifNotEmpty:
+		[ self queueTasks: retryTasks jobContext: taskContext jobContext ].
+	self checkJobCompleted: taskContext.
+	self assignTasksToWorkers.
 ]
 
 { #category : #private }
-GtRemoteRunner >> queueTasks: retryTasks jobContext: anObject [ 
+GtRemoteRunner >> queueTasks: retryTasks jobContext: aJobContext [ 
 
+	aJobContext isStarted ifFalse: [ ^ self ].
 	retryTasks do: [ :task |
 		self addTaskContext: (GtRrTaskContext new 
 			task: task;
-			jobContext: anObject) ]
+			jobContext: aJobContext) ]
 ]
 
 { #category : #accessing }
@@ -1253,15 +1267,17 @@ GtRemoteRunner >> terminateJobId: aJobId [
 	<return: #GtRrJob>
 	| jobContext |
 
-	jobContext := sharedAccess critical:
-		[ currentlyExecutingJobs 
+	sharedAccess critical:
+		[ jobContext := currentlyExecutingJobs 
 			at: aJobId 
 			ifPresent: [ :aJobContext | 
 				currentlyExecutingJobs removeKey: aJobId.
 				aJobContext ]
-			ifAbsent: [ ] ].
-	jobContext ifNil: [ ^ nil ].
-	jobContext terminateJob.
+			ifAbsent: [ ].
+		jobContext ifNil: [ ^ nil ].
+		jobContext terminateJob ].
+	"Separately empty the task queue of any tasks relating to the job as they may be missed during the code block above"
+	self emptyQueuesFor: aJobId.
 	self announceAndLog: (GtRrJobTerminatedAnnouncement job: jobContext job).
 	^ jobContext job
 

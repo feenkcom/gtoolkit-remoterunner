@@ -146,6 +146,8 @@ GtRrWorker class >> processCommandLineArgs: args [
 		worker attributes
 			at: (arg at: #key) value
 			put: (arg at: #value) value ].
+	StringSignal emit: 'Install UI manager...'.
+	UIManager default: GtRrUIManager new.
 	StringSignal emit: 'Starting worker...'.
 	worker start.
 	"Hibernate until the process exits"

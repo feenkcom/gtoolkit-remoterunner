@@ -55,7 +55,7 @@ GtRrTaskFixedRetry >> retryTask: aGtRrTask [
 	If the task should just fail answer an empty collection."
 
 	retryCount := retryCount + 1.
-	^ retryCount <= maxRetries 
+	^ retryCount < maxRetries 
 		ifTrue: [ { self privateRetryTaskFor: aGtRrTask } ]
 		ifFalse: [ #() ].
 ]

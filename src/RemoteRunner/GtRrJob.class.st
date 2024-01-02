@@ -581,7 +581,7 @@ GtRrJob >> startTime: anObject [
 
 { #category : #accessing }
 GtRrJob >> state [
-	"One of: #notStarted, #started, #cancelled, #completed"
+	"One of: #notStarted, #started, #cancelled, #terminating, #completed"
 	<return: #Symbol>
 
 	^ state
