@@ -51,7 +51,7 @@ GtRrPseudoPharoLinkServerConnection >> start [
 
 { #category : #'start-stop' }
 GtRrPseudoPharoLinkServerConnection >> stop [
-	AkgContextStackSignal emit.
+
 	worker ifNotNil: [ worker stop ]
 ]
 

@@ -302,7 +302,7 @@ GtRrWorkerConnection >> sendControlMessage: aMessage [
 
 { #category : #'start-stop' }
 GtRrWorkerConnection >> stop [
-	AkgContextStackSignal emit.
+
 	self stopWithReason: 'Worker stopped'
 
 ]
