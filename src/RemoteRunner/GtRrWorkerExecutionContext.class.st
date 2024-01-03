@@ -75,9 +75,10 @@ GtRrWorkerExecutionContext >> signalTaskCompletion [
 
 { #category : #'start-stop' }
 GtRrWorkerExecutionContext >> stop [
-
-	executionProcess signalException:
-		(Error new messageText: 'Worker stopped')
+	AkgContextStackSignal emit.
+	( executionProcess isTerminating or: [ executionProcess isTerminated ]) ifFalse:
+		[ executionProcess signalException:
+			GtRrWorkerTerminationNotification new ]
 ]
 
 { #category : #accessing }

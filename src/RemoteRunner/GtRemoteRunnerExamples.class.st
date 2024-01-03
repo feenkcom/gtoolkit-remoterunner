@@ -19,7 +19,7 @@ Class {
 GtRemoteRunnerExamples >> assignTasksToWorkersTaskFirst [
 	"Demonstrate assigning tasks to workers, with the tasks queued before the workers connect"
 	<gtExample>
-	<after: #stopRunnersAndWorkers>
+	"<after: #stopRunnersAndWorkers>"
 	| job tasks taskCompletedCount taskFailedCount jobCompletedCount semaphore |
 
 	jobCompletedCount := taskCompletedCount := taskFailedCount := 0.
@@ -42,7 +42,7 @@ GtRemoteRunnerExamples >> assignTasksToWorkersTaskFirst [
 			do: [ taskFailedCount := taskFailedCount + 1 ].
 	remoteRunner submitJob: job.
 
-	workers := (1 to: 2) collect: [ :i |
+	[ workers := (1 to: 2) collect: [ :i |
 		GtRrInImageWorker new
 			remoteRunner: remoteRunner;
 			exceptionHandlingStrategy: GtRrTaskHeadlessExceptionStrategy new;
@@ -53,7 +53,8 @@ GtRemoteRunnerExamples >> assignTasksToWorkersTaskFirst [
 	self assert: job results size equals: 6.
 	self assert: taskCompletedCount equals: 5.
 	self assert: taskFailedCount equals: 1.
-	self assert: jobCompletedCount equals: 1.
+	self assert: jobCompletedCount equals: 1. ]
+		ensure: [ remoteRunner stop ].
 
 	^ job
 ]

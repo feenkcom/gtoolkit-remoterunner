@@ -40,11 +40,14 @@ GtRrTaskExceptionStrategy >> runTask: taskContext inContext: aGtRrWorkerExecutio
 	If the task execution doesn't complete, fork a process to notify of failure.  The fork is required to work around a bug in unwinding the stack and evaluating ensure: & ifCurtailed: blocks."
 	| result |
 
-	[ [ result := taskContext task timedRun ]
+	[ [ [ result := taskContext task timedRun ]
 		on: GtRrTimeoutTaskError
 		do: [ :ex | self notifyTaskTimedOut: taskContext inContext: aGtRrWorkerExecutionContext ].
 	aGtRrWorkerExecutionContext worker
 		taskDone: taskContext with: result.
-	aGtRrWorkerExecutionContext signalTaskCompletion. ] ifCurtailed:
-		[ [ self notifyTaskDidntComplete: taskContext inContext: aGtRrWorkerExecutionContext ] fork. ].
+	aGtRrWorkerExecutionContext signalTaskCompletion ]
+		on: GtRrWorkerTerminationNotification
+		do: [ :ex | ] ] ifCurtailed:
+			[ [ self notifyTaskDidntComplete: taskContext 
+					inContext: aGtRrWorkerExecutionContext ] fork ].
 ]
