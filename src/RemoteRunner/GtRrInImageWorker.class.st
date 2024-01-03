@@ -32,7 +32,8 @@ GtRrInImageWorker >> initialize [
 	attributes
 		at: #workerPriority put: 10;
 		at: #workerInImage put: true.
-	connection := GtRrPseudoPharoLinkServerConnection new.
+	connection := GtRrPseudoPharoLinkServerConnection new
+		worker: self.
 	self connectionStrategy: GtRrWorkerInImageConnectionStrategy new.
 ]
 
