@@ -40,6 +40,8 @@ GtRrTaskRetry >> privateRetryTaskFor: aGtRrTask [
 
 	retryTask := aGtRrTask copy.
 	retryTask retryStrategy failedTask: aGtRrTask.
+	retryTask executionData additionalDataAt: #failedTaskExecutionData
+		put: aGtRrTask executionData.
 	^ retryTask
 ]
 
