@@ -344,6 +344,12 @@ GtRrJob >> initialize [
 ]
 
 { #category : #testing }
+GtRrJob >> isCancelled [
+
+	^ state == #cancelled
+]
+
+{ #category : #testing }
 GtRrJob >> isChecksJob [
 
 	^ false
@@ -352,13 +358,19 @@ GtRrJob >> isChecksJob [
 { #category : #testing }
 GtRrJob >> isFinished [
 
-	^ state == #completed
+	^ state == #completed or: [ state == #cancelled ]
 ]
 
 { #category : #testing }
 GtRrJob >> isStarted [
 
 	^ state == #started
+]
+
+{ #category : #testing }
+GtRrJob >> isTerminating [
+
+	^ state == #terminating
 ]
 
 { #category : #accessing }
@@ -397,7 +409,9 @@ GtRrJob >> markJobCompleted [
 
 	self isFinished ifTrue: [ ^ self ].
 	endTime := DateAndTime now.
-	state := #completed.
+	state := self isTerminating
+		ifTrue: [ #cancelled ]
+		ifFalse: [ #completed ].
 	self announce: (GtRrJobCompletedAnnouncement job: self).
 
 ]
@@ -581,7 +595,7 @@ GtRrJob >> startTime: anObject [
 
 { #category : #accessing }
 GtRrJob >> state [
-	"One of: #notStarted, #started, #cancelled, #terminating, #completed"
+	"One of: #notStarted, #started, #terminating, #cancelled, #completed"
 	<return: #Symbol>
 
 	^ state
