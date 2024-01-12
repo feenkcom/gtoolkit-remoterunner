@@ -274,7 +274,9 @@ GtRemoteRunner class >> setUniqueInstance: aGtRemoteRunner [
 
 { #category : #'headless remote runner' }
 GtRemoteRunner class >> startUp: resuming [
-	resuming ifTrue: [ self cleanUp ]
+
+	resuming ifTrue: 
+		[ [ self cleanUp ] forkNamed: 'GtRr startup stop' ]
 ]
 
 { #category : #accessing }
