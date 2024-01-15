@@ -276,7 +276,9 @@ GtRemoteRunner class >> setUniqueInstance: aGtRemoteRunner [
 GtRemoteRunner class >> startUp: resuming [
 
 	resuming ifTrue: 
-		[ [ self cleanUp ] forkNamed: 'GtRr startup stop' ]
+		[ [ self cleanUp ] 
+			forkAt: Processor userInterruptPriority
+			named: 'GtRr startup stop' ]
 ]
 
 { #category : #accessing }
