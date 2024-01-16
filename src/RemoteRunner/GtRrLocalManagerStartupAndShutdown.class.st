@@ -107,19 +107,6 @@ GtRrLocalManagerStartupAndShutdown >> gtSummaryFor: aView [
 		  actionUpdateButton
 ]
 
-{ #category : #accessing }
-GtRrLocalManagerStartupAndShutdown >> inMemoryLog [
-	"Answer a boolean indicating whether worker output should be stored in memory or not"
-
-	^ inMemoryLog
-]
-
-{ #category : #accessing }
-GtRrLocalManagerStartupAndShutdown >> inMemoryLog: aBoolean [
-
-	inMemoryLog := aBoolean
-]
-
 { #category : #initialization }
 GtRrLocalManagerStartupAndShutdown >> initialize [
 
@@ -131,6 +118,19 @@ GtRrLocalManagerStartupAndShutdown >> initialize [
 	workerCountCalculator := GtRrResourceWorkerCountCalculator new.
 	processes := OrderedCollection new.
 	watchdogSemaphore := Semaphore new.
+]
+
+{ #category : #accessing }
+GtRrLocalManagerStartupAndShutdown >> inMemoryLog [
+	"Answer a boolean indicating whether worker output should be stored in memory or not"
+
+	^ inMemoryLog
+]
+
+{ #category : #accessing }
+GtRrLocalManagerStartupAndShutdown >> inMemoryLog: aBoolean [
+
+	inMemoryLog := aBoolean
 ]
 
 { #category : #testing }
@@ -158,7 +158,6 @@ GtRrLocalManagerStartupAndShutdown >> newLogFileWorkerLocalProcess [
 	| settings builder process logFile |
 
 	settings := LanguageLinkSettings pharoDefaultSettings.
-	workerIndex := workerIndex + 1.
 	logFile := ('worker.', workerIndex asString, '.log') asFileReference.
 	builder := GtExternalProcessBuilder new
 		command: settings serverExecutable fullName;
@@ -175,6 +174,7 @@ GtRrLocalManagerStartupAndShutdown >> newLogFileWorkerLocalProcess [
 { #category : #private }
 GtRrLocalManagerStartupAndShutdown >> newWorkerLocalProcess [
 
+	workerIndex := workerIndex + 1.
 	^ inMemoryLog
 		ifTrue: [ self newInMemoryWorkerLocalProcess ]
 		ifFalse: [ self newLogFileWorkerLocalProcess ]
@@ -182,7 +182,7 @@ GtRrLocalManagerStartupAndShutdown >> newWorkerLocalProcess [
 
 { #category : #'instance creation' }
 GtRrLocalManagerStartupAndShutdown >> newWorkerLocalProcessArgumentsFor: someSettings [
-	| args |
+	| args pharoDebugFile |
 
 	(remoteRunner port isNil or:
 		[ remoteRunner port = #none ]) 
@@ -208,6 +208,10 @@ GtRrLocalManagerStartupAndShutdown >> newWorkerLocalProcessArgumentsFor: someSet
 		add: '--epiceaMemoryStore';
 		add: '--noLepiterReload';
 		add: '--noGtImageUpdate'.
+	pharoDebugFile := 'worker.pharoDebug.', workerIndex asString, '.log'.
+	args
+		add: '--pharoDebugLog';
+		add: pharoDebugFile.
 	^ args
 ]
 
@@ -275,25 +279,6 @@ GtRrLocalManagerStartupAndShutdown >> signalWatchdog [
 	watchdogSemaphore signal.
 ]
 
-{ #category : #private }
-GtRrLocalManagerStartupAndShutdown >> startWatchDog [
-
-	watchDog := [ [ autoRestart or: [ processes isNotEmpty ] ] whileTrue:
-		[ | broken |
-		watchdogSemaphore waitTimeoutSeconds: 30.
-		broken := processes reject: #isRunning.
-		broken do: [ :e | | process |
-			processes remove: e.
-			process := autoRestart
-				ifTrue: [ processes add: self newWorkerLocalProcess ]
-				ifFalse: [ ].
-			remoteRunner announceAndLog: (GtRrWorkerReplacedAnnouncement new
-				oldProcess: e;
-				newProcess: process) ].
-		 ] ] forkNamed:
-			'GtRemoteRunner local watch dog'
-]
-
 { #category : #'startup - shutdown' }
 GtRrLocalManagerStartupAndShutdown >> startup [ 
 	| isWindows |
@@ -311,6 +296,25 @@ GtRrLocalManagerStartupAndShutdown >> startup [
 		isWindows ifTrue: [ 1 second wait ] ].
 	self startWatchDog.
 
+]
+
+{ #category : #private }
+GtRrLocalManagerStartupAndShutdown >> startWatchDog [
+
+	watchDog := [ [ autoRestart or: [ processes isNotEmpty ] ] whileTrue:
+		[ | broken |
+		watchdogSemaphore waitTimeoutSeconds: 30.
+		broken := processes reject: #isRunning.
+		broken do: [ :e | | process |
+			processes remove: e.
+			process := autoRestart
+				ifTrue: [ processes add: self newWorkerLocalProcess ]
+				ifFalse: [ ].
+			remoteRunner announceAndLog: (GtRrWorkerReplacedAnnouncement new
+				oldProcess: e;
+				newProcess: process) ].
+		 ] ] forkNamed:
+			'GtRemoteRunner local watch dog'
 ]
 
 { #category : #ui }
