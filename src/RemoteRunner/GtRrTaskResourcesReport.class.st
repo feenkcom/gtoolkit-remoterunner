@@ -12,6 +12,14 @@ GtRrTaskResourcesReport class >> leJsonV4Name [
 	^ #gtRrTaskResourcesReport
 ]
 
+{ #category : #'memory usage' }
+GtRrTaskResourcesReport >> gtSpecificSizeInMemory [
+	^ super gtSpecificSizeInMemory 
+		+ (meminfoReport
+			ifNil: [ 0]
+			ifNotNil: [ :aReport | aReport gtSpecificSizeInMemory ])
+]
+
 { #category : #accessing }
 GtRrTaskResourcesReport >> machineAvailableMemory [
 	^ self meminfoReport ifNotNil: [ :aMemInfoReport |

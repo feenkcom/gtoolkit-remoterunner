@@ -42,6 +42,11 @@ GtRrMachineMeminfoReport >> cached: anObject [
 	cached := anObject
 ]
 
+{ #category : #'memory usage' }
+GtRrMachineMeminfoReport >> gtSpecificSizeInMemory [
+	^ self sizeInMemory
+]
+
 { #category : #accessing }
 GtRrMachineMeminfoReport >> memAvailable [
 

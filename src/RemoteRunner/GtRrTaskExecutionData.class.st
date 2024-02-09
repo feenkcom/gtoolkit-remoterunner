@@ -95,6 +95,14 @@ GtRrTaskExecutionData >> errorDetails: aGtErrorDetails [
 	errorDetails := aGtErrorDetails
 ]
 
+{ #category : #'memory usage' }
+GtRrTaskExecutionData >> gtSpecificSizeInMemory [
+	^ (DTObjectGraphTraversal new  
+			skipNil;
+			skipSymbols;
+			computeMemorySizeFor: self)
+]
+
 { #category : #'gt - extensions' }
 GtRrTaskExecutionData >> gtViewErrorTraceFor: aView [
 	<gtView>
