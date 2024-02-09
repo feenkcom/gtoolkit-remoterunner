@@ -11,7 +11,9 @@ GtRrWorkerConnectionExceptionHandler >> handleExceptionsDuring: aBlock for: msgB
 		on: ConnectionClosed
 		do: [ :ex |
 			"Announce that we're exiting"
-			GtRrWorkerOperationShutdownAnnouncement new emit.
+			GtRrWorkerOperationShutdownAnnouncement new 
+				reason: 'Connection Closed';
+				emit.
 			"Give other processes time to finish"
 			Processor activeProcess priority: 15.
 			Smalltalk snapshot: false andQuit: true ].

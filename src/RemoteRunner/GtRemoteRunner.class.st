@@ -747,6 +747,8 @@ GtRemoteRunner >> nextTaskForWorkerId: aUidString [
 		emit.
 	sharedAccess critical:
 		[ sharedAccess assertIsOwner.
+		(jobStartupAndShutdown finishedWithWorkerFuture: taskFuture) ifTrue:
+			[ ^ 'quit' ].
 		availableWorkers add: taskFuture.
 		self assignTasksToWorkers ].
 	taskFuture wait.

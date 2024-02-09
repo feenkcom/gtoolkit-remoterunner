@@ -370,6 +370,17 @@ GtRrWorker >> isRunning [
 		readProcess isTerminated not ] ]
 ]
 
+{ #category : #private }
+GtRrWorker >> logAndQuit [
+
+	GtRrWorkerOperationShutdownAnnouncement new 
+		reason: 'Quit received';
+		emit.
+	"Give other processes time to finish"
+	Processor activeProcess priority: 15.
+	Smalltalk snapshot: false andQuit: true.
+]
+
 { #category : #accessing }
 GtRrWorker >> newTaskProcess [
 
@@ -467,6 +478,7 @@ GtRrWorker >> stepService [
 	| taskContext |
 
 	taskContext := self nextTask.
+	taskContext = 'quit' ifTrue: [ self logAndQuit ].
 	GtRrWorkerTaskStartingAnnouncement new
 		task: taskContext;
 		emit.
