@@ -7,6 +7,15 @@ Class {
 	#category : #'RemoteRunner-Runner'
 }
 
+{ #category : #testing }
+GtRrJobStartupAndShutdown >> finishedWithWorkerFuture: taskFuture [
+	"Answer a boolean indicating whether the supplied worker is no longer required.
+	By default, workers are kept indefinitely.
+	Must be called within sharedAccess."
+
+	^ false
+]
+
 { #category : #accessing }
 GtRrJobStartupAndShutdown >> remoteRunner [
 
