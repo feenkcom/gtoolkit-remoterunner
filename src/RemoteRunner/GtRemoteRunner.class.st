@@ -200,7 +200,7 @@ GtRemoteRunner class >> newHeadlessRunnerProcess [
 GtRemoteRunner class >> onRemoveUniqueInstance: anInstance [
 	"Classes may perform some activities on a singleton that is about to be released"
 
-	uniqueInstance stop.
+	anInstance stop.
 ]
 
 { #category : #printing }
@@ -883,7 +883,7 @@ GtRemoteRunner >> registerWorkerWithDetails: aDictionary [
 		ifPresent: 
 			[:workerJobId |
 			(workerJobId = 'anyJob'
-				or: [currentlyExecutingJobs keys includes: workerJobId])
+				or: [currentlyExecutingJobs includesKey: workerJobId])
 					ifFalse: 
 						[(GtRrWorkerRegistrationRefusedAnnouncement new)
 							remoteAddressString: pharoLinkServerConnection remoteAddressString;
