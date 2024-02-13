@@ -1,6 +1,6 @@
 Class {
 	#name : #GtRrMachineCountPlot,
-	#superclass : #GtPlotterRawLineExamples,
+	#superclass : #Object,
 	#instVars : [
 		'values',
 		'minX',
@@ -218,16 +218,16 @@ GtRrMachineCountPlot >> plot [
 GtRrMachineCountPlot >> scaleX [
 
 	^ GtPlotterTimeScale new
-		domainFrom: self commits first key asMonth
-		to: self commits last key asMonth + 60 days.
+		domainFrom: minX
+		to: maxX.
 ]
 
 { #category : #'example - scale' }
 GtRrMachineCountPlot >> scaleY [
 
 	^ GtPlotterLinearScale new 
-		domainFrom: 0
-		to: (self commits detectMax: [ :e | e value ]) value.
+		domainFrom: minY
+		to: maxY.
 ]
 
 { #category : #accessing }
