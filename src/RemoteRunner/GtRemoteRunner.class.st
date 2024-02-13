@@ -117,6 +117,20 @@ GtRemoteRunner class >> commandLineCommand [
 ]
 
 { #category : #accessing }
+GtRemoteRunner class >> connectionOnPort: aNumberOrString [
+	"Answer a PharoLink connection to the supplied address"
+	| settings plApplication |
+
+	settings := LanguageLinkSettings pharoDefaultSettings.
+	settings
+		serverProcessClass: LanguageLinkManualProcess;
+		serverSocketAddress: (LanguageLinkSocketAddress from: aNumberOrString asString).
+	plApplication := PharoLinkApplication newWith: settings.
+	plApplication start.
+	^ plApplication
+]
+
+{ #category : #accessing }
 GtRemoteRunner class >> default [
 
 	^ self uniqueInstance
@@ -140,14 +154,9 @@ GtRemoteRunner class >> hasUniqueInstance [
 { #category : #accessing }
 GtRemoteRunner class >> headlessOnPort: aNumberOrString codeSync: aBoolean [
 	"Answer a proxy remote runner connected to the supplied address"
-	| settings plApplication runner |
+	| plApplication runner |
 
-	settings := LanguageLinkSettings pharoDefaultSettings.
-	settings
-		serverProcessClass: LanguageLinkManualProcess;
-		serverSocketAddress: (LanguageLinkSocketAddress from: aNumberOrString asString).
-	plApplication := PharoLinkApplication newWith: settings.
-	plApplication start.
+	plApplication := self connectionOnPort: aNumberOrString.
 	runner := plApplication newCommandFactory
 		sendAndWait: 'GtAssignedRemoteRunner'.
 	aBoolean ifTrue: [ runner startCodeSync ].
