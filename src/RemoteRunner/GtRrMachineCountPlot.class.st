@@ -12,11 +12,6 @@ Class {
 }
 
 { #category : #accessing }
-GtRrMachineCountPlot >> axisXkey [
-	^'Minutes'
-]
-
-{ #category : #accessing }
 GtRrMachineCountPlot >> axisXLabels [
 	
 	^ GtPlotterHorizontalTickLabelsElement new
@@ -34,6 +29,11 @@ GtRrMachineCountPlot >> axisXLabels [
 GtRrMachineCountPlot >> axisXProjectionLabels [
 
 	^ self corner
+]
+
+{ #category : #accessing }
+GtRrMachineCountPlot >> axisXkey [
+	^'Minutes'
 ]
 
 { #category : #accessing }
