@@ -43,6 +43,15 @@ GtRrWorkerAnnouncement >> initializeFromSlotData: aDictionary [
 	self workerAttributes: (aDictionary at: #workerAttributes).
 ]
 
+{ #category : #serialization }
+GtRrWorkerAnnouncement >> initializeFromTimestamp: aTimestamp andData: dataParts [
+
+	self 	
+		basicTimestamp: aTimestamp;
+		remoteAddressString: dataParts fourth;
+		workerAttributes: (self class evaluate: dataParts sixth).
+]
+
 { #category : #printing }
 GtRrWorkerAnnouncement >> printOneLineContentsOn: aStream [
 
@@ -113,7 +122,14 @@ GtRrWorkerAnnouncement >> workerDetailsForLog [
 GtRrWorkerAnnouncement >> workerId [
 	^ self workerAttributes
 		at: #id 
-		ifAbsent: [ '<unknown directory>' ]
+		ifAbsent: [ '<unknown id>' ]
+]
+
+{ #category : #serialization }
+GtRrWorkerAnnouncement >> workerId: anId [
+	^ self workerAttributes
+		at: #id 
+		put: anId
 ]
 
 { #category : #accessing }
@@ -121,4 +137,11 @@ GtRrWorkerAnnouncement >> workingDirectory [
 	^ self workerAttributes
 		at: #workingDirectory 
 		ifAbsent: [ '<unknown directory>' ]
+]
+
+{ #category : #serialization }
+GtRrWorkerAnnouncement >> workingDirectory: aString [
+	^ self workerAttributes
+		at: #workingDirectory 
+		put: aString
 ]
