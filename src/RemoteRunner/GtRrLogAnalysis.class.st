@@ -39,6 +39,21 @@ GtRrLogAnalysis >> eventsGroup [
 	^ eventsGroup ifNil: [ eventsGroup := self grouper rootEvents ]
 ]
 
+{ #category : #ui }
+GtRrLogAnalysis >> executionTimelineChartItems [
+	| tenMs |
+
+	tenMs := 10 milliSeconds.
+	^ self eventsGroup allEvents 
+		select: [ :each | each duration > tenMs ]
+		thenCollect: [ :each |
+			GtRrExecutionChartDataItem new
+				startTime: each startTimestamp;
+				endTime: each endTimestamp;
+				label: each description;
+				appendDurationToLabel ]
+]
+
 { #category : #accessing }
 GtRrLogAnalysis >> grouper [
 	^ grouper ifNil:
@@ -147,6 +162,21 @@ GtRrLogAnalysis >> gtMapFor: aView [
 		title: 'Duration map';
 		priority: 20;
 		stencil: [ self gtBarElements ]
+]
+
+{ #category : #ui }
+GtRrLogAnalysis >> gtViewExecutionTimelineListFor: aView [
+	<gtView>
+	^self executionTimelineChartItems
+		ifEmpty: [aView empty]
+		ifNotEmpty: [ :currentTimelineData |
+			aView explicit
+				title: 'Job Execution Timeline';
+				priority: 30;
+				stencil: 
+						[(GtRrExecutionHorizontalChartStencil new)
+							executions: currentTimelineData;
+							colorComputation: [ :anItem | nil ] ] ]
 ]
 
 { #category : #accessing }
