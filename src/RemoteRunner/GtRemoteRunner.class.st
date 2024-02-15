@@ -1082,6 +1082,20 @@ GtRemoteRunner >> stopLogging [
 	log := nil.
 ]
 
+{ #category : #'api - runner' }
+GtRemoteRunner >> stopRegisteredWorkers [
+	"Stop all registered workers.
+	Must be called within sharedAccess."
+	
+	GtRrStopRegisteredWorkersStartingSignal new
+		registeredWorkerCount: registeredWorkers size;
+		emit.
+	self registeredWorkersDo: #stop.
+	GtRrStopRegisteredWorkersCompletedSignal new
+		registeredWorkerCount: registeredWorkers size;
+		emit.
+]
+
 { #category : #'api - jobs' }
 GtRemoteRunner >> submitJob: aGtRrJob [
 	"Add the supplied job to the queue.
