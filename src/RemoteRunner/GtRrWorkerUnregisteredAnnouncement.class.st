@@ -11,14 +11,11 @@ Class {
 { #category : #serialization }
 GtRrWorkerUnregisteredAnnouncement >> initializeFromTimestamp: aTimestamp andData: dataParts [
 
-	workerAttributes := Dictionary new.
 	self
 		basicTimestamp: aTimestamp;
-		workerId: dataParts third;
-		remoteAddressString: dataParts fourth;
-		workingDirectory: dataParts fifth;
+		remoteAddressString: dataParts third;
 		reason: dataParts sixth;
-		workerCount: dataParts seventh asNumber.
+		workerAttributes: (self class evaluate: dataParts fifth).
 ]
 
 { #category : #accessing }

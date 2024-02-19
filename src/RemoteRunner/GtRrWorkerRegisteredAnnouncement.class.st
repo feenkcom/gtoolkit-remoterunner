@@ -10,11 +10,10 @@ Class {
 { #category : #serialization }
 GtRrWorkerRegisteredAnnouncement >> initializeFromTimestamp: aTimestamp andData: dataParts [
 
-	self 	
+	self
 		basicTimestamp: aTimestamp;
-		remoteAddressString: dataParts fourth;
-		workerAttributes: (self class evaluate: dataParts sixth);
-		workerCount: dataParts seventh asNumber.
+		remoteAddressString: dataParts third;
+		workerAttributes: (self class evaluate: dataParts fifth).
 ]
 
 { #category : #accessing }

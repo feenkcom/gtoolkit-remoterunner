@@ -28,6 +28,14 @@ GtRrJobStartupAndShutdownSignal class >> forJobContext: aJobContext [
 		jobId: aJobContext id
 ]
 
+{ #category : #accessing }
+GtRrJobStartupAndShutdownSignal >> initializeFromTimestamp: aDateAndTime andData: aCollection [
+
+	super initializeFromTimestamp: aDateAndTime andData: aCollection.
+	eventType := aCollection at: 3.
+	jobId := aCollection at: 4.
+]
+
 { #category : #testing }
 GtRrJobStartupAndShutdownSignal >> isEndSignalType [
 	^ eventType = #endSignal
@@ -60,13 +68,17 @@ GtRrJobStartupAndShutdownSignal >> markAsStartSignal [
 
 { #category : #accessing }
 GtRrJobStartupAndShutdownSignal >> printOneLineContentsOn: aStream [
+
+	super printOneLineContentsOn: aStream.
 	aStream 
-		nextPut: $|; space;
-		nextPutAll: 'RemoteRunnerSignal';
 		space; nextPut: $|; space;
 		nextPutAll: eventType;
 		space; nextPut: $|; space;
-		nextPutAll: self jobId;
-		space; nextPut: $|; space;
-		nextPutAll: self processId
+		nextPutAll: self jobId
+]
+
+{ #category : #accessing }
+GtRrJobStartupAndShutdownSignal >> signalTypeLabel [
+
+	^ 'RemoteRunnerSignal'
 ]
