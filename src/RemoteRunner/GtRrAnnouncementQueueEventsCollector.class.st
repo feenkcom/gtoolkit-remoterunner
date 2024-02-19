@@ -9,6 +9,11 @@ GtRrAnnouncementQueueEventsCollector >> createDefaultEventsGrouper [
 	^ GtRrAnnouncementQueueCycleCompositeEventsGrouper new
 ]
 
+{ #category : #initialization }
+GtRrAnnouncementQueueEventsCollector >> defaultSignalType [
+	^ GtRrAnnouncementQueueSignal
+]
+
 { #category : #'gt - extensions' }
 GtRrAnnouncementQueueEventsCollector >> gtViewQueuesListFor:  aView [
 	<gtView>

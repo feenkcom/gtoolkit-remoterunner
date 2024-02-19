@@ -67,14 +67,9 @@ GtRrWorkerAnnouncement >> printOneLineContentsOn: aStream [
 		nextPutAll: self remoteAddressString;
 		space; nextPut: $|; space;
 		nextPutAll: self workingDirectory;
-		space; nextPut: $|; space.
-	
-	self workerDetailsForLog do: [ :aValue |
-		aStream 
-			nextPutAll: (aValue ifNil: [ '' ]);
-			space; nextPut: $|; space ]. 
-
-	aStream
+		space; nextPut: $|; space;
+		nextPutAll: (workerAttributes storeString);
+		space; nextPut: $|; space;
 		nextPutAll: self processId
 ]
 

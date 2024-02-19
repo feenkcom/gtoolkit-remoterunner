@@ -884,6 +884,10 @@ GtRemoteRunner >> registerWorkerWithDetails: aDictionary [
 	"Register the supplied worker and connection details.
 	Register the connection for disconnection notification"
 	| pharoLinkServerConnection workerConnection workerId |
+
+	GtRrRegisterWorkerStartingSignal new
+		workerAttributes: aDictionary;
+		emit.
 	pharoLinkServerConnection := PharoLinkServerCurrentConnection value.
 	pharoLinkServerConnection setCloseOnExec: true.
 
@@ -894,13 +898,12 @@ GtRemoteRunner >> registerWorkerWithDetails: aDictionary [
 			(workerJobId = 'anyJob'
 				or: [currentlyExecutingJobs includesKey: workerJobId])
 					ifFalse: 
-						[(GtRrWorkerRegistrationRefusedAnnouncement new)
-							remoteAddressString: pharoLinkServerConnection remoteAddressString;
+						[ pharoLinkServerConnection stop.
+						GtRrRegisterWorkerRejectedSignal new
+							ipAddress: pharoLinkServerConnection remoteAddressString;
 							workerAttributes: aDictionary;
-							currentlyExecutingJobIds: currentlyExecutingJobs keys;
 							emit.
-						pharoLinkServerConnection stop.
-						^self]].
+						^self ] ].
 	workerConnection := GtRrWorkerConnection
 				connection: pharoLinkServerConnection
 				runner: self.
@@ -912,6 +915,11 @@ GtRemoteRunner >> registerWorkerWithDetails: aDictionary [
 	managerStartupAndShutdown registerWorker: workerConnection.
 	self announceAndLog: (GtRrWorkerRegisteredAnnouncement new
 				worker: workerConnection).
+	GtRrRegisterWorkerCompletedSignal new
+		workerAttributes: aDictionary;
+		ipAddress: pharoLinkServerConnection remoteAddressString;
+		emit.
+
 	"Answer a PharoLink primitive so that a proxy isn't created for the runner (which is a global, anyway)"
 	^nil
 ]

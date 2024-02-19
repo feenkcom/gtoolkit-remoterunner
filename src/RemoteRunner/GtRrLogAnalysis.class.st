@@ -4,28 +4,12 @@ Class {
 	#instVars : [
 		'logger',
 		'grouper',
-		'eventsGroup'
+		'eventsGroup',
+		'signals',
+		'strictMode'
 	],
 	#category : #'RemoteRunner-Analysis'
 }
-
-{ #category : #accessing }
-GtRrLogAnalysis >> analyze [
-	| i relevantRecordings recordings |
-
-	recordings := logger recordings.
-	relevantRecordings := OrderedCollection new.
-	i := 1.
-	[ | recording |
-	recording := recordings at: i.
-	((recording respondsTo: #signalTypeLabel) and:
-		[ recording signalTypeLabel ~= 'LwGtRrSignal' ]) ifTrue:
-			[ relevantRecordings add: recording ].
-	i := i + 1.
-	recording class = LwGtRrJobManagerJobCompletedSignal ] whileFalse.
-	grouper processEventSignalsFor: relevantRecordings.
-
-]
 
 { #category : #accessing }
 GtRrLogAnalysis >> description [
@@ -36,7 +20,7 @@ GtRrLogAnalysis >> description [
 { #category : #accessing }
 GtRrLogAnalysis >> eventsGroup [
 
-	^ eventsGroup ifNil: [ eventsGroup := self grouper rootEvents ]
+	^ eventsGroup ifNil: [ eventsGroup := self grouper eventsGroup ]
 ]
 
 { #category : #ui }
@@ -44,21 +28,24 @@ GtRrLogAnalysis >> executionTimelineChartItems [
 	| tenMs |
 
 	tenMs := 10 milliSeconds.
-	^ self eventsGroup allEvents 
+	^ self eventsGroup allEvents
 		select: [ :each | each duration > tenMs ]
-		thenCollect: [ :each |
-			GtRrExecutionChartDataItem new
+		thenCollect: [ :each | | item |
+			item := GtRrExecutionChartDataItem new
 				startTime: each startTimestamp;
 				endTime: each endTimestamp;
 				label: each description;
-				appendDurationToLabel ]
+				appendDurationToLabel.
+			item propertyAt: #source put: each.
+			item ]
 ]
 
 { #category : #accessing }
 GtRrLogAnalysis >> grouper [
 	^ grouper ifNil:
-		[ grouper := GtBeaconEventsGrouper new.
-		self analyze.
+		[ grouper := "GtBeaconEventsGrouper" GtFlatEventsGrouper new.
+		grouper strictMode: strictMode.
+		grouper processEventSignalsFor: self jobSignals.
 		grouper ].
 ]
 
@@ -180,13 +167,59 @@ GtRrLogAnalysis >> gtViewExecutionTimelineListFor: aView [
 ]
 
 { #category : #accessing }
+GtRrLogAnalysis >> initialize [
+
+	super initialize.
+	strictMode := true.
+]
+
+{ #category : #accessing }
+GtRrLogAnalysis >> jobSignals [
+	| i relevantRecordings |
+
+	relevantRecordings := OrderedCollection new.
+	i := 1.
+	[ | recording |
+	recording := signals at: i.
+	((recording respondsTo: #signalTypeLabel) and:
+		[ recording signalTypeLabel ~= 'LwGtRrSignal' ]) ifTrue:
+			[ relevantRecordings add: recording ].
+	i := i + 1.
+	recording class ~= LwGtRrJobManagerJobCompletedSignal
+		and: [ i <= signals size ] ] whileTrue.
+	^ relevantRecordings.
+]
+
+{ #category : #accessing }
 GtRrLogAnalysis >> logger [
 	^ logger
 ]
 
 { #category : #accessing }
-GtRrLogAnalysis >> logger: anObject [
-	logger := anObject
+GtRrLogAnalysis >> logger: aSignalLogger [
+
+	logger := aSignalLogger.
+	signals := aSignalLogger recordings.
+]
+
+{ #category : #accessing }
+GtRrLogAnalysis >> signals [
+	^ signals
+]
+
+{ #category : #accessing }
+GtRrLogAnalysis >> signals: anObject [
+	signals := anObject
+]
+
+{ #category : #accessing }
+GtRrLogAnalysis >> strictMode [
+	^ strictMode
+]
+
+{ #category : #accessing }
+GtRrLogAnalysis >> strictMode: anObject [
+	strictMode := anObject
 ]
 
 { #category : #accessing }
