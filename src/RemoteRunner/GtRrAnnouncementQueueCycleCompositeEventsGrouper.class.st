@@ -74,7 +74,7 @@ GtRrAnnouncementQueueCycleCompositeEventsGrouper >> gtViewRootEventsFor: aView [
 		priority: 15;
 		items: [ self rootEvents ];
 		children: #subEvents;
-		column: 'Event Type' text: [ :anEvent | anEvent class eventLabel ];
+		column: 'Event Type' text: [ :anEvent | anEvent eventLabel ];
 		column: 'Timestamp' text: #timestamp;
 		column: 'Duration' 
 			text: [ :anEvent | anEvent duration ];
