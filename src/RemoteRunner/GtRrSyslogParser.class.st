@@ -4,10 +4,51 @@ Class {
 	#instVars : [
 		'linuxVersion',
 		'gtRr',
-		'ipAddress'
+		'ipAddress',
+		'signals',
+		'bootSignalIndex',
+		'logger'
 	],
 	#category : #'RemoteRunner-Syslog'
 }
+
+{ #category : #accessing }
+GtRrSyslogParser >> bootSignal [
+
+	^ signals at: self bootSignalIndex
+]
+
+{ #category : #accessing }
+GtRrSyslogParser >> bootSignalIndex [
+	"Answer the index of the boot signal"
+	| index |
+
+	bootSignalIndex ifNotNil: [ ^ bootSignalIndex ].
+	index := 0.
+	signals doWithIndex: [ :signal :idx |
+		(signal messageText beginsWith: 'Linux version') ifTrue:
+			[ index := idx ] ].
+	bootSignalIndex := index max: 1.
+	^ bootSignalIndex
+]
+
+{ #category : #accessing }
+GtRrSyslogParser >> bootTime [
+
+	^ self bootSignal timestamp
+]
+
+{ #category : #accessing }
+GtRrSyslogParser >> gtSignalsFor: aView [
+	<gtView>
+
+	logger ifNil: [ ^ aView empty ].
+	^ aView forward
+		title: 'Signals';
+		priority: 20;
+		object: [ logger ];
+		view: #gtRecordingsFor:.
+]
 
 { #category : #accessing }
 GtRrSyslogParser >> initialize [
@@ -29,10 +70,16 @@ GtRrSyslogParser >> ipAddress: anObject [
 	ipAddress := anObject
 ]
 
+{ #category : #accessing }
+GtRrSyslogParser >> logger [
+
+	^ logger
+]
+
 { #category : #parsing }
 GtRrSyslogParser >> parseFile: aFileReference [
 
-	^ aFileReference readStreamDo: [ :stream |
+	^ aFileReference asFileReference readStreamDo: [ :stream |
 		self parseStream: stream ].
 ]
 
@@ -50,10 +97,22 @@ GtRrSyslogParser >> parseLine: line [
 { #category : #parsing }
 GtRrSyslogParser >> parseStream: stream [ 
 
-	^ Array streamContents: [ :resultStream |
+	signals := Array streamContents: [ :resultStream |
 		[ stream atEnd ] whileFalse:
 			 [ (self parseLine: stream nextLine) ifNotNil:
 				[ :signal | resultStream nextPut: signal ] ] ].
+	logger := MemoryLogger new basicRecordings: signals.
+]
+
+{ #category : #filtering }
+GtRrSyslogParser >> selectCurrentBoot [
+	"Remove signals from previous boots"
+	| index |
+
+	index := self bootSignalIndex.
+	index = 1 ifTrue: [ ^ self ].
+	signals := signals copyFrom: index to: signals size.
+	bootSignalIndex := 1.
 ]
 
 { #category : #'private ' }
@@ -65,8 +124,16 @@ GtRrSyslogParser >> signalFromLine: line index: index [
 		ipAddress: ipAddress.
 ]
 
+{ #category : #accessing }
+GtRrSyslogParser >> signals [
+
+	^ signals
+]
+
 { #category : #'private - parsing' }
-GtRrSyslogParser >> timestampFrom: line [ 
+GtRrSyslogParser >> timestampFrom: line [
+	"Read the timestamp from the supplied line.
+	Currently assumes that all records are less than 12 months old."
 	| today month day time year dateAndTime |
 
 	today := Date today.
@@ -78,6 +145,8 @@ GtRrSyslogParser >> timestampFrom: line [
 		date: (Date year: year month: month day: day)
 		time: time.
 	dateAndTime monthIndex > today monthIndex ifTrue:
-		[ dateAndTime year: today year - 1].
+		[ dateAndTime := DateAndTime 
+			date: (Date year: year-1 month: month day: day)
+			time: time ].
 	^ dateAndTime.
 ]
