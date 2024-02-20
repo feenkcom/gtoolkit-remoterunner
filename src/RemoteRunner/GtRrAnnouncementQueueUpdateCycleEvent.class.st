@@ -31,6 +31,11 @@ GtRrAnnouncementQueueUpdateCycleEvent >> descriptionOn: aStream [
 ]
 
 { #category : #accessing }
+GtRrAnnouncementQueueUpdateCycleEvent >> eventLabel [
+	^ self class eventLabel
+]
+
+{ #category : #accessing }
 GtRrAnnouncementQueueUpdateCycleEvent >> numberOfAnnouncements [
 	^ self completedEvent numberOfAnnouncements
 ]
