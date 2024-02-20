@@ -94,6 +94,18 @@ GtRrExecutionChartDataItem >> endTime: anObject [
 ]
 
 { #category : #accessing }
+GtRrExecutionChartDataItem >> gtPropertiesFor: aView [
+	<gtView>
+
+	properties ifNil: [ ^ aView empty ].
+	^ aView forward
+		title: 'Properties';
+		priority: 40;
+		object: [ properties ];
+		view: #gtLiveFor:
+]
+
+{ #category : #accessing }
 GtRrExecutionChartDataItem >> identifier [
 
 	^ identifier

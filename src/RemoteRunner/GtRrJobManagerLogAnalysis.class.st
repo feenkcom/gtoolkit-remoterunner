@@ -1,5 +1,5 @@
 Class {
-	#name : #GtRrLogAnalysis,
+	#name : #GtRrJobManagerLogAnalysis,
 	#superclass : #Object,
 	#instVars : [
 		'logger',
@@ -12,19 +12,19 @@ Class {
 }
 
 { #category : #accessing }
-GtRrLogAnalysis >> description [
+GtRrJobManagerLogAnalysis >> description [
 
 	^ 'A Job Description'
 ]
 
 { #category : #accessing }
-GtRrLogAnalysis >> eventsGroup [
+GtRrJobManagerLogAnalysis >> eventsGroup [
 
 	^ eventsGroup ifNil: [ eventsGroup := self grouper eventsGroup ]
 ]
 
 { #category : #ui }
-GtRrLogAnalysis >> executionTimelineChartItems [
+GtRrJobManagerLogAnalysis >> executionTimelineChartItems [
 	| tenMs |
 
 	tenMs := 10 milliSeconds.
@@ -41,7 +41,7 @@ GtRrLogAnalysis >> executionTimelineChartItems [
 ]
 
 { #category : #accessing }
-GtRrLogAnalysis >> grouper [
+GtRrJobManagerLogAnalysis >> grouper [
 	^ grouper ifNil:
 		[ grouper := "GtBeaconEventsGrouper" GtFlatEventsGrouper new.
 		grouper strictMode: strictMode.
@@ -50,13 +50,13 @@ GtRrLogAnalysis >> grouper [
 ]
 
 { #category : #ui }
-GtRrLogAnalysis >> gtBarElements [
+GtRrJobManagerLogAnalysis >> gtBarElements [
 	^ (self gtBarElementsWithGlobalWeight: 1.0 local: 1.0) asScrollableElement
 		margin: (BlInsets all: 10)
 ]
 
 { #category : #ui }
-GtRrLogAnalysis >> gtBarElementsWithGlobalWeight: aWeight local: aLocalWeight [
+GtRrJobManagerLogAnalysis >> gtBarElementsWithGlobalWeight: aWeight local: aLocalWeight [
 	| taskElements aBarColor |
 	
 	aBarColor := BlColorTransition interpolate: Color veryLightGray to: BrGlamorousColors errorBorderColor at: aWeight.
@@ -127,7 +127,7 @@ GtRrLogAnalysis >> gtBarElementsWithGlobalWeight: aWeight local: aLocalWeight [
 ]
 
 { #category : #ui }
-GtRrLogAnalysis >> gtItemsFor: aView [
+GtRrJobManagerLogAnalysis >> gtItemsFor: aView [
 	<gtView>
 	
 	^ aView columnedTree
@@ -142,7 +142,7 @@ GtRrLogAnalysis >> gtItemsFor: aView [
 ]
 
 { #category : #ui }
-GtRrLogAnalysis >> gtMapFor: aView [
+GtRrJobManagerLogAnalysis >> gtMapFor: aView [
 	<gtView>
 
 	^ aView explicit
@@ -152,7 +152,7 @@ GtRrLogAnalysis >> gtMapFor: aView [
 ]
 
 { #category : #ui }
-GtRrLogAnalysis >> gtViewExecutionTimelineListFor: aView [
+GtRrJobManagerLogAnalysis >> gtViewExecutionTimelineListFor: aView [
 	<gtView>
 	^self executionTimelineChartItems
 		ifEmpty: [aView empty]
@@ -163,18 +163,19 @@ GtRrLogAnalysis >> gtViewExecutionTimelineListFor: aView [
 				stencil: 
 						[(GtRrExecutionHorizontalChartStencil new)
 							executions: currentTimelineData;
-							colorComputation: [ :anItem | nil ] ] ]
+							colorComputation: [ :anItem |
+								(Color r: 92 g: 204 b: 231 range: 255) alpha: 0.8 ] ] ]
 ]
 
 { #category : #accessing }
-GtRrLogAnalysis >> initialize [
+GtRrJobManagerLogAnalysis >> initialize [
 
 	super initialize.
 	strictMode := true.
 ]
 
 { #category : #accessing }
-GtRrLogAnalysis >> jobSignals [
+GtRrJobManagerLogAnalysis >> jobSignals [
 	| i relevantRecordings |
 
 	relevantRecordings := OrderedCollection new.
@@ -191,45 +192,45 @@ GtRrLogAnalysis >> jobSignals [
 ]
 
 { #category : #accessing }
-GtRrLogAnalysis >> logger [
+GtRrJobManagerLogAnalysis >> logger [
 	^ logger
 ]
 
 { #category : #accessing }
-GtRrLogAnalysis >> logger: aSignalLogger [
+GtRrJobManagerLogAnalysis >> logger: aSignalLogger [
 
 	logger := aSignalLogger.
 	signals := aSignalLogger recordings.
 ]
 
 { #category : #accessing }
-GtRrLogAnalysis >> signals [
+GtRrJobManagerLogAnalysis >> signals [
 	^ signals
 ]
 
 { #category : #accessing }
-GtRrLogAnalysis >> signals: anObject [
+GtRrJobManagerLogAnalysis >> signals: anObject [
 	signals := anObject
 ]
 
 { #category : #accessing }
-GtRrLogAnalysis >> strictMode [
+GtRrJobManagerLogAnalysis >> strictMode [
 	^ strictMode
 ]
 
 { #category : #accessing }
-GtRrLogAnalysis >> strictMode: anObject [
+GtRrJobManagerLogAnalysis >> strictMode: anObject [
 	strictMode := anObject
 ]
 
 { #category : #accessing }
-GtRrLogAnalysis >> subEvents [
+GtRrJobManagerLogAnalysis >> subEvents [
 
 	^ self eventsGroup first subEvents
 ]
 
 { #category : #accessing }
-GtRrLogAnalysis >> totalDuration [
+GtRrJobManagerLogAnalysis >> totalDuration [
 
 	^ self eventsGroup first duration
 ]
