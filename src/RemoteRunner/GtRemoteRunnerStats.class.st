@@ -108,8 +108,15 @@ GtRemoteRunnerStats >> incrementTaskCount [
 GtRemoteRunnerStats >> initialize [
 
 	super initialize.
-	totalJobCount := 0.
-	totalTaskCount := 0.
+	totalJobCount := 
+		totalTaskCount :=
+		taskQueueSize :=
+		registeredWorkerCount :=
+		availableWorkerCount :=
+		currentlyExecutingJobCount :=
+		currentlyExecutingTaskCount :=
+		sharedAccessCount := 0.
+	isRunning := false.
 ]
 
 { #category : #initialization }
