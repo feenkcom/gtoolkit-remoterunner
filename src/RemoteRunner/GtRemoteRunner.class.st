@@ -836,17 +836,18 @@ GtRemoteRunner >> printOn: aStream [
 GtRemoteRunner >> privateTaskFailed: aTaskContextId executionData: aGtRrWorkerExecutionData [
 	"Mark the specified task as failed and retry if required.
 	Must be called within sharedAccess"
-	| taskContext retryTasks |
+	| taskContext retryTasks registeredAvailable |
 
 	taskContext := currentlyExecutingTasks 
 		removeKey: aTaskContextId 
 		ifAbsent: [ ^ self ].
 	taskContext task executionData updateFromWorker: aGtRrWorkerExecutionData.
 	retryTasks := taskContext task retryTasks.
-	retryTasks ifEmpty:
+	registeredAvailable := registeredWorkers isNotEmpty.
+	(retryTasks isEmpty or: [ registeredAvailable not ]) ifTrue:
 		[ taskContext markTaskCompleted.
 		self announceAndLog: (GtRrTaskFailedAnnouncement task: taskContext) ]
-	ifNotEmpty:
+	ifFalse:
 		[ self queueTasks: retryTasks jobContext: taskContext jobContext ].
 	self checkJobCompleted: taskContext.
 	self assignTasksToWorkers.
