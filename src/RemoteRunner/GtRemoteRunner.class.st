@@ -1322,6 +1322,20 @@ GtRemoteRunner >> terminateJobId: aJobId [
 ]
 
 { #category : #private }
+GtRemoteRunner >> terminateJobsOnNoWorkers [
+	"If managerStartupAndShutdown and jobStartupAndShutdown allow, and there are no workers,
+	terminate any jobs that are running (as no workers are expected in future)"
+
+	(managerStartupAndShutdown shouldTerminateJobsOnNoWorkers and:
+		[ jobStartupAndShutdown shouldTerminateJobsOnNoWorkers ]) ifFalse:
+			[ ^ self ].
+	sharedAccess critical:
+		[ registeredWorkers ifEmpty:
+			[ currentlyExecutingJobs do: [ :each |
+				self terminateJobId: each jobId ] ] ].
+]
+
+{ #category : #private }
 GtRemoteRunner >> terminateTaskContextId: aTaskContextId [
 	"Terminate the specified currently executing task"
 
@@ -1342,27 +1356,27 @@ GtRemoteRunner >> unregisterWorkerId: aUidString reason: aString [
 	| terminatedWorkers failedTasks errorDetails workerConnection |
 
 	sharedAccess critical: 
-			[workerConnection := registeredWorkers removeKey: aUidString
-						ifAbsent: 
-							[StringSignal
-								emit: 'Unable to properly unregister worker ' , aUidString asString
-										, ' due to reason ' , aString asString.
-							nil].
-			sharedAccess assertIsOwner.
-			terminatedWorkers := availableWorkers
-						select: [:workerFuture | workerFuture connection = workerConnection].
-			terminatedWorkers do: [:workerFuture | workerFuture terminateProcess].
-			availableWorkers removeAll: terminatedWorkers.
-			failedTasks := currentlyExecutingTasks
-						select: [:each | each connection = workerConnection].
-			failedTasks valuesDo: 
-					[:taskContext |
-					errorDetails := (GtRrErrorDetails new)
-								errorMessage: 'Worker Unregistered: ' , aString printString;
-								setTrace.
-					self privateTaskFailed: taskContext taskContextId
-						executionData: (GtRrWorkerExecutionData new errorDetails: errorDetails)].
-			self removeQueuedTasksForWorkerId: aUidString].
+		[workerConnection := registeredWorkers 
+			removeKey: aUidString
+			ifAbsent: 
+				[StringSignal
+					emit: 'Unable to properly unregister worker ' , aUidString asString
+						, ' due to reason ' , aString asString.
+				nil].
+		terminatedWorkers := availableWorkers select: [ :workerFuture | 
+			workerFuture connection = workerConnection].
+		terminatedWorkers do: [:workerFuture | workerFuture terminateProcess].
+		availableWorkers removeAll: terminatedWorkers.
+		failedTasks := currentlyExecutingTasks
+					select: [:each | each connection = workerConnection].
+		failedTasks valuesDo: [ :taskContext |
+			errorDetails := (GtRrErrorDetails new)
+				errorMessage: 'Worker Unregistered: ' , aString printString;
+				setTrace.
+			self privateTaskFailed: taskContext taskContextId
+				executionData: (GtRrWorkerExecutionData new errorDetails: errorDetails)].
+		self removeQueuedTasksForWorkerId: aUidString. 
+		"self terminateJobsOnNoWorkers" ].
 	workerConnection
 		ifNotNil: 
 			[self announceAndLog: ((GtRrWorkerUnregisteredAnnouncement new)

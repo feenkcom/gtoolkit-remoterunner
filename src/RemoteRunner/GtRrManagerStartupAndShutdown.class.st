@@ -33,6 +33,13 @@ GtRrManagerStartupAndShutdown >> remoteRunner: anObject [
 	remoteRunner := anObject
 ]
 
+{ #category : #testing }
+GtRrManagerStartupAndShutdown >> shouldTerminateJobsOnNoWorkers [
+	"Answer a boolean indicating whether jobs should be terminated if the last worker unregisters."
+	
+	^ false
+]
+
 { #category : #'startup - shutdown' }
 GtRrManagerStartupAndShutdown >> shutdown [ 
 	"Perform any actions associated with stopping the DTS cluster:
