@@ -668,7 +668,7 @@ GtRemoteRunnerExamples >> terminateStartedJobWithControlChannel [
 	self assert: taskCompletedCount equals: 0.
 	self assert: taskFailedCount equals: 3.
 	self assert: taskStartedCount equals: 1.
-	self assert: job state equals: #completed.
+	self assert: job state equals: #cancelled.
 	self assert: job hasErrors.
 	self assert: (job results allSatisfy: [ :task | task hasErrors ]).
 	self assert: (times collect: #key) asArray equals: #(0 1 2 2 2 4).
@@ -750,7 +750,7 @@ GtRemoteRunnerExamples >> terminateStartedJobWithoutControlChannel [
 	self assert: taskCompletedCount equals: 0.
 	self assert: taskFailedCount equals: 3.
 	self assert: taskStartedCount equals: 1.
-	self assert: job state equals: #completed.
+	self assert: job state equals: #cancelled.
 	self assert: job hasErrors.
 	self assert: (job results allSatisfy: [ :task | task hasErrors ]).
 	] ensure: [ remoteRunner stop ].
@@ -812,7 +812,7 @@ GtRemoteRunnerExamples >> timeoutJob [
 	self assert: taskFailedCount equals: 3.
 	self assert: (taskStartedCount between: 1 and: 3)
 		description: [ 'Unexpected taskStartedCount: ', taskStartedCount asString ].
-	self assert: job state equals: #completed.
+	self assert: job state equals: #cancelled.
 	self assert: job hasErrors.
 	self assert: job errorDetails errorMessage equals: 'Job exceeded time limit'.
 	] ensure: [ remoteRunner stop ].

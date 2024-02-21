@@ -91,6 +91,15 @@ PlpoGtRemoteRunner >> registerJob: aGtRrJob [
 	^ application proxyForObject: aGtRrJob
 ]
 
+{ #category : #accessing }
+PlpoGtRemoteRunner >> runnerStats [
+
+	^ GtRemoteRunnerStats new initializeFromDictionary: 
+		(self newCommandFactory
+			<< 'self runnerStats asDictionaryForExport';
+			sendAndWait)
+]
+
 { #category : #initialize }
 PlpoGtRemoteRunner >> startAnnouncementsNotifier [
 

@@ -300,7 +300,9 @@ GtRemoteRunner >> addCurrentlyExecutingTask: aGtRrTaskContext [
 	"Add the supplied task to the collection of currently executing tasks.
 	Must be called within sharedAccess."
 
-	currentlyExecutingTasks at: aGtRrTaskContext taskContextId put: aGtRrTaskContext
+	sharedAccess assertIsOwner.
+	currentlyExecutingTasks at: aGtRrTaskContext taskContextId put: aGtRrTaskContext.
+	runnerStats currentlyExecutingTaskCount: currentlyExecutingTasks size.
 ]
 
 { #category : #'api - worker' }
@@ -319,6 +321,7 @@ GtRemoteRunner >> addTaskContext: taskContext [
 	Can be called from anywhere since a SharedQueue is used."
 
 	taskQueue nextPut: taskContext.
+	runnerStats taskQueueSize: taskQueue size.
 ]
 
 { #category : #announcer }
@@ -368,18 +371,18 @@ GtRemoteRunner >> assignTasksToWorkers [
 			busyWorkers add: workerFuture.
 			timeoutManager addContext: taskContext.
 			self announceAndLog: (GtRrTaskStartedAnnouncement task: taskContext) ] ].
-	sharedAccess assertIsOwner.
 	busyWorkers do: [ :each |
 		availableWorkers 
 			remove: each
 			ifAbsent: [ StringSignal emit: 'Unable to mark unavailable: ', each printString.
 				self error: 'Unable to mark unavailable' ] ].
+	runnerStats availableWorkerCount: availableWorkers size.
 ]
 
 { #category : #accessing }
 GtRemoteRunner >> availableWorkerCount [
 
-	^ sharedAccess critical: [ availableWorkers size ]
+	^ runnerStats availableWorkerCount
 ]
 
 { #category : #'private - accessing' }
@@ -461,7 +464,7 @@ GtRemoteRunner >> checkRunningJobsCompleted [
 	"Check if the currently executing jobs have completed.
 	Mostly for debugging."
 
-	sharedAccess critical:
+	self critical:
 		[ currentlyExecutingJobs do: [ :jobContext |
 			self checkJobCompleted: jobContext ] ].
 ]
@@ -471,7 +474,12 @@ GtRemoteRunner >> critical: aBlock [
 	"Evaluate the supplied block within sharedAccess.
 	Only for use by cooperating objects."
 
-	^ sharedAccess critical: aBlock.
+	^ sharedAccess critical: 
+		[ | result |
+		runnerStats sharedAccessCount: sharedAccess size.
+		result := aBlock value.
+		runnerStats sharedAccessCount: sharedAccess size.
+		result ].
 ]
 
 { #category : #'private - accessing' }
@@ -511,22 +519,23 @@ GtRemoteRunner >> defaultWorkerTimeout [
 { #category : #private }
 GtRemoteRunner >> emptyQueuesFor: aJobId [
 
-	sharedAccess critical: [ | toRemove |
+	self critical: [ | toRemove |
 		toRemove := currentlyExecutingTasks values select:
 			[ :taskContext | taskContext jobId = aJobId ].
 		toRemove do: [ :each | 
 			each terminateTask.
 			currentlyExecutingTasks removeKey: each taskId ifAbsent: [] ].
 		[ (taskQueue nextOrNilSuchThat: [ :aTaskContext |
-			aTaskContext jobId = aJobId ]) isNotNil ] whileTrue ]
+			aTaskContext jobId = aJobId ]) isNotNil ] whileTrue.
+		runnerStats currentlyExecutingTaskCount: currentlyExecutingTasks size.
+		runnerStats taskQueueSize: taskQueue size ]
 ]
 
 { #category : #accessing }
 GtRemoteRunner >> executingJobCount [
 	"Answer the number of jobs that are currently being executed."
 	
-	^ sharedAccess critical:
-		[ currentlyExecutingJobs size ].
+	^ runnerStats currentlyExecutingJobCount
 ]
 
 { #category : #private }
@@ -534,13 +543,14 @@ GtRemoteRunner >> getNextTaskFor: aWorkerFuture [
 	"Answer the next task for the supplied worker, or nil.
 	Must be called within sharedAccess."
 	<return: #GtRrTaskContext>
-	| attributes |
+	| attributes result |
 
 	attributes := aWorkerFuture connection details.
-	^ taskQueue nextOrNilSuchThat: [ :taskContext | 
+	result := taskQueue nextOrNilSuchThat: [ :taskContext | 
 		(aWorkerFuture workerJobIdMatches: taskContext) and:
 			[ taskContext constraint matches: attributes ] ].
-
+	runnerStats taskQueueSize: taskQueue size.
+	^ result
 ]
 
 { #category : #ui }
@@ -550,7 +560,7 @@ GtRemoteRunner >> gtExecutingJobsFor: aView [
 	^ aView list
 		  title: 'Executing jobs';
 		  priority: 20;
-		  items: [ sharedAccess critical: [ currentlyExecutingJobs values ] ];
+		  items: [ self critical: [ currentlyExecutingJobs values ] ];
 		  send: [ :item | item ];
 		  updateWhen: GtRemoteRunnerAnnouncement in: [ self announcer ];
 		  actionUpdateButton
@@ -564,7 +574,7 @@ GtRemoteRunner >> gtExecutingTasksFor: aView [
 		  title: 'Executing tasks';
 		  priority: 20;
 		  items: [ 
-			  sharedAccess critical: [ currentlyExecutingTasks values ] ];
+			  self critical: [ currentlyExecutingTasks values ] ];
 		  send: [ :item | item ];
 		  updateWhen: GtRemoteRunnerAnnouncement in: [ self announcer ];
 		  actionUpdateButton
@@ -651,7 +661,9 @@ GtRemoteRunner >> initialize [
 	super initialize.
 	announcer := Announcer new.
 	taskQueue := SharedQueue new. "of GtRrTaskContext"
-	runnerStats := GtRemoteRunnerStats new.
+	runnerStats := GtRemoteRunnerStats new
+		defaultWorkerTimeout: self workerTimeout;
+		defaultTaskTimeout: self taskTimeout.
 	"currentlyExecutingJobs is a dictionary of GtRrJobContext keyed by job uid"
 	currentlyExecutingJobs := Dictionary new.
 	"currentlyExecutingTasks is a dictionary of GtRrTaskContext keyed by task context id"
@@ -690,7 +702,7 @@ GtRemoteRunner >> isRunning [
 GtRemoteRunner >> jobContextForJob: aGtRrJob [
 	"Answer the context for the supplied job"
 
-	^ sharedAccess critical:
+	^ self critical:
 		[ currentlyExecutingJobs at: aGtRrJob id ].
 ]
 
@@ -754,11 +766,11 @@ GtRemoteRunner >> nextTaskForWorkerId: aUidString [
 		worker: taskFuture;
 		message: 'nextTaskForWorkerId: pre';
 		emit.
-	sharedAccess critical:
-		[ sharedAccess assertIsOwner.
-		(jobStartupAndShutdown finishedWithWorkerFuture: taskFuture) ifTrue:
+	self critical:
+		[ (jobStartupAndShutdown finishedWithWorkerFuture: taskFuture) ifTrue:
 			[ ^ 'quit' ].
 		availableWorkers add: taskFuture.
+		runnerStats availableWorkerCount: availableWorkers size.
 		self assignTasksToWorkers ].
 	taskFuture wait.
 	GtRrWorkerTraceAnnouncement new
@@ -784,7 +796,7 @@ GtRemoteRunner >> pingAllWorkers [
 
 	errors := OrderedCollection new.
 	registeredWorkers do: [ :worker |
-		sharedAccess critical:
+		self critical:
 			[ [ worker commandPing ]
 				on: Error
 				do: [ :ex | errors add: worker -> ex freeze ] ] ].
@@ -820,6 +832,9 @@ GtRemoteRunner >> port: aPortNumberOrSymbol [
 	"If there is no listening port, ensure that the manager startup and shutdown is manual"
 	port == #none ifTrue:
 		[ self managerStartupAndShutdown: GtRrManualManagerStartupAndShutdown new ].
+	runnerStats 
+		portNumber: port;
+		isRunning: self isRunning.
 ]
 
 { #category : #printing }
@@ -836,17 +851,19 @@ GtRemoteRunner >> printOn: aStream [
 GtRemoteRunner >> privateTaskFailed: aTaskContextId executionData: aGtRrWorkerExecutionData [
 	"Mark the specified task as failed and retry if required.
 	Must be called within sharedAccess"
-	| taskContext retryTasks |
+	| taskContext retryTasks registeredAvailable |
 
 	taskContext := currentlyExecutingTasks 
 		removeKey: aTaskContextId 
 		ifAbsent: [ ^ self ].
+	runnerStats currentlyExecutingTaskCount: currentlyExecutingTasks size.
 	taskContext task executionData updateFromWorker: aGtRrWorkerExecutionData.
 	retryTasks := taskContext task retryTasks.
-	retryTasks ifEmpty:
+	registeredAvailable := registeredWorkers isNotEmpty.
+	(retryTasks isEmpty or: [ registeredAvailable not ]) ifTrue:
 		[ taskContext markTaskCompleted.
 		self announceAndLog: (GtRrTaskFailedAnnouncement task: taskContext) ]
-	ifNotEmpty:
+	ifFalse:
 		[ self queueTasks: retryTasks jobContext: taskContext jobContext ].
 	self checkJobCompleted: taskContext.
 	self assignTasksToWorkers.
@@ -910,8 +927,11 @@ GtRemoteRunner >> registerWorkerWithDetails: aDictionary [
 	workerConnection details: aDictionary.
 	workerId := aDictionary at: #id.
 	aDictionary at: #workerIpAddress put: workerConnection remoteAddressString.
-	sharedAccess
-		critical: [registeredWorkers at: workerId put: workerConnection].
+	self critical: 
+		[ registeredWorkers at: workerId put: workerConnection.
+		runnerStats 
+			registeredWorkerCount: registeredWorkers size;
+			isRunning: self isRunning ].
 	managerStartupAndShutdown registerWorker: workerConnection.
 	self announceAndLog: (GtRrWorkerRegisteredAnnouncement new
 				worker: workerConnection).
@@ -927,14 +947,14 @@ GtRemoteRunner >> registerWorkerWithDetails: aDictionary [
 { #category : #accessing }
 GtRemoteRunner >> registeredWorkerCount [
 
-	^ sharedAccess critical: [ registeredWorkers size ]
+	^ runnerStats registeredWorkerCount
 ]
 
 { #category : #'private - debugging' }
 GtRemoteRunner >> registeredWorkers [
 	"Answer the registeredWorkers."
 
-	^ sharedAccess critical: [ registeredWorkers copy ].
+	^ self critical: [ registeredWorkers copy ].
 ]
 
 { #category : #enumerating }
@@ -942,15 +962,19 @@ GtRemoteRunner >> registeredWorkersDo: aBlock [
 	"Evaluate aBlock for each of the receiver's registered workers.
 	Must be called within sharedAccess."
 
+	sharedAccess assertIsOwner.
 	registeredWorkers do: aBlock
 ]
 
 { #category : #'private - accessing' }
 GtRemoteRunner >> removeCurrentlyExecutingJob: aJobContextId [
 	"Remove the specified job from the collection of currently executing jobs.
-	It's possible that the job was cancelled on the server and a worker disappears at the same time, resulting in two attempts to remove the current job.  Do nothing if the job isn't found."
+	It's possible that the job was cancelled on the server and a worker disappears at the same time, resulting in two attempts to remove the current job.  Do nothing if the job isn't found.
+	Must be called within sharedAccess."
 
-	currentlyExecutingJobs removeKey: aJobContextId ifAbsent: []
+	sharedAccess assertIsOwner.
+	currentlyExecutingJobs removeKey: aJobContextId ifAbsent: [].
+	runnerStats currentlyExecutingJobCount: currentlyExecutingJobs size.
 ]
 
 { #category : #private }
@@ -965,7 +989,8 @@ GtRemoteRunner >> removeQueuedTasksForWorkerId: aUidString [
 			constraint class = GtRrEqualsConstraint
 				and: [constraint attribute = #id and: [constraint value = aUidString]]])
 		isNotNil]
-			whileTrue
+			whileTrue.
+	runnerStats taskQueueSize: taskQueue size.
 ]
 
 { #category : #'announcer - subscription' }
@@ -1005,6 +1030,12 @@ GtRemoteRunner >> runManagerStartup [
 ]
 
 { #category : #accessing }
+GtRemoteRunner >> runnerStats [
+
+	^ runnerStats
+]
+
+{ #category : #accessing }
 GtRemoteRunner >> server [
 
 	^ server
@@ -1027,6 +1058,7 @@ GtRemoteRunner >> start [
 
 	self runManagerStartup.
 	self runJobStartup.
+	runnerStats isRunning: self isRunning.
 ]
 
 { #category : #'api - logger' }
@@ -1052,7 +1084,7 @@ GtRemoteRunner >> startJob: aGtRrJob [
 	currentlyExecutingJobs
 		at: aGtRrJob id
 		put: context.
-		
+	runnerStats currentlyExecutingJobCount: currentlyExecutingJobs size.
 	self logEmitter emitJobStartupStartFor: context.
 	jobStartupAndShutdown startupJob: context.
 	self logEmitter emitJobStartupEndFor: context.
@@ -1073,22 +1105,9 @@ GtRemoteRunner >> startLogging [
 
 { #category : #ui }
 GtRemoteRunner >> state [
-	"Answer a label that represents the overall state of the runner.
-	Must be called within sharedAccess"
-	| availableWorkerCount taskQueueCount currentJobCount currentTaskCount registeredWorkerCount |
+	"Answer a label that represents the overall state of the runner"
 
-	self isRunning ifFalse: [ ^ #stopped ].
-	sharedAccess size > 0 ifTrue: [ ^ #waitingForSharedAccess ].
-	availableWorkerCount := availableWorkers size.
-	taskQueueCount := taskQueue size.
-	currentJobCount := currentlyExecutingJobs size.
-	currentTaskCount := currentlyExecutingTasks size.
-	registeredWorkerCount := registeredWorkers size.
-	(registeredWorkerCount = 0 and:
-		[ taskQueueCount > 0 or: [ currentJobCount > 0 ] ]) ifTrue: [ ^ #waitingForWorkers ].
-	(taskQueueCount = 0 and: [ currentJobCount = 0 ]) ifTrue: [ ^ #idle ].
-	(taskQueueCount > 0 or: [ currentJobCount > 0 ]) ifTrue: [ ^ #busy ].
-	self error: 'Unknown state'.
+	^ runnerStats state
 ]
 
 { #category : #'api - runner' }
@@ -1098,6 +1117,7 @@ GtRemoteRunner >> stop [
 	self runManagerShutdown.
 	self stopLogging.
 	self stopAnnouncementNotifier.
+	runnerStats isRunning: self isRunning.
 ]
 
 { #category : #'api - runner' }
@@ -1146,7 +1166,7 @@ GtRemoteRunner >> submitJob: aGtRrJob [
 	"Add the supplied job to the queue.
 	Start execution as soon as possible"
 
-	sharedAccess critical: [ self startJob: aGtRrJob ].
+	self critical: [ self startJob: aGtRrJob ].
 	^ aGtRrJob
 ]
 
@@ -1181,19 +1201,19 @@ GtRemoteRunner >> summaryAttributes [
 
 	^ Array streamContents: [ :stream |
 		stream
-			nextPut: { #State. self state. self state. };
+			nextPut: { #State. runnerStats state. self. };
 			nextPut: { 'Total Job Count'. runnerStats totalJobCount. self. };
 			nextPut: { 'Total Task Count'. runnerStats totalTaskCount. self. };
-			nextPut: {'Task Queue Size'. taskQueue size. taskQueue. };
-			nextPut: {'Registered Workers'. registeredWorkers size. registeredWorkers. };
-			nextPut: {'Available Workers'. availableWorkers size. availableWorkers. };
-			nextPut: {'Currently Executing Jobs'. currentlyExecutingJobs size. currentlyExecutingJobs. };
-			nextPut: {'Currently Executing Tasks'. currentlyExecutingTasks size. currentlyExecutingTasks. };
-			nextPut: { 'Default Worker Timeout'. self workerTimeout. self. };
-			nextPut: { 'Default Task Timeout'. self taskTimeout. self. };
+			nextPut: {'Task Queue Size'. runnerStats taskQueueSize. taskQueue. };
+			nextPut: {'Registered Workers'. runnerStats registeredWorkerCount. registeredWorkers. };
+			nextPut: {'Available Workers'. runnerStats availableWorkerCount. availableWorkers. };
+			nextPut: {'Currently Executing Jobs'. runnerStats currentlyExecutingJobCount. currentlyExecutingJobs. };
+			nextPut: {'Currently Executing Tasks'. runnerStats currentlyExecutingTaskCount. currentlyExecutingTasks. };
+			nextPut: { 'Default Worker Timeout'. runnerStats defaultWorkerTimeout. self. };
+			nextPut: { 'Default Task Timeout'. runnerStats defaultTaskTimeout. self. };
 			nextPut: { #Port. port. server. };
 			nextPut: { #Logging. log isNotNil. log. };
-			nextPut: { 'Shared Access Waiting'. sharedAccess size. sharedAccess. } ]
+			nextPut: { 'Shared Access Waiting'. runnerStats sharedAccessCount. sharedAccess. } ]
 ]
 
 { #category : #printing }
@@ -1224,11 +1244,12 @@ GtRemoteRunner >> taskDone: aTaskContextId executionData: aGtRrWorkerExecutionDa
 		message: 'taskDone: ', aTaskContextId asString, ' result: ', aResult asString;
 		emit.
 
-	sharedAccess critical: 
+	self critical: 
 		[ taskContext := currentlyExecutingTasks removeKey: aTaskContextId ifAbsent: [].
 		"If the task hasn't been found, assumed that it was terminated and move on"
 		taskContext ifNotNil:
-			[ taskContext workerConnection registerHeartbeat.
+			[ runnerStats currentlyExecutingTaskCount: currentlyExecutingTasks size.
+			taskContext workerConnection registerHeartbeat.
 			taskContext task executionData updateFromWorker: aGtRrWorkerExecutionData.
 			taskContext result: aResult.
 			taskContext markTaskCompleted.
@@ -1257,7 +1278,7 @@ GtRemoteRunner >> taskFailed: aTaskContextId executionData: aGtRrWorkerExecution
 	GtRrWorkerTraceAnnouncement new
 		message: 'taskFailed:with: pre ', aTaskContextId asString;
 		emit.
-	sharedAccess critical: 
+	self critical: 
 		[ self privateTaskFailed: aTaskContextId executionData: aGtRrWorkerExecutionData ].
 	GtRrWorkerTraceAnnouncement new
 		message: 'taskFailed:with: post ', aTaskContextId asString;
@@ -1284,7 +1305,8 @@ GtRemoteRunner >> taskTimeout [
 { #category : #accessing }
 GtRemoteRunner >> taskTimeout: anObject [
 
-	taskTimeout := anObject
+	taskTimeout := anObject.
+	runnerStats defaultTaskTimeout: taskTimeout.
 ]
 
 { #category : #accessing }
@@ -1292,7 +1314,7 @@ GtRemoteRunner >> terminateAllJobs [
 	"Terminate all the currently executing jobs"
 	| jobIds |
 
-	jobIds := sharedAccess critical:
+	jobIds := self critical:
 		[currentlyExecutingJobs values collect: #id ].
 	jobIds do: [ :id | self terminateJobId: id ].
 ]
@@ -1304,13 +1326,14 @@ GtRemoteRunner >> terminateJobId: aJobId [
 	<return: #GtRrJob>
 	| jobContext |
 
-	sharedAccess critical:
+	self critical:
 		[ jobContext := currentlyExecutingJobs 
 			at: aJobId 
 			ifPresent: [ :aJobContext | 
 				currentlyExecutingJobs removeKey: aJobId.
 				aJobContext ]
 			ifAbsent: [ ].
+		runnerStats currentlyExecutingJobCount: currentlyExecutingJobs size.
 		jobContext ifNil: [ ^ nil ].
 		jobContext terminateJob ].
 	"Separately empty the task queue of any tasks relating to the job as they may be missed during the code block above"
@@ -1321,13 +1344,29 @@ GtRemoteRunner >> terminateJobId: aJobId [
 ]
 
 { #category : #private }
+GtRemoteRunner >> terminateJobsOnNoWorkers [
+	"If managerStartupAndShutdown and jobStartupAndShutdown allow, and there are no workers,
+	terminate any jobs that are running (as no workers are expected in future)"
+
+	(managerStartupAndShutdown shouldTerminateJobsOnNoWorkers and:
+		[ jobStartupAndShutdown shouldTerminateJobsOnNoWorkers ]) ifFalse:
+			[ ^ self ].
+	self critical:
+		[ registeredWorkers ifEmpty:
+			[ currentlyExecutingJobs do: [ :each |
+				self terminateJobId: each jobId ] ] ].
+]
+
+{ #category : #private }
 GtRemoteRunner >> terminateTaskContextId: aTaskContextId [
 	"Terminate the specified currently executing task"
 
-	currentlyExecutingTasks at: aTaskContextId ifPresent:
-		[ :taskContext | taskContext terminateTask ].
-	(taskQueue nextOrNilSuchThat: [ :each | each taskContextId = aTaskContextId ])
-		ifNotNil: [ :taskContext | taskContext terminateTask ].
+	self critical:
+		[ currentlyExecutingTasks at: aTaskContextId ifPresent:
+			[ :taskContext | taskContext terminateTask ].
+		(taskQueue nextOrNilSuchThat: [ :each | each taskContextId = aTaskContextId ])
+			ifNotNil: [ :taskContext | taskContext terminateTask ].
+		runnerStats taskQueueSize: taskQueue size ].
 ]
 
 { #category : #accessing }
@@ -1340,28 +1379,32 @@ GtRemoteRunner >> timeoutManager [
 GtRemoteRunner >> unregisterWorkerId: aUidString reason: aString [
 	| terminatedWorkers failedTasks errorDetails workerConnection |
 
-	sharedAccess critical: 
-			[workerConnection := registeredWorkers removeKey: aUidString
-						ifAbsent: 
-							[StringSignal
-								emit: 'Unable to properly unregister worker ' , aUidString asString
-										, ' due to reason ' , aString asString.
-							nil].
-			sharedAccess assertIsOwner.
-			terminatedWorkers := availableWorkers
-						select: [:workerFuture | workerFuture connection = workerConnection].
-			terminatedWorkers do: [:workerFuture | workerFuture terminateProcess].
-			availableWorkers removeAll: terminatedWorkers.
-			failedTasks := currentlyExecutingTasks
-						select: [:each | each connection = workerConnection].
-			failedTasks valuesDo: 
-					[:taskContext |
-					errorDetails := (GtRrErrorDetails new)
-								errorMessage: 'Worker Unregistered: ' , aString printString;
-								setTrace.
-					self privateTaskFailed: taskContext taskContextId
-						executionData: (GtRrWorkerExecutionData new errorDetails: errorDetails)].
-			self removeQueuedTasksForWorkerId: aUidString].
+	self critical: 
+		[workerConnection := registeredWorkers 
+			removeKey: aUidString
+			ifAbsent: 
+				[StringSignal
+					emit: 'Unable to properly unregister worker ' , aUidString asString
+						, ' due to reason ' , aString asString.
+				nil].
+		runnerStats 
+			registeredWorkerCount: registeredWorkers size;
+			isRunning: self isRunning.
+		terminatedWorkers := availableWorkers select: [ :workerFuture | 
+			workerFuture connection = workerConnection].
+		terminatedWorkers do: [:workerFuture | workerFuture terminateProcess].
+		availableWorkers removeAll: terminatedWorkers.
+		runnerStats availableWorkerCount: availableWorkers size.
+		failedTasks := currentlyExecutingTasks
+					select: [:each | each connection = workerConnection].
+		failedTasks valuesDo: [ :taskContext |
+			errorDetails := (GtRrErrorDetails new)
+				errorMessage: 'Worker Unregistered: ' , aString printString;
+				setTrace.
+			self privateTaskFailed: taskContext taskContextId
+				executionData: (GtRrWorkerExecutionData new errorDetails: errorDetails)].
+		self removeQueuedTasksForWorkerId: aUidString. 
+		"self terminateJobsOnNoWorkers" ].
 	workerConnection
 		ifNotNil: 
 			[self announceAndLog: ((GtRrWorkerUnregisteredAnnouncement new)
@@ -1451,12 +1494,11 @@ GtRemoteRunner >> workerTimeout [
 { #category : #accessing }
 GtRemoteRunner >> workerTimeout: anObject [
 
-	workerTimeout := anObject
+	workerTimeout := anObject.
+	runnerStats defaultWorkerTimeout: workerTimeout.
 ]
 
 { #category : #accessing }
 GtRemoteRunner >> workersStateDescription [
-	^ '{1} registered workers [{2} busy]' format: {
-		registeredWorkers size. 
-		registeredWorkers size - availableWorkers size }
+	^ runnerStats workersStateDescription
 ]

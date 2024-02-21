@@ -219,7 +219,7 @@ GtRrCheckSchedulingTimes >> saveToFile: aFileReference [
 
 	fileReference := aFileReference asFileReference.
 	bakReference := fileReference withExtension: 'bak'.
-
+	fileReference parent ensureCreateDirectory.
 	bakReference ensureDelete.
 	fileReference exists ifTrue:
 		[ fileReference copy renameTo: bakReference basename ].
