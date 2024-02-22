@@ -50,6 +50,7 @@ GtRrJobStartupAndShutdown >> shutdownJob: aJobContext [
 	job := aJobContext job.
 	job markJobCompleted.
 	remoteRunner announceAndLog: (GtRrJobCompletedAnnouncement job: job).
+	remoteRunner announceStatusMessageWithString: 'Job shutdown'.
 ]
 
 { #category : #'api - startup' }

@@ -344,6 +344,26 @@ GtRemoteRunner >> announcer [
 	^ announcer
 ]
 
+{ #category : #announcer }
+GtRemoteRunner >> announceStatusMessage: aStatusMessage [
+	self announce: (GtRrStatusMessageChangedAnnouncement new
+			statusMessage: aStatusMessage)
+]
+
+{ #category : #announcer }
+GtRemoteRunner >> announceStatusMessageWithString: aMessageString [ 
+	self 
+		announceStatusMessageWithString: aMessageString 
+		andSourceLabel:  'JobManager'
+]
+
+{ #category : #announcer }
+GtRemoteRunner >> announceStatusMessageWithString: aMessageString andSourceLabel: aSourceLabel [
+	self announceStatusMessage: (GtRrStatusMessage new
+		messageString: aMessageString;
+		sourceToolLabel: aSourceLabel)
+]
+
 { #category : #private }
 GtRemoteRunner >> assignTasksToWorkers [
 	"Assign tasks to any available workers.
@@ -901,8 +921,11 @@ GtRemoteRunner >> registerAnnouncementsQueueForHeadlessRunner [
 	self assert: [ announcementQueue isNil ].
 	
 	self registerAnnouncementsQueueForAnnouncementType: 
-			GtRrJobAnnouncement, GtRrWorkerAnnouncement,
-			GtRrWorkerChangesSyncErrorAnnouncement, GtRrResultProcessingErrorAnnouncement.
+			GtRrJobAnnouncement, 
+			GtRrWorkerAnnouncement,
+			GtRrWorkerChangesSyncErrorAnnouncement,
+			GtRrResultProcessingErrorAnnouncement,
+			GtRrStatusMessageChangedAnnouncement.
 ]
 
 { #category : #accessing }
