@@ -19,7 +19,7 @@ GtRrStatusMessageChangedAnnouncement >> initializeFromSlotData: aDictionary [
 	super initializeFromSlotData: aDictionary.
 
 	statusMessage := GtRrStatusMessage 
-		fromJSONDictionary:  (aDictionary at: #taskExecutionResult).
+		fromJSONDictionary:  (aDictionary at: #statusMessage).
 ]
 
 { #category : #accessing }

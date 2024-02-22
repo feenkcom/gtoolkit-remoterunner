@@ -354,7 +354,7 @@ GtRemoteRunner >> announceStatusMessage: aStatusMessage [
 GtRemoteRunner >> announceStatusMessageWithString: aMessageString [ 
 	self 
 		announceStatusMessageWithString: aMessageString 
-		andSourceLabel:  'JobManager'
+		andSourceLabel:  'Runner'
 ]
 
 { #category : #announcer }
