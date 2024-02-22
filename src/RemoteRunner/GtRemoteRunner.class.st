@@ -962,7 +962,7 @@ GtRemoteRunner >> registeredWorkersDo: aBlock [
 	"Evaluate aBlock for each of the receiver's registered workers.
 	Must be called within sharedAccess."
 
-	sharedAccess assertIsOwner.
+	"sharedAccess assertIsOwner."
 	registeredWorkers do: aBlock
 ]
 
