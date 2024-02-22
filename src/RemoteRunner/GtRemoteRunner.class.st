@@ -1368,9 +1368,9 @@ GtRemoteRunner >> terminateJobId: aJobId [
 			ifAbsent: [ ].
 		runnerStats currentlyExecutingJobCount: currentlyExecutingJobs size.
 		jobContext ifNil: [ ^ nil ].
+		self emptyQueuesFor: aJobId.
 		jobContext terminateJob ].
-	"Separately empty the task queue of any tasks relating to the job as they may be missed during the code block above"
-	self emptyQueuesFor: aJobId.
+
 	self announceAndLog: (GtRrJobTerminatedAnnouncement job: jobContext job).
 	^ jobContext job
 
