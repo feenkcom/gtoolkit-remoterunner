@@ -1,8 +1,7 @@
 Class {
-	#name : #GtRrJobManagerLogAnalysis,
+	#name : #GtRrRemoteRunnerLogAnalysis,
 	#superclass : #Object,
 	#instVars : [
-		'logger',
 		'grouper',
 		'eventsGroup',
 		'signals',
@@ -12,19 +11,28 @@ Class {
 }
 
 { #category : #accessing }
-GtRrJobManagerLogAnalysis >> description [
+GtRrRemoteRunnerLogAnalysis >> description [
 
 	^ 'A Job Description'
 ]
 
 { #category : #accessing }
-GtRrJobManagerLogAnalysis >> eventsGroup [
+GtRrRemoteRunnerLogAnalysis >> eventsGroup [
+	| subEvents zero |
+	
+	eventsGroup ifNotNil: [ ^ eventsGroup ].
 
-	^ eventsGroup ifNil: [ eventsGroup := self grouper eventsGroup ]
+	zero := Duration zero.
+	subEvents := self grouper eventsGroup
+		select: [ :each | each duration > zero ].
+	eventsGroup := GtBeaconGenericLogCompositeEvent new
+		eventLabel: 'RemoteRunner';
+		addSubEvents: subEvents.
+	^ eventsGroup
 ]
 
 { #category : #ui }
-GtRrJobManagerLogAnalysis >> executionTimelineChartItems [
+GtRrRemoteRunnerLogAnalysis >> executionTimelineChartItems [
 	| tenMs |
 
 	tenMs := 10 milliSeconds.
@@ -41,7 +49,7 @@ GtRrJobManagerLogAnalysis >> executionTimelineChartItems [
 ]
 
 { #category : #accessing }
-GtRrJobManagerLogAnalysis >> grouper [
+GtRrRemoteRunnerLogAnalysis >> grouper [
 	^ grouper ifNil:
 		[ grouper := "GtBeaconEventsGrouper" GtFlatEventsGrouper new.
 		grouper strictMode: strictMode.
@@ -50,13 +58,13 @@ GtRrJobManagerLogAnalysis >> grouper [
 ]
 
 { #category : #ui }
-GtRrJobManagerLogAnalysis >> gtBarElements [
+GtRrRemoteRunnerLogAnalysis >> gtBarElements [
 	^ (self gtBarElementsWithGlobalWeight: 1.0 local: 1.0) asScrollableElement
 		margin: (BlInsets all: 10)
 ]
 
 { #category : #ui }
-GtRrJobManagerLogAnalysis >> gtBarElementsWithGlobalWeight: aWeight local: aLocalWeight [
+GtRrRemoteRunnerLogAnalysis >> gtBarElementsWithGlobalWeight: aWeight local: aLocalWeight [
 	| taskElements aBarColor |
 	
 	aBarColor := BlColorTransition interpolate: Color veryLightGray to: BrGlamorousColors errorBorderColor at: aWeight.
@@ -127,7 +135,7 @@ GtRrJobManagerLogAnalysis >> gtBarElementsWithGlobalWeight: aWeight local: aLoca
 ]
 
 { #category : #ui }
-GtRrJobManagerLogAnalysis >> gtItemsFor: aView [
+GtRrRemoteRunnerLogAnalysis >> gtItemsFor: aView [
 	<gtView>
 	
 	^ aView columnedTree
@@ -142,7 +150,7 @@ GtRrJobManagerLogAnalysis >> gtItemsFor: aView [
 ]
 
 { #category : #ui }
-GtRrJobManagerLogAnalysis >> gtMapFor: aView [
+GtRrRemoteRunnerLogAnalysis >> gtMapFor: aView [
 	<gtView>
 
 	^ aView explicit
@@ -152,7 +160,7 @@ GtRrJobManagerLogAnalysis >> gtMapFor: aView [
 ]
 
 { #category : #ui }
-GtRrJobManagerLogAnalysis >> gtViewExecutionTimelineListFor: aView [
+GtRrRemoteRunnerLogAnalysis >> gtViewExecutionTimelineListFor: aView [
 	<gtView>
 	^self executionTimelineChartItems
 		ifEmpty: [aView empty]
@@ -168,14 +176,14 @@ GtRrJobManagerLogAnalysis >> gtViewExecutionTimelineListFor: aView [
 ]
 
 { #category : #accessing }
-GtRrJobManagerLogAnalysis >> initialize [
+GtRrRemoteRunnerLogAnalysis >> initialize [
 
 	super initialize.
 	strictMode := true.
 ]
 
 { #category : #accessing }
-GtRrJobManagerLogAnalysis >> jobSignals [
+GtRrRemoteRunnerLogAnalysis >> jobSignals [
 	| i relevantRecordings |
 
 	relevantRecordings := OrderedCollection new.
@@ -192,45 +200,33 @@ GtRrJobManagerLogAnalysis >> jobSignals [
 ]
 
 { #category : #accessing }
-GtRrJobManagerLogAnalysis >> logger [
-	^ logger
-]
-
-{ #category : #accessing }
-GtRrJobManagerLogAnalysis >> logger: aSignalLogger [
-
-	logger := aSignalLogger.
-	signals := aSignalLogger recordings.
-]
-
-{ #category : #accessing }
-GtRrJobManagerLogAnalysis >> signals [
+GtRrRemoteRunnerLogAnalysis >> signals [
 	^ signals
 ]
 
 { #category : #accessing }
-GtRrJobManagerLogAnalysis >> signals: anObject [
+GtRrRemoteRunnerLogAnalysis >> signals: anObject [
 	signals := anObject
 ]
 
 { #category : #accessing }
-GtRrJobManagerLogAnalysis >> strictMode [
+GtRrRemoteRunnerLogAnalysis >> strictMode [
 	^ strictMode
 ]
 
 { #category : #accessing }
-GtRrJobManagerLogAnalysis >> strictMode: anObject [
+GtRrRemoteRunnerLogAnalysis >> strictMode: anObject [
 	strictMode := anObject
 ]
 
 { #category : #accessing }
-GtRrJobManagerLogAnalysis >> subEvents [
+GtRrRemoteRunnerLogAnalysis >> subEvents [
 
 	^ self eventsGroup first subEvents
 ]
 
 { #category : #accessing }
-GtRrJobManagerLogAnalysis >> totalDuration [
+GtRrRemoteRunnerLogAnalysis >> totalDuration [
 
 	^ self eventsGroup first duration
 ]

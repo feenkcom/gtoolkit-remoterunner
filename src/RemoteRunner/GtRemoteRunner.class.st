@@ -339,6 +339,26 @@ GtRemoteRunner >> announceAndLog: aBeaconSignal [
 ]
 
 { #category : #announcer }
+GtRemoteRunner >> announceStatusMessage: aStatusMessage [
+	self announce: (GtRrStatusMessageChangedAnnouncement new
+			statusMessage: aStatusMessage)
+]
+
+{ #category : #announcer }
+GtRemoteRunner >> announceStatusMessageWithString: aMessageString [ 
+	self 
+		announceStatusMessageWithString: aMessageString 
+		andSourceLabel:  'Runner'
+]
+
+{ #category : #announcer }
+GtRemoteRunner >> announceStatusMessageWithString: aMessageString andSourceLabel: aSourceLabel [
+	self announceStatusMessage: (GtRrStatusMessage new
+		messageString: aMessageString;
+		sourceToolLabel: aSourceLabel)
+]
+
+{ #category : #announcer }
 GtRemoteRunner >> announcer [
 
 	^ announcer
@@ -752,6 +772,22 @@ GtRemoteRunner >> managerStartupAndShutdown: aGtRrManagerStartupAndShutdown [
 	managerStartupAndShutdown remoteRunner: self.
 ]
 
+{ #category : #'api - logger' }
+GtRemoteRunner >> moveLoggingTo: aFileReference [
+	"Replace the receiver's logger with one that logs to the supplied file"
+	| oldLogger |
+
+	log ifNil: [ ^ nil ].
+	oldLogger := log.
+	log := RestartingStreamLogger new streamBlock: [  ZnNewLineWriterStream on: 
+		(ZnCharacterWriteStream
+			on: aFileReference asFileReference binaryWriteStream
+			encoding: 'utf8') ].
+	self startLogger: log.
+	oldLogger stop.
+	^ oldLogger.
+]
+
 { #category : #'api - worker' }
 GtRemoteRunner >> nextTaskForWorkerId: aUidString [
 	"Answer the next task allocated to the specified worker that is waiting on this method.
@@ -885,8 +921,11 @@ GtRemoteRunner >> registerAnnouncementsQueueForHeadlessRunner [
 	self assert: [ announcementQueue isNil ].
 	
 	self registerAnnouncementsQueueForAnnouncementType: 
-			GtRrJobAnnouncement, GtRrWorkerAnnouncement,
-			GtRrWorkerChangesSyncErrorAnnouncement, GtRrResultProcessingErrorAnnouncement.
+			GtRrJobAnnouncement, 
+			GtRrWorkerAnnouncement,
+			GtRrWorkerChangesSyncErrorAnnouncement,
+			GtRrResultProcessingErrorAnnouncement,
+			GtRrStatusMessageChangedAnnouncement.
 ]
 
 { #category : #accessing }
@@ -915,11 +954,11 @@ GtRemoteRunner >> registerWorkerWithDetails: aDictionary [
 			(workerJobId = 'anyJob'
 				or: [currentlyExecutingJobs includesKey: workerJobId])
 					ifFalse: 
-						[ pharoLinkServerConnection stop.
-						GtRrRegisterWorkerRejectedSignal new
+						[ GtRrRegisterWorkerRejectedSignal new
 							ipAddress: pharoLinkServerConnection remoteAddressString;
 							workerAttributes: aDictionary;
 							emit.
+						pharoLinkServerConnection stop.
 						^self ] ].
 	workerConnection := GtRrWorkerConnection
 				connection: pharoLinkServerConnection
@@ -928,8 +967,8 @@ GtRemoteRunner >> registerWorkerWithDetails: aDictionary [
 	workerId := aDictionary at: #id.
 	aDictionary at: #workerIpAddress put: workerConnection remoteAddressString.
 	self critical: 
-		[ registeredWorkers at: workerId put: workerConnection.
-		runnerStats 
+		 [ registeredWorkers at: workerId put: workerConnection.
+		 runnerStats 
 			registeredWorkerCount: registeredWorkers size;
 			isRunning: self isRunning ].
 	managerStartupAndShutdown registerWorker: workerConnection.
@@ -998,6 +1037,19 @@ GtRemoteRunner >> removeSubscription: subscription [
 	"Remove the given subscription from the receiver"
 
 	^ self announcer removeSubscription: subscription
+]
+
+{ #category : #'api - logger' }
+GtRemoteRunner >> replaceLogger [
+	"Replace the receiver's logger and answer the old one"
+	| oldLogger |
+
+	log ifNil: [ ^ nil ].
+	oldLogger := log.
+	log := nil.
+	self startLogging.
+	oldLogger stop.
+	^ oldLogger.
 ]
 
 { #category : #phases }
@@ -1085,10 +1137,7 @@ GtRemoteRunner >> startJob: aGtRrJob [
 		at: aGtRrJob id
 		put: context.
 	runnerStats currentlyExecutingJobCount: currentlyExecutingJobs size.
-	self logEmitter emitJobStartupStartFor: context.
 	jobStartupAndShutdown startupJob: context.
-	self logEmitter emitJobStartupEndFor: context.
-	
 	self announceAndLog: (GtRrJobStartedAnnouncement job: aGtRrJob).
 	self assignTasksToWorkers.
 	"If there are problems during submission the job will be marked with an error and the context should show isFinished."
@@ -1096,11 +1145,18 @@ GtRemoteRunner >> startJob: aGtRrJob [
 ]
 
 { #category : #'api - logger' }
+GtRemoteRunner >> startLogger: aLogger [
+
+	aLogger startFor: GtRemoteRunnerAnnouncement, GtRemoteRunnerSignal, StringSignal.
+]
+
+{ #category : #'api - logger' }
 GtRemoteRunner >> startLogging [
 	"Start the receiver's in-memory log"
 
 	log ifNotNil: [ ^ self ].
-	log := CircularMemoryLogger new startFor: GtRemoteRunnerAnnouncement, StringSignal.
+	log := MemoryLogger new.
+	self startLogger: log.
 ]
 
 { #category : #ui }
@@ -1335,9 +1391,9 @@ GtRemoteRunner >> terminateJobId: aJobId [
 			ifAbsent: [ ].
 		runnerStats currentlyExecutingJobCount: currentlyExecutingJobs size.
 		jobContext ifNil: [ ^ nil ].
+		self emptyQueuesFor: aJobId.
 		jobContext terminateJob ].
-	"Separately empty the task queue of any tasks relating to the job as they may be missed during the code block above"
-	self emptyQueuesFor: aJobId.
+
 	self announceAndLog: (GtRrJobTerminatedAnnouncement job: jobContext job).
 	^ jobContext job
 

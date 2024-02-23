@@ -50,6 +50,7 @@ GtRrJobStartupAndShutdown >> shutdownJob: aJobContext [
 	job := aJobContext job.
 	job markJobCompleted.
 	remoteRunner announceAndLog: (GtRrJobCompletedAnnouncement job: job).
+	remoteRunner announceStatusMessageWithString: 'Job shutdown'.
 ]
 
 { #category : #'api - startup' }
@@ -64,9 +65,10 @@ GtRrJobStartupAndShutdown >> startupJob: aGtRrJobContext [
 	- Use the scheduler to group all the tests in to tasks.
 	Must be called within sharedAccess."
 
+	remoteRunner logEmitter emitJobStartupStartFor: aGtRrJobContext.
 	aGtRrJobContext 
 		markJobStarted;
 		submitTasks.
 	remoteRunner timeoutManager addContext: aGtRrJobContext.
-
+	remoteRunner logEmitter emitJobStartupEndFor: aGtRrJobContext.
 ]

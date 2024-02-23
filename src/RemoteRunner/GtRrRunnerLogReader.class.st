@@ -44,6 +44,15 @@ GtRrRunnerLogReader >> load [
 			[ self processLine: stream nextLine ] ].
 ]
 
+{ #category : #accessing }
+GtRrRunnerLogReader >> memoryLogger [
+	"Answer a MemoryLogger loaded with the receiver's signals.
+	Generally for debugging purposes."
+
+	^ MemoryLogger new
+		basicRecordings: self signals.
+]
+
 { #category : #private }
 GtRrRunnerLogReader >> processLine: aString [
 	| words date cls data |
