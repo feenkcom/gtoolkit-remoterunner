@@ -1138,8 +1138,12 @@ GtRemoteRunner >> startJob: aGtRrJob [
 		put: context.
 	runnerStats currentlyExecutingJobCount: currentlyExecutingJobs size.
 	jobStartupAndShutdown startupJob: context.
+	
 	self announceAndLog: (GtRrJobStartedAnnouncement job: aGtRrJob).
+	self announceStatusMessageWithString: 'Running tests - Job started, awaiting workers'.
+		
 	self assignTasksToWorkers.
+	
 	"If there are problems during submission the job will be marked with an error and the context should show isFinished."
 	self checkJobCompleted: context.
 ]

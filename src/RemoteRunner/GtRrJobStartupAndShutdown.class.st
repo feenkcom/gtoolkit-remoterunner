@@ -46,11 +46,12 @@ GtRrJobStartupAndShutdown >> shutdown [
 GtRrJobStartupAndShutdown >> shutdownJob: aJobContext [
 	| job |
 
+	remoteRunner announceStatusMessageWithString: 'Performing job shutdown - Remove currently executing job'.
 	remoteRunner removeCurrentlyExecutingJob: aJobContext id.
 	job := aJobContext job.
 	job markJobCompleted.
 	remoteRunner announceAndLog: (GtRrJobCompletedAnnouncement job: job).
-	remoteRunner announceStatusMessageWithString: 'Job shutdown'.
+	
 ]
 
 { #category : #'api - startup' }
