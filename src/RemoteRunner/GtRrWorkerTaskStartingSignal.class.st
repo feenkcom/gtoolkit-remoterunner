@@ -4,9 +4,7 @@ Class {
 	#category : #'RemoteRunner-Signals'
 }
 
-{ #category : #printing }
-GtRrWorkerTaskStartingSignal >> printOneLineContentsOn: stream [
-
-	task ifNil: [ ^ self ].
-	stream print: task taskId
+{ #category : #testing }
+GtRrWorkerTaskStartingSignal >> isStartSignalType [
+	^ true
 ]

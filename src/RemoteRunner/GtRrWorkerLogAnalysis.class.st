@@ -1,11 +1,11 @@
 Class {
-	#name : #GtRrRemoteRunnerLogAnalysis,
+	#name : #GtRrWorkerLogAnalysis,
 	#superclass : #GtRemoteRunnerLogAnalysis,
 	#category : #'RemoteRunner-Analysis'
 }
 
 { #category : #accessing }
-GtRrRemoteRunnerLogAnalysis >> description [
+GtRrWorkerLogAnalysis >> description [
 
-	^ 'Remote Runner'
+	^ 'Worker'
 ]

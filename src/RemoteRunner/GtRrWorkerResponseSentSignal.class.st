@@ -11,7 +11,7 @@ Class {
 GtRrWorkerResponseSentSignal >> initializeFromTimestamp: aDateAndTime andData: aCollection [
 
 	super initializeFromTimestamp: aDateAndTime andData: aCollection.
-	task := aCollection at: 4.
+	result := aCollection at: 4.
 ]
 
 { #category : #printing }

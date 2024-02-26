@@ -68,8 +68,9 @@ GtRrWorkerResultEntry >> sendThroughApplication: aPharoLinkApplication [
 	checkProcess := [ self checkPromise ] forkAt: Processor userBackgroundPriority.
 	
 	GtRrWorkerResponseSentSignal new 
-		task: task;
-		result: self;
+		taskId: task taskId;
+		result: self printString;
+		propertyAt: #result put: self;
 		emit.
 ]
 
