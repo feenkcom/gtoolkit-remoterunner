@@ -12,15 +12,18 @@ GtRrWorkerRegistrationRefusedAnnouncement >> currentlyExecutingJobIds: aCollecti
 	currentlyExecutingJobIds := aCollection
 ]
 
+{ #category : #accessing }
+GtRrWorkerRegistrationRefusedAnnouncement >> initializeFromTimestamp: aTimestamp andData: dataParts [
+
+	super initializeFromTimestamp: aTimestamp andData: dataParts.
+	currentlyExecutingJobIds := self class evaluate: (dataParts at: 7).
+]
+
 { #category : #printing }
 GtRrWorkerRegistrationRefusedAnnouncement >> printOneLineContentsOn: aStream [
+
+	super printOneLineContentsOn: aStream.
 	aStream 
-		nextPut: $|; space;
-		nextPutAll: 'WorkerSignal';
-		space; nextPut: $|; space;
-		nextPutAll: currentlyExecutingJobIds storeString;
-		space; nextPut: $|; space;
-		nextPutAll: workerAttributes storeString;
-		space; nextPut: $|; space;
-		nextPutAll: self processId
+		<< ' | ';
+		<< currentlyExecutingJobIds storeString
 ]

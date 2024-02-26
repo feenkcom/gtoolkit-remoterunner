@@ -8,6 +8,14 @@ Class {
 	#category : #'RemoteRunner-Announcements'
 }
 
+{ #category : #printing }
+GtRrWorkerReplacedAnnouncement >> initializeFromTimestamp: aTimestamp andData: dataParts [
+
+	super initializeFromTimestamp: aTimestamp andData: dataParts.
+	oldProcess := dataParts at: 7.
+	newProcess := dataParts at: 8.
+]
+
 { #category : #accessing }
 GtRrWorkerReplacedAnnouncement >> newProcess [
 
@@ -35,9 +43,10 @@ GtRrWorkerReplacedAnnouncement >> oldProcess: anObject [
 { #category : #printing }
 GtRrWorkerReplacedAnnouncement >> printOneLineContentsOn: stream [
 
+	super printOneLineContentsOn: stream.
 	stream
-		<< 'old: ';
-		print: oldProcess;
-		<< ', new: ';
-		print: newProcess
+		<< ' | ';
+		<< oldProcess asString;
+		<< ' | ';
+		<< newProcess asString
 ]

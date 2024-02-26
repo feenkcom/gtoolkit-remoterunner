@@ -8,16 +8,6 @@ Class {
 	#category : #'RemoteRunner-Announcements'
 }
 
-{ #category : #serialization }
-GtRrWorkerUnregisteredAnnouncement >> initializeFromTimestamp: aTimestamp andData: dataParts [
-
-	self
-		basicTimestamp: aTimestamp;
-		remoteAddressString: dataParts third;
-		reason: dataParts sixth;
-		workerAttributes: (self class evaluate: dataParts fifth).
-]
-
 { #category : #accessing }
 GtRrWorkerUnregisteredAnnouncement >> reason [
 

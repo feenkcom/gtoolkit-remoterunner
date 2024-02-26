@@ -21,15 +21,23 @@ GtRrResultProcessingErrorAnnouncement >> errorDetails: anObject [
 ]
 
 { #category : #printing }
+GtRrResultProcessingErrorAnnouncement >> initializeFromTimestamp: aTimestamp andData: dataParts [
+
+	super initializeFromTimestamp: aTimestamp andData: dataParts.
+	self 	
+		workerId: dataParts seventh;
+		errorDetails: dataParts eighth.
+]
+
+{ #category : #printing }
 GtRrResultProcessingErrorAnnouncement >> printOneLineContentsOn: aStream [
 
-	(workerId isNil and: [ errorDetails isNil ]) ifTrue: [ ^ super printOneLineContentsOn: aStream ].
-	workerId ifNotNil: [ aStream << workerId asString ].
-	aStream << ': '.
-	errorDetails ifNotNil: 
-		[ aStream 
-			<< errorDetails errorMessage asString; cr;
-			<< errorDetails trace asString ].
+	super printOneLineContentsOn: aStream.
+	aStream
+		<< ' | ';
+		<< workerId asString;
+		<< ' | ';
+		<< errorDetails asString.
 ]
 
 { #category : #accessing }
