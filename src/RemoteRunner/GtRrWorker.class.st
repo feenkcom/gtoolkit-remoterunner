@@ -479,7 +479,7 @@ GtRrWorker >> stepService [
 
 	taskContext := self nextTask.
 	taskContext = 'quit' ifTrue: [ self logAndQuit ].
-	GtRrWorkerTaskStartingAnnouncement new
+	GtRrWorkerTaskStartingSignal new
 		task: taskContext;
 		emit.
 	executionContext := GtRrWorkerExecutionContext new
@@ -557,7 +557,7 @@ GtRrWorker >> syncChangesIfRequiredWith: aPharoLinkApplication [
 GtRrWorker >> taskDone: aTaskContext with: anObject [
 	| serializedResult executionData serializedExecutionData|
 
-	GtRrWorkerTaskCompletedAnnouncement new
+	GtRrWorkerTaskCompletedSignal new
 		task: aTaskContext;
 		message: 'Success: ' , anObject printString;
 		emit.
@@ -591,7 +591,7 @@ GtRrWorker >> taskFailed: aTaskContext with: anError [
 	| executionData serializedExecutionData |
 
 	Stdio stdout lf; << 'ensured3'; lf; flush.
-	GtRrWorkerTaskCompletedAnnouncement new
+	GtRrWorkerTaskCompletedSignal new
 		task: aTaskContext;
 		message: 'ERROR: ' , anError printString;
 		emit.
