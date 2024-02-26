@@ -58,19 +58,19 @@ GtRrWorkerAnnouncement >> printOneLineContentsOn: aStream [
 	(self worker isNil and: [
 		self remoteAddressString isNil ]) ifTrue: [ ^ self ].
 		
-	aStream 
-		nextPut: $|; space;
-		nextPutAll: 'WorkerSignal';
-		space; nextPut: $|; space;
-		nextPutAll: self workerId;
-		space; nextPut: $|; space;
+	aStream
+		<< '| ';
+		<< self signalTypeLabel;
+		<< ' | ';
+		<< self processId;
+		<< ' | ';
+		<< self workerId;
+		<< ' | ';
 		nextPutAll: self remoteAddressString;
-		space; nextPut: $|; space;
+		<< ' | ';
 		nextPutAll: self workingDirectory;
-		space; nextPut: $|; space;
-		nextPutAll: (workerAttributes storeString);
-		space; nextPut: $|; space;
-		nextPutAll: self processId
+		<< ' | ';
+		nextPutAll: (workerAttributes storeString)
 ]
 
 { #category : #accessing }
@@ -81,6 +81,12 @@ GtRrWorkerAnnouncement >> remoteAddressString [
 { #category : #accessing }
 GtRrWorkerAnnouncement >> remoteAddressString: anAddressString [ 
 	remoteAddressString := anAddressString
+]
+
+{ #category : #printing }
+GtRrWorkerAnnouncement >> signalTypeLabel [
+
+	^ 'Worker Signal'
 ]
 
 { #category : #accessing }

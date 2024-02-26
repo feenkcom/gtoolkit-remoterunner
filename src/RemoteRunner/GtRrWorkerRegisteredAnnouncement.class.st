@@ -7,15 +7,6 @@ Class {
 	#category : #'RemoteRunner-Announcements'
 }
 
-{ #category : #serialization }
-GtRrWorkerRegisteredAnnouncement >> initializeFromTimestamp: aTimestamp andData: dataParts [
-
-	self
-		basicTimestamp: aTimestamp;
-		remoteAddressString: dataParts third;
-		workerAttributes: (self class evaluate: dataParts fifth).
-]
-
 { #category : #accessing }
 GtRrWorkerRegisteredAnnouncement >> workerCount [
 	^ workerCount

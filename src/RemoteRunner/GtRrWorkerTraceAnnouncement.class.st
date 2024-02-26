@@ -13,6 +13,13 @@ GtRrWorkerTraceAnnouncement >> emit [
 ]
 
 { #category : #accessing }
+GtRrWorkerTraceAnnouncement >> initializeFromTimestamp: aTimestamp andData: dataParts [
+
+	super initializeFromTimestamp: aTimestamp andData: dataParts.
+	message := dataParts at: 7.
+]
+
+{ #category : #accessing }
 GtRrWorkerTraceAnnouncement >> message [
 
 	^ message
@@ -27,8 +34,8 @@ GtRrWorkerTraceAnnouncement >> message: anObject [
 { #category : #accessing }
 GtRrWorkerTraceAnnouncement >> printOneLineContentsOn: stream [
 
-	stream 
-		print: message;
-		<< ' from: '.
 	super printOneLineContentsOn: stream.
+	stream
+		<< ' | ';
+		<< message asString
 ]
