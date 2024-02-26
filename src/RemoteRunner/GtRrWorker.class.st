@@ -80,6 +80,12 @@ GtRrWorker class >> isCommandLineWorker [
 	^ Smalltalk commandLine argumentsInclude: self commandLineName
 ]
 
+{ #category : #clap }
+GtRrWorker class >> logFilenameFor: aGtRrWorker [
+
+	^ 'gtrrworker.log'
+]
+
 { #category : #private }
 GtRrWorker class >> newPharoApplication: aString [
 
@@ -99,23 +105,15 @@ GtRrWorker class >> newPharoLinkServer: aString [
 		  yourself
 ]
 
-{ #category : #accessing }
+{ #category : #clap }
 GtRrWorker class >> processCommandLineArgs: args [
 	| worker connectionStrategyId connectionStrategy logger serverSocketAddress announcements workerClass |
 
 	args
 		at: #help ifPresent: [ :help | 
 			help value.
-			help context exitSuccess ];
-		at: #log ifPresent: [ 
-			SignalLogger resetAllInstances.
-			logger := RestartingStreamLogger stdout.
-			announcements := AnnouncementSetWithExclusions withAll:
-				{ GtRemoteRunnerAnnouncement, 
-				PharoLinkSignal,
-				StringSignal }.
-			announcements addExclusions: ContextStackSignal allSubclasses.
-			logger startFor: announcements ].
+			help context exitSuccess ].
+	GtRrWorkerCliStartingSignal new emit.
 	serverSocketAddress := ((args at: #serverSocketAddress) at:
 			                          #address) value.
 	StringSignal emit: 'Server address: ' , serverSocketAddress.
@@ -146,10 +144,22 @@ GtRrWorker class >> processCommandLineArgs: args [
 		worker attributes
 			at: (arg at: #key) value
 			put: (arg at: #value) value ].
+	args at: #log ifPresent: 
+		[ SignalLogger resetAllInstances.
+		logger := RestartingStreamLogger appendToFile: (workerClass logFilenameFor: worker).
+		announcements := AnnouncementSetWithExclusions withAll:
+			{ GtRemoteRunnerAnnouncement, 
+			GtRemoteRunnerSignal,
+			PharoLinkSignal,
+			StringSignal }.
+		announcements addExclusions: ContextStackSignal allSubclasses.
+		logger startFor: announcements ].
+
 	StringSignal emit: 'Install UI manager...'.
 	UIManager default: GtRrUIManager new.
 	StringSignal emit: 'Starting worker...'.
 	worker start.
+	GtRrWorkerCliCompletedSignal new emit.
 	"Hibernate until the process exits"
 	Semaphore new wait.
 ]
@@ -480,7 +490,7 @@ GtRrWorker >> stepService [
 	taskContext := self nextTask.
 	taskContext = 'quit' ifTrue: [ self logAndQuit ].
 	GtRrWorkerTaskStartingSignal new
-		task: taskContext;
+		taskId: taskContext taskId;
 		emit.
 	executionContext := GtRrWorkerExecutionContext new
 		taskContext: taskContext;
@@ -558,7 +568,7 @@ GtRrWorker >> taskDone: aTaskContext with: anObject [
 	| serializedResult executionData serializedExecutionData|
 
 	GtRrWorkerTaskCompletedSignal new
-		task: aTaskContext;
+		taskId: aTaskContext taskId;
 		message: 'Success: ' , anObject printString;
 		emit.
 	executionData := GtRrWorkerExecutionData new
@@ -592,7 +602,7 @@ GtRrWorker >> taskFailed: aTaskContext with: anError [
 
 	Stdio stdout lf; << 'ensured3'; lf; flush.
 	GtRrWorkerTaskCompletedSignal new
-		task: aTaskContext;
+		taskId: aTaskContext taskId;
 		message: 'ERROR: ' , anError printString;
 		emit.
 	executionData := GtRrWorkerExecutionData new

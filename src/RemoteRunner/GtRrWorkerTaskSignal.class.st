@@ -2,7 +2,7 @@ Class {
 	#name : #GtRrWorkerTaskSignal,
 	#superclass : #GtRrWorkerOperationSignal,
 	#instVars : [
-		'task'
+		'taskId'
 	],
 	#category : #'RemoteRunner-Signals'
 }
@@ -11,7 +11,7 @@ Class {
 GtRrWorkerTaskSignal >> initializeFromTimestamp: aDateAndTime andData: aCollection [
 
 	super initializeFromTimestamp: aDateAndTime andData: aCollection.
-	task := aCollection at: 3.
+	taskId := aCollection at: 3.
 ]
 
 { #category : #printing }
@@ -20,19 +20,21 @@ GtRrWorkerTaskSignal >> printOneLineContentsOn: stream [
 	super printOneLineContentsOn: stream.
 	stream
 		<< ' | ';
-		<< (task
-			ifNil: [ '<no task>' ]
-			ifNotNil: [ task id asString ])
+		<< taskId asString
 ]
 
 { #category : #accessing }
-GtRrWorkerTaskSignal >> task [
+GtRrWorkerTaskSignal >> signalTypeLabel [
 
-	^ task
+	^ 'Worker Task Signal'
 ]
 
 { #category : #accessing }
-GtRrWorkerTaskSignal >> task: anObject [
+GtRrWorkerTaskSignal >> taskId [
+	^ taskId
+]
 
-	task := anObject
+{ #category : #accessing }
+GtRrWorkerTaskSignal >> taskId: anObject [
+	taskId := anObject
 ]

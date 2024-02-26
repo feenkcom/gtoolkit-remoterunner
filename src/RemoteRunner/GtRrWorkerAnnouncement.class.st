@@ -52,6 +52,18 @@ GtRrWorkerAnnouncement >> initializeFromTimestamp: aTimestamp andData: dataParts
 		workerAttributes: (self class evaluate: dataParts sixth).
 ]
 
+{ #category : #testing }
+GtRrWorkerAnnouncement >> isEndSignalType [
+
+	^ false
+]
+
+{ #category : #testing }
+GtRrWorkerAnnouncement >> isStartSignalType [
+
+	^ false
+]
+
 { #category : #printing }
 GtRrWorkerAnnouncement >> printOneLineContentsOn: aStream [
 
