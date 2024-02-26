@@ -28,6 +28,17 @@ GtRrRunnerLogReader >> filename: anObject [
 	filename := anObject
 ]
 
+{ #category : #accessing }
+GtRrRunnerLogReader >> gtSignalsFor: aView [
+	<gtView>
+
+	^ aView forward
+		title: 'Signals';
+		priority: 10;
+		object: [ self memoryLogger ];
+		view: #gtRecordingsFor:
+]
+
 { #category : #initialization }
 GtRrRunnerLogReader >> initialize [
 
@@ -42,6 +53,7 @@ GtRrRunnerLogReader >> load [
 	filename asFileReference readStreamDo: [ :stream |
 		[ stream atEnd ] whileFalse:
 			[ self processLine: stream nextLine ] ].
+	^ signals
 ]
 
 { #category : #accessing }
@@ -86,7 +98,7 @@ GtRrRunnerLogReader >> shouldLoad: words [
 { #category : #accessing }
 GtRrRunnerLogReader >> signals [
 
-	^ signals
+	^ signals ifNil: [ signals := self load ].
 ]
 
 { #category : #accessing }
