@@ -29,17 +29,9 @@ GtRemoteRunnerLogAnalysis >> eventLabel: anObject [
 
 { #category : #accessing }
 GtRemoteRunnerLogAnalysis >> eventSignals [
-	| i relevantRecordings |
 
-	relevantRecordings := OrderedCollection new.
-	i := 1.
-	[ | recording |
-	recording := signals at: i.
-	(recording respondsTo: #signalTypeLabel) ifTrue:
-			[ relevantRecordings add: recording ].
-	i := i + 1.
-	i <= signals size ] whileTrue.
-	^ relevantRecordings.
+	^ signals select: [ :each |
+		each respondsTo: #signalTypeLabel ]
 ]
 
 { #category : #ui }
