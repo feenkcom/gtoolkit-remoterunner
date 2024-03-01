@@ -46,6 +46,16 @@ GtRrExecutionHorizontalChartStencil >> configureWithMinimalDetails [
 ]
 
 { #category : #accessing }
+GtRrExecutionHorizontalChartStencil >> configureWithSmallerDetails [
+	barHeight := 5.
+	rowHeight := 5.
+	leftPadding := 20.
+	
+	hideRowLabels := true.
+	hideAxisLabels := false.
+]
+
+{ #category : #accessing }
 GtRrExecutionHorizontalChartStencil >> create [
 	<return: #Object>
 	| minCreationDate maxExpireDate plot timeScale barWidthScale |
