@@ -804,7 +804,8 @@ GtRemoteRunner >> nextTaskForWorkerId: aUidString [
 		emit.
 	self critical:
 		[ (jobStartupAndShutdown finishedWithWorkerFuture: taskFuture) ifTrue:
-			[ ^ 'quit' ].
+			[ runnerStats availableWorkerCount: availableWorkers size.
+			^ 'quit' ].
 		availableWorkers add: taskFuture.
 		runnerStats availableWorkerCount: availableWorkers size.
 		self assignTasksToWorkers ].
@@ -1477,6 +1478,30 @@ GtRemoteRunner >> unsubscribe: anObject [
 	"Unsubscribe all subscriptions of anObject from the receiver"
 
 	^ self announcer unsubscribe: anObject
+]
+
+{ #category : #'private - debugging' }
+GtRemoteRunner >> updateStats [
+	"Update all attributes of the stats object.
+	Answer the stats pre- and post-update.
+	For debugging purposes."
+	| pre post |
+
+	self critical:
+		[ pre := runnerStats copy.
+		runnerStats
+			registeredWorkerCount: registeredWorkers size;
+			currentlyExecutingJobCount: currentlyExecutingJobs size;
+			currentlyExecutingTaskCount: currentlyExecutingTasks size;
+			taskQueueSize: taskQueue size;
+			availableWorkerCount: availableWorkers size;
+			sharedAccessCount: sharedAccess size;
+			portNumber: port;
+			isRunning: self isRunning;
+			defaultTaskTimeout: taskTimeout;
+			defaultWorkerTimeout: workerTimeout.
+		post := runnerStats copy ].
+	^ { pre. post. }
 ]
 
 { #category : #'announcer - subscription' }
