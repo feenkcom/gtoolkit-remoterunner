@@ -17,6 +17,20 @@ GtRrExecutionChartDataItemsGroup class >> leJsonV4Name [
 ]
 
 { #category : #accessing }
+GtRrExecutionChartDataItemsGroup >> appendDurationToLabel [
+	| newLabel |
+	
+	newLabel := String streamContents: [ :aStream |
+		aStream 
+			<< self label;
+			<< ' (';
+			<< self duration gtShortPrintString;
+			<< ')' ].
+		
+	self label: newLabel
+]
+
+{ #category : #accessing }
 GtRrExecutionChartDataItemsGroup >> duration [
 	^ self endTime - self startTime
 ]

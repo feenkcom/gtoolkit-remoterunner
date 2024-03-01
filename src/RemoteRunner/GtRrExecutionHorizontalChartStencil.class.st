@@ -46,6 +46,16 @@ GtRrExecutionHorizontalChartStencil >> configureWithMinimalDetails [
 ]
 
 { #category : #accessing }
+GtRrExecutionHorizontalChartStencil >> configureWithSmallerDetails [
+	barHeight := 5.
+	rowHeight := 5.
+	leftPadding := 20.
+	
+	hideRowLabels := true.
+	hideAxisLabels := false.
+]
+
+{ #category : #accessing }
 GtRrExecutionHorizontalChartStencil >> create [
 	<return: #Object>
 	| minCreationDate maxExpireDate plot timeScale barWidthScale |
@@ -60,7 +70,9 @@ GtRrExecutionHorizontalChartStencil >> create [
 	
 	barWidthScale := GtPlotterDurationScale new 
 		domainFrom: 0 seconds 
-		to: maxExpireDate - minCreationDate.
+		to: (maxExpireDate
+			ifNil: [ 0 seconds ]
+			ifNotNil: [ maxExpireDate - minCreationDate ]).
 	
 	plot := BrVerticalPane new 
 		matchParent.
@@ -148,10 +160,12 @@ GtRrExecutionHorizontalChartStencil >> createPlotterScrollableElementForTimeScal
 				valueStyle: [ :anElement :aGtScaleContext |
 					self styleBar: anElement execution: aGtScaleContext originalValue.
 					anElement constraintsDo: [ :c | 
-						c frame horizontal 
-							alignLeftAt: (timeScale 
-								map: (startTimeComputation 
-									value: aGtScaleContext originalValue)) ] ];
+						(startTimeComputation 
+							value: aGtScaleContext originalValue)
+								ifNotNil: [:aValue | 
+									c frame horizontal 
+										alignLeftAt: (timeScale 
+										map: aValue) ] ] ];
 				scale: barWidthScale;
 				scaleData: [ :each | each duration ];
 				values: (rowValuesComputation cull: anExecutionDetails).
@@ -208,7 +222,13 @@ GtRrExecutionHorizontalChartStencil >> firstStartDate [
 	^ self executions
 		inject: (startTimeComputation value: self executions first)
 		into: [ :minDate :each | 
-			minDate min: (startTimeComputation value: each) ]
+			minDate 
+				ifNil: [ (startTimeComputation value: each)  ]
+				ifNotNil: [ 
+					(startTimeComputation value: each) 
+						ifNil: [ minDate ]
+						ifNotNil: [ :aDate | 
+							minDate min:  aDate ] ] ]
 ]
 
 { #category : #accessing }
@@ -267,7 +287,13 @@ GtRrExecutionHorizontalChartStencil >> lastEndDate [
 	^ self executions 
 		inject: (endTimeComputation value: self executions  first) 
 		into: [ :maxDate :each | 
-			maxDate max: (endTimeComputation value: each) ]
+			maxDate 
+				ifNil: [ (endTimeComputation value: each) ]
+				ifNotNil: [
+					(endTimeComputation value: each)
+						ifNil: [ maxDate ]
+						ifNotNil: [ :aDate |
+							maxDate max: aDate ] ] ]
 ]
 
 { #category : #accessing }

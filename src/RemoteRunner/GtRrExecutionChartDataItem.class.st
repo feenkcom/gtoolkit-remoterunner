@@ -79,7 +79,10 @@ GtRrExecutionChartDataItem >> appendDurationToLabel [
 { #category : #accessing }
 GtRrExecutionChartDataItem >> duration [
 	^ cachedDuration ifNil: [
-		cachedDuration := self endTime - self startTime ]
+		(self endTime isNil or: [self startTime isNil ]) 
+			ifTrue: [ nil ]
+			ifFalse: [
+				cachedDuration := self endTime - self startTime ] ]
 ]
 
 { #category : #accessing }
