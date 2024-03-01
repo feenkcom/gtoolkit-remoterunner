@@ -82,8 +82,15 @@ GtRrWorker class >> isCommandLineWorker [
 
 { #category : #clap }
 GtRrWorker class >> logFilenameFor: aGtRrWorker [
+	| pid filename |
 
-	^ 'gtrrworker.log'
+	pid := GtOsSystemInfo current currentProcessId.
+	filename := 'gtrrworker-' , pid asString , '.log'.
+	Stdio stdout
+		<< 'gtrrworker.log filename set to: ';
+		<< filename;
+		lf.
+	^ filename
 ]
 
 { #category : #private }
