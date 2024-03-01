@@ -136,6 +136,7 @@ GtRrWorker class >> processCommandLineArgs: args [
 			{ GtRemoteRunnerAnnouncement, 
 			GtRemoteRunnerSignal,
 			PharoLinkSignal,
+			LanguageLinkEventSignal,
 			StringSignal }.
 		announcements addExclusions: ContextStackSignal allSubclasses.
 		logger startFor: announcements ].
