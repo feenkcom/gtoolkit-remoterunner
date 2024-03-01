@@ -66,7 +66,10 @@ GtRrExecutionHorizontalChartStencil >> create [
 	timeScale := GtPlotterTimeScale new 
 		domainFrom: minCreationDate to: maxExpireDate.
 	timeScale tickFormat: [ :eachDateAndTime | 
-		(eachDateAndTime - minCreationDate) gtShortPrintString ].
+		(eachDateAndTime  isNil or: [ minCreationDate isNil ])
+			ifTrue: [ '' ] 
+			ifFalse: [
+				(eachDateAndTime - minCreationDate) gtShortPrintString ] ].
 	
 	barWidthScale := GtPlotterDurationScale new 
 		domainFrom: 0 seconds 

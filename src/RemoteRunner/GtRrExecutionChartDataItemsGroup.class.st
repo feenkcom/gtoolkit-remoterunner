@@ -37,7 +37,8 @@ GtRrExecutionChartDataItemsGroup >> duration [
 
 { #category : #accessing }
 GtRrExecutionChartDataItemsGroup >> endTime [ 
-
+	self items ifEmpty: [ ^ nil ].
+	
 	^ self items
 		inject: self items first endTime
 		into: [ :endTime :anItem | 
@@ -93,6 +94,7 @@ GtRrExecutionChartDataItemsGroup >> label: anObject [
 
 { #category : #accessing }
 GtRrExecutionChartDataItemsGroup >> startTime [ 
+	self items ifEmpty: [ ^ nil ].
 	
 	^ self items
 		inject: self items first startTime
