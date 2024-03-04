@@ -60,6 +60,10 @@ GtRrExecutionHorizontalChartStencil >> create [
 	<return: #Object>
 	| minCreationDate maxExpireDate plot timeScale barWidthScale |
 	
+	self executions ifEmpty: [  
+		^ BrVerticalPane new 
+			matchParent ].
+	
 	minCreationDate := self firstStartDate.	
 	maxExpireDate := self lastEndDate.
 	
