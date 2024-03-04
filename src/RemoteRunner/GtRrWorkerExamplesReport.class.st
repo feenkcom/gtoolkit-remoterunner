@@ -47,7 +47,7 @@ GtRrWorkerExamplesReport >> gtViewExecutionTimelineListFor: aView [
 	<gtView>
 	
 	^ aView explicit
-		title: 'Execution timeline';
+		title: 'Tasks timeline';
 		priority: 25;
 		stencil: [ 
 			GtRrExecutionHorizontalChartStencil new 

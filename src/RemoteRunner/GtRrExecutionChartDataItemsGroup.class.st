@@ -22,10 +22,13 @@ GtRrExecutionChartDataItemsGroup >> appendDurationToLabel [
 	
 	newLabel := String streamContents: [ :aStream |
 		aStream 
-			<< self label;
-			<< ' (';
-			<< self duration gtShortPrintString;
-			<< ')' ].
+			<< self label.
+		(self endTime notNil and: [self startTime notNil])
+			ifTrue: [
+				aStream
+					<< ' (';
+					<< self duration gtShortPrintString;
+					<< ')' ] ].
 		
 	self label: newLabel
 ]
