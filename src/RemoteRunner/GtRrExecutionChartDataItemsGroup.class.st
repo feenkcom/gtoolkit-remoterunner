@@ -22,10 +22,13 @@ GtRrExecutionChartDataItemsGroup >> appendDurationToLabel [
 	
 	newLabel := String streamContents: [ :aStream |
 		aStream 
-			<< self label;
-			<< ' (';
-			<< self duration gtShortPrintString;
-			<< ')' ].
+			<< self label.
+		(self endTime notNil and: [self startTime notNil])
+			ifTrue: [
+				aStream
+					<< ' (';
+					<< self duration gtShortPrintString;
+					<< ')' ] ].
 		
 	self label: newLabel
 ]
@@ -37,7 +40,8 @@ GtRrExecutionChartDataItemsGroup >> duration [
 
 { #category : #accessing }
 GtRrExecutionChartDataItemsGroup >> endTime [ 
-
+	self items ifEmpty: [ ^ nil ].
+	
 	^ self items
 		inject: self items first endTime
 		into: [ :endTime :anItem | 
@@ -93,6 +97,7 @@ GtRrExecutionChartDataItemsGroup >> label: anObject [
 
 { #category : #accessing }
 GtRrExecutionChartDataItemsGroup >> startTime [ 
+	self items ifEmpty: [ ^ nil ].
 	
 	^ self items
 		inject: self items first startTime

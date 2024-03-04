@@ -120,16 +120,32 @@ GtRrWorker class >> processCommandLineArgs: args [
 		at: #help ifPresent: [ :help | 
 			help value.
 			help context exitSuccess ].
-	GtRrWorkerCliStartingSignal new emit.
-	serverSocketAddress := ((args at: #serverSocketAddress) at:
-			                          #address) value.
-	StringSignal emit: 'Server address: ' , serverSocketAddress.
 	workerClass := self environment at: (args
 		at: #workerClass
 		ifPresent: [ :arg | (arg at: #workerClassName) value asSymbol ]
 		ifAbsent: [ #GtRrWorker ]).
-	StringSignal emit: 'WorkerClass: ' , workerClass name.
 	worker := workerClass new.
+	args occurrencesOf: #attribute do: [ :arg | 
+		worker attributes
+			at: (arg at: #key) value
+			put: (arg at: #value) value ].
+	args at: #log ifPresent: 
+		[ SignalLogger resetAllInstances.
+		logger := RestartingStreamLogger appendToFile: (workerClass logFilenameFor: worker).
+		announcements := AnnouncementSetWithExclusions withAll:
+			{ GtRemoteRunnerAnnouncement, 
+			GtRemoteRunnerSignal,
+			PharoLinkSignal,
+			LanguageLinkEventSignal,
+			StringSignal }.
+		announcements addExclusions: ContextStackSignal allSubclasses.
+		logger startFor: announcements ].
+
+	GtRrWorkerCliStartingSignal new emit.
+	serverSocketAddress := ((args at: #serverSocketAddress) at:
+			                          #address) value.
+	StringSignal emit: 'Server address: ' , serverSocketAddress.
+	StringSignal emit: 'WorkerClass: ' , workerClass name.
 	connectionStrategyId := args
 		at: #connectionStrategy
 		ifPresent: [ :arg | (arg at: #strategyId) value ]
@@ -146,21 +162,9 @@ GtRrWorker class >> processCommandLineArgs: args [
 	args at: #changesSync ifPresent:
 		[ StringSignal emit: 'changesSync: true'.
 		worker attributes at: #changesSync put: true ].
-	args occurrencesOf: #attribute do: [ :arg | 
-		StringSignal emit: 'key: ', (arg at: #key) value, ', value: ', (arg at: #value) value.
-		worker attributes
-			at: (arg at: #key) value
-			put: (arg at: #value) value ].
-	args at: #log ifPresent: 
-		[ SignalLogger resetAllInstances.
-		logger := RestartingStreamLogger appendToFile: (workerClass logFilenameFor: worker).
-		announcements := AnnouncementSetWithExclusions withAll:
-			{ GtRemoteRunnerAnnouncement, 
-			GtRemoteRunnerSignal,
-			PharoLinkSignal,
-			StringSignal }.
-		announcements addExclusions: ContextStackSignal allSubclasses.
-		logger startFor: announcements ].
+	StringSignal emit: 'Worker Attributes:'.
+	worker attributes keysAndValuesDo: [ :key :value |
+		StringSignal emit: 'key: ', key asString, ', value: ', value asString ].
 
 	StringSignal emit: 'Install UI manager...'.
 	UIManager default: GtRrUIManager new.

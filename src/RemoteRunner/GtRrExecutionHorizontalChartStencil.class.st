@@ -46,6 +46,16 @@ GtRrExecutionHorizontalChartStencil >> configureWithMinimalDetails [
 ]
 
 { #category : #accessing }
+GtRrExecutionHorizontalChartStencil >> configureWithSmallerDetails [
+	barHeight := 5.
+	rowHeight := 5.
+	leftPadding := 20.
+	
+	hideRowLabels := true.
+	hideAxisLabels := false.
+]
+
+{ #category : #accessing }
 GtRrExecutionHorizontalChartStencil >> create [
 	<return: #Object>
 	| minCreationDate maxExpireDate plot timeScale barWidthScale |
@@ -56,7 +66,10 @@ GtRrExecutionHorizontalChartStencil >> create [
 	timeScale := GtPlotterTimeScale new 
 		domainFrom: minCreationDate to: maxExpireDate.
 	timeScale tickFormat: [ :eachDateAndTime | 
-		(eachDateAndTime - minCreationDate) gtShortPrintString ].
+		(eachDateAndTime  isNil or: [ minCreationDate isNil ])
+			ifTrue: [ '' ] 
+			ifFalse: [
+				(eachDateAndTime - minCreationDate) gtShortPrintString ] ].
 	
 	barWidthScale := GtPlotterDurationScale new 
 		domainFrom: 0 seconds 

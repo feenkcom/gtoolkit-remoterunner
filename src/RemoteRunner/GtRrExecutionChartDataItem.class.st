@@ -70,7 +70,9 @@ GtRrExecutionChartDataItem >> appendDurationToLabel [
 		aStream 
 			<< self label;
 			<< ' (';
-			<< self duration gtShortPrintString;
+			<< (self duration 
+				ifNil: [ '<missing>']
+				ifNotNil: [ :aDuration | aDuration gtShortPrintString]);
 			<< ')' ].
 		
 	self label: newLabel
