@@ -1544,7 +1544,7 @@ GtRemoteRunner >> when: anAnnouncementClass send: aSelector to: anObject [
     When the message expects two arguments (eg #fooAnnouncement:announcer:) both the announcement and the announcer 
     are passed as argument"
 
-		^ self announcer when: anAnnouncementClass send: aSelector to: anObject
+		^ self announcer weak when: anAnnouncementClass send: aSelector to: anObject
 ]
 
 { #category : #'announcer - subscription' }
