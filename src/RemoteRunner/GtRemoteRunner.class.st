@@ -946,32 +946,31 @@ GtRemoteRunner >> registerWorkerWithDetails: aDictionary [
 		emit.
 	pharoLinkServerConnection := PharoLinkServerCurrentConnection value.
 	pharoLinkServerConnection setCloseOnExec: true.
-
-	"If the worker specifies that it is for a particular job only accept the connection if that job is currently running"
-	aDictionary at: #workerJobId
-		ifPresent: 
-			[:workerJobId |
-			(workerJobId = 'anyJob'
-				or: [currentlyExecutingJobs includesKey: workerJobId])
-					ifFalse: 
-						[ GtRrRegisterWorkerRejectedSignal new
-							ipAddress: pharoLinkServerConnection remoteAddressString;
-							workerAttributes: aDictionary;
-							emit.
-						pharoLinkServerConnection stop.
-						^self ] ].
-	workerConnection := GtRrWorkerConnection
+	self critical:
+		[ "If the worker specifies that it is for a particular job only accept the connection if that job is currently running"
+		aDictionary at: #workerJobId
+			ifPresent: 
+				[:workerJobId |
+				(workerJobId = 'anyJob'
+					or: [currentlyExecutingJobs includesKey: workerJobId])
+						ifFalse: 
+							[ GtRrRegisterWorkerRejectedSignal new
+								ipAddress: pharoLinkServerConnection remoteAddressString;
+								workerAttributes: aDictionary;
+								emit.
+							pharoLinkServerConnection stop.
+							^self ] ].
+		workerConnection := GtRrWorkerConnection
 				connection: pharoLinkServerConnection
 				runner: self.
-	workerConnection details: aDictionary.
-	workerId := aDictionary at: #id.
-	aDictionary at: #workerIpAddress put: workerConnection remoteAddressString.
-	self critical: 
-		 [ registeredWorkers at: workerId put: workerConnection.
-		 runnerStats 
+		workerConnection details: aDictionary.
+		workerId := aDictionary at: #id.
+		aDictionary at: #workerIpAddress put: workerConnection remoteAddressString.
+		registeredWorkers at: workerId put: workerConnection.
+		runnerStats 
 			registeredWorkerCount: registeredWorkers size;
-			isRunning: self isRunning ].
-	managerStartupAndShutdown registerWorker: workerConnection.
+			isRunning: self isRunning.
+	managerStartupAndShutdown registerWorker: workerConnection ].
 	self announceAndLog: (GtRrWorkerRegisteredAnnouncement new
 				worker: workerConnection).
 	GtRrRegisterWorkerCompletedSignal new
