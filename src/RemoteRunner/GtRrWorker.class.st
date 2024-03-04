@@ -550,9 +550,9 @@ GtRrWorker >> syncChangesIfRequiredWith: aPharoLinkApplication [
 
 	(attributes at: #changesSync ifAbsent: [ false ]) ifFalse: [ ^ self ].
 	remoteAddressString := aPharoLinkApplication remoteAddressString.
-	GtRrWorkerChangesSyncStartAnnouncement new
+	GtRrWorkerRetrieveChangesStartingSignal new
 		remoteAddressString: remoteAddressString;
-		worker: self;
+		workerId: self uid;
 		emit.
 	encodedEvents := aPharoLinkApplication newCommandFactory
 		setByValue;
@@ -560,16 +560,21 @@ GtRrWorker >> syncChangesIfRequiredWith: aPharoLinkApplication [
 			(STON toString: GtRrChangesSync headReference);
 		<< 'GtAssignedRemoteRunner changesSyncEventsFrom: anOmReference';
 		sendAndWait.
-	GtRrWorkerChangesSyncHaveEventsAnnouncement new
+	GtRrWorkerRetrieveChangesCompletedSignal new
 		remoteAddressString: remoteAddressString;
-		worker: self;
+		workerId: self uid;
+		emit.
+	GtRrWorkerApplyChangesStartingSignal new
+		remoteAddressString: remoteAddressString;
+		workerId: self uid;
 		emit.
 	events  := STON fromString: encodedEvents.
 	events do: [ :entry | entry content accept: GtExportedEventApplyVisitor new ].
-	GtRrWorkerChangesSyncedAnnouncement new
+	GtRrWorkerApplyChangesCompletedSignal new
 		remoteAddressString: remoteAddressString;
-		worker: self;
-		events: events;
+		workerId: self uid;
+		encodedEventsSize: encodedEvents size;
+		eventsCount: events size;
 		emit.
 	^ events
 ]
