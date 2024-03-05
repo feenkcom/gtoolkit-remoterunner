@@ -339,6 +339,12 @@ GtRemoteRunner >> announceAndLog: aBeaconSignal [
 ]
 
 { #category : #announcer }
+GtRemoteRunner >> announcer [
+
+	^ announcer
+]
+
+{ #category : #announcer }
 GtRemoteRunner >> announceStatusMessage: aStatusMessage [
 	self announce: (GtRrStatusMessageChangedAnnouncement new
 			statusMessage: aStatusMessage)
@@ -356,12 +362,6 @@ GtRemoteRunner >> announceStatusMessageWithString: aMessageString andSourceLabel
 	self announceStatusMessage: (GtRrStatusMessage new
 		messageString: aMessageString;
 		sourceToolLabel: aSourceLabel)
-]
-
-{ #category : #announcer }
-GtRemoteRunner >> announcer [
-
-	^ announcer
 ]
 
 { #category : #private }
@@ -930,6 +930,28 @@ GtRemoteRunner >> registerAnnouncementsQueueForHeadlessRunner [
 ]
 
 { #category : #accessing }
+GtRemoteRunner >> registeredWorkerCount [
+
+	^ runnerStats registeredWorkerCount
+]
+
+{ #category : #'private - debugging' }
+GtRemoteRunner >> registeredWorkers [
+	"Answer the registeredWorkers."
+
+	^ self critical: [ registeredWorkers copy ].
+]
+
+{ #category : #enumerating }
+GtRemoteRunner >> registeredWorkersDo: aBlock [
+	"Evaluate aBlock for each of the receiver's registered workers.
+	Must be called within sharedAccess."
+
+	"sharedAccess assertIsOwner."
+	registeredWorkers do: aBlock
+]
+
+{ #category : #accessing }
 GtRemoteRunner >> registerJob: aGtRrJob [
 	"Answer the proxy for the job when using a headless runner."
 
@@ -981,28 +1003,6 @@ GtRemoteRunner >> registerWorkerWithDetails: aDictionary [
 
 	"Answer a PharoLink primitive so that a proxy isn't created for the runner (which is a global, anyway)"
 	^nil
-]
-
-{ #category : #accessing }
-GtRemoteRunner >> registeredWorkerCount [
-
-	^ runnerStats registeredWorkerCount
-]
-
-{ #category : #'private - debugging' }
-GtRemoteRunner >> registeredWorkers [
-	"Answer the registeredWorkers."
-
-	^ self critical: [ registeredWorkers copy ].
-]
-
-{ #category : #enumerating }
-GtRemoteRunner >> registeredWorkersDo: aBlock [
-	"Evaluate aBlock for each of the receiver's registered workers.
-	Must be called within sharedAccess."
-
-	"sharedAccess assertIsOwner."
-	registeredWorkers do: aBlock
 ]
 
 { #category : #'private - accessing' }
@@ -1216,6 +1216,10 @@ GtRemoteRunner >> stopRegisteredWorkers [
 		registeredWorkerCount: registeredWorkers size;
 		emit.
 	self registeredWorkersDo: #stop.
+	"The stats will be updated when the worker is unregistered, so this isn't strictly necessary."
+	runnerStats
+		registeredWorkerCount: registeredWorkers size;
+		isRunning: self isRunning.
 	GtRrStopRegisteredWorkersCompletedSignal new
 		registeredWorkerCount: registeredWorkers size;
 		emit.
@@ -1570,6 +1574,11 @@ GtRemoteRunner >> workerResultProcessingError: errorDetails workerId: workerId t
 ]
 
 { #category : #accessing }
+GtRemoteRunner >> workersStateDescription [
+	^ runnerStats workersStateDescription
+]
+
+{ #category : #accessing }
 GtRemoteRunner >> workerTimeout [
 
 	^ workerTimeout ifNil: [ workerTimeout := self defaultWorkerTimeout ]
@@ -1580,9 +1589,4 @@ GtRemoteRunner >> workerTimeout: anObject [
 
 	workerTimeout := anObject.
 	runnerStats defaultWorkerTimeout: workerTimeout.
-]
-
-{ #category : #accessing }
-GtRemoteRunner >> workersStateDescription [
-	^ runnerStats workersStateDescription
 ]
