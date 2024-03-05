@@ -1216,6 +1216,10 @@ GtRemoteRunner >> stopRegisteredWorkers [
 		registeredWorkerCount: registeredWorkers size;
 		emit.
 	self registeredWorkersDo: #stop.
+	"The stats will be updated when the worker is unregistered, so this isn't strictly necessary."
+	runnerStats
+		registeredWorkerCount: registeredWorkers size;
+		isRunning: self isRunning.
 	GtRrStopRegisteredWorkersCompletedSignal new
 		registeredWorkerCount: registeredWorkers size;
 		emit.
