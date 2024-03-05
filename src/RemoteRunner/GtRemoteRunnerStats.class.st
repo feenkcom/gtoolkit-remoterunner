@@ -176,6 +176,11 @@ GtRemoteRunnerStats >> state [
 ]
 
 { #category : #accessing }
+GtRemoteRunnerStats >> state: anObject [
+	state := anObject
+]
+
+{ #category : #accessing }
 GtRemoteRunnerStats >> taskQueueSize [
 	^ taskQueueSize
 ]
@@ -194,9 +199,19 @@ GtRemoteRunnerStats >> totalJobCount [
 ]
 
 { #category : #accessing }
+GtRemoteRunnerStats >> totalJobCount: anObject [
+	totalJobCount := anObject
+]
+
+{ #category : #accessing }
 GtRemoteRunnerStats >> totalTaskCount [
 
 	^ totalTaskCount
+]
+
+{ #category : #accessing }
+GtRemoteRunnerStats >> totalTaskCount: anObject [
+	^ totalTaskCount := anObject
 ]
 
 { #category : #accessing }

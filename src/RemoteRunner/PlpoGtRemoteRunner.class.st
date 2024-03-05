@@ -96,6 +96,7 @@ PlpoGtRemoteRunner >> runnerStats [
 
 	^ GtRemoteRunnerStats new initializeFromDictionary: 
 		(self newCommandFactory
+			setBySerialized;
 			<< 'self runnerStats asDictionaryForExport';
 			sendAndWait)
 ]
