@@ -24,6 +24,11 @@ GtRrStatusMessage >> asDictionaryForExport [
 	} asDictionary
 ]
 
+{ #category : #accessing }
+GtRrStatusMessage >> highlightColor [
+	^ Color transparent
+]
+
 { #category : #initialization }
 GtRrStatusMessage >> initialize [
 	super initialize.
