@@ -2,7 +2,8 @@ Class {
 	#name : #GtRrRegisterWorkerSignal,
 	#superclass : #GtRemoteRunnerSignal,
 	#instVars : [
-		'workerAttributes'
+		'workerAttributes',
+		'mutexWait'
 	],
 	#category : #'RemoteRunner-Signals'
 }
@@ -12,6 +13,17 @@ GtRrRegisterWorkerSignal >> initializeFromTimestamp: aDateAndTime andData: aColl
 
 	super initializeFromTimestamp: aDateAndTime andData: aCollection.
 	workerAttributes := self class evaluate: (aCollection at: 3).
+	mutexWait := aCollection at: 4.
+]
+
+{ #category : #accessing }
+GtRrRegisterWorkerSignal >> mutexWait [
+	^ mutexWait
+]
+
+{ #category : #accessing }
+GtRrRegisterWorkerSignal >> mutexWait: anObject [
+	mutexWait := anObject
 ]
 
 { #category : #printing }
@@ -20,7 +32,9 @@ GtRrRegisterWorkerSignal >> printOneLineContentsOn: aStream [
 	super printOneLineContentsOn: aStream.
 	aStream
 		<< ' | ';
-		<< workerAttributes storeString
+		<< workerAttributes storeString;
+		<< ' | ';
+		<< mutexWait asString
 ]
 
 { #category : #accessing }

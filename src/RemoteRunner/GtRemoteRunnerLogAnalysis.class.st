@@ -192,8 +192,7 @@ GtRemoteRunnerLogAnalysis >> logEvent [
 	logEvent ifNotNil: [ ^ logEvent ].
 
 	zero := Duration zero.
-	subEvents := self grouper eventsGroup
-		select: [ :each | each duration > zero ].
+	subEvents := self grouper eventsGroup.
 	logEvent := GtBeaconGenericLogCompositeEvent new
 		eventLabel: self eventLabel;
 		addSubEvents: subEvents.

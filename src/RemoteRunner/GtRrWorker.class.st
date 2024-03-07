@@ -438,12 +438,15 @@ GtRrWorker >> nextTask [
 { #category : #private }
 GtRrWorker >> registerWith: aPharoLinkApplication [
 	"Register the receiver with the remote runner associated with the supplied PharoLinkApplication"
+	| result |
 
 	self syncChangesIfRequiredWith: aPharoLinkApplication.
-	^ aPharoLinkApplication newCommandFactory 
+	GtRrWorkerRegisterStartingSignal new emit.
+	result := aPharoLinkApplication newCommandFactory 
 			bindingAt: #attributes put: attributes;
 			sendAndWait: 'GtAssignedRemoteRunner registerWorkerWithDetails: attributes'.
-
+	GtRrWorkerRegisterCompletedSignal new emit.
+	^ result
 ]
 
 { #category : #private }
