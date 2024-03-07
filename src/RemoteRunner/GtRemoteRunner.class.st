@@ -792,27 +792,29 @@ GtRemoteRunner >> moveLoggingTo: aFileReference [
 GtRemoteRunner >> nextTaskForWorkerId: aUidString [
 	"Answer the next task allocated to the specified worker that is waiting on this method.
 	The task is assigned in a separate process."
-	| taskFuture workerConnection |
+	| taskFuture workerConnection mutexStart mutexEnd |
 
-	workerConnection := registeredWorkers at: aUidString.
-	workerConnection registerHeartbeat.
-	taskFuture := GtRrFutureWorkerTask new 
-		connection: workerConnection.
-	GtRrWorkerTraceAnnouncement new
-		worker: taskFuture;
-		message: 'nextTaskForWorkerId: pre';
-		emit.
+	GtRrNextTaskStartingSignal new emit.
+	mutexStart := DateAndTime now.
 	self critical:
-		[ (jobStartupAndShutdown finishedWithWorkerFuture: taskFuture) ifTrue:
+		[ mutexEnd := DateAndTime now.
+		workerConnection := registeredWorkers at: aUidString.
+		workerConnection registerHeartbeat.
+		taskFuture := GtRrFutureWorkerTask new 
+			connection: workerConnection.
+		(jobStartupAndShutdown finishedWithWorkerFuture: taskFuture) ifTrue:
 			[ runnerStats availableWorkerCount: availableWorkers size.
+			GtRrNextTaskCompletedSignal new
+				mutexWait: (mutexEnd - mutexStart) asMilliSeconds;
+				emit.
 			^ 'quit' ].
 		availableWorkers add: taskFuture.
 		runnerStats availableWorkerCount: availableWorkers size.
 		self assignTasksToWorkers ].
 	taskFuture wait.
-	GtRrWorkerTraceAnnouncement new
-		worker: taskFuture;
-		message: 'nextTaskForWorkerId: post';
+	GtRrNextTaskCompletedSignal new
+		mutexWait: (mutexEnd - mutexStart) asMilliSeconds;
+		taskId: taskFuture taskContext taskId;
 		emit.
 	^ taskFuture taskContext asWorkerTaskContext.
 
@@ -962,15 +964,17 @@ GtRemoteRunner >> registerJob: aGtRrJob [
 GtRemoteRunner >> registerWorkerWithDetails: aDictionary [
 	"Register the supplied worker and connection details.
 	Register the connection for disconnection notification"
-	| pharoLinkServerConnection workerConnection workerId |
+	| pharoLinkServerConnection workerConnection workerId mutexStart mutexEnd |
 
 	GtRrRegisterWorkerStartingSignal new
 		workerAttributes: aDictionary;
 		emit.
 	pharoLinkServerConnection := PharoLinkServerCurrentConnection value.
 	pharoLinkServerConnection setCloseOnExec: true.
+	mutexStart := DateAndTime now.
 	self critical:
-		[ "If the worker specifies that it is for a particular job only accept the connection if that job is currently running"
+		[ mutexEnd := DateAndTime now.
+		"If the worker specifies that it is for a particular job only accept the connection if that job is currently running"
 		aDictionary at: #workerJobId
 			ifPresent: 
 				[:workerJobId |
@@ -980,6 +984,7 @@ GtRemoteRunner >> registerWorkerWithDetails: aDictionary [
 							[ GtRrRegisterWorkerRejectedSignal new
 								ipAddress: pharoLinkServerConnection remoteAddressString;
 								workerAttributes: aDictionary;
+								mutexWait: (mutexEnd - mutexStart) asMilliSeconds;
 								emit.
 							pharoLinkServerConnection stop.
 							^self ] ].
@@ -993,12 +998,13 @@ GtRemoteRunner >> registerWorkerWithDetails: aDictionary [
 		runnerStats 
 			registeredWorkerCount: registeredWorkers size;
 			isRunning: self isRunning.
-	managerStartupAndShutdown registerWorker: workerConnection ].
+		managerStartupAndShutdown registerWorker: workerConnection ].
 	self announceAndLog: (GtRrWorkerRegisteredAnnouncement new
 				worker: workerConnection).
 	GtRrRegisterWorkerCompletedSignal new
 		workerAttributes: aDictionary;
 		ipAddress: pharoLinkServerConnection remoteAddressString;
+		mutexWait: (mutexEnd - mutexStart) asMilliSeconds;
 		emit.
 
 	"Answer a PharoLink primitive so that a proxy isn't created for the runner (which is a global, anyway)"
@@ -1302,14 +1308,15 @@ GtRemoteRunner >> syncChanges [
 
 { #category : #'api - worker' }
 GtRemoteRunner >> taskDone: aTaskContextId executionData: aGtRrWorkerExecutionData result: aResult [
-	| taskContext |
+	| taskContext mutexStart mutexEnd |
 
-	GtRrWorkerTraceAnnouncement new
-		message: 'taskDone: ', aTaskContextId asString, ' result: ', aResult asString;
+	GtRrTaskDoneStartingSignal new 
+		taskId: aTaskContextId;
 		emit.
-
+	mutexStart := DateAndTime now.
 	self critical: 
-		[ taskContext := currentlyExecutingTasks removeKey: aTaskContextId ifAbsent: [].
+		[ mutexEnd := DateAndTime now.
+		taskContext := currentlyExecutingTasks removeKey: aTaskContextId ifAbsent: [].
 		"If the task hasn't been found, assumed that it was terminated and move on"
 		taskContext ifNotNil:
 			[ runnerStats currentlyExecutingTaskCount: currentlyExecutingTasks size.
@@ -1321,15 +1328,10 @@ GtRemoteRunner >> taskDone: aTaskContextId executionData: aGtRrWorkerExecutionDa
 			self checkJobCompleted: taskContext ].
 		self assignTasksToWorkers. ].
 
-	taskContext ifNil:
-		[ GtRrWorkerTraceAnnouncement new
-			message: 'taskDone:with: task not found';
-			emit ]
-	ifNotNil:
-		[ GtRrWorkerTraceAnnouncement new
-			worker: taskContext workerFuture connection;
-			message: 'taskDone:with: post';
-			emit ].
+	GtRrTaskDoneCompletedSignal new
+		mutexWait: (mutexEnd - mutexStart) asMilliSeconds;
+		taskId: aTaskContextId;
+		emit.
 
 	"There is no useful result, avoid having to create proxies, etc."
 	^ nil.
