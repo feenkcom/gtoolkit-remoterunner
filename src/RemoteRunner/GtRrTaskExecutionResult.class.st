@@ -50,6 +50,11 @@ GtRrTaskExecutionResult >> durationOnRunner [
 ]
 
 { #category : #accessing }
+GtRrTaskExecutionResult >> durationOnWorker [
+	^ self duration
+]
+
+{ #category : #accessing }
 GtRrTaskExecutionResult >> endTime [
 
 	^ self executionData endTime

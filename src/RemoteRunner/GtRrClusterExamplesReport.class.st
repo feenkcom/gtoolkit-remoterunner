@@ -48,6 +48,22 @@ GtRrClusterExamplesReport >> avegareIncrementalGcDuration [
 ]
 
 { #category : #accessing }
+GtRrClusterExamplesReport >> cummulativeGapBetweenEndTimeAndReceivingResults [
+	^ self machineReports 
+		inject: 0 seconds 
+		into: [ :total  :aMachineReport | 
+			total + aMachineReport cummulativeGapBetweenEndTimeAndReceivingResults ]
+]
+
+{ #category : #accessing }
+GtRrClusterExamplesReport >> cummulativeGapBetweenHandoverAndStartTime [
+	^ self machineReports 
+		inject: 0 seconds 
+		into: [ :total  :aMachineReport | 
+			total + aMachineReport cummulativeGapBetweenHandoverAndStartTime ]
+]
+
+{ #category : #accessing }
 GtRrClusterExamplesReport >> cummulativeTasksDuration [
 	^ self machineReports 
 		inject: 0 seconds 
@@ -72,42 +88,6 @@ GtRrClusterExamplesReport >> fullGcDuration [
 { #category : #'accessing - gc details' }
 GtRrClusterExamplesReport >> fullGcTime [
 	^ self sumMachineValueWithNil: [ :aMachine | aMachine fullGcTime ]
-]
-
-{ #category : #'gt - extensions' }
-GtRrClusterExamplesReport >> gtViewCondensedExecutionTimelineFor:aView [
-	<gtView>
-	
-	^ aView forward
-		title: 'Condensed execution timeline';
-		priority: 35;
-		object: [ self workersReport];
-		view: #gtViewCondensedExecutionTimelineFor:
-]
-
-{ #category : #'gt - extensions' }
-GtRrClusterExamplesReport >> gtViewCondensedTasksTimelineFor:  aView [
-	<gtView>
-	
-	^ aView forward
-		title: 'Condensed tasks timeline';
-		priority: 45;
-		object: [ self workersReport];
-		view: #gtViewCondensedTasksTimelineFor: 
-]
-
-{ #category : #'gt - extensions' }
-GtRrClusterExamplesReport >> gtViewExecutionTimelineListFor: aView [
-	<gtView>
-	
-	^ aView explicit
-		title: 'Execution timeline';
-		priority: 30;
-		stencil: [ 
-			GtRrExecutionHorizontalChartStencil new 
-				executions: self machinesExecutionChartItems;
-				selectionTransformation: [ :anItem |
-					self machineWithIpAddress:  anItem identifier ] ]
 ]
 
 { #category : #'gt - extensions' }
@@ -364,8 +344,12 @@ GtRrClusterExamplesReport >> overviewData [
 		'Cummulative Tasks Duration (on workers)' -> self cummulativeTasksDuration.
 		'Cummulative Tasks Duration (on runner)' -> self cummulativeTasksDurationOnRunner.
 		'Tasks Duration Runner - Worker Difference' -> (self cummulativeTasksDurationOnRunner - self cummulativeTasksDuration).
-		'Cummulative Task Gaps' -> self taskGapsDuration.
-		'Average Task Gap' -> (self taskGapsDuration / self numberOfTasks).
+		
+		'Cummulative Task Gaps Between Consecutive Tasks' -> self taskGapsDuration.
+		'Average Task Gap Between Consecutive Tasks' -> (self taskGapsDuration / self numberOfTasks).
+		'Cummulative Task Gaps Between Handover and Start Time' -> self cummulativeGapBetweenHandoverAndStartTime.
+		'Cummulative Task Gaps Results Retrieved and End Time' -> self cummulativeGapBetweenEndTimeAndReceivingResults.
+		
 		'Number of Full GCs' -> self numberOfFullGCs.
 		'Number of Incremental GCs' -> self numberOfIncrementalGCs.
 		'Average Full GC Duration' -> self avegareFullGcDuration.

@@ -8,7 +8,7 @@ TGtRrClusterExamplesReportViews >> gtViewCondensedExecutionTimelineFor:aView [
 	<gtView>
 	
 	^ aView forward
-		title: 'Condensed execution timeline';
+		title: 'Condensed execution timeline (runner times)';
 		priority: 35;
 		object: [ self workersReport];
 		view: #gtViewCondensedExecutionTimelineFor:
@@ -23,6 +23,17 @@ TGtRrClusterExamplesReportViews >> gtViewCondensedTasksTimelineFor:  aView [
 		priority: 45;
 		object: [ self workersReport];
 		view: #gtViewCondensedTasksTimelineFor: 
+]
+
+{ #category : #'gt - extensions' }
+TGtRrClusterExamplesReportViews >> gtViewCondensedTasksTimelineWithWorkerTimesFor: aView [
+	<gtView>
+	
+	^ aView forward
+		title: 'Condensed tasks timeline  (worker times)';
+		priority: 45.1;
+		object: [ self workersReport];
+		view: #gtViewCondensedTasksTimelineWithWorkerTimesFor: 
 ]
 
 { #category : #'gt - extensions' }

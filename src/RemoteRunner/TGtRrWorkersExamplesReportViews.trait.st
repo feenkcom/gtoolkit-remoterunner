@@ -8,7 +8,7 @@ TGtRrWorkersExamplesReportViews >> gtViewCondensedExecutionTimelineFor: aView [
 	<gtView>
 	
 	^ aView explicit
-		title: 'Condensed execution timeline';
+		title: 'Condensed execution timeline (runner times)';
 		priority: 35;
 		stencil: [ 
 			GtRrExecutionHorizontalChartStencil new 
@@ -22,14 +22,29 @@ TGtRrWorkersExamplesReportViews >> gtViewCondensedTasksTimelineFor: aView [
 	<gtView>
 	
 	^ aView explicit
-		title: 'Condensed tasks timeline';
+		title: 'Condensed tasks timeline (runner times)';
 		priority: 45;
 		stencil: [ 
 			GtRrExecutionHorizontalChartStencil new 
 				withColorBasedOnScheduling;
 				configureWithMinimalDetails;
 				enabledGroupsInRow;
-				executions: self workersTasksExecutionChartItemsGroupWithScheduling ]
+				executions: self workersTasksExecutionChartItemsGroupWithSchedulingAndRunnerTimes ]
+]
+
+{ #category : #'gt - extensions' }
+TGtRrWorkersExamplesReportViews >> gtViewCondensedTasksTimelineWithWorkerTimesFor: aView [
+	<gtView>
+	
+	^ aView explicit
+		title: 'Condensed tasks timeline (worker times)';
+		priority: 45.1;
+		stencil: [ 
+			GtRrExecutionHorizontalChartStencil new 
+				withColorBasedOnScheduling;
+				configureWithMinimalDetails;
+				enabledGroupsInRow;
+				executions: self workersTasksExecutionChartItemsGroupWithSchedulingAndWorkerTimes ]
 ]
 
 { #category : #'gt - extensions' }
@@ -107,13 +122,45 @@ TGtRrWorkersExamplesReportViews >> gtViewTasksExecutionTimelineListFor: aView [
 	<gtView>
 	
 	^ aView explicit
-		title: 'Tasks timeline';
+		title: 'Tasks timeline (runner times)';
 		priority: 20;
 		stencil: [ 
 			GtRrExecutionHorizontalChartStencil new 
 				withColorBasedOnScheduling;
 				enabledGroupsInRow;
-				executions: self workersTasksExecutionChartItemsGroupWithScheduling;
+				executions: self workersTasksExecutionChartItemsGroupWithSchedulingAndRunnerTimes;
+				selectionTransformation: [ :anItem |
+					self workerWithId:  anItem identifier ] ]
+]
+
+{ #category : #'gt - extensions' }
+TGtRrWorkersExamplesReportViews >> gtViewTasksExecutionTimelineWithWorkerTimesFor: aView [
+	<gtView>
+	
+	^ aView explicit
+		title: 'Tasks timeline (worker times)';
+		priority: 20.1;
+		stencil: [ 
+			GtRrExecutionHorizontalChartStencil new 
+				withColorBasedOnScheduling;
+				enabledGroupsInRow;
+				executions: self workersTasksExecutionChartItemsGroupWithSchedulingAndWorkerTimes;
+				selectionTransformation: [ :anItem |
+					self workerWithId:  anItem identifier ] ]
+]
+
+{ #category : #'gt - extensions' }
+TGtRrWorkersExamplesReportViews >> gtViewTasksExecutionTimelineWorkerTimesFor: aView [
+	<gtView>
+	
+	^ aView explicit
+		title: 'Tasks timeline (worker times)';
+		priority: 20;
+		stencil: [ 
+			GtRrExecutionHorizontalChartStencil new 
+				withColorBasedOnScheduling;
+				enabledGroupsInRow;
+				executions: self workersTasksExecutionChartItemsGroupWithSchedulingAndWorkerTimes;
 				selectionTransformation: [ :anItem |
 					self workerWithId:  anItem identifier ] ]
 ]

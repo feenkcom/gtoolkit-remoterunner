@@ -12,6 +12,31 @@ Class {
 	#category : #'RemoteRunner-Reports'
 }
 
+{ #category : #'accessing - gc details' }
+GtRrRunnerMachineExamplesReport >> avegareFullGcDuration [
+	| numberOfFullGCs |
+	numberOfFullGCs := self numberOfFullGCs.
+	(numberOfFullGCs isNil or: [
+		numberOfFullGCs = 0]) ifTrue: [ ^ nil].
+		
+	^ self fullGcDuration / numberOfFullGCs
+]
+
+{ #category : #'accessing - gc details' }
+GtRrRunnerMachineExamplesReport >> avegareIncrementalGcDuration [
+	^ self incrGcDuration / self numberOfIncrementalGCs
+]
+
+{ #category : #accessing }
+GtRrRunnerMachineExamplesReport >> cummulativeGapBetweenEndTimeAndReceivingResults [
+	^ self workersReport cummulativeGapBetweenEndTimeAndReceivingResults
+]
+
+{ #category : #accessing }
+GtRrRunnerMachineExamplesReport >> cummulativeGapBetweenHandoverAndStartTime [
+	^ self workersReport cummulativeGapBetweenHandoverAndStartTime
+]
+
 { #category : #accessing }
 GtRrRunnerMachineExamplesReport >> cummulativeTasksDuration [
 	^ self workersReport cummulativeTasksDuration
@@ -28,74 +53,26 @@ GtRrRunnerMachineExamplesReport >> description [
 ]
 
 { #category : #'accessing - gc details' }
+GtRrRunnerMachineExamplesReport >> fullGcDuration [
+	^ self fullGcTime ifNotNil: [ :aTimeInMilliseconds |
+		aTimeInMilliseconds milliSeconds ]
+]
+
+{ #category : #'accessing - gc details' }
 GtRrRunnerMachineExamplesReport >> fullGcTime [
 	^ self workersReport fullGcTime
 ]
 
 { #category : #'gt - extensions' }
-GtRrRunnerMachineExamplesReport >> gtViewCondensedExecutionTimelineFor:aView [
+GtRrRunnerMachineExamplesReport >> gtViewOverviewFor: aView [
 	<gtView>
 	
-	^ aView forward
-		title: 'Condensed execution timeline';
-		priority: 35;
-		object: [ self workersReport];
-		view: #gtViewCondensedExecutionTimelineFor:
-]
-
-{ #category : #'gt - extensions' }
-GtRrRunnerMachineExamplesReport >> gtViewCondensedTasksTimelineFor:  aView [
-	<gtView>
-	
-	^ aView forward
-		title: 'Condensed tasks timeline';
-		priority: 45;
-		object: [ self workersReport];
-		view: #gtViewCondensedTasksTimelineFor: 
-]
-
-{ #category : #'gt - extensions' }
-GtRrRunnerMachineExamplesReport >> gtViewExecutionTimelineListFor: aView [
-	<gtView>
-	
-	^ aView forward
-		title: 'Execution timeline';
-		priority: 25;
-		object: [ self workersReport];
-		view: #gtViewExecutionTimelineListFor: 
-]
-
-{ #category : #'gt - extensions' }
-GtRrRunnerMachineExamplesReport >> gtViewMachineAvailableMemoryEvolutionFor:  aView [
-	<gtView>
-	
-	^ aView forward
-		title: 'Machine available memory';
-		priority: 55;
-		object: [ self workersReport];
-		view: #gtViewMachineAvailableMemoryEvolutionFor: 
-]
-
-{ #category : #'gt - extensions' }
-GtRrRunnerMachineExamplesReport >> gtViewMachineFreeMemoryEvolutionFor:  aView [
-	<gtView>
-	
-	^ aView forward
-		title: 'Machine free memory';
-		priority: 55;
-		object: [ self workersReport];
-		view: #gtViewMachineFreeMemoryEvolutionFor: 
-]
-
-{ #category : #'gt - extensions' }
-GtRrRunnerMachineExamplesReport >> gtViewTasksExecutionTimelineListFor: aView [
-	<gtView>
-	
-	^ aView forward
-		title: 'Tasks timeline';
-		priority: 25;
-		object: [ self workersReport];
-		view: #gtViewTasksExecutionTimelineListFor:
+	^ aView columnedList 
+		title: 'Overview';
+		priority: 60;
+		items: [ self overviewData ];
+		column: 'Property' text: [ :assoc | assoc key ];
+		column: 'Value' text: [ :assoc | assoc value ]
 ]
 
 { #category : #'gt - extensions' }
@@ -118,6 +95,12 @@ GtRrRunnerMachineExamplesReport >> gtViewWorkersTimingFor: aView [
 		priority: 20;
 		object: [ self workersReport ];
 		view: #gtViewWorkersTimingFor:
+]
+
+{ #category : #'accessing - gc details' }
+GtRrRunnerMachineExamplesReport >> incrGcDuration [
+	^ self incrGcTime ifNotNil: [ :aTimeInMilliseconds |
+		aTimeInMilliseconds milliSeconds ]
 ]
 
 { #category : #'accessing - gc details' }
@@ -217,6 +200,38 @@ GtRrRunnerMachineExamplesReport >> numberOfWorkers [
 	^ self workersReport workers size
 ]
 
+{ #category : #accessing }
+GtRrRunnerMachineExamplesReport >> overviewData [
+	^ {
+		'Number of workers' -> self numberOfWorkers.
+		'Number of tasks' -> self numberOfTasks.
+		'Number of tests' -> self numberOfExamples .
+		'Cummulative Tasks Duration (on workers)' -> self cummulativeTasksDuration.
+		'Cummulative Tasks Duration (on runner)' -> self cummulativeTasksDurationOnRunner.
+		'Tasks Duration Runner - Worker Difference' -> (self cummulativeTasksDurationOnRunner - self cummulativeTasksDuration).
+		'Cummulative Task Gaps Between Consecutive Tasks' -> self taskGapsDuration.
+		'Average Task Gap Between Consecutive Tasks' -> (self taskGapsDuration / self numberOfTasks).
+		'Cummulative Task Gaps Between Handover and Start Time' -> self cummulativeGapBetweenHandoverAndStartTime.
+		'Cummulative Task Gaps Results Retrieved and End Time' -> self cummulativeGapBetweenEndTimeAndReceivingResults.
+		
+		'Number of Full GCs' -> self numberOfFullGCs.
+		'Number of Incremental GCs' -> self numberOfIncrementalGCs.
+		'Average Full GC Duration' -> self avegareFullGcDuration. 
+		'Average Incremental GC Duration' -> self avegareIncrementalGcDuration.
+		'Total GC Time (workers)' -> self totalGCDuration.
+		'Full GC Time (workers)' -> self fullGcDuration. 
+		'Incremental GC Time (workers)' -> self incrGcDuration.
+		'Total GC Time (tasks)' -> self tasksTotalGCTime milliSeconds.
+		'Full GC Time (tasks)' -> self tasksFullGcTime milliSeconds.
+		'Incremental GC Time (tasks)' -> self tasksIncrGcTime milliSeconds.
+		'Maximum VM Memory Size' -> self vmMaximumMemorySize humanReadableIsqByteSize.
+		'Minimum VM Memory Size' -> self vmMinimumMemorySize humanReadableIsqByteSize.
+		'Average VM Memory Size' -> self vmAverageMemorySize humanReadableIsqByteSize . 
+		'Maximum VM Memory Size Increase' -> (self vmMaximumMemorySize- self vmMinimumMemorySize) humanReadableIsqByteSize.
+		'Maximum Worker Tasks Start Delay' -> self workersTasksStartMaximumDelay.
+		'Workers Tasks Competion Delay' -> self workersTasksCompletionDelay}
+]
+
 { #category : #printing }
 GtRrRunnerMachineExamplesReport >> printOn: aStream [
 	super printOn: aStream.
@@ -295,8 +310,29 @@ GtRrRunnerMachineExamplesReport >> tasksTotalGCTime [
 ]
 
 { #category : #'accessing - gc details' }
+GtRrRunnerMachineExamplesReport >> totalGCDuration [
+	^ self totalGCTime ifNotNil: [ :aTimeInMilliseconds |
+		aTimeInMilliseconds milliSeconds ]
+]
+
+{ #category : #'accessing - gc details' }
 GtRrRunnerMachineExamplesReport >> totalGCTime [
 	^ self workersReport totalGCTime
+]
+
+{ #category : #'accessing - resource report' }
+GtRrRunnerMachineExamplesReport >> vmAverageMemorySize [
+	^ self workersReport vmAverageMemorySize
+]
+
+{ #category : #'accessing - resource report' }
+GtRrRunnerMachineExamplesReport >> vmMaximumMemorySize [
+	^ self workersReport vmMaximumMemorySize
+]
+
+{ #category : #'accessing - resource report' }
+GtRrRunnerMachineExamplesReport >> vmMinimumMemorySize [
+	^ self workersReport vmMinimumMemorySize
 ]
 
 { #category : #accessing }
@@ -309,4 +345,14 @@ GtRrRunnerMachineExamplesReport >> workersReport [
 GtRrRunnerMachineExamplesReport >> workersReport: anObject [
 
 	workersReport := anObject
+]
+
+{ #category : #accessing }
+GtRrRunnerMachineExamplesReport >> workersTasksCompletionDelay [
+	^ self workersReport  tasksCompletionDelay
+]
+
+{ #category : #accessing }
+GtRrRunnerMachineExamplesReport >> workersTasksStartMaximumDelay [
+	^ self workersReport tasksStartInterval
 ]

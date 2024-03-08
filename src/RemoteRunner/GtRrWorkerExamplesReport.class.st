@@ -20,6 +20,30 @@ GtRrWorkerExamplesReport >> fullGcTime [
 	^ self vmStatisticsDiffReport ifNotNil: [ :aReport | aReport fullGcTimeDiff ]
 ]
 
+{ #category : #accessing }
+GtRrWorkerExamplesReport >> gapBetweenEndTimeAndReceivingResults [
+	| gapDuration|
+	gapDuration := 0 seconds.
+	self tasks  do: [ :aTask |
+		(aTask gapBetweenEndTimeAndReceivingResults)
+			ifNotNil: [  :aDuration |
+				gapDuration := gapDuration + aDuration].
+		gapDuration ].
+	^ gapDuration
+]
+
+{ #category : #accessing }
+GtRrWorkerExamplesReport >> gapBetweenHandoverAndStartTime [
+	| gapDuration|
+	gapDuration := 0 seconds.
+	self tasks  do: [ :aTask |
+		(aTask gapBetweenHandoverAndStartTime)
+			ifNotNil: [  :aDuration |
+				gapDuration := gapDuration + aDuration].
+		gapDuration ].
+	^ gapDuration
+]
+
 { #category : #'gt - extensions' }
 GtRrWorkerExamplesReport >> gtViewDurationExecutionChartListFor: aView [
 	<gtView>
@@ -56,16 +80,46 @@ GtRrWorkerExamplesReport >> gtViewExecutionTimelineListFor: aView [
 ]
 
 { #category : #'gt - extensions' }
+GtRrWorkerExamplesReport >> gtViewExecutionTimelineWithRunnerTimesWithDelaysFor: aView [
+	<gtView>
+	
+	^ aView explicit
+		title: 'Execution timeline - runner (with delays)';
+		priority: 45.3;
+		stencil: [ 
+			GtRrExecutionHorizontalChartStencil new 
+				withColorBasedOnScheduling;
+				executions: self tasksExecutionChartItemsGroupWithRunnerTimesWithDelays;
+				selectionTransformation: [ :anItem |
+					self taskWithId:  anItem identifier ] ]
+]
+
+{ #category : #'gt - extensions' }
+GtRrWorkerExamplesReport >> gtViewExecutionTimelineWithSchedulingAndWorkerTimesFor: aView [
+	<gtView>
+	
+	^ aView explicit
+		title: 'Execution timeline - worker (with scheduling)';
+		priority: 45.1;
+		stencil: [ 
+			GtRrExecutionHorizontalChartStencil new 
+				withColorBasedOnScheduling;
+				executions: self tasksExecutionChartItemsGroupWithSchedulingAndWorkerTimes;
+				selectionTransformation: [ :anItem |
+					self taskWithId:  anItem identifier ] ]
+]
+
+{ #category : #'gt - extensions' }
 GtRrWorkerExamplesReport >> gtViewExecutionTimelineWithSchedulingFor: aView [
 	<gtView>
 	
 	^ aView explicit
-		title: 'Execution timeline (with scheduling)';
+		title: 'Execution timeline - runner (with scheduling)';
 		priority: 45;
 		stencil: [ 
 			GtRrExecutionHorizontalChartStencil new 
 				withColorBasedOnScheduling;
-				executions: self tasksExecutionChartItemsGroupWithScheduling;
+				executions: self tasksExecutionChartItemsGroupWithSchedulingAndRunnerTimes;
 				selectionTransformation: [ :anItem |
 					self taskWithId:  anItem identifier ] ]
 ]
@@ -221,12 +275,22 @@ GtRrWorkerExamplesReport >> incrGcTime [
 ]
 
 { #category : #'accessing - chart data' }
-GtRrWorkerExamplesReport >> isTaskCorrectlyScheduledAtIndex: taskIndex inGroup: aTasksGroup [ 
+GtRrWorkerExamplesReport >> isTaskCorrectlyScheduledUsingRunnerTimesAtIndex: taskIndex inGroup: aTasksGroup [ 
 	| targetTask targetDuration|
 	targetTask := aTasksGroup at: taskIndex.
 	targetDuration := targetTask durationOnRunner.
 	aTasksGroup from: 1 to: taskIndex - 1 do: [ :aTask |
 		(targetDuration - aTask durationOnRunner > 5 seconds) ifTrue: [ ^ false ] ].
+	^ true
+]
+
+{ #category : #'accessing - chart data' }
+GtRrWorkerExamplesReport >> isTaskCorrectlyScheduledUsingWorkerTimesAtIndex: taskIndex inGroup: aTasksGroup [ 
+	| targetTask targetDuration|
+	targetTask := aTasksGroup at: taskIndex.
+	targetDuration := targetTask durationOnWorker.
+	aTasksGroup from: 1 to: taskIndex - 1 do: [ :aTask |
+		(targetDuration - aTask durationOnWorker > 5 seconds) ifTrue: [ ^ false ] ].
 	^ true
 ]
 
@@ -283,9 +347,10 @@ GtRrWorkerExamplesReport >> printOn: aStream [
 GtRrWorkerExamplesReport >> taskGapsDuration [
 	| gapDuration|
 	gapDuration := 0 seconds.
-	self tasks  pairsDo: [ :aTask :anotherTask |
+	self tasks  overlappingPairsDo: [ :aTask :anotherTask |
 		(anotherTask startTime notNil and: [aTask endTime notNil])
-			ifTrue: [ gapDuration := gapDuration + (anotherTask startTime - aTask endTime) ].
+			ifTrue: [ 
+				gapDuration := gapDuration + (anotherTask startTime - aTask endTime) ].
 		gapDuration ].
 	^ gapDuration
 ]
@@ -332,7 +397,7 @@ GtRrWorkerExamplesReport >> tasksExecutionChartItemsGroup [
 ]
 
 { #category : #'accessing - chart data' }
-GtRrWorkerExamplesReport >> tasksExecutionChartItemsGroupWithScheduling [
+GtRrWorkerExamplesReport >> tasksExecutionChartItemsGroupWithRunnerTimesWithDelays [
 	| completedTasks |
 	completedTasks := self tasks select: #hasCompleted.
 	^ (GtRrExecutionChartDataItemsGroup withAll: (completedTasks items
@@ -342,7 +407,43 @@ GtRrWorkerExamplesReport >> tasksExecutionChartItemsGroupWithScheduling [
 				dataItem 
 					propertyAt: #correctScheduling 
 					put: (self 
-						isTaskCorrectlyScheduledAtIndex: anIndex
+						isTaskCorrectlyScheduledUsingRunnerTimesAtIndex: anIndex
+						inGroup: completedTasks).
+				dataItem ]))
+		identifier: self workerId;
+		label: self workerId
+]
+
+{ #category : #'accessing - chart data' }
+GtRrWorkerExamplesReport >> tasksExecutionChartItemsGroupWithSchedulingAndRunnerTimes [
+	| completedTasks |
+	completedTasks := self tasks select: #hasCompleted.
+	^ (GtRrExecutionChartDataItemsGroup withAll: (completedTasks items
+			collectWithIndex: [ :aTask :anIndex |
+				| dataItem | 
+				dataItem := GtRrExecutionChartDataItem fromTask: aTask.
+				dataItem 
+					propertyAt: #correctScheduling 
+					put: (self 
+						isTaskCorrectlyScheduledUsingRunnerTimesAtIndex: anIndex
+						inGroup: completedTasks).
+				dataItem ]))
+		identifier: self workerId;
+		label: self workerId
+]
+
+{ #category : #'accessing - chart data' }
+GtRrWorkerExamplesReport >> tasksExecutionChartItemsGroupWithSchedulingAndWorkerTimes [
+	| completedTasks |
+	completedTasks := self tasks select: #hasCompleted.
+	^ (GtRrExecutionChartDataItemsGroup withAll: (completedTasks items
+			collectWithIndex: [ :aTask :anIndex |
+				| dataItem | 
+				dataItem := GtRrExecutionChartDataItem fromTaskWithWorkerTimes: aTask.
+				dataItem 
+					propertyAt: #correctScheduling 
+					put: (self 
+						isTaskCorrectlyScheduledUsingWorkerTimesAtIndex: anIndex
 						inGroup: completedTasks).
 				dataItem ]))
 		identifier: self workerId;

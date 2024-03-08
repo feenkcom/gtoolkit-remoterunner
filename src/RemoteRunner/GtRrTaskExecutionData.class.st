@@ -69,6 +69,11 @@ GtRrTaskExecutionData >> durationOnRunner [
 ]
 
 { #category : #accessing }
+GtRrTaskExecutionData >> durationOnWorker [
+	^ self duration
+]
+
+{ #category : #accessing }
 GtRrTaskExecutionData >> endTime [
 
 	^ endTime
@@ -93,6 +98,20 @@ GtRrTaskExecutionData >> errorDetails: aGtErrorDetails [
 
 	errorDetails ifNotNil: [ ^ self ].
 	errorDetails := aGtErrorDetails
+]
+
+{ #category : #accessing }
+GtRrTaskExecutionData >> gapBetweenEndTimeAndReceivingResults [
+	^ self endTime 
+		ifNotNil: [ :anEndTime |
+			self resultReceivedTime - anEndTime ]
+]
+
+{ #category : #accessing }
+GtRrTaskExecutionData >> gapBetweenHandoverAndStartTime [
+	^ self startTime 
+		ifNotNil: [ :aStartTime |
+			aStartTime - self handoverTime]
 ]
 
 { #category : #'memory usage' }
