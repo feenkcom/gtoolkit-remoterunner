@@ -28,6 +28,22 @@ GtRrWorkersExamplesReport class >> forTasks: aCollectionOfTasks [
 ]
 
 { #category : #accessing }
+GtRrWorkersExamplesReport >> cummulativeGapBetweenEndTimeAndReceivingResults [
+	^ self workers  
+		inject: 0 seconds 
+		into: [ :totalDuration :aWorker |
+			totalDuration + aWorker gapBetweenEndTimeAndReceivingResults ]
+]
+
+{ #category : #accessing }
+GtRrWorkersExamplesReport >> cummulativeGapBetweenHandoverAndStartTime [
+	^ self workers  
+		inject: 0 seconds 
+		into: [ :totalDuration :aWorker |
+			totalDuration + aWorker gapBetweenHandoverAndStartTime ]
+]
+
+{ #category : #accessing }
 GtRrWorkersExamplesReport >> cummulativeTasksDuration [
 	^ self workers  
 		inject: 0 seconds 
@@ -46,121 +62,6 @@ GtRrWorkersExamplesReport >> cummulativeTasksDurationOnRunner [
 { #category : #'accessing - gc details' }
 GtRrWorkersExamplesReport >> fullGcTime [
 	^ self sumWorkerValueWithNil: [ :aWorker | aWorker fullGcTime ]
-]
-
-{ #category : #'gt - extensions' }
-GtRrWorkersExamplesReport >> gtViewCondensedExecutionTimelineFor: aView [
-	<gtView>
-	
-	^ aView explicit
-		title: 'Condensed execution timeline';
-		priority: 35;
-		stencil: [ 
-			GtRrExecutionHorizontalChartStencil new 
-				colorComputation: [ Color darkGray ];
-				configureWithMinimalDetails;
-				executions: self workersExecutionChartItems ]
-]
-
-{ #category : #'gt - extensions' }
-GtRrWorkersExamplesReport >> gtViewCondensedTasksTimelineFor: aView [
-	<gtView>
-	
-	^ aView explicit
-		title: 'Condensed tasks timeline';
-		priority: 45;
-		stencil: [ 
-			GtRrExecutionHorizontalChartStencil new 
-				withColorBasedOnScheduling;
-				configureWithMinimalDetails;
-				enabledGroupsInRow;
-				executions: self workersTasksExecutionChartItemsGroupWithScheduling ]
-]
-
-{ #category : #'gt - extensions' }
-GtRrWorkersExamplesReport >> gtViewExecutionTimelineListFor: aView [
-	<gtView>
-	
-	^ aView explicit
-		title: 'Execution timeline';
-		priority: 25;
-		stencil: [ 
-			GtRrExecutionHorizontalChartStencil new 
-				executions: self workersExecutionChartItems;
-				selectionTransformation: [ :anItem |
-					self workerWithId:  anItem identifier ] ]
-]
-
-{ #category : #'gt - extensions' }
-GtRrWorkersExamplesReport >> gtViewMachineAvailableMemoryEvolutionFor: aView [
-	<gtView>
-	
-	^ aView explicit
-		title: 'Machine available memory';
-		priority: 50;
-		stencil: [ 
-			| data |
-				
-			data := GtPlotterDataGroup new 
-				values:(self workersTasksMachineAvailableMemoryChartItems
-					sorted: [ :anItem | anItem timestamp ] ascending).
-				
-			GtPlotterLineChart new
-				with: data;
-				valueX: [ :e | e timestamp ];
-				scaleX: GtPlotterTimeScale new;
-				labelFormatX: [ :e | e asTime ];
-				titleX: 'Time';
-				ticksX: 5;
-				valueY: [ :e | e data ];
-				scaleY: GtPlotterLinearScale new;
-				labelFormatY: [ :e | e humanReadableIsqByteSize ];
-				titleY: 'Machine Available Memory';
-				ticksY: 10. ]
-]
-
-{ #category : #'gt - extensions' }
-GtRrWorkersExamplesReport >> gtViewMachineFreeMemoryEvolutionFor: aView [
-	<gtView>
-	
-	^ aView explicit
-		title: 'Machine free memory';
-		priority: 50;
-		stencil: [ 
-			| data |
-				
-			data := GtPlotterDataGroup new 
-				values:(self workersTasksMachineFreeMemoryChartItems
-					sorted: [ :anItem | anItem timestamp ] ascending).
-				
-			GtPlotterLineChart new
-				with: data;
-				valueX: [ :e | e timestamp ];
-				scaleX: GtPlotterTimeScale new;
-				labelFormatX: [ :e | e asTime ];
-				titleX: 'Time';
-				ticksX: 5;
-				valueY: [ :e | e data ];
-				scaleY: GtPlotterLinearScale new;
-				labelFormatY: [ :e | e humanReadableIsqByteSize ];
-				titleY: 'Machine Free Memory';
-				ticksY: 10. ]
-]
-
-{ #category : #'gt - extensions' }
-GtRrWorkersExamplesReport >> gtViewTasksExecutionTimelineListFor: aView [
-	<gtView>
-	
-	^ aView explicit
-		title: 'Tasks timeline';
-		priority: 20;
-		stencil: [ 
-			GtRrExecutionHorizontalChartStencil new 
-				withColorBasedOnScheduling;
-				enabledGroupsInRow;
-				executions: self workersTasksExecutionChartItemsGroupWithScheduling;
-				selectionTransformation: [ :anItem |
-					self workerWithId:  anItem identifier ] ]
 ]
 
 { #category : #'gt - extensions' }
@@ -432,10 +333,18 @@ GtRrWorkersExamplesReport >> workersExecutionChartItems [
 ]
 
 { #category : #'accessing - chart data' }
-GtRrWorkersExamplesReport >> workersTasksExecutionChartItemsGroupWithScheduling [
+GtRrWorkersExamplesReport >> workersTasksExecutionChartItemsGroupWithSchedulingAndRunnerTimes [
 	^ self workers
 		collect: [ :aWorker |
-			aWorker tasksExecutionChartItemsGroupWithScheduling ] 
+			aWorker tasksExecutionChartItemsGroupWithSchedulingAndRunnerTimes ] 
+		as: Array
+]
+
+{ #category : #'accessing - chart data' }
+GtRrWorkersExamplesReport >> workersTasksExecutionChartItemsGroupWithSchedulingAndWorkerTimes [
+	^ self workers
+		collect: [ :aWorker |
+			aWorker tasksExecutionChartItemsGroupWithSchedulingAndWorkerTimes ] 
 		as: Array
 ]
 

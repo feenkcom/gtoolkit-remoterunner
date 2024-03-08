@@ -60,7 +60,7 @@ PlpoGtRrWorkerExamplesReport >> gtViewExecutionTimelineWithSchedulingFor: aView 
 		stencil: [ 
 			GtRrExecutionHorizontalChartStencil new 
 				withColorBasedOnScheduling;
-				executions: self tasksExecutionChartItemsGroupWithScheduling;
+				executions: self tasksExecutionChartItemsGroupWithSchedulingAndRunnerTimes;
 				selectionTransformation: [ :anItem |
 					self taskWithId:  anItem identifier ] ]
 ]
@@ -182,8 +182,8 @@ PlpoGtRrWorkerExamplesReport >> tasksExecutionChartItems [
 ]
 
 { #category : #'accessing - chart data' }
-PlpoGtRrWorkerExamplesReport >> tasksExecutionChartItemsGroupWithScheduling [
-	^ self proxyPerformSerialized: #tasksExecutionChartItemsGroupWithScheduling
+PlpoGtRrWorkerExamplesReport >> tasksExecutionChartItemsGroupWithSchedulingAndRunnerTimes [
+	^ self proxyPerformSerialized: #tasksExecutionChartItemsGroupWithSchedulingAndRunnerTimes
 ]
 
 { #category : #'accessing - chart data' }

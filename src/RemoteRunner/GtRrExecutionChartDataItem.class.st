@@ -36,6 +36,15 @@ GtRrExecutionChartDataItem class >> fromTask: aTask [
 ]
 
 { #category : #'instance - creation' }
+GtRrExecutionChartDataItem class >> fromTaskWithWorkerTimes: aTask [
+	^ self new 
+		identifier: aTask taskId;
+		startTime: aTask startTime;
+		endTime: aTask endTime;
+		label:  aTask description
+]
+
+{ #category : #'instance - creation' }
 GtRrExecutionChartDataItem class >> fromWorker: aWorker [
 	^ self new 
 		identifier: aWorker workerId;

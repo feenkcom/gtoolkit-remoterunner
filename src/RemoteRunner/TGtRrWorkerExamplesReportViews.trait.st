@@ -52,7 +52,7 @@ TGtRrWorkerExamplesReportViews >> gtViewExecutionTimelineWithSchedulingFor: aVie
 		stencil: [ 
 			GtRrExecutionHorizontalChartStencil new 
 				withColorBasedOnScheduling;
-				executions: self tasksExecutionChartItemsGroupWithScheduling;
+				executions: self tasksExecutionChartItemsGroupWithSchedulingAndRunnerTimes;
 				selectionTransformation: [ :anItem |
 					self taskWithId:  anItem identifier ] ]
 ]

@@ -67,6 +67,11 @@ GtRrTask >> durationOnRunner [
 ]
 
 { #category : #accessing }
+GtRrTask >> durationOnWorker [
+	^ self duration
+]
+
+{ #category : #accessing }
 GtRrTask >> endTime [
 	"Answer the time at which the task was completed on the worker"
 	<return: #Duration>

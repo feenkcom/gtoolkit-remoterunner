@@ -27,6 +27,16 @@ GtRrTasksGroup >> durationOnRunner [
 ]
 
 { #category : #accessing }
+GtRrTasksGroup >> durationOnWorker [
+	^ self items  
+		inject: 0 seconds 
+		into: [ :totalDuration :aTask |
+			aTask durationOnWorker 
+				ifNil: [ totalDuration ]
+				ifNotNil: [ :aDuration | totalDuration + aDuration ] ]
+]
+
+{ #category : #accessing }
 GtRrTasksGroup >> endTime [ 
 	| time |
 	time := self items first endTime.
@@ -244,6 +254,11 @@ GtRrTasksGroup >> lastTaskWithResourceReport [
 { #category : #accessing }
 GtRrTasksGroup >> maxValue: aBlock [
 	^ self items maxValue: aBlock
+]
+
+{ #category : #accessing }
+GtRrTasksGroup >> overlappingPairsDo:  aBlockClosure [
+	^ self items overlappingPairsDo: aBlockClosure
 ]
 
 { #category : #accessing }
