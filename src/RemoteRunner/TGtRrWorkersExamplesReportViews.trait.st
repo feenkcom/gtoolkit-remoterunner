@@ -8,7 +8,7 @@ TGtRrWorkersExamplesReportViews >> gtViewCondensedExecutionTimelineFor: aView [
 	<gtView>
 	
 	^ aView explicit
-		title: 'Condensed execution timeline (runner times)';
+		title: 'Condensed timeline';
 		priority: 35;
 		stencil: [ 
 			GtRrExecutionHorizontalChartStencil new 
@@ -26,10 +26,26 @@ TGtRrWorkersExamplesReportViews >> gtViewCondensedTasksTimelineFor: aView [
 		priority: 45;
 		stencil: [ 
 			GtRrExecutionHorizontalChartStencil new 
-				withColorBasedOnScheduling;
+				"withColorBasedOnScheduling;"
+				colorComputation: [ :anItem | Color gray ];
 				configureWithMinimalDetails;
 				enabledGroupsInRow;
 				executions: self workersTasksExecutionChartItemsGroupWithSchedulingAndRunnerTimes ]
+]
+
+{ #category : #'gt - extensions' }
+TGtRrWorkersExamplesReportViews >> gtViewCondensedTasksTimelineWithWorkerTimesAndSchedulingFor: aView [
+	<gtView>
+	
+	^ aView explicit
+		title: 'Condensed tasks timeline (worker times - scheduling)';
+		priority: 45.2;
+		stencil: [ 
+			GtRrExecutionHorizontalChartStencil new 
+				withColorBasedOnScheduling;
+				configureWithMinimalDetails;
+				enabledGroupsInRow;
+				executions: self workersTasksExecutionChartItemsGroupWithSchedulingAndWorkerTimes ]
 ]
 
 { #category : #'gt - extensions' }
@@ -41,7 +57,7 @@ TGtRrWorkersExamplesReportViews >> gtViewCondensedTasksTimelineWithWorkerTimesFo
 		priority: 45.1;
 		stencil: [ 
 			GtRrExecutionHorizontalChartStencil new 
-				withColorBasedOnScheduling;
+				colorComputation: [ :anItem |Color gray ];
 				configureWithMinimalDetails;
 				enabledGroupsInRow;
 				executions: self workersTasksExecutionChartItemsGroupWithSchedulingAndWorkerTimes ]
