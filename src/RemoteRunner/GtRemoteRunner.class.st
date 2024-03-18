@@ -779,10 +779,12 @@ GtRemoteRunner >> moveLoggingTo: aFileReference [
 
 	log ifNil: [ ^ nil ].
 	oldLogger := log.
-	log := RestartingStreamLogger new streamBlock: [  ZnNewLineWriterStream on: 
-		(ZnCharacterWriteStream
-			on: aFileReference asFileReference binaryWriteStream
-			encoding: 'utf8') ].
+	log := RestartingStreamLogger new 
+		flush: false;
+		streamBlock: [  ZnNewLineWriterStream on: 
+			(ZnCharacterWriteStream
+				on: aFileReference asFileReference binaryWriteStream
+				encoding: 'utf8') ].
 	self startLogger: log.
 	oldLogger stop.
 	^ oldLogger.
