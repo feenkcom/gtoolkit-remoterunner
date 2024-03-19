@@ -470,13 +470,14 @@ GtRemoteRunner >> checkJobCompleted: aGtRrContext [
 	"After each task has been completed, check if the job has finished, and if so, signal it.
 	Must be called within sharedAccess."
 	| jobContext |
-"self halt."
+
 	jobContext := aGtRrContext jobContext.
 	jobContext isFinished ifFalse: [ ^ self ].
 
 	self logEmitter emitJobShutdownStartFor:  jobContext.
 	jobStartupAndShutdown shutdownJob: jobContext.
 	self logEmitter emitJobShutdownEndFor:  jobContext.
+	self flushLogger.
 ]
 
 { #category : #'private - debugging' }
@@ -556,6 +557,13 @@ GtRemoteRunner >> executingJobCount [
 	"Answer the number of jobs that are currently being executed."
 	
 	^ runnerStats currentlyExecutingJobCount
+]
+
+{ #category : #'api - logger' }
+GtRemoteRunner >> flushLogger [
+
+	log ifNil: [ ^ self ].
+	log flushLog.
 ]
 
 { #category : #private }
