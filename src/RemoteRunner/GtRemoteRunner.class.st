@@ -783,16 +783,17 @@ GtRemoteRunner >> managerStartupAndShutdown: aGtRrManagerStartupAndShutdown [
 { #category : #'api - logger' }
 GtRemoteRunner >> moveLoggingTo: aFileReference [
 	"Replace the receiver's logger with one that logs to the supplied file"
-	| oldLogger |
+	| oldLogger newLogger |
 
 	log ifNil: [ ^ nil ].
 	oldLogger := log.
-	log := RestartingStreamLogger new 
+	newLogger := RestartingStreamLogger new 
 		flush: false;
 		streamBlock: [  ZnNewLineWriterStream on: 
 			(ZnCharacterWriteStream
 				on: aFileReference asFileReference binaryWriteStream
 				encoding: 'utf8') ].
+	log := StreamLoggerFlusher new logger: newLogger.
 	self startLogger: log.
 	oldLogger stop.
 	^ oldLogger.
