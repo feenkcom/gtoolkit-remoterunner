@@ -4,7 +4,8 @@ Class {
 	#traits : 'TPlpoGtWithAnnouncementsQueueListener',
 	#classTraits : 'TPlpoGtWithAnnouncementsQueueListener classTrait',
 	#instVars : [
-		'taskCount'
+		'taskCount',
+		'originalJob'
 	],
 	#category : #'RemoteRunner-Jobs'
 }
@@ -82,6 +83,16 @@ PlpoGtRrJob >> jobTimeout [
 	"Answer the receiver's timeout"
 
 	^ self proxyPerform: #jobTimeout
+]
+
+{ #category : #accessing }
+PlpoGtRrJob >> originalJob [
+	^ originalJob
+]
+
+{ #category : #accessing }
+PlpoGtRrJob >> originalJob: anObject [
+	originalJob := anObject
 ]
 
 { #category : #accessing }

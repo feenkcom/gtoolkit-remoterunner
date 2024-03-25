@@ -445,6 +445,13 @@ GtRrJob >> name: anObject [
 	name := anObject
 ]
 
+{ #category : #accessing }
+GtRrJob >> originalJob [
+	"For a job proxy this is the job that was submitted to create the proxy."
+
+	^ self
+]
+
 { #category : #copying }
 GtRrJob >> postCopy [
 	"A copied job has its own UID and tasks (as a task holds its results)"

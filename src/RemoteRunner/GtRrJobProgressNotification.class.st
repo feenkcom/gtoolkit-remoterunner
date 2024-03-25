@@ -173,6 +173,9 @@ GtRrJobProgressNotification >> setJob: aGtRrJob [
 
 { #category : #callbacks }
 GtRrJobProgressNotification >> spawnInspectToolFromSource: anElement [
+
+	(self job isLanguageLinkProxyObject and: [ self job isProxyObjectActive not ]) ifTrue:
+		[ ^ self inform: 'Unable to inspect project object - connection closed' ].
 	GtInspectorTool
 		openWrappedOn: self job
 		title: self job name
