@@ -104,10 +104,19 @@ GtRrTimeoutManager >> size [
 	^ contexts size
 ]
 
+{ #category : #'start - stop' }
+GtRrTimeoutManager >> stop [
+	"Stop the receiver.
+	The receiver will be automatically restarted if a context is added."
+	
+	TaskAtQueue default removeTask: scheduleTask
+]
+
 { #category : #private }
 GtRrTimeoutManager >> updateScheduledTask [
 	"Reschedule the scheduleTask so that it is executed at the appropriate time"
 
+	remoteRunner isRunning ifFalse: [ ^ self ].
 	contexts ifEmpty: [ ^ self ].
 	nextTimeout := contexts first contextTimeoutTime.
 	scheduleTask scheduledTime: nextTimeout.
