@@ -1190,6 +1190,7 @@ GtRemoteRunner >> state [
 { #category : #'api - runner' }
 GtRemoteRunner >> stop [
 
+	self stopRegisteredWorkers.
 	self runJobShutdown.
 	self runManagerShutdown.
 	self stopLogging.
