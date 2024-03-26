@@ -38,6 +38,7 @@ GtRrTimeoutManager >> checkTimeouts [
 	"Check the queue and timeout contexts as required"
 	| now context |
 
+	remoteRunner isRunning ifFalse: [ ^ self ].
 	contexts ifEmpty: [ ^ self ].
 	now := DateAndTime now.
 	[ contexts isNotEmpty and: 
@@ -89,6 +90,7 @@ GtRrTimeoutManager >> scheduleCheckTimeouts [
 	"Schedule a timeout check to be run"
 	| future |
 
+	remoteRunner isRunning ifFalse: [ ^ self ].
 	future := [ self checkTimeouts ] future.
 	future onFailureDo: [ :anError |
 		anError freeze.
