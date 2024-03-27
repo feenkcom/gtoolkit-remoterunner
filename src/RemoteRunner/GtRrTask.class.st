@@ -1,3 +1,23 @@
+"
+GtRrTasks are the unit of work handed out to workers to be executed.  A GtRrJob has one or more GtRrTasks to be executed by the available workers.
+
+A note on GtRrTask design:
+
+Gt Remote Runner has three basic components:
+
+1. The user submitting jobs.
+2. The GtRemoteRunner instance that accepts the jobs and coordinates their execution.
+3. One or more workers that are given GtRrTasks for execution.
+
+The GtRemoteRunner may be in the same image as the user, or in a separate image, possibly on a remote machine.
+
+Likewise, the workers may also be in the same image as the GtRemoteRunner, or in separate image(s), possibly on one ore more separate machines.
+
+In the case where the runner and workers are in separate images, the issue of code synchronisation becomes important.
+
+Both workers and the remote runner can have code synchronisation enabled, or it can be handled via external mechanisms.
+
+"
 Class {
 	#name : #GtRrTask,
 	#superclass : #Object,
