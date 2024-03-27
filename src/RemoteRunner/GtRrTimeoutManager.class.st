@@ -1,7 +1,7 @@
 "
 The GtRrTimeoutManager is responsible for efficiently monitoring worker and job timeouts.
 
-A single sorted collection of task and job contexts is maintained, sorted by absolute timeout time.  {{gtClass:BlTaskAtQueue}} is used to trigger a check when the next timeout could occur.
+A single sorted collection of task and job contexts is maintained, sorted by absolute timeout time.  {{gtClass:TaskAtQueue}} is used to trigger a check when the next timeout could occur.
 
 
 "
