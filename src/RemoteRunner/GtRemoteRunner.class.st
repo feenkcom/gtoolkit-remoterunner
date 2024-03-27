@@ -1193,6 +1193,7 @@ GtRemoteRunner >> stop [
 	self stopRegisteredWorkers.
 	self runJobShutdown.
 	self runManagerShutdown.
+	self stopTimeoutManager.
 	self stopLogging.
 	self stopAnnouncementNotifier.
 	runnerStats isRunning: self isRunning.
@@ -1241,6 +1242,13 @@ GtRemoteRunner >> stopRegisteredWorkers [
 	GtRrStopRegisteredWorkersCompletedSignal new
 		registeredWorkerCount: registeredWorkers size;
 		emit.
+]
+
+{ #category : #'api - logger' }
+GtRemoteRunner >> stopTimeoutManager [
+	"Stop the receiver's timeout manager"
+
+	timeoutManager stop.
 ]
 
 { #category : #'api - jobs' }

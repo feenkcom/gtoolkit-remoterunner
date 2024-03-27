@@ -1,7 +1,7 @@
 "
 The GtRrTimeoutManager is responsible for efficiently monitoring worker and job timeouts.
 
-A single sorted collection of task and job contexts is maintained, sorted by absolute timeout time.  {{gtClass:BlTaskAtQueue}} is used to trigger a check when the next timeout could occur.
+A single sorted collection of task and job contexts is maintained, sorted by absolute timeout time.  {{gtClass:TaskAtQueue}} is used to trigger a check when the next timeout could occur.
 
 
 "
@@ -104,10 +104,19 @@ GtRrTimeoutManager >> size [
 	^ contexts size
 ]
 
+{ #category : #'start - stop' }
+GtRrTimeoutManager >> stop [
+	"Stop the receiver.
+	The receiver will be automatically restarted if a context is added."
+	
+	TaskAtQueue default removeTask: scheduleTask
+]
+
 { #category : #private }
 GtRrTimeoutManager >> updateScheduledTask [
 	"Reschedule the scheduleTask so that it is executed at the appropriate time"
 
+	remoteRunner isRunning ifFalse: [ ^ self ].
 	contexts ifEmpty: [ ^ self ].
 	nextTimeout := contexts first contextTimeoutTime.
 	scheduleTask scheduledTime: nextTimeout.
