@@ -763,10 +763,11 @@ GtRemoteRunnerExamples >> timeoutJob [
 	"Demonstrate terminating a job due to it timing out"
 	<gtExample>
 	<noTest>
-	| job tasks taskFailedCount taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount workerRegisteredSemaphore |
+	| job tasks failedTasks taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount workerRegisteredSemaphore |
 
 	self ignoreWorkerExamples ifTrue: [ ^ self ].
-	jobStartedCount := jobCompletedCount := taskStartedCount := taskCompletedCount := taskFailedCount := 0.
+	jobStartedCount := jobCompletedCount := taskStartedCount := taskCompletedCount := 0.
+	failedTasks := OrderedCollection new.
 	jobSemaphore := GtMutualExclusionSemaphore new.
 	workerRegisteredSemaphore := Semaphore new.
 	remoteRunner := GtRemoteRunner new.
@@ -799,7 +800,7 @@ GtRemoteRunnerExamples >> timeoutJob [
 		when: GtRrTaskCompletedAnnouncement do: 
 			[ taskCompletedCount := taskCompletedCount + 1. ];
 		when: GtRrTaskFailedAnnouncement do: 
-			[ taskFailedCount := taskFailedCount + 1. ].
+			[ :announcement | failedTasks add: announcement task. ].
 	remoteRunner submitJob: job.
 	self waitOn: jobSemaphore for: 10 description: 'Job didn''t complete in time'.
 
@@ -809,7 +810,7 @@ GtRemoteRunnerExamples >> timeoutJob [
 	self assert: jobCompletedCount equals: 1.
 	self assert: jobStartedCount equals: 1.
 	self assert: taskCompletedCount equals: 0.
-	self assert: taskFailedCount equals: 3.
+	self assert: failedTasks size equals: 3.
 	self assert: (taskStartedCount between: 1 and: 3)
 		description: [ 'Unexpected taskStartedCount: ', taskStartedCount asString ].
 	self assert: job state equals: #cancelled.
