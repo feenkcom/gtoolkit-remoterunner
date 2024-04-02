@@ -362,7 +362,7 @@ GtRrJobContext >> terminateJob [
 	job isFinished ifFalse:
 		[ job markJobTerminating.
 		self taskContexts do: [ :taskContext |
-			self remoteRunner terminateTaskContextId: taskContext taskContextId ] ].
+			taskContext terminateTask ] ].
 	remoteRunner checkJobCompleted: self.
 ]
 

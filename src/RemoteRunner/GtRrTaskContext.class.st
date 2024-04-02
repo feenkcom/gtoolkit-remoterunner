@@ -172,6 +172,7 @@ GtRrTaskContext >> jobTimeout [
 { #category : #running }
 GtRrTaskContext >> markTaskCancelled [
 
+	(#(completed cancelled) includes: task state) ifTrue: [ ^ self ].
 	task markTaskCancelled.
 	jobContext markTaskCancelled: self.
 ]
@@ -179,6 +180,7 @@ GtRrTaskContext >> markTaskCancelled [
 { #category : #running }
 GtRrTaskContext >> markTaskCompleted [
 
+	(#(completed cancelled) includes: task state) ifTrue: [ ^ self ].
 	task markTaskCompleted.
 	jobContext markTaskCompleted: self.
 ]
@@ -311,7 +313,7 @@ GtRrTaskContext >> terminateTask [
 	Despite being in the GtRrTaskContext, this represents a worker timeout"
 	| executionData |
 
-	task state = #started ifFalse: [ self markTaskCancelled ].
+	task isFinished ifFalse: [ self markTaskCancelled ].
 	"If the worker has timed out its state is unknown,
 	simply close the connection."
 	workerFuture ifNotNil:

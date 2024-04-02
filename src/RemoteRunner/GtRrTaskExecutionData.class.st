@@ -160,7 +160,7 @@ GtRrTaskExecutionData >> handoverTime: anObject [
 { #category : #testing }
 GtRrTaskExecutionData >> hasCompleted [
 
-	^ self state = #completed or: [ self state = #terminated ]
+	^ #(completed terminated cancelled) includes: self state
 ]
 
 { #category : #testing }
