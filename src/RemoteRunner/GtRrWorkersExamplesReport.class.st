@@ -306,13 +306,6 @@ GtRrWorkersExamplesReport >> vmMinimumMemorySize [
 ]
 
 { #category : #accessing }
-GtRrWorkersExamplesReport >> workerWithId: aWorkerId [
-	^ self workers 
-		detect: [ :aWorker |
-			aWorker workerId = aWorkerId ]
-]
-
-{ #category : #accessing }
 GtRrWorkersExamplesReport >> workers [
 
 	^ workers
@@ -358,4 +351,11 @@ GtRrWorkersExamplesReport >> workersTasksMachineAvailableMemoryChartItems [
 GtRrWorkersExamplesReport >> workersTasksMachineFreeMemoryChartItems [
 	^ self workers flatCollect: [ :aWorker | 
 		aWorker tasksMachineFreeMemoryChartItems ]
+]
+
+{ #category : #accessing }
+GtRrWorkersExamplesReport >> workerWithId: aWorkerId [
+	^ self workers 
+		detect: [ :aWorker |
+			aWorker workerId = aWorkerId ]
 ]

@@ -98,8 +98,8 @@ GtRrClusterExamplesReport >> gtViewMachineMemoryStatsFor: aView [
 		title: 'Machines memory';
 		priority: 25;
 		items: [ self machineReports ];
-		column: 'Type' text: [ :aMachineReport |
-			aMachineReport machineType ];
+		column: 'Machine Type' text: [ :aMachineReport |
+			aMachineReport machineType ifNil: [ '-' ] ];
 		column: 'Ip Address' text: [ :aMachineReport |
 			aMachineReport ipAddress ];
 		column: 'Workers Count' text: [ :aMachineReport |
@@ -130,10 +130,10 @@ GtRrClusterExamplesReport >> gtViewMachinesFor: aView [
 		title: 'Machines stats';
 		priority: 10;
 		items: [ self machineReports ];
-		column: 'Id' text: [ :aMachineReport |
-			aMachineReport machineId ];
-		column: 'Type' text: [ :aMachineReport |
-			aMachineReport machineType ];
+		column: 'Machine Id' text: [ :aMachineReport |
+			aMachineReport machineId ifNil: [ '-' ] ];
+		column: 'Machine Type' text: [ :aMachineReport |
+			aMachineReport machineType ifNil: [ '-' ] ];
 		column: 'Ip Address' text: [ :aMachineReport |
 			aMachineReport ipAddress ];
 		column: 'Workers Count' text: [ :aMachineReport |
@@ -194,8 +194,8 @@ GtRrClusterExamplesReport >> gtViewMachinesTimingFor: aView [
 		title: 'Machines timing';
 		priority: 20;
 		items: [ self machineReports ];
-		column: 'Type' text: [ :aMachineReport |
-			aMachineReport machineType ];
+		column: 'Machine Type' text: [ :aMachineReport |
+			aMachineReport machineType ifNil: [ '-' ] ];
 		column: 'Ip Address' text: [ :aMachineReport |
 			aMachineReport ipAddress ];
 		column: 'Workers Count' text: [ :aMachineReport |
@@ -275,19 +275,19 @@ GtRrClusterExamplesReport >> machineReports: aCollectionOfReports [
 	machineReports := aCollectionOfReports
 ]
 
-{ #category : #accessing }
-GtRrClusterExamplesReport >> machineWithIpAddress: anIpAddress [
-	^ self machineReports 
-		detect: [ :aMachine |
-			aMachine ipAddress = anIpAddress ]
-]
-
 { #category : #'accessing - chart data' }
 GtRrClusterExamplesReport >> machinesExecutionChartItems [
 	^ self machineReports
 		collect: [ :aMachineReport |
 			GtRrExecutionChartDataItem fromMachine: aMachineReport ] 
 		as: Array
+]
+
+{ #category : #accessing }
+GtRrClusterExamplesReport >> machineWithIpAddress: anIpAddress [
+	^ self machineReports 
+		detect: [ :aMachine |
+			aMachine ipAddress = anIpAddress ]
 ]
 
 { #category : #accessing }
