@@ -158,7 +158,8 @@ GtRrLocalManagerStartupAndShutdown >> newLogFileWorkerLocalProcess [
 	| settings builder process logFile |
 
 	settings := LanguageLinkSettings pharoDefaultSettings.
-	logFile := ('worker.', workerIndex asString, '.log') asFileReference.
+	'workerLogs' asFileReference ensureCreateDirectory.
+	logFile := ('workerLogs/worker.', workerIndex asString, '.log') asFileReference.
 	builder := GtExternalProcessBuilder new
 		command: settings serverExecutable fullName;
 		args: (self newWorkerLocalProcessArgumentsFor: settings);
@@ -208,7 +209,7 @@ GtRrLocalManagerStartupAndShutdown >> newWorkerLocalProcessArgumentsFor: someSet
 		add: '--epiceaMemoryStore';
 		add: '--noLepiterReload';
 		add: '--noGtImageUpdate'.
-	pharoDebugFile := 'worker.pharoDebug.', workerIndex asString, '.log'.
+	pharoDebugFile := 'workerLogs/worker.pharoDebug.', workerIndex asString, '.log'.
 	args
 		add: '--pharoDebugLog';
 		add: pharoDebugFile.
