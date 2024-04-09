@@ -11,7 +11,8 @@ Class {
 	#name : #GtRemoteAnnouncementQueue,
 	#superclass : #Object,
 	#instVars : [
-		'queue'
+		'queue',
+		'announcingObject'
 	],
 	#category : #'RemoteRunner-AnnouncementQueue'
 }
@@ -27,6 +28,11 @@ GtRemoteAnnouncementQueue class >> onAnnouncingObject: anAnnouncingObject withAn
 	^ self new
 		initializeForAnnouncingObject: anAnnouncingObject
 		andAnnouncementTypes: anAnnouncementType 
+]
+
+{ #category : #accessing }
+GtRemoteAnnouncementQueue >> announcingObject [
+	^ announcingObject
 ]
 
 { #category : #'gt - extensions' }
@@ -85,7 +91,8 @@ GtRemoteAnnouncementQueue >> pollSerialized [
 { #category : #accessing }
 GtRemoteAnnouncementQueue >> subscribeAnnouncingObject: anAnnouncingObject andAnnouncementType: anAnnouncementType [ 
 	"For now this only subscribes strongly to the object."
-	
-	anAnnouncingObject 
+
+	announcingObject := anAnnouncingObject.
+	announcingObject 
 		when: anAnnouncementType send: #onAnnouncement: to: self
 ]
