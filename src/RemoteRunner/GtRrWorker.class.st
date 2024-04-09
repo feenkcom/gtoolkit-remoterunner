@@ -34,7 +34,11 @@ GtRrWorker class >> commandLineCommand [
 	^ (ClapCommand id: self commandLineName)
 		description: 'Run the RemoteRunner worker';
 		add: ClapFlag forHelp;
-		add: ((ClapFlag id: #log) description: 'Enable logging to stdout');
+		add: ((ClapFlag id: #log) description: 'Enable logging');
+		add: ((ClapFlag id: #logDir) 
+				description: 'Directory to save logs in (./workerLogs)';
+				add: (ClapPositional id: #directory);
+				yourself);
 		add: ((ClapFlag id: #serverSocketAddress)
 				   description:
 					   'The server socket address on which to connect for requests';
@@ -60,7 +64,7 @@ GtRrWorker class >> commandLineCommand [
 		yourself
 ]
 
-{ #category : #accessing }
+{ #category : #clap }
 GtRrWorker class >> commandLineName [
 
 	^ #remoteRunnerWorker
@@ -82,15 +86,10 @@ GtRrWorker class >> isCommandLineWorker [
 
 { #category : #clap }
 GtRrWorker class >> logFilenameFor: aGtRrWorker [
-	| pid filename |
+	| pid |
 
 	pid := GtOsSystemInfo current currentProcessId.
-	filename := 'gtrrworker-' , pid asString , '.log'.
-	Stdio stdout
-		<< 'gtrrworker.log filename set to: ';
-		<< filename;
-		lf.
-	^ filename
+	^ 'gtrrworker-' , pid asString , '.log'.
 ]
 
 { #category : #private }
@@ -114,65 +113,58 @@ GtRrWorker class >> newPharoLinkServer: aString [
 
 { #category : #clap }
 GtRrWorker class >> processCommandLineArgs: args [
-	| worker connectionStrategyId connectionStrategy logger serverSocketAddress announcements workerClass |
-
-	args
-		at: #help ifPresent: [ :help | 
+	| worker connectionStrategyId connectionStrategy serverSocketAddress workerClass |
+	args at: #help
+		ifPresent: 
+			[:help |
 			help value.
-			help context exitSuccess ].
+			help context exitSuccess].
 	workerClass := self environment at: (args
-		at: #workerClass
-		ifPresent: [ :arg | (arg at: #workerClassName) value asSymbol ]
-		ifAbsent: [ #GtRrWorker ]).
+						at: #workerClass
+						ifPresent: [:arg | (arg at: #workerClassName) value asSymbol]
+						ifAbsent: [#GtRrWorker]).
 	worker := workerClass new.
-	args occurrencesOf: #attribute do: [ :arg | 
-		worker attributes
-			at: (arg at: #key) value
-			put: (arg at: #value) value ].
-	args at: #log ifPresent: 
-		[ SignalLogger resetAllInstances.
-		logger := RestartingStreamLogger appendToFile: (workerClass logFilenameFor: worker).
-		announcements := AnnouncementSetWithExclusions withAll:
-			{ GtRemoteRunnerAnnouncement, 
-			GtRemoteRunnerSignal,
-			PharoLinkSignal,
-			LanguageLinkEventSignal,
-			StringSignal }.
-		announcements addExclusions: ContextStackSignal allSubclasses.
-		logger startFor: announcements ].
-
+	args occurrencesOf: #attribute
+		do: [:arg | worker attributes at: (arg at: #key) value put: (arg at: #value) value].
+	workerClass startLoggerFor: worker arguments: args.
 	GtRrWorkerCliStartingSignal new emit.
-	serverSocketAddress := ((args at: #serverSocketAddress) at:
-			                          #address) value.
+	serverSocketAddress := ((args at: #serverSocketAddress) at: #address)
+				value.
 	StringSignal emit: 'Server address: ' , serverSocketAddress.
 	StringSignal emit: 'WorkerClass: ' , workerClass name.
 	connectionStrategyId := args
-		at: #connectionStrategy
-		ifPresent: [ :arg | (arg at: #strategyId) value ]
-		ifAbsent: [ ].
-	StringSignal emit: 'ConnectionStrategy: ', (connectionStrategyId ifNil: [ '<none>' ]).
-	connectionStrategyId ifNotNil: [ 
-		connectionStrategy := ({ 
-			(#perMessage -> [ GtRrWorkerConnectionPerMessageStrategy new ]).
-			(#single -> [ GtRrWorkerSingleConnectionStrategy new ]) } asDictionary
-				at: connectionStrategyId
-				ifAbsent: [ self error: 'Invalid connectionStrategy: ', connectionStrategyId printString ]) value.
-		worker connectionStrategy: connectionStrategy ].
+				at: #connectionStrategy
+				ifPresent: [:arg | (arg at: #strategyId) value]
+				ifAbsent: [].
+	StringSignal
+		emit: 'ConnectionStrategy: ' , (connectionStrategyId ifNil: ['<none>']).
+	connectionStrategyId
+		ifNotNil: 
+			[connectionStrategy := (
+					{#perMessage -> [GtRrWorkerConnectionPerMessageStrategy new].
+					#single -> [GtRrWorkerSingleConnectionStrategy new]}
+							asDictionary at: connectionStrategyId
+							ifAbsent: 
+								[self
+									error: 'Invalid connectionStrategy: ' , connectionStrategyId printString])
+							value.
+			worker connectionStrategy: connectionStrategy].
 	worker connectionStrategy socketAddress: serverSocketAddress.
-	args at: #changesSync ifPresent:
-		[ StringSignal emit: 'changesSync: true'.
-		worker attributes at: #changesSync put: true ].
+	args at: #changesSync
+		ifPresent: 
+			[StringSignal emit: 'changesSync: true'.
+			worker attributes at: #changesSync put: true].
 	StringSignal emit: 'Worker Attributes:'.
-	worker attributes keysAndValuesDo: [ :key :value |
-		StringSignal emit: 'key: ', key asString, ', value: ', value asString ].
-
+	worker attributes keysAndValuesDo: 
+			[:key :value |
+			StringSignal emit: 'key: ' , key asString , ', value: ' , value asString].
 	StringSignal emit: 'Install UI manager...'.
 	UIManager default: GtRrUIManager new.
 	StringSignal emit: 'Starting worker...'.
 	worker start.
 	GtRrWorkerCliCompletedSignal new emit.
 	"Hibernate until the process exits"
-	Semaphore new wait.
+	Semaphore new wait
 ]
 
 { #category : #'instance creation' }
@@ -182,6 +174,29 @@ GtRrWorker class >> serverSocketAddress: aString [
 	worker := self new.
 	worker connectionStrategy socketAddress: aString.
 	^ worker.
+]
+
+{ #category : #clap }
+GtRrWorker class >> startLoggerFor: worker arguments: args [
+	| announcements logger logDir filename |
+
+	args at: #log ifAbsent: [^ self ].
+
+	logDir := (args at: #logDir
+		ifPresent: [:arg | (arg at: #directory) value]
+		ifAbsent: ['workerLogs']) asFileReference.
+	SignalLogger resetAllInstances.
+	filename := logDir / (worker class logFilenameFor: worker).
+	Stdio stdout
+		<< 'worker log filename set to: ';
+		<< filename asString;
+		lf.
+	logger := RestartingStreamLogger appendToFile: filename.
+	announcements := AnnouncementSetWithExclusions withAll: 
+		{GtRemoteRunnerAnnouncement , GtRemoteRunnerSignal , PharoLinkSignal, 
+			LanguageLinkEventSignal , StringSignal}.
+	announcements addExclusions: ContextStackSignal allSubclasses.
+	logger startFor: announcements.
 ]
 
 { #category : #observer }
