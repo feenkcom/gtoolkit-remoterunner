@@ -6,55 +6,32 @@ Class {
 	#category : #'RemoteRunner-Examples'
 }
 
-{ #category : #accessing }
-GtRemoteAnnouncementQueueExamples >> simpleQueue [
+{ #category : #examples }
+GtRemoteAnnouncementQueueExamples >> queueGetsAnnouncements [
 	<gtExample>
-	<noTest>
-	| runner queue |
+	| job jobSemaphore queue polled runner |
+
 	runner := GtRemoteRunnerExamples new simpleRunner.
-	
 	queue := GtRemoteAnnouncementQueue onAnnouncingObject: runner.
-	
+	jobSemaphore := Semaphore new.
 	self assert: queue poll size equals: 0.
-	
-	^ queue
-]
 
-{ #category : #accessing }
-GtRemoteAnnouncementQueueExamples >> simpleQueueWithAnnouncement [
-	<gtExample>
-	<noTest>
-	| queue polled runner |
-	queue := self simpleQueueWithStartedJobs.
-	runner := queue object.
-	
-	5 seconds wait.
+	[ runner start.
+	job := GtRemoteRunnerExamples new simpleJob.
+	job when: GtRrJobCompletedAnnouncement
+		do: [ :ann | jobSemaphore signal ].
+	runner submitJob: job.
+
+	jobSemaphore wait.
 	polled := queue poll.
-	self assert: polled size equals: 6.
-	self assert: (polled allButLast last isKindOf: GtRrTaskCompletedAnnouncement) description: 'Task is finished and announcement is in queue'.
+	self assert: polled size equals: 8.
+	self assert: ((polled at: 6) isKindOf: GtRrTaskCompletedAnnouncement) description: 'Task is finished and announcement is in queue'.
 	self assert: (polled last isKindOf: GtRrJobCompletedAnnouncement) description: 'Job is finished and announcement is in queue'.
-	
-	self assert: queue poll size equals: 0.
-	
-	runner stop.
-	
-	self assert: queue poll size equals: 1.
-	
-	^ queue
-]
 
-{ #category : #accessing }
-GtRemoteAnnouncementQueueExamples >> simpleQueueWithStartedJobs [
-	<gtExample>
-	<noTest>
-	| queue runner |
-	queue := self simpleQueue.
-	runner := queue object.
-	
-	runner start.
-	runner submitJob: GtRemoteRunnerExamples new simpleJob.
-	
-	self deny: runner state equals: #idle.
-	
+	self assert: queue poll size equals: 0 ]
+		ensure: [ runner stop ].
+
+	self assert: queue poll size equals: 1.
+
 	^ queue
 ]
