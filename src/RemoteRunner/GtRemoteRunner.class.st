@@ -652,12 +652,13 @@ GtRemoteRunner >> gtWorkersFor: aView [
 	<gtView>
 
 	^ aView columnedList
-		  title: 'Registered workers';
-		  priority: 50;
-		  items: [ registeredWorkers values ];
-		  column: 'IP Address' text: [ :item | GtRemoteRunner printIpAddress: item remoteAddress ];
-			column: 'Working Directory' text: [ :item | item detailAt: #workingDirectory ifAbsent: [ '' ] ];
-		  actionUpdateButton
+		title: 'Registered workers';
+		priority: 50;
+		items: [ registeredWorkers values sorted: #remoteAddressString ascending ];
+		column: 'IP Address' text: [ :item | GtRemoteRunner printIpAddress: item remoteAddress ];
+		column: 'Working Directory' text: [ :item | item detailAt: #workingDirectory ifAbsent: [ '' ] ];
+		column: 'PID' text: [ :item | item pid ];
+		actionUpdateButton
 ]
 
 { #category : #'api - logger' }
