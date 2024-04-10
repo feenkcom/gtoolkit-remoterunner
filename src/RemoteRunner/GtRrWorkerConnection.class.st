@@ -236,6 +236,12 @@ GtRrWorkerConnection >> pharoLinkServerOnPort: anInteger [
 	^ application.
 ]
 
+{ #category : #accessing }
+GtRrWorkerConnection >> pid [
+
+	^ attributes at: #pid ifAbsent: []
+]
+
 { #category : #printing }
 GtRrWorkerConnection >> printOn: aStream [
 
