@@ -69,7 +69,7 @@ GtRrJobContext >> gtActionCancelFor: anAction [
 		  priority: 3;
 		  action: [ :aButton | 
 		  	self terminate.
-			  aButton phlow fireUpdateWish ]
+			  aButton phlow fireToolUpdateWish ]
 ]
 
 { #category : #accessing }
@@ -83,7 +83,7 @@ GtRrJobContext >> gtActionStartFor: anAction [
 		  priority: 2;
 		  action: [ :aButton | 
 		  	remoteRunner submitJob: job.
-			  aButton phlow fireUpdateWish ]
+			  aButton phlow fireToolUpdateWish ]
 ]
 
 { #category : #ui }
