@@ -24,7 +24,7 @@ PlpoGtRrJobContext >> gtActionCancelFor: anAction [
 		  priority: 3;
 		  action: [ :aButton | 
 		  	self terminate.
-			  aButton phlow fireUpdateWish ]
+			  aButton phlow fireToolUpdateWish ]
 ]
 
 { #category : #accessing }
