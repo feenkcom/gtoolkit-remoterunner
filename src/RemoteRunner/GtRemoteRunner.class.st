@@ -396,7 +396,7 @@ GtRemoteRunner >> assignTasksToWorkers [
 			remove: each
 			ifAbsent: [ StringSignal emit: 'Unable to mark unavailable: ', each printString.
 				self error: 'Unable to mark unavailable' ] ].
-	runnerStats availableWorkerCount: availableWorkers size.
+	runnerStats updateAvailableWorkerCounts: availableWorkers.
 ]
 
 { #category : #accessing }
@@ -745,7 +745,8 @@ GtRemoteRunner >> jobStartupAndShutdown [
 GtRemoteRunner >> jobStartupAndShutdown: aGtDtsJobStartupAndShutdown [
 
 	jobStartupAndShutdown := aGtDtsJobStartupAndShutdown.
-	jobStartupAndShutdown remoteRunner: self
+	jobStartupAndShutdown remoteRunner: self.
+	runnerStats updateJobStartupAndShutdown:  jobStartupAndShutdown.
 ]
 
 { #category : #'api - logger' }
@@ -779,6 +780,7 @@ GtRemoteRunner >> managerStartupAndShutdown: aGtRrManagerStartupAndShutdown [
 
 	managerStartupAndShutdown := aGtRrManagerStartupAndShutdown.
 	managerStartupAndShutdown remoteRunner: self.
+	runnerStats updateManagerStartupAndShutdown: managerStartupAndShutdown.
 ]
 
 { #category : #'api - logger' }
@@ -815,13 +817,13 @@ GtRemoteRunner >> nextTaskForWorkerId: aUidString [
 		taskFuture := GtRrFutureWorkerTask new 
 			connection: workerConnection.
 		(jobStartupAndShutdown finishedWithWorkerFuture: taskFuture) ifTrue:
-			[ runnerStats availableWorkerCount: availableWorkers size.
+			[ runnerStats updateAvailableWorkerCounts: availableWorkers.
 			GtRrNextTaskCompletedSignal new
 				mutexWait: (mutexEnd - mutexStart) asMilliSeconds;
 				emit.
 			^ 'quit' ].
 		availableWorkers add: taskFuture.
-		runnerStats availableWorkerCount: availableWorkers size.
+		runnerStats updateAvailableWorkerCounts: availableWorkers.
 		self assignTasksToWorkers ].
 	taskFuture wait.
 	GtRrNextTaskCompletedSignal new
@@ -986,7 +988,7 @@ GtRemoteRunner >> registerWorkerWithDetails: aDictionary [
 		aDictionary at: #workerIpAddress put: workerConnection remoteAddressString.
 		registeredWorkers at: workerId put: workerConnection.
 		runnerStats 
-			registeredWorkerCount: registeredWorkers size;
+			updateRegisteredWorkerCounts: registeredWorkers;
 			isRunning: self isRunning.
 		managerStartupAndShutdown registerWorker: workerConnection ].
 	self announceAndLog: (GtRrWorkerRegisteredAnnouncement new
@@ -1238,7 +1240,7 @@ GtRemoteRunner >> stopRegisteredWorkers [
 	self registeredWorkersDo: #stop.
 	"The stats will be updated when the worker is unregistered, so this isn't strictly necessary."
 	runnerStats
-		registeredWorkerCount: registeredWorkers size;
+		updateRegisteredWorkerCounts: registeredWorkers;
 		isRunning: self isRunning.
 	GtRrStopRegisteredWorkersCompletedSignal new
 		registeredWorkerCount: registeredWorkers size;
@@ -1475,13 +1477,13 @@ GtRemoteRunner >> unregisterWorkerId: aUidString reason: aString [
 						, ' due to reason ' , aString asString.
 				nil].
 		runnerStats 
-			registeredWorkerCount: registeredWorkers size;
+			updateRegisteredWorkerCounts: registeredWorkers;
 			isRunning: self isRunning.
 		terminatedWorkers := availableWorkers select: [ :workerFuture | 
 			workerFuture connection = workerConnection].
 		terminatedWorkers do: [:workerFuture | workerFuture terminateProcess].
 		availableWorkers removeAll: terminatedWorkers.
-		runnerStats availableWorkerCount: availableWorkers size.
+		runnerStats updateAvailableWorkerCounts: availableWorkers.
 		failedTasks := currentlyExecutingTasks
 					select: [:each | each connection = workerConnection].
 		failedTasks valuesDo: [ :taskContext |
@@ -1516,11 +1518,11 @@ GtRemoteRunner >> updateStats [
 	self critical:
 		[ pre := runnerStats copy.
 		runnerStats
-			registeredWorkerCount: registeredWorkers size;
+			updateRegisteredWorkerCounts: registeredWorkers;
 			currentlyExecutingJobCount: currentlyExecutingJobs size;
 			currentlyExecutingTaskCount: currentlyExecutingTasks size;
 			taskQueueSize: taskQueue size;
-			availableWorkerCount: availableWorkers size;
+			updateAvailableWorkerCounts: availableWorkers;
 			sharedAccessCount: sharedAccess size;
 			portNumber: port;
 			isRunning: self isRunning;
@@ -1607,9 +1609,4 @@ GtRemoteRunner >> workerTimeout: anObject [
 
 	workerTimeout := anObject.
 	runnerStats defaultWorkerTimeout: workerTimeout.
-]
-
-{ #category : #accessing }
-GtRemoteRunner >> workersStateDescription [
-	^ runnerStats workersStateDescription
 ]

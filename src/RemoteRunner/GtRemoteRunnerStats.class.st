@@ -6,15 +6,17 @@ Class {
 		'totalTaskCount',
 		'state',
 		'taskQueueSize',
-		'registeredWorkerCount',
-		'availableWorkerCount',
 		'currentlyExecutingJobCount',
 		'currentlyExecutingTaskCount',
 		'defaultWorkerTimeout',
 		'defaultTaskTimeout',
 		'portNumber',
 		'sharedAccessCount',
-		'isRunning'
+		'isRunning',
+		'registeredWorkerCounts',
+		'availableWorkerCounts',
+		'jobStartupAndShutdown',
+		'managerStartupAndShutdown'
 	],
 	#category : #'RemoteRunner-Runner'
 }
@@ -31,13 +33,20 @@ GtRemoteRunnerStats >> asDictionaryForExport [
 
 { #category : #accessing }
 GtRemoteRunnerStats >> availableWorkerCount [
-	^ availableWorkerCount
+	^ availableWorkerCounts
+		inject: 0
+		into: [ :s :v | s + v ]
 ]
 
 { #category : #accessing }
-GtRemoteRunnerStats >> availableWorkerCount: anObject [
+GtRemoteRunnerStats >> availableWorkerCounts [
 
-	availableWorkerCount := anObject
+	^ availableWorkerCounts
+]
+
+{ #category : #serialisation }
+GtRemoteRunnerStats >> availableWorkerCounts: anObject [
+	^ availableWorkerCounts := anObject
 ]
 
 { #category : #accessing }
@@ -85,7 +94,7 @@ GtRemoteRunnerStats >> defaultWorkerTimeout: anObject [
 { #category : #private }
 GtRemoteRunnerStats >> getState [
 	isRunning ifFalse: [ ^ #stopped ].
-	(registeredWorkerCount = 0 and:
+	(registeredWorkerCounts isEmpty and:
 		[ taskQueueSize > 0 or: [ currentlyExecutingJobCount > 0 ] ]) ifTrue: [ ^ #waitingForWorkers ].
 	(taskQueueSize = 0 and: [ currentlyExecutingJobCount = 0 ]) ifTrue: [ ^ #idle ].
 	(taskQueueSize > 0 or: [ currentlyExecutingJobCount > 0 ]) ifTrue: [ ^ #busy ].
@@ -111,12 +120,12 @@ GtRemoteRunnerStats >> initialize [
 	totalJobCount := 
 		totalTaskCount :=
 		taskQueueSize :=
-		registeredWorkerCount :=
-		availableWorkerCount :=
 		currentlyExecutingJobCount :=
 		currentlyExecutingTaskCount :=
 		sharedAccessCount := 0.
 	isRunning := false.
+	registeredWorkerCounts :=
+		availableWorkerCounts := Dictionary new.
 ]
 
 { #category : #initialization }
@@ -139,6 +148,26 @@ GtRemoteRunnerStats >> isRunning: aBoolean [
 ]
 
 { #category : #accessing }
+GtRemoteRunnerStats >> jobStartupAndShutdown [
+	^ jobStartupAndShutdown
+]
+
+{ #category : #accessing }
+GtRemoteRunnerStats >> jobStartupAndShutdown: anObject [
+	jobStartupAndShutdown := anObject
+]
+
+{ #category : #accessing }
+GtRemoteRunnerStats >> managerStartupAndShutdown [
+	^ managerStartupAndShutdown
+]
+
+{ #category : #accessing }
+GtRemoteRunnerStats >> managerStartupAndShutdown: anObject [
+	managerStartupAndShutdown := anObject
+]
+
+{ #category : #accessing }
 GtRemoteRunnerStats >> portNumber [
 	^ portNumber
 ]
@@ -150,14 +179,20 @@ GtRemoteRunnerStats >> portNumber: anObject [
 
 { #category : #accessing }
 GtRemoteRunnerStats >> registeredWorkerCount [
-	^ registeredWorkerCount
+	^ registeredWorkerCounts
+		inject: 0
+		into: [ :s :v | s + v ]
 ]
 
 { #category : #accessing }
-GtRemoteRunnerStats >> registeredWorkerCount: anInteger [
+GtRemoteRunnerStats >> registeredWorkerCounts [
 
-	registeredWorkerCount := anInteger.
-	state := nil.
+	^ registeredWorkerCounts
+]
+
+{ #category : #serialisation }
+GtRemoteRunnerStats >> registeredWorkerCounts: anObject [
+	registeredWorkerCounts := anObject
 ]
 
 { #category : #accessing }
@@ -215,8 +250,54 @@ GtRemoteRunnerStats >> totalTaskCount: anObject [
 ]
 
 { #category : #accessing }
+GtRemoteRunnerStats >> updateAvailableWorkerCounts: aDictionary [
+	"Update the receiver's available worker counts from the runner's availableWorkers dictionary.
+	Must be called within the runners sharedAccess."
+	| bag counts |
+
+	bag := Bag new.
+	aDictionary do: [ :worker |
+		bag add: worker remoteAddress ].
+	counts := Dictionary new.
+	bag keysAndValuesDo: [ :ipAddress :count |
+		counts
+			at: (GtRemoteRunner printIpAddress: ipAddress)
+			put: count ].
+	availableWorkerCounts := counts.
+]
+
+{ #category : #accessing }
+GtRemoteRunnerStats >> updateJobStartupAndShutdown: aJobStartupAndShutdown [
+
+	jobStartupAndShutdown := aJobStartupAndShutdown asStatsDictionary.
+]
+
+{ #category : #accessing }
+GtRemoteRunnerStats >> updateManagerStartupAndShutdown: aManagerStartupAndShutdown [
+
+	managerStartupAndShutdown := aManagerStartupAndShutdown asStatsDictionary.
+]
+
+{ #category : #accessing }
+GtRemoteRunnerStats >> updateRegisteredWorkerCounts: aDictionary [
+	"Update the receiver's registered worker counts from the runner's registeredWorkers dictionary.
+	Must be called within the runners sharedAccess."
+	| bag counts |
+
+	bag := Bag new.
+	aDictionary do: [ :worker |
+		bag add: worker remoteAddress ].
+	counts := Dictionary new.
+	bag keysAndValuesDo: [ :ipAddress :count |
+		counts
+			at: (GtRemoteRunner printIpAddress: ipAddress)
+			put: count ].
+	registeredWorkerCounts := counts.
+]
+
+{ #category : #accessing }
 GtRemoteRunnerStats >> workersStateDescription [
 	^ '{1} registered workers [{2} busy]' format: {
-		registeredWorkerCount. 
-		registeredWorkerCount - availableWorkerCount }
+		self registeredWorkerCount. 
+		self registeredWorkerCount - self availableWorkerCount }
 ]

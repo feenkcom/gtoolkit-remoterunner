@@ -15,6 +15,14 @@ Class {
 	#category : #'RemoteRunner-Runner'
 }
 
+{ #category : #accessing }
+GtRrManagerStartupAndShutdown >> asStatsDictionary [
+
+	^ Dictionary new
+		at: #name put: self class name;
+		yourself
+]
+
 { #category : #'api - worker' }
 GtRrManagerStartupAndShutdown >> registerWorker: aWorkerConnection [
 	"Subclasses can provide additional actions to perform when a worker is registered"

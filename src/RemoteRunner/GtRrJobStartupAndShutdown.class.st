@@ -7,6 +7,14 @@ Class {
 	#category : #'RemoteRunner-Runner'
 }
 
+{ #category : #serialisation }
+GtRrJobStartupAndShutdown >> asStatsDictionary [
+
+	^ Dictionary new
+		at: #name put: self class name;
+		yourself
+]
+
 { #category : #testing }
 GtRrJobStartupAndShutdown >> finishedWithWorkerFuture: taskFuture [
 	"Answer a boolean indicating whether the supplied worker is no longer required.
