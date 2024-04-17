@@ -935,8 +935,7 @@ GtRemoteRunner >> queueTasks: retryTasks jobContext: aJobContext [
 { #category : #accessing }
 GtRemoteRunner >> registerAnnouncementsQueueForHeadlessRunner [
 	"Register a queue only for certaint types of announcements. This exists as now announcements for tasks are also delivered to the the remote announcements."
-	self assert: [ announcementQueue isNil ].
-	
+
 	self registerAnnouncementsQueueForAnnouncementType: 
 			GtRrJobAnnouncement, 
 			GtRrWorkerAnnouncement,
