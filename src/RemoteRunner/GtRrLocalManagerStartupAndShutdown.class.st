@@ -107,19 +107,6 @@ GtRrLocalManagerStartupAndShutdown >> gtSummaryFor: aView [
 		  actionUpdateButton
 ]
 
-{ #category : #accessing }
-GtRrLocalManagerStartupAndShutdown >> inMemoryLog [
-	"Answer a boolean indicating whether worker output should be stored in memory or not"
-
-	^ inMemoryLog
-]
-
-{ #category : #accessing }
-GtRrLocalManagerStartupAndShutdown >> inMemoryLog: aBoolean [
-
-	inMemoryLog := aBoolean
-]
-
 { #category : #initialization }
 GtRrLocalManagerStartupAndShutdown >> initialize [
 
@@ -131,6 +118,19 @@ GtRrLocalManagerStartupAndShutdown >> initialize [
 	workerCountCalculator := GtRrResourceWorkerCountCalculator new.
 	processes := OrderedCollection new.
 	watchdogSemaphore := Semaphore new.
+]
+
+{ #category : #accessing }
+GtRrLocalManagerStartupAndShutdown >> inMemoryLog [
+	"Answer a boolean indicating whether worker output should be stored in memory or not"
+
+	^ inMemoryLog
+]
+
+{ #category : #accessing }
+GtRrLocalManagerStartupAndShutdown >> inMemoryLog: aBoolean [
+
+	inMemoryLog := aBoolean
 ]
 
 { #category : #testing }
@@ -280,25 +280,6 @@ GtRrLocalManagerStartupAndShutdown >> signalWatchdog [
 	watchdogSemaphore signal.
 ]
 
-{ #category : #private }
-GtRrLocalManagerStartupAndShutdown >> startWatchDog [
-
-	watchDog := [ [ autoRestart or: [ processes isNotEmpty ] ] whileTrue:
-		[ | broken |
-		watchdogSemaphore waitTimeoutSeconds: 30.
-		broken := processes reject: #isRunning.
-		broken do: [ :e | | process |
-			processes remove: e.
-			process := autoRestart
-				ifTrue: [ processes add: self newWorkerLocalProcess ]
-				ifFalse: [ ].
-			remoteRunner announceAndLog: (GtRrWorkerReplacedAnnouncement new
-				oldProcess: e;
-				newProcess: process) ].
-		 ] ] forkNamed:
-			'GtRemoteRunner local watch dog'
-]
-
 { #category : #'startup - shutdown' }
 GtRrLocalManagerStartupAndShutdown >> startup [ 
 	| isWindows |
@@ -316,6 +297,25 @@ GtRrLocalManagerStartupAndShutdown >> startup [
 		isWindows ifTrue: [ 1 second wait ] ].
 	self startWatchDog.
 
+]
+
+{ #category : #private }
+GtRrLocalManagerStartupAndShutdown >> startWatchDog [
+
+	watchDog := [ [ autoRestart or: [ processes isNotEmpty ] ] whileTrue:
+		[ | broken |
+		watchdogSemaphore waitTimeoutSeconds: 30.
+		broken := processes reject: #isRunning.
+		broken do: [ :e | | process |
+			processes remove: e.
+			process := autoRestart
+				ifTrue: [ processes add: self newWorkerLocalProcess ]
+				ifFalse: [ ].
+			remoteRunner announceAndLog: (GtRrWorkerReplacedAnnouncement new
+				oldProcess: e;
+				newProcess: process) ].
+		 ] ] forkNamed:
+			'GtRemoteRunner local watch dog'
 ]
 
 { #category : #ui }

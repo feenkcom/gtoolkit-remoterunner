@@ -18,6 +18,7 @@ GtRrClusterExamplesReport class >> forJob: aJob [
 			GtRrRunnerMachineExamplesReport new
 				machineId: assoc key ;
 				machineType: assoc value first workerMachineType;
+				machineCores: assoc value first halt;
 				ipAddress: assoc value first workerIpAddress;
 				workersReport: (GtRrWorkersExamplesReport 
 					forTasks: assoc value);
@@ -235,6 +236,26 @@ GtRrClusterExamplesReport >> gtViewWorkersStatusFor: aView [
 		view: #gtViewWorkersFor:
 ]
 
+{ #category : #'gt - extensions' }
+GtRrClusterExamplesReport >> gtViewWorkersVsCoresFor: aView [
+	<gtView>
+
+	^ aView columnedList 
+		title: 'Workers vs Cores';
+		priority: 50;
+		items: [ self workersVsCoresData ];
+		column: 'Machine Type' text: [ :aDictionary |
+			aDictionary at: #machineType ];
+		column: 'Workers Count' text: [ :aDictionary |
+			aDictionary at: #workersCount ];
+		column: 'Corrected Cores Count' text: [ :aDictionary |
+			aDictionary at: #correctedCoreCount ];
+		column: 'Cores Count' text: [ :aDictionary |
+			aDictionary at: #coreCount ];
+		column: 'Diff' text: [ :aDictionary |
+			aDictionary at: #diff ]
+]
+
 { #category : #'accessing - gc details' }
 GtRrClusterExamplesReport >> incrGcDuration [
 	^ self incrGcTime ifNotNil: [ :aTimeInMilliseconds |
@@ -275,19 +296,19 @@ GtRrClusterExamplesReport >> machineReports: aCollectionOfReports [
 	machineReports := aCollectionOfReports
 ]
 
-{ #category : #accessing }
-GtRrClusterExamplesReport >> machineWithIpAddress: anIpAddress [
-	^ self machineReports 
-		detect: [ :aMachine |
-			aMachine ipAddress = anIpAddress ]
-]
-
 { #category : #'accessing - chart data' }
 GtRrClusterExamplesReport >> machinesExecutionChartItems [
 	^ self machineReports
 		collect: [ :aMachineReport |
 			GtRrExecutionChartDataItem fromMachine: aMachineReport ] 
 		as: Array
+]
+
+{ #category : #accessing }
+GtRrClusterExamplesReport >> machineWithIpAddress: anIpAddress [
+	^ self machineReports 
+		detect: [ :aMachine |
+			aMachine ipAddress = anIpAddress ]
 ]
 
 { #category : #accessing }
@@ -448,4 +469,26 @@ GtRrClusterExamplesReport >> workersTasksCompletionDelay [
 { #category : #accessing }
 GtRrClusterExamplesReport >> workersTasksStartMaximumDelay [
 	^ self workersReport tasksStartInterval
+]
+
+{ #category : #'gt - extensions' }
+GtRrClusterExamplesReport >> workersVsCoresData [
+
+	^ machineReports collect: [ :machine | 
+		| machineType cc ccc diff |
+		machineType := GtAwsAmazonWebServices default instanceTypes 
+			at: machine machineType
+			ifAbsent: [].
+		ccc := machineType ifNotNil: #correctedCoreCount.
+		cc := machineType ifNotNil: #coreCount.
+		diff := (ccc notNil and: [ cc notNil ]) 
+			ifTrue: [ (ccc - machine numberOfWorkers) abs + (ccc - cc) abs ]
+			ifFalse: [ 0 ].
+		Dictionary new
+			at: #machineType put: (machineType ifNil: [ '-' ]);
+			at: #workersCount put: machine numberOfWorkers;
+			at: #correctedCoreCount put: (machineType ifNil: [ '-' ] ifNotNil: #correctedCoreCount);
+			at: #coreCount put: (machineType ifNil: [ '-' ] ifNotNil: #coreCount);
+			at: #diff put: diff;
+			yourself ].
 ]

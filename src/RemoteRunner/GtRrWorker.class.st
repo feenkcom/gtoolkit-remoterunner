@@ -420,7 +420,8 @@ GtRrWorker >> logAndQuit [
 { #category : #accessing }
 GtRrWorker >> newTaskProcess [
 
-	^ [ [ stopFlag ] whileFalse:
+	^ [ GCConfiguration forLargeObjectAllocation writeToVM.
+	[ stopFlag ] whileFalse:
 		[ [ [ self stepService ] repeat ]
 			on: Error
 			do: [ :ex |
