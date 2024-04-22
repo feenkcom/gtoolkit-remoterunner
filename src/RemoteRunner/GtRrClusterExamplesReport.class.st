@@ -18,7 +18,7 @@ GtRrClusterExamplesReport class >> forJob: aJob [
 			GtRrRunnerMachineExamplesReport new
 				machineId: assoc key ;
 				machineType: assoc value first workerMachineType;
-				machineCores: assoc value first halt;
+				"machineCores: assoc value first halt;"
 				ipAddress: assoc value first workerIpAddress;
 				workersReport: (GtRrWorkersExamplesReport 
 					forTasks: assoc value);
@@ -296,19 +296,19 @@ GtRrClusterExamplesReport >> machineReports: aCollectionOfReports [
 	machineReports := aCollectionOfReports
 ]
 
+{ #category : #accessing }
+GtRrClusterExamplesReport >> machineWithIpAddress: anIpAddress [
+	^ self machineReports 
+		detect: [ :aMachine |
+			aMachine ipAddress = anIpAddress ]
+]
+
 { #category : #'accessing - chart data' }
 GtRrClusterExamplesReport >> machinesExecutionChartItems [
 	^ self machineReports
 		collect: [ :aMachineReport |
 			GtRrExecutionChartDataItem fromMachine: aMachineReport ] 
 		as: Array
-]
-
-{ #category : #accessing }
-GtRrClusterExamplesReport >> machineWithIpAddress: anIpAddress [
-	^ self machineReports 
-		detect: [ :aMachine |
-			aMachine ipAddress = anIpAddress ]
 ]
 
 { #category : #accessing }
