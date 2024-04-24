@@ -7,7 +7,8 @@ Class {
 		'ipAddress',
 		'workersReport',
 		'machineId',
-		'machineType'
+		'machineType',
+		'machineCores'
 	],
 	#category : #'RemoteRunner-Reports'
 }
@@ -121,6 +122,16 @@ GtRrRunnerMachineExamplesReport >> ipAddress: anIpAddressString [
 ]
 
 { #category : #accessing }
+GtRrRunnerMachineExamplesReport >> machineCores [
+	^ machineCores
+]
+
+{ #category : #accessing }
+GtRrRunnerMachineExamplesReport >> machineCores: anObject [
+	machineCores := anObject
+]
+
+{ #category : #accessing }
 GtRrRunnerMachineExamplesReport >> machineId [
 	^ machineId
 ]
@@ -229,7 +240,8 @@ GtRrRunnerMachineExamplesReport >> overviewData [
 		'Average VM Memory Size' -> self vmAverageMemorySize humanReadableIsqByteSize . 
 		'Maximum VM Memory Size Increase' -> (self vmMaximumMemorySize- self vmMinimumMemorySize) humanReadableIsqByteSize.
 		'Maximum Worker Tasks Start Delay' -> self workersTasksStartMaximumDelay.
-		'Workers Tasks Competion Delay' -> self workersTasksCompletionDelay}
+		'Workers Tasks Competion Delay' -> self workersTasksCompletionDelay.
+		'Machine Type' -> self machineType. }
 ]
 
 { #category : #printing }
