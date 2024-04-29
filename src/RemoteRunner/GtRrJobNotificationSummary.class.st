@@ -61,7 +61,7 @@ GtRrJobNotificationSummary >> initialize [
 { #category : #subscriptions }
 GtRrJobNotificationSummary >> subscribeToNotifications [
 	notifications do: [ :aNotification |
-		aNotification
+		aNotification weak
 			when: GtNotificationDataChangedAnnouncement
 			send: #requestUpdate
 			to: self ]
