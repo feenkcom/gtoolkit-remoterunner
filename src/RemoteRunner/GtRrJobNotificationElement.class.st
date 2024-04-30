@@ -240,7 +240,7 @@ GtRrJobNotificationElement >> runJobAgain [
 { #category : #subscriptions }
 GtRrJobNotificationElement >> subscribeToNotification [
 	self notificationDo: [ :aNotification | 
-		aNotification
+		aNotification weak
 			when: GtNotificationDataChangedAnnouncement
 			send: #onNotificationDataChangedFor: 
 			to: self ]
