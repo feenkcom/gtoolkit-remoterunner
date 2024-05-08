@@ -129,8 +129,8 @@ GtRrJob >> asDictionary [
 	| dict |
 
 	dict := Dictionary new.
-	self class allInstVarNames do: [ :name |
-		dict at: name put: (name value: self) ].
+	self class allInstVarNames do: [ :aVarName |
+		dict at: aVarName put: (aVarName value: self) ].
 	dict removeKey: #announcer.
 	^ dict
 ]
