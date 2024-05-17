@@ -191,6 +191,12 @@ GtRrTaskExecutionData >> isLocalWorker [
 ]
 
 { #category : #accessing }
+GtRrTaskExecutionData >> jobId [
+
+	^ workerAttributes at: #workerJobId
+]
+
+{ #category : #accessing }
 GtRrTaskExecutionData >> resourceReport [
 
 	^ resourceReport
