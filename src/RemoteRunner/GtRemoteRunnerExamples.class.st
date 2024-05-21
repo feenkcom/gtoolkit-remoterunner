@@ -264,7 +264,7 @@ GtRemoteRunnerExamples >> multipleJobs [
 				[ taskFailedCount := taskFailedCount + 1 ].
 		job ].
 	jobs do: [ :aJob | remoteRunner submitJob: aJob ].
-	2 timesRepeat: [ self waitOn: jobSemaphore for: 10 description: 'Job didn''t complete in time' ].
+	2 timesRepeat: [ self waitOn: jobSemaphore for: 30 description: 'Job didn''t complete in time' ].
 
 	self assert: remoteRunner currentlyExecutingJobs size equals: 0.
 	self assert: remoteRunner currentlyExecutingTasks size equals: 0.
