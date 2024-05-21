@@ -2,6 +2,8 @@ Extension { #name : #TKTRunningTaskState }
 
 { #category : #'*RemoteRunner' }
 TKTRunningTaskState >> cancelTaskExecution: aTaskExecution reason: aReason [
+	<gtPharoPatch: #Pharo>
+	
 	| cancelState activeContext timeoutContext taskProcess |
 
 	taskProcess := aTaskExecution executionProcess.
