@@ -11,6 +11,7 @@ Mutex >> assertIsOwner [
 
 { #category : #'*RemoteRunner' }
 Mutex >> size [
-
+	<gtPharoPatch: #Pharo>
+	
 	^ semaphore size
 ]
