@@ -128,7 +128,7 @@ GtRemoteRunnerExamples >> changesSync [
 	workers := { worker }.
 	worker attributes at: #changesSync put: true.
 	worker connectionStrategy connectDuring: [ :application |
-		receivedEvents := worker syncChangesIfRequiredWith: application ].
+		receivedEvents := worker syncChangesFromServerWith: application ].
 	self assert: (STON toString: receivedEvents) equals: encodedEvents.
 ]
 
@@ -1035,6 +1035,56 @@ GtRemoteRunnerExamples >> timeoutWorker [
 ]
 
 { #category : #examples }
+GtRemoteRunnerExamples >> workerChangesFile [
+	<gtExample>
+	| settings semaphore args workerProcess changesFile logFile processBuilder task job rrIndex |
+
+	remoteRunner := GtRemoteRunner new.
+	remoteRunner managerStartupAndShutdown 
+		autoRestart: false;
+		poolSize: 0.
+	semaphore := Semaphore new.
+	remoteRunner when: GtRrWorkerRegisteredAnnouncement do: [ semaphore signal ].
+	remoteRunner when: GtRrJobCompletedAnnouncement do: [ semaphore signal ].
+	remoteRunner start.
+	settings := LanguageLinkSettings pharoDefaultSettings.
+	changesFile := FileReference newTempFilePrefix: 'workerChangesFile' suffix: '.ombu'.
+	self writeChangesSyncFileTestMethodTo: changesFile.
+	args := (GtRrLocalManagerStartupAndShutdown new
+		remoteRunner: remoteRunner;
+		changesSync: true) newWorkerLocalProcessArgumentsFor: settings.
+	"clap arguments must be grouped together prior to the global arguments"
+	rrIndex := args indexOf: 'remoteRunnerWorker'.
+	self assert: rrIndex > 0 description: 'Unable to find remoteRunnerWorker argument'.
+	args
+		add: '--changesFile' beforeIndex: rrIndex+1;
+		add: changesFile fullName beforeIndex: rrIndex+2.
+	'workerLogs' asFileReference ensureCreateDirectory.
+	logFile := ('workerLogs/workerChangesFile.log') asFileReference.
+	processBuilder := GtExternalProcessBuilder new
+		command: settings serverExecutable fullName;
+		args: args;
+		fileStdout: logFile;
+		fileStderr: logFile;
+		workingDirectory: settings workingDirectory resolve fullName.
+	[ workerProcess := processBuilder createNativeCommand spawn.
+	workerProcess terminateOnShutdown.
+	self waitOn: semaphore for: 20
+		description: 'Worker didn''t register in time'.
+	semaphore := Semaphore new.
+	task := GtRrScriptTask script: 'self assert: GtRemoteRunnerExamples new changesSyncFileTestMethod equals: 1. true'.
+	job := remoteRunner submitJob: task asJob.
+	self waitOn: semaphore for: 20
+		description: 'Job didn''t complete in time'.
+	self deny: job hasErrors.
+	self assert: job results first result.
+	] ensure: 
+		[ workerProcess ifNotNil: #kill. 
+		remoteRunner ifNotNil: #stop.
+		changesFile ifNotNil: #ensureDelete. ].
+]
+
+{ #category : #examples }
 GtRemoteRunnerExamples >> workerDetails [
 	"Demonstrate retrieving the remote worker's details"
 	<gtExample>
@@ -1061,4 +1111,33 @@ GtRemoteRunnerExamples >> workerDetails [
 	] ensure: [ remoteRunner stop ].
 
 	^ worker
+]
+
+{ #category : #'private - helpers' }
+GtRemoteRunnerExamples >> writeChangesSyncFileTestMethodTo: changesFile [ 
+
+	changesFile writeStreamDo: [ :stream | stream <<
+'OmEntry {
+	#tags : {
+		#author : ''AlistairGrant'',
+		#time : DateAndTime [ ''2024-05-23T14:55:58.440449+02:00'' ],
+		#prior : OmReference [ ''Pharo11-SNAPSHOT-64bit-aece1b5.30B6DC2CBE88'', ''10'' ],
+		#self : OmReference [ ''1'' ]
+	},
+	#content : EpMethodAddition {
+		#method : RGMethodDefinition {
+			#annotations : IdentityDictionary {
+				#className : #GtRemoteRunnerExamples,
+				#isMetaSide : false
+			},
+			#name : #changesSyncFileTestMethod,
+			#protocol : #auto-generated,
+			#sourceCode : ''changesSyncFileTestMethod\r\r\t^ 1'',
+			#stamp : '''',
+			#package : #RemoteRunner
+		}
+	}
+}
+
+' ]
 ]
