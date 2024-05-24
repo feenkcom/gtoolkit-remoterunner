@@ -51,6 +51,10 @@ GtRrWorker class >> commandLineCommand [
 				   yourself);
 		add: ((ClapFlag id: #changesSync) description:
 			'Synchronise the changes with the remote runner on startup');
+		add: ((ClapFlag id: #changesFile) 
+			description: 'Load the specified changes file on startup';
+			add: (ClapPositional id: #changesFilename);
+			yourself);
 		add: ((ClapFlag id: #attribute)
 				   description: 'add key/value pairs to attributes';
 				   multiple: true;
@@ -136,28 +140,31 @@ GtRrWorker class >> processCommandLineArgs: args [
 				at: #connectionStrategy
 				ifPresent: [:arg | (arg at: #strategyId) value]
 				ifAbsent: [].
-	StringSignal
-		emit: 'ConnectionStrategy: ' , (connectionStrategyId ifNil: ['<none>']).
-	connectionStrategyId
-		ifNotNil: 
-			[connectionStrategy := (
-					{#perMessage -> [GtRrWorkerConnectionPerMessageStrategy new].
-					#single -> [GtRrWorkerSingleConnectionStrategy new]}
-							asDictionary at: connectionStrategyId
-							ifAbsent: 
-								[self
-									error: 'Invalid connectionStrategy: ' , connectionStrategyId printString])
-							value.
-			worker connectionStrategy: connectionStrategy].
+	StringSignal emit: 
+		'ConnectionStrategy: ' , (connectionStrategyId ifNil: ['<none>']).
+	connectionStrategyId ifNotNil: 
+	[connectionStrategy := (
+		{#perMessage -> [GtRrWorkerConnectionPerMessageStrategy new].
+		#single -> [GtRrWorkerSingleConnectionStrategy new]}
+			asDictionary at: connectionStrategyId
+			ifAbsent: 
+				[self
+					error: 'Invalid connectionStrategy: ' , connectionStrategyId printString])
+			value.
+	worker connectionStrategy: connectionStrategy].
 	worker connectionStrategy socketAddress: serverSocketAddress.
-	args at: #changesSync
-		ifPresent: 
-			[StringSignal emit: 'changesSync: true'.
-			worker attributes at: #changesSync put: true].
+	args at: #changesSync ifPresent: 
+		[StringSignal emit: 'changesSync: true'.
+		worker attributes at: #changesSync put: true].
+	args at: #changesFile ifPresent: 
+		[ :arg | | filename |
+		filename := (arg at: #changesFilename) value.
+		worker attributes at: #changesFile put: filename.
+		StringSignal emit: 'changesFile: ', filename asString ].
 	StringSignal emit: 'Worker Attributes:'.
 	worker attributes keysAndValuesDo: 
-			[:key :value |
-			StringSignal emit: 'key: ' , key asString , ', value: ' , value asString].
+		[:key :value |
+		StringSignal emit: 'key: ' , key asString , ', value: ' , value asString].
 	StringSignal emit: 'Install UI manager...'.
 	UIManager default: GtRrUIManager new.
 	StringSignal emit: 'Starting worker...'.
@@ -455,7 +462,7 @@ GtRrWorker >> registerWith: aPharoLinkApplication [
 	"Register the receiver with the remote runner associated with the supplied PharoLinkApplication"
 	| result |
 
-	self syncChangesIfRequiredWith: aPharoLinkApplication.
+	self syncChangesWith: aPharoLinkApplication.
 	GtRrWorkerRegisterStartingSignal new emit.
 	result := aPharoLinkApplication newCommandFactory 
 			bindingAt: #attributes put: attributes;
@@ -563,7 +570,26 @@ GtRrWorker >> stopReadProcess [
 ]
 
 { #category : #private }
-GtRrWorker >> syncChangesIfRequiredWith: aPharoLinkApplication [ 
+GtRrWorker >> syncChangesFromFile: filenameString [
+	| omStore |
+
+	GtRrWorkerApplyChangesStartingSignal new
+		remoteAddressString: filenameString;
+		workerId: self uid;
+		emit.
+	omStore := OmFileStore named: 'GtRrWorker' inFile: filenameString asFileReference.
+	omStore entriesDo: [ :entry | entry content applyCodeChange ].
+	GtRrWorkerApplyChangesCompletedSignal new
+		remoteAddressString: filenameString;
+		workerId: self uid;
+		encodedEventsSize: filenameString asFileReference size;
+		eventsCount: omStore entriesCount;
+		emit.
+	^ omStore
+]
+
+{ #category : #private }
+GtRrWorker >> syncChangesFromServerWith: aPharoLinkApplication [ 
 	| encodedEvents events remoteAddressString |
 
 	(attributes at: #changesSync ifAbsent: [ false ]) ifFalse: [ ^ self ].
@@ -595,6 +621,15 @@ GtRrWorker >> syncChangesIfRequiredWith: aPharoLinkApplication [
 		eventsCount: events size;
 		emit.
 	^ events
+]
+
+{ #category : #private }
+GtRrWorker >> syncChangesWith: aPharoLinkApplication [ 
+
+	(attributes at: #changesSync ifAbsent: [ false ]) ifTrue: 
+		[ self syncChangesFromServerWith: aPharoLinkApplication ].
+	attributes at: #changesFile ifPresent: [ :filename | 
+		self syncChangesFromFile: filename ].
 ]
 
 { #category : #accessing }

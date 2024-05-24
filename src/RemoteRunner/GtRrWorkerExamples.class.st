@@ -44,6 +44,29 @@ GtRrWorkerExamples >> commandLineWithAttributes [
 ]
 
 { #category : #examples }
+GtRrWorkerExamples >> commandLineWithChanges [
+	"Demonstrate parsing the Remote Runner Worker command line"
+	<gtExample>
+	| commandLine |
+
+	commandLine := GtRrWorker commandLineCommand match:
+		#('remoteRunnerWorker' 
+		'--serverSocketAddress' '7084'
+		'--changesSync'
+		'--changesFile' '/path/to/file').
+
+	self assert: (commandLine at: #log) value equals: false.
+	self assert: ((commandLine at: #serverSocketAddress) at: #address) value equals: '7084'.
+	self assert: (commandLine at: #changesSync ifPresent: [ true ] ifAbsent: [ false ]).
+	commandLine at: #changesFile
+		ifPresent: [ :arg | self assert: (arg at: #changesFilename) value
+			equals: '/path/to/file' ]
+		ifAbsent: [ AssertionFailure signal: '#changesFile not found' ].
+
+	^ commandLine
+]
+
+{ #category : #examples }
 GtRrWorkerExamples >> commandLineWithStrategy [
 	"Demonstrate parsing the Remote Runner Worker command line"
 	<gtExample>
