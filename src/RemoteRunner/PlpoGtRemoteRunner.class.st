@@ -87,8 +87,11 @@ PlpoGtRemoteRunner >> registerAnnouncementsQueueForHeadlessRunner [
 { #category : #accessing }
 PlpoGtRemoteRunner >> registerJob: aGtRrJob [
 	"Answer the proxy for the job when using a headless runner."
+	| jobProxy |
 
-	^ application proxyForObject: aGtRrJob
+	jobProxy := application proxyForObject: aGtRrJob.
+	jobProxy originalJob: aGtRrJob.
+	^ jobProxy
 ]
 
 { #category : #accessing }
