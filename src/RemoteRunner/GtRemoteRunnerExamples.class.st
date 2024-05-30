@@ -1117,7 +1117,7 @@ GtRemoteRunnerExamples >> workerDetails [
 GtRemoteRunnerExamples >> writeChangesSyncFileTestMethodTo: changesFile [ 
 
 	changesFile writeStreamDo: [ :stream | stream <<
-'OmEntry {
+'[OmEntry {
 	#tags : {
 		#author : ''AlistairGrant'',
 		#time : DateAndTime [ ''2024-05-23T14:55:58.440449+02:00'' ],
@@ -1138,6 +1138,6 @@ GtRemoteRunnerExamples >> writeChangesSyncFileTestMethodTo: changesFile [
 		}
 	}
 }
-
+]
 ' ]
 ]
