@@ -571,21 +571,23 @@ GtRrWorker >> stopReadProcess [
 
 { #category : #private }
 GtRrWorker >> syncChangesFromFile: filenameString [
-	| omStore |
+	"Load the changes from the specified file.
+	The changes are encoded as an array of OmEntries."
+	| entries |
 
 	GtRrWorkerApplyChangesStartingSignal new
 		remoteAddressString: filenameString;
 		workerId: self uid;
 		emit.
-	omStore := OmFileStore named: 'GtRrWorker' inFile: filenameString asFileReference.
-	omStore entriesDo: [ :entry | entry content applyCodeChange ].
+	entries  := STON fromString: filenameString asFileReference contents.
+	entries do: [ :entry | entry content applyCodeChange ].
 	GtRrWorkerApplyChangesCompletedSignal new
 		remoteAddressString: filenameString;
 		workerId: self uid;
 		encodedEventsSize: filenameString asFileReference size;
-		eventsCount: omStore entriesCount;
+		eventsCount: entries size;
 		emit.
-	^ omStore
+	^ entries
 ]
 
 { #category : #private }
