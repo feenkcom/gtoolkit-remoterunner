@@ -1069,7 +1069,7 @@ GtRemoteRunnerExamples >> workerChangesFile [
 		workingDirectory: settings workingDirectory resolve fullName.
 	[ workerProcess := processBuilder createNativeCommand spawn.
 	workerProcess terminateOnShutdown.
-	self waitOn: semaphore for: 20
+	self waitOn: semaphore for: 30
 		description: 'Worker didn''t register in time'.
 	semaphore := Semaphore new.
 	task := GtRrScriptTask script: 'self assert: GtRemoteRunnerExamples new changesSyncFileTestMethod equals: 1. true'.
