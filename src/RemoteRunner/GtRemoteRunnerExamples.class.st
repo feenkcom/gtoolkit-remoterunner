@@ -1069,7 +1069,7 @@ GtRemoteRunnerExamples >> workerChangesFile [
 		workingDirectory: settings workingDirectory resolve fullName.
 	[ workerProcess := processBuilder createNativeCommand spawn.
 	workerProcess terminateOnShutdown.
-	self waitOn: semaphore for: 20
+	self waitOn: semaphore for: 30
 		description: 'Worker didn''t register in time'.
 	semaphore := Semaphore new.
 	task := GtRrScriptTask script: 'self assert: GtRemoteRunnerExamples new changesSyncFileTestMethod equals: 1. true'.
@@ -1117,7 +1117,7 @@ GtRemoteRunnerExamples >> workerDetails [
 GtRemoteRunnerExamples >> writeChangesSyncFileTestMethodTo: changesFile [ 
 
 	changesFile writeStreamDo: [ :stream | stream <<
-'OmEntry {
+'[OmEntry {
 	#tags : {
 		#author : ''AlistairGrant'',
 		#time : DateAndTime [ ''2024-05-23T14:55:58.440449+02:00'' ],
@@ -1138,6 +1138,6 @@ GtRemoteRunnerExamples >> writeChangesSyncFileTestMethodTo: changesFile [
 		}
 	}
 }
-
+]
 ' ]
 ]
