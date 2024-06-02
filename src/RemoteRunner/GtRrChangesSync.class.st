@@ -11,9 +11,10 @@ Class {
 		'subscription',
 		'workerOmReference',
 		'encodedEvents',
-		'latestOmReference',
 		'mutex',
-		'epLog'
+		'epLog',
+		'encodedOmReference',
+		'latestOmReference'
 	],
 	#category : #'RemoteRunner-Runner-ImageSync'
 }
@@ -29,14 +30,9 @@ GtRrChangesSync class >> applyChanges: encodedEvents [
 
 { #category : #accessing }
 GtRrChangesSync class >> headReference [
-	"Answer the current headReference, using the latest recorded session if a memory store is being used"
-	| omReference |
+	"Answer the latest code change saved to disk"
 
-	omReference := EpMonitor current log headReference.
-	"If this is the null reference and we've been started with epiceaMemoryStore use the latest recorded session"
-	(omReference isNull and: [ Smalltalk argumentsInclude: '--epiceaMemoryStore' ]) ifTrue:
-		[ omReference := self uniqueInstance sessionHistory last ].
-	^ omReference.
+	^ self uniqueInstance sessionHistory last
 ]
 
 { #category : #initialization }
@@ -61,14 +57,12 @@ GtRrChangesSync class >> uniqueInstance [
 { #category : #private }
 GtRrChangesSync >> addEntry: anOmEntry [
 	"Update the session history based on the supplied entry.
-	If it is a snapshot we need to ensure that the current localName is in the history."
+	Only the latest code change in each ombu file are stored."
 
-	self addReference: (anOmEntry tagAt: #self).
-	"If this is a snapshot add the entry a second time.
-	Subsequent code modifications will update this entry in the history and keep the original unmodified in case the snapshot is used at a later date"
-	anOmEntry content class = EpSessionSnapshot 
-		ifTrue: [ sessionHistory add: (anOmEntry tagAt: #self) ].
-
+	anOmEntry content class = EpSessionSnapshot ifTrue: 
+		[ self addReference: latestOmReference ]
+	ifFalse: [ anOmEntry content isCodeChange ifTrue: 
+		[ latestOmReference := anOmEntry tagAt: #self ] ].
 ]
 
 { #category : #private }
@@ -77,11 +71,7 @@ GtRrChangesSync >> addReference: anOmReference [
 	If it is in the same file as the most recent entry, just update the localName."
 
 	self assert: anOmReference isNull not.
-	sessionHistory ifEmpty: [ ^ sessionHistory add: anOmReference ].
-	^ sessionHistory last globalName = anOmReference globalName ifTrue:
-		[ sessionHistory at: sessionHistory size put: anOmReference ]
-	ifFalse:
-		[ sessionHistory add: anOmReference ].
+	sessionHistory add: anOmReference.
 ]
 
 { #category : #accessing }
@@ -109,20 +99,20 @@ GtRrChangesSync >> encodedChangesFrom: anOmReference [
 	Cache the latest request on the assumption that all workers will start from the same image."
 	| enumerator entries haveLatest headReference |
 
-	haveLatest := latestOmReference = self epLog headReference.
+	haveLatest := encodedOmReference = self epLog headReference.
 	(haveLatest and: [ workerOmReference = anOmReference ]) ifTrue: [ ^ encodedEvents ].
 	(self includesReference: anOmReference) ifFalse:
 		[ (GtRrUnknownOmReference omReference: anOmReference source: self) signal ].
 
 	^ mutex critical: 
-		[ haveLatest := latestOmReference = self epLog headReference.
+		[ haveLatest := encodedOmReference = self epLog headReference.
 		(haveLatest and: [ workerOmReference = anOmReference ]) ifFalse:
 			[ enumerator := GtEpLogEnumerator new latestLog: self epLog.
 			headReference := self epLog headReference.
 			entries := GtEpForExportEventSequencer sequence: 
 				(enumerator entriesFrom: anOmReference to: headReference).
 			workerOmReference := anOmReference.
-			latestOmReference := headReference.
+			encodedOmReference := headReference.
 			encodedEvents := STON toString: entries ].
 		encodedEvents ]
 ]

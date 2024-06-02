@@ -109,10 +109,13 @@ GtRemoteRunnerExamples >> changesSync [
 	"Demonstrate getting changes to a worker from the server"
 	<gtExample>
 	<after: #stopRunnersAndWorkers>
-	| semaphore worker encodedEvents events receivedEvents |
+	| entry semaphore worker encodedEvents events receivedEvents |
 
-	encodedEvents := STON toString: {(OmEntry content:
-		(EpExpressionEvaluation expression: '4+3'))}.
+	entry := OmEntry content: (EpExpressionEvaluation expression: '4+3').
+	entry tags at: #self put: (OmReference
+		globalName: 'test'
+		localName: '1').
+	encodedEvents := STON toString: { entry }.
 	events := GtRrImageSyncEncodedEvents new
 		sessionHistory: GtRrChangesSync default sessionHistory;
 		latestOmReference: GtRrChangesSync headReference;
@@ -1122,7 +1125,7 @@ GtRemoteRunnerExamples >> writeChangesSyncFileTestMethodTo: changesFile [
 		#author : ''AlistairGrant'',
 		#time : DateAndTime [ ''2024-05-23T14:55:58.440449+02:00'' ],
 		#prior : OmReference [ ''Pharo11-SNAPSHOT-64bit-aece1b5.30B6DC2CBE88'', ''10'' ],
-		#self : OmReference [ ''1'' ]
+		#self : OmReference [ ''Pharo11-SNAPSHOT-64bit-aece1b5.30B6DC2CBE89'', ''1'' ]
 	},
 	#content : EpMethodAddition {
 		#method : RGMethodDefinition {

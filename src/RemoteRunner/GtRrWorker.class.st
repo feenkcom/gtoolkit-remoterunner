@@ -575,11 +575,13 @@ GtRrWorker >> syncChangesFromFile: filenameString [
 	The changes are encoded as an array of OmEntries."
 	| entries |
 
+	entries  := self 
+		unplayedEventsIn: (STON fromString: filenameString asFileReference contents)
+		remoteAddress: filenameString.
 	GtRrWorkerApplyChangesStartingSignal new
 		remoteAddressString: filenameString;
 		workerId: self uid;
 		emit.
-	entries  := STON fromString: filenameString asFileReference contents.
 	entries do: [ :entry | entry content applyCodeChange ].
 	GtRrWorkerApplyChangesCompletedSignal new
 		remoteAddressString: filenameString;
@@ -610,12 +612,15 @@ GtRrWorker >> syncChangesFromServerWith: aPharoLinkApplication [
 		remoteAddressString: remoteAddressString;
 		workerId: self uid;
 		emit.
+	events := self 
+		unplayedEventsIn: (STON fromString: encodedEvents)
+		remoteAddress: remoteAddressString.
 	GtRrWorkerApplyChangesStartingSignal new
 		remoteAddressString: remoteAddressString;
 		workerId: self uid;
 		emit.
-	events  := STON fromString: encodedEvents.
-	events do: [ :entry | entry content accept: GtExportedEventApplyVisitor new ].
+	events do: [ :entry |
+		entry content accept: GtExportedEventApplyVisitor new ].
 	GtRrWorkerApplyChangesCompletedSignal new
 		remoteAddressString: remoteAddressString;
 		workerId: self uid;
@@ -702,6 +707,27 @@ GtRrWorker >> taskFailed: aTaskContext with: anError [
 GtRrWorker >> uid [
 
 	^ uid
+]
+
+{ #category : #private }
+GtRrWorker >> unplayedEventsIn: events remoteAddress: remoteAddressString [
+	| ids index unplayed |
+
+	GtRrWorkerFilterChangesStartingSignal new
+		remoteAddressString: remoteAddressString;
+		workerId: self uid;
+		emit.
+	"Events are in chronological order"
+	ids := GtRrChangesSync default sessionHistory collect: #shortName as: Set.
+	index := events size.
+	[ index > 0 and: [ (ids includes: ((events at: index) tagAt: #self) shortName) not ] ]
+		whileTrue: [ index := index - 1 ].
+	unplayed := events copyFrom: index+1 to: events size.
+	GtRrWorkerFilterChangesCompletedSignal new
+		remoteAddressString: remoteAddressString;
+		workerId: self uid;
+		emit.
+	^ unplayed
 ]
 
 { #category : #private }

@@ -439,18 +439,28 @@ GtRemoteRunner >> changesSyncEventsFrom: aSerializedOmReference [
 	"Answer a collection of encoded EpEvents that will take the worker from the supplied OmReference to the state ready for testing.
 	If a collection of events is supplied, use that, otherwise synchronise with the current image.
 	Ensure that the supplied OmReference is in the receiver's history"
-	| workerOmReference |
+	| workerOmReference ipAddress result |
 
 	workerOmReference := STON fromString: aSerializedOmReference.
-	^ [ changesSyncEvents
+	ipAddress := PharoLinkServerCurrentConnection value remoteAddressString.
+	GtRrChangesSyncRetrievalStartingSignal new
+		omReference: workerOmReference;
+		ipAddress: ipAddress;
+		emit.
+	result := [ changesSyncEvents
 		ifNil: [ GtRrChangesSync uniqueInstance encodedChangesFrom: workerOmReference ]
 		ifNotNil: [ changesSyncEvents encodedChangesFrom: workerOmReference ] ]
 			on: Error
 			do: [ :ex |
 				self announceAndLog: (GtRrWorkerChangesSyncErrorAnnouncement new
-					ipAddress: PharoLinkServerCurrentConnection value remoteAddressString;
+					ipAddress: ipAddress;
 					exception: ex copy freeze).
 				ex pass ].
+	GtRrChangesSyncRetrievalCompletedSignal new
+		omReference: workerOmReference;
+		ipAddress: ipAddress;
+		emit.
+	^ result.
 ]
 
 { #category : #'api - jobs' }
