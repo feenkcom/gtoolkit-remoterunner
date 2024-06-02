@@ -165,6 +165,10 @@ GtRrChangesSync >> initialize [
 	super initialize.
 	sessionHistory := OrderedCollection new.
 	mutex := Mutex new.
+
+	"Ensure at least one entry"
+	latestOmReference := EpMonitor current log headReference.
+	sessionHistory add: latestOmReference.
 ]
 
 { #category : #'hooks - session' }
