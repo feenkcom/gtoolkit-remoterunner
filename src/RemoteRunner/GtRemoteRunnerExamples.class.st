@@ -122,6 +122,7 @@ GtRemoteRunnerExamples >> changesSync [
 		encodedEvents: encodedEvents.
 	semaphore := GtMutualExclusionSemaphore new.
 	remoteRunner := GtRemoteRunner new.
+	remoteRunner managerStartupAndShutdown poolSize: 0.
 	remoteRunner
 		changesSyncEvents: events;
 		start.
@@ -131,7 +132,7 @@ GtRemoteRunnerExamples >> changesSync [
 	workers := { worker }.
 	worker attributes at: #changesSync put: true.
 	worker connectionStrategy connectDuring: [ :application |
-		receivedEvents := worker syncChangesFromServerWith: application ].
+		receivedEvents := worker syncChangesWith: application ].
 	self assert: (STON toString: receivedEvents) equals: encodedEvents.
 ]
 
