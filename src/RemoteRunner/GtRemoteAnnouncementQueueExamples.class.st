@@ -1,8 +1,8 @@
 Class {
 	#name : #GtRemoteAnnouncementQueueExamples,
 	#superclass : #Object,
-	#traits : 'TAssertable',
-	#classTraits : 'TAssertable classTrait',
+	#traits : 'TAssertable + TGtRrExampleHelp',
+	#classTraits : 'TAssertable classTrait + TGtRrExampleHelp classTrait',
 	#category : #'RemoteRunner-Examples'
 }
 
@@ -22,7 +22,10 @@ GtRemoteAnnouncementQueueExamples >> queueGetsAnnouncements [
 		do: [ :ann | jobSemaphore signal ].
 	runner submitJob: job.
 
-	jobSemaphore wait.
+	self
+		waitOn: jobSemaphore
+		for: 30
+		description: 'Job didn''t complete in time'.
 	polled := queue poll.
 	self assert: polled size equals: 8.
 	self assert: ((polled at: 6) isKindOf: GtRrTaskCompletedAnnouncement) description: 'Task is finished and announcement is in queue'.
