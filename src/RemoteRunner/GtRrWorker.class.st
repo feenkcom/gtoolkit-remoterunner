@@ -631,12 +631,16 @@ GtRrWorker >> syncChangesFromServerWith: aPharoLinkApplication [
 ]
 
 { #category : #private }
-GtRrWorker >> syncChangesWith: aPharoLinkApplication [ 
+GtRrWorker >> syncChangesWith: aPharoLinkApplication [
+	| serverEvents fileEvents |
 
-	(attributes at: #changesSync ifAbsent: [ false ]) ifTrue: 
-		[ self syncChangesFromServerWith: aPharoLinkApplication ].
-	attributes at: #changesFile ifPresent: [ :filename | 
-		self syncChangesFromFile: filename ].
+	serverEvents := fileEvents := #().
+	(attributes at: #changesSync ifAbsent: [ false ])
+		ifTrue: [ serverEvents := self syncChangesFromServerWith: aPharoLinkApplication ].
+	attributes
+		at: #changesFile
+		ifPresent: [ :filename | fileEvents := self syncChangesFromFile: filename ].
+	^ serverEvents, fileEvents
 ]
 
 { #category : #accessing }
