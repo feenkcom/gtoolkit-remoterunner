@@ -70,8 +70,10 @@ GtRrChangesSync >> addReference: anOmReference [
 	"Add the supplied reference.
 	If it is in the same file as the most recent entry, just update the localName."
 
+	anOmReference ifNil: [ ^ self ].
 	self assert: anOmReference isNull not.
 	sessionHistory add: anOmReference.
+	latestOmReference := nil.
 ]
 
 { #category : #accessing }
