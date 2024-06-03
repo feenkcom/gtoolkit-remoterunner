@@ -582,7 +582,7 @@ GtRrWorker >> syncChangesFromFile: filenameString [
 		remoteAddressString: filenameString;
 		workerId: self uid;
 		emit.
-	entries do: [ :entry | entry content applyCodeChange ].
+	entries do: [ :entry | entry content accept: GtExportedEventApplyVisitor new ].
 	GtRrWorkerApplyChangesCompletedSignal new
 		remoteAddressString: filenameString;
 		workerId: self uid;
