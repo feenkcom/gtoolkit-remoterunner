@@ -24,6 +24,14 @@ PlpoGtRemoteRunner >> actOnProxyObjectCreated [
 	self initializeAnnouncementsQueueListener.
 ]
 
+{ #category : #private }
+PlpoGtRemoteRunner >> announceAndLog: aBeaconSignal [
+	"Announce the supplied signal to the receiver's announcer and then emit the signal for logging"
+
+	self announcer announce: aBeaconSignal.
+	aBeaconSignal emit.
+]
+
 { #category : #accessing }
 PlpoGtRemoteRunner >> changesSyncEvents: aGtRrChangesSyncEncodedEvents [
 
