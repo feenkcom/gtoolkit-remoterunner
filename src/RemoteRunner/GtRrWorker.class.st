@@ -570,23 +570,23 @@ GtRrWorker >> stopReadProcess [
 ]
 
 { #category : #private }
-GtRrWorker >> syncChangesFromFile: filenameString [
+GtRrWorker >> syncChangesFromFile: aFileReference [
 	"Load the changes from the specified file.
 	The changes are encoded as an array of OmEntries."
 	| entries |
 
 	entries  := self 
-		unplayedEventsIn: (STON fromString: filenameString asFileReference contents)
-		remoteAddress: filenameString.
+		unplayedEventsIn: (STON fromString: aFileReference asFileReference contents)
+		remoteAddress: aFileReference fullName.
 	GtRrWorkerApplyChangesStartingSignal new
-		remoteAddressString: filenameString;
+		remoteAddressString: aFileReference fullName;
 		workerId: self uid;
 		emit.
-	entries do: [ :entry | entry content applyCodeChange ].
+	entries do: [ :entry | entry content accept: GtExportedEventApplyVisitor new ].
 	GtRrWorkerApplyChangesCompletedSignal new
-		remoteAddressString: filenameString;
+		remoteAddressString: aFileReference fullName;
 		workerId: self uid;
-		encodedEventsSize: filenameString asFileReference size;
+		encodedEventsSize: aFileReference asFileReference size;
 		eventsCount: entries size;
 		emit.
 	^ entries
@@ -639,7 +639,7 @@ GtRrWorker >> syncChangesWith: aPharoLinkApplication [
 		ifTrue: [ serverEvents := self syncChangesFromServerWith: aPharoLinkApplication ].
 	attributes
 		at: #changesFile
-		ifPresent: [ :filename | fileEvents := self syncChangesFromFile: filename ].
+		ifPresent: [ :filename | fileEvents := self syncChangesFromFile: filename asFileReference ].
 	^ serverEvents, fileEvents
 ]
 
