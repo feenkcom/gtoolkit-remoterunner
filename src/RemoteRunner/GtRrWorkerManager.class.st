@@ -120,12 +120,19 @@ GtRrWorkerManager >> isRunning [
 
 { #category : #private }
 GtRrWorkerManager >> newWorkerLocalProcess [
-	| settings builder process logFile |
+	| settings builder process logFile pid |
 
 	settings := LanguageLinkSettings pharoDefaultSettings.
 	workerIndex := workerIndex + 1.
 	'workerLogs' asFileReference ensureCreateDirectory.
-	logFile := ('workerLogs/worker.', workerIndex asString, '.log') asFileReference.
+	pid := GtOsSystemInfo current currentProcessId.
+	logFile := (String streamContents: [ :stream |
+		stream
+			<< 'workerLogs/worker.';
+			print: pid;
+			<< '.';
+			print: workerIndex;
+			<< '.log' ]) asFileReference.
 
 	builder := GtExternalProcessBuilder new
 		command: settings serverExecutable fullName;
@@ -141,7 +148,7 @@ GtRrWorkerManager >> newWorkerLocalProcess [
 
 { #category : #private }
 GtRrWorkerManager >> newWorkerLocalProcessArgumentsFor: someSettings [
-	| args pharoDebugFile |
+	| args |
 
 	remoteIpAddress ifNil:
 		[ self error: 'Attempt to start worker without server address' ].
@@ -172,10 +179,6 @@ GtRrWorkerManager >> newWorkerLocalProcessArgumentsFor: someSettings [
 		add: '--epiceaMemoryStore';
 		add: '--noLepiterReload';
 		add: '--noGtImageUpdate'.
-	pharoDebugFile := 'workerLogs/worker.pharoDebug.', workerIndex asString, '.log'.
-	args
-		add: '--pharoDebugLog';
-		add: pharoDebugFile.
 	^ args
 ]
 
