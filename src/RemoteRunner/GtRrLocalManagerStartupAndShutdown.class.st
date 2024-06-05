@@ -10,45 +10,23 @@ Class {
 		'processes',
 		'workerCountCalculator',
 		'connectionStrategyId',
-		'changesSync'
+		'changesSync',
+		'workerManager'
 	],
 	#category : #'RemoteRunner-Runner'
 }
-
-{ #category : #private }
-GtRrLocalManagerStartupAndShutdown >> addOrRemoveWorkers [
-	"Add or remove workers in the remote runner to reach the current pool size"
-	 | poolSize currentSize |
-
-	remoteRunner critical:
-		[ poolSize := self poolSize.
-		currentSize := processes size.
-		currentSize = poolSize ifTrue: [ ^ self ].
-		poolSize > currentSize 
-			ifTrue: [ self addWorkers: poolSize - currentSize ]
-			ifFalse: [ self removeWorkers: currentSize - poolSize ] ].
-]
-
-{ #category : #private }
-GtRrLocalManagerStartupAndShutdown >> addWorkers: anInteger [
-	"Add the specified number of workers to the remote runner.
-	Must be called within sharedAccess."
-
-	anInteger timesRepeat:
-		[ processes add: self newWorkerLocalProcess ]
-]
 
 { #category : #accessing }
 GtRrLocalManagerStartupAndShutdown >> autoRestart [
 	"Answer a boolean indicating whether the workers should be automatically restarted when they fail"
 
-	^ autoRestart
+	^ self workerManager autoRestart
 ]
 
 { #category : #accessing }
 GtRrLocalManagerStartupAndShutdown >> autoRestart: aBoolean [
 
-	autoRestart := aBoolean
+	self workerManager autoRestart: aBoolean
 ]
 
 { #category : #accessing }
@@ -56,14 +34,14 @@ GtRrLocalManagerStartupAndShutdown >> changesSync [
 	"Answer a boolean indicating whether workers should be started with changesSync enabled."
 	<return: #Boolean>
 
-	^ changesSync
+	^ self workerManager changesSync
 ]
 
 { #category : #accessing }
 GtRrLocalManagerStartupAndShutdown >> changesSync: aBoolean [
 	"Set the flag indicating whether workers should be started with changesSync enabled."
 
-	changesSync := aBoolean
+	self workerManager changesSync: aBoolean
 ]
 
 { #category : #accessing }
@@ -72,13 +50,13 @@ GtRrLocalManagerStartupAndShutdown >> connectionStrategyId [
 	For a list of valid values, see {{gtMethod:GtRrWorker class>>#commandLine}}"
 	<return: #Symbol>
 
-	^ connectionStrategyId
+	^ self workerManager connectionStrategyId
 ]
 
 { #category : #accessing }
 GtRrLocalManagerStartupAndShutdown >> connectionStrategyId: aSymbol [
 
-	connectionStrategyId := aSymbol
+	self workerManager connectionStrategyId: aSymbol
 ]
 
 { #category : #'gt-extension' }
@@ -88,7 +66,7 @@ GtRrLocalManagerStartupAndShutdown >> gtProcessesFor: aView [
 	^ aView list
 		title: 'Processes';
 		priority: 20;
-		items: [ processes ];
+		items: [ self workerManager processes ];
 		actionUpdateButton.
 ]
 
@@ -107,169 +85,35 @@ GtRrLocalManagerStartupAndShutdown >> gtSummaryFor: aView [
 		  actionUpdateButton
 ]
 
-{ #category : #accessing }
-GtRrLocalManagerStartupAndShutdown >> inMemoryLog [
-	"Answer a boolean indicating whether worker output should be stored in memory or not"
-
-	^ inMemoryLog
-]
-
-{ #category : #accessing }
-GtRrLocalManagerStartupAndShutdown >> inMemoryLog: aBoolean [
-
-	inMemoryLog := aBoolean
-]
-
-{ #category : #initialization }
-GtRrLocalManagerStartupAndShutdown >> initialize [
-
-	super initialize.
-	inMemoryLog := false.
-	workerIndex := 0.
-	autoRestart := true.
-	changesSync := true.
-	workerCountCalculator := GtRrResourceWorkerCountCalculator new.
-	processes := OrderedCollection new.
-	watchdogSemaphore := Semaphore new.
-]
-
 { #category : #testing }
 GtRrLocalManagerStartupAndShutdown >> isRunning [
 
-	^ watchDog isNotNil
-]
-
-{ #category : #private }
-GtRrLocalManagerStartupAndShutdown >> newInMemoryWorkerLocalProcess [
-
-	| settings |
-	settings := LanguageLinkSettings pharoDefaultSettings.
-	^ GtSubprocessWithInMemoryOutput new
-		  command: settings serverExecutable fullName;
-		  arguments: (self newWorkerLocalProcessArgumentsFor: settings);
-		  workingDirectory: settings workingDirectory resolve fullName;
-		  terminateOnShutdown;
-		  run;
-		  yourself
-]
-
-{ #category : #private }
-GtRrLocalManagerStartupAndShutdown >> newLogFileWorkerLocalProcess [
-	| settings builder process logFile |
-
-	settings := LanguageLinkSettings pharoDefaultSettings.
-	'workerLogs' asFileReference ensureCreateDirectory.
-	logFile := ('workerLogs/worker.', workerIndex asString, '.log') asFileReference.
-	builder := GtExternalProcessBuilder new
-		command: settings serverExecutable fullName;
-		args: (self newWorkerLocalProcessArgumentsFor: settings);
-		fileStdout: logFile;
-		fileStderr: logFile;
-		workingDirectory: settings workingDirectory resolve fullName.
-	process := builder createNativeCommand spawn.
-	process terminateOnShutdown.
-	^ process.
-
-]
-
-{ #category : #private }
-GtRrLocalManagerStartupAndShutdown >> newWorkerLocalProcess [
-
-	workerIndex := workerIndex + 1.
-	^ inMemoryLog
-		ifTrue: [ self newInMemoryWorkerLocalProcess ]
-		ifFalse: [ self newLogFileWorkerLocalProcess ]
-]
-
-{ #category : #'instance creation' }
-GtRrLocalManagerStartupAndShutdown >> newWorkerLocalProcessArgumentsFor: someSettings [
-	| args pharoDebugFile |
-
-	(remoteRunner port isNil or:
-		[ remoteRunner port = #none ]) 
-			ifTrue: [ self error: 'Attempt to start worker without server port' ].
-
-	args := OrderedCollection new.
-	args
-		add: someSettings serverImage fullName;
-		add: 'clap';
-		add: 'remoteRunnerWorker'.
-	remoteRunner debugMode ifTrue: [ args add: '--log' ].
-	args
-		add: '--serverSocketAddress';
-		add: remoteRunner port asString.
-	connectionStrategyId ifNotNil:
-		[ args
-			add: '--connectionStrategy';
-			add: connectionStrategyId asString ].
-	changesSync ifTrue:
-		[ args add: '--changesSync' ].
-	args
-		add: '--detachChangesFromFileSystem';
-		add: '--epiceaMemoryStore';
-		add: '--noLepiterReload';
-		add: '--noGtImageUpdate'.
-	pharoDebugFile := 'workerLogs/worker.pharoDebug.', workerIndex asString, '.log'.
-	args
-		add: '--pharoDebugLog';
-		add: pharoDebugFile.
-	^ args
+	^ self workerManager isRunning
 ]
 
 { #category : #accessing }
 GtRrLocalManagerStartupAndShutdown >> poolSize [
 
-	^ workerCountCalculator workerCount
+	^ self workerManager poolSize
 ]
 
 { #category : #accessing }
 GtRrLocalManagerStartupAndShutdown >> poolSize: anInteger [
-	"Set the receiver's pool size to the fixed value provided.
-	If the runner has been started, add new workers or disconnect existing workers as required."
-	| oldSize |
 
-	oldSize := self poolSize.
-	workerCountCalculator := GtRrFixedWorkerCountCalculator workerCount: anInteger.
-	oldSize = self poolSize ifTrue: [ ^ self ].
-	remoteRunner isRunning ifTrue:
-		[ remoteRunner critical:
-			[ self addOrRemoveWorkers ] ]
+	self workerManager poolSize: anInteger
 ]
 
 { #category : #accessing }
 GtRrLocalManagerStartupAndShutdown >> processCount [
 
-	^ processes size.
-]
-
-{ #category : #private }
-GtRrLocalManagerStartupAndShutdown >> removeWorkers: anInteger [
-	"Remove the specified number of workers from the pool.
-	Only remove workers that are currently available, i.e. idle.
-	This is a best attempt, not a guarantee, if the workers are all currently busy this will quietly return.
-	Must be called within sharedAccess."
-	| removeCount workers |
-
-	removeCount := anInteger min: remoteRunner availableWorkers size.
-	workers := remoteRunner availableWorkers asArray first: removeCount.
-	"Run the stop in separate processes to avoid sharedAccess recursion lock"
-	workers do: [ :worker |
-		[ worker connection stop ] fork ].
+	^ self workerManager processCount
 ]
 
 { #category : #'startup - shutdown' }
 GtRrLocalManagerStartupAndShutdown >> shutdown [ 
 
-	self isRunning ifFalse: [ ^ self ].
-	[ watchDog terminate ]
-		on: ProcessAlreadyTerminating
-		do: [ "noop" ].
-	watchDog := nil.
-	processes do: #terminate.
-	remoteRunner debugMode ifFalse:
-		[ processes removeAll ].
+	self workerManager shutdownLocalWorkers.
 	super shutdown.
-
 ]
 
 { #category : #'running tests' }
@@ -277,45 +121,16 @@ GtRrLocalManagerStartupAndShutdown >> signalWatchdog [
 	"Signal the watchdog to check immediately.
 	Used for testing."
 
-	watchdogSemaphore signal.
-]
-
-{ #category : #private }
-GtRrLocalManagerStartupAndShutdown >> startWatchDog [
-
-	watchDog := [ [ autoRestart or: [ processes isNotEmpty ] ] whileTrue:
-		[ | broken |
-		watchdogSemaphore waitTimeoutSeconds: 30.
-		broken := processes reject: #isRunning.
-		broken do: [ :e | | process |
-			processes remove: e.
-			process := autoRestart
-				ifTrue: [ processes add: self newWorkerLocalProcess ]
-				ifFalse: [ ].
-			remoteRunner announceAndLog: (GtRrWorkerReplacedAnnouncement new
-				oldProcess: e;
-				newProcess: process) ].
-		 ] ] forkNamed:
-			'GtRemoteRunner local watch dog'
+	self workerManager signalWatchdog.
 ]
 
 { #category : #'startup - shutdown' }
 GtRrLocalManagerStartupAndShutdown >> startup [ 
-	| isWindows |
 
-	self assert: processes isEmpty.
 	self assert: self isRunning not.
 	super startup.
 
-	isWindows := OSPlatform current isWin32.
-	self poolSize timesRepeat: 
-		[ processes add: self newWorkerLocalProcess.
-		"Pharo writes a number of files during startup.
-		Windows locks these files causing the workers to fail during startup,
-		give each worker a fighting chance to get going."
-		isWindows ifTrue: [ 1 second wait ] ].
-	self startWatchDog.
-
+	self workerManager startLocalWorkers.
 ]
 
 { #category : #ui }
@@ -323,18 +138,30 @@ GtRrLocalManagerStartupAndShutdown >> summaryAttributes [
 
 	^ OrderedCollection new
 		add: { #Running. self isRunning. self. };
-		add: { #ProcessCount. self processCount. processes. };
+		add: { #ProcessCount. self processCount. self workerManager. };
 		yourself
 ]
 
 { #category : #accessing }
 GtRrLocalManagerStartupAndShutdown >> workerCountCalculator [
 
-	^ workerCountCalculator
+	^ self workerManager workerCountCalculator
 ]
 
 { #category : #accessing }
 GtRrLocalManagerStartupAndShutdown >> workerCountCalculator: anObject [
 
-	workerCountCalculator := anObject
+	self workerManager workerCountCalculator: anObject
+]
+
+{ #category : #accessing }
+GtRrLocalManagerStartupAndShutdown >> workerManager [
+
+	^ workerManager ifNil:
+ 		[ workerManager := GtRrWorkerManager new
+ 			remoteRunner: remoteRunner;
+ 			remoteIpAddress: remoteRunner port.
+ 		workerCountCalculator ifNotNil:
+ 			[ workerManager workerCountCalculator: workerCountCalculator ].
+ 		workerManager ].
 ]

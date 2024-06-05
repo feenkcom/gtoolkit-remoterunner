@@ -10,10 +10,66 @@ Class {
 		'remoteRunner',
 		'workerIndex',
 		'changesSync',
-		'workerCountCalculator'
+		'workerCountCalculator',
+		'state',
+		'connectionStrategyId',
+		'workerClassName'
 	],
 	#category : #'RemoteRunner-Runner-Workers'
 }
+
+{ #category : #'start-stop' }
+GtRrWorkerManager >> addOrRemoveWorkers [
+	"Add or remove workers in the remote runner to reach the current pool size"
+	 | poolSize currentSize |
+
+	remoteRunner critical:
+		[ poolSize := self poolSize.
+		currentSize := processes size.
+		currentSize = poolSize ifTrue: [ ^ self ].
+		poolSize > currentSize 
+			ifTrue: [ self addWorkers: poolSize - currentSize ]
+			ifFalse: [ self removeWorkers: currentSize - poolSize ] ].
+]
+
+{ #category : #private }
+GtRrWorkerManager >> addWorkers: anInteger [
+	"Add the specified number of workers to the remote runner.
+	Must be called within sharedAccess."
+
+	anInteger timesRepeat:
+		[ processes add: self newWorkerLocalProcess ]
+]
+
+{ #category : #accessing }
+GtRrWorkerManager >> autoRestart [
+	^ autoRestart
+]
+
+{ #category : #accessing }
+GtRrWorkerManager >> autoRestart: anObject [
+	autoRestart := anObject
+]
+
+{ #category : #accessing }
+GtRrWorkerManager >> changesSync [
+	^ changesSync
+]
+
+{ #category : #accessing }
+GtRrWorkerManager >> changesSync: anObject [
+	changesSync := anObject
+]
+
+{ #category : #accessing }
+GtRrWorkerManager >> connectionStrategyId [
+	^ connectionStrategyId
+]
+
+{ #category : #accessing }
+GtRrWorkerManager >> connectionStrategyId: anObject [
+	connectionStrategyId := anObject
+]
 
 { #category : #ui }
 GtRrWorkerManager >> gtProcessesFor: aView [
@@ -50,14 +106,16 @@ GtRrWorkerManager >> initialize [
 	workerCountCalculator := GtRrResourceWorkerCountCalculator new
 		algorithm: #workerCountFreeMemory;
 		minWorkers: 0.
+	inMemoryLog := false.
 	processes := OrderedCollection new.
 	watchdogSemaphore := Semaphore new.
+	state := #notStarted.
 ]
 
 { #category : #testing }
 GtRrWorkerManager >> isRunning [
 
-	^ watchDog notNil
+	^ watchDog notNil and: [ state = #running ]
 ]
 
 { #category : #private }
@@ -68,15 +126,6 @@ GtRrWorkerManager >> newWorkerLocalProcess [
 	workerIndex := workerIndex + 1.
 	'workerLogs' asFileReference ensureCreateDirectory.
 	logFile := ('workerLogs/worker.', workerIndex asString, '.log') asFileReference.
-
-	"Stdio stdout
-		<< settings serverExecutable fullName;
-		<< ' '.
-	(self newWorkerLocalProcessArgumentsFor: settings)
-		do: [ :arg | Stdio stdout << arg ]
-		separatedBy: [ Stdio stdout << ' ' ].
-	Stdio stdout << String lf.
-	true ifTrue: [ ^ self ]."
 
 	builder := GtExternalProcessBuilder new
 		command: settings serverExecutable fullName;
@@ -94,22 +143,28 @@ GtRrWorkerManager >> newWorkerLocalProcess [
 GtRrWorkerManager >> newWorkerLocalProcessArgumentsFor: someSettings [
 	| args pharoDebugFile |
 
-	(remoteRunner port isNil or:
-		[ remoteRunner port = #none ]) 
-			ifTrue: [ self error: 'Attempt to start worker without server port' ].
+	remoteIpAddress ifNil:
+		[ self error: 'Attempt to start worker without server address' ].
 
 	args := OrderedCollection new.
 	args
 		add: someSettings serverImage fullName;
 		add: 'clap';
-		add: 'remoteRunnerWorker';
-		add: '--workerClass';
-		add: 'LwGtRrWorker';
+		add: 'remoteRunnerWorker'.
+	workerClassName ifNotNil:
+		[ args
+			add: '--workerClass';
+			add: workerClassName ].
+	args
 		add: '--log';
 		add: '--logDir';
 		add: 'workerLogs';
 		add: '--serverSocketAddress';
-		add: remoteIpAddress.
+		add: remoteIpAddress asString.
+	connectionStrategyId ifNotNil:
+		[ args
+			add: '--connectionStrategy';
+			add: connectionStrategyId asString ].
 	changesSync ifTrue:
 		[ args add: '--changesSync' ].
 	args
@@ -132,15 +187,28 @@ GtRrWorkerManager >> poolSize [
 
 { #category : #accessing }
 GtRrWorkerManager >> poolSize: anInteger [
-	"Set the receiver's pool size to the fixed value provided"
+	"Set the receiver's pool size to the fixed value provided.
+	If the runner has been started, add new workers or disconnect existing workers as required."
+	| oldSize |
 
+	oldSize := self poolSize.
 	workerCountCalculator := GtRrFixedWorkerCountCalculator workerCount: anInteger.
+	oldSize = self poolSize ifTrue: [ ^ self ].
+	remoteRunner isRunning ifTrue:
+		[ remoteRunner critical:
+			[ self addOrRemoveWorkers ] ]
 ]
 
 { #category : #accessing }
 GtRrWorkerManager >> processCount [
 
 	^ processes size.
+]
+
+{ #category : #accessing }
+GtRrWorkerManager >> processes [
+
+	^ processes
 ]
 
 { #category : #accessing }
@@ -164,8 +232,23 @@ GtRrWorkerManager >> remoteRunner: anObject [
 ]
 
 { #category : #private }
+GtRrWorkerManager >> removeWorkers: anInteger [
+	"Remove the specified number of workers from the pool.
+	Only remove workers that are currently available, i.e. idle.
+	This is a best attempt, not a guarantee, if the workers are all currently busy this will quietly return.
+	Must be called within sharedAccess."
+	| removeCount workers |
+
+	remoteRunner sharedAccess assertIsOwner.
+	removeCount := anInteger min: remoteRunner availableWorkers size.
+	workers := remoteRunner availableWorkers asArray first: removeCount.
+	workers do: [ :worker | worker connection stop ].
+]
+
+{ #category : #'start-stop' }
 GtRrWorkerManager >> shutdownLocalWorkers [
 
+	state := #stopping.
 	watchDog ifNotNil: 
 		[ [ watchDog terminate ]
 			on: ProcessAlreadyTerminating
@@ -173,10 +256,18 @@ GtRrWorkerManager >> shutdownLocalWorkers [
 	watchDog := nil.
 	processes do: #terminate.
 	processes removeAll.
+	state := #stopped.
 ]
 
-{ #category : #private }
-GtRrWorkerManager >> startLocalWorkersFor: aGtRrJobContext [
+{ #category : #'start-stop' }
+GtRrWorkerManager >> signalWatchdog [
+	"Signal the watchdog to check immediately"
+
+	watchdogSemaphore signal.
+]
+
+{ #category : #'start-stop' }
+GtRrWorkerManager >> startLocalWorkers [
 	| processCount isWindows |
 
 	processCount := self poolSize.
@@ -187,27 +278,23 @@ GtRrWorkerManager >> startLocalWorkersFor: aGtRrJobContext [
 		Windows locks these files causing the workers to fail during startup,
 		give each worker a fighting chance to get going."
 		isWindows ifTrue: [ 1 second wait ] ].
-	"processes removeAll."
-	self startWatchDog.
+	self startWatchdog.
+]
+
+{ #category : #'start-stop' }
+GtRrWorkerManager >> startLocalWorkersFor: aGtRrJobContext [
+
+	self startLocalWorkers.
 ]
 
 { #category : #private }
-GtRrWorkerManager >> startWatchDog [
+GtRrWorkerManager >> startWatchdog [
 
-	watchDog := [ [ autoRestart or: [ processes notEmpty ] ] whileTrue:
-		[ | broken |
-		watchdogSemaphore waitTimeoutSeconds: 30.
-		broken := processes reject: #isRunning.
-		broken do: [ :e | | process |
-			processes remove: e.
-			process := autoRestart
-				ifTrue: [ processes add: self newWorkerLocalProcess ]
-				ifFalse: [ ].
-			remoteRunner announceAndLog: (GtRrWorkerReplacedAnnouncement new
-				oldProcess: e;
-				newProcess: process) ].
-		 ] ] forkNamed:
-			'GtRrWorkerManager local watch dog'
+	state := #running.
+	watchDog := [ [ state = #running and: [ autoRestart or: [ processes notEmpty ] ] ] whileTrue:
+		[ watchdogSemaphore waitTimeoutSeconds: 30.
+		self watchDogCheck.
+		 ] ] forkNamed: 'GtRrWorkerManager local watch dog'.
 ]
 
 { #category : #ui }
@@ -217,4 +304,42 @@ GtRrWorkerManager >> summaryAttributes [
 		add: { #Running. self isRunning. self. };
 		add: { #ProcessCount. self processCount. processes. };
 		yourself
+]
+
+{ #category : #private }
+GtRrWorkerManager >> watchDogCheck [
+	| broken |
+
+	broken := processes reject: #isRunning.
+	broken do: [ :e | | process |
+		processes remove: e.
+		process := autoRestart ifTrue: 
+			[ [ processes add: self newWorkerLocalProcess ]
+				on: Error
+				do: [ :ex | self isRunning 
+					ifTrue: [ ex pass ]
+					ifFalse: [ ^ self ] ] ].
+		remoteRunner announceAndLog: (GtRrWorkerReplacedAnnouncement new
+			oldProcess: e;
+			newProcess: process) ].
+]
+
+{ #category : #accessing }
+GtRrWorkerManager >> workerClassName [
+	^ workerClassName
+]
+
+{ #category : #accessing }
+GtRrWorkerManager >> workerClassName: anObject [
+	workerClassName := anObject
+]
+
+{ #category : #accessing }
+GtRrWorkerManager >> workerCountCalculator [
+	^ workerCountCalculator
+]
+
+{ #category : #accessing }
+GtRrWorkerManager >> workerCountCalculator: anObject [
+	workerCountCalculator := anObject
 ]
