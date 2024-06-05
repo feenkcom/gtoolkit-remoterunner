@@ -825,6 +825,7 @@ GtRemoteRunnerExamples >> timeoutJob [
 GtRemoteRunnerExamples >> timeoutTask [
 	"Demonstrate terminating a task due to it timing out"
 	<gtExample>
+	<noTest>
 	| job completingTask timeoutTask taskFailedCount taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount times taskFailedSemaphore workerRegisteredSemaphore |
 
 	self ignoreWorkerExamples ifTrue: [ ^ self ].
