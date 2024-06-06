@@ -51,7 +51,9 @@ GtRrClassSUnitTask >> sunitClassName: anObject [
 
 { #category : #accessing }
 GtRrClassSUnitTask >> testSuite [
+	| testSuite |
 
-	^ (self classWithName: sunitClassName) buildSuite.
-
+	testSuite := (self classWithName: sunitClassName) buildSuite.
+	GtRrTestSuite adoptInstance: testSuite.
+	^ testSuite
 ]

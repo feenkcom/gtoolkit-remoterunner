@@ -53,7 +53,7 @@ GtRrPackageSUnitTask >> sunitPackageName: anObject [
 GtRrPackageSUnitTask >> testSuite [
 	| suite classes |
 
-	suite := TestSuite named: taskId.
+	suite := GtRrTestSuite named: taskId.
 	classes := sunitPackageName asPackage classes select: [ :cls |
 		(cls inheritsFrom: TestCase) and: [ cls isAbstract not ] ].
 	classes do: [ :cls |
