@@ -185,7 +185,7 @@ GtRrWorker class >> serverSocketAddress: aString [
 
 { #category : #clap }
 GtRrWorker class >> startLoggerFor: worker arguments: args [
-	| announcements logger logDir filename |
+	| announcements logger logDir filename pid pharoDebugLogFile |
 
 	args at: #log ifAbsent: [^ self ].
 
@@ -197,6 +197,13 @@ GtRrWorker class >> startLoggerFor: worker arguments: args [
 	Stdio stdout
 		<< 'worker log filename set to: ';
 		<< filename asString;
+		lf.
+	pid := GtOsSystemInfo current currentProcessId.
+	pharoDebugLogFile := (logDir / ('worker.pharoDebug.', pid asString, '.log')) fullName.
+	Smalltalk logFileName: pharoDebugLogFile.
+	Stdio stdout
+		<< 'PharoDebug.log filename set to: ';
+		<< pharoDebugLogFile;
 		lf.
 	logger := RestartingStreamLogger appendToFile: filename.
 	announcements := AnnouncementSetWithExclusions withAll: 

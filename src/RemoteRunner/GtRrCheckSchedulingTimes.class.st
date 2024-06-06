@@ -26,6 +26,13 @@ GtRrCheckSchedulingTimes class >> classWithName: aString [
 ]
 
 { #category : #accessing }
+GtRrCheckSchedulingTimes class >> instance [
+	"Don't use this as an example as it starts local workers and doesn't stop them"
+
+	^ self uniqueInstance
+]
+
+{ #category : #accessing }
 GtRrCheckSchedulingTimes class >> leJsonV4AttributeMapping [ 
 
 	^ { 
