@@ -97,8 +97,10 @@ GtRrExamplesTask >> run [
 	group := self group.
 	^ group examples collect: [ :exampleWithResult |
 		resourceReport := nil.
-		
 		(ignoreNoTest or: [ exampleWithResult ignoreTest not ]) ifTrue: [ 
+			GtRrWorkerCheckStartingSignal new
+				example: exampleWithResult example;
+				emit.
 			resourceReport := GtRrCheckResourcesReport new.
 			exampleStartTime := DateAndTime now.
 			resourceReport recordSourceReport.
@@ -107,7 +109,10 @@ GtRrExamplesTask >> run [
 				ifFalse: [ exampleWithResult run ].
 			resourceReport recordTargetReport.
 			exampleEndTime := DateAndTime now ].
-			
+			GtRrWorkerCheckCompletedSignal new
+				example: exampleWithResult example;
+				emit.
+
 		exampleResult := exampleWithResult result.
 		announcement := exampleResult
 			ifNil: [ PharoLinkTestCaseSkip new ]

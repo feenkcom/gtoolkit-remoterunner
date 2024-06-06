@@ -78,7 +78,7 @@ GtRrExplicitSUnitTask >> sunitTestNames: aCollection [
 GtRrExplicitSUnitTask >> testSuite [
 	| suite |
 
-	suite := TestSuite named: taskId.
+	suite := GtRrTestSuite named: taskId.
 	checkNames do: [ :assoc | | class |
 		class := self class environment at: assoc key asSymbol.
 		suite addTest: (class new setTestSelector: assoc value asSymbol) ].
