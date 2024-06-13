@@ -356,13 +356,6 @@ GtRrWorkerExamplesReport >> taskGapsDuration [
 ]
 
 { #category : #accessing }
-GtRrWorkerExamplesReport >> taskWithId: aTaskId [
-	^ self tasks 
-		detect: [ :aTask |
-			aTask taskId = aTaskId ]
-]
-
-{ #category : #accessing }
 GtRrWorkerExamplesReport >> tasks [
 	^ tasks
 ]
@@ -545,6 +538,13 @@ GtRrWorkerExamplesReport >> tasksVmMemoryChartItems [
 							aReport vmFreeMemoryAtEnd}) ] 
 				ifAbsent: [].
 			memoryValues ]) asArray
+]
+
+{ #category : #accessing }
+GtRrWorkerExamplesReport >> taskWithId: aTaskId [
+	^ self tasks 
+		detect: [ :aTask |
+			aTask taskId = aTaskId ]
 ]
 
 { #category : #'accessing - gc details' }
