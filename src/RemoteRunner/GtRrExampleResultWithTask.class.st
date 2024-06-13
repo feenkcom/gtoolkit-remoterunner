@@ -90,6 +90,11 @@ GtRrExampleResultWithTask >> providerClass [
 ]
 
 { #category : #accessing }
+GtRrExampleResultWithTask >> resourceReport [
+	^ exampleResult resourceReport
+]
+
+{ #category : #accessing }
 GtRrExampleResultWithTask >> summaryAttributes [
 	^ self exampleResult summaryAttributes, {
 		'Task' -> self task }
