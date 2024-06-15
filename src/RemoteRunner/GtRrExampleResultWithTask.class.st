@@ -65,6 +65,19 @@ GtRrExampleResultWithTask >> gtTraceFor: aView [
 ]
 
 { #category : #'gt - extensions' }
+GtRrExampleResultWithTask >> gtViewMessageTallyFor: aView [ 
+	<gtView>
+	
+	self exampleResult messageTallyReport 
+		ifNil: [ ^ aView empty ].
+		
+	^ aView forward 
+		title: 'Message Tally';
+		object: [ self exampleResult messageTallyReport ];
+		view: #gtViewReportOn:
+]
+
+{ #category : #'gt - extensions' }
 GtRrExampleResultWithTask >> gtViewWorkerAttributesFor: aView [
 	<gtView>
 	
