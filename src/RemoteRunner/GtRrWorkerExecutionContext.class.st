@@ -39,7 +39,7 @@ GtRrWorkerExecutionContext >> exceptionHandlingStrategy: anObject [
 
 { #category : #accessing }
 GtRrWorkerExecutionContext >> forkAndRun [
-	"Run the task in a separate Process."
+	"Run the task and timeout monitor in separate processes.  Some UI processes are executed at userBackgroundPriority, so run just under that to avoid slowing down the UI when run in-image.  Dedicated workers shouldn't have higher priority processes anyway."
 
 	executionProcess := [ self runTask]
 		forkAt: Processor userBackgroundPriority  - 2
