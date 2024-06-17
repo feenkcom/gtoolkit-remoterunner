@@ -108,11 +108,17 @@ GtRrWorkerExecutionContext >> timeout: aDuration [
 
 { #category : #private }
 GtRrWorkerExecutionContext >> timeoutTask [
+	| loopAnalysis taskError |
 
 	timeout wait.
 	"Don't terminate the process if it is already terminated or is suspended (likely being debugged)"
-	(executionProcess isTerminated or: [ executionProcess isSuspended ]) ifFalse:
-		[ executionProcess signalException: GtRrTimeoutTaskError new ].
+	(executionProcess isTerminated or: [ executionProcess isSuspended ]) ifTrue: [ ^ self ].
+	loopAnalysis := GtProcessLoopAnalyser new
+		process: executionProcess;
+		run.
+	taskError := GtRrTimeoutTaskError new.
+	taskError pharoLinkAdditionalData at: #loopAnalysis put: loopAnalysis report.
+	executionProcess signalException: taskError.
 ]
 
 { #category : #accessing }
