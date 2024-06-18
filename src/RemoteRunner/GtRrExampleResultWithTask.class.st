@@ -65,6 +65,19 @@ GtRrExampleResultWithTask >> gtTraceFor: aView [
 ]
 
 { #category : #'gt - extensions' }
+GtRrExampleResultWithTask >> gtViewMessageTallyFor: aView [ 
+	<gtView>
+	
+	self exampleResult messageTallyReport 
+		ifNil: [ ^ aView empty ].
+		
+	^ aView forward 
+		title: 'Message Tally';
+		object: [ self exampleResult messageTallyReport ];
+		view: #gtViewReportOn:
+]
+
+{ #category : #'gt - extensions' }
 GtRrExampleResultWithTask >> gtViewWorkerAttributesFor: aView [
 	<gtView>
 	
@@ -87,6 +100,11 @@ GtRrExampleResultWithTask >> printOn: aStream [
 { #category : #accessing }
 GtRrExampleResultWithTask >> providerClass [
 	^ self exampleResult providerClass
+]
+
+{ #category : #accessing }
+GtRrExampleResultWithTask >> resourceReport [
+	^ exampleResult resourceReport
 ]
 
 { #category : #accessing }

@@ -39,7 +39,7 @@ GtRrWorkerExecutionContext >> exceptionHandlingStrategy: anObject [
 
 { #category : #accessing }
 GtRrWorkerExecutionContext >> forkAndRun [
-	"Run the task in a separate Process."
+	"Run the task and timeout monitor in separate processes.  Some UI processes are executed at userBackgroundPriority, so run just under that to avoid slowing down the UI when run in-image.  Dedicated workers shouldn't have higher priority processes anyway."
 
 	executionProcess := [ self runTask]
 		forkAt: Processor userBackgroundPriority  - 2
@@ -108,11 +108,17 @@ GtRrWorkerExecutionContext >> timeout: aDuration [
 
 { #category : #private }
 GtRrWorkerExecutionContext >> timeoutTask [
+	| loopAnalysis taskError |
 
 	timeout wait.
 	"Don't terminate the process if it is already terminated or is suspended (likely being debugged)"
-	(executionProcess isTerminated or: [ executionProcess isSuspended ]) ifFalse:
-		[ executionProcess signalException: GtRrTimeoutTaskError new ].
+	(executionProcess isTerminated or: [ executionProcess isSuspended ]) ifTrue: [ ^ self ].
+	loopAnalysis := GtProcessLoopAnalyser new
+		process: executionProcess;
+		run.
+	taskError := GtRrTimeoutTaskError new.
+	taskError pharoLinkAdditionalData at: #loopAnalysis put: loopAnalysis report.
+	executionProcess signalException: taskError.
 ]
 
 { #category : #accessing }
