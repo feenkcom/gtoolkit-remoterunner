@@ -73,6 +73,7 @@ GtRrExampleResultWithTask >> gtViewMessageTallyFor: aView [
 		
 	^ aView forward 
 		title: 'Message Tally';
+		priority: 50;
 		object: [ self exampleResult messageTallyReport ];
 		view: #gtViewReportOn:
 ]
