@@ -111,7 +111,8 @@ GtRrExampleResultWithTask >> resourceReport [
 { #category : #accessing }
 GtRrExampleResultWithTask >> summaryAttributes [
 	^ self exampleResult summaryAttributes, {
-		'Task' -> self task }
+		'Task' -> self task.
+		'Task Id' -> self task taskId }
 ]
 
 { #category : #accessing }
@@ -124,6 +125,12 @@ GtRrExampleResultWithTask >> task [
 GtRrExampleResultWithTask >> task: anObject [
 
 	task := anObject
+]
+
+{ #category : #accessing }
+GtRrExampleResultWithTask >> taskId [
+
+	^ task taskId
 ]
 
 { #category : #accessing }
