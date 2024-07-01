@@ -118,6 +118,7 @@ GtRrWorkerExecutionContext >> timeoutTask [
 		run.
 	taskError := GtRrTimeoutTaskError new.
 	taskError pharoLinkAdditionalData at: #loopAnalysis put: loopAnalysis report.
+	taskError initializeProcessesReport.
 	executionProcess signalException: taskError.
 ]
 
