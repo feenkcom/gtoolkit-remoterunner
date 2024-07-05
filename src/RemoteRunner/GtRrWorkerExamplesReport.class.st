@@ -289,6 +289,7 @@ GtRrWorkerExamplesReport >> isTaskCorrectlyScheduledUsingWorkerTimesAtIndex: tas
 	| targetTask targetDuration|
 	targetTask := aTasksGroup at: taskIndex.
 	targetDuration := targetTask durationOnWorker.
+	targetDuration ifNil: [ ^ true ].
 	aTasksGroup from: 1 to: taskIndex - 1 do: [ :aTask |
 		(targetDuration - aTask durationOnWorker > 5 seconds) ifTrue: [ ^ false ] ].
 	^ true

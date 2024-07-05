@@ -45,7 +45,7 @@ GtRrExecutionChartDataItemsGroup >> endTime [
 	^ self items
 		inject: self items first endTime
 		into: [ :endTime :anItem | 
-			anItem endTime > endTime
+			(anItem endTime notNil and: [ anItem endTime  > endTime])
 				ifTrue: [ anItem endTime ]
 				ifFalse: [ endTime ] ]
 ]
@@ -102,7 +102,7 @@ GtRrExecutionChartDataItemsGroup >> startTime [
 	^ self items
 		inject: self items first startTime
 		into: [ :startTime :anItem | 
-			anItem startTime < startTime
+			(anItem startTime notNil and: [ anItem startTime < startTime])
 				ifTrue: [ anItem startTime ]
 				ifFalse: [ startTime ] ]
 ]
