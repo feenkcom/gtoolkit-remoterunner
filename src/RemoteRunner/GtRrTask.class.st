@@ -255,6 +255,14 @@ GtRrTask >> hasResourceReport [
 	^ self executionData resourceReport notNil
 ]
 
+{ #category : #accessing }
+GtRrTask >> includesTaskId: aTaskId [
+	"Answer a boolean indicating if the supplied task id is the receiver's or one of its retried tasks"
+
+	^ self taskId = aTaskId or: 
+		[ retryStrategy includesTaskId: aTaskId ]
+]
+
 { #category : #'accessing - gc details' }
 GtRrTask >> incrGcTime [
 	^ self 

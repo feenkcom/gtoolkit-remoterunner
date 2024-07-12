@@ -33,6 +33,13 @@ GtRrTaskRetry >> failedTask: anObject [
 	failedTask := anObject
 ]
 
+{ #category : #accessing }
+GtRrTaskRetry >> includesTaskId: aTaskId [
+	"Answer a boolean indicating if the supplied task id is the receiver's or one of its retried tasks"
+
+	^ failedTask isNotNil and: [ failedTask includesTaskId: aTaskId ]
+]
+
 { #category : #private }
 GtRrTaskRetry >> privateRetryTaskFor: aGtRrTask [
 	"Answer a copy of the supplied task"
