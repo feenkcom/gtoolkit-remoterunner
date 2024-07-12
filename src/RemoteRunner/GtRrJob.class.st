@@ -547,6 +547,16 @@ GtRrJob >> resultCount [
 ]
 
 { #category : #accessing }
+GtRrJob >> resultWithTaskid: aTaskId [
+	"Answer the result (GtRrTask) with the given id.
+	This may not be the same task as submitted due to task retry."
+
+	results ifNil: [ ^ nil ].
+	^ results detect: [ :task |
+		task includesTaskId: aTaskId ].
+]
+
+{ #category : #accessing }
 GtRrJob >> results [
 
 	^ results
