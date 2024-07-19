@@ -142,6 +142,11 @@ GtRrWorkersExamplesReport >> numberOfIncrementalGCs [
 ]
 
 { #category : #accessing }
+GtRrWorkersExamplesReport >> numberOfTaskRetries [
+	^ self workers sumNumbers: [ :aWorker | aWorker numberOfTaskRetries ]
+]
+
+{ #category : #accessing }
 GtRrWorkersExamplesReport >> numberOfTasks [
 	^ self workers sumNumbers: [ :aWorker | aWorker numberOfTasks ]
 ]
@@ -306,13 +311,6 @@ GtRrWorkersExamplesReport >> vmMinimumMemorySize [
 ]
 
 { #category : #accessing }
-GtRrWorkersExamplesReport >> workerWithId: aWorkerId [
-	^ self workers 
-		detect: [ :aWorker |
-			aWorker workerId = aWorkerId ]
-]
-
-{ #category : #accessing }
 GtRrWorkersExamplesReport >> workers [
 
 	^ workers
@@ -358,4 +356,11 @@ GtRrWorkersExamplesReport >> workersTasksMachineAvailableMemoryChartItems [
 GtRrWorkersExamplesReport >> workersTasksMachineFreeMemoryChartItems [
 	^ self workers flatCollect: [ :aWorker | 
 		aWorker tasksMachineFreeMemoryChartItems ]
+]
+
+{ #category : #accessing }
+GtRrWorkersExamplesReport >> workerWithId: aWorkerId [
+	^ self workers 
+		detect: [ :aWorker |
+			aWorker workerId = aWorkerId ]
 ]

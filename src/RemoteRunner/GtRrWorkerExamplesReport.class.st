@@ -327,6 +327,11 @@ GtRrWorkerExamplesReport >> numberOfIncrementalGCs [
 ]
 
 { #category : #accessing }
+GtRrWorkerExamplesReport >> numberOfTaskRetries [
+	^ tasks count: [ :aTask | aTask isTaskRetry ] 
+]
+
+{ #category : #accessing }
 GtRrWorkerExamplesReport >> numberOfTasks [ 
 	^ tasks size
 ]
@@ -354,13 +359,6 @@ GtRrWorkerExamplesReport >> taskGapsDuration [
 				gapDuration := gapDuration + (anotherTask startTime - aTask endTime) ].
 		gapDuration ].
 	^ gapDuration
-]
-
-{ #category : #accessing }
-GtRrWorkerExamplesReport >> taskWithId: aTaskId [
-	^ self tasks 
-		detect: [ :aTask |
-			aTask taskId = aTaskId ]
 ]
 
 { #category : #accessing }
@@ -546,6 +544,13 @@ GtRrWorkerExamplesReport >> tasksVmMemoryChartItems [
 							aReport vmFreeMemoryAtEnd}) ] 
 				ifAbsent: [].
 			memoryValues ]) asArray
+]
+
+{ #category : #accessing }
+GtRrWorkerExamplesReport >> taskWithId: aTaskId [
+	^ self tasks 
+		detect: [ :aTask |
+			aTask taskId = aTaskId ]
 ]
 
 { #category : #'accessing - gc details' }
