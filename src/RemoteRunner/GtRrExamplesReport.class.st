@@ -143,6 +143,16 @@ GtRrExamplesReport >> gtNotExecutedExamplesFor: aView [
 ]
 
 { #category : #ui }
+GtRrExamplesReport >> gtRetriedExamplesFor: aView [
+	<gtView>
+
+	^ self gtView: aView 
+		forExamples: self retriedExamples
+		title: 'Retried'
+		priority: 20.
+]
+
+{ #category : #ui }
 GtRrExamplesReport >> gtSkippedExamplesFor: aView [
 	<gtView>
 
@@ -239,6 +249,13 @@ GtRrExamplesReport >> numberOfSkips [
 GtRrExamplesReport >> numberOfSuccesses [
 	^ self tasks sumNumbers: [ :task |
 		task numberOfSuccesses ] 
+]
+
+{ #category : #'accessing - dynamic' }
+GtRrExamplesReport >> retriedExamples [
+
+	^ self wrapPlainExamples: ((self tasks select: [ :task | task wasRetried ]) 
+		flatCollect: [ :task | task allExamples ])
 ]
 
 { #category : #'accessing - dynamic' }

@@ -64,6 +64,18 @@ GtRrExampleResultWithTask >> gtTraceFor: aView [
 		object: [ self exampleResult]
 ]
 
+{ #category : #accessing }
+GtRrExampleResultWithTask >> gtViewExternalMemReportFor: aView [
+	<gtView>
+
+	task executionData resourceReport externalMemReport ifNil: [ ^ aView empty ].
+	^ aView forward
+		title: 'External Memory';
+		priority: 45;
+		object: [ task executionData resourceReport externalMemReport ];
+		view: #gtTableFor:
+]
+
 { #category : #'gt - extensions' }
 GtRrExampleResultWithTask >> gtViewMessageTallyFor: aView [ 
 	<gtView>

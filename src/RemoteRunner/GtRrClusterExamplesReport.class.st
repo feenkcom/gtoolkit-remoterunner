@@ -45,7 +45,12 @@ GtRrClusterExamplesReport >> avegareFullGcDuration [
 
 { #category : #'accessing - gc details' }
 GtRrClusterExamplesReport >> avegareIncrementalGcDuration [
-	^ self incrGcDuration / self numberOfIncrementalGCs
+	| numberOfIncrementalGCs |
+	
+	numberOfIncrementalGCs := self numberOfIncrementalGCs.
+	^ numberOfIncrementalGCs = 0 
+		ifTrue: [ 0 ]
+		ifFalse: [ self incrGcDuration / self numberOfIncrementalGCs ]
 ]
 
 { #category : #accessing }
