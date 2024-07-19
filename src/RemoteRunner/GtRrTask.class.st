@@ -628,6 +628,14 @@ GtRrTask >> vmStatisticsAtStart [
 		ifAbsent: [ nil ]
 ]
 
+{ #category : #testing }
+GtRrTask >> wasRetried [
+
+	^ self isFinished and:
+		[ retryStrategy isNotNil and:
+		[ retryStrategy failedTask isNotNil ] ]
+]
+
 { #category : #accessing }
 GtRrTask >> workerAttributes [
 

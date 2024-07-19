@@ -101,6 +101,12 @@ GtRrTaskExecutionData >> errorDetails: aGtErrorDetails [
 ]
 
 { #category : #accessing }
+GtRrTaskExecutionData >> externalMemReport [
+
+	^ resourceReport externalMemReport
+]
+
+{ #category : #accessing }
 GtRrTaskExecutionData >> gapBetweenEndTimeAndReceivingResults [
 	^ self endTime 
 		ifNotNil: [ :anEndTime |

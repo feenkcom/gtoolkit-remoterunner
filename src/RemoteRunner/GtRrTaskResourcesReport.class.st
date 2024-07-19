@@ -2,7 +2,8 @@ Class {
 	#name : #GtRrTaskResourcesReport,
 	#superclass : #GtVmRuntimeStatisticsDiffReport,
 	#instVars : [
-		'meminfoReport'
+		'meminfoReport',
+		'externalMemReport'
 	],
 	#category : #'RemoteRunner-Tasks'
 }
@@ -10,6 +11,16 @@ Class {
 { #category : #serialization }
 GtRrTaskResourcesReport class >> leJsonV4Name [
 	^ #gtRrTaskResourcesReport
+]
+
+{ #category : #accessing }
+GtRrTaskResourcesReport >> externalMemReport [
+	^ externalMemReport
+]
+
+{ #category : #accessing }
+GtRrTaskResourcesReport >> externalMemReport: anObject [
+	externalMemReport := anObject
 ]
 
 { #category : #'memory usage' }
@@ -50,11 +61,24 @@ GtRrTaskResourcesReport >> meminfoReport: anObject [
 ]
 
 { #category : #profiling }
+GtRrTaskResourcesReport >> recordSourceReport [
+
+	super recordSourceReport.
+	GtRrExternalMemoryAndFinalizationStats hasUniqueInstance ifTrue:
+		[ GtRrExternalMemoryAndFinalizationStats uniqueInstance restart ].
+]
+
+{ #category : #profiling }
 GtRrTaskResourcesReport >> recordTargetReport [
+
 	super recordTargetReport.
-	
+
+	GtRrExternalMemoryAndFinalizationStats hasUniqueInstance ifTrue:
+		[ externalMemReport := GtRrExternalMemoryAndFinalizationStats uniqueInstance copy.
+		GtRrExternalMemoryAndFinalizationStats uniqueInstance restart ].
+
 	OSPlatform current isUnix ifFalse: [ ^ self ].
 	
 	meminfoReport := GtRrMachineMeminfoReport new 
-		recordReportStatistics
+		recordReportStatistics.
 ]
