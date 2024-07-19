@@ -327,6 +327,11 @@ GtRrWorkerExamplesReport >> numberOfIncrementalGCs [
 ]
 
 { #category : #accessing }
+GtRrWorkerExamplesReport >> numberOfTaskRetries [
+	^ tasks count: [ :aTask | aTask isTaskRetry ] 
+]
+
+{ #category : #accessing }
 GtRrWorkerExamplesReport >> numberOfTasks [ 
 	^ tasks size
 ]

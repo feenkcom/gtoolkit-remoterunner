@@ -202,6 +202,11 @@ GtRrRunnerMachineExamplesReport >> numberOfIncrementalGCs [
 ]
 
 { #category : #accessing }
+GtRrRunnerMachineExamplesReport >> numberOfTaskRetries [
+	^ self workersReport numberOfTaskRetries
+]
+
+{ #category : #accessing }
 GtRrRunnerMachineExamplesReport >> numberOfTasks [
 	^ self workersReport numberOfTasks
 ]
@@ -216,7 +221,8 @@ GtRrRunnerMachineExamplesReport >> overviewData [
 	^ {
 		'Number of workers' -> self numberOfWorkers.
 		'Number of tasks' -> self numberOfTasks.
-		'Number of tests' -> self numberOfExamples .
+		'Number of test runs' -> self numberOfExamples .
+		'Number of task retries' -> self numberOfTaskRetries.
 		'Cummulative Tasks Duration (on workers)' -> self cummulativeTasksDuration.
 		'Cummulative Tasks Duration (on runner)' -> self cummulativeTasksDurationOnRunner.
 		'Tasks Duration Runner - Worker Difference' -> (self cummulativeTasksDurationOnRunner - self cummulativeTasksDuration).

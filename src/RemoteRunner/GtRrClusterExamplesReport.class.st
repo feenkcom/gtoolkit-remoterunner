@@ -350,6 +350,12 @@ GtRrClusterExamplesReport >> numberOfIncrementalGCs [
 ]
 
 { #category : #accessing }
+GtRrClusterExamplesReport >> numberOfTaskRetries [
+	^ self machineReports
+		sumNumbers: [ :aWorkerReport | aWorkerReport numberOfTaskRetries ]
+]
+
+{ #category : #accessing }
 GtRrClusterExamplesReport >> numberOfTasks [
 	^ self machineReports
 		sumNumbers: [ :aWorkerReport | aWorkerReport numberOfTasks ]
@@ -366,7 +372,8 @@ GtRrClusterExamplesReport >> overviewData [
 		'Number of IP addresses' -> self numberOfIdAddresses.
 		'Number of workers' -> self numberOfWorkers.
 		'Number of tasks' -> self numberOfTasks.
-		'Number of tests' -> self numberOfExamples .
+		'Number of task retries' -> self numberOfTaskRetries.
+		'Number of test runs' -> self numberOfExamples .
 		'Cummulative Tasks Duration (on workers)' -> self cummulativeTasksDuration.
 		'Cummulative Tasks Duration (on runner)' -> self cummulativeTasksDurationOnRunner.
 		'Tasks Duration Runner - Worker Difference' -> (self cummulativeTasksDurationOnRunner - self cummulativeTasksDuration).

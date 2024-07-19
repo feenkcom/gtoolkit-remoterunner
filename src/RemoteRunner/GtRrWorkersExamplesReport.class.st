@@ -142,6 +142,11 @@ GtRrWorkersExamplesReport >> numberOfIncrementalGCs [
 ]
 
 { #category : #accessing }
+GtRrWorkersExamplesReport >> numberOfTaskRetries [
+	^ self workers sumNumbers: [ :aWorker | aWorker numberOfTaskRetries ]
+]
+
+{ #category : #accessing }
 GtRrWorkersExamplesReport >> numberOfTasks [
 	^ self workers sumNumbers: [ :aWorker | aWorker numberOfTasks ]
 ]

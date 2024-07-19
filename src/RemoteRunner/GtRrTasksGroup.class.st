@@ -6,6 +6,11 @@ Class {
 	#category : #'RemoteRunner-Tasks'
 }
 
+{ #category : #'math functions' }
+GtRrTasksGroup >> count: aBlock [
+	^ self items count: aBlock
+]
+
 { #category : #accessing }
 GtRrTasksGroup >> duration [
 	^ self items  
