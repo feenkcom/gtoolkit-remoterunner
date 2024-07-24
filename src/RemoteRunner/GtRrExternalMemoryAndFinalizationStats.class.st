@@ -62,12 +62,12 @@ GtRrExternalMemoryAndFinalizationStats class >> installFinalization [
 	 [firstMourner := self primitiveFetchMourner.
 	  firstMourner notNil] whileTrue:
 		[MournLoopProcess := [
-			GtRuntimeStats uniqueInstance finalization startCycle.
+			GtRrExternalMemoryAndFinalizationStats uniqueInstance finalization startCycle.
 			[ [ self mournLoopWith: firstMourner]
 				on: Error
 				fork: [ :ex | ex pass ] ]
 					ensure: [ 
-						GtRuntimeStats uniqueInstance finalization endCycle.
+						GtRrExternalMemoryAndFinalizationStats uniqueInstance finalization endCycle.
 						throttle signal ].
 		] forkAt: Processor activePriority + 1.
 		 throttle wait]]'
@@ -86,10 +86,10 @@ GtRrExternalMemoryAndFinalizationStats class >> installGcallocate [
 	BEWARE: there should be no copy of self, nor any pointer to a sub part..."
 
 	| externalAddress |
-	GtRuntimeStats uniqueInstance gcallocate startCycle.
+	GtRrExternalMemoryAndFinalizationStats uniqueInstance gcallocate startCycle.
 	externalAddress := self allocate: byteSize.
 	self finalizationRegistry add: externalAddress.
-	GtRuntimeStats uniqueInstance gcallocate endCycle.
+	GtRrExternalMemoryAndFinalizationStats uniqueInstance gcallocate endCycle.
 	^externalAddress'
 		classified: 'gt-runtime-stats-temporary'.
 ]
@@ -114,9 +114,9 @@ GtRrExternalMemoryAndFinalizationStats class >> installMemcpyPrimitive [
 	No buffer overflow checks are done on ExternalAddresses."
 	| result |
 
-	GtRuntimeStats uniqueInstance memcpyPrimitive startCycle.
+	GtRrExternalMemoryAndFinalizationStats uniqueInstance memcpyPrimitive startCycle.
 	result := self actualPrimitiveCopyFrom: src at: srcStart to: dest at: destStart size: size.
-	GtRuntimeStats uniqueInstance memcpyPrimitive endCycle.
+	GtRrExternalMemoryAndFinalizationStats uniqueInstance memcpyPrimitive endCycle.
 	^ result.'
 		classified: 'gt-runtime-stats-temporary'.
 ]
@@ -129,9 +129,9 @@ GtRrExternalMemoryAndFinalizationStats class >> installNewPinned [
 'newPinned: sizeRequested
 	| object |
 
-	GtRuntimeStats uniqueInstance newPinned startCycle.
+	GtRrExternalMemoryAndFinalizationStats uniqueInstance newPinned startCycle.
 	object := (self basicNewPinned: sizeRequested) initialize.
-	GtRuntimeStats uniqueInstance newPinned endCycle.
+	GtRrExternalMemoryAndFinalizationStats uniqueInstance newPinned endCycle.
 	^ object'
 		classified: 'gt-runtime-stats-temporary'.
 ]
@@ -148,9 +148,9 @@ GtRrExternalMemoryAndFinalizationStats class >> installPinInMemory [
 	 This method ensures an object is pinned, and answers whether it was already pinned."
 	 | result |
 
-	GtRuntimeStats uniqueInstance pinInMemory startCycle.
+	GtRrExternalMemoryAndFinalizationStats uniqueInstance pinInMemory startCycle.
 	result := self setPinnedInMemory: true.
-	GtRuntimeStats uniqueInstance pinInMemory endCycle.
+	GtRrExternalMemoryAndFinalizationStats uniqueInstance pinInMemory endCycle.
 	^ result'
 		classified: 'gt-runtime-stats-temporary'.
 ]
