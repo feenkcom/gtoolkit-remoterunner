@@ -82,8 +82,8 @@ GtRrResourceWorkerCountCalculator class >> gtViewAlgorithmsFor: aView [
 		title: 'Worker Count Algorithms';
 		priority: 31;
 		items: [ {
-			'Based on physical memory' -> #workerCountPhysicalMemory.
-			'Based on free memory' ->#workerCountFreeMemory} ];
+			'Physical memory' -> #workerCountPhysicalMemory.
+			'Free memory' ->#workerCountFreeMemory} ];
 		column: 'Algorithm' text: [ :each | each key ];
 		column: 'Worker count' text:[ :each | self new
 			perform: each value ];
