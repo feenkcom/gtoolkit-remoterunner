@@ -74,6 +74,59 @@ GtRrResourceWorkerCountCalculator class >> defaultMinWorkers: anObject [
 ]
 
 { #category : #accessing }
+GtRrResourceWorkerCountCalculator class >> gtViewAlgorithmsFor: aView [
+	<gtView>
+	<gtClassView>
+	
+	^ aView columnedList 
+		title: 'Worker Count Algorithms';
+		priority: 31;
+		items: [ {
+			'Physical memory' -> #workerCountPhysicalMemory.
+			'Free memory' ->#workerCountFreeMemory} ];
+		column: 'Algorithm' text: [ :each | each key ];
+		column: 'Worker count' text:[ :each | self new
+			perform: each value ];
+		column: 'Is Default' 
+			text: [ :each | (each value = (self defaultAlgorithm
+					ifNil: [ #workerCountPhysicalMemory ]))
+				ifTrue: ['Yes']
+				ifFalse: [''] ]
+			width: 75;
+		send: [ :each |
+			self new 
+				algorithm: each value ]
+]
+
+{ #category : #accessing }
+GtRrResourceWorkerCountCalculator class >> gtViewDefaultsFor: aView [
+	<gtView>
+	<gtClassView>
+	
+	^ aView columnedList 
+		title: 'Defaults';
+		priority: 34;
+		items: [ {
+			{'Min workers' . 
+				self defaultMinWorkers . 
+				self new minWorkers}.
+			{'Max workers' . 
+				self defaultMaxWorkers. 
+				self new maxWorkers}.
+			{'Algorithm' . 
+				self defaultAlgorithm. 
+				self new algorithm}.
+			{'Memory multiplier' . 
+				self defaultMemorySizeMultiplier. 
+				self new memorySizeMultiplier}.
+		} ];
+		column: 'Property' text: [ :each | each first ];
+		column: 'Current value' text:[ :each | each third ];
+		column: 'Saved value' text:[ :each | each second ];
+		send: [ :each | each second ]
+]
+
+{ #category : #accessing }
 GtRrResourceWorkerCountCalculator >> algorithm [
 	^ algorithm ifNil: [ algorithm := DefaultAlgorithm ifNil: [ #workerCountPhysicalMemory ] ]
 ]
@@ -83,28 +136,24 @@ GtRrResourceWorkerCountCalculator >> algorithm: anObject [
 	algorithm := anObject
 ]
 
-{ #category : #accessing }
+{ #category : #'gt - extensions' }
 GtRrResourceWorkerCountCalculator >> gtViewDetailsFor: aView [
 	<gtView>
-	
-	^ aView columnedList 
+	^ aView columnedList
 		title: 'Details';
 		priority: 10;
-		items: [ 
-			{
-				'CPU Cores'  -> GtOsSystemInfo current numberOfCores.
-				'Physical memory' -> (GtOsSystemInfo current 
-					physicalMemory humanReadableSIByteSize).
-				'Free Memory' -> (GtOsSystemInfo current 
-					freeMemory humanReadableSIByteSize).
-				'VM Memory Size' -> SmalltalkImage current vm 
-					memorySize humanReadableSIByteSize.
+		items: [ {'CPU Cores' -> GtOsSystemInfo current numberOfCores.
+				'Physical memory'
+					-> GtOsSystemInfo current physicalMemory humanReadableSISizeString.
+				'Free Memory' -> GtOsSystemInfo current freeMemory humanReadableSISizeString.
+				'VM Memory Size'
+					-> SmalltalkImage current vm memorySize humanReadableSISizeString.
 				'VM Memory Multiplier' -> self memorySizeMultiplier.
-				'Computed Workers Count' ->  self workerCount
-			} ];
+				'VM Multiplied Memory' -> (SmalltalkImage current vm memorySize * self memorySizeMultiplier) asInteger humanReadableSISizeString.
+				'Computed Workers Count' -> self workerCount} ];
 		column: 'Property' text: [ :assoc | assoc key ];
 		column: 'Property' text: [ :assoc | assoc value ];
-		actionUpdateButton.
+		actionUpdateButton
 ]
 
 { #category : #accessing }
@@ -155,7 +204,7 @@ GtRrResourceWorkerCountCalculator >> workerCount [
 	^ self algorithm value: self.
 ]
 
-{ #category : #accessing }
+{ #category : #algorithm }
 GtRrResourceWorkerCountCalculator >> workerCountFreeMemory [
 	"Answer the number of workers to start"
 	| systemInfo cpuCores freeMemory memorySize |
@@ -188,7 +237,7 @@ GtRrResourceWorkerCountCalculator >> workerCountFromVmMemory: vmMemorySize cpuCo
 	^ ((cpuCores min: physicalMemCount) min: self maxWorkers) max: self minWorkers
 ]
 
-{ #category : #accessing }
+{ #category : #algorithm }
 GtRrResourceWorkerCountCalculator >> workerCountPhysicalMemory [
 	"Answer the number of workers to start"
 	| systemInfo cpuCores physicalMem memorySize |
