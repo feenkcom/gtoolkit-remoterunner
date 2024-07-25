@@ -16,6 +16,12 @@ GtRrWorkerExamplesReport >> description [
 ]
 
 { #category : #'accessing - gc details' }
+GtRrWorkerExamplesReport >> fullGcDuration [
+	^ self fullGcTime ifNotNil: [ :aTimeInMilliseconds |
+		aTimeInMilliseconds milliSeconds ]
+]
+
+{ #category : #'accessing - gc details' }
 GtRrWorkerExamplesReport >> fullGcTime [
 	^ self vmStatisticsDiffReport ifNotNil: [ :aReport | aReport fullGcTimeDiff ]
 ]
@@ -192,6 +198,31 @@ GtRrWorkerExamplesReport >> gtViewMemoryStatisticsDiffFor: aView [
 ]
 
 { #category : #'gt - extensions' }
+GtRrWorkerExamplesReport >> gtViewTasksGCStatsFor: aView [
+	<gtView>
+	
+	^ aView columnedList 
+		title: 'Tasks GC';
+		priority: 47;
+		items: [ self tasks  ];
+		column: 'Id' text: [ :aTask | aTask workerId ];
+		column: 'Checks' text: [ :aTask | aTask totalCount ];
+		column: 'Duration (worker)' text: [ :aTask | 
+			aTask duration ifNil: [ '-' ] ];
+		column: 'Toal GC - duration' text: [ :aTask |
+			aTask totalGCDuration ifNil: [ '-' ] ];
+		column: 'Full GC - duration' text: [ :aTask |
+			aTask fullGcDuration ifNil: [ '-' ] ];
+		column: 'Incremental GC - duration' text: [ :aTask |
+			aTask incrGcDuration ifNil: [ '-' ] ];
+		column: 'Full GC - count' text: [ :aTask |
+			aTask numberOfFullGCs  ];
+		column: 'Incremental GC - count' text: [ :aTask |
+			aTask numberOfIncrementalGCs ]
+	
+]
+
+{ #category : #'gt - extensions' }
 GtRrWorkerExamplesReport >> gtViewTasksListFor: aView [
 	<gtView>
 	
@@ -267,6 +298,12 @@ GtRrWorkerExamplesReport >> gtViewVmMemoryEvolutionFor: aView [
 				labelFormatY: [ :e | e humanReadableIsqByteSize ];
 				titleY: 'VM Memory';
 				ticksY: 10. ]
+]
+
+{ #category : #'accessing - gc details' }
+GtRrWorkerExamplesReport >> incrGcDuration [
+	^ self incrGcTime ifNotNil: [ :aTimeInMilliseconds |
+		aTimeInMilliseconds milliSeconds ]
 ]
 
 { #category : #'accessing - gc details' }
@@ -551,6 +588,12 @@ GtRrWorkerExamplesReport >> tasksVmMemoryChartItems [
 							aReport vmFreeMemoryAtEnd}) ] 
 				ifAbsent: [].
 			memoryValues ]) asArray
+]
+
+{ #category : #'accessing - gc details' }
+GtRrWorkerExamplesReport >> totalGCDuration [
+	^ self totalGCTime ifNotNil: [ :aTimeInMilliseconds |
+		aTimeInMilliseconds milliSeconds ]
 ]
 
 { #category : #'accessing - gc details' }

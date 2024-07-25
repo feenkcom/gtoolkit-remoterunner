@@ -27,6 +27,16 @@ GtRrWorkersExamplesReport class >> forTasks: aCollectionOfTasks [
 		workers: workers
 ]
 
+{ #category : #'accessing - gc details' }
+GtRrWorkersExamplesReport >> avegareFullGcDuration [
+	| numberOfFullGCs |
+	numberOfFullGCs := self numberOfFullGCs.
+	(numberOfFullGCs isNil or: [
+		numberOfFullGCs = 0]) ifTrue: [ ^ nil].
+		
+	^ self fullGcDuration / numberOfFullGCs
+]
+
 { #category : #accessing }
 GtRrWorkersExamplesReport >> cummulativeGapBetweenEndTimeAndReceivingResults [
 	^ self workers  
@@ -60,6 +70,12 @@ GtRrWorkersExamplesReport >> cummulativeTasksDurationOnRunner [
 ]
 
 { #category : #'accessing - gc details' }
+GtRrWorkersExamplesReport >> fullGcDuration [
+	^ self fullGcTime ifNotNil: [ :aTimeInMilliseconds |
+		aTimeInMilliseconds milliSeconds ]
+]
+
+{ #category : #'accessing - gc details' }
 GtRrWorkersExamplesReport >> fullGcTime [
 	^ self sumWorkerValueWithNil: [ :aWorker | aWorker fullGcTime ]
 ]
@@ -76,6 +92,31 @@ GtRrWorkersExamplesReport >> gtViewWorkersFor: aView [
 		column: 'Tasks' text: [ :aWorker | aWorker numberOfTasks ];
 		column: 'Checks' text: [ :aWorker | aWorker numberOfExamples ];
 		column: 'Tasks Duration' text: [ :aWorker | aWorker tasksDuration ]
+]
+
+{ #category : #'gt - extensions' }
+GtRrWorkersExamplesReport >> gtViewWorkersGCStatsFor: aView [
+	<gtView>
+	
+	^ aView columnedList 
+		title: 'GC stats';
+		priority: 47;
+		items: [ self workers  ];
+		column: 'Id' text: [ :aWorker | aWorker workerId ];
+		column: 'Tasks' text: [ :aWorker | aWorker numberOfTasks ] width: 75;
+		column: 'Checks' text: [ :aWorker | aWorker numberOfExamples ] width: 75;
+		column: 'Tasks Duration' text: [ :aWorker | aWorker tasksDuration ];
+		column: 'Toal GC - duration' text: [ :aWorker |
+			aWorker totalGCDuration ifNil: [ '-' ] ];
+		column: 'Full GC - duration' text: [ :aWorker |
+			aWorker fullGcDuration ifNil: [ '-' ] ];
+		column: 'Incremental GC - duration' text: [ :aWorker |
+			aWorker incrGcDuration ifNil: [ '-' ] ];
+		column: 'Full GC - count' text: [ :aWorker |
+			aWorker numberOfFullGCs  ];
+		column: 'Incremental GC - count' text: [ :aWorker |
+			aWorker numberOfIncrementalGCs ]
+	
 ]
 
 { #category : #'gt - extensions' }
