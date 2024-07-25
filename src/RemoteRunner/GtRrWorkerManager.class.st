@@ -103,10 +103,10 @@ GtRrWorkerManager >> initialize [
 	workerIndex := 0.
 	autoRestart := true.
 	changesSync := true.
-	workerCountCalculator := GtRrResourceWorkerCountCalculator new
-		algorithm: #workerCountFreeMemory;
+	workerCountCalculator := GtRrWorkerCountCalculator new
+		algorithm: (GtRrWorkerCountResourceAlgorithm new
+			availableMemoryModel: GtRrWorkerCountFreeMemoryModel new);
 		minWorkers: 0.
-	inMemoryLog := false.
 	processes := OrderedCollection new.
 	watchdogSemaphore := Semaphore new.
 	state := #notStarted.
