@@ -88,6 +88,17 @@ GtRrRunnerMachineExamplesReport >> gtViewWorkersFor: aView [
 ]
 
 { #category : #'gt - extensions' }
+GtRrRunnerMachineExamplesReport >> gtViewWorkersGCStatsFor:   aView [
+	<gtView>
+	
+	^ aView forward
+		title: 'Workers GC';
+		priority: 47;
+		object: [ self workersReport];
+		view: #gtViewWorkersGCStatsFor: 
+]
+
+{ #category : #'gt - extensions' }
 GtRrRunnerMachineExamplesReport >> gtViewWorkersTimingFor: aView [
 	<gtView>
 	

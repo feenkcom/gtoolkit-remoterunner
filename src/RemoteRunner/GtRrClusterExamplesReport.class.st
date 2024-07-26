@@ -97,6 +97,32 @@ GtRrClusterExamplesReport >> fullGcTime [
 ]
 
 { #category : #'gt - extensions' }
+GtRrClusterExamplesReport >> gtViewMachineGCStatsFor: aView [
+	<gtView>
+	
+	^ aView columnedList 
+		title: 'Machines GC';
+		priority: 26;
+		items: [ self machineReports ];
+		column: 'Machine Type' text: [ :aMachineReport |
+			aMachineReport machineType ifNil: [ '-' ] ];
+		column: 'Ip Address' text: [ :aMachineReport |
+			aMachineReport ipAddress ];
+		column: 'Workers count' text: [ :aMachineReport |
+			aMachineReport numberOfWorkers ];
+		column: 'Total GC duration' text: [ :aMachineReport |
+			aMachineReport totalGCDuration  ];
+		column: 'Full GC - count' text: [ :aMachineReport |
+			aMachineReport numberOfFullGCs  ];
+		column: 'Incremental GC - count' text: [ :aMachineReport |
+			aMachineReport numberOfIncrementalGCs ];
+		column: 'Full GC - average duration' text: [ :aMachineReport |
+			aMachineReport avegareFullGcDuration ifNil: [ '-' ] ];
+		column: 'Incremental GC - average duration' text: [ :aMachineReport |
+			aMachineReport avegareIncrementalGcDuration ifNil: [ '-' ] ]
+]
+
+{ #category : #'gt - extensions' }
 GtRrClusterExamplesReport >> gtViewMachineMemoryStatsFor: aView [
 	<gtView>
 	
