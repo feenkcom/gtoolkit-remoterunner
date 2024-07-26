@@ -3,8 +3,9 @@ GtResourceWorkerCountCalculator determines the number of workers to create based
 
 - At least minWorkers are created.
 - No more than maxWorkers are created.
-- The algorithm is a subclass of {{gtClass:GtRrResourceWorkerCountAlgorithm}} 
-- The number is the smaller of:
+- The algorithm is a subclass of {{gtClass:GtRrWorkerCountAlgorithm}} 
+
+For resource based calculations, the number is the smaller of:
   - The number of CPU cores of the host machine
   - Memory / (VM memorySize * memorySizeMultiplier)
   
