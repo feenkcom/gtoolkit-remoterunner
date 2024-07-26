@@ -28,6 +28,7 @@ GtRrWorkerCountFixedCountAlgorithm >> workerCount [
 ]
 
 { #category : #accessing }
-GtRrWorkerCountFixedCountAlgorithm >> workerCount: anObject [
-	workerCount := anObject
+GtRrWorkerCountFixedCountAlgorithm >> workerCount: anInteger [
+
+	workerCount := anInteger
 ]

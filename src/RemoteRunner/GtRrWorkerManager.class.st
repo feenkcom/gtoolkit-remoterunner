@@ -195,7 +195,7 @@ GtRrWorkerManager >> poolSize: anInteger [
 	| oldSize |
 
 	oldSize := self poolSize.
-	workerCountCalculator := GtRrFixedWorkerCountCalculator workerCount: anInteger.
+	workerCountCalculator := GtRrWorkerCountCalculator fixedCount: anInteger.
 	oldSize = self poolSize ifTrue: [ ^ self ].
 	remoteRunner isRunning ifTrue:
 		[ remoteRunner critical:

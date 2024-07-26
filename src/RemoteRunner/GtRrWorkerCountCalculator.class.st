@@ -92,6 +92,16 @@ GtRrWorkerCountCalculator class >> defaultMinWorkers: anInteger [
 	DefaultMinWorkers := anInteger
 ]
 
+{ #category : #'instance creation' }
+GtRrWorkerCountCalculator class >> fixedCount: anInteger [
+
+	^ self new
+		algorithm: (GtRrWorkerCountFixedCountAlgorithm new
+			workerCount: anInteger);
+		minWorkers: anInteger;
+		maxWorkers: anInteger.
+]
+
 { #category : #accessing }
 GtRrWorkerCountCalculator class >> gtViewAlgorithmsFor: aView [
 	<gtView>
