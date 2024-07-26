@@ -38,6 +38,7 @@ GtRrWorkerCountCalculatorExamples >> freeMemoryVmSize [
 
 	calculator := GtRrWorkerCountCalculator new.
 	calculator
+		algorithm: GtRrWorkerCountResourceAlgorithm new;
 		minWorkers: 1;
 		maxWorkers: SmallInteger maxVal;
 		memorySizeMultiplier: 1.
@@ -95,5 +96,5 @@ GtRrWorkerCountCalculatorExamples >> modelDefaults [
 	self assert: calculator algorithm identicalTo: GtRrWorkerCountCalculator defaultAlgorithm.
 	self assert: calculator minWorkers equals: GtRrWorkerCountCalculator defaultMinWorkers.
 	self assert: calculator maxWorkers equals: GtRrWorkerCountCalculator defaultMaxWorkers.
-	self assert: calculator memorySizeMultiplier equals: GtRrWorkerCountCalculator defaultMemorySizeMultiplier.
+	self assert: calculator memorySizeMultiplier equals: GtRrWorkerCountCalculator defaultMemorySizeMultiplier. 
 ]

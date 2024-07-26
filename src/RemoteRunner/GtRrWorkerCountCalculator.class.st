@@ -39,7 +39,7 @@ GtRrWorkerCountCalculator class >> cleanUp [
 
 { #category : #accessing }
 GtRrWorkerCountCalculator class >> defaultAlgorithm [
-	^ DefaultAlgorithm ifNil: [ DefaultAlgorithm := GtRrWorkerCountResourceAlgorithm new ]
+	^ DefaultAlgorithm ifNil: [ DefaultAlgorithm := GtRrWorkerCountResourceAlgorithm new ] 
 ]
 
 { #category : #accessing }
@@ -92,10 +92,51 @@ GtRrWorkerCountCalculator class >> defaultMinWorkers: anInteger [
 ]
 
 { #category : #accessing }
+GtRrWorkerCountCalculator class >> gtViewAlgorithmsFor: aView [
+	<gtView>
+	<gtClassView>
+	
+	^ aView columnedList 
+		title: 'Worker Count Algorithms';
+		priority: 31;
+		items: [ {
+			'Physical memory' -> #workerCountPhysicalMemory.
+			'Free memory' ->#workerCountFreeMemory} ];
+		column: 'Algorithm' text: [ :each | each key ];
+		column: 'Worker count' text:[ :each | self new
+			algorithm: each value;
+			workerCount ];
+		column: 'Is Default' 
+			text: [ :each | (each value = (self defaultAlgorithm
+					ifNil: [ #workerCountPhysicalMemory ]))
+				ifTrue: ['Yes']
+				ifFalse: [''] ]
+			width: 75;
+		send: [ :each |
+			self new 
+				algorithm: each value ]
+]
+
+{ #category : #accessing }
+GtRrWorkerCountCalculator class >> gtViewDefaultsFor: aView [
+	<gtView>
+	<gtClassView>
+
+	^ aView columnedList
+		title: 'Defaults';
+		priority: 30;
+		items: [ #(#defaultAlgorithm #defaultMinWorkers #defaultMaxWorkers #defaultMemorySizeMultiplier) ];
+		column: 'Default' text: #yourself;
+		column: 'Value' text: [ :item | self perform: item ];
+		send: [ :item | self perform: item ];
+		actionUpdateButton
+]
+
+{ #category : #accessing }
 GtRrWorkerCountCalculator >> algorithm [
 	<return: #GtRrWorkerCountAlgorithm>
 
-	^ algorithm ifNil: [ algorithm := self class defaultAlgorithm ]
+	^ algorithm ifNil: [ algorithm := self class defaultAlgorithm ] 
 ]
 
 { #category : #accessing }
@@ -109,7 +150,7 @@ GtRrWorkerCountCalculator >> algorithm: aGtRrFixedWorkerCountAlgorithm [
 	algorithm == #workerCountFreeMemory ifTrue:
 		[ algorithm := GtRrWorkerCountFixedCountAlgorithm new ]
 	ifFalse: [ algorithm == #workerCountPhysicalMemory ifTrue:
-		[ algorithm := GtRrWorkerCountResourceAlgorithm new ] ].
+		[ algorithm := GtRrWorkerCountResourceAlgorithm new ] ]. 
 ]
 
 { #category : #accessing }
@@ -134,13 +175,13 @@ GtRrWorkerCountCalculator >> gtViewDetailsFor: aView [
 { #category : #accessing }
 GtRrWorkerCountCalculator >> maxWorkers [
 
-	^ maxWorkers ifNil: [ maxWorkers := DefaultMaxWorkers ifNil: [ SmallInteger maxVal ] ].
+	^ maxWorkers ifNil: [ maxWorkers := DefaultMaxWorkers ifNil: [ SmallInteger maxVal ] ]
 ]
 
 { #category : #accessing }
 GtRrWorkerCountCalculator >> maxWorkers: anInteger [
 
-	anInteger < self minWorkers ifTrue:
+	(minWorkers isNotNil and: [ anInteger < minWorkers ]) ifTrue:
 		[ self error: 'minWorkers must be <= maxWorkers' ].
 	maxWorkers := anInteger
 ]
@@ -161,13 +202,13 @@ GtRrWorkerCountCalculator >> memorySizeMultiplier: anObject [
 { #category : #accessing }
 GtRrWorkerCountCalculator >> minWorkers [
 
-	^ minWorkers ifNil: [ minWorkers := DefaultMinWorkers ifNil: [ 1 ] ].
+	^ minWorkers ifNil: [ minWorkers := DefaultMinWorkers ifNil: [ 1 ] ]
 ]
 
 { #category : #accessing }
 GtRrWorkerCountCalculator >> minWorkers: anInteger [
 
-	anInteger > self maxWorkers ifTrue:
+	(maxWorkers isNotNil and: [ anInteger > maxWorkers ]) ifTrue:
 		[ self error: 'minWorkers must be <= maxWorkers' ].
 	minWorkers := anInteger
 ]
