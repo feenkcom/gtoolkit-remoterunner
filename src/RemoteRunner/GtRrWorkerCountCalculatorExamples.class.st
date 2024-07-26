@@ -20,6 +20,7 @@ GtRrWorkerCountCalculatorExamples >> fixedRequiredSize [
 	algorithm := GtRrWorkerCountResourceAlgorithm new.
 	algorithm
 		availableMemoryModel: (GtRrWorkerCountAvailableMemoryModel new availableMemory: 20 * (1024 ** 3));
+		coreCount: 4;
 		requiredMemoryModel: (GtRrWorkerCountFixedSizeMemoryModel new requiredMemory: 6 * (1024 ** 3)).
 	calculator := GtRrWorkerCountCalculator new.
 	calculator

@@ -3,7 +3,8 @@ Class {
 	#superclass : #GtRrWorkerCountAlgorithm,
 	#instVars : [
 		'availableMemoryModel',
-		'requiredMemoryModel'
+		'requiredMemoryModel',
+		'coreCount'
 	],
 	#category : #'RemoteRunner-WorkerCount'
 }
@@ -16,6 +17,17 @@ GtRrWorkerCountResourceAlgorithm >> availableMemoryModel [
 { #category : #accessing }
 GtRrWorkerCountResourceAlgorithm >> availableMemoryModel: anObject [
 	availableMemoryModel := anObject
+]
+
+{ #category : #accessing }
+GtRrWorkerCountResourceAlgorithm >> coreCount [
+
+	^ coreCount ifNil: [ coreCount := GtOsSystemInfo current numberOfCores ]
+]
+
+{ #category : #accessing }
+GtRrWorkerCountResourceAlgorithm >> coreCount: anObject [
+	coreCount := anObject
 ]
 
 { #category : #accessing }
@@ -38,9 +50,8 @@ GtRrWorkerCountResourceAlgorithm >> requiredMemoryModel: anObject [
 
 { #category : #accessing }
 GtRrWorkerCountResourceAlgorithm >> value: aGtRrWorkerCountCalculator [
-	| coreCount memoryCount |
+	| memoryCount |
 
-	coreCount := GtOsSystemInfo current numberOfCores.
 	memoryCount := (availableMemoryModel availableMemory / (requiredMemoryModel requiredMemory * aGtRrWorkerCountCalculator memorySizeMultiplier)) truncated.
-	^ coreCount min: memoryCount
+	^ self coreCount min: memoryCount
 ]
