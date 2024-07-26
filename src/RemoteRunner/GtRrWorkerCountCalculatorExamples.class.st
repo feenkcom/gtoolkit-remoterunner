@@ -15,11 +15,33 @@ GtRrWorkerCountCalculatorExamples >> assert: number1 equals: number2 within: per
 { #category : #examples }
 GtRrWorkerCountCalculatorExamples >> fixedRequiredSize [
 	<gtExample>
-	| calculator algorithm calculatedCount |
+	| calculator algorithm calculatedCount checkCount coreCount |
 
+	coreCount := 128.
 	algorithm := GtRrWorkerCountResourceAlgorithm new.
 	algorithm
 		availableMemoryModel: (GtRrWorkerCountAvailableMemoryModel new availableMemory: 20 * (1024 ** 3));
+		coreCount: coreCount;
+		requiredMemoryModel: GtRrWorkerCountImageMemoryModel new.
+	calculator := GtRrWorkerCountCalculator new.
+	calculator
+		algorithm: algorithm;
+		minWorkers: 1;
+		maxWorkers: SmallInteger maxVal;
+		memorySizeMultiplier: 1.
+	calculatedCount := calculator workerCount.
+	checkCount := ((20 * (1024 ** 3)) / (FileLocator image size)) truncated.
+	self assert: calculatedCount equals: (checkCount min: coreCount).
+]
+
+{ #category : #examples }
+GtRrWorkerCountCalculatorExamples >> freeMemoryVmSize [
+	<gtExample>
+	| calculator calculatedCount algorithm |
+
+	algorithm := GtRrWorkerCountResourceAlgorithm new.
+	algorithm
+		availableMemoryModel: (GtRrWorkerCountFreeMemoryModel new availableMemory: 20 * (1024 ** 3));
 		coreCount: 4;
 		requiredMemoryModel: (GtRrWorkerCountFixedSizeMemoryModel new requiredMemory: 6 * (1024 ** 3)).
 	calculator := GtRrWorkerCountCalculator new.
@@ -30,23 +52,6 @@ GtRrWorkerCountCalculatorExamples >> fixedRequiredSize [
 		memorySizeMultiplier: 1.
 	calculatedCount := calculator workerCount.
 	self assert: calculatedCount equals: 3.
-]
-
-{ #category : #examples }
-GtRrWorkerCountCalculatorExamples >> freeMemoryVmSize [
-	<gtExample>
-	| calculator calculatedCount checkCount systemInfo|
-
-	calculator := GtRrWorkerCountCalculator new.
-	calculator
-		algorithm: GtRrWorkerCountResourceAlgorithm new;
-		minWorkers: 1;
-		maxWorkers: SmallInteger maxVal;
-		memorySizeMultiplier: 1.
-	calculatedCount := calculator workerCount.
-	systemInfo := GtOsSystemInfo current.
-	checkCount := (systemInfo freeMemory / Smalltalk vm memorySize) truncated min: GtOsSystemInfo current numberOfCores.
-	self assert: calculatedCount equals: checkCount.
 ]
 
 { #category : #examples }
