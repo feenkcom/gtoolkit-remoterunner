@@ -30,7 +30,7 @@ GtRrWorkerCountCalculatorExamples >> fixedRequiredSize [
 		maxWorkers: SmallInteger maxVal;
 		memorySizeMultiplier: 1.
 	calculatedCount := calculator workerCount.
-	checkCount := ((20 * (1024 ** 3)) / (FileLocator image size)) truncated.
+	checkCount := ((20 * (1024 ** 3)) / (FileLocator image size * 2)) truncated.
 	self assert: calculatedCount equals: (checkCount min: coreCount).
 ]
 
@@ -96,7 +96,7 @@ GtRrWorkerCountCalculatorExamples >> modelDefaults [
 		equals: SmalltalkImage current vm memorySize
 		within: 0.2.
 	self assert: GtRrWorkerCountImageMemoryModel new requiredMemory
-		equals: Smalltalk imageFile size.
+		equals: Smalltalk imageFile size * 2.
 
 	calculator := GtRrWorkerCountCalculator new.
 	self assert: calculator algorithm identicalTo: GtRrWorkerCountCalculator defaultAlgorithm.
