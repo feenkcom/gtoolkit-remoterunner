@@ -4,6 +4,11 @@ Class {
 	#category : #'RemoteRunner-WorkerCount'
 }
 
+{ #category : #accessing }
+GtRrWorkerCountAlgorithm >> parameterDetailsWithCalculator: aGtRrWorkerCountCalculator [
+	^ #()
+]
+
 { #category : #evaluating }
 GtRrWorkerCountAlgorithm >> value: aGtRrWorkerCountCalculator [
 

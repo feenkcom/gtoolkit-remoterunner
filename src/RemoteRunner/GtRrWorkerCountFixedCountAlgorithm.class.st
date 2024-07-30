@@ -14,6 +14,12 @@ GtRrWorkerCountFixedCountAlgorithm >> initialize [
 	workerCount := 2.
 ]
 
+{ #category : #accessing }
+GtRrWorkerCountFixedCountAlgorithm >> parameterDetailsWithCalculator: aGtRrWorkerCountCalculator [
+	^{	
+		'Algorithm Fixed Workers Count' -> self workerCount }
+]
+
 { #category : #evaluating }
 GtRrWorkerCountFixedCountAlgorithm >> value: aGtRrWorkerCountCalcaulator [
 	"Answer the number of workers to start.
