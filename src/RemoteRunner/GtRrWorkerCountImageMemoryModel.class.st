@@ -31,7 +31,7 @@ GtRrWorkerCountImageMemoryModel class >> gtViewAlgorithmsFor: aView [
 			calculator algorithm requiredMemoryModel additionalOldSpace truncated humanReadableSISizeString ];
 		column: 'Required Memory' text: [ :calculator | 
 			calculator algorithm requiredMemoryModel requiredMemory truncated humanReadableSISizeString ];
-		column: 'Memory Size Multiplier' text: [ :calculator | 
+		column: 'Multiplier' text: [ :calculator | 
 			calculator memorySizeMultiplier ];
 		column: 'Available Memory' text: [ :calculator | 
 			calculator algorithm availableMemoryModel availableMemory truncated humanReadableSISizeString ];

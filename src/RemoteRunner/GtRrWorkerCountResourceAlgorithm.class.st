@@ -45,7 +45,7 @@ GtRrWorkerCountResourceAlgorithm >> parameterDetailsWithCalculator: aGtRrWorkerC
 	^
 	{'Algorithm Available VM Memory'
 		-> self availableMemoryModel availableMemory humanReadableSISizeString.
-	'Algorithm Required VM Memory' -> computedRequiredMemory humanReadableSISizeString.
+	'Algorithm Required VM Memory' -> computedRequiredMemory asInteger humanReadableSISizeString.
 	'Algorithm VM Multiplied Memory'
 		-> (computedRequiredMemory * aGtRrWorkerCountCalculator  memorySizeMultiplier)
 				asInteger humanReadableSISizeString}
