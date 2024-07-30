@@ -171,14 +171,7 @@ GtRrWorkerCountCalculator >> gtViewDetailsFor: aView [
 	^ aView columnedList
 		title: 'Details';
 		priority: 10;
-		items: [ {'CPU Cores' -> GtOsSystemInfo current numberOfCores.
-				'Physical memory'
-					-> GtOsSystemInfo current physicalMemory humanReadableSISizeString.
-				'Free Memory' -> GtOsSystemInfo current freeMemory humanReadableSISizeString.
-				'VM Memory Size'
-					-> SmalltalkImage current vm memorySize humanReadableSISizeString.
-				'VM Memory Multiplier' -> self memorySizeMultiplier.
-				'Computed Workers Count' -> self workerCount} ];
+		items: [ self parameterDetails ];
 		column: 'Property' text: [ :assoc | assoc key ];
 		column: 'Property' text: [ :assoc | assoc value ];
 		actionUpdateButton
@@ -223,6 +216,19 @@ GtRrWorkerCountCalculator >> minWorkers: anInteger [
 	(maxWorkers isNotNil and: [ anInteger > maxWorkers ]) ifTrue:
 		[ self error: 'minWorkers must be <= maxWorkers' ].
 	minWorkers := anInteger
+]
+
+{ #category : #accessing }
+GtRrWorkerCountCalculator >> parameterDetails [ 
+	^ {
+		'System CPU Cores' -> GtOsSystemInfo current numberOfCores.
+		'System Physical memory'
+					-> GtOsSystemInfo current physicalMemory humanReadableSISizeString.
+		'System Free Memory' -> GtOsSystemInfo current freeMemory humanReadableSISizeString.
+		'Current VM Memory Size'
+					-> SmalltalkImage current vm memorySize humanReadableSISizeString.
+		}, (self algorithm parameterDetailsWithCalculator: self) ,
+		{ 'Algorithm Computed Workers Count' -> self workerCount }
 ]
 
 { #category : #accessing }

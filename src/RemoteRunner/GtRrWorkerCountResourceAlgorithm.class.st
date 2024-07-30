@@ -39,6 +39,19 @@ GtRrWorkerCountResourceAlgorithm >> initialize [
 ]
 
 { #category : #accessing }
+GtRrWorkerCountResourceAlgorithm >> parameterDetailsWithCalculator: aGtRrWorkerCountCalculator [
+	| computedRequiredMemory |
+	computedRequiredMemory := self requiredMemoryModel requiredMemory.
+	^
+	{'Algorithm Available VM Memory'
+		-> self availableMemoryModel availableMemory humanReadableSISizeString.
+	'Algorithm Required VM Memory' -> computedRequiredMemory humanReadableSISizeString.
+	'Algorithm VM Multiplied Memory'
+		-> (computedRequiredMemory * aGtRrWorkerCountCalculator  memorySizeMultiplier)
+				asInteger humanReadableSISizeString}
+]
+
+{ #category : #accessing }
 GtRrWorkerCountResourceAlgorithm >> requiredMemoryModel [
 	^ requiredMemoryModel
 ]
