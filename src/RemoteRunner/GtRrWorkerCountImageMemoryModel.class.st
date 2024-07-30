@@ -28,15 +28,15 @@ GtRrWorkerCountImageMemoryModel class >> gtViewAlgorithmsFor: aView [
 						memorySizeMultiplier: aMemoryMultiplier. ]
 			] ];
 		column: 'Additional Old Space' text: [ :calculator | 
-			calculator algorithm requiredMemoryModel additionalOldSpace truncated humanReadableSISizeString ];
+			calculator algorithm requiredMemoryModel additionalOldSpace asInteger humanReadableSISizeString ];
 		column: 'Required Memory' text: [ :calculator | 
-			calculator algorithm requiredMemoryModel requiredMemory truncated humanReadableSISizeString ];
+			calculator algorithm requiredMemoryModel requiredMemory asInteger humanReadableSISizeString ];
 		column: 'Multiplier' text: [ :calculator | 
 			calculator memorySizeMultiplier ];
 		column: 'Available Memory' text: [ :calculator | 
-			calculator algorithm availableMemoryModel availableMemory truncated humanReadableSISizeString ];
+			calculator algorithm availableMemoryModel availableMemory asInteger humanReadableSISizeString ];
 		column: 'Multiplied Required Memory' text: [ :calculator | 
-			(calculator algorithm requiredMemoryModel requiredMemory + (calculator algorithm requiredMemoryModel requiredMemory * calculator memorySizeMultiplier) ) truncated humanReadableSISizeString ];
+			(calculator algorithm requiredMemoryModel requiredMemory * calculator memorySizeMultiplier) asInteger humanReadableSISizeString ];
 		
 		column: 'Worker count' text:[ :calculator | 
 			calculator workerCount ]
