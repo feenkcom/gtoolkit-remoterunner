@@ -464,6 +464,16 @@ GtRrWorker >> nextTask [
 
 ]
 
+{ #category : #accessing }
+GtRrWorker >> postTaskProcessing [
+	"Subclasses may use this to do any post task processing"
+]
+
+{ #category : #stepping }
+GtRrWorker >> preTaskConfiguration [
+	"Subclasses may use this to do any configuration prior to running a task"
+]
+
 { #category : #private }
 GtRrWorker >> registerWith: aPharoLinkApplication [
 	"Register the receiver with the remote runner associated with the supplied PharoLinkApplication"
@@ -535,6 +545,7 @@ GtRrWorker >> stepService [
 	GtRrWorkerTaskStartingSignal new
 		taskId: taskContext taskId;
 		emit.
+	self preTaskConfiguration.
 	executionContext := GtRrWorkerExecutionContext new
 		taskContext: taskContext;
 		timeout: taskContext taskTimeout;
@@ -669,6 +680,7 @@ GtRrWorker >> taskDone: aTaskContext with: anObject [
 	serializedResult := [ LeJsonV4 uniqueInstance serialize: anObject ]
 		on: Error 
 		do: [ :ex | ^ self taskFailed: aTaskContext with: ex ].
+	self postTaskProcessing.
 	resultQueue nextPut: (GtRrWorkerResultEntry
 		worker: self
 		task: aTaskContext
@@ -702,6 +714,7 @@ GtRrWorker >> taskFailed: aTaskContext with: anError [
 						trace: anError stackString);
 		additionalData: aTaskContext executionData additionalData.
 	serializedExecutionData := LeJsonV4 uniqueInstance serialize: executionData.
+	self postTaskProcessing.
 	resultQueue nextPut: (GtRrWorkerResultEntry
 		worker: self
 		task: aTaskContext
