@@ -18,7 +18,7 @@ GtRrWorkerCountImageMemoryModel class >> gtViewAlgorithmsFor: aView [
 		items: [ 
 			| imageFileSize |
 			imageFileSize := Smalltalk imageFile size.
-			#(0.5 1 1.5 2) flatCollect: [ :aMemoryMultiplier |
+			#(1 1.5 2) flatCollect: [ :aMemoryMultiplier |
 				#(0 0.5 1 1.5 2) collect: [ :aMultiplier |
 					GtRrWorkerCountCalculator  new 
 						algorithm: (GtRrWorkerCountResourceAlgorithm new
