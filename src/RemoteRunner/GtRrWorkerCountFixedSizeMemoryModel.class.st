@@ -7,6 +7,5 @@ Class {
 { #category : #ui }
 GtRrWorkerCountFixedSizeMemoryModel >> calculationAttributesWith: aGtRrWorkerCountCalculator [
 
-	^ { { '- Required Memory (Fixed Size)'. ''. self. }.
-		{ '- - Total Required Memory'. requiredMemory humanReadableIsqByteSize. self. }. }
+	^ { { '- Required Memory (Fixed Size)'. requiredMemory humanReadableIsqByteSize. self. }. }
 ]

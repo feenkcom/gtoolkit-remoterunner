@@ -7,8 +7,7 @@ Class {
 { #category : #ui }
 GtRrWorkerCountCurrentMemoryModel >> calculationAttributesWith: aGtRrWorkerCountCalculator [
 
-	^ { { '- Required Memory (Current Memory)'. ''. self. }.
-		{ '- - Total Required Memory'. requiredMemory humanReadableIsqByteSize. self. }. }
+	^ { { '- Required Memory (Current Memory)'. requiredMemory humanReadableIsqByteSize. self. }. }
 ]
 
 { #category : #initialize }

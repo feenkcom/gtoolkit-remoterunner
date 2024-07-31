@@ -160,9 +160,11 @@ GtRrWorkerCountCalculator >> algorithm: aGtRrFixedWorkerCountAlgorithm [
 	#workerCountFreeMemory = GtRrWorkerCountFreeMemoryAlgorithm.
 	#workerCountPhysicalMemory = GtRrWorkerCountPhysicalMemoryAlgorithm."
 	algorithm == #workerCountFreeMemory ifTrue:
-		[ algorithm := GtRrWorkerCountFixedCountAlgorithm new ]
+		[ algorithm := GtRrWorkerCountResourceAlgorithm new
+			availableMemoryModel: GtRrWorkerCountFreeMemoryModel new ]
 	ifFalse: [ algorithm == #workerCountPhysicalMemory ifTrue:
-		[ algorithm := GtRrWorkerCountResourceAlgorithm new ] ]. 
+		[ algorithm := GtRrWorkerCountResourceAlgorithm new
+			availableMemoryModel: GtRrWorkerCountPhysicalMemoryModel new ] ]. 
 ]
 
 { #category : #ui }

@@ -7,8 +7,7 @@ Class {
 { #category : #ui }
 GtRrWorkerCountPhysicalMemoryModel >> calculationAttributesWith: aGtRrWorkerCountCalculator [
 
-	^ (super calculationAttributesWith: aGtRrWorkerCountCalculator), 
-		{ '- Available Memory (Physical)'. availableMemory humanReadableIsqByteSize. self. }
+	^ { { '- Available Memory (Physical)'. availableMemory humanReadableIsqByteSize. self. } }
 ]
 
 { #category : #initialize }
