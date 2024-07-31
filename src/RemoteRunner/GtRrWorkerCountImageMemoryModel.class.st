@@ -44,7 +44,8 @@ GtRrWorkerCountImageMemoryModel class >> gtViewAlgorithmsFor: aView [
 
 { #category : #accessing }
 GtRrWorkerCountImageMemoryModel >> additionalOldSpace [
-	^ additionalOldSpace
+
+	^ additionalOldSpace ifNil: [ 0 ]
 ]
 
 { #category : #accessing }
@@ -61,9 +62,31 @@ GtRrWorkerCountImageMemoryModel >> additionalOldSpace: anInteger imageFileSize: 
 	requiredMemory := anotherInteger + additionalOldSpace.
 ]
 
+{ #category : #ui }
+GtRrWorkerCountImageMemoryModel >> calculationAttributesWith: aGtRrWorkerCountCalculator [
+
+	^ { { '- Required Memory (On-Disk Image + Additional)'. ''. self. }.
+		{ '- - Image Size'. self onDiskSize humanReadableIsqByteSize. self. }.
+		{ '- - Additional Old Space'. self additionalOldSpace humanReadableIsqByteSize. self. }.
+		{ '- - Total Required Memory'. self requiredMemory humanReadableIsqByteSize. self. }.
+		}		
+]
+
 { #category : #initialize }
 GtRrWorkerCountImageMemoryModel >> initialize [
 
 	super initialize.
 	self additionalOldSpace: Smalltalk imageFile size.
+]
+
+{ #category : #accessing }
+GtRrWorkerCountImageMemoryModel >> onDiskSize [
+
+	^ Smalltalk imageFile size
+]
+
+{ #category : #accessing }
+GtRrWorkerCountImageMemoryModel >> requiredMemory [
+
+	^ self onDiskSize + self additionalOldSpace
 ]

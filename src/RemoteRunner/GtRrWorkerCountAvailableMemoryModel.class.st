@@ -19,3 +19,9 @@ GtRrWorkerCountAvailableMemoryModel >> availableMemory [
 GtRrWorkerCountAvailableMemoryModel >> availableMemory: anObject [
 	availableMemory := anObject
 ]
+
+{ #category : #ui }
+GtRrWorkerCountAvailableMemoryModel >> calculationAttributesWith: aGtRrWorkerCountCalculator [
+
+	^ { { '- Available Memory'. ''. self. } }
+]
