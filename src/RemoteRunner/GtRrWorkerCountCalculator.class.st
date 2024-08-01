@@ -160,9 +160,37 @@ GtRrWorkerCountCalculator >> algorithm: aGtRrFixedWorkerCountAlgorithm [
 	#workerCountFreeMemory = GtRrWorkerCountFreeMemoryAlgorithm.
 	#workerCountPhysicalMemory = GtRrWorkerCountPhysicalMemoryAlgorithm."
 	algorithm == #workerCountFreeMemory ifTrue:
-		[ algorithm := GtRrWorkerCountFixedCountAlgorithm new ]
+		[ algorithm := GtRrWorkerCountResourceAlgorithm new
+			availableMemoryModel: GtRrWorkerCountFreeMemoryModel new ]
 	ifFalse: [ algorithm == #workerCountPhysicalMemory ifTrue:
-		[ algorithm := GtRrWorkerCountResourceAlgorithm new ] ]. 
+		[ algorithm := GtRrWorkerCountResourceAlgorithm new
+			availableMemoryModel: GtRrWorkerCountPhysicalMemoryModel new ] ]. 
+]
+
+{ #category : #ui }
+GtRrWorkerCountCalculator >> calculationAttributes [
+
+	^ Array streamContents: [ :stream |
+		stream 
+			nextPutAll: (self algorithm calculationAttributesWith: self);
+			nextPut: { 'Minimum Workers'. self minWorkers. };
+			nextPut: { 'Maximum Workers'. self maxWorkers = SmallInteger maxVal
+				ifTrue: [ 'unlimited' ]
+				ifFalse: [ self maxWorkers ]. };
+			nextPut: { 'Worker Count'. self workerCount. } ]
+]
+
+{ #category : #ui }
+GtRrWorkerCountCalculator >> gtViewCalculationFor: aView [
+	<gtView>
+	^ aView columnedList
+		title: 'Calculation';
+		priority: 10;
+		items: [ self calculationAttributes ];
+		column: 'Attribute' text: [ :item | item first ];
+		column: 'Value' text: [ :item | item second ];
+		send: [ :item | item last ];
+		actionUpdateButton
 ]
 
 { #category : #accessing }
@@ -170,7 +198,7 @@ GtRrWorkerCountCalculator >> gtViewDetailsFor: aView [
 	<gtView>
 	^ aView columnedList
 		title: 'Details';
-		priority: 10;
+		priority: 20;
 		items: [ self parameterDetails ];
 		column: 'Property' text: [ :assoc | assoc key ];
 		column: 'Property' text: [ :assoc | assoc value ];

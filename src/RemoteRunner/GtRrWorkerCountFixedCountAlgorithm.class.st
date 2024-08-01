@@ -7,6 +7,13 @@ Class {
 	#category : #'RemoteRunner-WorkerCount'
 }
 
+{ #category : #ui }
+GtRrWorkerCountFixedCountAlgorithm >> calculationAttributesWith: aGtRrWorkerCountCalculator [
+
+	^ { { 'Algorithm'. 'Fixed Count'. self. }.
+		{ '- Algorithm Count'. self workerCount. self } }
+]
+
 { #category : #initialialize }
 GtRrWorkerCountFixedCountAlgorithm >> initialize [
 

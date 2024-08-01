@@ -4,6 +4,12 @@ Class {
 	#category : #'RemoteRunner-WorkerCount'
 }
 
+{ #category : #ui }
+GtRrWorkerCountCurrentMemoryModel >> calculationAttributesWith: aGtRrWorkerCountCalculator [
+
+	^ { { '- Required Memory (Current Memory)'. requiredMemory humanReadableIsqByteSize. self. }. }
+]
+
 { #category : #initialize }
 GtRrWorkerCountCurrentMemoryModel >> initialize [
 

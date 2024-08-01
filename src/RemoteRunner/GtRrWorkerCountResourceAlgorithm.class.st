@@ -20,6 +20,19 @@ GtRrWorkerCountResourceAlgorithm >> availableMemoryModel: anObject [
 ]
 
 { #category : #accessing }
+GtRrWorkerCountResourceAlgorithm >> calculationAttributesWith: aGtRrWorkerCountCalculator [
+
+	^ Array streamContents: [ :stream |
+		stream 
+			nextPut: { 'Algorithm'. 'Resource Based'. self. };
+			nextPut: { '- Description'. '(Available / Required) min: Cores'. self. };
+			nextPutAll: (self availableMemoryModel calculationAttributesWith: aGtRrWorkerCountCalculator);
+			nextPutAll: (self requiredMemoryModel calculationAttributesWith: aGtRrWorkerCountCalculator);
+			nextPut: { '- Number of Cores'. self coreCount. self. };
+			nextPut: { '- Algorithm Count'. (self value: aGtRrWorkerCountCalculator). self. } ]
+]
+
+{ #category : #accessing }
 GtRrWorkerCountResourceAlgorithm >> coreCount [
 
 	^ coreCount ifNil: [ coreCount := GtOsSystemInfo current numberOfCores ]
