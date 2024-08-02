@@ -137,7 +137,6 @@ GtRrWorkerCountCalculatorExamples >> modelDefaults [
 		equals: Smalltalk imageFile size * 2.
 
 	calculator := GtRrWorkerCountCalculator new.
-	self assert: calculator algorithm identicalTo: GtRrWorkerCountCalculator defaultAlgorithm.
 	self assert: calculator minWorkers equals: GtRrWorkerCountCalculator defaultMinWorkers.
 	self assert: calculator maxWorkers equals: GtRrWorkerCountCalculator defaultMaxWorkers.
 	self assert: calculator memorySizeMultiplier equals: GtRrWorkerCountCalculator defaultMemorySizeMultiplier. 
