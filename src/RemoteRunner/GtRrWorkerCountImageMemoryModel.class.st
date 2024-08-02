@@ -63,7 +63,7 @@ GtRrWorkerCountImageMemoryModel >> additionalOldSpace: anInteger imageFileSize: 
 ]
 
 { #category : #ui }
-GtRrWorkerCountImageMemoryModel >> calculationAttributesWith: aGtRrWorkerCountCalculator [
+GtRrWorkerCountImageMemoryModel >> calculationAttributes [
 
 	^ { { '- Required Memory (On-Disk Image + Additional)'. ''. self. }.
 		{ '- - Image Size'. self onDiskSize humanReadableIsqByteSize. self. }.

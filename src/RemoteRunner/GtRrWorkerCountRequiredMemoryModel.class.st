@@ -2,23 +2,28 @@ Class {
 	#name : #GtRrWorkerCountRequiredMemoryModel,
 	#superclass : #Object,
 	#instVars : [
-		'requiredMemory'
+		'workerCountCalculator'
 	],
 	#category : #'RemoteRunner-WorkerCount'
 }
 
 { #category : #ui }
-GtRrWorkerCountRequiredMemoryModel >> calculationAttributesWith: aGtRrWorkerCountCalculator [
+GtRrWorkerCountRequiredMemoryModel >> calculationAttributes [
 
 	^ { { '- Required Memory'. ''. self. } }
 ]
 
 { #category : #accessing }
 GtRrWorkerCountRequiredMemoryModel >> requiredMemory [
-	^ requiredMemory
+	^ self subclassResponsibility
 ]
 
 { #category : #accessing }
-GtRrWorkerCountRequiredMemoryModel >> requiredMemory: anObject [
-	requiredMemory := anObject
+GtRrWorkerCountRequiredMemoryModel >> workerCountCalculator [
+	^ workerCountCalculator
+]
+
+{ #category : #accessing }
+GtRrWorkerCountRequiredMemoryModel >> workerCountCalculator: anObject [
+	workerCountCalculator := anObject
 ]
