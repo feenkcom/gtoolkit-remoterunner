@@ -148,7 +148,8 @@ GtRrWorkerCountCalculator class >> gtViewDefaultsFor: aView [
 GtRrWorkerCountCalculator >> algorithm [
 	<return: #GtRrWorkerCountAlgorithm>
 
-	^ algorithm ifNil: [ algorithm := self class defaultAlgorithm ] 
+	algorithm ifNil: [ self algorithm: self class defaultAlgorithm copy ].
+	^ algorithm
 ]
 
 { #category : #accessing }
