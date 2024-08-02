@@ -149,7 +149,8 @@ GtRrWorkerCountCalculatorExamples >> requiredMemory [
 	<gtExample>
 	| calculator fixedRequiredModel currentRequiredModel imageRequiredModel fixedRequired currentRequired imageRequired oldPriority |
 
-	calculator := GtRrWorkerCountCalculator new.
+	calculator := GtRrWorkerCountCalculator new
+		memorySizeMultiplier: 1.95.
 	calculator algorithm: GtRrWorkerCountResourceAlgorithm new.
 	fixedRequiredModel := GtRrWorkerCountFixedSizeRequiredMemoryModel new
 		requiredMemory: 123456.
@@ -171,7 +172,7 @@ GtRrWorkerCountCalculatorExamples >> requiredMemory [
 
 	self assert: fixedRequired equals: 123456.
 	self assert: currentRequired
-		equals: Smalltalk vm oldSpace * 1.95
+		equals: Smalltalk vm memorySize * 1.95
 		within: 0.2.
 	self assert: imageRequired
 		equals: Smalltalk imageFile size + 123456.
