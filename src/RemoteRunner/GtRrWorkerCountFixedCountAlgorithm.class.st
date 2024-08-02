@@ -8,17 +8,10 @@ Class {
 }
 
 { #category : #ui }
-GtRrWorkerCountFixedCountAlgorithm >> calculationAttributesWith: aGtRrWorkerCountCalculator [
+GtRrWorkerCountFixedCountAlgorithm >> calculationAttributes [
 
 	^ { { 'Algorithm'. 'Fixed Count'. self. }.
 		{ '- Algorithm Count'. self workerCount. self } }
-]
-
-{ #category : #initialialize }
-GtRrWorkerCountFixedCountAlgorithm >> initialize [
-
-	super initialize.
-	workerCount := 2.
 ]
 
 { #category : #accessing }
@@ -27,16 +20,16 @@ GtRrWorkerCountFixedCountAlgorithm >> parameterDetailsWithCalculator: aGtRrWorke
 		'Algorithm Fixed Workers Count' -> self workerCount }
 ]
 
-{ #category : #evaluating }
-GtRrWorkerCountFixedCountAlgorithm >> value: aGtRrWorkerCountCalcaulator [
-	"Answer the number of workers to start.
-	Note that the calculator will override this value with min or max workers."
+{ #category : #accessing }
+GtRrWorkerCountFixedCountAlgorithm >> value [
 
-	^ workerCount
+	^ self workerCount
 ]
 
 { #category : #accessing }
 GtRrWorkerCountFixedCountAlgorithm >> workerCount [
+
+	workerCount isNumber ifFalse: [ self error: 'workerCount not yet set' ].
 	^ workerCount
 ]
 

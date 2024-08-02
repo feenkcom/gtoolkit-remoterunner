@@ -165,6 +165,7 @@ GtRrWorkerCountCalculator >> algorithm: aGtRrFixedWorkerCountAlgorithm [
 	ifFalse: [ algorithm == #workerCountPhysicalMemory ifTrue:
 		[ algorithm := GtRrWorkerCountResourceAlgorithm new
 			availableMemoryModel: GtRrWorkerCountPhysicalMemoryModel new ] ]. 
+	algorithm workerCountCalculator: self.
 ]
 
 { #category : #ui }
@@ -172,7 +173,7 @@ GtRrWorkerCountCalculator >> calculationAttributes [
 
 	^ Array streamContents: [ :stream |
 		stream 
-			nextPutAll: (self algorithm calculationAttributesWith: self);
+			nextPutAll: self algorithm calculationAttributes;
 			nextPut: { 'Minimum Workers'. self minWorkers. };
 			nextPut: { 'Maximum Workers'. self maxWorkers = SmallInteger maxVal
 				ifTrue: [ 'unlimited' ]
@@ -183,6 +184,7 @@ GtRrWorkerCountCalculator >> calculationAttributes [
 { #category : #ui }
 GtRrWorkerCountCalculator >> gtViewCalculationFor: aView [
 	<gtView>
+
 	^ aView columnedList
 		title: 'Calculation';
 		priority: 10;
@@ -263,6 +265,6 @@ GtRrWorkerCountCalculator >> parameterDetails [
 GtRrWorkerCountCalculator >> workerCount [
 	"Answer the number of workers to start"
 
-	^ (self algorithm value: self)
+	^ self algorithm value
 		min: self maxWorkers max: self minWorkers.
 ]

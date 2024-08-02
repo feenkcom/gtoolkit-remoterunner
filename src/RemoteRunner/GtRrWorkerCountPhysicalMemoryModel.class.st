@@ -4,15 +4,14 @@ Class {
 	#category : #'RemoteRunner-WorkerCount'
 }
 
-{ #category : #ui }
-GtRrWorkerCountPhysicalMemoryModel >> calculationAttributesWith: aGtRrWorkerCountCalculator [
+{ #category : #initialize }
+GtRrWorkerCountPhysicalMemoryModel >> availableMemory [
 
-	^ { { '- Available Memory (Physical)'. availableMemory humanReadableIsqByteSize. self. } }
+	^ GtOsSystemInfo current physicalMemory
 ]
 
-{ #category : #initialize }
-GtRrWorkerCountPhysicalMemoryModel >> initialize [
+{ #category : #ui }
+GtRrWorkerCountPhysicalMemoryModel >> calculationAttributes [
 
-	super initialize.
-	availableMemory := GtOsSystemInfo current physicalMemory.
+	^ { { '- Available Memory (Physical)'. self availableMemory humanReadableIsqByteSize. self. } }
 ]

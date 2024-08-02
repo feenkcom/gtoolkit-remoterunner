@@ -5,23 +5,28 @@ Class {
 	#name : #GtRrWorkerCountAvailableMemoryModel,
 	#superclass : #Object,
 	#instVars : [
-		'availableMemory'
+		'workerCountCalculator'
 	],
 	#category : #'RemoteRunner-WorkerCount'
 }
 
 { #category : #accessing }
 GtRrWorkerCountAvailableMemoryModel >> availableMemory [
-	^ availableMemory
-]
-
-{ #category : #accessing }
-GtRrWorkerCountAvailableMemoryModel >> availableMemory: anObject [
-	availableMemory := anObject
+	^ self subclassResponsibility
 ]
 
 { #category : #ui }
-GtRrWorkerCountAvailableMemoryModel >> calculationAttributesWith: aGtRrWorkerCountCalculator [
+GtRrWorkerCountAvailableMemoryModel >> calculationAttributes [
 
 	^ { { '- Available Memory'. ''. self. } }
+]
+
+{ #category : #accessing }
+GtRrWorkerCountAvailableMemoryModel >> workerCountCalculator [
+	^ workerCountCalculator
+]
+
+{ #category : #accessing }
+GtRrWorkerCountAvailableMemoryModel >> workerCountCalculator: anObject [
+	workerCountCalculator := anObject
 ]

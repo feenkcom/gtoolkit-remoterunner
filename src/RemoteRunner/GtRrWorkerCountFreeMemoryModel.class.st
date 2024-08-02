@@ -4,15 +4,14 @@ Class {
 	#category : #'RemoteRunner-WorkerCount'
 }
 
-{ #category : #ui }
-GtRrWorkerCountFreeMemoryModel >> calculationAttributesWith: aGtRrWorkerCountCalculator [
+{ #category : #initialize }
+GtRrWorkerCountFreeMemoryModel >> availableMemory [
 
-	^ { { '- Available Memory (Free)'. availableMemory humanReadableIsqByteSize. self. } }
+	^ GtOsSystemInfo current freeMemory
 ]
 
-{ #category : #initialize }
-GtRrWorkerCountFreeMemoryModel >> initialize [
+{ #category : #ui }
+GtRrWorkerCountFreeMemoryModel >> calculationAttributes [
 
-	super initialize.
-	availableMemory := GtOsSystemInfo current freeMemory.
+	^ { { '- Available Memory (Free)'. self availableMemory humanReadableIsqByteSize. self. } }
 ]

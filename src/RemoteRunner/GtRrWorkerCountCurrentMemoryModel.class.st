@@ -5,14 +5,13 @@ Class {
 }
 
 { #category : #ui }
-GtRrWorkerCountCurrentMemoryModel >> calculationAttributesWith: aGtRrWorkerCountCalculator [
+GtRrWorkerCountCurrentMemoryModel >> calculationAttributes [
 
-	^ { { '- Required Memory (Current Memory)'. requiredMemory humanReadableIsqByteSize. self. }. }
+	^ { { '- Required Memory (Current Memory)'. self requiredMemory humanReadableIsqByteSize. self. }. }
 ]
 
 { #category : #initialize }
-GtRrWorkerCountCurrentMemoryModel >> initialize [
+GtRrWorkerCountCurrentMemoryModel >> requiredMemory [
 
-	super initialize.
-	requiredMemory := Smalltalk vm memorySize.
+	^ Smalltalk vm memorySize * workerCountCalculator memorySizeMultiplier
 ]
