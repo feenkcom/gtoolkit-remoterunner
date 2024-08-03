@@ -15,6 +15,8 @@ GtRrWorkerCountRequiredMemoryModel >> calculationAttributes [
 
 { #category : #accessing }
 GtRrWorkerCountRequiredMemoryModel >> requiredMemory [
+	<return: #Integer>
+
 	^ self subclassResponsibility
 ]
 
