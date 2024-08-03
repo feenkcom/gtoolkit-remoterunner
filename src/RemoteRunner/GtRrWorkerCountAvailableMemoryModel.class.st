@@ -12,6 +12,8 @@ Class {
 
 { #category : #accessing }
 GtRrWorkerCountAvailableMemoryModel >> availableMemory [
+	<return: #Integer>
+
 	^ self subclassResponsibility
 ]
 

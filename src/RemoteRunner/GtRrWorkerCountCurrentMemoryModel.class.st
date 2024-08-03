@@ -12,6 +12,7 @@ GtRrWorkerCountCurrentMemoryModel >> calculationAttributes [
 
 { #category : #initialize }
 GtRrWorkerCountCurrentMemoryModel >> requiredMemory [
+	<return: #Integer>
 
-	^ Smalltalk vm memorySize * workerCountCalculator memorySizeMultiplier
+	^ (Smalltalk vm memorySize * workerCountCalculator memorySizeMultiplier) rounded
 ]
