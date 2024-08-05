@@ -66,6 +66,14 @@ GtRrWorkerCountResourceAlgorithm >> parameterDetailsWithCalculator: aGtRrWorkerC
 				asInteger humanReadableSISizeString}
 ]
 
+{ #category : #copying }
+GtRrWorkerCountResourceAlgorithm >> postCopy [
+
+	super postCopy.
+	availableMemoryModel := availableMemoryModel copy.
+	requiredMemoryModel := requiredMemoryModel copy.
+]
+
 { #category : #accessing }
 GtRrWorkerCountResourceAlgorithm >> requiredMemoryModel [
 	^ requiredMemoryModel
