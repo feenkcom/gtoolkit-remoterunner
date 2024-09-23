@@ -144,14 +144,6 @@ GtRrJobProgressNotification >> notificationLabel [
 	^ self job jobName
 ]
 
-{ #category : #private }
-GtRrJobProgressNotification >> registerNotifications [
-	"A different approach would be to show the notification using the UI Manager"
-	
-	GtWorld allInstancesDo: [ :world |
-		world showNotification: self ].
-]
-
 { #category : #accessing }
 GtRrJobProgressNotification >> runJobAgain [
 	"Create a copy of the receiver's job and run it with progress notifications"
