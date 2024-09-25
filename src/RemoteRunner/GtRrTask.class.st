@@ -140,6 +140,20 @@ GtRrTask >> fullGcTime [
 		ifAbsent: [ nil ]
 ]
 
+{ #category : #accessing }
+GtRrTask >> gapBetweenEndTimeAndReceivingResults [
+	^ self endTime 
+		ifNotNil: [ :anEndTime |
+			self resultReceivedTime - anEndTime ]
+]
+
+{ #category : #accessing }
+GtRrTask >> gapBetweenHandoverAndStartTime [
+	^ self startTime 
+		ifNotNil: [ :aStartTime |
+			aStartTime - self handoverTime]
+]
+
 { #category : #'accessing - pharolink' }
 GtRrTask >> getSerialized [
 	"Anser the receiver as a local value.
