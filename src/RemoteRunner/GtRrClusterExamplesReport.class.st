@@ -403,7 +403,7 @@ GtRrClusterExamplesReport >> overviewData [
 		'Cummulative Tasks Duration (on workers)' -> self cummulativeTasksDuration.
 		'Cummulative Tasks Duration (on runner)' -> self cummulativeTasksDurationOnRunner.
 		'Tasks Duration Runner - Worker Difference' -> (self cummulativeTasksDurationOnRunner - self cummulativeTasksDuration).
-		
+		'Cluster efficiency (wokers busy percentage)' -> self workesBusyPercentage.
 		'Cummulative Task Gaps Between Consecutive Tasks' -> self taskGapsDuration.
 		'Average Task Gap Between Consecutive Tasks' -> (self taskGapsDuration / self numberOfTasks).
 		'Cummulative Task Gaps Between Handover and Start Time' -> self cummulativeGapBetweenHandoverAndStartTime.
@@ -529,4 +529,12 @@ GtRrClusterExamplesReport >> workersVsCoresData [
 			at: #coreCount put: (machineType ifNil: [ '-' ] ifNotNil: #coreCount);
 			at: #diff put: diff;
 			yourself ].
+]
+
+{ #category : #'as yet unclassified' }
+GtRrClusterExamplesReport >> workesBusyPercentage [
+	| durationOnWorkers durationOnRunner |
+	durationOnWorkers := self cummulativeTasksDuration.
+	durationOnRunner := self cummulativeTasksDurationOnRunner.
+	^((durationOnWorkers / durationOnRunner) * 100) printShowingDecimalPlaces: 1
 ]
