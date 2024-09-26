@@ -11,16 +11,16 @@ PlpoGtRrClusterExamplesReport class >> remoteClassName [
 	^ #GtRrClusterExamplesReport
 ]
 
-{ #category : #'accessing - chart data' }
-PlpoGtRrClusterExamplesReport >> machinesExecutionChartItems [
-	^ self proxyPerformSerialized: #machinesExecutionChartItems
-]
-
 { #category : #accessing }
 PlpoGtRrClusterExamplesReport >> machineWithIpAddress: anIpAddress [ 
 	^ self 
 		proxyPerform:  #machineWithIpAddress: 
 		withPrimitiveArguments: {anIpAddress}
+]
+
+{ #category : #'accessing - chart data' }
+PlpoGtRrClusterExamplesReport >> machinesExecutionChartItems [
+	^ self proxyPerformSerialized: #machinesExecutionChartItems
 ]
 
 { #category : #accessing }
