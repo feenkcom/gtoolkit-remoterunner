@@ -25,6 +25,8 @@ GtRrWorkerCheckSignal >> example: aGtExample [
 
 { #category : #printing }
 GtRrWorkerCheckSignal >> printOneLineContentsOn: stream [
+
+	super printOneLineContentsOn: stream.
 	stream 
 		<< ' | ';
 		<< checkName asString

@@ -27,7 +27,8 @@ Class {
 		'taskId',
 		'taskTimeout',
 		'retryStrategy',
-		'executionData'
+		'executionData',
+		'properties'
 	],
 	#category : #'RemoteRunner-Tasks'
 }
@@ -179,6 +180,18 @@ GtRrTask >> gtConstraintFor: aView [
 		title: 'Constraint';
 		priority: 40;
 		object: constraint;
+		view: #gtLiveFor:
+]
+
+{ #category : #ui }
+GtRrTask >> gtPropertiesFor: aView [
+	<gtView>
+
+	properties ifNil: [ ^ aView empty ].
+	^ aView forward
+		title: 'Properties';
+		priority: 50;
+		object: [ properties ];
 		view: #gtLiveFor:
 ]
 
@@ -401,6 +414,53 @@ GtRrTask >> printSupplementalOn: aStream [
 	self hasErrors ifTrue:
 		[ aStream << ' with errors' ].
 
+]
+
+{ #category : #'accessing - properties' }
+GtRrTask >> properties [
+	"Answer the task's properties.
+	This allows user data specific to a task to be kept with the task and to provide information to modify the worker's behaviour.
+	All keys and values must be JSON serialisable."
+
+	^ properties ifNil: [ properties := Dictionary new ].
+]
+
+{ #category : #'accessing - properties' }
+GtRrTask >> properties: aDictionary [
+
+	properties := aDictionary
+]
+
+{ #category : #'accessing - properties' }
+GtRrTask >> propertyAt: aString [
+
+	^ self properties at: aString
+]
+
+{ #category : #'accessing - properties' }
+GtRrTask >> propertyAt: aString ifAbsent: absentBlock [
+
+	^ self properties 
+		at: aString
+		ifAbsent: absentBlock
+]
+
+{ #category : #'accessing - properties' }
+GtRrTask >> propertyAt: aString ifPresent: presentBlock ifAbsent: absentBlock [
+
+	^ self properties 
+		at: aString
+		ifPresent: presentBlock
+		ifAbsent: absentBlock
+]
+
+{ #category : #'accessing - properties' }
+GtRrTask >> propertyAt: aString put: anObject [
+	"Store the supplied property.
+	Note that both the key and value must be serialisable by LeJson.
+	Including large amounts of information will increase the task handover time as it must be copied across the network."
+
+	^ self properties at: aString put: anObject
 ]
 
 { #category : #accessing }
