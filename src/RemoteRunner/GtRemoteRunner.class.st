@@ -692,6 +692,7 @@ GtRemoteRunner >> heartbeatForWorkerId: aUidString [
 	registeredWorkers 
 		at: aUidString
 		ifPresent: [ :worker | worker registerHeartbeat ].
+	^ nil
 ]
 
 { #category : #initialization }

@@ -490,12 +490,18 @@ GtRrWorker >> registerWith: aPharoLinkApplication [
 
 { #category : #private }
 GtRrWorker >> sendHeartbeat [
+	| start end |
 
+	start := Time microsecondClockValue.
+	GtRrWorkerHeatbeatStartingSignal new emit.
 	self connectDuring: [ :application |
 		lastHeartbeat := DateAndTime now.
 		application newCommandFactory send:
-			'GtAssignedRemoteRunner heartbeatForWorkerId: ''', uid, ''''.
-				GtRrWorkerHeartbeatSentAnnouncement new emit ].
+			'GtAssignedRemoteRunner heartbeatForWorkerId: ''', uid, '''' ].
+	end := Time microsecondClockValue.
+	GtRrWorkerHeartbeatCompletedSignal new
+		milliseconds: ((end - start) / 1000) rounded;
+		emit.
 ]
 
 { #category : #private }
