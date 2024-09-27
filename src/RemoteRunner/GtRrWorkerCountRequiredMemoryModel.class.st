@@ -8,6 +8,13 @@ Class {
 }
 
 { #category : #serialization }
+GtRrWorkerCountRequiredMemoryModel class >> leJsonV4AttributeMapping [
+	"The workerCountCalculator will be set when deserialising the calculator"
+
+	^ OrderedCollection new
+]
+
+{ #category : #serialization }
 GtRrWorkerCountRequiredMemoryModel class >> leJsonV4Name [
 
 	^ #gtRrWorkerCountRequiredMemoryModel

@@ -8,6 +8,13 @@ Class {
 }
 
 { #category : #seralization }
+GtRrWorkerCountFixedAvailableMemoryModel class >> deSerializeAllImplementorsInstances [
+	"Answer a collection of instances to be tested for serialisation / deserialisation"
+
+	^ { self new availableMemory: 0 }
+]
+
+{ #category : #seralization }
 GtRrWorkerCountFixedAvailableMemoryModel class >> leJsonV4AttributeMapping [
 
 	^ super leJsonV4AttributeMapping
