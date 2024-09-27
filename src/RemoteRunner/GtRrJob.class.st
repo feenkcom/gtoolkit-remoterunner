@@ -374,6 +374,13 @@ GtRrJob >> isTerminating [
 ]
 
 { #category : #accessing }
+GtRrJob >> job [
+	"Polymorphism with {{gtClass:GtRrJobContext}}"
+	
+	^ self
+]
+
+{ #category : #accessing }
 GtRrJob >> jobId [
 	^ self id
 ]
@@ -500,6 +507,14 @@ GtRrJob >> propertyAt: aString ifAbsent: absentBlock [
 	^ self properties 
 		at: aString
 		ifAbsent: absentBlock
+]
+
+{ #category : #'accessing - properties' }
+GtRrJob >> propertyAt: aString ifPresent: presentBlock [
+
+	^ self properties 
+		at: aString
+		ifPresent: presentBlock
 ]
 
 { #category : #'accessing - properties' }

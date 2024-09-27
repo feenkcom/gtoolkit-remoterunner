@@ -4,6 +4,12 @@ Class {
 	#category : #'RemoteRunner-WorkerCount'
 }
 
+{ #category : #serialization }
+GtRrWorkerCountFreeMemoryModel class >> leJsonV4Name [
+
+	^ #gtRrWorkerCountFreeMemoryModel
+]
+
 { #category : #initialize }
 GtRrWorkerCountFreeMemoryModel >> availableMemory [
 

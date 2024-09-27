@@ -9,3 +9,9 @@ GtRrResourceWorkerCountCalculator class >> isDeprecated [
 
 	^ true
 ]
+
+{ #category : #serialization }
+GtRrResourceWorkerCountCalculator class >> leJsonV4Name [
+
+	^ nil
+]

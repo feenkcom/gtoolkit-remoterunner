@@ -7,6 +7,28 @@ Class {
 	#category : #'RemoteRunner-WorkerCount'
 }
 
+{ #category : #serialization }
+GtRrWorkerCountFixedCountAlgorithm class >> deSerializeAllImplementorsInstances [
+	"Answer a collection of instances to be tested for serialisation / deserialisation"
+
+	^ { self new workerCount: 0 }
+]
+
+{ #category : #serialization }
+GtRrWorkerCountFixedCountAlgorithm class >> leJsonV4AttributeMapping [
+	"The workerCountCalculator will be set when deserialising the calculator"
+
+	^ super leJsonV4AttributeMapping
+		add: #workerCount -> #workerCount;
+		yourself
+]
+
+{ #category : #serialization }
+GtRrWorkerCountFixedCountAlgorithm class >> leJsonV4Name [
+
+	^ #gtRrWorkerCountFixedCountAlgorithm
+]
+
 { #category : #ui }
 GtRrWorkerCountFixedCountAlgorithm >> calculationAttributes [
 

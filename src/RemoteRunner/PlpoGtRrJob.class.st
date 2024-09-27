@@ -68,6 +68,13 @@ PlpoGtRrJob >> isFinished [
 ]
 
 { #category : #accessing }
+PlpoGtRrJob >> job [
+	"Polymorphism with {{gtClass:GtRrJobContext}}"
+
+	^ originalJob
+]
+
+{ #category : #accessing }
 PlpoGtRrJob >> jobId [
 	^ self proxyPerform: #jobId
 ]

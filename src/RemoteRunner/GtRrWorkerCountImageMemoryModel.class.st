@@ -42,6 +42,21 @@ GtRrWorkerCountImageMemoryModel class >> gtViewAlgorithmsFor: aView [
 			calculator workerCount ]
 ]
 
+{ #category : #serialization }
+GtRrWorkerCountImageMemoryModel class >> leJsonV4AttributeMapping [
+	"The workerCountCalculator will be set when deserialising the calculator"
+
+	^ super leJsonV4AttributeMapping
+		add: #additionalOldSpace -> #additionalOldSpace;
+		yourself.
+]
+
+{ #category : #serialization }
+GtRrWorkerCountImageMemoryModel class >> leJsonV4Name [
+
+	^ #gtRrWorkerCountImageMemoryModel
+]
+
 { #category : #accessing }
 GtRrWorkerCountImageMemoryModel >> additionalOldSpace [
 
