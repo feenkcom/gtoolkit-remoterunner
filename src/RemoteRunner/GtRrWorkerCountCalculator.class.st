@@ -145,6 +145,12 @@ GtRrWorkerCountCalculator class >> gtViewDefaultsFor: aView [
 ]
 
 { #category : #accessing }
+GtRrWorkerCountCalculator class >> leJsonV4Name [
+
+	^ #gtRrWorkerCountCalculator
+]
+
+{ #category : #accessing }
 GtRrWorkerCountCalculator >> algorithm [
 	<return: #GtRrWorkerCountAlgorithm>
 

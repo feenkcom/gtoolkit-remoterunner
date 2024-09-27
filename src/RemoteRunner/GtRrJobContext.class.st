@@ -101,6 +101,18 @@ GtRrJobContext >> gtErrorsFor: aView [
 ]
 
 { #category : #ui }
+GtRrJobContext >> gtPropertiesFor: aView [
+	<gtView>
+
+	job ifNil: [ ^ aView empty ].
+	^ aView forward
+		title: 'Properties';
+		priority: 50;
+		object: [ job ];
+		view: #gtPropertiesFor:
+]
+
+{ #category : #ui }
 GtRrJobContext >> gtResultsFor: aView [
 	<gtView>
 

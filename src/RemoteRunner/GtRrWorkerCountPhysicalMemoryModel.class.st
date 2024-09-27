@@ -4,6 +4,12 @@ Class {
 	#category : #'RemoteRunner-WorkerCount'
 }
 
+{ #category : #serialization }
+GtRrWorkerCountPhysicalMemoryModel class >> leJsonV4Name [
+
+	^ #gtRrWorkerCountPhysicalMemoryModel
+]
+
 { #category : #initialize }
 GtRrWorkerCountPhysicalMemoryModel >> availableMemory [
 

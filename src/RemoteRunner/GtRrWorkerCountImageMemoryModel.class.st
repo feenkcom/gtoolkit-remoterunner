@@ -42,6 +42,12 @@ GtRrWorkerCountImageMemoryModel class >> gtViewAlgorithmsFor: aView [
 			calculator workerCount ]
 ]
 
+{ #category : #serialization }
+GtRrWorkerCountImageMemoryModel class >> leJsonV4Name [
+
+	^ #gtRrWorkerCountImageMemoryModel
+]
+
 { #category : #accessing }
 GtRrWorkerCountImageMemoryModel >> additionalOldSpace [
 

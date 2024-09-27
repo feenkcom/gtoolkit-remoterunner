@@ -10,6 +10,19 @@ Class {
 	#category : #'RemoteRunner-WorkerCount'
 }
 
+{ #category : #serialization }
+GtRrWorkerCountAvailableMemoryModel class >> leJsonV4AttributeMapping [
+	"The workerCountCalculator will be set when deserialising the calculator"
+
+	^ OrderedCollection new
+]
+
+{ #category : #serialization }
+GtRrWorkerCountAvailableMemoryModel class >> leJsonV4Name [
+
+	^ #gtRrWorkerCountAvailableMemoryModel
+]
+
 { #category : #accessing }
 GtRrWorkerCountAvailableMemoryModel >> availableMemory [
 	<return: #Integer>

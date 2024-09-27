@@ -9,6 +9,22 @@ Class {
 	#category : #'RemoteRunner-WorkerCount'
 }
 
+{ #category : #seralization }
+GtRrWorkerCountResourceAlgorithm class >> leJsonV4AttributeMapping [
+
+	^ super leJsonV4AttributeMapping
+		add: #availableMemoryModel -> #availableMemoryModel;
+		add: #requiredMemoryModel -> #requiredMemoryModel;
+		add: #coreCount -> #coreCount;
+		yourself
+]
+
+{ #category : #seralization }
+GtRrWorkerCountResourceAlgorithm class >> leJsonV4Name [
+
+	^ #gtRrWorkerCountResourceAlgorithm
+]
+
 { #category : #accessing }
 GtRrWorkerCountResourceAlgorithm >> availableMemoryModel [
 	^ availableMemoryModel

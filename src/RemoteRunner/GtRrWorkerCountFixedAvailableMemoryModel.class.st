@@ -7,6 +7,20 @@ Class {
 	#category : #'RemoteRunner-WorkerCount'
 }
 
+{ #category : #seralization }
+GtRrWorkerCountFixedAvailableMemoryModel class >> leJsonV4AttributeMapping [
+
+	^ super leJsonV4AttributeMapping
+		add: #availableMemory -> #availableMemory;
+		yourself
+]
+
+{ #category : #seralization }
+GtRrWorkerCountFixedAvailableMemoryModel class >> leJsonV4Name [
+
+	^ #gtRrWorkerCountFixedAvailableMemoryModel
+]
+
 { #category : #accessing }
 GtRrWorkerCountFixedAvailableMemoryModel >> availableMemory [
 

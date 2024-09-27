@@ -7,6 +7,19 @@ Class {
 	#category : #'RemoteRunner-WorkerCount'
 }
 
+{ #category : #serialization }
+GtRrWorkerCountAlgorithm class >> leJsonV4AttributeMapping [
+	"The workerCountCalculator will be set when deserialising the calculator"
+
+	^ OrderedCollection new
+]
+
+{ #category : #serialization }
+GtRrWorkerCountAlgorithm class >> leJsonV4Name [
+
+	^ #gtRrWorkerCountAlgorithm
+]
+
 { #category : #ui }
 GtRrWorkerCountAlgorithm >> calculationAttributes [
 

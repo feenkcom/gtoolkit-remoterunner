@@ -7,6 +7,12 @@ Class {
 	#category : #'RemoteRunner-WorkerCount'
 }
 
+{ #category : #serialization }
+GtRrWorkerCountFixedSizeRequiredMemoryModel class >> leJsonV4Name [
+
+	^ #gtRrWorkerCountFixedSizeRequiredMemoryModel
+]
+
 { #category : #ui }
 GtRrWorkerCountFixedSizeRequiredMemoryModel >> calculationAttributes [
 
