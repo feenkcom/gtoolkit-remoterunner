@@ -15,6 +15,13 @@ Class {
 	#category : #'RemoteRunner-Examples'
 }
 
+{ #category : #asserting }
+GtRemoteRunnerExamples >> assert: actual equals: expected [
+	^ self
+		assert: (actual sameContentAs: expected)
+		description: [ self comparingStringBetween: actual and: expected ]
+]
+
 { #category : #examples }
 GtRemoteRunnerExamples >> assignTasksToWorkersTaskFirst [
 	"Demonstrate assigning tasks to workers, with the tasks queued before the workers connect"

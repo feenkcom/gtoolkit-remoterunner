@@ -6,44 +6,63 @@ Class {
 	#category : #'RemoteRunner-Examples'
 }
 
+{ #category : #asserting }
+GtRrSerialisationExamples >> assert: actual equals: expected [
+	^ self
+		assert: (actual sameContentAs: expected)
+		description: [ self comparingStringBetween: actual and: expected ]
+]
+
 { #category : #examples }
 GtRrSerialisationExamples >> gtRrClassExampleTask [
-	<gtExample>
 	"Demonstrate (de)serialising a GtRrClassExampleTask and its result"
-	| task serializedTask deserializedTask result serializedResult deserializedResult example |
+	<gtExample>
 
+	| task serializedTask deserializedTask result serializedResult deserializedResult example |
 	LeJsonV4 cleanUp.
 	task := GtRrClassExampleTask exampleClassName: #GtRrWorkerExamples.
 
 	serializedTask := LeJsonV4 uniqueInstance serialize: task.
-	deserializedTask := LeJsonV4 uniqueInstance deserialize: serializedTask readStream.
-	self assert: deserializedTask class = GtRrClassExampleTask
-		description: 'deserializedTask class incorrect: ', deserializedTask class name.
-	self assert: deserializedTask exampleClassName = #GtRrWorkerExamples
-		description: 'deserializedTask exampleClassName incorrect: ', deserializedTask exampleClassName printString.
+	deserializedTask := LeJsonV4 uniqueInstance
+			deserialize: serializedTask readStream.
+	self
+		assert: deserializedTask class = GtRrClassExampleTask
+		description: 'deserializedTask class incorrect: ' , deserializedTask class name.
+	self
+		assert: deserializedTask exampleClassName = #GtRrWorkerExamples
+		description: 'deserializedTask exampleClassName incorrect: '
+				, deserializedTask exampleClassName printString.
 
 	result := task run.
 	serializedResult := LeJsonV4 uniqueInstance serialize: result.
-	deserializedResult := LeJsonV4 uniqueInstance deserialize: serializedResult readStream.
-	self assert: (deserializedResult allSatisfy: [ :each | each isKindOf: PharoLinkTestCaseEndAnnouncement ])
-		description: [ 'deserializedResult class incorrect: ', (deserializedResult collect: [ :each | each class name ] ) printString ].
-	self assert: (deserializedResult allSatisfy: [ :each | each testCaseClassName = #GtRrWorkerExamples ])
-		description: [ 'deserializedResult exampleClass incorrect: ', (deserializedResult collect: [ :each | each testCaseClassName ] as: Set) printString ].
-	
-	example := deserializedResult detect:
-		           [ :exampleResult | exampleResult testCaseSelector = #commandLineWithAttributes ].
+	deserializedResult := LeJsonV4 uniqueInstance
+			deserialize: serializedResult readStream.
+	self
+		assert: (deserializedResult
+				allSatisfy: [ :each | each isKindOf: PharoLinkTestCaseEndAnnouncement ])
+		description: [ 'deserializedResult class incorrect: '
+				, (deserializedResult collect: [ :each | each class name ]) printString ].
+	self
+		assert: (deserializedResult
+				allSatisfy: [ :each | each testCaseClassName = 'GtRrWorkerExamples' ])
+		description: [ 'deserializedResult exampleClass incorrect: '
+				, (deserializedResult collect: [ :each | each testCaseClassName ] as: Set)
+						printString ].
+
+	example := deserializedResult
+			detect: [ :exampleResult | exampleResult testCaseSelector = #commandLineWithAttributes ].
 	self
 		assert: example isSuccess
 		description: 'deserializedResult commandLineWithAttributes example isSuccess failed'.
 
-	example := deserializedResult detect:
-		           [ :anExample | anExample testCaseSelector = #commandLineWithoutAttributes ].
+	example := deserializedResult
+			detect: [ :anExample | anExample testCaseSelector = #commandLineWithoutAttributes ].
 	self
 		assert: example isSuccess
 		description: 'deserializedResult commandLineWithoutAttributes example isSuccess failed'.
 
-	example := deserializedResult detect:
-		           [ :anExample | anExample testCaseSelector = #workerControlChannelCommandTimeout ].
+	example := deserializedResult
+			detect: [ :anExample | anExample testCaseSelector = #workerControlChannelCommandTimeout ].
 	self
 		assert: (example method hasPragmaNamed: #noTest)
 		description: 'deserializedResult workerControlChannelCommandTimeout example hasNoTestPragma failed'.
@@ -51,7 +70,7 @@ GtRrSerialisationExamples >> gtRrClassExampleTask [
 		assert: example isSkipped
 		description: 'deserializedResult workerControlChannelCommandTimeout example isSkipped failed'.
 
-	^ result.
+	^ result
 ]
 
 { #category : #examples }

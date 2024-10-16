@@ -10,6 +10,13 @@ Class {
 	#category : #'RemoteRunner-Examples'
 }
 
+{ #category : #asserting }
+GtRrWorkerExamples >> assert: actual equals: expected [
+	^ self
+		assert: (actual sameContentAs: expected)
+		description: [ self comparingStringBetween: actual and: expected ]
+]
+
 { #category : #private }
 GtRrWorkerExamples >> cleanUp [
 
