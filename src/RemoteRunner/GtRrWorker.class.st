@@ -402,7 +402,7 @@ GtRrWorker >> initialize [
 	"Attributes is a dictionary of information can be json encoded.
 	Additional values can be provided, or existing values overwritten, by the command line.
 	This is used by the remote runner to determine which workers can run a given task (the constraints)."
-	attributes := Dictionary new
+	attributes := GtStringContentDictionary new
 		at: #workingDirectory put: FileLocator workingDirectory resolve fullName;
 		at: #id put: uid;
 		at: #pid put: self currentProcessId;
