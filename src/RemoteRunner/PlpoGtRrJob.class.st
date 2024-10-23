@@ -109,6 +109,13 @@ PlpoGtRrJob >> properties [
 ]
 
 { #category : #accessing }
+PlpoGtRrJob >> propertyAt: aString put: anObject [
+
+	self proxyPerform: #propertyAt:put: withPrimitiveArguments: { aString. anObject. }.
+	^ anObject
+]
+
+{ #category : #accessing }
 PlpoGtRrJob >> results [
 	"Answer the results from the job as an Array.
 	Leave the return type as a proxy object as the size may be large."
