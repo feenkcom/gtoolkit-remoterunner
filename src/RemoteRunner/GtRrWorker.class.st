@@ -205,7 +205,7 @@ GtRrWorker class >> startLoggerFor: worker arguments: args [
 		<< 'PharoDebug.log filename set to: ';
 		<< pharoDebugLogFile;
 		lf.
-	logger := RestartingStreamLogger appendToFile: filename.
+	logger := SessionFallbackFileLogger filename: filename.
 	announcements := AnnouncementSetWithExclusions withAll: 
 		{GtRemoteRunnerAnnouncement , GtRemoteRunnerSignal , PharoLinkSignal, 
 			LanguageLinkEventSignal , StringSignal}.

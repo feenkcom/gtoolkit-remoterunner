@@ -801,15 +801,10 @@ GtRemoteRunner >> moveLoggingTo: aFileReference [
 
 	log ifNil: [ ^ nil ].
 	oldLogger := log.
-	newLogger := RestartingStreamLogger new 
-		flush: false;
-		streamBlock: [  ZnNewLineWriterStream on: 
-			(ZnCharacterWriteStream
-				on: aFileReference asFileReference binaryWriteStream
-				encoding: 'utf8') ].
+	newLogger := SessionFallbackFileLogger filename: aFileReference.
 	log := StreamLoggerFlusher new logger: newLogger.
 	self startLogger: log.
-	oldLogger stop.
+	oldLogger stop; close.
 	^ oldLogger.
 ]
 
@@ -1078,7 +1073,7 @@ GtRemoteRunner >> replaceLogger [
 	oldLogger := log.
 	log := nil.
 	self startLogging.
-	oldLogger stop.
+	oldLogger stop; close.
 	^ oldLogger.
 ]
 
@@ -1235,7 +1230,7 @@ GtRemoteRunner >> stopLogging [
 	"Stop the receiver's in-memory log"
 
 	log ifNil: [ ^ self ].
-	log stop.
+	log stop; close.
 	log := nil.
 ]
 
