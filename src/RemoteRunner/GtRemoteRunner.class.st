@@ -799,7 +799,10 @@ GtRemoteRunner >> moveLoggingTo: aFileReference [
 	"Replace the receiver's logger with one that logs to the supplied file"
 	| oldLogger newLogger |
 
-	log ifNil: [ ^ nil ].
+	(log isNil or:
+		[ log fileReference isNotNil
+			and: [ log fileReference resolve = aFileReference resolve ] ])
+				ifTrue: [ ^ self ].
 	oldLogger := log.
 	newLogger := SessionFallbackFileLogger filename: aFileReference.
 	log := StreamLoggerFlusher new logger: newLogger.
