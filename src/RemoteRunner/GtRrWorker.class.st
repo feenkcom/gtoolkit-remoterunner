@@ -378,6 +378,13 @@ GtRrWorker >> currentProcessId [
 	^ GtOsSystemInfo current currentProcessId
 ]
 
+{ #category : #'as yet unclassified' }
+GtRrWorker >> enableStrictSymbolComparison [
+	<gtWorkerStartupScript>
+
+	GtStrictSymbolComparisonFlag setStrictComparison
+]
+
 { #category : #accessing }
 GtRrWorker >> exceptionHandlingStrategy [
 
@@ -488,6 +495,19 @@ GtRrWorker >> registerWith: aPharoLinkApplication [
 	^ result
 ]
 
+{ #category : #starting }
+GtRrWorker >> runWorkerStartupScripts [
+	"Run any worker startup scripts in the receiver's class"
+
+	self class methods
+		select: [ :method | method hasPragmaNamed: #gtWorkerStartupScript ]
+		thenDo: [ :method | 
+			method
+				receiver: self
+				withArguments: #()
+				executeMethod: method ]
+]
+
 { #category : #private }
 GtRrWorker >> sendHeartbeat [
 	| start end |
@@ -517,6 +537,7 @@ GtRrWorker >> start [
 
 	stopFlag := false.
 	connectionStrategy start.
+	self runWorkerStartupScripts.
 	readProcess := self newTaskProcess.
 	self startHeartbeat.
 ]

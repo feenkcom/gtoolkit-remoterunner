@@ -214,3 +214,32 @@ GtRrWorkerExamples >> workerInImage [
 	self assert: remoteWorkerTask state equals: #notStarted.
 	self assert: runner taskQueue size equals: 1.
 ]
+
+{ #category : #examples }
+GtRrWorkerExamples >> workerStartupScripts [
+	<gtExample>
+
+	EpMonitor disableDuring:
+		[ [ GtRrWorker compile:
+'gtRrWorkerExamplesStartupScript
+	<gtWorkerStartupScript>
+
+	attributes at: #startupScriptExampleExecuted put: true.'
+			classified: 'examples'.
+		GtRrInImageWorker compile:
+'gtRrWorkerExamplesStartupScript
+	<gtWorkerStartupScript>
+
+	attributes at: #inImageStartupScriptExampleExecuted put: true.'
+			classified: 'examples'.
+		self assert: (GtRrWorker new runWorkerStartupScripts attributes
+			at: #startupScriptExampleExecuted).
+		self deny: (GtRrWorker new runWorkerStartupScripts attributes
+			includesKey: #inImageStartupScriptExampleExecuted).
+		self assert: (GtRrInImageWorker new runWorkerStartupScripts attributes
+			at: #inImageStartupScriptExampleExecuted).
+		self deny: (GtRrInImageWorker new runWorkerStartupScripts attributes
+			includesKey: #startupScriptExampleExecuted) ] ensure:
+				[ GtRrWorker removeSelector: #gtRrWorkerExamplesStartupScript.
+				GtRrInImageWorker removeSelector: #gtRrWorkerExamplesStartupScript ] ].
+]
