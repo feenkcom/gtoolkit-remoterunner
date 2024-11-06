@@ -378,6 +378,13 @@ GtRrWorker >> currentProcessId [
 	^ GtOsSystemInfo current currentProcessId
 ]
 
+{ #category : #'as yet unclassified' }
+GtRrWorker >> enableStrictSymbolComparison [
+	<gtWorkerStartupScript>
+
+	GtStrictSymbolComparisonFlag setStrictComparison
+]
+
 { #category : #accessing }
 GtRrWorker >> exceptionHandlingStrategy [
 
