@@ -13,7 +13,8 @@ Class {
 		'workerCountCalculator',
 		'state',
 		'connectionStrategyId',
-		'workerClassName'
+		'workerClassName',
+		'currentSession'
 	],
 	#category : #'RemoteRunner-Runner-Workers'
 }
@@ -291,10 +292,17 @@ GtRrWorkerManager >> startLocalWorkersFor: aGtRrJobContext [
 GtRrWorkerManager >> startWatchdog [
 
 	state := #running.
+	currentSession := SessionManager default currentSession.
 	watchDog := [ [ state = #running and: [ autoRestart or: [ processes notEmpty ] ] ] whileTrue:
 		[ watchdogSemaphore waitTimeoutSeconds: 30.
 		self watchDogCheck.
 		 ] ] forkNamed: 'GtRrWorkerManager local watch dog'.
+]
+
+{ #category : #accessing }
+GtRrWorkerManager >> state [
+
+	^ state
 ]
 
 { #category : #ui }
@@ -308,7 +316,13 @@ GtRrWorkerManager >> summaryAttributes [
 
 { #category : #private }
 GtRrWorkerManager >> watchDogCheck [
+	"Check for failed workers are restart if appropriate"
 	| broken |
+
+	"Terminate if the session has changed to prevent the possibility of accidentally starting workers because the image was saved in an inconsistent state."
+	currentSession = SessionManager default currentSession ifFalse:
+		[ state := #sessionIdChanged.
+		^ self ].
 
 	broken := processes reject: #isRunning.
 	broken do: [ :e | | process |
