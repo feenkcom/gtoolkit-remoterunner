@@ -970,7 +970,7 @@ GtRemoteRunner >> registerWorkerWithDetails: aDictionary [
 		workerAttributes: aDictionary;
 		emit.
 	pharoLinkServerConnection := PharoLinkServerCurrentConnection value.
-	pharoLinkServerConnection setCloseOnExec: true.
+	pharoLinkServerConnection closeOnExec: true.
 	mutexStart := DateAndTime now.
 	self critical:
 		[ mutexEnd := DateAndTime now.
