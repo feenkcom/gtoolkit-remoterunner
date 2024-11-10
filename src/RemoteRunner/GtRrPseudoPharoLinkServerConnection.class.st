@@ -20,6 +20,11 @@ GtRrPseudoPharoLinkServerConnection >> announcer [
 	^ announcer ifNil: [ announcer := Announcer new ]
 ]
 
+{ #category : #initialization }
+GtRrPseudoPharoLinkServerConnection >> closeOnExec: aBoolean [
+
+]
+
 { #category : #testing }
 GtRrPseudoPharoLinkServerConnection >> isConnected [
 	"GtRrPseudoPharoLinkServerConnection doesn't really know if it is running or not, answer true"
@@ -37,11 +42,6 @@ GtRrPseudoPharoLinkServerConnection >> remoteAddress [
 GtRrPseudoPharoLinkServerConnection >> remoteAddressString [
 
 	^ GtRemoteRunner printIpAddress: self remoteAddress
-]
-
-{ #category : #initialization }
-GtRrPseudoPharoLinkServerConnection >> setCloseOnExec: aBoolean [
-
 ]
 
 { #category : #'start-stop' }
