@@ -5,10 +5,54 @@ Class {
 		'job',
 		'notStartedLabel',
 		'successfulLabel',
+		'erroredLabel',
 		'failedLabel'
 	],
 	#category : #'RemoteRunner-Jobs-Notifications'
 }
+
+{ #category : #'building - widgets' }
+GtRrJobNotificationSummary >> createErrorLabel [
+	^(BrLabel new)
+		aptitude: BrGlamorousLabelAptitude;
+		beSmallSize;
+		hFitContent;
+		vExact: 15;
+		margin: (BlInsets all: 3);
+		background: BrGlamorousColors errorBackgroundColor;
+		layout: BlLinearLayout horizontal alignCenter;
+		geometry: (BlRoundedRectangleGeometry cornerRadius: 4);
+		visibility: BlVisibility gone;
+		text: '0'
+]
+
+{ #category : #'building - widgets' }
+GtRrJobNotificationSummary >> createNotStartedLabel [
+	^(BrLabel new)
+		aptitude: BrGlamorousLabelAptitude;
+		beSmallSize;
+		hFitContent;
+		vExact: 15;
+		margin: (BlInsets all: 3);
+		layout: BlLinearLayout horizontal alignCenter;
+		geometry: (BlRoundedRectangleGeometry cornerRadius: 4);
+		text: '0'
+]
+
+{ #category : #'building - widgets' }
+GtRrJobNotificationSummary >> createSuccessLabel [
+	^(BrLabel new)
+		aptitude: BrGlamorousLabelAptitude;
+		beSmallSize;
+		hFitContent;
+		vExact: 15;
+		margin: (BlInsets all: 3);
+		background: BrGlamorousColors successBackgroundColor;
+		layout: BlLinearLayout horizontal alignCenter;
+		geometry: (BlRoundedRectangleGeometry cornerRadius: 4);
+		visibility: BlVisibility gone;
+		text: '0'
+]
 
 { #category : #initialization }
 GtRrJobNotificationSummary >> initialize [
@@ -24,38 +68,15 @@ GtRrJobNotificationSummary >> initialize [
 	self padding: (BlInsets left: 5 right: 5).
 	self background: Color white.
 	
+	self initializeResultLabels
+]
+
+{ #category : #initialization }
+GtRrJobNotificationSummary >> initializeResultLabels [
 	self
-		addChild: (notStartedLabel := BrLabel new
-					aptitude: BrGlamorousLabelAptitude;
-					beSmallSize;
-					hFitContent;
-					vExact: 15;
-					margin: (BlInsets all: 3);
-					layout: BlLinearLayout horizontal alignCenter;
-					geometry: (BlRoundedRectangleGeometry cornerRadius: 4);
-					text: '0');
-		addChild: (failedLabel := BrLabel new
-					aptitude: BrGlamorousLabelAptitude;
-					beSmallSize;
-					hFitContent;
-					vExact: 15;
-					margin: (BlInsets all: 3);
-					background: BrGlamorousColors errorBackgroundColor;
-					layout: BlLinearLayout horizontal alignCenter;
-					geometry: (BlRoundedRectangleGeometry cornerRadius: 4);
-					visibility: BlVisibility gone;
-					text: '0');
-		addChild: (successfulLabel := BrLabel new
-					aptitude: BrGlamorousLabelAptitude;
-					beSmallSize;
-					hFitContent;
-					vExact: 15;
-					margin: (BlInsets all: 3);
-					background: BrGlamorousColors successBackgroundColor;
-					layout: BlLinearLayout horizontal alignCenter;
-					geometry: (BlRoundedRectangleGeometry cornerRadius: 4);
-					visibility: BlVisibility gone;
-					text: '0')
+		addChild: (notStartedLabel := self createNotStartedLabel);
+		addChild: (erroredLabel := self createErrorLabel);
+		addChild: (successfulLabel := self createSuccessLabel)
 ]
 
 { #category : #subscriptions }
@@ -98,7 +119,7 @@ GtRrJobNotificationSummary >> updateSummaryContent [
 					+ (aNotification taskCount - aNotification succeededCount - aNotification erroredCount).
 			failedCounter := failedCounter + aNotification erroredCount ].
 	
-	self updateLabel: failedLabel withCount: failedCounter.
+	self updateLabel: erroredLabel withCount: failedCounter.
 	self updateLabel: successfulLabel withCount: successfulCounter.
 	self updateLabel: notStartedLabel withCount: notStartedCounter.
 ]
