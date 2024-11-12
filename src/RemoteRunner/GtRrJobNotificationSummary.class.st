@@ -5,8 +5,7 @@ Class {
 		'job',
 		'notStartedLabel',
 		'successfulLabel',
-		'erroredLabel',
-		'failedLabel'
+		'erroredLabel'
 	],
 	#category : #'RemoteRunner-Jobs-Notifications'
 }
