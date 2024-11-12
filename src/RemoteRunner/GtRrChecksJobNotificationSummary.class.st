@@ -1,6 +1,9 @@
 Class {
 	#name : #GtRrChecksJobNotificationSummary,
 	#superclass : #GtRrJobNotificationSummary,
+	#instVars : [
+		'failedLabel'
+	],
 	#category : #'RemoteRunner-Jobs-Notifications'
 }
 
