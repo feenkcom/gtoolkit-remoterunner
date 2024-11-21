@@ -294,7 +294,12 @@ GtRrRunnerMachineExamplesReport >> overviewData [
 		'Maximum VM Memory Size Increase' -> (self vmMaximumMemorySize- self vmMinimumMemorySize) humanReadableIsqByteSize.
 		'Maximum Worker Tasks Start Delay' -> self workersTasksStartMaximumDelay.
 		'Workers Tasks Competion Delay' -> self workersTasksCompletionDelay.
-		'Machine Type' -> self machineType. }
+		'Machine Region' -> self machineRegion.
+		'Machine Type' -> self machineType.
+		'Machine Memory Info' -> self machineTotalMemory humanReadableIsqByteSize.
+		'Machine Memory Defined' -> self machineTotalDefinedMemory humanReadableIsqByteSize.
+		'Memory Difference: Available - Defined' -> self machineDefinedVsAvailableMemoryDescription .
+		'Machine Cores' -> self machineCores}
 ]
 
 { #category : #printing }

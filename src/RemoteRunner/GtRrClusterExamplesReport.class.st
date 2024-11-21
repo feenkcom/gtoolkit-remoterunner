@@ -107,8 +107,6 @@ GtRrClusterExamplesReport >> gtViewMachineCoresStatsFor: aView [
 			aMachineReport machineType isNil ] ];
 		column: 'Machine Type' text: [ :aMachineReport |
 			aMachineReport machineType ifNil: [ '-' ] ];
-		column: 'Machine Region' text: [ :aMachineReport |
-			aMachineReport machineRegion ifNil: [ '-' ] ];
 		column: 'Ip Address' text: [ :aMachineReport |
 			aMachineReport ipAddress ];
 		column: 'Machine Cores' text: [ :aMachineReport |
@@ -167,23 +165,29 @@ GtRrClusterExamplesReport >> gtViewMachineMemoryStatsFor: aView [
 			aMachineReport numberOfWorkers ];
 		column: 'Total Memory' text: [ :aMachineReport |
 			aMachineReport machineTotalMemory 
+				ifNil: [ '-' ]
 				ifNotNil: [ :aValue | aValue humanReadableIsqByteSize ] ];
 		column: 'Declared Memory'  text: [ :aMachineReport |
 			aMachineReport machineTotalDefinedMemory 
+				ifNil: [ '-' ]
 				ifNotNil: [ :aValue | aValue humanReadableIsqByteSize ] ];
 		column: 'Memory Diff'  text: [ :aMachineReport |
 			aMachineReport machineDefinedVsAvailableMemoryDescription ];
 		column: 'Minimum Available Memory' text: [ :aMachineReport |
 			aMachineReport machineMinimumAvailableMemory 
+				ifNil: [ '-' ]
 				ifNotNil: [ :aValue | aValue humanReadableIsqByteSize ] ];
 		column: 'Maximum (initial) Available Memory' text: [ :aMachineReport |
 			aMachineReport machineMaximumAvailableMemory 
+				ifNil: [ '-' ]
 				ifNotNil: [ :aValue | aValue humanReadableIsqByteSize ] ];
 		column: 'Total Consumed Memory' text: [ :aMachineReport |
 			aMachineReport machineTotalConsumedMemory
+				ifNil: [ '-' ]
 				ifNotNil: [ :aValue | aValue humanReadableIsqByteSize ] ];
 		column: 'Avegare Consumed Memory per Worker' text: [ :aMachineReport |
 			aMachineReport machineTotalConsumedMemoryPerWorker 
+				ifNil: [ '-' ]
 				ifNotNil: [ :aValue | aValue humanReadableIsqByteSize ] ]
 			
 ]
@@ -200,6 +204,8 @@ GtRrClusterExamplesReport >> gtViewMachinesFor: aView [
 			aMachineReport machineId ifNil: [ '-' ] ];
 		column: 'Machine Type' text: [ :aMachineReport |
 			aMachineReport machineType ifNil: [ '-' ] ];
+		column: 'Machine Region' text: [ :aMachineReport |
+			aMachineReport machineRegion ifNil: [ '-' ] ];
 		column: 'Ip Address' text: [ :aMachineReport |
 			aMachineReport ipAddress ];
 		column: 'Workers Count' text: [ :aMachineReport |
