@@ -651,3 +651,8 @@ GtRrWorkerExamplesReport >> workerAttributes: aDictionary [
 GtRrWorkerExamplesReport >> workerId [
 	^ self workerAttributes at: 'id'
 ]
+
+{ #category : #accessing }
+GtRrWorkerExamplesReport >> workerMachineRegion [
+	^ self workerAttributes at: 'awsRegion'
+]

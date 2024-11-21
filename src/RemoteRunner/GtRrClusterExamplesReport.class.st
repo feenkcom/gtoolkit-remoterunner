@@ -97,6 +97,35 @@ GtRrClusterExamplesReport >> fullGcTime [
 ]
 
 { #category : #'gt - extensions' }
+GtRrClusterExamplesReport >> gtViewMachineCoresStatsFor: aView [
+	<gtView>
+	
+	^ aView columnedList 
+		title: 'Machines cores';
+		priority: 25.5;
+		items: [ self machineReports reject: [ :aMachineReport |
+			aMachineReport machineType isNil ] ];
+		column: 'Machine Type' text: [ :aMachineReport |
+			aMachineReport machineType ifNil: [ '-' ] ];
+		column: 'Machine Region' text: [ :aMachineReport |
+			aMachineReport machineRegion ifNil: [ '-' ] ];
+		column: 'Ip Address' text: [ :aMachineReport |
+			aMachineReport ipAddress ];
+		column: 'Machine Cores' text: [ :aMachineReport |
+			aMachineReport machineCores ];
+		column: 'Workers Count' text: [ :aMachineReport |
+			aMachineReport numberOfWorkers ];
+		column: 'Total Memory' text: [ :aMachineReport |
+			aMachineReport machineTotalMemory 
+				ifNotNil: [ :aValue | aValue humanReadableIsqByteSize ] ];
+		column: 'Minimum Available Memory' textDo: [ :aColumn |
+			aColumn 
+				format: [:aMachineReport|
+					aMachineReport machineMinimumAvailableMemory 
+						ifNotNil: [ :aValue | aValue humanReadableIsqByteSize ] ] ]
+]
+
+{ #category : #'gt - extensions' }
 GtRrClusterExamplesReport >> gtViewMachineGCStatsFor: aView [
 	<gtView>
 	
@@ -139,6 +168,11 @@ GtRrClusterExamplesReport >> gtViewMachineMemoryStatsFor: aView [
 		column: 'Total Memory' text: [ :aMachineReport |
 			aMachineReport machineTotalMemory 
 				ifNotNil: [ :aValue | aValue humanReadableIsqByteSize ] ];
+		column: 'Declared Memory'  text: [ :aMachineReport |
+			aMachineReport machineTotalDefinedMemory 
+				ifNotNil: [ :aValue | aValue humanReadableIsqByteSize ] ];
+		column: 'Memory Diff'  text: [ :aMachineReport |
+			aMachineReport machineDefinedVsAvailableMemoryDescription ];
 		column: 'Minimum Available Memory' text: [ :aMachineReport |
 			aMachineReport machineMinimumAvailableMemory 
 				ifNotNil: [ :aValue | aValue humanReadableIsqByteSize ] ];

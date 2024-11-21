@@ -8,7 +8,8 @@ Class {
 		'workersReport',
 		'machineId',
 		'machineType',
-		'machineCores'
+		'machineCores',
+		'machineRegion'
 	],
 	#category : #'RemoteRunner-Reports'
 }
@@ -143,6 +144,22 @@ GtRrRunnerMachineExamplesReport >> machineCores: anObject [
 ]
 
 { #category : #accessing }
+GtRrRunnerMachineExamplesReport >> machineDefinedVsAvailableMemoryDescription [
+	| definedMemory availableMemory |
+	definedMemory  := self machineTotalDefinedMemory.
+	availableMemory := self machineTotalMemory .
+	(definedMemory isNil or: [availableMemory isNil]) ifTrue: [ ^ '-' ].
+	^ String streamContents: [ :aStream |
+		| memoryDifference|
+		memoryDifference := definedMemory- availableMemory.
+		aStream nextPutAll: memoryDifference humanReadableIsqByteSize.
+		aStream nextPutAll: ' ('.
+		aStream nextPutAll: ((Percentage 
+			with: memoryDifference/definedMemory) displayStringFormat: '#0.0').
+		aStream nextPutAll: ')']
+]
+
+{ #category : #accessing }
 GtRrRunnerMachineExamplesReport >> machineId [
 	^ machineId
 ]
@@ -160,6 +177,16 @@ GtRrRunnerMachineExamplesReport >> machineMaximumAvailableMemory [
 { #category : #'accessing - resource report' }
 GtRrRunnerMachineExamplesReport >> machineMinimumAvailableMemory [
 	^ self workersReport machineMinimumAvailableMemory
+]
+
+{ #category : #accessing }
+GtRrRunnerMachineExamplesReport >> machineRegion [
+	^ machineRegion
+]
+
+{ #category : #accessing }
+GtRrRunnerMachineExamplesReport >> machineRegion: aRegionName [
+	machineRegion := aRegionName
 ]
 
 { #category : #'accessing - resource report' }
@@ -180,6 +207,15 @@ GtRrRunnerMachineExamplesReport >> machineTotalConsumedMemoryPerWorker [
 	(totalMemory isNil or: [minimumAvailableMemory isNil]) ifTrue: [ ^ nil ].
 	
 	^ ((totalMemory - minimumAvailableMemory) / self numberOfWorkers) asInteger
+]
+
+{ #category : #'accessing - resource report' }
+GtRrRunnerMachineExamplesReport >> machineTotalDefinedMemory [
+	^ (GtAwsAmazonWebServices default instanceTypes 
+			at: (self machineType )
+			ifPresent: [ :anInstanceType | 
+				anInstanceType totalMemory]
+			ifAbsent: [ nil ])
 ]
 
 { #category : #'accessing - resource report' }
