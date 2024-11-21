@@ -738,6 +738,11 @@ GtRrTask >> workerMachineId [
 ]
 
 { #category : #accessing }
+GtRrTask >> workerMachineRegion [
+	^ self executionData workerMachineRegion
+]
+
+{ #category : #accessing }
 GtRrTask >> workerMachineType [
 	^ self executionData workerMachineType
 ]
