@@ -43,7 +43,7 @@ GtRrTasksExecutionHorizontalChartStencil >> createHistogramChartWithScale: barsS
 		constraintsDo: [ :c | 
 			c horizontal matchParent.
 			c vertical matchParent ];
-		geometry: (BlHistogram new
+		geometry: (BlHistogramGeometry new
 			beLeftToRight;
 			values: (self taskItems 
 				collect: [ :aTaskOrItem | 
