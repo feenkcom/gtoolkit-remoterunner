@@ -120,7 +120,11 @@ GtRrClusterExamplesReport >> gtViewMachineCoresStatsFor: aView [
 			aColumn 
 				format: [:aMachineReport|
 					aMachineReport machineMinimumAvailableMemory 
-						ifNotNil: [ :aValue | aValue humanReadableIsqByteSize ] ] ]
+						ifNotNil: [ :aValue | aValue humanReadableIsqByteSize ] ];
+				background: [ :aText :aMachineReport |
+					(aMachineReport machineMinimumAvailableMemory<(1024 * 1024 * 1024))
+						ifTrue: [BrGlamorousColors failureBackgroundColor. ]
+						ifFalse: [Color transparent] ] ]
 ]
 
 { #category : #'gt - extensions' }
@@ -367,19 +371,19 @@ GtRrClusterExamplesReport >> machineReports: aCollectionOfReports [
 	machineReports := aCollectionOfReports
 ]
 
-{ #category : #accessing }
-GtRrClusterExamplesReport >> machineWithIpAddress: anIpAddress [
-	^ self machineReports 
-		detect: [ :aMachine |
-			aMachine ipAddress = anIpAddress ]
-]
-
 { #category : #'accessing - chart data' }
 GtRrClusterExamplesReport >> machinesExecutionChartItems [
 	^ self machineReports
 		collect: [ :aMachineReport |
 			GtRrExecutionChartDataItem fromMachine: aMachineReport ] 
 		as: Array
+]
+
+{ #category : #accessing }
+GtRrClusterExamplesReport >> machineWithIpAddress: anIpAddress [
+	^ self machineReports 
+		detect: [ :aMachine |
+			aMachine ipAddress = anIpAddress ]
 ]
 
 { #category : #accessing }
