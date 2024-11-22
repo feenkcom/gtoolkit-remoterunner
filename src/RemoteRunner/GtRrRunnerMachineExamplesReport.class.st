@@ -9,7 +9,8 @@ Class {
 		'machineId',
 		'machineType',
 		'machineCores',
-		'machineRegion'
+		'machineRegion',
+		'awsWeightedCapacity'
 	],
 	#category : #'RemoteRunner-Reports'
 }
@@ -27,6 +28,16 @@ GtRrRunnerMachineExamplesReport >> avegareFullGcDuration [
 { #category : #'accessing - gc details' }
 GtRrRunnerMachineExamplesReport >> avegareIncrementalGcDuration [
 	^ self incrGcDuration / self numberOfIncrementalGCs
+]
+
+{ #category : #accessing }
+GtRrRunnerMachineExamplesReport >> awsWeightedCapacity [
+	^ awsWeightedCapacity
+]
+
+{ #category : #accessing }
+GtRrRunnerMachineExamplesReport >> awsWeightedCapacity: anObject [
+	awsWeightedCapacity := anObject
 ]
 
 { #category : #accessing }
@@ -267,6 +278,7 @@ GtRrRunnerMachineExamplesReport >> numberOfWorkers [
 GtRrRunnerMachineExamplesReport >> overviewData [
 	^ {
 		'Number of workers' -> self numberOfWorkers.
+		'Weighted Capacity' -> (self awsWeightedCapacity ifNil: [ '-' ]).
 		'Number of tasks' -> self numberOfTasks.
 		'Number of test runs' -> self numberOfExamples .
 		'Number of task retries' -> self numberOfTaskRetries.
