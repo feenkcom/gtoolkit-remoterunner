@@ -18,7 +18,8 @@ GtRrClusterExamplesReport class >> forJob: aJob [
 			GtRrRunnerMachineExamplesReport new
 				machineId: assoc key ;
 				machineType: assoc value first workerMachineType;
-				"machineCores: assoc value first halt;"
+				"machineRegion: assoc value first workerMachineRegion;"
+				"machineCores: assoc value first workerMachineCores;"
 				ipAddress: assoc value first workerIpAddress;
 				workersReport: (GtRrWorkersExamplesReport 
 					forTasks: assoc value);
@@ -177,10 +178,15 @@ GtRrClusterExamplesReport >> gtViewMachineMemoryStatsFor: aView [
 				ifNotNil: [ :aValue | aValue humanReadableIsqByteSize ] ];
 		column: 'Memory Diff'  text: [ :aMachineReport |
 			aMachineReport machineDefinedVsAvailableMemoryDescription ];
-		column: 'Minimum Available Memory' text: [ :aMachineReport |
-			aMachineReport machineMinimumAvailableMemory 
-				ifNil: [ '-' ]
-				ifNotNil: [ :aValue | aValue humanReadableIsqByteSize ] ];
+		column: 'Minimum Available Memory' textDo: [ :aColumn |
+			aColumn 
+				format: [:aMachineReport|
+					aMachineReport machineMinimumAvailableMemory 
+						ifNotNil: [ :aValue | aValue humanReadableIsqByteSize ] ];
+				background: [ :aText :aMachineReport |
+					(aMachineReport machineMinimumAvailableMemory<(1024 * 1024 * 1024))
+						ifTrue: [BrGlamorousColors failureBackgroundColor. ]
+						ifFalse: [Color transparent] ] ];
 		column: 'Maximum (initial) Available Memory' text: [ :aMachineReport |
 			aMachineReport machineMaximumAvailableMemory 
 				ifNil: [ '-' ]
