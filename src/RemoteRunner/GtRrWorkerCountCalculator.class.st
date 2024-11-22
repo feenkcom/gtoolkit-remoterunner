@@ -268,6 +268,13 @@ GtRrWorkerCountCalculator >> parameterDetails [
 		{ 'Algorithm Computed Workers Count' -> self workerCount }
 ]
 
+{ #category : #initialization }
+GtRrWorkerCountCalculator >> reset [
+	"Reset cached run-time parameters, forcing the calculation to be updated."
+
+	algorithm ifNotNil: [ algorithm reset ]
+]
+
 { #category : #accessing }
 GtRrWorkerCountCalculator >> workerCount [
 	"Answer the number of workers to start"

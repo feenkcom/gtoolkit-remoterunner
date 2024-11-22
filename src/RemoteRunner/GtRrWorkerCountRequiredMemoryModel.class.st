@@ -33,6 +33,12 @@ GtRrWorkerCountRequiredMemoryModel >> requiredMemory [
 	^ self subclassResponsibility
 ]
 
+{ #category : #initialization }
+GtRrWorkerCountRequiredMemoryModel >> reset [
+	"Reset cached run-time parameters, forcing the calculation to be updated.
+	Subclasses should overwrite as required."
+]
+
 { #category : #accessing }
 GtRrWorkerCountRequiredMemoryModel >> workerCountCalculator [
 	^ workerCountCalculator

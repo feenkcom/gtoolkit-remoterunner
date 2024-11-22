@@ -271,6 +271,7 @@ GtRrWorkerManager >> signalWatchdog [
 GtRrWorkerManager >> startLocalWorkers [
 	| processCount isWindows |
 
+	workerCountCalculator reset.
 	processCount := self poolSize.
 	isWindows := OSPlatform current isWin32.
 	processCount timesRepeat: 

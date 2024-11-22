@@ -1,6 +1,9 @@
 Class {
 	#name : #GtRrWorkerCountCurrentMemoryModel,
 	#superclass : #GtRrWorkerCountRequiredMemoryModel,
+	#instVars : [
+		'requiredMemory'
+	],
 	#category : #'RemoteRunner-WorkerCount'
 }
 
@@ -20,5 +23,13 @@ GtRrWorkerCountCurrentMemoryModel >> calculationAttributes [
 GtRrWorkerCountCurrentMemoryModel >> requiredMemory [
 	<return: #Integer>
 
-	^ (Smalltalk vm memorySize * workerCountCalculator memorySizeMultiplier) rounded
+	^ requiredMemory ifNil: [ requiredMemory := 
+		(Smalltalk vm memorySize * workerCountCalculator memorySizeMultiplier) rounded ]
+]
+
+{ #category : #initialization }
+GtRrWorkerCountCurrentMemoryModel >> reset [
+	"Reset cached run-time parameters, forcing the calculation to be updated."
+
+	requiredMemory := nil
 ]

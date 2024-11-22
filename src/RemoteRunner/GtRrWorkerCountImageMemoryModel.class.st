@@ -2,7 +2,8 @@ Class {
 	#name : #GtRrWorkerCountImageMemoryModel,
 	#superclass : #GtRrWorkerCountRequiredMemoryModel,
 	#instVars : [
-		'additionalOldSpace'
+		'additionalOldSpace',
+		'onDiskSize'
 	],
 	#category : #'RemoteRunner-WorkerCount'
 }
@@ -97,11 +98,18 @@ GtRrWorkerCountImageMemoryModel >> initialize [
 { #category : #accessing }
 GtRrWorkerCountImageMemoryModel >> onDiskSize [
 
-	^ Smalltalk imageFile size
+	^ onDiskSize ifNil: [ onDiskSize := Smalltalk imageFile size ]
 ]
 
 { #category : #accessing }
 GtRrWorkerCountImageMemoryModel >> requiredMemory [
 
 	^ self onDiskSize + self additionalOldSpace
+]
+
+{ #category : #initialization }
+GtRrWorkerCountImageMemoryModel >> reset [
+	"Reset cached run-time parameters, forcing the calculation to be updated."
+
+	onDiskSize := nil
 ]

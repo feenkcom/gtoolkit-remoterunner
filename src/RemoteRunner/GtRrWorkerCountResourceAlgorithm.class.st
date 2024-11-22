@@ -46,6 +46,7 @@ GtRrWorkerCountResourceAlgorithm >> calculationAttributes [
 			nextPut: { '- Description'. '(Available / Required) min: Cores'. self. };
 			nextPutAll: (self availableMemoryModel calculationAttributes);
 			nextPutAll: (self requiredMemoryModel calculationAttributes);
+			nextPut: { '- - Memory Count'. self memoryCount. };
 			nextPut: { '- Number of Cores'. self coreCount. self. };
 			nextPut: { '- Algorithm Count'. self value. self. } ]
 ]
@@ -53,7 +54,7 @@ GtRrWorkerCountResourceAlgorithm >> calculationAttributes [
 { #category : #accessing }
 GtRrWorkerCountResourceAlgorithm >> coreCount [
 
-	^ coreCount ifNil: [ GtOsSystemInfo current numberOfCores ]
+	^ coreCount ifNil: [ coreCount := GtOsSystemInfo current numberOfCores ]
 ]
 
 { #category : #accessing }
@@ -67,6 +68,13 @@ GtRrWorkerCountResourceAlgorithm >> initialize [
 	super initialize.
 	availableMemoryModel := GtRrWorkerCountFreeMemoryModel new.
 	requiredMemoryModel := GtRrWorkerCountCurrentMemoryModel new.
+]
+
+{ #category : #accessing }
+GtRrWorkerCountResourceAlgorithm >> memoryCount [
+	"Answer the number of workers that would be started based on memory alone"
+
+	^ (availableMemoryModel availableMemory / requiredMemoryModel requiredMemory) truncated
 ]
 
 { #category : #accessing }
@@ -102,12 +110,19 @@ GtRrWorkerCountResourceAlgorithm >> requiredMemoryModel: aGtRrWorkerCountRequire
 	requiredMemoryModel workerCountCalculator: workerCountCalculator.
 ]
 
+{ #category : #initialization }
+GtRrWorkerCountResourceAlgorithm >> reset [
+	"Reset cached run-time parameters, forcing the calculation to be updated."
+
+	availableMemoryModel reset.
+	requiredMemoryModel reset.
+	coreCount := nil.
+]
+
 { #category : #accessing }
 GtRrWorkerCountResourceAlgorithm >> value [
-	| memoryCount |
 
-	memoryCount := (availableMemoryModel availableMemory / requiredMemoryModel requiredMemory) truncated.
-	^ self coreCount min: memoryCount
+	^ self coreCount min: self memoryCount
 ]
 
 { #category : #accessing }
