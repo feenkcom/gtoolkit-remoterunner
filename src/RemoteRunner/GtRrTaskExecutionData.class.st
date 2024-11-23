@@ -314,6 +314,12 @@ GtRrTaskExecutionData >> workerMachineId [
 ]
 
 { #category : #accessing }
+GtRrTaskExecutionData >> workerMachineRegion [
+	^ self workerAttributes ifNotNil: [ :attributes |
+		attributes at: 'awsRegion' ifAbsent: [ nil ] ]
+]
+
+{ #category : #accessing }
 GtRrTaskExecutionData >> workerMachineType [
 	^ self workerAttributes ifNotNil: [ :attributes |
 		attributes at: 'awsInstanceType' ifAbsent: [ nil ] ]

@@ -18,7 +18,8 @@ GtRrClusterExamplesReport class >> forJob: aJob [
 			GtRrRunnerMachineExamplesReport new
 				machineId: assoc key ;
 				machineType: assoc value first workerMachineType;
-				"machineCores: assoc value first halt;"
+				"machineRegion: assoc value first workerMachineRegion;"
+				"machineCores: assoc value first workerMachineCores;"
 				ipAddress: assoc value first workerIpAddress;
 				workersReport: (GtRrWorkersExamplesReport 
 					forTasks: assoc value);
@@ -97,6 +98,45 @@ GtRrClusterExamplesReport >> fullGcTime [
 ]
 
 { #category : #'gt - extensions' }
+GtRrClusterExamplesReport >> gtViewMachineCoresStatsFor: aView [
+	<gtView>
+	
+	^ aView columnedList 
+		title: 'Machines cores';
+		priority: 25.5;
+		items: [ self machineReports reject: [ :aMachineReport |
+			aMachineReport machineType isNil ] ];
+		column: 'Machine Type' text: [ :aMachineReport |
+			aMachineReport machineType ifNil: [ '-' ] ];
+		column: 'Ip Address' text: [ :aMachineReport |
+			aMachineReport ipAddress ];
+		column: 'Machine Cores' text: [ :aMachineReport |
+			aMachineReport machineCores ];
+		column: 'Weighted Capacity' text: [ :aMachineReport |
+			aMachineReport awsWeightedCapacity ];
+		column: 'Workers Count' textDo: [ :aColumn |
+			aColumn 
+				format: [ :aMachineReport |
+					aMachineReport numberOfWorkers ];
+				background: [ :aText :aMachineReport |
+					(aMachineReport awsWeightedCapacity ~= aMachineReport numberOfWorkers)
+						ifTrue: [BrGlamorousColors paleFailureBackgroundColor. ]
+						ifFalse: [Color transparent] ] ];
+		column: 'Total Memory' text: [ :aMachineReport |
+			aMachineReport machineTotalMemory 
+				ifNotNil: [ :aValue | aValue humanReadableIsqByteSize ] ];
+		column: 'Minimum Available Memory' textDo: [ :aColumn |
+			aColumn 
+				format: [:aMachineReport|
+					aMachineReport machineMinimumAvailableMemory 
+						ifNotNil: [ :aValue | aValue humanReadableIsqByteSize ] ];
+				background: [ :aText :aMachineReport |
+					(aMachineReport machineMinimumAvailableMemory<(1024 * 1024 * 1024))
+						ifTrue: [BrGlamorousColors failureBackgroundColor. ]
+						ifFalse: [Color transparent] ] ]
+]
+
+{ #category : #'gt - extensions' }
 GtRrClusterExamplesReport >> gtViewMachineGCStatsFor: aView [
 	<gtView>
 	
@@ -138,18 +178,34 @@ GtRrClusterExamplesReport >> gtViewMachineMemoryStatsFor: aView [
 			aMachineReport numberOfWorkers ];
 		column: 'Total Memory' text: [ :aMachineReport |
 			aMachineReport machineTotalMemory 
+				ifNil: [ '-' ]
 				ifNotNil: [ :aValue | aValue humanReadableIsqByteSize ] ];
-		column: 'Minimum Available Memory' text: [ :aMachineReport |
-			aMachineReport machineMinimumAvailableMemory 
+		column: 'Declared Memory'  text: [ :aMachineReport |
+			aMachineReport machineTotalDefinedMemory 
+				ifNil: [ '-' ]
 				ifNotNil: [ :aValue | aValue humanReadableIsqByteSize ] ];
+		column: 'Memory Diff'  text: [ :aMachineReport |
+			aMachineReport machineDefinedVsAvailableMemoryDescription ];
+		column: 'Minimum Available Memory' textDo: [ :aColumn |
+			aColumn 
+				format: [:aMachineReport|
+					aMachineReport machineMinimumAvailableMemory 
+						ifNotNil: [ :aValue | aValue humanReadableIsqByteSize ] ];
+				background: [ :aText :aMachineReport |
+					(aMachineReport machineMinimumAvailableMemory<(1024 * 1024 * 1024))
+						ifTrue: [BrGlamorousColors failureBackgroundColor. ]
+						ifFalse: [Color transparent] ] ];
 		column: 'Maximum (initial) Available Memory' text: [ :aMachineReport |
 			aMachineReport machineMaximumAvailableMemory 
+				ifNil: [ '-' ]
 				ifNotNil: [ :aValue | aValue humanReadableIsqByteSize ] ];
 		column: 'Total Consumed Memory' text: [ :aMachineReport |
 			aMachineReport machineTotalConsumedMemory
+				ifNil: [ '-' ]
 				ifNotNil: [ :aValue | aValue humanReadableIsqByteSize ] ];
 		column: 'Avegare Consumed Memory per Worker' text: [ :aMachineReport |
 			aMachineReport machineTotalConsumedMemoryPerWorker 
+				ifNil: [ '-' ]
 				ifNotNil: [ :aValue | aValue humanReadableIsqByteSize ] ]
 			
 ]
@@ -166,6 +222,8 @@ GtRrClusterExamplesReport >> gtViewMachinesFor: aView [
 			aMachineReport machineId ifNil: [ '-' ] ];
 		column: 'Machine Type' text: [ :aMachineReport |
 			aMachineReport machineType ifNil: [ '-' ] ];
+		column: 'Machine Region' text: [ :aMachineReport |
+			aMachineReport machineRegion ifNil: [ '-' ] ];
 		column: 'Ip Address' text: [ :aMachineReport |
 			aMachineReport ipAddress ];
 		column: 'Workers Count' text: [ :aMachineReport |
@@ -376,9 +434,15 @@ GtRrClusterExamplesReport >> numberOfIncrementalGCs [
 ]
 
 { #category : #accessing }
+GtRrClusterExamplesReport >> numberOfMachineCores [
+	^ self machineReports
+		sumNumbers: [ :aMachineReport | aMachineReport machineCores ]
+]
+
+{ #category : #accessing }
 GtRrClusterExamplesReport >> numberOfTaskRetries [
 	^ self machineReports
-		sumNumbers: [ :aWorkerReport | aWorkerReport numberOfTaskRetries ]
+		sumNumbers: [ :aMachineReport | aMachineReport numberOfTaskRetries ]
 ]
 
 { #category : #accessing }
@@ -396,7 +460,11 @@ GtRrClusterExamplesReport >> numberOfWorkers [
 GtRrClusterExamplesReport >> overviewData [
 	^ {
 		'Number of IP addresses' -> self numberOfIdAddresses.
+		'Number of cores' -> self numberOfMachineCores.
 		'Number of workers' -> self numberOfWorkers.
+		'Total AWS weighted capacity - sum' -> self totalAwsWeightedCapacity.
+		'Total AWS weighted capacity - fulfilled percentage' -> self totalAwsWeightedCapacityEfficiency.
+		'Total cores - fulfilled percentage' -> self totalMachineCoresEfficiency.
 		'Number of tasks' -> self numberOfTasks.
 		'Number of task retries' -> self numberOfTaskRetries.
 		'Number of test runs' -> self numberOfExamples .
@@ -466,6 +534,17 @@ GtRrClusterExamplesReport >> tasksTotalGCTime [
 	^ self sumMachineValueWithNil: [ :aMachine | aMachine tasksTotalGCTime ]
 ]
 
+{ #category : #accessing }
+GtRrClusterExamplesReport >> totalAwsWeightedCapacity [
+	^ self machineReports
+		sumNumbers: [ :aMachineReport | aMachineReport awsWeightedCapacity ]
+]
+
+{ #category : #accessing }
+GtRrClusterExamplesReport >> totalAwsWeightedCapacityEfficiency [ 
+	^ ((self numberOfWorkers / self totalAwsWeightedCapacity) * 100) printShowingDecimalPlaces: 1
+]
+
 { #category : #'accessing - gc details' }
 GtRrClusterExamplesReport >> totalGCDuration [
 	^ self totalGCTime ifNotNil: [ :aTimeInMilliseconds |
@@ -475,6 +554,11 @@ GtRrClusterExamplesReport >> totalGCDuration [
 { #category : #'accessing - gc details' }
 GtRrClusterExamplesReport >> totalGCTime [ 
 	^ self sumMachineValueWithNil: [ :aMachine | aMachine totalGCTime ]
+]
+
+{ #category : #accessing }
+GtRrClusterExamplesReport >> totalMachineCoresEfficiency [ 
+	^ ((self numberOfWorkers / self numberOfMachineCores) * 100) printShowingDecimalPlaces: 1
 ]
 
 { #category : #'accessing - resource report' }

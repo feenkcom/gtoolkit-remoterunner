@@ -36,6 +36,12 @@ GtRrWorkerCountAvailableMemoryModel >> calculationAttributes [
 	^ { { '- Available Memory'. ''. self. } }
 ]
 
+{ #category : #initialization }
+GtRrWorkerCountAvailableMemoryModel >> reset [
+	"Reset cached run-time parameters, forcing the calculation to be updated.
+	Subclasses should overwrite as required."
+]
+
 { #category : #accessing }
 GtRrWorkerCountAvailableMemoryModel >> workerCountCalculator [
 	^ workerCountCalculator

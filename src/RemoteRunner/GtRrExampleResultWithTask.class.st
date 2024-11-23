@@ -146,6 +146,11 @@ GtRrExampleResultWithTask >> taskId [
 ]
 
 { #category : #accessing }
+GtRrExampleResultWithTask >> workerMachineRegion [
+	^ self task workerMachineRegion
+]
+
+{ #category : #accessing }
 GtRrExampleResultWithTask >> workerMachineType [
 	^ self task workerMachineType
 ]

@@ -8,7 +8,9 @@ Class {
 		'workersReport',
 		'machineId',
 		'machineType',
-		'machineCores'
+		'machineCores',
+		'machineRegion',
+		'awsWeightedCapacity'
 	],
 	#category : #'RemoteRunner-Reports'
 }
@@ -26,6 +28,16 @@ GtRrRunnerMachineExamplesReport >> avegareFullGcDuration [
 { #category : #'accessing - gc details' }
 GtRrRunnerMachineExamplesReport >> avegareIncrementalGcDuration [
 	^ self incrGcDuration / self numberOfIncrementalGCs
+]
+
+{ #category : #accessing }
+GtRrRunnerMachineExamplesReport >> awsWeightedCapacity [
+	^ awsWeightedCapacity
+]
+
+{ #category : #accessing }
+GtRrRunnerMachineExamplesReport >> awsWeightedCapacity: anObject [
+	awsWeightedCapacity := anObject
 ]
 
 { #category : #accessing }
@@ -143,6 +155,22 @@ GtRrRunnerMachineExamplesReport >> machineCores: anObject [
 ]
 
 { #category : #accessing }
+GtRrRunnerMachineExamplesReport >> machineDefinedVsAvailableMemoryDescription [
+	| definedMemory availableMemory |
+	definedMemory  := self machineTotalDefinedMemory.
+	availableMemory := self machineTotalMemory .
+	(definedMemory isNil or: [availableMemory isNil]) ifTrue: [ ^ '-' ].
+	^ String streamContents: [ :aStream |
+		| memoryDifference|
+		memoryDifference := definedMemory- availableMemory.
+		aStream nextPutAll: memoryDifference humanReadableIsqByteSize.
+		aStream nextPutAll: ' ('.
+		aStream nextPutAll: ((Percentage 
+			with: memoryDifference/definedMemory) displayStringFormat: '#0.0').
+		aStream nextPutAll: ')']
+]
+
+{ #category : #accessing }
 GtRrRunnerMachineExamplesReport >> machineId [
 	^ machineId
 ]
@@ -160,6 +188,16 @@ GtRrRunnerMachineExamplesReport >> machineMaximumAvailableMemory [
 { #category : #'accessing - resource report' }
 GtRrRunnerMachineExamplesReport >> machineMinimumAvailableMemory [
 	^ self workersReport machineMinimumAvailableMemory
+]
+
+{ #category : #accessing }
+GtRrRunnerMachineExamplesReport >> machineRegion [
+	^ machineRegion
+]
+
+{ #category : #accessing }
+GtRrRunnerMachineExamplesReport >> machineRegion: aRegionName [
+	machineRegion := aRegionName
 ]
 
 { #category : #'accessing - resource report' }
@@ -180,6 +218,15 @@ GtRrRunnerMachineExamplesReport >> machineTotalConsumedMemoryPerWorker [
 	(totalMemory isNil or: [minimumAvailableMemory isNil]) ifTrue: [ ^ nil ].
 	
 	^ ((totalMemory - minimumAvailableMemory) / self numberOfWorkers) asInteger
+]
+
+{ #category : #'accessing - resource report' }
+GtRrRunnerMachineExamplesReport >> machineTotalDefinedMemory [
+	^ (GtAwsAmazonWebServices default instanceTypes 
+			at: (self machineType )
+			ifPresent: [ :anInstanceType | 
+				anInstanceType totalMemory]
+			ifAbsent: [ nil ])
 ]
 
 { #category : #'accessing - resource report' }
@@ -231,6 +278,7 @@ GtRrRunnerMachineExamplesReport >> numberOfWorkers [
 GtRrRunnerMachineExamplesReport >> overviewData [
 	^ {
 		'Number of workers' -> self numberOfWorkers.
+		'Weighted Capacity' -> (self awsWeightedCapacity ifNil: [ '-' ]).
 		'Number of tasks' -> self numberOfTasks.
 		'Number of test runs' -> self numberOfExamples .
 		'Number of task retries' -> self numberOfTaskRetries.
@@ -258,7 +306,12 @@ GtRrRunnerMachineExamplesReport >> overviewData [
 		'Maximum VM Memory Size Increase' -> (self vmMaximumMemorySize- self vmMinimumMemorySize) humanReadableIsqByteSize.
 		'Maximum Worker Tasks Start Delay' -> self workersTasksStartMaximumDelay.
 		'Workers Tasks Competion Delay' -> self workersTasksCompletionDelay.
-		'Machine Type' -> self machineType. }
+		'Machine Region' -> self machineRegion.
+		'Machine Type' -> self machineType.
+		'Machine Memory Info' -> self machineTotalMemory humanReadableIsqByteSize.
+		'Machine Memory Defined' -> self machineTotalDefinedMemory humanReadableIsqByteSize.
+		'Memory Difference: Available - Defined' -> self machineDefinedVsAvailableMemoryDescription .
+		'Machine Cores' -> self machineCores}
 ]
 
 { #category : #printing }

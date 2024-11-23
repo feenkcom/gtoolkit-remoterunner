@@ -31,6 +31,12 @@ GtRrWorkerCountAlgorithm >> parameterDetailsWithCalculator: aGtRrWorkerCountCalc
 	^ #()
 ]
 
+{ #category : #initialization }
+GtRrWorkerCountAlgorithm >> reset [
+	"Reset cached run-time parameters, forcing the calculation to be updated.
+	Subclasses should overwrite as required."
+]
+
 { #category : #accessing }
 GtRrWorkerCountAlgorithm >> value [
 	"Answer the calculated number of workers based solely on the receiver's algorithm.
