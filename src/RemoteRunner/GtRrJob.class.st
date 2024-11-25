@@ -510,6 +510,14 @@ GtRrJob >> propertyAt: aString ifAbsent: absentBlock [
 ]
 
 { #category : #'accessing - properties' }
+GtRrJob >> propertyAt: aString ifAbsentPut: absentBlock [
+
+	^ self properties 
+		at: aString
+		ifAbsentPut: absentBlock
+]
+
+{ #category : #'accessing - properties' }
 GtRrJob >> propertyAt: aString ifPresent: presentBlock [
 
 	^ self properties 
