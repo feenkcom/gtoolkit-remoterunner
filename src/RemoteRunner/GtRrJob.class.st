@@ -510,6 +510,14 @@ GtRrJob >> propertyAt: aString ifAbsent: absentBlock [
 ]
 
 { #category : #'accessing - properties' }
+GtRrJob >> propertyAt: aString ifAbsentPut: absentBlock [
+
+	^ self properties 
+		at: aString
+		ifAbsentPut: absentBlock
+]
+
+{ #category : #'accessing - properties' }
 GtRrJob >> propertyAt: aString ifPresent: presentBlock [
 
 	^ self properties 
@@ -562,6 +570,16 @@ GtRrJob >> resultCount [
 ]
 
 { #category : #accessing }
+GtRrJob >> resultWithTaskid: aTaskId [
+	"Answer the result (GtRrTask) with the given id.
+	This may not be the same task as submitted due to task retry."
+
+	results ifNil: [ ^ nil ].
+	^ results detect: [ :task |
+		task includesTaskId: aTaskId ].
+]
+
+{ #category : #accessing }
 GtRrJob >> results [
 
 	^ results
@@ -579,16 +597,6 @@ GtRrJob >> resultsWithErrors [
 	"Answer the subset of results that have errors"
 
 	^ results select: #hasErrors
-]
-
-{ #category : #accessing }
-GtRrJob >> resultWithTaskid: aTaskId [
-	"Answer the result (GtRrTask) with the given id.
-	This may not be the same task as submitted due to task retry."
-
-	results ifNil: [ ^ nil ].
-	^ results detect: [ :task |
-		task includesTaskId: aTaskId ].
 ]
 
 { #category : #'private - running' }
@@ -723,23 +731,6 @@ GtRrJob >> taskExecutionTime [
 ]
 
 { #category : #accessing }
-GtRrJob >> tasks [
-	"Answer the collection of tasks to be executed"
-	<return: #SequenceableCollection>
-
-	^ self subclassResponsibility 
-]
-
-{ #category : #accessing }
-GtRrJob >> tasksFor: aGtRemoteRunner [
-	"Special jobs may depend on the remote runner to create the tasks,
-	e.g. the code sync wants a task per worker.
-	Such subclasses can override this method."
-
-	^ self tasks.
-]
-
-{ #category : #accessing }
 GtRrJob >> taskTimeout [
 	<return: #Duration>
 
@@ -759,6 +750,23 @@ GtRrJob >> taskTimeoutSeconds: aNumber [
 		description: 'Timeout must be a number'.
 
 	taskTimeout := aNumber seconds
+]
+
+{ #category : #accessing }
+GtRrJob >> tasks [
+	"Answer the collection of tasks to be executed"
+	<return: #SequenceableCollection>
+
+	^ self subclassResponsibility 
+]
+
+{ #category : #accessing }
+GtRrJob >> tasksFor: aGtRemoteRunner [
+	"Special jobs may depend on the remote runner to create the tasks,
+	e.g. the code sync wants a task per worker.
+	Such subclasses can override this method."
+
+	^ self tasks.
 ]
 
 { #category : #'announcer - subscription' }
