@@ -1,3 +1,6 @@
+"
+Subclasses hold information about which tasks / checks were retried in task completion announcements, .
+"
 Class {
 	#name : #GtRrAbstractRetryTasks,
 	#superclass : #Object,

@@ -143,10 +143,12 @@ GtRrExamplesTask >> setIgnoreNoTest [
 
 { #category : #accessing }
 GtRrExamplesTask >> splitTests [
-	"Answer a collection of tasks in which each task has only 1 test from the receiver.
-	If the receiver only has 1 test, answer the receiver."
+	"Answer a collection of tasks which need to be retried and in which each task has only 1 check from the receiver.
+	If the receiver has errors (the task overall failed), retry all unsuccessful checks.
+	Once a definition of flaky tests has been added: If the receiver succeeded, retry failing flaky checks."
 	| group |
 
+	self hasErrors ifFalse: [ ^ #() ].
 	group := self group.
 	group size = 1 ifTrue: [ ^ { self copy } ].
 	^ group collect: [ :example |
