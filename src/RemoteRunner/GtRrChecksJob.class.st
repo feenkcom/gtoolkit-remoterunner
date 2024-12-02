@@ -19,6 +19,14 @@ GtRrChecksJob class >> leJsonV4Name [
 	^ #gtRrChecksJob
 ]
 
+{ #category : #'as yet unclassified' }
+GtRrChecksJob class >> retryTasksInfoFrom: aCollectionOfTasks [
+	"Answer a GtRrAbstractRetryTasks populated with the receiver's information.
+	Only valid when the receiver is a retry tasks."
+
+	^ GtRrChecksRetryTasks fromTasks: aCollectionOfTasks
+]
+
 { #category : #accessing }
 GtRrChecksJob class >> sunitTestNames: anArray [
 
@@ -29,4 +37,15 @@ GtRrChecksJob class >> sunitTestNames: anArray [
 GtRrChecksJob >> isChecksJob [
 
 	^ true
+]
+
+{ #category : #accessing }
+GtRrChecksJob >> resultsGroupedByTestName [
+	| dictionary |
+
+	dictionary := Dictionary new.
+	results do: [ :task |
+		task result do: [ :testResult |
+			(dictionary at: testResult testName ifAbsentPut: [ OrderedCollection new ]) add: testResult ] ].
+	^ dictionary
 ]

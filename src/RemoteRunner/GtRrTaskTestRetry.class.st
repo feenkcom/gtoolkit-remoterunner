@@ -54,6 +54,8 @@ GtRrTaskTestRetry >> retryTask: aGtRrTask [
 	"Test retry has a maximum number of retries, however if the task contains multiple tests we want to break out the tests in to individual tasks so that one test can't cause the failure of others"
 	| retryTasks |
 
+	(aGtRrTask hasErrors not and:
+		[ aGtRrTask totalCount - aGtRrTask numberOfSuccesses = 0 ]) ifTrue: [ ^ #() ].
 	retryCount := retryCount + 1.
 	^ retryCount <= maxRetries ifTrue: 
 		[ retryTasks := aGtRrTask splitTests.

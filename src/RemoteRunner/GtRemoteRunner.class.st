@@ -322,6 +322,17 @@ GtRemoteRunner >> addTaskContext: taskContext [
 
 	taskQueue nextPut: taskContext.
 	runnerStats taskQueueSize: taskQueue size.
+	self assignTasksToWorkers.
+]
+
+{ #category : #adding }
+GtRemoteRunner >> addTaskContextFirst: taskContext [
+	"Add the supplied taskContext to the task queue.
+	Can be called from anywhere since a SharedQueue is used."
+
+	taskQueue putFirst: taskContext.
+	runnerStats taskQueueSize: taskQueue size.
+	self assignTasksToWorkers.
 ]
 
 { #category : #announcer }
@@ -921,12 +932,13 @@ GtRemoteRunner >> privateTaskFailed: aTaskContextId executionData: aGtRrWorkerEx
 	runnerStats currentlyExecutingTaskCount: currentlyExecutingTasks size.
 	taskContext task executionData updateFromWorker: aGtRrWorkerExecutionData.
 	retryTasks := taskContext task retryTasks.
+	taskContext retryTasks: retryTasks.
 	registeredAvailable := registeredWorkers isNotEmpty.
 	(retryTasks isEmpty or: [ registeredAvailable not ]) ifTrue:
-		[ taskContext markTaskCompleted.
-		self announceAndLog: (GtRrTaskFailedAnnouncement task: taskContext) ]
+		[ taskContext markTaskCompleted ]
 	ifFalse:
-		[ self queueTasks: retryTasks jobContext: taskContext jobContext ].
+		[ self queueTasksFirst: retryTasks jobContext: taskContext jobContext ].
+	self announceAndLog: taskContext taskFailedAnnouncement.
 	self checkJobCompleted: taskContext.
 	self assignTasksToWorkers.
 ]
@@ -937,6 +949,16 @@ GtRemoteRunner >> queueTasks: retryTasks jobContext: aJobContext [
 	aJobContext isStarted ifFalse: [ ^ self ].
 	retryTasks do: [ :task |
 		self addTaskContext: (GtRrTaskContext new 
+			task: task;
+			jobContext: aJobContext) ]
+]
+
+{ #category : #private }
+GtRemoteRunner >> queueTasksFirst: retryTasks jobContext: aJobContext [ 
+
+	aJobContext isStarted ifFalse: [ ^ self ].
+	retryTasks do: [ :task |
+		self addTaskContextFirst: (GtRrTaskContext new 
 			task: task;
 			jobContext: aJobContext) ]
 ]
@@ -1339,23 +1361,28 @@ GtRemoteRunner >> syncChanges [
 
 { #category : #'api - worker' }
 GtRemoteRunner >> taskDone: aTaskContextId executionData: aGtRrWorkerExecutionData result: aResult [
-	| taskContext mutexStart mutexEnd |
+	| mutexStart mutexEnd |
 
 	GtRrTaskDoneStartingSignal new 
 		taskId: aTaskContextId;
 		emit.
 	mutexStart := DateAndTime now.
 	self critical: 
-		[ mutexEnd := DateAndTime now.
+		[ | taskContext |
+		mutexEnd := DateAndTime now.
 		taskContext := currentlyExecutingTasks removeKey: aTaskContextId ifAbsent: [].
 		"If the task hasn't been found, assumed that it was terminated and move on"
-		taskContext ifNotNil:
-			[ runnerStats currentlyExecutingTaskCount: currentlyExecutingTasks size.
+		taskContext ifNotNil: [ | retryTasks |
 			taskContext workerConnection registerHeartbeat.
+			runnerStats currentlyExecutingTaskCount: currentlyExecutingTasks size.
 			taskContext task executionData updateFromWorker: aGtRrWorkerExecutionData.
 			taskContext result: aResult.
+			retryTasks := taskContext task retryTasks.
+			taskContext retryTasks: retryTasks.
 			taskContext markTaskCompleted.
-			self announceAndLog: (GtRrTaskCompletedAnnouncement task: taskContext).
+			(retryTasks isNotEmpty and: [ registeredWorkers isNotEmpty ]) ifTrue:
+				[ self queueTasksFirst: retryTasks jobContext: taskContext jobContext ].
+			self announceAndLog: taskContext taskCompletedAnnouncement.
 			self checkJobCompleted: taskContext ].
 		self assignTasksToWorkers. ].
 
