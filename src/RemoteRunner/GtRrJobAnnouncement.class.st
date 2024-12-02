@@ -42,6 +42,12 @@ GtRrJobAnnouncement >> job: anObject [
 	job := anObject
 ]
 
+{ #category : #'as yet unclassified' }
+GtRrJobAnnouncement >> jobId [
+
+	^ job jobId
+]
+
 { #category : #printing }
 GtRrJobAnnouncement >> printOneLineContentsOn: stream [
 

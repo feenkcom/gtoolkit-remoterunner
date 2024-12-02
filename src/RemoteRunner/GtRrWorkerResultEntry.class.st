@@ -26,12 +26,18 @@ GtRrWorkerResultEntry >> checkPromise [
 	"Check that the result was processed successfully.
 	If not, notify the remote runner.
 	If that fails signal the error."
-	| errorDetails |
 
 	promise wait.
 	promise exception ifNil: [ ^ self ].
 
-	worker connectDuring: [ :application |
+	Stdio stdout
+		<< 'checkPromise error: ';
+			<< promise exception errorMessage asString; lf;
+		<< 'trace:'; lf;
+		<< promise exception trace withUnixLineEndings; lf;
+		<< 'task id: ';
+			<< task taskContextId asString; lf.
+	worker connectDuring: [ :application | | errorDetails |
 		errorDetails := GtRrErrorDetails new
 			errorMessage: 'RemoteRunner result processing error: ', promise exception errorMessage asString;
 			trace: promise exception trace.

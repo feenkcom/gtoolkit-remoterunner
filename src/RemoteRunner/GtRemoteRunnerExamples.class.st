@@ -463,7 +463,8 @@ GtRemoteRunnerExamples >> simpleTask [
 
 { #category : #examples }
 GtRemoteRunnerExamples >> simpleTestRetryTask [
-	"Demonstrate executing a simple test task"
+	"Demonstrate retrying a task that 'crashes' the worker.
+	This will take approximately 4 times the worker heartbeat timeout time to execute (3 or 4 minutes)."
 	<gtExample>
 	<noTest>
 	| factory job taskFailedCount taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount workerRegisteredSemaphore |
@@ -474,7 +475,10 @@ GtRemoteRunnerExamples >> simpleTestRetryTask [
 	workerRegisteredSemaphore := Semaphore new.
 	GtRrSampleTest compile: 
 'testCrash
-	"1"
+	Stdio stdout
+		<< Time now printString;
+		<< '' testCrash quitting image'';
+		lf; flush.
 	Smalltalk snapshot: false andQuit: true.'
 			classified: #tests.
 	remoteRunner := self simpleRunner.
@@ -484,7 +488,9 @@ GtRemoteRunnerExamples >> simpleTestRetryTask [
 	Wait for the worker to register before proceeding with tests."
 	remoteRunner when: GtRrWorkerRegisteredAnnouncement do: [ :ann | 
 		workerRegisteredSemaphore signal ].
-	remoteRunner start.
+	remoteRunner
+		startLogging;
+		start.
 	[ 4 timesRepeat:
 			[ self waitOn: workerRegisteredSemaphore for: 20
 				description: 'Worker didn''t register in time' ].
@@ -510,7 +516,7 @@ GtRemoteRunnerExamples >> simpleTestRetryTask [
 	job tasks do: [ :task |
 		task retryStrategy: GtRrTaskTestRetry new ].
 	remoteRunner submitJob: job.
-	self waitOn: jobSemaphore for: 10 description: 'Job didn''t complete in time'.
+	self waitOn: jobSemaphore for: 240 description: 'Job didn''t complete in time'.
 	self assert: remoteRunner taskQueue size equals: 0.
 	self assert: remoteRunner currentlyExecutingJobs size equals: 0.
 	self assert: remoteRunner currentlyExecutingTasks size equals: 0.

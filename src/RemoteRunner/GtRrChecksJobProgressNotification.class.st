@@ -14,7 +14,7 @@ Class {
 { #category : #adding }
 GtRrChecksJobProgressNotification >> addTaskAnnouncement: anAnnouncement [
 
-	self updateSummaryWithTaskResult: anAnnouncement taskResult.	
+	self updateSummaryWithAnnouncement: anAnnouncement.
 	super addTaskAnnouncement: anAnnouncement.
 ]
 
@@ -232,14 +232,22 @@ GtRrChecksJobProgressNotification >> totalChecksCount: anInteger [
 ]
 
 { #category : #'updating - summary' }
-GtRrChecksJobProgressNotification >> updateSummaryWithTaskResult: aTaskResult [
+GtRrChecksJobProgressNotification >> updateSummaryWithAnnouncement: anAnnouncement [
+	| taskResult retryCount retryTaskInfo completedTests testNames |
 
-	self incrementSuccessfulChecksCountWith: (aTaskResult count: [ :aResult | 
+	taskResult := anAnnouncement taskResult.
+	retryTaskInfo := anAnnouncement retryTaskInfo.
+	retryCount := retryTaskInfo retryCount.
+	"Don't take retries in to account in the statistics"
+	testNames := retryTaskInfo taskIdChecks flatCollect: #value.
+	completedTests := taskResult reject: [ :each |
+		testNames includes: (each testName) ].
+	self incrementSuccessfulChecksCountWith: (completedTests count: [ :aResult | 
 		aResult isSuccess ]).
-	self incrementSkippedChecksCountWith: (aTaskResult count: [ :aResult | 
+	self incrementSkippedChecksCountWith: (completedTests count: [ :aResult | 
 		aResult isSkipped ]).
-	self incrementFailedChecksCountWith: (aTaskResult count: [ :aResult | 
+	self incrementFailedChecksCountWith: (completedTests count: [ :aResult | 
 		aResult isFailure ]).
-	self incrementErrorChecksCountWith: (aTaskResult count: [ :aResult | 
+	self incrementErrorChecksCountWith: (completedTests count: [ :aResult | 
 		aResult isError or: [ aResult isWarning ] ]).
 ]

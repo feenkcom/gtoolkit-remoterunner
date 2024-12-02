@@ -13,9 +13,9 @@ GtRrTaskRetryExamples >> exampleRetry [
 	| task tasks |
 
 	task := GtRrExplicitExampleTask examples:
-		{ #GtRrSampleExample -> #testPass.
-		#GtRrSampleExample -> #testFail.
-		#GtRrSampleExample -> #testError. }.
+		{ #GtRrSampleExample -> #passExample.
+		#GtRrSampleExample -> #failExample.
+		#GtRrSampleExample -> #errorExample. }.
 	task retryStrategy: GtRrTaskTestRetry new.
 
 	"Default is 2 retries, first retry splits the tests out"
@@ -44,11 +44,11 @@ GtRrTaskRetryExamples >> fixedRetry [
 	<gtExample>
 	| task tasks |
 
-	task := GtRrExampleValueTask new.
+	task := GtRrExampleValueTask new setError.
 	task retryStrategy: GtRrTaskFixedRetry new.
 	"Default is 2 retries"
 	2 timesRepeat: 
-		[ task runInImage.
+		[ self runCheckTask: task.
 		self assert: task isFinished.
 		tasks := task retryTasks.
 		self assert: tasks size equals: 1.
@@ -69,6 +69,19 @@ GtRrTaskRetryExamples >> neverRetry [
 	"Never retry is the default behaviour"
 	self assert: task retryStrategy identicalTo: GtRrTaskNeverRetry uniqueInstance.
 	self assert: task retryTasks isEmpty.
+]
+
+{ #category : #'private - helpers' }
+GtRrTaskRetryExamples >> runCheckTask: aTask [
+	"Run the supplied check task with exception handling"
+	| executionContext taskContext |
+
+	taskContext := GtRrWorkerTaskContext new
+		task: aTask;
+		exceptionHandlingStrategy: GtRrTaskStandaloneExceptionStrategy new.
+	executionContext := GtRrWorkerExecutionContext new
+		taskContext: taskContext.
+	executionContext runTask.
 ]
 
 { #category : #examples }

@@ -55,7 +55,7 @@ GtRrExampleValueTask >> printOn: aStream [
 { #category : #accessing }
 GtRrExampleValueTask >> run [
 
-	errorFlag ifTrue: [ self error: value ].
+	errorFlag ifTrue: [ self assert: value ].
 	^ value
 ]
 

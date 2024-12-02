@@ -19,3 +19,11 @@ SharedQueue >> items: aCollection [
 		[ self assert: items isEmpty.
 		items := aCollection asOrderedCollection ]
 ]
+
+{ #category : #'*RemoteRunner' }
+SharedQueue >> putFirst: anObject [
+	monitor critical: [
+		items addFirst: anObject.
+		monitor signal].
+	^ anObject
+]

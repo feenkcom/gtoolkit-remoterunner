@@ -58,7 +58,11 @@ GtRrTaskRetry >> privateRetryTaskFor: aGtRrTask [
 { #category : #accessing }
 GtRrTaskRetry >> retryTask: aGtRrTask [
 	"Answer the collection of tasks to be retried.
-	If the task should just fail answer an empty collection."
+	If no further action should be taken, i.e. the task has passed or should just fail, answer an empty collection.
+	Note that the task is asked for retry tasks on both success and failure
+	(which allows for the task to handle the scenario where the overall task completed,
+	but some subset of the task should be rerun for whatever reason, e.g. and individual
+	test failed within the group)."
 
 	^ self subclassResponsibility.
 ]

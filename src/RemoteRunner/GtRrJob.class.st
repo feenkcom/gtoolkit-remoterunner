@@ -85,6 +85,14 @@ GtRrJob class >> leJsonV4Name [
 	^ #gtRrJob
 ]
 
+{ #category : #accessing }
+GtRrJob class >> retryTasksInfoFrom: aCollectionOfTasks [
+	"Answer a GtRrAbstractRetryTasks populated with the receiver's information.
+	Only valid when the receiver is a retry tasks."
+	
+	^ GtRrRetryTasks fromTasks: aCollectionOfTasks
+]
+
 { #category : #'job submission' }
 GtRrJob class >> script: aString [
 	"Answer a job with a single script task"
@@ -107,9 +115,6 @@ GtRrJob >> addResult: aGtRrTask [
 	results add: aGtRrTask.
 	hasErrors := aGtRrTask hasErrors.
 	hasErrors ifTrue: [ errorCount := errorCount + 1 ].
-	self announce: (hasErrors
-		ifTrue: [ GtRrTaskFailedAnnouncement task: aGtRrTask ]
-		ifFalse: [ GtRrTaskCompletedAnnouncement task: aGtRrTask ])
 ]
 
 { #category : #announcer }
