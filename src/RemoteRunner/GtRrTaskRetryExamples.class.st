@@ -17,6 +17,7 @@ GtRrTaskRetryExamples >> exampleRetry [
 		#GtRrSampleExample -> #failExample.
 		#GtRrSampleExample -> #errorExample. }.
 	task retryStrategy: GtRrTaskTestRetry new.
+	task executionData: (GtRrTaskExecutionData new errorDetails: GtRrErrorDetails new).
 
 	"Default is 2 retries, first retry splits the tests out"
 	tasks := task retryTasks.
@@ -27,6 +28,7 @@ GtRrTaskRetryExamples >> exampleRetry [
 	"Each task will be retried once more"
 	tasks do: [ :each |
 		task := each.
+		task executionData: (GtRrTaskExecutionData new errorDetails: GtRrErrorDetails new).
 		tasks := task retryTasks.
 		self assert: tasks size equals: 1.
 		task := tasks first.
@@ -34,6 +36,7 @@ GtRrTaskRetryExamples >> exampleRetry [
 
 	"Next failure attempt should not retry"
 	tasks do: [ :each |
+		each executionData: (GtRrTaskExecutionData new errorDetails: GtRrErrorDetails new).
 		tasks := each retryTasks.
 		self assert: tasks isEmpty ].
 ]
@@ -95,6 +98,7 @@ GtRrTaskRetryExamples >> testRetry [
 		#GtRrSampleTest -> #testFail.
 		#GtRrSampleTest -> #testError. }.
 	task retryStrategy: GtRrTaskTestRetry new.
+	task executionData: (GtRrTaskExecutionData new errorDetails: GtRrErrorDetails new).
 
 	"Default is 2 retries, first retry splits the tests out"
 	tasks := task retryTasks.
@@ -105,6 +109,7 @@ GtRrTaskRetryExamples >> testRetry [
 	"Each task will be retried once more"
 	tasks do: [ :each |
 		task := each.
+		task executionData: (GtRrTaskExecutionData new errorDetails: GtRrErrorDetails new).
 		tasks := task retryTasks.
 		self assert: tasks size equals: 1.
 		task := tasks first.
@@ -112,6 +117,7 @@ GtRrTaskRetryExamples >> testRetry [
 
 	"Third attempt should not retry"
 	tasks do: [ :each |
+		each executionData: (GtRrTaskExecutionData new errorDetails: GtRrErrorDetails new).
 		tasks := each retryTasks.
 		self assert: tasks isEmpty ].
 ]
