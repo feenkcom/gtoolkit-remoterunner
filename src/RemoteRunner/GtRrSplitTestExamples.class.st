@@ -19,7 +19,14 @@ GtRrSplitTestExamples >> splitClassExamples [
 		collect: [ :example | example methodClass name -> example selector ]
 		as: Set.
 
+	"Tasks without errors don't split"
+	self assert: splitTasks size equals: 0.
+
+	"The presence of error details is enough to trigger the split"
+	compoundTask executionData: (GtRrTaskExecutionData new errorDetails: GtRrErrorDetails new).
+	splitTasks := compoundTask splitTests.
 	self assert: splitTasks size equals: 4.
+
 	splitTasks do: [ :splitTask |
 		self assert: splitTask constraint identicalTo: compoundTask constraint.
 		self assert: splitTask taskTimeout identicalTo: compoundTask taskTimeout.
@@ -42,7 +49,14 @@ GtRrSplitTestExamples >> splitClassTests [
 		collect: [ :testCase | testCase class name -> testCase selector ]
 		as: Set.
 
+	"Tasks without errors don't split"
+	self assert: splitTasks size equals: 0.
+
+	"The presence of error details is enough to trigger the split"
+	compoundTask executionData: (GtRrTaskExecutionData new errorDetails: GtRrErrorDetails new).
+	splitTasks := compoundTask splitTests.
 	self assert: splitTasks size equals: 4.
+
 	splitTasks do: [ :splitTask |
 		self assert: splitTask constraint identicalTo: compoundTask constraint.
 		self assert: splitTask taskTimeout identicalTo: compoundTask taskTimeout.
@@ -63,12 +77,19 @@ GtRrSplitTestExamples >> splitExplicitExamples [
 		{ #GtRrSampleExample -> #passExample }.
 	splitTasks := compoundTask splitTests.
 
+	"Tasks without errors don't split"
+	self assert: splitTasks size equals: 0.
+
+	"The presence of error details is enough to trigger the split"
+	compoundTask executionData: (GtRrTaskExecutionData new errorDetails: GtRrErrorDetails new).
+	splitTasks := compoundTask splitTests.
 	self assert: splitTasks size equals: 1.
 
 	compoundExampleNames := { #GtRrSampleExample -> #passExample.
 		#GtRrSampleExample -> #failExample.
 		#GtRrSampleExample -> #errorExample. }.
 	compoundTask := GtRrExplicitExampleTask examples: compoundExampleNames.
+	compoundTask executionData: (GtRrTaskExecutionData new errorDetails: GtRrErrorDetails new).
 	splitTasks := compoundTask splitTests.
 
 	self assert: splitTasks size equals: 3.
@@ -88,12 +109,19 @@ GtRrSplitTestExamples >> splitExplicitTests [
 		{ #GtRrSampleTest -> #testPass }.
 	splitTasks := compoundTask splitTests.
 
+	"Tasks without errors don't split"
+	self assert: splitTasks size equals: 0.
+
+	"The presence of error details is enough to trigger the split"
+	compoundTask executionData: (GtRrTaskExecutionData new errorDetails: GtRrErrorDetails new).
+	splitTasks := compoundTask splitTests.
 	self assert: splitTasks size equals: 1.
 
 	compoundTestNames := { #GtRrSampleExample -> #passExample.
 		#GtRrSampleExample -> #failExample.
 		#GtRrSampleExample -> #errorExample. }.
 	compoundTask := GtRrExplicitSUnitTask sunitTestNames: compoundTestNames.
+	compoundTask executionData: (GtRrTaskExecutionData new errorDetails: GtRrErrorDetails new).
 	splitTasks := compoundTask splitTests.
 
 	self assert: splitTasks size equals: 3.
@@ -108,6 +136,8 @@ GtRrSplitTestExamples >> splitPackageExamples [
 	| compoundTask splitTasks taskNames |
 
 	compoundTask := GtRrPackageExampleTask examplePackageName: 'RemoteRunner'.
+	"The presence of error details is enough to trigger the split"
+	compoundTask executionData: (GtRrTaskExecutionData new errorDetails: GtRrErrorDetails new).
 	splitTasks := compoundTask splitTests.
 
 	taskNames := compoundTask group examples
@@ -130,6 +160,8 @@ GtRrSplitTestExamples >> splitPackageTests [
 	| compoundTask splitTasks taskNames |
 
 	compoundTask := GtRrPackageSUnitTask sunitPackageName: 'RemoteRunner'.
+	"The presence of error details is enough to trigger the split"
+	compoundTask executionData: (GtRrTaskExecutionData new errorDetails: GtRrErrorDetails new).
 	splitTasks := compoundTask splitTests.
 
 	taskNames := compoundTask allExamples
