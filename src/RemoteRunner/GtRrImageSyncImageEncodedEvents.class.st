@@ -4,6 +4,9 @@ GtRrImageSyncImageEncodedEvents provides pre-serialised Epicea events to synchro
 Class {
 	#name : #GtRrImageSyncImageEncodedEvents,
 	#superclass : #GtRrImageSyncEncodedEvents,
+	#instVars : [
+		'latestOmReference'
+	],
 	#category : #'RemoteRunner-Runner-ImageSync'
 }
 

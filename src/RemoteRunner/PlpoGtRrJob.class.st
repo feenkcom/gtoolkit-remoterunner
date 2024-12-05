@@ -56,6 +56,14 @@ PlpoGtRrJob >> hasExceptionHandlingStrategy [
 ]
 
 { #category : #testing }
+PlpoGtRrJob >> includesProperty: aString [
+
+	^ originalJob
+		ifNil: [ self proxyPerform: #includesProperty: withPrimitiveArguments: { aString } ]
+		ifNotNil: [ originalJob includesProperty: aString ]
+]
+
+{ #category : #testing }
 PlpoGtRrJob >> isChecksJob [
 
 	^ false
@@ -106,6 +114,14 @@ PlpoGtRrJob >> originalJob: anObject [
 PlpoGtRrJob >> properties [
 
 	^ self proxyPerformSerialized: #properties
+]
+
+{ #category : #'properties - accessing' }
+PlpoGtRrJob >> propertyAt: aString [
+
+	^ originalJob
+		ifNil: [ self proxyPerform: #propertyAt: withPrimitiveArguments: { aString } ]
+		ifNotNil: [ originalJob propertyAt: aString ]
 ]
 
 { #category : #accessing }
@@ -159,6 +175,15 @@ PlpoGtRrJob >> taskCount [
 ]
 
 { #category : #accessing }
+PlpoGtRrJob >> tasks [
+
+	^ self newCommandFactory 
+		setByValue;
+		<< 'self tasks asArray';
+		sendAndWait.
+]
+
+{ #category : #accessing }
 PlpoGtRrJob >> taskTimeout [
 	
 	^ self proxyPerformSerialized: #taskTimeout
@@ -172,15 +197,6 @@ PlpoGtRrJob >> taskTimeoutSeconds: aNumber [
 
 	^ self proxyPerform: #taskTimeoutSeconds: 
 		withPrimitiveArguments: { aNumber }.
-]
-
-{ #category : #accessing }
-PlpoGtRrJob >> tasks [
-
-	^ self newCommandFactory 
-		setByValue;
-		<< 'self tasks asArray';
-		sendAndWait.
 ]
 
 { #category : #'announcer - subscription' }

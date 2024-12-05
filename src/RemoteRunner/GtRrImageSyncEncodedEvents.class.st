@@ -6,8 +6,7 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'encodedEvents',
-		'sessionHistory',
-		'latestOmReference'
+		'sessionHistory'
 	],
 	#category : #'RemoteRunner-Runner-ImageSync'
 }
@@ -45,6 +44,18 @@ GtRrImageSyncEncodedEvents >> events [
 	^ STON fromString: encodedEvents.
 ]
 
+{ #category : #'as yet unclassified' }
+GtRrImageSyncEncodedEvents >> gtEntriesFor: aView [
+	<gtView>
+
+	^ aView columnedList
+		title: 'Entries';
+		priority: 20;
+		items: [ STON fromString: encodedEvents ];
+		column: 'Entry' text:
+			[ :entry | entry content printString ]
+]
+
 { #category : #ui }
 GtRrImageSyncEncodedEvents >> gtSessionHistoryFor: aView [
 	<gtView>
@@ -61,18 +72,6 @@ GtRrImageSyncEncodedEvents >> includesReference: anOmReference [
 	"Answer a boolean indicating whether anOmReference is part of the receiver's session history"
 
 	^ sessionHistory includes: anOmReference
-]
-
-{ #category : #accessing }
-GtRrImageSyncEncodedEvents >> latestOmReference [
-
-	^ latestOmReference
-]
-
-{ #category : #accessing }
-GtRrImageSyncEncodedEvents >> latestOmReference: anObject [
-
-	latestOmReference := anObject
 ]
 
 { #category : #accessing }

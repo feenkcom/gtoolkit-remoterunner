@@ -88,7 +88,7 @@ GtRrChangesSync >> changesFrom: anOmReference [
 	| enumerator |
 
 	(self includesReference: anOmReference) ifFalse:
-		[ self error: 'Unknown OmReference: ', anOmReference gtDisplayString ].
+		[ (GtRrUnknownOmReference omReference: anOmReference source: self) signal ].
 
 	enumerator := GtEpLogEnumerator new latestLog: self epLog.
 	^ GtEpForExportEventSequencer sequence: 

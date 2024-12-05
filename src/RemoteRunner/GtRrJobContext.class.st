@@ -35,6 +35,12 @@ GtRrJobContext >> asDictionary [
 		yourself.
 ]
 
+{ #category : #'as yet unclassified' }
+GtRrJobContext >> changesSync [
+
+	^ job changesSync
+]
+
 { #category : #accessing }
 GtRrJobContext >> checkJobCompleted [
 	"Ask the RemoteRunner to check whether the receiver is complete.
