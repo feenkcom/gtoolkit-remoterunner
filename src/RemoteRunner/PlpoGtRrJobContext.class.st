@@ -10,6 +10,12 @@ PlpoGtRrJobContext class >> remoteClassName [
 	^ #GtRrJobContext
 ]
 
+{ #category : #testing }
+PlpoGtRrJobContext >> changesSync [
+
+	^ self proxyPerform: #changesSync
+]
+
 { #category : #accessing }
 PlpoGtRrJobContext >> gtActionCancelFor: anAction [
 	"Terminate the receiver's job.
@@ -27,7 +33,7 @@ PlpoGtRrJobContext >> gtActionCancelFor: anAction [
 			  aButton phlow fireToolUpdateWish ]
 ]
 
-{ #category : #accessing }
+{ #category : #testing }
 PlpoGtRrJobContext >> isStarted [
 
 	^ self proxyPerform: #isStarted

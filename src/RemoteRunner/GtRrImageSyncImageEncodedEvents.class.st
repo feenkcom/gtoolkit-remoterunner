@@ -16,12 +16,9 @@ GtRrImageSyncImageEncodedEvents class >> leJsonV4Name [
 { #category : #accessing }
 GtRrImageSyncImageEncodedEvents >> updateEncodedEvents [
 	"Update the receiver's encoded events."
-	| newLatestOmReference changesSyncManager |
+	| changesSyncManager |
 
 	changesSyncManager := GtRrChangesSync uniqueInstance.
-	newLatestOmReference := changesSyncManager epLog headReference.
-	newLatestOmReference = latestOmReference ifTrue: [ ^ self ].
-	latestOmReference := newLatestOmReference.
 	sessionHistory := changesSyncManager sessionHistory.
 	encodedEvents := changesSyncManager encodedChangesFrom: sessionHistory first.
 ]

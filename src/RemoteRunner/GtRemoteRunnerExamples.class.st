@@ -123,7 +123,6 @@ GtRemoteRunnerExamples >> changesSync [
 	encodedEvents := STON toString: { entry }.
 	events := GtRrImageSyncEncodedEvents new
 		sessionHistory: GtRrChangesSync default sessionHistory;
-		latestOmReference: GtRrChangesSync headReference;
 		encodedEvents: encodedEvents.
 	semaphore := GtMutualExclusionSemaphore new.
 	remoteRunner := GtRemoteRunner new.

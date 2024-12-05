@@ -149,6 +149,13 @@ GtRrJob >> cancelJob [
 
 ]
 
+{ #category : #testing }
+GtRrJob >> changesSync [
+	"Answer a boolean indicating whether changes should be synced to the workers."
+
+	^ properties includesKey: 'changeEvents'
+]
+
 { #category : #accessing }
 GtRrJob >> creationTime [
 
@@ -339,6 +346,12 @@ GtRrJob >> id [
 GtRrJob >> id: anObject [
 
 	id := anObject
+]
+
+{ #category : #'properties - testing' }
+GtRrJob >> includesProperty: aString [
+
+	^ self properties includesKey: aString
 ]
 
 { #category : #initialization }

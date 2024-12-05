@@ -441,6 +441,8 @@ GtRemoteRunner >> changesSyncEvents [
 
 { #category : #accessing }
 GtRemoteRunner >> changesSyncEvents: anObject [
+	"Set the change events to be replayed by each worker.
+	Storing the change events in the runner is normally only done when workers will be used for multiple jobs.  If workers are restarted for each job the change events will normally be provided with the job using the 'changeEvents' property."
 
 	changesSyncEvents := anObject
 ]
