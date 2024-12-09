@@ -9,9 +9,9 @@ Class {
 }
 
 { #category : #'event construction' }
-GtRrImageSyncEventsBuilder >> addEvent: anEpEvent [
+GtRrImageSyncEventsBuilder >> addEntry: anOmEntry [
 
-	events add: anEpEvent
+	events add: anOmEntry
 ]
 
 { #category : #'event construction' }
