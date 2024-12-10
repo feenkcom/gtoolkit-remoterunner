@@ -22,6 +22,16 @@ GtRrWorkerExamplesReport >> fullGcDuration [
 ]
 
 { #category : #'accessing - gc details' }
+GtRrWorkerExamplesReport >> fullGcPercentage [
+	| fullGcTime tasksDurationOnWorker |
+	fullGcTime := self fullGcTime.
+	tasksDurationOnWorker := self tasksDurationOnWorker.
+	(fullGcTime isNil or: [ tasksDurationOnWorker isNil ]) ifTrue: [ ^nil ].
+	
+	^fullGcTime / tasksDurationOnWorker asMilliSeconds * 100 printShowingDecimalPlaces: 1
+]
+
+{ #category : #'accessing - gc details' }
 GtRrWorkerExamplesReport >> fullGcTime [
 	^ self vmStatisticsDiffReport ifNotNil: [ :aReport | aReport fullGcTimeDiff ]
 ]
@@ -307,6 +317,16 @@ GtRrWorkerExamplesReport >> incrGcDuration [
 ]
 
 { #category : #'accessing - gc details' }
+GtRrWorkerExamplesReport >> incrGcPercentage [
+	| incrGcTime tasksDurationOnWorker |
+	incrGcTime := self incrGcTime.
+	tasksDurationOnWorker := self tasksDurationOnWorker. 
+	(incrGcTime isNil or: [tasksDurationOnWorker isNil]) ifTrue: [ ^nil ].
+	
+	^ ((incrGcTime / tasksDurationOnWorker asMilliSeconds) * 100) printShowingDecimalPlaces: 1
+]
+
+{ #category : #'accessing - gc details' }
 GtRrWorkerExamplesReport >> incrGcTime [
 	^ self vmStatisticsDiffReport ifNotNil: [ :aReport | aReport incrGcTimeDiff ]
 ]
@@ -399,13 +419,6 @@ GtRrWorkerExamplesReport >> taskGapsDuration [
 ]
 
 { #category : #accessing }
-GtRrWorkerExamplesReport >> taskWithId: aTaskId [
-	^ self tasks 
-		detect: [ :aTask |
-			aTask taskId = aTaskId ]
-]
-
-{ #category : #accessing }
 GtRrWorkerExamplesReport >> tasks [
 	^ tasks
 ]
@@ -423,6 +436,11 @@ GtRrWorkerExamplesReport >> tasksDuration [
 { #category : #accessing }
 GtRrWorkerExamplesReport >> tasksDurationOnRunner [
 	^ self tasks durationOnRunner
+]
+
+{ #category : #accessing }
+GtRrWorkerExamplesReport >> tasksDurationOnWorker [
+	^ self tasksDuration
 ]
 
 { #category : #accessing }
@@ -590,10 +608,27 @@ GtRrWorkerExamplesReport >> tasksVmMemoryChartItems [
 			memoryValues ]) asArray
 ]
 
+{ #category : #accessing }
+GtRrWorkerExamplesReport >> taskWithId: aTaskId [
+	^ self tasks 
+		detect: [ :aTask |
+			aTask taskId = aTaskId ]
+]
+
 { #category : #'accessing - gc details' }
 GtRrWorkerExamplesReport >> totalGCDuration [
 	^ self totalGCTime ifNotNil: [ :aTimeInMilliseconds |
 		aTimeInMilliseconds milliSeconds ]
+]
+
+{ #category : #'accessing - gc details' }
+GtRrWorkerExamplesReport >> totalGCPercentage [
+	| totalGCTime tasksDurationOnWorker|
+	totalGCTime := self totalGCTime.
+	tasksDurationOnWorker := self tasksDurationOnWorker.
+	(totalGCTime isNil or: [ tasksDurationOnWorker isNil ]) ifTrue: [ ^ nil ].
+	
+	^ ((totalGCTime / tasksDurationOnWorker asMilliSeconds) * 100) printShowingDecimalPlaces: 1
 ]
 
 { #category : #'accessing - gc details' }

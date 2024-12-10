@@ -398,6 +398,11 @@ GtRrRunnerMachineExamplesReport >> totalGCDuration [
 ]
 
 { #category : #'accessing - gc details' }
+GtRrRunnerMachineExamplesReport >> totalGCPercentage [
+	^ self workersReport totalGCPercentage
+]
+
+{ #category : #'accessing - gc details' }
 GtRrRunnerMachineExamplesReport >> totalGCTime [
 	^ self workersReport totalGCTime
 ]
