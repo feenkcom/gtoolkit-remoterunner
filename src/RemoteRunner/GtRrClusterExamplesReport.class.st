@@ -150,10 +150,14 @@ GtRrClusterExamplesReport >> gtViewMachineGCStatsFor: aView [
 			aMachineReport ipAddress ];
 		column: 'Workers count' text: [ :aMachineReport |
 			aMachineReport numberOfWorkers ];
+		column: 'Checks Count' text: [ :aMachineReport |
+			aMachineReport numberOfExamples ];
 		column: 'Total GC duration' text: [ :aMachineReport |
-			aMachineReport totalGCDuration  ];
+			aMachineReport totalGCDuration ];
+		column: 'Total GC percent' text: [ :aMachineReport |
+			aMachineReport totalGCPercentage asString , '%' ];
 		column: 'Full GC - count' text: [ :aMachineReport |
-			aMachineReport numberOfFullGCs  ];
+			aMachineReport numberOfFullGCs ];
 		column: 'Incremental GC - count' text: [ :aMachineReport |
 			aMachineReport numberOfIncrementalGCs ];
 		column: 'Full GC - average duration' text: [ :aMachineReport |
@@ -487,6 +491,9 @@ GtRrClusterExamplesReport >> overviewData [
 		'Total GC Time (tasks)' -> self tasksTotalGCTime milliSeconds.
 		'Full GC Time (tasks)' -> self tasksFullGcTime milliSeconds.
 		'Incremental GC Time (tasks)' -> self tasksIncrGcTime milliSeconds.
+		'Total GC Time (tasks percentage)' -> self tasksTotalGCPercentageDescription .
+		'Full GC Time (tasks percentage)' -> self tasksFullGcTimePercentageDescription .
+		'Incremental GC Time (tasks percentage)' -> self tasksIncrGcTimePercentageDescription.
 		'Maximum VM Memory Size' -> self vmMaximumMemorySize humanReadableIsqByteSize.
 		'Minimum VM Memory Size' -> self vmMinimumMemorySize humanReadableIsqByteSize.
 		'Average VM Memory Size' -> self vmAverageMemorySize humanReadableIsqByteSize .
@@ -494,6 +501,13 @@ GtRrClusterExamplesReport >> overviewData [
 		'Maximum Worker Tasks Start Delay' -> self workersTasksStartMaximumDelay.
 		'Maximum Workers Tasks Start Delay per Machine' -> self maximumWorkersTasksStartIntervalPerMachine.
 		'Workers Tasks Competion Delay' -> self workersTasksCompletionDelay}
+]
+
+{ #category : #utils }
+GtRrClusterExamplesReport >> percentageDescriptionForFraction: aNumber [
+	^aNumber 
+		ifNil: ['='] 
+		ifNotNil: [ aNumber asString, '%']
 ]
 
 { #category : #printing }
@@ -525,13 +539,56 @@ GtRrClusterExamplesReport >> tasksFullGcTime [
 ]
 
 { #category : #'accessing - gc details' }
+GtRrClusterExamplesReport >> tasksFullGcTimePercentage [
+	^self 
+		timePercentageOf: self tasksFullGcTime 
+		inDuration: self cummulativeTasksDuration
+]
+
+{ #category : #'accessing - gc details' }
+GtRrClusterExamplesReport >> tasksFullGcTimePercentageDescription [
+	^self percentageDescriptionForFraction: self tasksFullGcTimePercentage
+]
+
+{ #category : #'accessing - gc details' }
 GtRrClusterExamplesReport >> tasksIncrGcTime [
 	^ self sumMachineValueWithNil: [ :aMachine | aMachine tasksIncrGcTime ]
 ]
 
 { #category : #'accessing - gc details' }
+GtRrClusterExamplesReport >> tasksIncrGcTimePercentage [
+	^self 
+		timePercentageOf: self tasksIncrGcTime 
+		inDuration: self cummulativeTasksDuration
+]
+
+{ #category : #'accessing - gc details' }
+GtRrClusterExamplesReport >> tasksIncrGcTimePercentageDescription [
+	^self percentageDescriptionForFraction: self tasksIncrGcTimePercentage
+]
+
+{ #category : #'accessing - gc details' }
+GtRrClusterExamplesReport >> tasksTotalGCPercentage [
+	^self 
+		timePercentageOf: self tasksTotalGCTime 
+		inDuration: self cummulativeTasksDuration
+]
+
+{ #category : #'accessing - gc details' }
+GtRrClusterExamplesReport >> tasksTotalGCPercentageDescription [
+	^self percentageDescriptionForFraction: self tasksTotalGCPercentage
+]
+
+{ #category : #'accessing - gc details' }
 GtRrClusterExamplesReport >> tasksTotalGCTime [
 	^ self sumMachineValueWithNil: [ :aMachine | aMachine tasksTotalGCTime ]
+]
+
+{ #category : #'accessing - gc details' }
+GtRrClusterExamplesReport >> timePercentageOf: aTime inDuration: aTotalDuration [
+	(aTime isNil or: [ aTotalDuration isNil ]) ifTrue: [ ^nil ].
+	
+	^((aTime / aTotalDuration asMilliSeconds) * 100) printShowingDecimalPlaces: 1
 ]
 
 { #category : #accessing }

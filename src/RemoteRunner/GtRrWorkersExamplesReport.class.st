@@ -106,12 +106,24 @@ GtRrWorkersExamplesReport >> gtViewWorkersGCStatsFor: aView [
 		column: 'Tasks' text: [ :aWorker | aWorker numberOfTasks ] width: 75;
 		column: 'Checks' text: [ :aWorker | aWorker numberOfExamples ] width: 75;
 		column: 'Tasks Duration' text: [ :aWorker | aWorker tasksDuration ];
-		column: 'Toal GC - duration' text: [ :aWorker |
+		column: 'Total GC - duration' text: [ :aWorker |
 			aWorker totalGCDuration ifNil: [ '-' ] ];
 		column: 'Full GC - duration' text: [ :aWorker |
 			aWorker fullGcDuration ifNil: [ '-' ] ];
 		column: 'Incremental GC - duration' text: [ :aWorker |
 			aWorker incrGcDuration ifNil: [ '-' ] ];
+		column: 'Total GC - percent' text: [ :aWorker |
+			aWorker totalGCPercentage 
+				ifNil: ['-']
+				ifNotNil: [ :aNumber | aNumber asString , '%' ] ];
+		column: 'Full GC - percent' text: [ :aWorker |
+			aWorker fullGcPercentage 
+				ifNil: ['-']
+				ifNotNil: [ :aNumber | aNumber asString , '%' ] ];
+		column: 'Incremental GC - percent' text: [ :aWorker |
+			aWorker incrGcPercentage 
+				ifNil: ['-']
+				ifNotNil: [ :aNumber | aNumber asString , '%' ] ];
 		column: 'Full GC - count' text: [ :aWorker |
 			aWorker numberOfFullGCs  ];
 		column: 'Incremental GC - count' text: [ :aWorker |
@@ -328,6 +340,11 @@ GtRrWorkersExamplesReport >> tasksStartTime [
 { #category : #'accessing - gc details' }
 GtRrWorkersExamplesReport >> tasksTotalGCTime [
 	^ self sumWorkerValueWithNil: [ :aWorker | aWorker tasksTotalGCTime ]
+]
+
+{ #category : #'accessing - gc details' }
+GtRrWorkersExamplesReport >> totalGCPercentage [
+	^ ((self totalGCTime / self cummulativeTasksDuration asMilliSeconds) * 100) printShowingDecimalPlaces: 1
 ]
 
 { #category : #'accessing - gc details' }
