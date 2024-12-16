@@ -27,6 +27,11 @@ GtRrTimeoutTaskError >> pharoLinkAdditionalData [
 ]
 
 { #category : #accessing }
+GtRrTimeoutTaskError >> pharoLinkAdditionalDataInRuntimeContext: aRuntimeContent [
+	^ additionalData
+]
+
+{ #category : #accessing }
 GtRrTimeoutTaskError >> processesReport [
 	^ processesReport
 ]
