@@ -1203,7 +1203,7 @@ GtRemoteRunner >> startJob: aGtRrJob [
 { #category : #'api - logger' }
 GtRemoteRunner >> startLogger: aLogger [
 
-	aLogger startFor: GtRemoteRunnerAnnouncement, GtRemoteRunnerSignal, StringSignal.
+	aLogger startFor: GtRemoteRunnerAnnouncement, GtRemoteRunnerSignal, PharoLinkServerSignal, StringSignal.
 ]
 
 { #category : #'api - logger' }
