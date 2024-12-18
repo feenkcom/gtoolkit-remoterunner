@@ -52,8 +52,13 @@ GtRrCodeSyncTask >> gtChangesFor: aView [
 { #category : #executing }
 GtRrCodeSyncTask >> run [
 
+	Stdio stdout
+		<< 'CodeSync run: '.
 	(LanguageLinkUtils base64Decode: serializedChanges readStream) do:
-		#applyCodeChange.
+		[ :each | 
+			Stdio stdout << each printString; lf.
+			each accept: GtExportedEventApplyVisitor new ].
+	Stdio stdout lf; flush.
 	^ true
 ]
 

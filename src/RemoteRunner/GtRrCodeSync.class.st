@@ -8,7 +8,8 @@ Class {
 		'events',
 		'subscription',
 		'flusher',
-		'remoteRunner'
+		'remoteRunner',
+		'systemAnnouncements'
 	],
 	#category : #'RemoteRunner-Runner-CodeSync'
 }
@@ -56,6 +57,13 @@ GtRrCodeSync >> onEntryAdded: anEntryAddedEvent [
 ]
 
 { #category : #accessing }
+GtRrCodeSync >> onExpressionEvaluated: anExpressionEvaluated [
+
+	events nextPut: (EpExpressionEvaluation expression: anExpressionEvaluated expressionEvaluated).
+	flusher schedule: [ self flush ]
+]
+
+{ #category : #accessing }
 GtRrCodeSync >> remoteRunner [
 
 	^ remoteRunner
@@ -75,6 +83,11 @@ GtRrCodeSync >> start [
 			                when: EpEntryAdded
 			                send: #onEntryAdded:
 			                to: self ].
+	systemAnnouncements ifNil: [
+		systemAnnouncements := SystemAnnouncer uniqueInstance weak
+							when: ExpressionEvaluated 
+							send: #onExpressionEvaluated: 
+							to: self ].
 ]
 
 { #category : #accessing }
@@ -82,5 +95,8 @@ GtRrCodeSync >> stop [
 
 	subscription ifNotNil: [ 
 		subscription announcer removeSubscription: subscription.
-		subscription := nil ]
+		subscription := nil ].
+	systemAnnouncements ifNotNil: [
+		SystemAnnouncer uniqueInstance unsubscribe: self.
+		systemAnnouncements := nil ].
 ]
