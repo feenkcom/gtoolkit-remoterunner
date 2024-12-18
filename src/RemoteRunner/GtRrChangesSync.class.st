@@ -14,7 +14,9 @@ Class {
 		'mutex',
 		'epLog',
 		'encodedOmReference',
-		'latestOmReference'
+		'latestOmReference',
+		'omReference',
+		'events'
 	],
 	#category : #'RemoteRunner-Runner-ImageSync'
 }
@@ -85,37 +87,41 @@ GtRrChangesSync >> allEncodedChanges [
 { #category : #'api - remoterunner' }
 GtRrChangesSync >> changesFrom: anOmReference [
 	"Answer the encoded collection of EpEvents from anOmReference up to the image's current state."
-	| enumerator |
+	| haveLatest |
+
+	haveLatest := omReference = self epLog headReference.
+	(haveLatest and: [ workerOmReference = anOmReference ]) ifTrue: [ ^ events ].
 
 	(self includesReference: anOmReference) ifFalse:
 		[ (GtRrUnknownOmReference omReference: anOmReference source: self) signal ].
 
-	enumerator := GtEpLogEnumerator new latestLog: self epLog.
-	^ GtEpForExportEventSequencer sequence: 
-		(enumerator entriesFrom: anOmReference to: self epLog headReference)
+	^ mutex critical:
+		[ haveLatest := omReference = self epLog headReference.
+		(haveLatest and: [ workerOmReference = anOmReference ]) ifFalse:
+			[ | enumerator |
+			enumerator := GtEpLogEnumerator new latestLog: self epLog.
+			events := GtEpForExportEventSequencer sequence: 
+				(enumerator entriesFrom: anOmReference to: self epLog headReference).
+			workerOmReference := anOmReference ].
+		events ].
 ]
 
 { #category : #'api - remoterunner' }
 GtRrChangesSync >> encodedChangesFrom: anOmReference [
 	"Answer the encoded collection of EpEvents from anOmReference up to the image's current state.
 	Cache the latest request on the assumption that all workers will start from the same image."
-	| enumerator entries haveLatest headReference |
 
-	haveLatest := encodedOmReference = self epLog headReference.
-	(haveLatest and: [ workerOmReference = anOmReference ]) ifTrue: [ ^ encodedEvents ].
+	((encodedOmReference = self epLog headReference) and: [ workerOmReference = anOmReference ]) ifTrue: [ ^ encodedEvents ].
 	(self includesReference: anOmReference) ifFalse:
 		[ (GtRrUnknownOmReference omReference: anOmReference source: self) signal ].
 
 	^ mutex critical: 
-		[ haveLatest := encodedOmReference = self epLog headReference.
-		(haveLatest and: [ workerOmReference = anOmReference ]) ifFalse:
-			[ enumerator := GtEpLogEnumerator new latestLog: self epLog.
-			headReference := self epLog headReference.
-			entries := GtEpForExportEventSequencer sequence: 
-				(enumerator entriesFrom: anOmReference to: headReference).
-			workerOmReference := anOmReference.
+		[ | headReference |
+		headReference := self epLog headReference.
+		((encodedOmReference = headReference) and: [ workerOmReference = anOmReference ]) ifFalse:
+			[ self changesFrom: anOmReference.
 			encodedOmReference := headReference.
-			encodedEvents := STON toString: entries ].
+			encodedEvents := STON toString: events ].
 		encodedEvents ]
 ]
 
