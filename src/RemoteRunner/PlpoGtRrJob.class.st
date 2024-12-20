@@ -30,6 +30,15 @@ PlpoGtRrJob >> announcementQueue [
 	^ self proxyPerform: #announcementQueue
 ]
 
+{ #category : #testing }
+PlpoGtRrJob >> changesSync [
+	"Answer a boolean indicating whether changes should be synced to the workers."
+
+	^ originalJob
+		ifNil: [ self proxyPerform: #changesSync ]
+		ifNotNil: [ originalJob changesSync ]
+]
+
 { #category : #initiailize }
 PlpoGtRrJob >> configureAnnouncementsQueueListener: aListener [
 	aListener
@@ -124,11 +133,53 @@ PlpoGtRrJob >> propertyAt: aString [
 		ifNotNil: [ originalJob propertyAt: aString ]
 ]
 
+{ #category : #'properties - accessing' }
+PlpoGtRrJob >> propertyAt: aString ifAbsent: absentBlock [
+	"This should pass the absentBlock to the remote object if the originalJob isn't set.
+	Until that works, raise an error"
+	
+	^ originalJob
+		ifNil: [ self error: 'Unable to pass block to proxy' ]
+		ifNotNil: [ originalJob propertyAt: aString ifAbsent: absentBlock ]
+]
+
+{ #category : #'properties - accessing' }
+PlpoGtRrJob >> propertyAt: aString ifAbsentPut: absentBlock [
+	"This should pass the absentBlock to the remote object if the originalJob isn't set.
+	Until that works, raise an error"
+	
+	^ originalJob
+		ifNil: [ self error: 'Unable to pass block to proxy' ]
+		ifNotNil: [ originalJob propertyAt: aString ifAbsentPut: absentBlock ]
+]
+
+{ #category : #'properties - accessing' }
+PlpoGtRrJob >> propertyAt: aString ifPresent: presentBlock [
+	"This should pass the absentBlock to the remote object if the originalJob isn't set.
+	Until that works, raise an error"
+	
+	^ originalJob
+		ifNil: [ self error: 'Unable to pass block to proxy' ]
+		ifNotNil: [ originalJob propertyAt: aString ifPresent: presentBlock ]
+]
+
+{ #category : #'properties - accessing' }
+PlpoGtRrJob >> propertyAt: aString ifPresent: presentBlock ifAbsent: absentBlock [
+	"This should pass the absentBlock to the remote object if the originalJob isn't set.
+	Until that works, raise an error"
+	
+	^ originalJob
+		ifNil: [ self error: 'Unable to pass block to proxy' ]
+		ifNotNil: [ originalJob propertyAt: aString ifPresent: presentBlock ifAbsent: absentBlock ]
+]
+
 { #category : #accessing }
 PlpoGtRrJob >> propertyAt: aString put: anObject [
 
-	self proxyPerform: #propertyAt:put: withPrimitiveArguments: { aString. anObject. }.
-	^ anObject
+	self proxyPerform: #propertyAt:put: 
+		withPrimitiveArguments: { aString. anObject. }.
+	originalJob ifNotNil: [ originalJob propertyAt: aString put: anObject ].
+	^ anObject.
 ]
 
 { #category : #accessing }
