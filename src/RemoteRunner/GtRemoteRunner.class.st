@@ -923,6 +923,57 @@ GtRemoteRunner >> printOn: aStream [
 ]
 
 { #category : #private }
+GtRemoteRunner >> privateRegisterWorkerWithDetails: aDictionary [
+	"Register the supplied worker and connection details.
+	Register the connection for disconnection notification"
+	| pharoLinkServerConnection workerConnection workerId mutexStart mutexEnd |
+
+	GtRrRegisterWorkerStartingSignal new
+		workerAttributes: aDictionary;
+		emit.
+	pharoLinkServerConnection := PharoLinkServerCurrentConnection value.
+	pharoLinkServerConnection closeOnExec: true.
+	mutexStart := DateAndTime now.
+	self critical:
+		[ mutexEnd := DateAndTime now.
+		"If the worker specifies that it is for a particular job only accept the connection if that job is currently running"
+		aDictionary at: #workerJobId
+			ifPresent: 
+				[:workerJobId |
+				(workerJobId = 'anyJob'
+					or: [currentlyExecutingJobs includesKey: workerJobId])
+						ifFalse: 
+							[ GtRrRegisterWorkerRejectedSignal new
+								ipAddress: pharoLinkServerConnection remoteAddressString;
+								workerAttributes: aDictionary;
+								mutexWait: (mutexEnd - mutexStart) asMilliSeconds;
+								emit.
+							pharoLinkServerConnection stop.
+							^self ] ].
+		workerConnection := GtRrWorkerConnection
+				connection: pharoLinkServerConnection
+				runner: self.
+		workerConnection details: aDictionary.
+		workerId := aDictionary at: #id.
+		aDictionary at: #workerIpAddress put: workerConnection remoteAddressString.
+		registeredWorkers at: workerId put: workerConnection.
+		runnerStats 
+			updateRegisteredWorkerCounts: registeredWorkers;
+			isRunning: self isRunning.
+		managerStartupAndShutdown registerWorker: workerConnection ].
+	self announceAndLog: (GtRrWorkerRegisteredAnnouncement new
+				worker: workerConnection).
+	GtRrRegisterWorkerCompletedSignal new
+		workerAttributes: aDictionary;
+		ipAddress: pharoLinkServerConnection remoteAddressString;
+		mutexWait: (mutexEnd - mutexStart) asMilliSeconds;
+		emit.
+
+	"Answer a PharoLink primitive so that a proxy isn't created for the runner (which is a global, anyway)"
+	^nil
+]
+
+{ #category : #private }
 GtRemoteRunner >> privateTaskFailed: aTaskContextId executionData: aGtRrWorkerExecutionData [
 	"Mark the specified task as failed and retry if required.
 	Must be called within sharedAccess"
@@ -988,51 +1039,12 @@ GtRemoteRunner >> registerJob: aGtRrJob [
 GtRemoteRunner >> registerWorkerWithDetails: aDictionary [
 	"Register the supplied worker and connection details.
 	Register the connection for disconnection notification"
-	| pharoLinkServerConnection workerConnection workerId mutexStart mutexEnd |
 
-	GtRrRegisterWorkerStartingSignal new
-		workerAttributes: aDictionary;
-		emit.
-	pharoLinkServerConnection := PharoLinkServerCurrentConnection value.
-	pharoLinkServerConnection closeOnExec: true.
-	mutexStart := DateAndTime now.
-	self critical:
-		[ mutexEnd := DateAndTime now.
-		"If the worker specifies that it is for a particular job only accept the connection if that job is currently running"
-		aDictionary at: #workerJobId
-			ifPresent: 
-				[:workerJobId |
-				(workerJobId = 'anyJob'
-					or: [currentlyExecutingJobs includesKey: workerJobId])
-						ifFalse: 
-							[ GtRrRegisterWorkerRejectedSignal new
-								ipAddress: pharoLinkServerConnection remoteAddressString;
-								workerAttributes: aDictionary;
-								mutexWait: (mutexEnd - mutexStart) asMilliSeconds;
-								emit.
-							pharoLinkServerConnection stop.
-							^self ] ].
-		workerConnection := GtRrWorkerConnection
-				connection: pharoLinkServerConnection
-				runner: self.
-		workerConnection details: aDictionary.
-		workerId := aDictionary at: #id.
-		aDictionary at: #workerIpAddress put: workerConnection remoteAddressString.
-		registeredWorkers at: workerId put: workerConnection.
-		runnerStats 
-			updateRegisteredWorkerCounts: registeredWorkers;
-			isRunning: self isRunning.
-		managerStartupAndShutdown registerWorker: workerConnection ].
-	self announceAndLog: (GtRrWorkerRegisteredAnnouncement new
-				worker: workerConnection).
-	GtRrRegisterWorkerCompletedSignal new
-		workerAttributes: aDictionary;
-		ipAddress: pharoLinkServerConnection remoteAddressString;
-		mutexWait: (mutexEnd - mutexStart) asMilliSeconds;
-		emit.
-
-	"Answer a PharoLink primitive so that a proxy isn't created for the runner (which is a global, anyway)"
-	^nil
+	^ [ self privateRegisterWorkerWithDetails: aDictionary ]
+		on: Error
+		do: [ :ex |
+			ex logStackToFile.
+			ex pass ].
 ]
 
 { #category : #accessing }
