@@ -66,7 +66,7 @@ GtRrJob class >> leJsonV4AttributeMapping [
 
 	^ { 
 		#results -> #results.
-		#id -> #id.
+		#jobId -> #id.
 		#state -> #state.
 		#startTime -> #startTime.
 		#endTime -> #endTime.
@@ -339,12 +339,13 @@ GtRrJob >> hasSubscriber: anObject [
 { #category : #accessing }
 GtRrJob >> id [
 
+	self deprecated: 'Use #jobId instead'.
 	^ id
 ]
 
 { #category : #'private - serialization' }
 GtRrJob >> id: anObject [
-
+	self deprecated: 'Use #jobId: instead'.
 	id := anObject
 ]
 
@@ -400,7 +401,13 @@ GtRrJob >> job [
 
 { #category : #accessing }
 GtRrJob >> jobId [
-	^ self id
+	^ id
+]
+
+{ #category : #accessing }
+GtRrJob >> jobId: aUuidString [
+
+	id := aUuidString
 ]
 
 { #category : #accessing }
@@ -712,7 +719,7 @@ GtRrJob >> summaryAttributes [
 	attributes
 		add: 'Job Timeout' -> jobTimeout;
 		add: 'Task Timeout' -> taskTimeout;
-		add: 'Id' -> self id.
+		add: 'Id' -> self jobId.
 	^ attributes
 ]
 

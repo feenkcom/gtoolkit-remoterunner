@@ -221,7 +221,7 @@ GtRrJobContext >> jobContext [
 { #category : #accessing }
 GtRrJobContext >> jobId [
 
-	^ job id
+	^ job jobId
 ]
 
 { #category : #accessing }
@@ -368,7 +368,7 @@ GtRrJobContext >> taskTimeout [
 GtRrJobContext >> terminate [
 	"Terminate the receiver's job."
 
-	remoteRunner terminateJobId: job id.
+	remoteRunner terminateJobId: job jobId.
 ]
 
 { #category : #private }
@@ -391,5 +391,5 @@ GtRrJobContext >> timeoutContext [
 	job errorDetails: (GtRrErrorDetails new
 		errorMessage: 'Job exceeded time limit';
 		setTrace).
-	remoteRunner terminateJobId: self id
+	remoteRunner terminateJobId: self jobId
 ]

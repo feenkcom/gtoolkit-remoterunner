@@ -664,7 +664,7 @@ GtRemoteRunner >> gtTaskQueueFor: aView [
 		  title: 'Task queue';
 		  priority: 50;
 		  items: [ taskQueue itemArray ];
-		  column: 'Job' text: [ :item | item jobContext id ];
+		  column: 'Job' text: [ :item | item jobContext jobId ];
 			column: 'Task' text: [ :item | item taskId ];
 		  column: 'Description' text: [ :item | item printString ];
 		  actionUpdateButton
@@ -756,7 +756,7 @@ GtRemoteRunner >> jobContextForJob: aGtRrJob [
 	"Answer the context for the supplied job"
 
 	^ self critical:
-		[ currentlyExecutingJobs at: aGtRrJob id ].
+		[ currentlyExecutingJobs at: aGtRrJob jobId ].
 ]
 
 { #category : #accessing }
@@ -1198,7 +1198,7 @@ GtRemoteRunner >> startJob: aGtRrJob [
 		remoteRunner: self;
 		job: aGtRrJob.
 	currentlyExecutingJobs
-		at: aGtRrJob id
+		at: aGtRrJob jobId
 		put: context.
 	runnerStats currentlyExecutingJobCount: currentlyExecutingJobs size.
 	jobStartupAndShutdown startupJob: context.
@@ -1453,7 +1453,7 @@ GtRemoteRunner >> terminateAllJobs [
 	| jobIds |
 
 	jobIds := self critical:
-		[currentlyExecutingJobs values collect: #id ].
+		[currentlyExecutingJobs values collect: #jobId ].
 	jobIds do: [ :id | self terminateJobId: id ].
 ]
 
