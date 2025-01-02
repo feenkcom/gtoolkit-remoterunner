@@ -25,7 +25,7 @@ GtRrJobStartupAndShutdownSignal class >> emitStartForJobContext: aJobContext [
 { #category : #'instance creation' }
 GtRrJobStartupAndShutdownSignal class >> forJobContext: aJobContext [ 
 	^ self new 
-		jobId: aJobContext id
+		jobId: aJobContext jobId
 ]
 
 { #category : #accessing }

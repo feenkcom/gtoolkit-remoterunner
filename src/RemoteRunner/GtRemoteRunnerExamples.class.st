@@ -671,7 +671,7 @@ GtRemoteRunnerExamples >> terminateStartedJobWithControlChannel [
 	self assert: remoteRunner currentlyExecutingTasks size equals: 1.
 	self assert: remoteRunner taskQueue size equals: 2.
 
-	remoteRunner terminateJobId: job id.
+	remoteRunner terminateJobId: job jobId.
 	self waitOn: semaphore for: 10 description: 'Job didn''t terminate in time'.
 
 	self assert: remoteRunner currentlyExecutingJobs size equals: 0.
@@ -747,7 +747,7 @@ GtRemoteRunnerExamples >> terminateStartedJobWithoutControlChannel [
 	self assert: remoteRunner currentlyExecutingTasks size equals: 1.
 	self assert: remoteRunner taskQueue size equals: 2.
 
-	remoteRunner terminateJobId: job id.
+	remoteRunner terminateJobId: job jobId.
 	self waitOn: semaphore for: 10 description: 'Job didn''t terminate in time'.
 
 	waitForTaskCompletion ifTrue:

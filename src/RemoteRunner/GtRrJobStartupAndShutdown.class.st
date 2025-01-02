@@ -55,7 +55,7 @@ GtRrJobStartupAndShutdown >> shutdownJob: aJobContext [
 	| job |
 
 	remoteRunner announceStatusMessageWithString: 'Performing job shutdown - Remove currently executing job'.
-	remoteRunner removeCurrentlyExecutingJob: aJobContext id.
+	remoteRunner removeCurrentlyExecutingJob: aJobContext jobId.
 	job := aJobContext job.
 	job markJobCompleted.
 	remoteRunner announceAndLog: (GtRrJobCompletedAnnouncement job: job).
