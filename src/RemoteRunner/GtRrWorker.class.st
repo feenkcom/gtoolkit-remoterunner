@@ -15,7 +15,8 @@ Class {
 		'stopFlag',
 		'executionContext',
 		'readProcess',
-		'exceptionHandlingStrategy'
+		'exceptionHandlingStrategy',
+		'logger'
 	],
 	#category : #'RemoteRunner-Worker'
 }
@@ -130,7 +131,8 @@ GtRrWorker class >> processCommandLineArgs: args [
 	worker := workerClass new.
 	args occurrencesOf: #attribute
 		do: [:arg | worker attributes at: (arg at: #key) value put: (arg at: #value) value].
-	workerClass startLoggerFor: worker arguments: args.
+	worker startLoggerFor: worker arguments: args.
+	
 	GtRrWorkerCliStartingSignal new emit.
 	serverSocketAddress := ((args at: #serverSocketAddress) at: #address)
 				value.
@@ -181,36 +183,6 @@ GtRrWorker class >> serverSocketAddress: aString [
 	worker := self new.
 	worker connectionStrategy socketAddress: aString.
 	^ worker.
-]
-
-{ #category : #clap }
-GtRrWorker class >> startLoggerFor: worker arguments: args [
-	| announcements logger logDir filename pid pharoDebugLogFile |
-
-	args at: #log ifAbsent: [^ self ].
-
-	logDir := (args at: #logDir
-		ifPresent: [:arg | (arg at: #directory) value]
-		ifAbsent: ['workerLogs']) asFileReference.
-	SignalLogger resetAllInstances.
-	filename := logDir / (worker class logFilenameFor: worker).
-	Stdio stdout
-		<< 'worker log filename set to: ';
-		<< filename asString;
-		lf.
-	pid := GtOsSystemInfo current currentProcessId.
-	pharoDebugLogFile := (logDir / ('worker.pharoDebug.', pid asString, '.log')) fullName.
-	Smalltalk logFileName: pharoDebugLogFile.
-	Stdio stdout
-		<< 'PharoDebug.log filename set to: ';
-		<< pharoDebugLogFile;
-		lf.
-	logger := SessionFallbackFileLogger filename: filename.
-	announcements := AnnouncementSetWithExclusions withAll: 
-		{GtRemoteRunnerAnnouncement , GtRemoteRunnerSignal , PharoLinkSignal, 
-			LanguageLinkEventSignal , StringSignal}.
-	announcements addExclusions: ContextStackSignal allSubclasses.
-	logger startFor: announcements.
 ]
 
 { #category : #observer }
@@ -599,6 +571,40 @@ GtRrWorker >> startHeartbeat [
 			[ self sendHeartbeat ].
 		expiry := lastHeartbeat + heartbeatDelay. ].
 				] forkAt: Processor lowIOPriority named: 'Worker Heartbeat'.
+]
+
+{ #category : #logging }
+GtRrWorker >> startLoggerFor: worker arguments: args [
+	| announcements logDir filename pid pharoDebugLogFile |
+
+	args at: #log ifAbsent: [^ self ].
+
+	logDir := (args at: #logDir
+		ifPresent: [:arg | (arg at: #directory) value]
+		ifAbsent: ['workerLogs']) asFileReference.
+	SignalLogger resetAllInstances.
+	filename := logDir / (worker class logFilenameFor: worker).
+	Stdio stdout
+		<< 'worker log filename set to: ';
+		<< filename asString;
+		lf.
+	pid := GtOsSystemInfo current currentProcessId.
+	pharoDebugLogFile := (logDir / ('worker.pharoDebug.', pid asString, '.log')) fullName.
+	Smalltalk logFileName: pharoDebugLogFile.
+	Stdio stdout
+		<< 'PharoDebug.log filename set to: ';
+		<< pharoDebugLogFile;
+		lf.
+		
+	"SessionFallbackFileLogger resetInstance."
+	logger := StreamLoggerFlusher new 
+		logger: (SessionFallbackFileLogger filename: filename).
+	
+	announcements := AnnouncementSetWithExclusions withAll: 
+		{GtRemoteRunnerAnnouncement , GtRemoteRunnerSignal , PharoLinkSignal, 
+			LanguageLinkEventSignal , StringSignal}.
+	announcements addExclusions: ContextStackSignal allSubclasses.
+	logger startFor: announcements.
 ]
 
 { #category : #stepping }
