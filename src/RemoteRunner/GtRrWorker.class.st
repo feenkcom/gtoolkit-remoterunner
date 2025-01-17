@@ -215,16 +215,35 @@ GtRrWorker class >> startLoggerFor: worker arguments: args [
 
 { #category : #observer }
 GtRrWorker >> addObserver [
-	| commandFactory observer |
+	^self connectDuring: [:application |
+		| commandFactory observer |
+		commandFactory := application newCommandFactory.
+		observer := commandFactory
+			observerFromCallback: [:message | self command: message].
+		observer setByValue.
+		"register needs to keep request alive to keep observer alive"
+		commandFactory
+			send: ('GtAssignedRemoteRunner addObserver: {1} toWorkerId: ''{2}'''
+				format: {
+					observer pharoLinkFormattedCode. uid})]
+]
 
-	^ self connectDuring: [ :application |
-	commandFactory := application newCommandFactory.
-	observer := commandFactory observerFromCallback: [ :message | 
-		            self command: message ].
-	observer setByValue.
-	"register needs to keep request alive to keep observer alive"
-	commandFactory send: ('GtAssignedRemoteRunner addObserver: {1} toWorkerId: ''{2}''' format:
-			   { observer pharoLinkFormattedCode. uid. }) ]
+{ #category : #private }
+GtRrWorker >> applyOmbuEntry: anOmbuEntry remoteAddressString: aRemoteAddressString [
+	GtRrWorkerApplyChangeStartingSignal new
+		initializeFromOmbuEntry: anOmbuEntry;
+		remoteAddressString: aRemoteAddressString;
+		workerId: self uid;
+		emit.
+		
+	anOmbuEntry content 
+		accept: GtExportedEventApplyVisitor new.
+	
+	GtRrWorkerApplyChangeCompletedSignal new
+		initializeFromOmbuEntry: anOmbuEntry;
+		remoteAddressString: aRemoteAddressString;
+		workerId: self uid;
+		emit.
 ]
 
 { #category : #accessing }
@@ -495,6 +514,30 @@ GtRrWorker >> registerWith: aPharoLinkApplication [
 	^ result
 ]
 
+{ #category : #private }
+GtRrWorker >> retrieveEncodedChangesFromServerWith: aPharoLinkApplication [ 
+	| encodedEvents remoteAddressString |
+
+	remoteAddressString := aPharoLinkApplication remoteAddressString.
+	
+	GtRrWorkerRetrieveChangesStartingSignal new
+		remoteAddressString: remoteAddressString;
+		workerId: self uid;
+		emit.
+	encodedEvents := aPharoLinkApplication newCommandFactory
+		setByValue;
+		bindingAt: #anOmReference put: 
+			(STON toString: GtRrChangesSync headReference);
+		<< 'GtAssignedRemoteRunner changesSyncEventsFrom: anOmReference';
+		sendAndWait.
+	GtRrWorkerRetrieveChangesCompletedSignal new
+		remoteAddressString: remoteAddressString;
+		workerId: self uid;
+		emit.
+	
+	^ encodedEvents
+]
+
 { #category : #starting }
 GtRrWorker >> runWorkerStartupScripts [
 	"Run any worker startup scripts in the receiver's class"
@@ -615,25 +658,44 @@ GtRrWorker >> stopReadProcess [
 ]
 
 { #category : #private }
+GtRrWorker >> syncChanges: aCollectionOfChanges remoteAddress: aRemoteAddressString eventsSize: eventsSize [
+	"Apply the given list of changes.
+	Changes are encoded as an array of OmEntries."
+	
+	GtRrWorkerApplyChangesStartingSignal new
+		remoteAddressString: aRemoteAddressString;
+		workerId: self uid;
+		emit.
+		
+	aCollectionOfChanges do: [ :anOmbuEntry |
+		self 
+			applyOmbuEntry: anOmbuEntry
+			remoteAddressString: aRemoteAddressString  ].
+		
+	GtRrWorkerApplyChangesCompletedSignal new
+		remoteAddressString: aRemoteAddressString;
+		workerId: self uid;
+		encodedEventsSize: eventsSize;
+		eventsCount: aCollectionOfChanges size;
+		emit.
+]
+
+{ #category : #private }
 GtRrWorker >> syncChangesFromFile: aFileReference [
 	"Load the changes from the specified file.
 	The changes are encoded as an array of OmEntries."
-	| entries |
+	| entries encodedEvents |
 
+	encodedEvents := aFileReference asFileReference contents.
 	entries  := self 
-		unplayedEventsIn: (STON fromString: aFileReference asFileReference contents)
+		unplayedEventsIn: (STON fromString: encodedEvents)
 		remoteAddress: aFileReference fullName.
-	GtRrWorkerApplyChangesStartingSignal new
-		remoteAddressString: aFileReference fullName;
-		workerId: self uid;
-		emit.
-	entries do: [ :entry | entry content accept: GtExportedEventApplyVisitor new ].
-	GtRrWorkerApplyChangesCompletedSignal new
-		remoteAddressString: aFileReference fullName;
-		workerId: self uid;
-		encodedEventsSize: aFileReference asFileReference size;
-		eventsCount: entries size;
-		emit.
+		
+	self 
+		syncChanges: entries
+		remoteAddress: aFileReference fullName 
+		eventsSize: aFileReference asFileReference size.
+		
 	^ entries
 ]
 
@@ -643,35 +705,17 @@ GtRrWorker >> syncChangesFromServerWith: aPharoLinkApplication [
 
 	(attributes at: #changesSync ifAbsent: [ false ]) ifFalse: [ ^ self ].
 	remoteAddressString := aPharoLinkApplication remoteAddressString.
-	GtRrWorkerRetrieveChangesStartingSignal new
-		remoteAddressString: remoteAddressString;
-		workerId: self uid;
-		emit.
-	encodedEvents := aPharoLinkApplication newCommandFactory
-		setByValue;
-		bindingAt: #anOmReference put: 
-			(STON toString: GtRrChangesSync headReference);
-		<< 'GtAssignedRemoteRunner changesSyncEventsFrom: anOmReference';
-		sendAndWait.
-	GtRrWorkerRetrieveChangesCompletedSignal new
-		remoteAddressString: remoteAddressString;
-		workerId: self uid;
-		emit.
+	
+	encodedEvents := self retrieveEncodedChangesFromServerWith:  aPharoLinkApplication.
 	events := self 
 		unplayedEventsIn: (STON fromString: encodedEvents)
 		remoteAddress: remoteAddressString.
-	GtRrWorkerApplyChangesStartingSignal new
-		remoteAddressString: remoteAddressString;
-		workerId: self uid;
-		emit.
-	events do: [ :entry |
-		entry content accept: GtExportedEventApplyVisitor new ].
-	GtRrWorkerApplyChangesCompletedSignal new
-		remoteAddressString: remoteAddressString;
-		workerId: self uid;
-		encodedEventsSize: encodedEvents size;
-		eventsCount: events size;
-		emit.
+		
+	self 
+		syncChanges: events
+		remoteAddress: remoteAddressString 
+		eventsSize: encodedEvents size.
+		
 	^ events
 ]
 
