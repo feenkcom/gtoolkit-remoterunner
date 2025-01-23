@@ -30,6 +30,11 @@ GtRrImageSyncEvents >> encodedEvents [
 ]
 
 { #category : #accessing }
+GtRrImageSyncEvents >> encodedEvents: anObject [
+	encodedEvents := anObject
+]
+
+{ #category : #accessing }
 GtRrImageSyncEvents >> events [
 	^ events
 ]
