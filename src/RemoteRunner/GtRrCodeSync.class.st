@@ -14,6 +14,22 @@ Class {
 	#category : #'RemoteRunner-Runner-CodeSync'
 }
 
+{ #category : #accessing }
+GtRrCodeSync >> createOmbuEntryForEvent: anEpiceaEvent [ 
+	| entry newReference |
+	entry := OmEntry content: anEpiceaEvent.
+
+	newReference := OmReference 
+		globalName: 'ExpressionEvaluation'
+		localName: UUID new asString36.
+	
+	entry tags 
+		at: OmStore selfReferenceKey put: newReference;
+		at: EpLog timeKey put: DateAndTime now.
+	
+	^entry
+]
+
 { #category : #finalization }
 GtRrCodeSync >> finalize [
 
@@ -52,14 +68,15 @@ GtRrCodeSync >> onEntryAdded: anEntryAddedEvent [
 	anEntryAddedEvent entry content isCodeChange ifFalse: 
 		[ "only capture code changes" 
 		^ self ].
-	events nextPut: anEntryAddedEvent entry content.
+	events nextPut: anEntryAddedEvent entry.
 	flusher schedule: [ self flush ]
 ]
 
 { #category : #accessing }
 GtRrCodeSync >> onExpressionEvaluated: anExpressionEvaluated [
 
-	events nextPut: (EpExpressionEvaluation expression: anExpressionEvaluated expressionEvaluated).
+	events nextPut: (self createOmbuEntryForEvent:(EpExpressionEvaluation 
+		expression: anExpressionEvaluated expressionEvaluated)).
 	flusher schedule: [ self flush ]
 ]
 

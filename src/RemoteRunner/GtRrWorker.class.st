@@ -210,7 +210,7 @@ GtRrWorker >> applyOmbuEntry: anOmbuEntry remoteAddressString: aRemoteAddressStr
 		
 	anOmbuEntry content 
 		accept: GtExportedEventApplyVisitor new.
-	
+	      
 	GtRrWorkerApplyChangeCompletedSignal new
 		initializeFromOmbuEntry: anOmbuEntry;
 		remoteAddressString: aRemoteAddressString;
@@ -220,7 +220,7 @@ GtRrWorker >> applyOmbuEntry: anOmbuEntry remoteAddressString: aRemoteAddressStr
 
 { #category : #accessing }
 GtRrWorker >> attributes [
-
+ 
 	^ attributes
 ]
 
