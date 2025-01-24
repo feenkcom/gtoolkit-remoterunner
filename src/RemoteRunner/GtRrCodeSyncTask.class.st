@@ -31,6 +31,20 @@ GtRrCodeSyncTask >> acceptVisitor: aVisitor [
 	^ aVisitor visitCodeSyncTask: self
 ]
 
+{ #category : #executing }
+GtRrCodeSyncTask >> applyOmbuEntry: anOmbuEntry [ 
+	GtRrCodeSyncApplyChangeStartingSignal new
+		initializeFromOmbuEntry: anOmbuEntry;
+		emit.
+		
+	anOmbuEntry content 
+		accept: GtExportedEventApplyVisitor new.
+	
+	GtRrCodeSyncApplyChangeCompletedSignal new
+		initializeFromOmbuEntry: anOmbuEntry;
+		emit.
+]
+
 { #category : #'gt-extensions' }
 GtRrCodeSyncTask >> gtChangesFor: aView [
 	<gtView>
@@ -51,14 +65,11 @@ GtRrCodeSyncTask >> gtChangesFor: aView [
 
 { #category : #executing }
 GtRrCodeSyncTask >> run [
-
-	Stdio stdout
-		<< 'CodeSync run: '.
-	(LanguageLinkUtils base64Decode: serializedChanges readStream) do:
-		[ :each | 
-			Stdio stdout << each printString; lf.
-			each accept: GtExportedEventApplyVisitor new ].
-	Stdio stdout lf; flush.
+	
+	(LanguageLinkUtils base64Decode: serializedChanges readStream) 
+		do: [ :anOmbuEntry | 
+			self applyOmbuEntry: anOmbuEntry  ].
+			
 	^ true
 ]
 

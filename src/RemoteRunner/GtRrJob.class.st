@@ -153,7 +153,8 @@ GtRrJob >> cancelJob [
 GtRrJob >> changesSync [
 	"Answer a boolean indicating whether changes should be synced to the workers."
 
-	^ properties includesKey: 'changeEvents'
+	^ (properties includesKey: 'changeEvents') or:
+		[ properties includesKey: 'runnerChangesFile' ]
 ]
 
 { #category : #accessing }
@@ -565,6 +566,12 @@ GtRrJob >> propertyAt: aString put: anObject [
 	Note that both the key and value must be serialisable by LeJson."
 
 	^ self properties at: aString put: anObject
+]
+
+{ #category : #'accessing - properties' }
+GtRrJob >> removePropertyKey: aString [
+
+	self properties removeKey: aString.
 ]
 
 { #category : #'announcer - subscription' }

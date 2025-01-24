@@ -7,6 +7,11 @@ Class {
 	#category : #'RemoteRunner-Signals'
 }
 
+{ #category : #accessing }
+GtRrWorkerApplyChangeSignal class >> eventType [
+	^GtRrWorkerApplyChangeLogEvent
+]
+
 { #category : #initialization }
 GtRrWorkerApplyChangeSignal >> initializeFromOmbuEntry: anOmbuEntry [
 	ombuEntryReferenceName := (anOmbuEntry 
@@ -39,5 +44,5 @@ GtRrWorkerApplyChangeSignal >> printOneLineContentsOn: stream [
 { #category : #accessing }
 GtRrWorkerApplyChangeSignal >> signalTypeLabel [
 
-	^ 'GtRrWorkerApplyChangeEvent'
+	^ 'Worker Apply Change Signal'
 ]

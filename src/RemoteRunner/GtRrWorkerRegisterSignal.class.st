@@ -7,5 +7,5 @@ Class {
 { #category : #accessing }
 GtRrWorkerRegisterSignal >> signalTypeLabel [
 
-	^ 'GtRrWorkerRegisterSignal'
+	^ 'Worker Register Signal'
 ]
