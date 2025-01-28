@@ -350,12 +350,6 @@ GtRemoteRunner >> announceAndLog: aBeaconSignal [
 ]
 
 { #category : #announcer }
-GtRemoteRunner >> announcer [
-
-	^ announcer
-]
-
-{ #category : #announcer }
 GtRemoteRunner >> announceStatusMessage: aStatusMessage [
 	self announce: (GtRrStatusMessageChangedAnnouncement new
 			statusMessage: aStatusMessage)
@@ -373,6 +367,12 @@ GtRemoteRunner >> announceStatusMessageWithString: aMessageString andSourceLabel
 	self announceStatusMessage: (GtRrStatusMessage new
 		messageString: aMessageString;
 		sourceToolLabel: aSourceLabel)
+]
+
+{ #category : #announcer }
+GtRemoteRunner >> announcer [
+
+	^ announcer
 ]
 
 { #category : #private }
@@ -1029,6 +1029,25 @@ GtRemoteRunner >> registerAnnouncementsQueueForHeadlessRunner [
 ]
 
 { #category : #accessing }
+GtRemoteRunner >> registerJob: aGtRrJob [
+	"Answer the proxy for the job when using a headless runner."
+
+	^ aGtRrJob
+]
+
+{ #category : #'api - worker' }
+GtRemoteRunner >> registerWorkerWithDetails: aDictionary [
+	"Register the supplied worker and connection details.
+	Register the connection for disconnection notification"
+
+	^ [ self privateRegisterWorkerWithDetails: aDictionary ]
+		on: Error
+		do: [ :ex |
+			ex logStackToFile.
+			ex pass ].
+]
+
+{ #category : #accessing }
 GtRemoteRunner >> registeredWorkerCount [
 
 	^ runnerStats registeredWorkerCount
@@ -1048,25 +1067,6 @@ GtRemoteRunner >> registeredWorkersDo: aBlock [
 
 	"sharedAccess assertIsOwner."
 	registeredWorkers do: aBlock
-]
-
-{ #category : #accessing }
-GtRemoteRunner >> registerJob: aGtRrJob [
-	"Answer the proxy for the job when using a headless runner."
-
-	^ aGtRrJob
-]
-
-{ #category : #'api - worker' }
-GtRemoteRunner >> registerWorkerWithDetails: aDictionary [
-	"Register the supplied worker and connection details.
-	Register the connection for disconnection notification"
-
-	^ [ self privateRegisterWorkerWithDetails: aDictionary ]
-		on: Error
-		do: [ :ex |
-			ex logStackToFile.
-			ex pass ].
 ]
 
 { #category : #'private - accessing' }

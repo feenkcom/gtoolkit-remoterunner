@@ -14,22 +14,23 @@ GtRrTaskHeadlessExceptionStrategy class >> leJsonV4Name [
 ]
 
 { #category : #accessing }
-GtRrTaskHeadlessExceptionStrategy >> handledExceptions [
-
-	^ Error, UnhandledException
-]
-
-{ #category : #accessing }
 GtRrTaskHeadlessExceptionStrategy >> handleException: anException workerContext: aGtRrWorkerContext [
 	| infoException |
 
 	infoException := (anException class == UnhandledError)
 		ifTrue: [ anException exception ]
 		ifFalse: [ anException ].
+	infoException logStackToFile.
 	aGtRrWorkerContext worker 
 		taskFailed: aGtRrWorkerContext taskContext
 		with: infoException.
 	aGtRrWorkerContext signalTaskCompletion.
+]
+
+{ #category : #accessing }
+GtRrTaskHeadlessExceptionStrategy >> handledExceptions [
+
+	^ Error, UnhandledException
 ]
 
 { #category : #accessing }
