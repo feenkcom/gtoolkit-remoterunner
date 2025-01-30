@@ -53,8 +53,8 @@ GtRemoteRunnerLogAnalysis >> executionTimelineChartItems [
 
 { #category : #accessing }
 GtRemoteRunnerLogAnalysis >> grouper [
-	^ grouper ifNil:
-		[ grouper := GtFlatEventsGrouper new.
+	^ grouper ifNil:[ 
+		grouper := GtFlatEventsGrouper new.
 		grouper strictMode: strictMode.
 		grouper processEventSignalsFor: self eventSignals.
 		grouper ].

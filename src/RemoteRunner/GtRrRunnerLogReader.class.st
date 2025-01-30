@@ -41,8 +41,8 @@ GtRrRunnerLogReader >> gtSignalsFor: aView [
 
 { #category : #initialization }
 GtRrRunnerLogReader >> initialize [
-
 	super initialize.
+	
 	strictMode := true.
 ]
 

@@ -5,7 +5,12 @@ Class {
 }
 
 { #category : #accessing }
+GtRrWorkerApplyChangesSignal class >> eventType [
+	^GtRrWorkerApplyChangesLogEvent
+]
+
+{ #category : #accessing }
 GtRrWorkerApplyChangesSignal >> signalTypeLabel [
 
-	^ 'GtRrWorkerApplyChangesSignal'
+	^ 'Worker Apply Changes Signal'
 ]

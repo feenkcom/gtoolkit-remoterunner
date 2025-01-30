@@ -33,6 +33,12 @@ GtRrWorkerCheckSignal >> printOneLineContentsOn: stream [
 ]
 
 { #category : #accessing }
+GtRrWorkerCheckSignal >> signalTypeLabel [
+
+	^ 'Worker Check Execution Signal'
+]
+
+{ #category : #accessing }
 GtRrWorkerCheckSignal >> testResult: aTest [
 
 	self checkName: aTest class name asString, '>>', aTest selector

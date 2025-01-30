@@ -20,6 +20,7 @@ GtRrTaskHeadlessExceptionStrategy >> handleException: anException workerContext:
 	infoException := (anException class == UnhandledError)
 		ifTrue: [ anException exception ]
 		ifFalse: [ anException ].
+	infoException logStackToFile.
 	aGtRrWorkerContext worker 
 		taskFailed: aGtRrWorkerContext taskContext
 		with: infoException.
