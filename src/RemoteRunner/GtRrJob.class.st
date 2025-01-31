@@ -255,7 +255,7 @@ GtRrJob >> gtErrorsFor: aView [
 	<gtView>
 
 	^ aView list
-		title: 'Errors';
+		title: 'Task Errors';
 		priority: 16;
 		items: [ self resultsWithErrors ];
 		updateWhen: GtRemoteRunnerAnnouncement in: [ self announcer ];
@@ -279,7 +279,7 @@ GtRrJob >> gtResultsFor: aView [
 	<gtView>
 
 	^ aView list
-		title: 'Results';
+		title: 'Task Results';
 		priority: 15;
 		items: [ results ];
 		itemText: [ :item | item result ifNil: [ item errorDetails ] ];
@@ -711,12 +711,12 @@ GtRrJob >> summaryAttributes [
 
 	attributes := OrderedCollection new.
 	attributes 
-		add: #State -> self state;
-		add: #Tasks -> ([ self tasks size ]
+		add: 'State' -> self state;
+		add: 'Tasks' -> ([ self tasks size ]
 			on: ShouldNotImplement
 			do: [ :ex | 'N/A' ]);
-		add: #Results -> results size;
-		add: #Errors -> errorCount;
+		add: 'Results' -> results size;
+		add: 'Task Errors' -> errorCount;
 		add: 'Start Time' -> startTime;
 		add: 'End Time' -> endTime.
 	(startTime isNotNil and: [ endTime isNotNil ]) ifTrue:
