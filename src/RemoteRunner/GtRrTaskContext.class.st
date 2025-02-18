@@ -260,7 +260,7 @@ GtRrTaskContext >> run [
 GtRrTaskContext >> runInImage [
 
 	self markTaskStarted.
-	task runInImage.
+	task result: task timedRun.
 	self markTaskCompleted.
 ]
 
