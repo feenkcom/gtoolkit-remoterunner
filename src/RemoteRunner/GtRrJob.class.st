@@ -89,7 +89,8 @@ GtRrJob class >> leJsonV4Name [
 GtRrJob class >> retryTasksInfoFrom: aCollectionOfTasks [
 	"Answer a GtRrAbstractRetryTasks populated with the receiver's information.
 	Only valid when the receiver is a retry tasks."
-	
+
+	aCollectionOfTasks ifNil: [ ^ nil ].
 	^ GtRrRetryTasks fromTasks: aCollectionOfTasks
 ]
 

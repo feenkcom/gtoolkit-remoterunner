@@ -308,10 +308,12 @@ GtRrJobContext >> runInImage [
 	| taskContext |
 
 	self markJobStarted.
+	taskContexts := OrderedCollection new.
 	job tasks do: [ :task |
 		taskContext := GtRrTaskContext new
 			task: task;
 			jobContext: self.
+		taskContexts add: taskContext.
 		taskContext runInImage ].
 	self markJobCompleted.
 ]

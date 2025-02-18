@@ -531,8 +531,7 @@ GtRrTask >> runInImage [
 	"Run the receiver in the current process.
 	For testing only - no error handling, etc."
 
-	self result: self timedRun.
-
+	self asJob runInImage.
 ]
 
 { #category : #accessing }
