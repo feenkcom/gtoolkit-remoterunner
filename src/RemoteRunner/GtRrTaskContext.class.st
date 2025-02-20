@@ -8,7 +8,8 @@ Class {
 		'taskTimeoutTime',
 		'workerTimeoutTime',
 		'jobContext',
-		'retryTasks'
+		'retryTasks',
+		'workerConnection'
 	],
 	#category : #'RemoteRunner-Runner-State'
 }
@@ -51,7 +52,7 @@ GtRrTaskContext >> asWorkerTaskContext [
 { #category : #accessing }
 GtRrTaskContext >> connection [
 
-	^ workerFuture connection
+	^ workerFuture ifNotNil: [ workerFuture connection ]
 ]
 
 { #category : #accessing }
@@ -141,6 +142,18 @@ GtRrTaskContext >> isFinished [
 ]
 
 { #category : #testing }
+GtRrTaskContext >> isNotStarted [
+
+	^ task isNotStarted
+]
+
+{ #category : #testing }
+GtRrTaskContext >> isStarted [
+
+	^ task isStarted
+]
+
+{ #category : #testing }
 GtRrTaskContext >> isTaskContext [
 
 	^ true
@@ -215,6 +228,12 @@ GtRrTaskContext >> printOn: aStream [
 			aStream
 				<< ', ';
 				print: taskContextId ]
+]
+
+{ #category : #running }
+GtRrTaskContext >> registerHeartbeat [
+
+	workerFuture registerHeartbeat
 ]
 
 { #category : #accessing }
@@ -354,13 +373,10 @@ GtRrTaskContext >> terminateTask [
 	Despite being in the GtRrTaskContext, this represents a worker timeout"
 	| executionData |
 
-	task isFinished ifFalse: [ self markTaskCancelled ].
 	"If the worker has timed out its state is unknown,
 	simply close the connection."
-	workerFuture ifNotNil:
-		[ workerFuture connection stop ].
-	task hasCompleted ifTrue: [ ^ self ].
-	"The worker failed to terminate the task, terminate it on the server"
+	self workerConnection ifNotNil:
+		[ :connection | connection stop ].
 	executionData := GtRrWorkerExecutionData new
 		startTime: task startTime;
 		endTime: task endTime;
@@ -372,6 +388,7 @@ GtRrTaskContext >> terminateTask [
 		additionalData: task executionData additionalData.
 	self remoteRunner
 		taskFailed: self taskContextId
+		workerId: (self workerConnection ifNotNil: [ : connection | connection  workerId ])
 		executionData: executionData.
 ]
 
@@ -393,9 +410,18 @@ GtRrTaskContext >> workerAttributes: anObject [
 
 { #category : #accessing }
 GtRrTaskContext >> workerConnection [
+	"Answer the receiver's worker connection.
+	For PharoLink runners this will be via the future.
+	For MQ runners this will be set directly."
 	<return: #GtRrWorkerConnection>
 
-	^ workerFuture connection
+	^ workerConnection ifNil: [ workerFuture ifNotNil:
+		[ workerFuture connection ] ]
+]
+
+{ #category : #accessing }
+GtRrTaskContext >> workerConnection: anObject [
+	workerConnection := anObject
 ]
 
 { #category : #accessing }

@@ -3,7 +3,7 @@ Class {
 	#superclass : #GtRemoteRunnerSignal,
 	#instVars : [
 		'omReference',
-		'ipAddress'
+		'workerId'
 	],
 	#category : #'RemoteRunner-Signals'
 }
@@ -13,17 +13,7 @@ GtRrChangesSyncRetrievalSignal >> initializeFromTimestamp: aDateAndTime andData:
 
 	super initializeFromTimestamp: aDateAndTime andData: aCollection.
 	omReference := aCollection at: 3.
-	ipAddress := aCollection at: 4.
-]
-
-{ #category : #accessing }
-GtRrChangesSyncRetrievalSignal >> ipAddress [
-	^ ipAddress
-]
-
-{ #category : #accessing }
-GtRrChangesSyncRetrievalSignal >> ipAddress: anObject [
-	ipAddress := anObject
+	workerId := aCollection at: 4.
 ]
 
 { #category : #accessing }
@@ -44,11 +34,21 @@ GtRrChangesSyncRetrievalSignal >> printOneLineContentsOn: aStream [
 		<< ' | ';
 		<< omReference asString;
 		<< ' | ';
-		<< ipAddress asString
+		<< workerId asString
 ]
 
 { #category : #accessing }
 GtRrChangesSyncRetrievalSignal >> signalTypeLabel [
 
 	^ 'GtRrChangesSyncRetrieval'
+]
+
+{ #category : #accessing }
+GtRrChangesSyncRetrievalSignal >> workerId [
+	^ workerId
+]
+
+{ #category : #accessing }
+GtRrChangesSyncRetrievalSignal >> workerId: anObject [
+	workerId := anObject
 ]

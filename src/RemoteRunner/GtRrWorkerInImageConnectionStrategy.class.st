@@ -1,6 +1,6 @@
 Class {
 	#name : #GtRrWorkerInImageConnectionStrategy,
-	#superclass : #GtRrWorkerConnectionStrategy,
+	#superclass : #GtRrLlWorkerConnectionStrategy,
 	#category : #'RemoteRunner-Worker'
 }
 

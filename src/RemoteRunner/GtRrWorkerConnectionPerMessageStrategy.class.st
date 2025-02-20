@@ -3,7 +3,7 @@ GtRrWorkerConnectionPerMessageStrategy creates a new connection for each call to
 "
 Class {
 	#name : #GtRrWorkerConnectionPerMessageStrategy,
-	#superclass : #GtRrWorkerConnectionStrategy,
+	#superclass : #GtRrLlWorkerConnectionStrategy,
 	#category : #'RemoteRunner-Worker'
 }
 

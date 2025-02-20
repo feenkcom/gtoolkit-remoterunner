@@ -55,7 +55,7 @@ GtRrInImageWorker >> registerWith: ignored [
 
 	PharoLinkServerCurrentConnection 
 		value: connection
-		during: [ remoteRunner registerWorkerWithDetails: attributes ].
+		during: [ remoteRunner registerWorkerWithDetails: attributes controlChannelAvailable: false ].
 
 ]
 
@@ -89,6 +89,7 @@ GtRrInImageWorker >> taskDone: aTaskContext with: anObject [
 		additionalData: aTaskContext executionData additionalData.
 	remoteRunner
 		taskDone: aTaskContext taskContextId
+		workerId: self uid
 		executionData: executionData
 		result: anObject.
 ]
@@ -108,6 +109,7 @@ GtRrInImageWorker >> taskFailed: aTaskContext with: anError [
 		additionalData: aTaskContext executionData additionalData.
 	remoteRunner
 		taskFailed: aTaskContext taskContextId
+		workerId: self uid
 		executionData: executionData.
 ]
 

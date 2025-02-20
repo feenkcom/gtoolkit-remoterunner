@@ -95,7 +95,7 @@ GtRrHeartbeatContext >> timeoutContext [
 	now := DateAndTime now.
 	registeredWorkers do: 
 			[:workerConnection |
-			isInImage := workerConnection detailAt: #workerInImage ifAbsent: [false].
+			isInImage := workerConnection attributes at: #workerInImage ifAbsent: [false].
 			(isInImage not and: [now - workerConnection lastHeartbeat > maxDuration])
 				ifTrue: [self stopWorkerConnection: workerConnection]].
 	nextRunTime := DateAndTime now + GtRrWorker heartbeatDelay.

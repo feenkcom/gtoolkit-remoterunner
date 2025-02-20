@@ -14,10 +14,17 @@ Class {
 		'state',
 		'connectionStrategyId',
 		'workerClassName',
-		'currentSession'
+		'currentSession',
+		'additionalArguments'
 	],
 	#category : #'RemoteRunner-Runner-Workers'
 }
+
+{ #category : #accessing }
+GtRrWorkerManager >> addArguments: aCollection [
+
+	additionalArguments addAll: aCollection
+]
 
 { #category : #'start-stop' }
 GtRrWorkerManager >> addOrRemoveWorkers [
@@ -72,6 +79,13 @@ GtRrWorkerManager >> connectionStrategyId: anObject [
 	connectionStrategyId := anObject
 ]
 
+{ #category : #initialize }
+GtRrWorkerManager >> forLocalStompMq [
+
+	remoteIpAddress := 'localhost:', StampConstants defaultPort asString.
+	connectionStrategyId := #stompMq.
+]
+
 { #category : #ui }
 GtRrWorkerManager >> gtProcessesFor: aView [
 	<gtView>
@@ -108,6 +122,7 @@ GtRrWorkerManager >> initialize [
 	processes := OrderedCollection new.
 	watchdogSemaphore := Semaphore new.
 	state := #notStarted.
+	additionalArguments := OrderedCollection new.
 ]
 
 { #category : #testing }
@@ -172,6 +187,7 @@ GtRrWorkerManager >> newWorkerLocalProcessArgumentsFor: someSettings [
 			add: connectionStrategyId asString ].
 	changesSync ifTrue:
 		[ args add: '--changesSync' ].
+	args addAll: additionalArguments.
 	args
 		add: '--detachChangesFromFileSystem';
 		add: '--epiceaMemoryStore';
@@ -195,7 +211,7 @@ GtRrWorkerManager >> poolSize: anInteger [
 	oldSize := self poolSize.
 	workerCountCalculator := GtRrWorkerCountCalculator fixedCount: anInteger.
 	oldSize = self poolSize ifTrue: [ ^ self ].
-	remoteRunner isRunning ifTrue:
+	(remoteRunner isNotNil and: [ remoteRunner isRunning ]) ifTrue:
 		[ remoteRunner critical:
 			[ self addOrRemoveWorkers ] ]
 ]
@@ -210,6 +226,11 @@ GtRrWorkerManager >> processCount [
 GtRrWorkerManager >> processes [
 
 	^ processes
+]
+
+{ #category : #'api - worker' }
+GtRrWorkerManager >> registerWorker: aWorkerConnection [
+	"Do nothing"
 ]
 
 { #category : #accessing }
@@ -244,6 +265,12 @@ GtRrWorkerManager >> removeWorkers: anInteger [
 	removeCount := anInteger min: remoteRunner availableWorkers size.
 	workers := remoteRunner availableWorkers asArray first: removeCount.
 	workers do: [ :worker | worker connection stop ].
+]
+
+{ #category : #'start-stop' }
+GtRrWorkerManager >> shutdown [
+
+	self shutdownLocalWorkers.
 ]
 
 { #category : #'start-stop' }
@@ -298,6 +325,12 @@ GtRrWorkerManager >> startWatchdog [
 		[ watchdogSemaphore waitTimeoutSeconds: 30.
 		self watchDogCheck.
 		 ] ] forkNamed: 'GtRrWorkerManager local watch dog'.
+]
+
+{ #category : #'start-stop' }
+GtRrWorkerManager >> startup [
+
+	self startLocalWorkers.
 ]
 
 { #category : #accessing }

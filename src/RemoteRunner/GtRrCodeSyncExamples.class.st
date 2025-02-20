@@ -22,10 +22,7 @@ GtRrCodeSyncExamples >> addRemoveMethod [
 	<gtExample>
 	<noTest>
 	| runner codeSync semaphore |
-	runner := GtRemoteRunner new
-		          port: 8042;
-					startLogging;
-		          yourself.
+	runner := self simpleRunner.
 	codeSync := runner managerStartupAndShutdown codeSync.
 	runner managerStartupAndShutdown poolSize: 1.
 	[ semaphore := Semaphore new.
@@ -129,4 +126,21 @@ GtRrCodeSyncExamples >> hasMethodIn: aRunner [
 		onCompletion: [ "noop" ] 
 		onTimeout: [ self error: 'Didn''t receive expected job completion announcement' ].
 	^ job tasks first result
+]
+
+{ #category : #'as yet unclassified' }
+GtRrCodeSyncExamples >> simpleRunner [
+	"Answer a started RemoteRunner.
+	It is up to the caller to stop the runner (and thus the workers)."
+	| remoteRunner  |
+
+	remoteRunner := GtRemoteRunner new.
+	remoteRunner managerStartupAndShutdown 
+		autoRestart: false;
+		poolSize: 1.
+
+	self assert: remoteRunner taskQueue size equals: 0.
+	self assert: remoteRunner currentlyExecutingJobs size equals: 0.
+	self assert: remoteRunner currentlyExecutingTasks size equals: 0.
+	^ remoteRunner
 ]
