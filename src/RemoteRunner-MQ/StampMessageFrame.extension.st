@@ -1,6 +1,6 @@
 Extension { #name : #StampMessageFrame }
 
-{ #category : #'*RemoteRunner' }
+{ #category : #'*RemoteRunner-MQ' }
 StampMessageFrame >> gtViewHeadersFor: aView [
 	<gtView>
 

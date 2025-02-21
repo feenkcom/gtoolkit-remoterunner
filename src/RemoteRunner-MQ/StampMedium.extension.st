@@ -1,6 +1,6 @@
 Extension { #name : #StampMedium }
 
-{ #category : #'*RemoteRunner' }
+{ #category : #'*RemoteRunner-MQ' }
 StampMedium >> socket [
 
 	^ stream socket

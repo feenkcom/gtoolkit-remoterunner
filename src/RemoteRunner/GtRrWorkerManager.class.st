@@ -79,13 +79,6 @@ GtRrWorkerManager >> connectionStrategyId: anObject [
 	connectionStrategyId := anObject
 ]
 
-{ #category : #initialize }
-GtRrWorkerManager >> forLocalStompMq [
-
-	remoteIpAddress := 'localhost:', StampConstants defaultPort asString.
-	connectionStrategyId := #stompMq.
-]
-
 { #category : #ui }
 GtRrWorkerManager >> gtProcessesFor: aView [
 	<gtView>
