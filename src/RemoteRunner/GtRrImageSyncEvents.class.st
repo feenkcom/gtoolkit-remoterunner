@@ -16,6 +16,14 @@ GtRrImageSyncEvents class >> leJsonV4Name [
 ]
 
 { #category : #accessing }
+GtRrImageSyncEvents >> changesFrom: anOmReference [
+
+	(sessionHistory includes: anOmReference) ifFalse:
+		[ (GtRrUnknownOmReference omReference: anOmReference source: self) signal ].
+	^ events.
+]
+
+{ #category : #accessing }
 GtRrImageSyncEvents >> encodedChangesFrom: anOmReference [
 
 	(sessionHistory includes: anOmReference) ifFalse:
@@ -26,12 +34,13 @@ GtRrImageSyncEvents >> encodedChangesFrom: anOmReference [
 { #category : #accessing }
 GtRrImageSyncEvents >> encodedEvents [
 
-	^ STON toString: events
+	^ encodedEvents ifNil: [ encodedEvents := STON toString: events ]
 ]
 
 { #category : #accessing }
-GtRrImageSyncEvents >> encodedEvents: anObject [
-	encodedEvents := anObject
+GtRrImageSyncEvents >> encodedEvents: aCollection [
+
+	encodedEvents := aCollection
 ]
 
 { #category : #accessing }

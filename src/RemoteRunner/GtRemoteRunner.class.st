@@ -452,26 +452,37 @@ GtRemoteRunner >> changesSyncEventsFrom: aSerializedOmReference [
 	"Answer a collection of encoded EpEvents that will take the worker from the supplied OmReference to the state ready for testing.
 	If a collection of events is supplied, use that, otherwise synchronise with the current image.
 	Ensure that the supplied OmReference is in the receiver's history"
-	| workerOmReference ipAddress result |
-
+	| workerOmReference connection workerId |
+self halt.
 	workerOmReference := STON fromString: aSerializedOmReference.
-	ipAddress := PharoLinkServerCurrentConnection value remoteAddressString.
+	connection := PharoLinkServerCurrentConnection value.
+	workerId := nil.
+	^ self changesSyncEventsFrom: workerOmReference workerId: workerId.
+]
+
+{ #category : #accessing }
+GtRemoteRunner >> changesSyncEventsFrom: anOmReference workerId: workerId [
+	"Answer a collection of EpEvents that will take the worker from the supplied OmReference to the state ready for testing.
+	If a collection of events is supplied, use that, otherwise synchronise with the current image.
+	Ensure that the supplied OmReference is in the receiver's history"
+	| result |
+
 	GtRrChangesSyncRetrievalStartingSignal new
-		omReference: workerOmReference;
-		ipAddress: ipAddress;
+		omReference: anOmReference;
+		workerId: workerId;
 		emit.
 	result := [ changesSyncEvents
-		ifNil: [ GtRrChangesSync uniqueInstance encodedChangesFrom: workerOmReference ]
-		ifNotNil: [ changesSyncEvents encodedChangesFrom: workerOmReference ] ]
+		ifNil: [ GtRrChangesSync uniqueInstance changesFrom: anOmReference ]
+		ifNotNil: [ changesSyncEvents changesFrom: anOmReference ] ]
 			on: Error
 			do: [ :ex |
 				self announceAndLog: (GtRrWorkerChangesSyncErrorAnnouncement new
-					ipAddress: ipAddress;
+					workerId: workerId;
 					exception: ex copy freeze).
 				ex pass ].
 	GtRrChangesSyncRetrievalCompletedSignal new
-		omReference: workerOmReference;
-		ipAddress: ipAddress;
+		omReference: anOmReference;
+		workerId: workerId;
 		emit.
 	^ result.
 ]
@@ -548,6 +559,11 @@ GtRemoteRunner >> debugMode [
 	^ true.
 ]
 
+{ #category : #initialization }
+GtRemoteRunner >> defaultManagerStartupAndShutdown [
+	^ GtRrCodeSyncedLocalManagerStartupAndShutdown new
+]
+
 { #category : #accessing }
 GtRemoteRunner >> defaultTaskTimeout [
 
@@ -573,6 +589,33 @@ GtRemoteRunner >> emptyQueuesFor: aJobId [
 			aTaskContext jobId = aJobId ]) isNotNil ] whileTrue.
 		runnerStats currentlyExecutingTaskCount: currentlyExecutingTasks size.
 		runnerStats taskQueueSize: taskQueue size ]
+]
+
+{ #category : #accessing }
+GtRemoteRunner >> encodedChangesSyncEventsFrom: anOmReference workerId: workerId [
+	"Answer a collection of EpEvents that will take the worker from the supplied OmReference to the state ready for testing.
+	If a collection of events is supplied, use that, otherwise synchronise with the current image.
+	Ensure that the supplied OmReference is in the receiver's history"
+	| result |
+
+	GtRrChangesSyncRetrievalStartingSignal new
+		omReference: anOmReference;
+		workerId: workerId;
+		emit.
+	result := [ changesSyncEvents
+		ifNil: [ GtRrChangesSync uniqueInstance encodedChangesFrom: anOmReference ]
+		ifNotNil: [ changesSyncEvents encodedChangesFrom: anOmReference ] ]
+			on: Error
+			do: [ :ex |
+				self announceAndLog: (GtRrWorkerChangesSyncErrorAnnouncement new
+					workerId: workerId;
+					exception: ex copy freeze).
+				ex pass ].
+	GtRrChangesSyncRetrievalCompletedSignal new
+		omReference: anOmReference;
+		workerId: workerId;
+		emit.
+	^ result.
 ]
 
 { #category : #accessing }
@@ -679,7 +722,7 @@ GtRemoteRunner >> gtWorkersFor: aView [
 		priority: 50;
 		items: [ registeredWorkers values sorted: #remoteAddressString ascending ];
 		column: 'IP Address' text: [ :item | GtRemoteRunner printIpAddress: item remoteAddress ];
-		column: 'Working Directory' text: [ :item | item detailAt: #workingDirectory ifAbsent: [ '' ] ];
+		column: 'Working Directory' text: [ :item | item attributes at: #workingDirectory ifAbsent: [ '' ] ];
 		column: 'PID' text: [ :item | item pid ];
 		actionUpdateButton
 ]
@@ -710,29 +753,25 @@ GtRemoteRunner >> heartbeatForWorkerId: aUidString [
 
 { #category : #initialization }
 GtRemoteRunner >> initialize [
-
 	super initialize.
 	announcer := Announcer new.
-	taskQueue := SharedQueue new. "of GtRrTaskContext"
+	taskQueue := SharedQueue new.	"of GtRrTaskContext"
 	runnerStats := GtRemoteRunnerStats new
-		defaultWorkerTimeout: self workerTimeout;
-		defaultTaskTimeout: self taskTimeout.
-	"currentlyExecutingJobs is a dictionary of GtRrJobContext keyed by job uid"
-	currentlyExecutingJobs := Dictionary new.
-	"currentlyExecutingTasks is a dictionary of GtRrTaskContext keyed by task context id"
+			defaultWorkerTimeout: self workerTimeout;
+			defaultTaskTimeout: self taskTimeout.	"currentlyExecutingJobs is a dictionary of GtRrJobContext keyed by job uid"
+	currentlyExecutingJobs := Dictionary new.	"currentlyExecutingTasks is a dictionary of GtRrTaskContext keyed by task context id"
 	currentlyExecutingTasks := Dictionary new.
-	sharedAccess := Mutex new.
-	"availableWorkers is a SortedCollection of GtRrFutureWorkerTask, sorted by #workerPriority.
+	sharedAccess := Mutex new.	"availableWorkers is a SortedCollection of GtRrFutureWorkerTask, sorted by #workerPriority.
 	The worker is represented by a GtRrWorkerConnection and is waiting on the semaphore held by the GtRrFutureWorkerTask.
 	Sort the collection ascending and remove the last item to minimise the need for repacking the collection."
 	availableWorkers := SortedCollection sortUsing: #workerPriority ascending.
 	registeredWorkers := Dictionary new.
 	timeoutManager := GtRrTimeoutManager remoteRunner: self.
 	logEmitter := GtRemoteRunnerBeaconsEmitter new.
-	
-	self 
-		managerStartupAndShutdown: GtRrCodeSyncedLocalManagerStartupAndShutdown new;
-		jobStartupAndShutdown: GtRrLocalJobStartupAndShutdown new.
+
+	self
+		managerStartupAndShutdown: self defaultManagerStartupAndShutdown;
+		jobStartupAndShutdown: GtRrLocalJobStartupAndShutdown new
 ]
 
 { #category : #accessing }
@@ -805,6 +844,15 @@ GtRemoteRunner >> managerStartupAndShutdown: aGtRrManagerStartupAndShutdown [
 	managerStartupAndShutdown := aGtRrManagerStartupAndShutdown.
 	managerStartupAndShutdown remoteRunner: self.
 	runnerStats updateManagerStartupAndShutdown: managerStartupAndShutdown.
+]
+
+{ #category : #'as yet unclassified' }
+GtRemoteRunner >> markTaskStarted: taskId [
+	"Mark the specified task as started"
+
+	self critical:
+		[ currentlyExecutingTasks at: taskId
+			ifPresent: [ :task| task markTaskStarted ] ]
 ]
 
 { #category : #'api - logger' }
@@ -923,16 +971,19 @@ GtRemoteRunner >> printOn: aStream [
 ]
 
 { #category : #private }
-GtRemoteRunner >> privateRegisterWorkerWithDetails: aDictionary [
+GtRemoteRunner >> privateRegisterWorkerWithDetails: aDictionary controlChannelAvailable: aBoolean [
 	"Register the supplied worker and connection details.
-	Register the connection for disconnection notification"
+	Answer a boolean indicating whether the registration was accepted.
+	aBoolean indicates whether the control channel is automatically available.  If so, announce it."
 	| pharoLinkServerConnection workerConnection workerId mutexStart mutexEnd |
 
 	GtRrRegisterWorkerStartingSignal new
 		workerAttributes: aDictionary;
 		emit.
+	"For MQ comms pharoLinkServer will be nil"
 	pharoLinkServerConnection := PharoLinkServerCurrentConnection value.
-	pharoLinkServerConnection closeOnExec: true.
+	pharoLinkServerConnection ifNotNil:
+		[ pharoLinkServerConnection closeOnExec: true ].
 	mutexStart := DateAndTime now.
 	self critical:
 		[ mutexEnd := DateAndTime now.
@@ -948,14 +999,14 @@ GtRemoteRunner >> privateRegisterWorkerWithDetails: aDictionary [
 								workerAttributes: aDictionary;
 								mutexWait: (mutexEnd - mutexStart) asMilliSeconds;
 								emit.
-							pharoLinkServerConnection stop.
-							^self ] ].
-		workerConnection := GtRrWorkerConnection
-				connection: pharoLinkServerConnection
-				runner: self.
-		workerConnection details: aDictionary.
+							^ false ] ].
+		workerConnection := (server 
+						ifNil: [ GtRrWorkerConnection new ]
+						ifNotNil: #newWorkerConnection)
+				connection: pharoLinkServerConnection;
+				remoteRunner: self.
+		workerConnection attributes: aDictionary.
 		workerId := aDictionary at: #id.
-		aDictionary at: #workerIpAddress put: workerConnection remoteAddressString.
 		registeredWorkers at: workerId put: workerConnection.
 		runnerStats 
 			updateRegisteredWorkerCounts: registeredWorkers;
@@ -963,18 +1014,19 @@ GtRemoteRunner >> privateRegisterWorkerWithDetails: aDictionary [
 		managerStartupAndShutdown registerWorker: workerConnection ].
 	self announceAndLog: (GtRrWorkerRegisteredAnnouncement new
 				worker: workerConnection).
+	aBoolean ifTrue:
+		[ self announceAndLog: (GtRrWorkerControlChannelRegisteredAnnouncement worker: workerConnection). ].
 	GtRrRegisterWorkerCompletedSignal new
 		workerAttributes: aDictionary;
-		ipAddress: pharoLinkServerConnection remoteAddressString;
+		ipAddress: workerConnection remoteAddressString;
 		mutexWait: (mutexEnd - mutexStart) asMilliSeconds;
 		emit.
 
-	"Answer a PharoLink primitive so that a proxy isn't created for the runner (which is a global, anyway)"
-	^nil
+	^ true
 ]
 
 { #category : #private }
-GtRemoteRunner >> privateTaskFailed: aTaskContextId executionData: aGtRrWorkerExecutionData [
+GtRemoteRunner >> privateTaskFailed: aTaskContextId workerId: workerId executionData: aGtRrWorkerExecutionData [
 	"Mark the specified task as failed and retry if required.
 	Must be called within sharedAccess"
 	| taskContext retryTasks registeredAvailable |
@@ -1036,11 +1088,11 @@ GtRemoteRunner >> registerJob: aGtRrJob [
 ]
 
 { #category : #'api - worker' }
-GtRemoteRunner >> registerWorkerWithDetails: aDictionary [
+GtRemoteRunner >> registerWorkerWithDetails: aDictionary controlChannelAvailable: aBoolean [
 	"Register the supplied worker and connection details.
-	Register the connection for disconnection notification"
+	Answer a boolean indicating whether the registration was accepted."
 
-	^ [ self privateRegisterWorkerWithDetails: aDictionary ]
+	^ [ self privateRegisterWorkerWithDetails: aDictionary controlChannelAvailable: aBoolean ]
 		on: Error
 		do: [ :ex |
 			ex logStackToFile.
@@ -1374,7 +1426,7 @@ GtRemoteRunner >> syncChanges [
 ]
 
 { #category : #'api - worker' }
-GtRemoteRunner >> taskDone: aTaskContextId executionData: aGtRrWorkerExecutionData result: aResult [
+GtRemoteRunner >> taskDone: aTaskContextId workerId: workerId executionData: aGtRrWorkerExecutionData result: aResult [
 	| mutexStart mutexEnd |
 
 	GtRrTaskDoneStartingSignal new 
@@ -1387,7 +1439,8 @@ GtRemoteRunner >> taskDone: aTaskContextId executionData: aGtRrWorkerExecutionDa
 		taskContext := currentlyExecutingTasks removeKey: aTaskContextId ifAbsent: [].
 		"If the task hasn't been found, assumed that it was terminated and move on"
 		taskContext ifNotNil: [ | retryTasks |
-			taskContext workerConnection registerHeartbeat.
+			registeredWorkers at: workerId
+				ifPresent: [ :worker | worker registerHeartbeat ].
 			runnerStats currentlyExecutingTaskCount: currentlyExecutingTasks size.
 			taskContext task executionData updateFromWorker: aGtRrWorkerExecutionData.
 			taskContext result: aResult.
@@ -1410,14 +1463,14 @@ GtRemoteRunner >> taskDone: aTaskContextId executionData: aGtRrWorkerExecutionDa
 ]
 
 { #category : #'api - worker' }
-GtRemoteRunner >> taskFailed: aTaskContextId executionData: aGtRrWorkerExecutionData [
+GtRemoteRunner >> taskFailed: aTaskContextId workerId: workerId executionData: aGtRrWorkerExecutionData [
 	"Mark the specified task as failed"
 
 	GtRrWorkerTraceAnnouncement new
 		message: 'taskFailed:with: pre ', aTaskContextId asString;
 		emit.
 	self critical: 
-		[ self privateTaskFailed: aTaskContextId executionData: aGtRrWorkerExecutionData ].
+		[ self privateTaskFailed: aTaskContextId workerId: workerId executionData: aGtRrWorkerExecutionData ].
 	GtRrWorkerTraceAnnouncement new
 		message: 'taskFailed:with: post ', aTaskContextId asString;
 		emit.
@@ -1445,6 +1498,26 @@ GtRemoteRunner >> taskTimeout: anObject [
 
 	taskTimeout := anObject.
 	runnerStats defaultTaskTimeout: taskTimeout.
+]
+
+{ #category : #accessing }
+GtRemoteRunner >> tasksRemainingCount [
+	"Answer the number of tasks yet to be run.
+	For a Message Queue based system this also includes tasks that are executing but not yet started.
+	Should be called within sharedAccess."
+
+	^ taskQueue size + (currentlyExecutingTasks count: [ :task |
+		task isNotStarted ])
+]
+
+{ #category : #accessing }
+GtRemoteRunner >> tasksStartedCount [
+	"Answer the number of tasks yet to be run.
+	For a Message Queue based system this also includes tasks that are executing but not yet started.
+	Should be called within sharedAccess."
+
+	^ currentlyExecutingTasks count: [ :task |
+		task isStarted ]
 ]
 
 { #category : #accessing }
@@ -1540,6 +1613,7 @@ GtRemoteRunner >> unregisterWorkerId: aUidString reason: aString [
 				errorMessage: 'Worker Unregistered: ' , aString printString;
 				setTrace.
 			self privateTaskFailed: taskContext taskContextId
+				workerId: aUidString
 				executionData: (GtRrWorkerExecutionData new errorDetails: errorDetails)].
 		self removeQueuedTasksForWorkerId: aUidString. 
 		"self terminateJobsOnNoWorkers" ].
@@ -1570,7 +1644,7 @@ GtRemoteRunner >> updateStats [
 			updateRegisteredWorkerCounts: registeredWorkers;
 			currentlyExecutingJobCount: currentlyExecutingJobs size;
 			currentlyExecutingTaskCount: currentlyExecutingTasks size;
-			taskQueueSize: taskQueue size;
+			taskQueueSize: self tasksRemainingCount;
 			updateAvailableWorkerCounts: availableWorkers;
 			sharedAccessCount: sharedAccess size;
 			portNumber: port;
@@ -1643,7 +1717,7 @@ GtRemoteRunner >> workerResultProcessingError: errorDetails workerId: workerId t
 	currentlyExecutingTasks
 		at: taskContextId
 		ifPresent: [ :taskContext |
-			self taskFailed: taskContextId executionData: (GtRrWorkerExecutionData new
+			self taskFailed: taskContextId workerId: workerId executionData: (GtRrWorkerExecutionData new
 				errorDetails: errorDetails) ].
 ]
 

@@ -5,7 +5,7 @@ No attempt to reconnect is made if the connection is lost.
 "
 Class {
 	#name : #GtRrWorkerSingleConnectionStrategy,
-	#superclass : #GtRrWorkerConnectionStrategy,
+	#superclass : #GtRrLlWorkerConnectionStrategy,
 	#instVars : [
 		'application'
 	],

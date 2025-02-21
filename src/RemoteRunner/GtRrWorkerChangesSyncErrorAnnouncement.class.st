@@ -3,7 +3,7 @@ Class {
 	#superclass : #GtRemoteRunnerAnnouncement,
 	#instVars : [
 		'exception',
-		'ipAddress'
+		'workerId'
 	],
 	#category : #'RemoteRunner-Announcements'
 }
@@ -11,7 +11,7 @@ Class {
 { #category : #accessing }
 GtRrWorkerChangesSyncErrorAnnouncement >> asDataForRemoteSerialize [
 	^ super asDataForRemoteSerialize
-		at: #ipAddress put: ipAddress;
+		at: #workerId put: workerId;
 		at: #exception put: (GtRrErrorDetails fromException: exception);
 		yourself.
 ]
@@ -31,17 +31,7 @@ GtRrWorkerChangesSyncErrorAnnouncement >> initializeFromSlotData: aDictionary [
 	super initializeFromSlotData: aDictionary.
 
 	exception := (aDictionary at: #exception).
-	ipAddress := (aDictionary at: #ipAddress).
-]
-
-{ #category : #accessing }
-GtRrWorkerChangesSyncErrorAnnouncement >> ipAddress [
-	^ ipAddress
-]
-
-{ #category : #accessing }
-GtRrWorkerChangesSyncErrorAnnouncement >> ipAddress: anObject [
-	ipAddress := anObject
+	workerId := (aDictionary at: #workerId).
 ]
 
 { #category : #printing }
@@ -50,7 +40,7 @@ GtRrWorkerChangesSyncErrorAnnouncement >> printOn: stream [
 	stream
 		print: exception;
 		<< ' @ ';
-		<< ipAddress asString.
+		<< workerId asString.
 ]
 
 { #category : #printing }
@@ -59,5 +49,15 @@ GtRrWorkerChangesSyncErrorAnnouncement >> printOneLineContentsOn: stream [
 	stream
 		print: exception;
 		<< ' @ ';
-		print: ipAddress.
+		print: workerId.
+]
+
+{ #category : #accessing }
+GtRrWorkerChangesSyncErrorAnnouncement >> workerId [
+	^ workerId
+]
+
+{ #category : #accessing }
+GtRrWorkerChangesSyncErrorAnnouncement >> workerId: anObject [
+	workerId := anObject
 ]

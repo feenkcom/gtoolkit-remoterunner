@@ -63,6 +63,17 @@ GtRrWorkerTaskContext >> postCopy [
 	task := task copy.
 ]
 
+{ #category : #printing }
+GtRrWorkerTaskContext >> printOn: aStream [
+
+	super printOn: aStream.
+	taskContextId ifNotNil:
+		[ aStream
+			nextPut: $(;
+			print: taskContextId;
+			nextPut: $) ].
+]
+
 { #category : #accessing }
 GtRrWorkerTaskContext >> startTime [
 

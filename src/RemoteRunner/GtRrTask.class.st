@@ -319,6 +319,12 @@ GtRrTask >> isNotStarted [
 	^ self state = #notStarted
 ]
 
+{ #category : #testing }
+GtRrTask >> isStarted [
+
+	^ self state = #started
+]
+
 { #category : #'accessing - resource report' }
 GtRrTask >> machineAvailableMemory [  
 	^ self

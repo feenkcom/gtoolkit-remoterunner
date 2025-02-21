@@ -24,7 +24,7 @@ GtRrUserNotificationExamples >> notifyOnChangesSyncError [
 	PharoLinkServerCurrentConnection
 		value: GtRrPseudoPharoLinkServerConnection new
 		during:
-			[ self should: [ runner changesSyncEventsFrom: (STON toString: omReference) ] 
+			[ self should: [ runner changesSyncEventsFrom: omReference workerId: nil ] 
 				raise: Error ].
 	self assert: runner logNotifier announcementCount equals: 1.
 ]
@@ -46,7 +46,7 @@ GtRrUserNotificationExamples >> notifyOnChangesSyncSuccess [
 		description: 'Should not have a null omReference'.
 	PharoLinkServerCurrentConnection
 		value: GtRrPseudoPharoLinkServerConnection new
-		during: [ runner changesSyncEventsFrom: (STON toString: omReference) ].
+		during: [ runner changesSyncEventsFrom: omReference workerId: nil ].
 	self assert: runner logNotifier announcementCount equals: 0.
 ]
 

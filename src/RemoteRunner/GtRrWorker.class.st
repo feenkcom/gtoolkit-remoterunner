@@ -145,15 +145,16 @@ GtRrWorker class >> processCommandLineArgs: args [
 	StringSignal emit: 
 		'ConnectionStrategy: ' , (connectionStrategyId ifNil: ['<none>']).
 	connectionStrategyId ifNotNil: 
-	[connectionStrategy := (
-		{#perMessage -> [GtRrWorkerConnectionPerMessageStrategy new].
-		#single -> [GtRrWorkerSingleConnectionStrategy new]}
-			asDictionary at: connectionStrategyId
-			ifAbsent: 
-				[self
-					error: 'Invalid connectionStrategy: ' , connectionStrategyId printString])
-			value.
-	worker connectionStrategy: connectionStrategy].
+		[connectionStrategy := (
+			{#perMessage -> [GtRrWorkerConnectionPerMessageStrategy new].
+			#single -> [GtRrWorkerSingleConnectionStrategy new].
+			#stompMq -> [ GtRrMqWorkerConnectionStrategy new ]}
+				asDictionary at: connectionStrategyId
+				ifAbsent: 
+					[self
+						error: 'Invalid connectionStrategy: ' , connectionStrategyId printString])
+							value.
+		worker connectionStrategy: connectionStrategy].
 	worker connectionStrategy socketAddress: serverSocketAddress.
 	args at: #changesSync ifPresent: 
 		[StringSignal emit: 'changesSync: true'.
@@ -258,7 +259,7 @@ GtRrWorker >> command: anArray [
 GtRrWorker >> commandCurrentTaskContextId [
 	"Answer the current task context id, or nil if nothing is being currently executed"
 
-	^ executionContext ifNotNil: [ executionContext task taskContextId ]
+	^ executionContext ifNotNil: [ executionContext taskContext taskContextId ]
 ]
 
 { #category : #commands }
@@ -418,15 +419,27 @@ GtRrWorker >> isRunning [
 		readProcess isTerminated not ] ]
 ]
 
+{ #category : #accessing }
+GtRrWorker >> lastHeartbeat [
+	^ lastHeartbeat
+]
+
+{ #category : #accessing }
+GtRrWorker >> lastHeartbeat: anObject [
+	lastHeartbeat := anObject
+]
+
 { #category : #private }
-GtRrWorker >> logAndQuit [
+GtRrWorker >> logAndQuit: reasonString [
 
 	GtRrWorkerOperationShutdownAnnouncement new 
-		reason: 'Quit received';
+		reason: 'Quit received: ', reasonString asString;
 		emit.
 	"Give other processes time to finish"
 	Processor activeProcess priority: 15.
-	Smalltalk snapshot: false andQuit: true.
+	Smalltalk image isInteractiveGraphic 
+		ifTrue: [ UIManager notify: 'GtRrWorker>>logAndQuit: ', reasonString asString ]
+		ifFalse: [ Smalltalk snapshot: false andQuit: true ].
 ]
 
 { #category : #accessing }
@@ -447,19 +460,8 @@ GtRrWorker >> newTaskProcess [
 { #category : #private }
 GtRrWorker >> nextTask [
 	"Send any queued results and get the next task"
-	| promise result serializedTask |
-	
-	^ self connectDuring: [ :application |
-		[ result := resultQueue nextOrNil ] whileNotNil:
-			[ result sendThroughApplication: application ].
 
-		GtRrWorkerWaitForTaskAnnouncement new emit.
-		promise := application newCommandFactory send:
-			'GtAssignedRemoteRunner nextTaskSerializedForWorkerId: ''', uid, ''''.
-		serializedTask := promise waitForValue.
-		lastHeartbeat := DateAndTime now.
-		LeJsonV4 uniqueInstance deserialize: serializedTask readStream ].
-
+	^ connectionStrategy nextTask
 ]
 
 { #category : #accessing }
@@ -475,39 +477,19 @@ GtRrWorker >> preTaskConfiguration [
 { #category : #private }
 GtRrWorker >> registerWith: aPharoLinkApplication [
 	"Register the receiver with the remote runner associated with the supplied PharoLinkApplication"
-	| result |
 
-	self syncChangesWith: aPharoLinkApplication.
-	GtRrWorkerRegisterStartingSignal new emit.
-	result := aPharoLinkApplication newCommandFactory 
-			bindingAt: #attributes put: attributes;
-			sendAndWait: 'GtAssignedRemoteRunner registerWorkerWithDetails: attributes'.
-	GtRrWorkerRegisterCompletedSignal new emit.
-	^ result
+	^ connectionStrategy registerWith: aPharoLinkApplication
+]
+
+{ #category : #accessing }
+GtRrWorker >> resultQueue [
+	^ resultQueue
 ]
 
 { #category : #private }
-GtRrWorker >> retrieveEncodedChangesFromServerWith: aPharoLinkApplication [ 
-	| encodedEvents remoteAddressString |
+GtRrWorker >> retrieveChangesFromServerWith: aPharoLinkApplication [ 
 
-	remoteAddressString := aPharoLinkApplication remoteAddressString.
-	
-	GtRrWorkerRetrieveChangesStartingSignal new
-		remoteAddressString: remoteAddressString;
-		workerId: self uid;
-		emit.
-	encodedEvents := aPharoLinkApplication newCommandFactory
-		setByValue;
-		bindingAt: #anOmReference put: 
-			(STON toString: GtRrChangesSync headReference);
-		<< 'GtAssignedRemoteRunner changesSyncEventsFrom: anOmReference';
-		sendAndWait.
-	GtRrWorkerRetrieveChangesCompletedSignal new
-		remoteAddressString: remoteAddressString;
-		workerId: self uid;
-		emit.
-	
-	^ encodedEvents
+	^ connectionStrategy  retrieveChangesFromServerWith: aPharoLinkApplication
 ]
 
 { #category : #starting }
@@ -525,18 +507,8 @@ GtRrWorker >> runWorkerStartupScripts [
 
 { #category : #private }
 GtRrWorker >> sendHeartbeat [
-	| start end |
 
-	start := Time microsecondClockValue.
-	GtRrWorkerHeatbeatStartingSignal new emit.
-	self connectDuring: [ :application |
-		lastHeartbeat := DateAndTime now.
-		application newCommandFactory send:
-			'GtAssignedRemoteRunner heartbeatForWorkerId: ''', uid, '''' ].
-	end := Time microsecondClockValue.
-	GtRrWorkerHeartbeatCompletedSignal new
-		milliseconds: ((end - start) / 1000) rounded;
-		emit.
+	connectionStrategy sendHeartbeat
 ]
 
 { #category : #private }
@@ -617,7 +589,7 @@ GtRrWorker >> stepService [
 	| taskContext |
 
 	taskContext := self nextTask.
-	taskContext = 'quit' ifTrue: [ self logAndQuit ].
+	taskContext = 'quit' ifTrue: [ self logAndQuit: 'Quit Received' ].
 	GtRrWorkerTaskStartingSignal new
 		taskId: taskContext taskId;
 		emit.
@@ -667,7 +639,7 @@ GtRrWorker >> stopReadProcess [
 GtRrWorker >> syncChanges: aCollectionOfChanges remoteAddress: aRemoteAddressString eventsSize: eventsSize [
 	"Apply the given list of changes.
 	Changes are encoded as an array of OmEntries."
-	
+
 	GtRrWorkerApplyChangesStartingSignal new
 		remoteAddressString: aRemoteAddressString;
 		workerId: self uid;
@@ -707,20 +679,19 @@ GtRrWorker >> syncChangesFromFile: aFileReference [
 
 { #category : #private }
 GtRrWorker >> syncChangesFromServerWith: aPharoLinkApplication [ 
-	| encodedEvents events remoteAddressString |
+	| events remoteAddressString |
 
-	(attributes at: #changesSync ifAbsent: [ false ]) ifFalse: [ ^ self ].
+	(attributes at: #changesSync ifAbsent: [ false ]) ifFalse: [ ^ #() ].
 	remoteAddressString := aPharoLinkApplication remoteAddressString.
-	
-	encodedEvents := self retrieveEncodedChangesFromServerWith:  aPharoLinkApplication.
+
 	events := self 
-		unplayedEventsIn: (STON fromString: encodedEvents)
+		unplayedEventsIn: (self retrieveChangesFromServerWith:  aPharoLinkApplication)
 		remoteAddress: remoteAddressString.
-		
+
 	self 
 		syncChanges: events
 		remoteAddress: remoteAddressString 
-		eventsSize: encodedEvents size.
+		eventsSize: events size.
 		
 	^ events
 ]
@@ -740,74 +711,25 @@ GtRrWorker >> syncChangesWith: aPharoLinkApplication [
 
 { #category : #accessing }
 GtRrWorker >> taskDone: aTaskContext with: anObject [
-	| serializedResult executionData serializedExecutionData|
 
-	GtRrWorkerTaskCompletedSignal new
-		taskId: aTaskContext taskId;
-		message: 'Success: ' , anObject printString;
-		emit.
-	executionData := GtRrWorkerExecutionData new
-		startTime: aTaskContext startTime;
-		endTime: aTaskContext endTime;
-		resourceReport: aTaskContext executionData resourceReport;
-		additionalData: aTaskContext executionData additionalData.
-	serializedExecutionData := [ LeJsonV4 uniqueInstance serialize: executionData ]
-		on: Error 
-		do: [ :ex | ^ self taskFailed: aTaskContext with: ex ].
-	serializedResult := [ LeJsonV4 uniqueInstance serialize: anObject ]
-		on: Error 
-		do: [ :ex | ^ self taskFailed: aTaskContext with: ex ].
-	self postTaskProcessing.
-	resultQueue nextPut: (GtRrWorkerResultEntry
-		worker: self
-		task: aTaskContext
-		bindings: { 
-			#taskContextId -> aTaskContext taskContextId.
-			#executionData -> serializedExecutionData.
-			#result -> serializedResult. }
-		command: 'GtAssignedRemoteRunner 
-			taskDone: taskContextId 
-			executionData: (LeJsonV4 uniqueInstance deserialize: executionData readStream)
-			result: (LeJsonV4 uniqueInstance deserialize: result readStream). true').
-
+	connectionStrategy taskDone: aTaskContext with: anObject
 ]
 
 { #category : #accessing }
 GtRrWorker >> taskFailed: aTaskContext with: anError [
-	| executionData serializedExecutionData |
 
-	Stdio stdout lf; << 'ensured3'; lf; flush.
-	GtRrWorkerTaskCompletedSignal new
-		taskId: aTaskContext taskId;
-		message: 'ERROR: ' , anError printString;
-		emit.
-	executionData := GtRrWorkerExecutionData new
-		startTime: aTaskContext startTime;
-		endTime: aTaskContext endTime;
-		resourceReport: aTaskContext executionData resourceReport;
-		errorDetails: (GtRrErrorDetails new
-						errorMessage: (anError messageText ifEmpty:
-							[ anError printString ]);
-						trace: anError stackString);
-		additionalData: aTaskContext executionData additionalData.
-	serializedExecutionData := LeJsonV4 uniqueInstance serialize: executionData.
-	self postTaskProcessing.
-	resultQueue nextPut: (GtRrWorkerResultEntry
-		worker: self
-		task: aTaskContext
-		bindings: { 
-			#taskContextId -> aTaskContext taskContextId.
-			#executionData -> serializedExecutionData. }
-		command: 'GtAssignedRemoteRunner 
-				taskFailed: taskContextId 
-				executionData: (LeJsonV4 uniqueInstance deserialize: executionData readStream). true').
-
+	connectionStrategy taskFailed: aTaskContext with: anError
 ]
 
 { #category : #accessing }
 GtRrWorker >> uid [
 
 	^ uid
+]
+
+{ #category : #accessing }
+GtRrWorker >> uid: anObject [
+	uid := anObject
 ]
 
 { #category : #private }
@@ -835,7 +757,5 @@ GtRrWorker >> unplayedEventsIn: events remoteAddress: remoteAddressString [
 GtRrWorker >> unregisterWith: aPharoLinkApplication [
 	"Register the receiver with the remote runner associated with the supplied PharoLinkApplication"
 
-	^ aPharoLinkApplication newCommandFactory sendAndWait: 
-		'GtAssignedRemoteRunner unregisterWorkerId: ''', uid, ''' reason: ''Worker stopped'''.
-
+	^ connectionStrategy unregisterWith: aPharoLinkApplication
 ]
