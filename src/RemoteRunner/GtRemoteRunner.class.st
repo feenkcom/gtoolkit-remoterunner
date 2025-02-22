@@ -453,7 +453,7 @@ GtRemoteRunner >> changesSyncEventsFrom: aSerializedOmReference [
 	If a collection of events is supplied, use that, otherwise synchronise with the current image.
 	Ensure that the supplied OmReference is in the receiver's history"
 	| workerOmReference connection workerId |
-self halt.
+
 	workerOmReference := STON fromString: aSerializedOmReference.
 	connection := PharoLinkServerCurrentConnection value.
 	workerId := nil.
