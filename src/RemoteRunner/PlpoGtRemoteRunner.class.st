@@ -170,6 +170,13 @@ PlpoGtRemoteRunner >> stopAnnouncementNotifier [
 	announcementNotifier := nil.
 ]
 
+{ #category : #private }
+PlpoGtRemoteRunner >> stopOnWorker [
+	"This has become a worker image.
+	The application will be stopped independently due to the socket being closed.
+	No other action required."
+]
+
 { #category : #'api - jobs' }
 PlpoGtRemoteRunner >> submitJob: aGtRrJob [
 	| jobProxy |

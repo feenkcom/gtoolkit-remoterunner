@@ -10,16 +10,98 @@ Class {
 		'commandCallback',
 		'commandSubscription',
 		'messageSubscription',
-		'replyRegistry',
 		'commandChannelName',
 		'messageChannelName',
 		'owner',
 		'rpcRegistry',
 		'sharedAccess',
-		'mqPort'
+		'mqPort',
+		'mqUsername',
+		'mqPassword',
+		'closingException',
+		'socketAccess',
+		'state',
+		'listenerStopping'
+	],
+	#classVars : [
+		'DefaultHost',
+		'DefaultPassword',
+		'DefaultUsername'
 	],
 	#category : #'RemoteRunner-MQ-Runner'
 }
+
+{ #category : #accessing }
+GtRrStompMqProcessor class >> defaultHost [
+	^DefaultHost
+]
+
+{ #category : #accessing }
+GtRrStompMqProcessor class >> defaultHost: anObject [
+	DefaultHost := anObject
+]
+
+{ #category : #accessing }
+GtRrStompMqProcessor class >> defaultHostName [
+
+	^ self hostNameFrom: DefaultHost
+]
+
+{ #category : #accessing }
+GtRrStompMqProcessor class >> defaultPassword [
+	^DefaultPassword
+]
+
+{ #category : #accessing }
+GtRrStompMqProcessor class >> defaultPassword: anObject [
+	DefaultPassword := anObject
+]
+
+{ #category : #accessing }
+GtRrStompMqProcessor class >> defaultPort [
+
+	^ self portFrom: DefaultHost
+]
+
+{ #category : #accessing }
+GtRrStompMqProcessor class >> defaultUsername [
+	^DefaultUsername
+]
+
+{ #category : #accessing }
+GtRrStompMqProcessor class >> defaultUsername: anObject [
+	DefaultUsername := anObject
+]
+
+{ #category : #accessing }
+GtRrStompMqProcessor class >> hostNameFrom: aHostString [
+	| segments |
+
+	aHostString ifNil: [ ^ nil ].
+	segments := $: split: aHostString.
+	segments size > 2 ifTrue: [ 
+		self error: aHostString printString , ' must be formatted <host>[:<port>]' ].
+	^ segments size = 1
+		ifTrue: [ segments first ]
+		ifFalse: [ nil ].
+]
+
+{ #category : #accessing }
+GtRrStompMqProcessor class >> portFrom: aHostString [
+	| segments |
+
+	aHostString ifNil: [ ^ StampConstants defaultPort ].
+	segments := $: split: aHostString.
+	segments size > 2 ifTrue: [ 
+		self error: aHostString printString , ' must be formatted <host>:[<port>]' ].
+	^ segments size = 1 ifTrue: 
+		[ StampConstants defaultPort ]
+	ifFalse: [ | port |
+		port := segments second.
+		(port allSatisfy: #isDigit) ifFalse: [ 
+			self error: aHostString printString , ' the port must be a number' ].
+		port asInteger ]
+]
 
 { #category : #'queue names' }
 GtRrStompMqProcessor class >> runnerControlChannelName [
@@ -75,7 +157,10 @@ GtRrStompMqProcessor >> connect [
 	
 	mqClient := StampClient new.
 	mqClient optionAt: #gtRrOwner put: self.
-	mqClient host: self mqHostName.
+	self mqHostName ifNotNil: [ :hn | mqClient host: hn ].
+	self mqPort ifNotNil: [ :port | mqClient port: port ].
+	self mqUsername ifNotNil: [ :un | mqClient login: un ].
+	self mqPassword ifNotNil: [ :pwd | mqClient passcode: pwd ].
 	mqClient timeout: 60.
 	mqClient open.
 	mqClient isConnected ifFalse:
@@ -93,8 +178,11 @@ GtRrStompMqProcessor >> critical: aBlock [
 GtRrStompMqProcessor >> initialize [
 
 	super initialize.
+	socketAccess := Mutex new.
 	sharedAccess := Mutex new.
 	rpcRegistry := Dictionary new.
+	state := #notStarted.
+	listenerStopping := false.
 	commandCallback := messageCallback :=
 		[ :mqMessage :gtMessage :anOwner |
 			GtRrStompMqCallbackStartingSignal new
@@ -113,6 +201,18 @@ GtRrStompMqProcessor >> isRunning [
 		[ mqClient isConnected and:
 		[ mqListener isNotNil and: 
 		[ mqListener isTerminated not ] ] ]
+]
+
+{ #category : #testing }
+GtRrStompMqProcessor >> isStopRequested [
+
+	^ state = #stopRequested
+]
+
+{ #category : #testing }
+GtRrStompMqProcessor >> isStopped [
+
+	^ state = #stopped
 ]
 
 { #category : #accessing }
@@ -143,7 +243,7 @@ GtRrStompMqProcessor >> messageChannelName: anObject [
 
 { #category : #accessing }
 GtRrStompMqProcessor >> mqHostName [
-	^ mqHostName ifNil: [ 'localhost' ]
+	^ mqHostName ifNil: [ self class defaultHostName ]
 ]
 
 { #category : #accessing }
@@ -152,8 +252,18 @@ GtRrStompMqProcessor >> mqHostName: anObject [
 ]
 
 { #category : #accessing }
+GtRrStompMqProcessor >> mqPassword [
+	^mqPassword ifNil: [ self class defaultPassword ]
+]
+
+{ #category : #accessing }
+GtRrStompMqProcessor >> mqPassword: anObject [
+	mqPassword := anObject
+]
+
+{ #category : #accessing }
 GtRrStompMqProcessor >> mqPort [
-	^ mqPort ifNil: [ StampConstants defaultPort ]
+	^ mqPort ifNil: [ self class defaultPort ]
 ]
 
 { #category : #accessing }
@@ -169,6 +279,16 @@ GtRrStompMqProcessor >> mqProcessor [
 ]
 
 { #category : #accessing }
+GtRrStompMqProcessor >> mqUsername [
+	^mqUsername ifNil: [ self class defaultUsername ]
+]
+
+{ #category : #accessing }
+GtRrStompMqProcessor >> mqUsername: anObject [
+	mqUsername := anObject
+]
+
+{ #category : #accessing }
 GtRrStompMqProcessor >> owner [
 	^ owner
 ]
@@ -176,6 +296,15 @@ GtRrStompMqProcessor >> owner [
 { #category : #accessing }
 GtRrStompMqProcessor >> owner: anObject [
 	owner := anObject
+]
+
+{ #category : #'start - stop' }
+GtRrStompMqProcessor >> privateStop [
+
+	self stopMqHeartbeat.
+	mqClient ifNotNil: [ mqClient closeMedium ].
+	mqClient := messageSubscription := commandSubscription := owner := nil.
+	state := #stopped.
 ]
 
 { #category : #private }
@@ -201,30 +330,37 @@ GtRrStompMqProcessor >> promiseAt: rpcId [
 
 { #category : #housekeeping }
 GtRrStompMqProcessor >> purgeQueue: queueName [
-	"Connect the mqClient and read messages until the processor has been idle for 2 seconds."
-	| client listener count lastMessageTime subscription |
+	"Connect the mqClient and read messages until the processor has been idle for 2 seconds.
+	This is a hack until proper control of the server is possible."
+	| listener count lastMessageTime subscription |
 
-	client := StampClient new.
-	client host: self mqHostName.
-	client timeout: 60.
-	client open.
-	client isConnected ifFalse:
-		[ self error: 'Unable to connect to MQ server' ].
+	self assert: mqClient isNil
+		description: 'Purging is only supported while not connected'.
 
-	subscription := client newSubscriptionTo: queueName.
+	self connect.
+
+	subscription := mqClient newSubscriptionTo: queueName.
 	subscription autoAck.
-	client writeWithReceipt: subscription subscribeFrame.
+	mqClient writeWithReceipt: subscription subscribeFrame.
 
 	lastMessageTime := DateAndTime now.
 	count := 0.
-	listener := [ client runWith: [ :message |
+	listener := [ mqClient runWith: [ :message |
 		count := count + 1.
 		lastMessageTime := DateAndTime now ] ] fork.
 	[ (DateAndTime now - lastMessageTime) < 2 seconds ] whileTrue:
 		[ 500 milliseconds wait ].
+	self stopMqHeartbeat.
 	listener terminate.
-	client closeMedium.
+	mqClient closeMedium.
+	mqClient := nil.
 	^ count.
+]
+
+{ #category : #'start - stop' }
+GtRrStompMqProcessor >> reconnect [
+
+	self notYetImplemented.
 ]
 
 { #category : #'as yet unclassified' }
@@ -281,12 +417,7 @@ GtRrStompMqProcessor >> sendCommandRpcMessage: aGtRrMessage to: commandChannel r
 	promise := GtRrMqPromise new
 		rpcId: rpcId.
 	self critical: [ rpcRegistry at: rpcId put: promise ].
-	mqMessage := mqClient newSendFrameTo: commandChannel.
-	mqMessage 
-		bytes: (GtWireEncoder onByteArray
-			nextPut: rpcMessage;
-			contents).
-	mqClient write: mqMessage.
+	self sendGtMessage: rpcMessage to: commandChannel.
 	^ promise
 ]
 
@@ -294,11 +425,17 @@ GtRrStompMqProcessor >> sendCommandRpcMessage: aGtRrMessage to: commandChannel r
 GtRrStompMqProcessor >> sendGtMessage: aGtRrMessage to: destination [
 	| mqMessage |
 
+	GtRrStompMqSendMessageStartingSignal new
+		gtMessagePrintString: aGtRrMessage printString;
+		emit.
 	mqMessage := mqClient newSendFrameTo: destination.
 	mqMessage bytes: (GtWireEncoder onByteArray
 		nextPut: aGtRrMessage;
 		contents).
-	mqClient write: mqMessage.
+	self write: mqMessage.
+	GtRrStompMqSendMessageCompletedSignal new
+		gtMessagePrintString: aGtRrMessage printString;
+		emit.
 ]
 
 { #category : #actions }
@@ -310,10 +447,18 @@ GtRrStompMqProcessor >> sendRpcBlockClosure: aBlockClosure to: commandDestinatio
 ]
 
 { #category : #'start - stop' }
+GtRrStompMqProcessor >> setStopRequested [
+
+	state := #stopRequested
+]
+
+{ #category : #'start - stop' }
 GtRrStompMqProcessor >> start [
 	"Start the receiver.
 	Message subscription must be started separately, to allow for handshaking over the command channel"
 
+	state := #starting.
+	listenerStopping := false.
 	self connect.
 
 	"Subscribe to runner command messages"
@@ -322,6 +467,7 @@ GtRrStompMqProcessor >> start [
 	mqClient writeWithReceipt: commandSubscription subscribeFrame.
 
 	self startMqListener.
+	state := #running.
 ]
 
 { #category : #'start - stop' }
@@ -331,7 +477,8 @@ GtRrStompMqProcessor >> startMqHeartbeat [
 	mqHeartbeatProcess := [ [ mqClient isConnected ] whileTrue: [
 		30 seconds wait.
 		mqClient isConnected ifTrue:
-			[ mqClient writeHeartbeatIfNeeded ] ] ] fork.
+			[ socketAccess critical: 
+				[ mqClient writeHeartbeatIfNeeded ] ] ] ] fork.
 ]
 
 { #category : #'start - stop' }
@@ -339,19 +486,32 @@ GtRrStompMqProcessor >> startMqListener [
 
 	mqListener := 
 		[ "Process messages until ConnectionClosed is signalled"
-		mqClient runWith: self mqProcessor.
-		"a quit message has been received"
-		self stopRequested.
+		[ mqClient runWith: self mqProcessor ]
+			on: ZnIncomplete, SocketError
+			do: [ :ex | 
+			Stdio stdout
+				<< Time now asString;
+				<< (' AKG Received mqListener exception: ', ex messageText asString);
+				lf; flush.
+			"ex logStackToFile."
+			closingException := ex freeze ].
+		listenerStopping := true.
+		"Ask the owner to take over.
+		The receiver should either be shut down or reconnected.
+		Either way, this process should terminate once the processing is complete, and not continue to be used."
+		owner ifNotNil: [ :anOwner |
+			anOwner handleMqListenerException: closingException ].
 		 ] fork.
 ]
 
 { #category : #'start - stop' }
 GtRrStompMqProcessor >> stop [
 
+	state := #stopRequested.
 	self stopMqHeartbeat.
-	mqClient ifNotNil: [ mqClient closeMedium ].
-	mqListener ifNotNil: [ mqListener terminate ].
-	mqClient := mqListener := messageSubscription := commandSubscription := owner := nil.
+	listenerStopping ifFalse: [ mqListener signalException: ConnectionClosed new ].
+	commandSubscription := messageSubscription := nil.
+	state := #stopped.
 ]
 
 { #category : #'start - stop' }
@@ -365,7 +525,10 @@ GtRrStompMqProcessor >> stopMqHeartbeat [
 { #category : #'start - stop' }
 GtRrStompMqProcessor >> stopRequested [
 
-	owner stopRequested.
+	state := #stopRequested.
+	owner 
+		ifNil: [ self stop ]
+		ifNotNil: [ owner stopRequested ].
 ]
 
 { #category : #'start - stop' }
@@ -381,11 +544,12 @@ GtRrStompMqProcessor >> subscribeToMessagesPrefetchCount: prefetchCountInteger [
 	messageSubscription clientIndividualAck.
 	prefetchCountInteger ifNotNil:
 		[ messageSubscription prefetchCount: prefetchCountInteger ].
-	mqClient write: messageSubscription subscribeFrame.
+	self write: messageSubscription subscribeFrame.
 ]
 
 { #category : #'primitive operations' }
 GtRrStompMqProcessor >> write: aStampFrame [
 
-	mqClient write: aStampFrame
+	socketAccess critical:
+		[ mqClient write: aStampFrame ]
 ]

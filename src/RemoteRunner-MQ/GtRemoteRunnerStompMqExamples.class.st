@@ -10,6 +10,7 @@ GtRemoteRunnerStompMqExamples >> mqCommandMessage [
 	<gtExample>
 	| worker workerCommandChannel workerSemaphore runner runnerCommandChannel gtMessage |
 
+	self purgeQueues.
 	workerSemaphore := Semaphore new.
 	workerCommandChannel  := '/topic/gtrrWorkerControl.1'.
 	worker := GtRrStompMqProcessor new
@@ -26,7 +27,7 @@ GtRemoteRunnerStompMqExamples >> mqCommandMessage [
 
 	[ runner sendGtMessage: GtRrPingMessage new to: workerCommandChannel.
 	self waitOn: workerSemaphore for: 20 description: 'Command not received'.
-	self assert: gtMessage class = GtRrPingMessage ]
+	self assert: gtMessage class = GtRrPingMessage. ]
 		ensure: [ worker stop. runner stop. ].
 ]
 
@@ -36,6 +37,7 @@ GtRemoteRunnerStompMqExamples >> mqCommandRpcMessage [
 	<gtExample>
 	| worker workerCommandChannel runner runnerCommandChannel result promise |
 
+	self purgeQueues.
 	workerCommandChannel  := '/topic/gtrrWorkerControl.1'.
 	worker := GtRrStompMqProcessor new
 		commandChannelName: workerCommandChannel.
@@ -76,7 +78,8 @@ GtRemoteRunnerStompMqExamples >> mqTaskMessage [
 			gtMessage1 seconds seconds wait.
 			times add: Time microsecondClockValue.
 			times size = 5 ifTrue:
-				[ workerSemaphore signal ] ].
+				[ workerSemaphore signal ].
+			worker write: mqMessage1 ackFrame ].
 	runnerCommandChannel := '/queue/runner_control'.
 	runner := GtRrStompMqProcessor new
 		commandChannelName: runnerCommandChannel.
@@ -111,11 +114,13 @@ GtRemoteRunnerStompMqExamples >> simpleRunner [
 	| manager |
 
 	self ignoreWorkerExamples ifTrue: [ ^ self ].
+	GtRrStompMqProcessor defaultHost ifNil:
+		[ GtRrStompMqProcessor defaultHost: 'localhost' ].
 	manager := GtRrPluggableManager new.
 	manager 
 		serverManager: GtRrMqServerManager new;
 		workerManager: (GtRrWorkerManager new
-			forLocalStompMq;
+			forStompMq;
 			autoRestart: false;
 			changesSync: false;
 			poolSize: 1).

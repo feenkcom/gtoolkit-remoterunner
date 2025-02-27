@@ -447,17 +447,22 @@ GtRemoteRunner >> changesSyncEvents: anObject [
 	changesSyncEvents := anObject
 ]
 
-{ #category : #accessing }
-GtRemoteRunner >> changesSyncEventsFrom: aSerializedOmReference [
+{ #category : #'as yet unclassified' }
+GtRemoteRunner >> changesSyncEventsFrom: aSerializedOmReference integrationVersion: integrationVersion [
 	"Answer a collection of encoded EpEvents that will take the worker from the supplied OmReference to the state ready for testing.
-	If a collection of events is supplied, use that, otherwise synchronise with the current image.
-	Ensure that the supplied OmReference is in the receiver's history"
-	| workerOmReference connection workerId |
-
+	If the supplied omReference isn't valid but the integrationVersion matches, send all changes"
+	<sys_ext>
+	| workerOmReference eventRecord |
 	workerOmReference := STON fromString: aSerializedOmReference.
-	connection := PharoLinkServerCurrentConnection value.
-	workerId := nil.
-	^ self changesSyncEventsFrom: workerOmReference workerId: workerId.
+	eventRecord := changesSyncEvents ifNil: [GtRrChangesSync uniqueInstance].
+	(eventRecord includesReference: workerOmReference)
+		ifTrue: [^self lwChangesSyncEventsFrom: aSerializedOmReference].
+	integrationVersion = #AIntegrationManager asClass integrationVersion
+		ifFalse: 
+			[(GtRrUnknownOmReference omReference: workerOmReference source: self)
+				signal].
+	^self
+		lwChangesSyncEventsFrom: (STON toString: eventRecord sessionHistory first)
 ]
 
 { #category : #accessing }
@@ -830,6 +835,34 @@ GtRemoteRunner >> logNotifier [
 	^ announcementNotifier
 ]
 
+{ #category : #'as yet unclassified' }
+GtRemoteRunner >> lwChangesSyncEventsFrom: aSerializedOmReference [
+	"Answer a collection of encoded EpEvents that will take the worker from the supplied OmReference to the state ready for testing.
+	If a collection of events is supplied, use that, otherwise synchronise with the current image.
+	Ensure that the supplied OmReference is in the receiver's history"
+	<sys_ext>
+	| workerOmReference ipAddress result |
+	workerOmReference := STON fromString: aSerializedOmReference.
+	ipAddress := PharoLinkServerCurrentConnection value remoteAddressString.
+	(GtRrChangesSyncRetrievalStartingSignal new)
+		omReference: workerOmReference;
+		emit.
+	result := 
+			[changesSyncEvents
+				ifNil: [GtRrChangesSync uniqueInstance encodedChangesFrom: workerOmReference]
+				ifNotNil: [changesSyncEvents encodedChangesFrom: workerOmReference]]
+					on: Error
+					do: 
+						[:ex |
+						self announceAndLog: ((GtRrWorkerChangesSyncErrorAnnouncement new)
+									exception: ex copy freeze).
+						ex pass].
+	(GtRrChangesSyncRetrievalCompletedSignal new)
+		omReference: workerOmReference;
+		emit.
+	^result
+]
+
 { #category : #accessing }
 GtRemoteRunner >> managerStartupAndShutdown [
 
@@ -886,7 +919,7 @@ GtRemoteRunner >> nextTaskForWorkerId: aUidString [
 		workerConnection registerHeartbeat.
 		taskFuture := GtRrFutureWorkerTask new 
 			connection: workerConnection.
-		(jobStartupAndShutdown finishedWithWorkerFuture: taskFuture) ifTrue:
+		(jobStartupAndShutdown finishedWithWorkerId: taskFuture workerId) ifTrue:
 			[ runnerStats updateAvailableWorkerCounts: availableWorkers.
 			GtRrNextTaskCompletedSignal new
 				mutexWait: (mutexEnd - mutexStart) asMilliSeconds;
@@ -988,6 +1021,11 @@ GtRemoteRunner >> privateRegisterWorkerWithDetails: aDictionary controlChannelAv
 	self critical:
 		[ mutexEnd := DateAndTime now.
 		"If the worker specifies that it is for a particular job only accept the connection if that job is currently running"
+		workerConnection := (server 
+						ifNil: [ GtRrWorkerConnection new ]
+						ifNotNil: #newWorkerConnection)
+				connection: pharoLinkServerConnection;
+				remoteRunner: self.
 		aDictionary at: #workerJobId
 			ifPresent: 
 				[:workerJobId |
@@ -995,16 +1033,11 @@ GtRemoteRunner >> privateRegisterWorkerWithDetails: aDictionary controlChannelAv
 					or: [currentlyExecutingJobs includesKey: workerJobId])
 						ifFalse: 
 							[ GtRrRegisterWorkerRejectedSignal new
-								ipAddress: pharoLinkServerConnection remoteAddressString;
+								ipAddress: workerConnection remoteAddressString;
 								workerAttributes: aDictionary;
 								mutexWait: (mutexEnd - mutexStart) asMilliSeconds;
 								emit.
 							^ false ] ].
-		workerConnection := (server 
-						ifNil: [ GtRrWorkerConnection new ]
-						ifNotNil: #newWorkerConnection)
-				connection: pharoLinkServerConnection;
-				remoteRunner: self.
 		workerConnection attributes: aDictionary.
 		workerId := aDictionary at: #id.
 		registeredWorkers at: workerId put: workerConnection.
@@ -1045,7 +1078,7 @@ GtRemoteRunner >> privateTaskFailed: aTaskContextId workerId: workerId execution
 		[ self queueTasksFirst: retryTasks jobContext: taskContext jobContext ].
 	self announceAndLog: taskContext taskFailedAnnouncement.
 	self checkJobCompleted: taskContext.
-	self assignTasksToWorkers.
+	self taskCompletedForWorkerId: workerId.
 ]
 
 { #category : #private }
@@ -1325,6 +1358,13 @@ GtRemoteRunner >> stopLogging [
 	log := nil.
 ]
 
+{ #category : #private }
+GtRemoteRunner >> stopOnWorker [
+	"This has become a worker image, stop the receiver"
+
+	self stop.
+]
+
 { #category : #'api - runner' }
 GtRemoteRunner >> stopRegisteredWorkers [
 	"Stop all registered workers.
@@ -1348,6 +1388,39 @@ GtRemoteRunner >> stopTimeoutManager [
 	"Stop the receiver's timeout manager"
 
 	timeoutManager stop.
+]
+
+{ #category : #'api - runner' }
+GtRemoteRunner >> stopWorker: workerConnection reason: aString [
+	"Stop the specified worker."
+
+	GtRrStopRegisteredWorkerStartingSignal new
+		registeredWorkerCount: registeredWorkers size;
+		workerId: workerConnection workerId;
+		attributes: workerConnection attributes;
+		emit.
+	workerConnection stopWithReason: aString.
+	"The stats will be updated when the worker is unregistered, so this isn't strictly necessary."
+	runnerStats
+		updateRegisteredWorkerCounts: registeredWorkers;
+		isRunning: self isRunning.
+	GtRrStopRegisteredWorkerStartingSignal new
+		registeredWorkerCount: registeredWorkers size;
+		workerId: workerConnection workerId;
+		attributes: workerConnection attributes;
+		emit.
+]
+
+{ #category : #'api - runner' }
+GtRemoteRunner >> stopWorkerId: workerId reason: aString [
+	"Stop the specified worker.
+	Must be called within sharedAccess."
+	| workerConnection |
+
+	sharedAccess assertIsOwner.
+	workerConnection := registeredWorkers at: workerId
+		ifAbsent: [ "already stopped" ^ self ].
+	self stopWorker: workerConnection reason: aString.
 ]
 
 { #category : #'api - jobs' }
@@ -1425,6 +1498,12 @@ GtRemoteRunner >> syncChanges [
 
 ]
 
+{ #category : #private }
+GtRemoteRunner >> taskCompletedForWorkerId: workerId [
+
+	self assignTasksToWorkers.
+]
+
 { #category : #'api - worker' }
 GtRemoteRunner >> taskDone: aTaskContextId workerId: workerId executionData: aGtRrWorkerExecutionData result: aResult [
 	| mutexStart mutexEnd |
@@ -1451,7 +1530,7 @@ GtRemoteRunner >> taskDone: aTaskContextId workerId: workerId executionData: aGt
 				[ self queueTasksFirst: retryTasks jobContext: taskContext jobContext ].
 			self announceAndLog: taskContext taskCompletedAnnouncement.
 			self checkJobCompleted: taskContext ].
-		self assignTasksToWorkers. ].
+		self taskCompletedForWorkerId: workerId. ].
 
 	GtRrTaskDoneCompletedSignal new
 		mutexWait: (mutexEnd - mutexStart) asMilliSeconds;
@@ -1596,7 +1675,7 @@ GtRemoteRunner >> unregisterWorkerId: aUidString reason: aString [
 			ifAbsent: 
 				[StringSignal
 					emit: 'Unable to properly unregister worker ' , aUidString asString
-						, ' due to reason ' , aString asString.
+						, ' with reason ' , aString asString.
 				nil].
 		runnerStats 
 			updateRegisteredWorkerCounts: registeredWorkers;
@@ -1653,6 +1732,13 @@ GtRemoteRunner >> updateStats [
 			defaultWorkerTimeout: workerTimeout.
 		post := runnerStats copy ].
 	^ { pre. post. }
+]
+
+{ #category : #testing }
+GtRemoteRunner >> useMessageQueue [
+	"Temporary test while developing MQ functionality"
+
+	^ false
 ]
 
 { #category : #'announcer - subscription' }

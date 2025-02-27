@@ -3,7 +3,6 @@ Class {
 	#superclass : #GtRrWorkerConnectionStrategy,
 	#instVars : [
 		'mqHost',
-		'mqListener',
 		'nextTask',
 		'nextTaskSemaphore',
 		'mqProcessor',
@@ -27,6 +26,19 @@ GtRrMqWorkerConnectionStrategy >> connectDuring: aBlock [
 ]
 
 { #category : #'as yet unclassified' }
+GtRrMqWorkerConnectionStrategy >> handleMqListenerException: closingException [
+	"Shut down the worker (and potentially exit the image)"
+
+	mqProcessor ifNotNil: [ :anMqProcessor |
+		anMqProcessor isStopRequested ifTrue: [ ^ self ].
+		anMqProcessor setStopRequested.
+		closingException class = ConnectionClosed
+			ifTrue: [ self stopRequested ]
+			ifFalse: [ self error: 'Unexpected loss of connection: ',
+				closingException printString ] ].
+]
+
+{ #category : #'as yet unclassified' }
 GtRrMqWorkerConnectionStrategy >> initialize [
 
 	super initialize.
@@ -35,33 +47,14 @@ GtRrMqWorkerConnectionStrategy >> initialize [
 
 { #category : #'start-stop' }
 GtRrMqWorkerConnectionStrategy >> mqHostName [
-	| segments |
 
-	mqHost ifNil: [ ^ nil ].
-	segments := $: split: mqHost.
-	segments size > 2 ifTrue: [ 
-		self error:
-			mqHost printString , ' must be formatted [<host>:]<port>' ].
-	^ segments size = 1
-		ifTrue: [ nil ]
-		ifFalse: [ segments first ].
+	^ GtRrStompMqProcessor hostNameFrom: mqHost
 ]
 
 { #category : #'start-stop' }
 GtRrMqWorkerConnectionStrategy >> mqPortNumber [
-	| segments port |
 
-	mqHost ifNil: [ ^ nil ].
-	segments := $: split: mqHost.
-	segments size > 2 ifTrue: [ 
-		self error:
-			mqHost printString , ' must be formatted [<host>:]<port>' ].
-	port := segments size = 1
-		ifTrue: [ mqHost ]
-		ifFalse: [ segments second ].
-	(port allSatisfy: #isDigit) ifFalse: [ 
-		self error: mqHost printString , ' the port must be a number' ].
-	^ port asInteger
+	^ GtRrStompMqProcessor portFrom: mqHost
 ]
 
 { #category : #'api - running' }
@@ -194,6 +187,7 @@ GtRrMqWorkerConnectionStrategy >> stop [
 { #category : #'start-stop' }
 GtRrMqWorkerConnectionStrategy >> stopRequested [
 
+	mqProcessor setStopRequested.
 	worker stop.
 ]
 
@@ -205,16 +199,18 @@ GtRrMqWorkerConnectionStrategy >> strategyName [
 
 { #category : #private }
 GtRrMqWorkerConnectionStrategy >> taskDone: aTaskContext with: anObject [
-	| taskDoneMessage |
+	| taskDoneMessage currentAckFrame |
 
 	taskDoneMessage := GtRrWorkerTaskDoneMessage new
 		taskContextId: aTaskContext taskContextId;
 		workerId: worker uid;
 		executionData: (self executionDataFromTaskContext:  aTaskContext);
 		result: anObject.
-	mqProcessor write: ackFrame.
-	mqProcessor sendGtMessage: taskDoneMessage to: GtRrStompMqProcessor taskResultName.
+	currentAckFrame := ackFrame.
 	nextTask := ackFrame := nil.
+	currentAckFrame ifNotNil:
+		[ mqProcessor write: currentAckFrame ].
+	mqProcessor sendGtMessage: taskDoneMessage to: GtRrStompMqProcessor taskResultName.
 ]
 
 { #category : #private }
@@ -244,7 +240,7 @@ GtRrMqWorkerConnectionStrategy >> taskSubscriptionId [
 { #category : #private }
 GtRrMqWorkerConnectionStrategy >> unregisterWith: aPharoLinkApplication [
 
-	self halt.
+	self notYetImplemented.
 ]
 
 { #category : #accessing }

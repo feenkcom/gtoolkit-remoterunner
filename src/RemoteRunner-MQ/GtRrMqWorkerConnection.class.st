@@ -124,7 +124,9 @@ GtRrMqWorkerConnection >> remoteAddress [
 { #category : #accessing }
 GtRrMqWorkerConnection >> remoteAddressString [
 
-	^ GtRemoteRunner printIpAddress: self remoteAddress
+	^ [ GtRemoteRunner printIpAddress: self remoteAddress ]
+		on: KeyNotFound
+		do: [ :ex | '<unknown>' ]
 ]
 
 { #category : #accessing }

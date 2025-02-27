@@ -26,10 +26,12 @@ GtRrSampleExample >> failExample [
 
 { #category : #accessing }
 GtRrSampleExample >> haltExample [
+	"Demonstrate sending a halt in an example.
+	To avoid CI checks, use an indirect send."
 	<gtExample>
 	<noTest>
 
-	self halt.
+	self perform: 'halt' asSymbol.
 
 ]
 

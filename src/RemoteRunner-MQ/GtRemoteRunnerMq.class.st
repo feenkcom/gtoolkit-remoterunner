@@ -20,14 +20,22 @@ GtRemoteRunnerMq >> addTaskContextFirst: taskContext [
 	self addTaskContext: taskContext
 ]
 
-{ #category : #private }
-GtRemoteRunnerMq >> assignTasksToWorkers [
-	"Not relevant for MessageQueue"
-	
-	^ self
-]
-
 { #category : #initialization }
 GtRemoteRunnerMq >> defaultManagerStartupAndShutdown [
 	^ GtRrCodeSyncedLocalManagerStartupAndShutdown new
+]
+
+{ #category : #private }
+GtRemoteRunnerMq >> taskCompletedForWorkerId: workerId [
+
+	(jobStartupAndShutdown finishedWithWorkerId: workerId) ifTrue:
+		[ runnerStats updateAvailableWorkerCounts: availableWorkers.
+		self stopWorkerId: workerId reason: 'Finished with worker' ].
+]
+
+{ #category : #testing }
+GtRemoteRunnerMq >> useMessageQueue [
+	"Temporary test while developing MQ functionality"
+
+	^ true
 ]

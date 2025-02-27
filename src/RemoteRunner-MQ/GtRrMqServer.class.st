@@ -9,6 +9,25 @@ Class {
 	#category : #'RemoteRunner-MQ-Runner'
 }
 
+{ #category : #'as yet unclassified' }
+GtRrMqServer >> gtRrStopOnWorker [
+
+	self stop.
+]
+
+{ #category : #'as yet unclassified' }
+GtRrMqServer >> handleMqListenerException: closingException [
+
+	GtRrWorker isCommandLineWorker ifTrue: [ ^ remoteRunner stop ].
+	(mqProcessor isNil or:
+		[ mqProcessor isStopRequested or: 
+		[ mqProcessor isStopped ] ]) ifTrue: [ ^ self ].
+	closingException class = ConnectionClosed
+		ifTrue: [ self error: 'Unexpected close request' ]
+		ifFalse: [ self error: 'Unexpected loss of connection'
+			"mqProcessor reconnect" ].
+]
+
 { #category : #testing }
 GtRrMqServer >> isRunning [
 
@@ -87,8 +106,6 @@ GtRrMqServer >> start [
 
 	mqProcessor := GtRrStompMqProcessor new
 		owner: self;
-		mqHostName: self mqHostName;
-		"mqPort: self mqPort;"
 		commandChannelName: GtRrStompMqProcessor runnerControlChannelName;
 		messageChannelName: GtRrStompMqProcessor taskResultName.
 	mqProcessor start.
