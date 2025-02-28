@@ -350,6 +350,12 @@ GtRemoteRunner >> announceAndLog: aBeaconSignal [
 ]
 
 { #category : #announcer }
+GtRemoteRunner >> announcer [
+
+	^ announcer
+]
+
+{ #category : #announcer }
 GtRemoteRunner >> announceStatusMessage: aStatusMessage [
 	self announce: (GtRrStatusMessageChangedAnnouncement new
 			statusMessage: aStatusMessage)
@@ -367,12 +373,6 @@ GtRemoteRunner >> announceStatusMessageWithString: aMessageString andSourceLabel
 	self announceStatusMessage: (GtRrStatusMessage new
 		messageString: aMessageString;
 		sourceToolLabel: aSourceLabel)
-]
-
-{ #category : #announcer }
-GtRemoteRunner >> announcer [
-
-	^ announcer
 ]
 
 { #category : #private }
@@ -445,24 +445,6 @@ GtRemoteRunner >> changesSyncEvents: anObject [
 	Storing the change events in the runner is normally only done when workers will be used for multiple jobs.  If workers are restarted for each job the change events will normally be provided with the job using the 'changeEvents' property."
 
 	changesSyncEvents := anObject
-]
-
-{ #category : #'as yet unclassified' }
-GtRemoteRunner >> changesSyncEventsFrom: aSerializedOmReference integrationVersion: integrationVersion [
-	"Answer a collection of encoded EpEvents that will take the worker from the supplied OmReference to the state ready for testing.
-	If the supplied omReference isn't valid but the integrationVersion matches, send all changes"
-	<sys_ext>
-	| workerOmReference eventRecord |
-	workerOmReference := STON fromString: aSerializedOmReference.
-	eventRecord := changesSyncEvents ifNil: [GtRrChangesSync uniqueInstance].
-	(eventRecord includesReference: workerOmReference)
-		ifTrue: [^self lwChangesSyncEventsFrom: aSerializedOmReference].
-	integrationVersion = #AIntegrationManager asClass integrationVersion
-		ifFalse: 
-			[(GtRrUnknownOmReference omReference: workerOmReference source: self)
-				signal].
-	^self
-		lwChangesSyncEventsFrom: (STON toString: eventRecord sessionHistory first)
 ]
 
 { #category : #accessing }
@@ -835,34 +817,6 @@ GtRemoteRunner >> logNotifier [
 	^ announcementNotifier
 ]
 
-{ #category : #'as yet unclassified' }
-GtRemoteRunner >> lwChangesSyncEventsFrom: aSerializedOmReference [
-	"Answer a collection of encoded EpEvents that will take the worker from the supplied OmReference to the state ready for testing.
-	If a collection of events is supplied, use that, otherwise synchronise with the current image.
-	Ensure that the supplied OmReference is in the receiver's history"
-	<sys_ext>
-	| workerOmReference ipAddress result |
-	workerOmReference := STON fromString: aSerializedOmReference.
-	ipAddress := PharoLinkServerCurrentConnection value remoteAddressString.
-	(GtRrChangesSyncRetrievalStartingSignal new)
-		omReference: workerOmReference;
-		emit.
-	result := 
-			[changesSyncEvents
-				ifNil: [GtRrChangesSync uniqueInstance encodedChangesFrom: workerOmReference]
-				ifNotNil: [changesSyncEvents encodedChangesFrom: workerOmReference]]
-					on: Error
-					do: 
-						[:ex |
-						self announceAndLog: ((GtRrWorkerChangesSyncErrorAnnouncement new)
-									exception: ex copy freeze).
-						ex pass].
-	(GtRrChangesSyncRetrievalCompletedSignal new)
-		omReference: workerOmReference;
-		emit.
-	^result
-]
-
 { #category : #accessing }
 GtRemoteRunner >> managerStartupAndShutdown [
 
@@ -1114,25 +1068,6 @@ GtRemoteRunner >> registerAnnouncementsQueueForHeadlessRunner [
 ]
 
 { #category : #accessing }
-GtRemoteRunner >> registerJob: aGtRrJob [
-	"Answer the proxy for the job when using a headless runner."
-
-	^ aGtRrJob
-]
-
-{ #category : #'api - worker' }
-GtRemoteRunner >> registerWorkerWithDetails: aDictionary controlChannelAvailable: aBoolean [
-	"Register the supplied worker and connection details.
-	Answer a boolean indicating whether the registration was accepted."
-
-	^ [ self privateRegisterWorkerWithDetails: aDictionary controlChannelAvailable: aBoolean ]
-		on: Error
-		do: [ :ex |
-			ex logStackToFile.
-			ex pass ].
-]
-
-{ #category : #accessing }
 GtRemoteRunner >> registeredWorkerCount [
 
 	^ runnerStats registeredWorkerCount
@@ -1152,6 +1087,25 @@ GtRemoteRunner >> registeredWorkersDo: aBlock [
 
 	"sharedAccess assertIsOwner."
 	registeredWorkers do: aBlock
+]
+
+{ #category : #accessing }
+GtRemoteRunner >> registerJob: aGtRrJob [
+	"Answer the proxy for the job when using a headless runner."
+
+	^ aGtRrJob
+]
+
+{ #category : #'api - worker' }
+GtRemoteRunner >> registerWorkerWithDetails: aDictionary controlChannelAvailable: aBoolean [
+	"Register the supplied worker and connection details.
+	Answer a boolean indicating whether the registration was accepted."
+
+	^ [ self privateRegisterWorkerWithDetails: aDictionary controlChannelAvailable: aBoolean ]
+		on: Error
+		do: [ :ex |
+			ex logStackToFile.
+			ex pass ].
 ]
 
 { #category : #'private - accessing' }
@@ -1567,19 +1521,6 @@ GtRemoteRunner >> taskQueue [
 ]
 
 { #category : #accessing }
-GtRemoteRunner >> taskTimeout [
-
-	^ taskTimeout ifNil: [ taskTimeout := self defaultTaskTimeout ]
-]
-
-{ #category : #accessing }
-GtRemoteRunner >> taskTimeout: anObject [
-
-	taskTimeout := anObject.
-	runnerStats defaultTaskTimeout: taskTimeout.
-]
-
-{ #category : #accessing }
 GtRemoteRunner >> tasksRemainingCount [
 	"Answer the number of tasks yet to be run.
 	For a Message Queue based system this also includes tasks that are executing but not yet started.
@@ -1597,6 +1538,19 @@ GtRemoteRunner >> tasksStartedCount [
 
 	^ currentlyExecutingTasks count: [ :task |
 		task isStarted ]
+]
+
+{ #category : #accessing }
+GtRemoteRunner >> taskTimeout [
+
+	^ taskTimeout ifNil: [ taskTimeout := self defaultTaskTimeout ]
+]
+
+{ #category : #accessing }
+GtRemoteRunner >> taskTimeout: anObject [
+
+	taskTimeout := anObject.
+	runnerStats defaultTaskTimeout: taskTimeout.
 ]
 
 { #category : #accessing }

@@ -152,9 +152,13 @@ GtRrStompMqProcessor >> commandChannelName: anObject [
 
 { #category : #private }
 GtRrStompMqProcessor >> connect [
+	"Connect to the Stomp MQ"
 
 	self assert: mqClient isNil.
-	
+
+	"This signal should be more generic"
+	LlEsConnectStartingSignal new emit.
+
 	mqClient := StampClient new.
 	mqClient optionAt: #gtRrOwner put: self.
 	self mqHostName ifNotNil: [ :hn | mqClient host: hn ].
@@ -166,6 +170,9 @@ GtRrStompMqProcessor >> connect [
 	mqClient isConnected ifFalse:
 		[ self error: 'Unable to connect to MQ server' ].
 	self startMqHeartbeat.
+	LlEsConnectCompletedSignal new
+		isConnected: mqClient isConnected;
+		emit.
 ]
 
 { #category : #private }
@@ -204,15 +211,15 @@ GtRrStompMqProcessor >> isRunning [
 ]
 
 { #category : #testing }
-GtRrStompMqProcessor >> isStopRequested [
-
-	^ state = #stopRequested
-]
-
-{ #category : #testing }
 GtRrStompMqProcessor >> isStopped [
 
 	^ state = #stopped
+]
+
+{ #category : #testing }
+GtRrStompMqProcessor >> isStopRequested [
+
+	^ state = #stopRequested
 ]
 
 { #category : #accessing }

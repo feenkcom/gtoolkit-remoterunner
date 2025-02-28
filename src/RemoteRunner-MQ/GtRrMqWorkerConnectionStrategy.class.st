@@ -73,6 +73,7 @@ GtRrMqWorkerConnectionStrategy >> nextTask [
 GtRrMqWorkerConnectionStrategy >> registerWith: ignored [
 	| registerMessage result promise |
 
+	GtRrWorkerRegisterStartingSignal new emit.
 	worker syncChangesWith: ignored.
 	registerMessage := GtRrWorkerRegisterMessage new 
 		attributes: worker attributes.
@@ -85,6 +86,7 @@ GtRrMqWorkerConnectionStrategy >> registerWith: ignored [
 	result ifFalse: [ worker
 		stop;
 		logAndQuit: 'Registration Rejected' ].
+	GtRrWorkerRegisterCompletedSignal new emit.
 ]
 
 { #category : #'api - running' }
