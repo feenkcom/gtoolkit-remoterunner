@@ -28,6 +28,7 @@ GtRrSampleExample >> failExample [
 GtRrSampleExample >> haltExample [
 	<gtExample>
 	<noTest>
+	<gtIgnoreConstraint: #GtSendersOfHaltSelectorsInGtPackagesConstraint>
 
 	self halt.
 
