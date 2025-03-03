@@ -30,9 +30,9 @@ GtRrSampleExample >> haltExample [
 	To avoid CI checks, use an indirect send."
 	<gtExample>
 	<noTest>
+	<gtIgnoreConstraint: #GtSendersOfHaltSelectorsInGtPackagesConstraint>
 
-	self perform: 'halt' asSymbol.
-
+	self halt
 ]
 
 { #category : #accessing }
