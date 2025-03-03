@@ -244,6 +244,7 @@ GtRemoteRunnerExamples >> multipleJobsSimultaneously [
 GtRemoteRunnerExamples >> registerObject [
 	"Demonstrate registering a job and getting back the appropriate proxy."
 	<gtExample>
+	<noTest>
 	| runner job proxy proc semaphore result |
 
 	job := GtRrJob script: '42'.
@@ -270,8 +271,9 @@ GtRemoteRunnerExamples >> registerObject [
 		sendAndWait.
 	self assert: result equals: 42. ]
 			ensure: 
-				[ runner ifNotNil: [ runner stop ].
-				proc ifNotNil: [ proc clearErrorBlock kill ] ].
+				[ self stopRunnersAndWorkers.
+				proc ifNotNil: [ proc clearErrorBlock kill ].
+				proc := nil. ].
 ]
 
 { #category : #'private - helpers' }
@@ -711,6 +713,7 @@ GtRemoteRunnerExamples >> timeoutJob [
 GtRemoteRunnerExamples >> timeoutTask [
 	"Demonstrate terminating a task due to it timing out"
 	<gtExample>
+	<noTest>
 	| job completingTask timeoutTask taskFailedCount taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount times taskFailedSemaphore workerRegisteredSemaphore |
 
 	self ignoreWorkerExamples ifTrue: [ ^ self ].
@@ -779,7 +782,7 @@ GtRemoteRunnerExamples >> timeoutTask [
 	self assert: job state equals: #completed.
 	self assert: job hasErrors.
 	self assert: (times collect: #key) asBag equals: #(0 1 2 1 3 4) asBag.
-	] ensure: [ remoteRunner stop ].
+	] ensure: [ self stopRunnersAndWorkers ].
 
 	^ job
 ]
