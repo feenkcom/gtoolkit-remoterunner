@@ -205,14 +205,15 @@ GtRrWorkerConnection >> onConnectionLost [
 	"Handle the worker disconnection.
 	Ignored if not a single connection"
 
-	((attributes at: #workerConnectionStrategy)
-		sameContentAs: GtRrWorkerSingleConnectionStrategy strategyName)
-		ifFalse: [ ^ self ].
-
-	self hasObserver ifTrue: [ self removeObserver ].
-	self remoteRunner
-		unregisterWorkerId: self workerId
-		reason: 'Worker connection lost'
+	remoteRunner critical:
+		[ ((attributes at: #workerConnectionStrategy ifAbsent: [ '' ])
+			sameContentAs: GtRrWorkerSingleConnectionStrategy strategyName)
+			ifFalse: [ ^ self ].
+	
+		self hasObserver ifTrue: [ self removeObserver ].
+		self remoteRunner
+			unregisterWorkerId: self workerId
+			reason: 'Worker connection lost' ]
 ]
 
 { #category : #debugging }

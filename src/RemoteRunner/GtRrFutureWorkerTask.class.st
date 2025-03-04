@@ -99,6 +99,12 @@ GtRrFutureWorkerTask >> workerAttributes [
 	^ connection details
 ]
 
+{ #category : #accessing }
+GtRrFutureWorkerTask >> workerId [
+
+	^ connection workerId
+]
+
 { #category : #testing }
 GtRrFutureWorkerTask >> workerJobIdMatches: aTaskContext [
 	"Answer a boolean indicating whether the "

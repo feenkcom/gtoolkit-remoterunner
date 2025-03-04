@@ -26,12 +26,13 @@ GtRrSampleExample >> failExample [
 
 { #category : #accessing }
 GtRrSampleExample >> haltExample [
+	"Demonstrate sending a halt in an example.
+	To avoid CI checks, use an indirect send."
 	<gtExample>
 	<noTest>
 	<gtIgnoreConstraint: #GtSendersOfHaltSelectorsInGtPackagesConstraint>
 
-	self halt.
-
+	self halt
 ]
 
 { #category : #accessing }

@@ -16,7 +16,7 @@ GtRrJobStartupAndShutdown >> asStatsDictionary [
 ]
 
 { #category : #testing }
-GtRrJobStartupAndShutdown >> finishedWithWorkerFuture: taskFuture [
+GtRrJobStartupAndShutdown >> finishedWithWorkerId: taskFuture [
 	"Answer a boolean indicating whether the supplied worker is no longer required.
 	By default, workers are kept indefinitely.
 	Must be called within sharedAccess."

@@ -614,6 +614,13 @@ GtRrWorker >> stop [
 ]
 
 { #category : #stopping }
+GtRrWorker >> stopAndQuit: aString [
+
+	[ self stop  ]
+		ensure: [ self logAndQuit: aString ].
+]
+
+{ #category : #stopping }
 GtRrWorker >> stopExecutionContext [
 
 	executionContext ifNotNil: [ executionContext stop ].

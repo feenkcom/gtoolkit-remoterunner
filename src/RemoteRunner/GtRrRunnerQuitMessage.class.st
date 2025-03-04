@@ -12,6 +12,9 @@ GtRrRunnerQuitMessage >> processMq: mqMessage processor: aGtRrProcessor for: anO
 	"Process the supplied message for anObject.
 	anOwner (outside of testing) will either be a GtRrWorker or GtRemoteRunner."
 
+	GtRrWorkerOperationShutdownAnnouncement new 
+		reason: 'Quit received: quit message from runner';
+		emit.
 	ConnectionClosed signal.
 ]
 

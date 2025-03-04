@@ -194,7 +194,6 @@ GtRemoteRunnerExamples >> multipleJobs [
 GtRemoteRunnerExamples >> multipleJobsSimultaneously [
 	"Demonstrate executing multiple jobs started simultaneously"
 	<gtExample>
-	<noTest>
 	| job jobs semaphore workerConnections retryCount currentTask workerRegisteredSemaphore |
 
 	self ignoreWorkerExamples ifTrue: [ ^ self ].
@@ -272,8 +271,9 @@ GtRemoteRunnerExamples >> registerObject [
 		sendAndWait.
 	self assert: result equals: 42. ]
 			ensure: 
-				[ runner ifNotNil: [ runner stop ].
-				proc ifNotNil: [ proc clearErrorBlock kill ] ].
+				[ self stopRunnersAndWorkers.
+				proc ifNotNil: [ proc clearErrorBlock kill ].
+				proc := nil. ].
 ]
 
 { #category : #'private - helpers' }
@@ -298,7 +298,6 @@ GtRemoteRunnerExamples >> simpleRunner [
 GtRemoteRunnerExamples >> simpleTask [
 	"Demonstrate executing a simple task"
 	<gtExample>
-	<noTest>
 	| job taskFailedCount taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount times workerRegisteredSemaphore |
 
 	self ignoreWorkerExamples ifTrue: [ ^ self ].
@@ -360,7 +359,6 @@ GtRemoteRunnerExamples >> simpleTestRetryTask [
 	"Demonstrate retrying a task that 'crashes' the worker.
 	This will take approximately 4 times the worker heartbeat timeout time to execute (3 or 4 minutes)."
 	<gtExample>
-	<noTest>
 	| factory job taskFailedCount taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount workerRegisteredSemaphore |
 
 	self ignoreWorkerExamples ifTrue: [ ^ self ].
@@ -493,7 +491,6 @@ GtRemoteRunnerExamples >> simpleTestTask [
 GtRemoteRunnerExamples >> terminateStartedJobWithControlChannel [
 	"Terminate a job that has been started, ensuring that all tasks have been marked as terminated"
 	<gtExample>
-	<noTest>
 	| job tasks taskFailedCount taskCompletedCount jobCompletedCount semaphore jobStartedCount taskStartedCount workerConnection currentTask retryCount workerRegisteredSemaphore notStarted |
 
 	self ignoreWorkerExamples ifTrue: [ ^ self ].
@@ -572,7 +569,6 @@ GtRemoteRunnerExamples >> terminateStartedJobWithControlChannel [
 GtRemoteRunnerExamples >> terminateStartedJobWithoutControlChannel [
 	"Terminate a job that has been started, ensuring that all tasks have been marked as terminated"
 	<gtExample>
-	<noTest>
 	| job tasks taskFailedCount taskCompletedCount jobCompletedCount semaphore jobStartedCount taskStartedCount waitForTaskCompletion taskWaitTime workerRegisteredSemaphore notStarted |
 
 	self ignoreWorkerExamples ifTrue: [ ^ self ].
@@ -786,7 +782,7 @@ GtRemoteRunnerExamples >> timeoutTask [
 	self assert: job state equals: #completed.
 	self assert: job hasErrors.
 	self assert: (times collect: #key) asBag equals: #(0 1 2 1 3 4) asBag.
-	] ensure: [ remoteRunner stop ].
+	] ensure: [ self stopRunnersAndWorkers ].
 
 	^ job
 ]
