@@ -22,7 +22,7 @@ GtRrWorkerPortNumberStencil >> create [
 		icon: BrGlamorousVectorIcons playground;
 		label: self tooltip;
 		aptitude: BrGlamorousButtonWithIconAptitude;
-		addAptitude: ((BrGlamorousWithDropdownAptitude
+		addAptitude: ((BrGlamorousWithExplicitDropdownAptitude
 			handle: [
 				BrButton new
 					icon: BrGlamorousVectorIcons playground;
