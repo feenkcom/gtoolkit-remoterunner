@@ -329,7 +329,8 @@ GtRrJobContext >> submitTasks [
 	"Submit the tasks to the receiver's runner"
 
 	self taskContexts do: [ :taskContext |
-		remoteRunner addTaskContext: taskContext ]
+		remoteRunner addTaskContext: taskContext ].
+	remoteRunner assignTasksToWorkers.
 ]
 
 { #category : #ui }
