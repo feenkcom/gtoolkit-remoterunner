@@ -322,7 +322,6 @@ GtRemoteRunner >> addTaskContext: taskContext [
 
 	taskQueue nextPut: taskContext.
 	runnerStats taskQueueSize: taskQueue size.
-	self assignTasksToWorkers.
 ]
 
 { #category : #adding }
@@ -332,7 +331,6 @@ GtRemoteRunner >> addTaskContextFirst: taskContext [
 
 	taskQueue putFirst: taskContext.
 	runnerStats taskQueueSize: taskQueue size.
-	self assignTasksToWorkers.
 ]
 
 { #category : #announcer }
@@ -863,32 +861,12 @@ GtRemoteRunner >> moveLoggingTo: aFileReference [
 GtRemoteRunner >> nextTaskForWorkerId: aUidString [
 	"Answer the next task allocated to the specified worker that is waiting on this method.
 	The task is assigned in a separate process."
-	| taskFuture workerConnection mutexStart mutexEnd |
 
-	GtRrNextTaskStartingSignal new emit.
-	mutexStart := DateAndTime now.
-	self critical:
-		[ mutexEnd := DateAndTime now.
-		workerConnection := registeredWorkers at: aUidString.
-		workerConnection registerHeartbeat.
-		taskFuture := GtRrFutureWorkerTask new 
-			connection: workerConnection.
-		(jobStartupAndShutdown finishedWithWorkerId: taskFuture workerId) ifTrue:
-			[ runnerStats updateAvailableWorkerCounts: availableWorkers.
-			GtRrNextTaskCompletedSignal new
-				mutexWait: (mutexEnd - mutexStart) asMilliSeconds;
-				emit.
-			^ 'quit' ].
-		availableWorkers add: taskFuture.
-		runnerStats updateAvailableWorkerCounts: availableWorkers.
-		self assignTasksToWorkers ].
-	taskFuture wait.
-	GtRrNextTaskCompletedSignal new
-		mutexWait: (mutexEnd - mutexStart) asMilliSeconds;
-		taskId: taskFuture taskContext taskId;
-		emit.
-	^ taskFuture taskContext asWorkerTaskContext.
-
+	^ [ self privateNextTaskForWorkerId: aUidString ]
+		on: Error
+		do: [ :ex |
+			ex logStackToFile.
+			ex pass ].
 ]
 
 { #category : #'api - worker' }
@@ -955,6 +933,41 @@ GtRemoteRunner >> printOn: aStream [
 		nextPut: $(;
 		<< self state;
 		nextPut: $).
+]
+
+{ #category : #private }
+GtRemoteRunner >> privateNextTaskForWorkerId: aUidString [
+	"Answer the next task allocated to the specified worker that is waiting on this method.
+	The task is assigned in a separate process."
+	| taskFuture workerConnection mutexStart mutexEnd |
+
+	GtRrNextTaskStartingSignal new emit.
+	mutexStart := DateAndTime now.
+	self critical:
+		[ mutexEnd := DateAndTime now.
+		workerConnection := registeredWorkers at: aUidString ifAbsent:
+			[ GtRrNextTaskWorkerNotRegisteredSignal new
+				mutexWait: (mutexEnd - mutexStart) asMilliSeconds;
+				emit.
+			^ 'quit' ].
+		workerConnection registerHeartbeat.
+		taskFuture := GtRrFutureWorkerTask new 
+			connection: workerConnection.
+		(jobStartupAndShutdown finishedWithWorkerId: taskFuture workerId) ifTrue:
+			[ runnerStats updateAvailableWorkerCounts: availableWorkers.
+			GtRrNextTaskFinishedWithWorkerSignal new
+				mutexWait: (mutexEnd - mutexStart) asMilliSeconds;
+				emit.
+			^ 'quit' ].
+		availableWorkers add: taskFuture.
+		runnerStats updateAvailableWorkerCounts: availableWorkers.
+		self assignTasksToWorkers ].
+	taskFuture wait.
+	GtRrNextTaskCompletedSignal new
+		mutexWait: (mutexEnd - mutexStart) asMilliSeconds;
+		taskId: taskFuture taskContext taskId;
+		emit.
+	^ taskFuture taskContext asWorkerTaskContext.
 ]
 
 { #category : #private }
@@ -1042,7 +1055,8 @@ GtRemoteRunner >> queueTasks: retryTasks jobContext: aJobContext [
 	retryTasks do: [ :task |
 		self addTaskContext: (GtRrTaskContext new 
 			task: task;
-			jobContext: aJobContext) ]
+			jobContext: aJobContext) ].
+	self assignTasksToWorkers.
 ]
 
 { #category : #private }
@@ -1052,7 +1066,8 @@ GtRemoteRunner >> queueTasksFirst: retryTasks jobContext: aJobContext [
 	retryTasks do: [ :task |
 		self addTaskContextFirst: (GtRrTaskContext new 
 			task: task;
-			jobContext: aJobContext) ]
+			jobContext: aJobContext) ].
+	self assignTasksToWorkers.
 ]
 
 { #category : #accessing }
