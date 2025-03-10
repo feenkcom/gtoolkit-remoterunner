@@ -211,15 +211,15 @@ GtRrStompMqProcessor >> isRunning [
 ]
 
 { #category : #testing }
-GtRrStompMqProcessor >> isStopped [
-
-	^ state = #stopped
-]
-
-{ #category : #testing }
 GtRrStompMqProcessor >> isStopRequested [
 
 	^ state = #stopRequested
+]
+
+{ #category : #testing }
+GtRrStompMqProcessor >> isStopped [
+
+	^ state = #stopped
 ]
 
 { #category : #accessing }

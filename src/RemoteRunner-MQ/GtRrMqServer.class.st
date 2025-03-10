@@ -90,13 +90,19 @@ GtRrMqServer >> sendRpcMessage: aGtRrMessage to: workerCommandDestination [
 		to: workerCommandDestination.
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #private }
 GtRrMqServer >> sendWorkerTaskContext: aWorkerTaskContext [
 	| taskMessage |
 
+	GtRrMqQueueTaskStartingSignal new
+		taskId: aWorkerTaskContext taskId;
+		emit.
 	taskMessage := GtRrRunnerTaskMessage new
 		task: aWorkerTaskContext.
 	mqProcessor sendGtMessage: taskMessage to: GtRrStompMqProcessor taskQueueName.
+	GtRrMqQueueTaskCompletedSignal new
+		taskId: aWorkerTaskContext taskId;
+		emit.
 ]
 
 { #category : #'start - stop' }

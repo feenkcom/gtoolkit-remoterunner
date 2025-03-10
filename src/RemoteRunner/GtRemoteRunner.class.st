@@ -1709,7 +1709,7 @@ GtRemoteRunner >> updateStats [
 
 { #category : #testing }
 GtRemoteRunner >> useMessageQueue [
-	"Temporary test while developing MQ functionality"
+	"GtRemoteRunnerMq uses the MessageQueue"
 
 	^ false
 ]

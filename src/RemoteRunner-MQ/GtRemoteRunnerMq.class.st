@@ -35,7 +35,6 @@ GtRemoteRunnerMq >> taskCompletedForWorkerId: workerId [
 
 { #category : #testing }
 GtRemoteRunnerMq >> useMessageQueue [
-	"Temporary test while developing MQ functionality"
 
 	^ true
 ]
