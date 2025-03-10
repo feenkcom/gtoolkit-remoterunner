@@ -849,8 +849,9 @@ GtRemoteRunner >> moveLoggingTo: aFileReference [
 		[ log fileReference isNotNil
 			and: [ log fileReference resolve = aFileReference resolve ] ])
 				ifTrue: [ ^ self ].
+
 	oldLogger := log.
-	newLogger := SessionFallbackFileLogger filename: aFileReference.
+	newLogger := SessionFallbackFileLogger new filename: aFileReference.
 	log := StreamLoggerFlusher new logger: newLogger.
 	self startLogger: log.
 	oldLogger stop; close.
@@ -1323,7 +1324,10 @@ GtRemoteRunner >> stopLogging [
 	"Stop the receiver's in-memory log"
 
 	log ifNil: [ ^ self ].
-	log stop; close.
+	"The stop can fail if an image with a running Rr has been copied to another machine.  Ignore failures."
+	[ log stop; close ]
+		on: PrimitiveFailed
+		do: [ :ex | "nothing" ].
 	log := nil.
 ]
 

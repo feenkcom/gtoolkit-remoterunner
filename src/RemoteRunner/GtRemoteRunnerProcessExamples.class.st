@@ -801,7 +801,8 @@ GtRemoteRunnerProcessExamples >> timeoutTask [
 	[ "Give the process time to die and be registered by the subprocess.
 	If this isn't enough time, it will be caught on the next cycle (just take longer)."
 		2 seconds wait.
-		remoteRunner managerStartupAndShutdown workerManager signalWatchdog ] fork.
+		remoteRunner ifNotNil: [ :rr |
+			rr managerStartupAndShutdown workerManager signalWatchdog ] ] fork.
 	self waitOn: jobSemaphore for: 40 description: 'Job didn''t complete in time'.
 
 	self assert: remoteRunner currentlyExecutingJobs size equals: 0.
