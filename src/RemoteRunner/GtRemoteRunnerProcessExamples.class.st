@@ -816,7 +816,7 @@ GtRemoteRunnerProcessExamples >> timeoutTask [
 	self assert: job state equals: #completed.
 	self assert: job hasErrors.
 	self assert: (times collect: #key) asBag equals: #(0 1 2 1 3 4) asBag.
-	] ensure: [ remoteRunner stop ].
+	] ensure: [ self stopRunnersAndWorkers ].
 
 	^ job
 ]

@@ -226,6 +226,13 @@ PlpoGtRemoteRunner >> unsubscribe: anObject [
 	^ self announcer unsubscribe: anObject
 ]
 
+{ #category : #testing }
+PlpoGtRemoteRunner >> useMessageQueue [
+	"MessageQueue isn't supported in headless RemoteRunner configuration"
+
+	^ false
+]
+
 { #category : #accessing }
 PlpoGtRemoteRunner >> when: anAnnouncementClass send: aSelector to: anObject [
 
