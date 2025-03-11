@@ -304,7 +304,8 @@ GtRrTaskExecutionData >> workerIndex [
 { #category : #accessing }
 GtRrTaskExecutionData >> workerIpAddress [
 	^ self workerAttributes ifNotNil: [ :attributes |
-		attributes at: 'workerIpAddress' ifAbsent: [ nil ] ]
+		attributes at: 'workerIpAddress' ifAbsent: 
+			[ attributes at: 'awsInstanceIp' ifAbsent: [ nil ] ] ]
 ]
 
 { #category : #accessing }
