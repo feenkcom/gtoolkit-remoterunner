@@ -192,9 +192,7 @@ GtRrTaskContext >> jobTimeout [
 { #category : #running }
 GtRrTaskContext >> markTaskCancelled [
 
-	(#(completed cancelled) includes: task state) ifTrue: [ ^ self ].
-	task markTaskCancelled.
-	jobContext markTaskCancelled: self.
+	self quietlyCancelTask.
 	self job announce: (GtRrTaskFailedAnnouncement task: task)
 ]
 
@@ -228,6 +226,14 @@ GtRrTaskContext >> printOn: aStream [
 			aStream
 				<< ', ';
 				print: taskContextId ]
+]
+
+{ #category : #running }
+GtRrTaskContext >> quietlyCancelTask [
+
+	(#(completed cancelled) includes: task state) ifTrue: [ ^ self ].
+	task markTaskCancelled.
+	jobContext markTaskCancelled: self.
 ]
 
 { #category : #running }
