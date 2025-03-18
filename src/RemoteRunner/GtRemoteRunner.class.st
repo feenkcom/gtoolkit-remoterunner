@@ -1044,7 +1044,7 @@ GtRemoteRunner >> privateTaskFailed: aTaskContextId workerId: workerId execution
 		[ taskContext markTaskCompleted ]
 	ifFalse:
 		[ self queueTasksFirst: retryTasks jobContext: taskContext jobContext.
-		taskContext markTaskCancelled. ].
+		taskContext quietlyCancelTask. ].
 	self announceAndLog: taskContext taskFailedAnnouncement.
 	self checkJobCompleted: taskContext.
 	self taskCompletedForWorkerId: workerId.
