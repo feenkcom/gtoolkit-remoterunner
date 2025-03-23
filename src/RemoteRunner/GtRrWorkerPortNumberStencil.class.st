@@ -15,6 +15,7 @@ Class {
 { #category : #'api - instantiation' }
 GtRrWorkerPortNumberStencil >> create [
 	"Create the new element"
+
 	| aButton |
 	"Specify the button to be used when the dropdown is hidden"
 	aButton := BrButton new.
@@ -22,23 +23,20 @@ GtRrWorkerPortNumberStencil >> create [
 		icon: BrGlamorousVectorIcons playground;
 		label: self tooltip;
 		aptitude: BrGlamorousButtonWithIconAptitude;
-		addAptitude: ((BrGlamorousWithExplicitDropdownAptitude
-			handle: [
-				BrButton new
-					icon: BrGlamorousVectorIcons playground;
-					label: self tooltip;
-					aptitude: 	BrGlamorousButtonWithIconAptitude 
-						- BrGlamorousButtonWithLabelTooltipAptitude
-						- BrGlamorousButtonExteriorAptitude ]
-			content: [ | element |
-				element := GtRrWorkerPortNumberWidget new.
-				element
-					workerConnection: workerConnection;
-					exact: self extent;
-					padding: (BlInsets all: 20);
-					"Pass the top original button to the widget to use for spawning the result.
-					The button passed in to the action is too high in the element hierarchy, and can't spawn the result."
-					spawnButton: aButton ])).
+		addAptitude: (BrGlamorousWithExplicitDropdownAptitude
+				handle: [ BrButton new
+						icon: BrGlamorousVectorIcons playground;
+						label: self tooltip;
+						aptitude: BrGlamorousButtonWithIconAptitude - BrGlamorousButtonWithLabelTooltipAptitude2
+								- BrGlamorousButtonExteriorAptitude ]
+				content: [ | element |
+					element := GtRrWorkerPortNumberWidget new.
+					element
+						workerConnection: workerConnection;
+						exact: self extent;
+						padding: (BlInsets all: 20);
+						spawnButton: aButton	"Pass the top original button to the widget to use for spawning the result.
+					The button passed in to the action is too high in the element hierarchy, and can't spawn the result." ]).
 	^ aButton
 ]
 

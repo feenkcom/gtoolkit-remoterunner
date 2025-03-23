@@ -284,9 +284,8 @@ GtRrJobNotificationElement >> updateLabelStatusIcon [
 	nameLabel removeChildNamed: #statusIcon.
 	nameLabel
 		addChild: (BrGlamorousVectorIcons accept asElement asScalableElement
-			addAptitude: (BrGlamorousWithLabelTooltipAptitude new 
-				text: 'Finished'))
-		as: #statusIcon.
+				addAptitude: (BrGlamorousWithExplicitTooltipAptitude text: 'Finished'))
+		as: #statusIcon
 ]
 
 { #category : #'private - updating' }
