@@ -1,7 +1,7 @@
 Class {
 	#name : #GtRemoteRunnerStompMqExamples,
 	#superclass : #GtRemoteRunnerProcessExamples,
-	#category : #'RemoteRunner-MQ-Examples'
+	#category : #'RemoteRunner-NoTest'
 }
 
 { #category : #examples }

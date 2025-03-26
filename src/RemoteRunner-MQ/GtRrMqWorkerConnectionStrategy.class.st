@@ -64,6 +64,7 @@ GtRrMqWorkerConnectionStrategy >> nextTask [
 	nextTaskSemaphore wait.
 	mqProcessor sendGtMessage: (GtRrWorkerTaskStartedMessage new
 			taskContextId: nextTask taskContextId;
+			taskId: nextTask taskId;
 			workerId: worker uid)
 		to: GtRrStompMqProcessor runnerControlChannelName.
 	^ nextTask.

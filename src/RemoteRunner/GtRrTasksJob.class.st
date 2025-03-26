@@ -213,6 +213,13 @@ GtRrTasksJob >> tasks: anObject [
 	tasks := anObject
 ]
 
+{ #category : #accessing }
+GtRrTasksJob >> tasksWithId: aString [
+
+	^ self tasks select: [ :task |
+		task taskId = aString ]
+]
+
 { #category : #'accessing - examples' }
 GtRrTasksJob >> totalExamplesCount [ 
 	^ tasks sumNumbers: #totalCount
