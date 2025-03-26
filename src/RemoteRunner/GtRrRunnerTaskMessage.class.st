@@ -10,6 +10,7 @@ Class {
 { #category : #'as yet unclassified' }
 GtRrRunnerTaskMessage >> processMq: mqMessage processor: aGtRrProcessor for: anOwner [
 
+	StringSignal emit: mqMessage headers storeString.
 	(mqMessage headerAt: #redelivered ifAbsent: [ false ]) = 'true'
 		ifTrue: [ anOwner rejectRedeliveredTask: task ackFrame: mqMessage ackFrame ]
 		ifFalse: [ anOwner setNextTask: task ackFrame: mqMessage ackFrame ].

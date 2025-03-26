@@ -44,11 +44,11 @@ GtRrRpcRequestMessage >> processMq: mqMessage processor: aGtRrProcessor for: anO
 				result: result)
 					to: responseQueue ]
 		otherwise: [ :ex |
-			aGtRrProcessor sendGtMessage: (GtRrRpcExceptionMessage new
-				rpcId: rpcId;
-				stackString: ex stackString;
-				exception: ex freeze)
-					to: responseQueue ]
+			aGtRrProcessor 
+				sendGtMessage: (GtRrRpcExceptionMessage 
+					fromException: ex
+					rpcId: rpcId)
+				to: responseQueue ]
 ]
 
 { #category : #accessing }

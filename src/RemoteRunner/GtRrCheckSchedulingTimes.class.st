@@ -275,18 +275,6 @@ GtRrCheckSchedulingTimes >> timeForClassName: classNameSymbol selector: selector
 			ifAbsent: absentBlock ]
 ]
 
-{ #category : #accessing }
-GtRrCheckSchedulingTimes >> timeStrategy [
-
-	^ timeStrategy
-]
-
-{ #category : #accessing }
-GtRrCheckSchedulingTimes >> timeStrategy: anObject [
-
-	timeStrategy := anObject
-]
-
 { #category : #'private - accessing' }
 GtRrCheckSchedulingTimes >> times [
 
@@ -313,6 +301,18 @@ GtRrCheckSchedulingTimes >> timesForClassName: aSymbol [
 	^ self critical:
 		[ times at: className ifAbsentPut: 
 			[ GtRrCheckSchedulingClassTimes testClassName: className ] ].
+]
+
+{ #category : #accessing }
+GtRrCheckSchedulingTimes >> timeStrategy [
+
+	^ timeStrategy
+]
+
+{ #category : #accessing }
+GtRrCheckSchedulingTimes >> timeStrategy: anObject [
+
+	timeStrategy := anObject
 ]
 
 { #category : #accessing }

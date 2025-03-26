@@ -348,6 +348,12 @@ GtRemoteRunner >> announceAndLog: aBeaconSignal [
 ]
 
 { #category : #announcer }
+GtRemoteRunner >> announcer [
+
+	^ announcer
+]
+
+{ #category : #announcer }
 GtRemoteRunner >> announceStatusMessage: aStatusMessage [
 	self announce: (GtRrStatusMessageChangedAnnouncement new
 			statusMessage: aStatusMessage)
@@ -365,12 +371,6 @@ GtRemoteRunner >> announceStatusMessageWithString: aMessageString andSourceLabel
 	self announceStatusMessage: (GtRrStatusMessage new
 		messageString: aMessageString;
 		sourceToolLabel: aSourceLabel)
-]
-
-{ #category : #announcer }
-GtRemoteRunner >> announcer [
-
-	^ announcer
 ]
 
 { #category : #private }
@@ -569,7 +569,7 @@ GtRemoteRunner >> emptyQueuesFor: aJobId [
 			[ :taskContext | taskContext jobId = aJobId ].
 		toRemove do: [ :each | 
 			each terminateTask.
-			currentlyExecutingTasks removeKey: each taskId ifAbsent: [] ].
+			currentlyExecutingTasks removeKey: each taskContextId ifAbsent: [] ].
 		[ (taskQueue nextOrNilSuchThat: [ :aTaskContext |
 			aTaskContext jobId = aJobId ]) isNotNil ] whileTrue.
 		runnerStats currentlyExecutingTaskCount: currentlyExecutingTasks size.
@@ -832,12 +832,12 @@ GtRemoteRunner >> managerStartupAndShutdown: aGtRrManagerStartupAndShutdown [
 ]
 
 { #category : #'as yet unclassified' }
-GtRemoteRunner >> markTaskStarted: taskId [
+GtRemoteRunner >> markTaskStarted: taskContextId [
 	"Mark the specified task as started"
 
 	self critical:
-		[ currentlyExecutingTasks at: taskId
-			ifPresent: [ :task| task markTaskStarted ] ]
+		[ currentlyExecutingTasks at: taskContextId
+			ifPresent: [ :taskContext | taskContext markTaskStarted ] ]
 ]
 
 { #category : #'api - logger' }
@@ -909,7 +909,8 @@ GtRemoteRunner >> port [
 
 { #category : #accessing }
 GtRemoteRunner >> port: aPortNumberOrSymbol [
-	"Set the port number.
+	"This was originally the port number that the receiver would listen on for workers.
+	With support for MessageQueue, this can now be the host:port of the MessageQueue server.
 	0 = find a free port.
 	#none = don't listen on the port (in-image workers only).
 		This should be set prior to changing the manager."
@@ -1085,25 +1086,6 @@ GtRemoteRunner >> registerAnnouncementsQueueForHeadlessRunner [
 ]
 
 { #category : #accessing }
-GtRemoteRunner >> registerJob: aGtRrJob [
-	"Answer the proxy for the job when using a headless runner."
-
-	^ aGtRrJob
-]
-
-{ #category : #'api - worker' }
-GtRemoteRunner >> registerWorkerWithDetails: aDictionary controlChannelAvailable: aBoolean [
-	"Register the supplied worker and connection details.
-	Answer a boolean indicating whether the registration was accepted."
-
-	^ [ self privateRegisterWorkerWithDetails: aDictionary controlChannelAvailable: aBoolean ]
-		on: Error
-		do: [ :ex |
-			ex logStackToFile.
-			ex pass ].
-]
-
-{ #category : #accessing }
 GtRemoteRunner >> registeredWorkerCount [
 
 	^ runnerStats registeredWorkerCount
@@ -1123,6 +1105,25 @@ GtRemoteRunner >> registeredWorkersDo: aBlock [
 
 	"sharedAccess assertIsOwner."
 	registeredWorkers do: aBlock
+]
+
+{ #category : #accessing }
+GtRemoteRunner >> registerJob: aGtRrJob [
+	"Answer the proxy for the job when using a headless runner."
+
+	^ aGtRrJob
+]
+
+{ #category : #'api - worker' }
+GtRemoteRunner >> registerWorkerWithDetails: aDictionary controlChannelAvailable: aBoolean [
+	"Register the supplied worker and connection details.
+	Answer a boolean indicating whether the registration was accepted."
+
+	^ [ self privateRegisterWorkerWithDetails: aDictionary controlChannelAvailable: aBoolean ]
+		on: Error
+		do: [ :ex |
+			ex logStackToFile.
+			ex pass ].
 ]
 
 { #category : #'private - accessing' }
@@ -1541,26 +1542,12 @@ GtRemoteRunner >> taskQueue [
 ]
 
 { #category : #accessing }
-GtRemoteRunner >> taskTimeout [
-
-	^ taskTimeout ifNil: [ taskTimeout := self defaultTaskTimeout ]
-]
-
-{ #category : #accessing }
-GtRemoteRunner >> taskTimeout: anObject [
-
-	taskTimeout := anObject.
-	runnerStats defaultTaskTimeout: taskTimeout.
-]
-
-{ #category : #accessing }
 GtRemoteRunner >> tasksRemainingCount [
 	"Answer the number of tasks yet to be run.
 	For a Message Queue based system this also includes tasks that are executing but not yet started.
 	Should be called within sharedAccess."
 
-	^ taskQueue size + (currentlyExecutingTasks count: [ :task |
-		task isNotStarted ])
+	^ taskQueue size + currentlyExecutingTasks size
 ]
 
 { #category : #accessing }
@@ -1571,6 +1558,19 @@ GtRemoteRunner >> tasksStartedCount [
 
 	^ currentlyExecutingTasks count: [ :task |
 		task isStarted ]
+]
+
+{ #category : #accessing }
+GtRemoteRunner >> taskTimeout [
+
+	^ taskTimeout ifNil: [ taskTimeout := self defaultTaskTimeout ]
+]
+
+{ #category : #accessing }
+GtRemoteRunner >> taskTimeout: anObject [
+
+	taskTimeout := anObject.
+	runnerStats defaultTaskTimeout: taskTimeout.
 ]
 
 { #category : #accessing }
@@ -1660,7 +1660,7 @@ GtRemoteRunner >> unregisterWorkerId: aUidString reason: aString [
 		availableWorkers removeAll: terminatedWorkers.
 		runnerStats updateAvailableWorkerCounts: availableWorkers.
 		failedTasks := currentlyExecutingTasks
-					select: [:each | each connection = workerConnection].
+					select: [:each | each workerConnection = workerConnection].
 		failedTasks valuesDo: [ :taskContext |
 			errorDetails := (GtRrErrorDetails new)
 				errorMessage: 'Worker Unregistered: ' , aString printString;
@@ -1764,6 +1764,14 @@ GtRemoteRunner >> when: anAnnouncementClass send: aSelector to: anObject for: aS
 	"Declare that when anAnnouncementClass is raised, anObject should receive the message aSelector."
 
 	^ (self when: anAnnouncementClass send: aSelector to: anObject) subscriber: aSubscriber.
+]
+
+{ #category : #accessing }
+GtRemoteRunner >> workerConnectionStrategyId [
+	"Answer the connection strategy to be used.
+	Use the default strategy."
+	
+	^ nil
 ]
 
 { #category : #accessing }

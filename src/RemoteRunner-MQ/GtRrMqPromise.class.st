@@ -9,7 +9,9 @@ Class {
 		'exceptionBlocks',
 		'result',
 		'sharedAccess',
-		'stackString'
+		'stackString',
+		'exceptionClassName',
+		'messageText'
 	],
 	#category : #'RemoteRunner-MQ-Runner'
 }
@@ -30,6 +32,16 @@ GtRrMqPromise >> exception: anObject [
 		semaphore signalAll. ].
 ]
 
+{ #category : #accessing }
+GtRrMqPromise >> exceptionClassName [
+	^exceptionClassName
+]
+
+{ #category : #accessing }
+GtRrMqPromise >> exceptionClassName: anObject [
+	exceptionClassName := anObject
+]
+
 { #category : #initialization }
 GtRrMqPromise >> initialize [
 
@@ -37,6 +49,26 @@ GtRrMqPromise >> initialize [
 	state := #unfulfilled.
 	semaphore := Semaphore new.
 	sharedAccess := Mutex new.
+]
+
+{ #category : #accessing }
+GtRrMqPromise >> messageText [
+	^messageText
+]
+
+{ #category : #accessing }
+GtRrMqPromise >> messageText: anObject [
+	messageText := anObject
+]
+
+{ #category : #accessing }
+GtRrMqPromise >> processException [
+	self critical:
+		[ result := messageText.
+		state := #exception.
+		exceptionBlocks ifNotNil: [ exceptionBlocks do: [ :each |
+			each cull: messageText cull: stackString cull: exceptionClassName ].
+		semaphore signalAll. ] ].
 ]
 
 { #category : #accessing }
@@ -77,7 +109,7 @@ GtRrMqPromise >> then: successBlock otherwise: failureBlock [
 		[ state = #fulfilled ifTrue:
 			[ ^ successBlock value: result ].
 		state = #exception ifTrue:
-			[ ^ failureBlock value: result ].
+			[ ^ failureBlock cull: messageText cull: stackString cull: exceptionClassName ].
 		successBlocks add: successBlock.
 		exceptionBlocks add: failureBlock ].
 	

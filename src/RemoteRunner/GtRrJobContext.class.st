@@ -274,7 +274,8 @@ GtRrJobContext >> markTaskCompleted: aGtRrTaskContext [
 { #category : #'api - running' }
 GtRrJobContext >> markTaskStarted: aGtRrTaskContext [
 
-	job announce: (GtRrTaskStartedAnnouncement task: aGtRrTaskContext task)
+	remoteRunner announceAndLog: (GtRrTaskStartedAnnouncement task: aGtRrTaskContext).
+	job announce: (GtRrTaskStartedAnnouncement task: aGtRrTaskContext task).
 ]
 
 { #category : #printing }

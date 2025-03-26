@@ -45,6 +45,31 @@ GtRrMqWorkerConnectionStrategy >> initialize [
 	nextTaskSemaphore := Semaphore new.
 ]
 
+{ #category : #private }
+GtRrMqWorkerConnectionStrategy >> lwRetrieveChangesFromServerWith: myself [ 
+	| events encodedChangesMessage promise |
+
+	GtRrWorkerRetrieveChangesStartingSignal new
+		workerId: worker uid;
+		emit.
+	encodedChangesMessage := LwGtRrWorkerEncodedChangesMessage new 
+		workerId: worker uid;
+		headReference: GtRrChangesSync headReference;
+		integrationVersion: #AIntegrationManager asClass integrationVersion.
+	promise := mqProcessor sendCommandRpcMessage: encodedChangesMessage 
+		to: GtRrStompMqProcessor runnerControlChannelName 
+		response: self workerControlTopicName.
+	promise wait
+		then: [ :aResult | events := aResult ]
+		otherwise: [ :messageText :stackString :exceptionClassName | 
+			self error: 'Unable to retrieve changes: ', messageText asString ].
+	GtRrWorkerRetrieveChangesCompletedSignal new
+		workerId: worker uid;
+		emit.
+	
+	^ events
+]
+
 { #category : #'start-stop' }
 GtRrMqWorkerConnectionStrategy >> mqHostName [
 
@@ -64,6 +89,7 @@ GtRrMqWorkerConnectionStrategy >> nextTask [
 	nextTaskSemaphore wait.
 	mqProcessor sendGtMessage: (GtRrWorkerTaskStartedMessage new
 			taskContextId: nextTask taskContextId;
+			taskId: nextTask taskId;
 			workerId: worker uid)
 		to: GtRrStompMqProcessor runnerControlChannelName.
 	^ nextTask.

@@ -25,6 +25,17 @@ GtRemoteRunnerMq >> defaultManagerStartupAndShutdown [
 	^ GtRrCodeSyncedLocalManagerStartupAndShutdown new
 ]
 
+{ #category : #accessing }
+GtRemoteRunnerMq >> port: aString [
+	"For MessageQueue, this is the address of the MQ server."
+
+	port := aString.
+
+	runnerStats 
+		portNumber: port;
+		isRunning: self isRunning.
+]
+
 { #category : #private }
 GtRemoteRunnerMq >> taskCompletedForWorkerId: workerId [
 
@@ -37,4 +48,12 @@ GtRemoteRunnerMq >> taskCompletedForWorkerId: workerId [
 GtRemoteRunnerMq >> useMessageQueue [
 
 	^ true
+]
+
+{ #category : #accessing }
+GtRemoteRunnerMq >> workerConnectionStrategyId [
+	"Answer the connection strategy to be used.
+	Use the default strategy."
+	
+	^ #stompMq
 ]

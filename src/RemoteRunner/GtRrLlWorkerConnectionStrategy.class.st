@@ -51,6 +51,40 @@ GtRrLlWorkerConnectionStrategy >> llSocketAddress: anObject [
 ]
 
 { #category : #private }
+GtRrLlWorkerConnectionStrategy >> lwRetrieveChangesFromServerWith: aPharoLinkApplication [
+
+	^ STON fromString: (self lwRetrieveEncodedChangesFromServerWith:  aPharoLinkApplication)
+]
+
+{ #category : #private }
+GtRrLlWorkerConnectionStrategy >> lwRetrieveEncodedChangesFromServerWith: aPharoLinkApplication [ 
+	| encodedEvents  remoteAddressString |
+
+	remoteAddressString := aPharoLinkApplication remoteAddressString.
+	GtRrWorkerRetrieveChangesStartingSignal new
+		remoteAddressString: remoteAddressString;
+		workerId: worker uid;
+		emit.
+	encodedEvents := aPharoLinkApplication newCommandFactory
+		setByValue;
+		bindingAt: #anOmReference put: 
+			(STON toString: GtRrChangesSync headReference);
+		bindingAt: #integrationVersion put: #AIntegrationManager asClass integrationVersion;
+		bindingAt: #workerId put: worker uid;
+		<< 'GtAssignedRemoteRunner 
+			lwEncodedChangesSyncEventsFrom: (STON fromString: anOmReference) 
+			integrationVersion: integrationVersion 
+			workerId: workerId';
+		sendAndWait.
+	GtRrWorkerRetrieveChangesCompletedSignal new
+		remoteAddressString: remoteAddressString;
+		workerId: worker uid;
+		emit.
+		
+	^ encodedEvents
+]
+
+{ #category : #private }
 GtRrLlWorkerConnectionStrategy >> newApplication [
 	"Answer a new PharoLinkApplication.
 	Subclasses will determine its lifetime"
