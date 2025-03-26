@@ -426,8 +426,10 @@ GtRrTaskContext >> workerConnection [
 ]
 
 { #category : #accessing }
-GtRrTaskContext >> workerConnection: anObject [
-	workerConnection := anObject
+GtRrTaskContext >> workerConnection: aGrRrWorkerConnection [
+
+	workerConnection := aGrRrWorkerConnection.
+	aGrRrWorkerConnection taskContext: self.
 ]
 
 { #category : #accessing }

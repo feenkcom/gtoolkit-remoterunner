@@ -11,7 +11,8 @@ Class {
 		'observerProcess',
 		'observerSemaphore',
 		'lastHeartbeat',
-		'attributes'
+		'attributes',
+		'taskContext'
 	],
 	#category : #'RemoteRunner-MQ-Runner'
 }
@@ -170,6 +171,16 @@ GtRrMqWorkerConnection >> summaryAttributes [
 		attributes ifNotNil:
 			[ attributes associationsDo: [ :assoc |
 				stream nextPut: { assoc key. assoc value. self. } ] ] ].
+]
+
+{ #category : #accessing }
+GtRrMqWorkerConnection >> taskContext [
+	^taskContext
+]
+
+{ #category : #accessing }
+GtRrMqWorkerConnection >> taskContext: anObject [
+	taskContext := anObject
 ]
 
 { #category : #private }

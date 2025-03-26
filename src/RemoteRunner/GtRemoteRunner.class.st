@@ -398,8 +398,7 @@ GtRemoteRunner >> assignTasksToWorkers [
 			"Set the task in the workerFuture, this will signal the workerFuture's semaphore, waking up the workerFuture's process"
 			workerFuture taskContext: taskContext.
 			busyWorkers add: workerFuture.
-			timeoutManager addContext: taskContext.
-			self announceAndLog: (GtRrTaskStartedAnnouncement task: taskContext) ] ].
+			timeoutManager addContext: taskContext ] ].
 	busyWorkers do: [ :each |
 		availableWorkers 
 			remove: each
@@ -569,7 +568,7 @@ GtRemoteRunner >> emptyQueuesFor: aJobId [
 			[ :taskContext | taskContext jobId = aJobId ].
 		toRemove do: [ :each | 
 			each terminateTask.
-			currentlyExecutingTasks removeKey: each taskId ifAbsent: [] ].
+			currentlyExecutingTasks removeKey: each taskContextId ifAbsent: [] ].
 		[ (taskQueue nextOrNilSuchThat: [ :aTaskContext |
 			aTaskContext jobId = aJobId ]) isNotNil ] whileTrue.
 		runnerStats currentlyExecutingTaskCount: currentlyExecutingTasks size.
@@ -832,12 +831,12 @@ GtRemoteRunner >> managerStartupAndShutdown: aGtRrManagerStartupAndShutdown [
 ]
 
 { #category : #'as yet unclassified' }
-GtRemoteRunner >> markTaskStarted: taskId [
+GtRemoteRunner >> markTaskStarted: taskContextId [
 	"Mark the specified task as started"
 
 	self critical:
-		[ currentlyExecutingTasks at: taskId
-			ifPresent: [ :task| task markTaskStarted ] ]
+		[ currentlyExecutingTasks at: taskContextId
+			ifPresent: [ :taskContext | taskContext markTaskStarted ] ]
 ]
 
 { #category : #'api - logger' }
@@ -909,7 +908,8 @@ GtRemoteRunner >> port [
 
 { #category : #accessing }
 GtRemoteRunner >> port: aPortNumberOrSymbol [
-	"Set the port number.
+	"This was originally the port number that the receiver would listen on for workers.
+	With support for MessageQueue, this can now be the host:port of the MessageQueue server.
 	0 = find a free port.
 	#none = don't listen on the port (in-image workers only).
 		This should be set prior to changing the manager."
@@ -1660,7 +1660,7 @@ GtRemoteRunner >> unregisterWorkerId: aUidString reason: aString [
 		availableWorkers removeAll: terminatedWorkers.
 		runnerStats updateAvailableWorkerCounts: availableWorkers.
 		failedTasks := currentlyExecutingTasks
-					select: [:each | each connection = workerConnection].
+					select: [:each | each workerConnection = workerConnection].
 		failedTasks valuesDo: [ :taskContext |
 			errorDetails := (GtRrErrorDetails new)
 				errorMessage: 'Worker Unregistered: ' , aString printString;
@@ -1764,6 +1764,14 @@ GtRemoteRunner >> when: anAnnouncementClass send: aSelector to: anObject for: aS
 	"Declare that when anAnnouncementClass is raised, anObject should receive the message aSelector."
 
 	^ (self when: anAnnouncementClass send: aSelector to: anObject) subscriber: aSubscriber.
+]
+
+{ #category : #accessing }
+GtRemoteRunner >> workerConnectionStrategyId [
+	"Answer the connection strategy to be used.
+	Use the default strategy."
+	
+	^ nil
 ]
 
 { #category : #accessing }

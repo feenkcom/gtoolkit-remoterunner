@@ -2,7 +2,8 @@ Class {
 	#name : #GtRrWorkerTaskStartedMessage,
 	#superclass : #GtRrWorkerMessage,
 	#instVars : [
-		'taskContextId'
+		'taskContextId',
+		'taskId'
 	],
 	#category : #'RemoteRunner-Model'
 }
@@ -16,10 +17,20 @@ GtRrWorkerTaskStartedMessage >> processMq: mqMessage processor: aGtRrProcessor f
 	remoteRunner := anOwner remoteRunner.
 	remoteRunner markTaskStarted: taskContextId.
 	remoteRunner critical:
-		[ remoteRunner currentlyExecutingTasks at: taskContextId ifPresent: [ :taskContext | 
-			remoteRunner registeredWorkers at: workerId ifPresent: [ :worker |
-				remoteRunner timeoutManager addContext: taskContext.
-				taskContext workerConnection: worker ] ] ]
+		[ remoteRunner currentlyExecutingTasks at: taskContextId 
+			ifPresent: [ :taskContext | 
+				remoteRunner registeredWorkers at: workerId 
+					ifPresent: [ :worker |
+						remoteRunner timeoutManager addContext: taskContext.
+						taskContext workerConnection: worker ]
+					ifAbsent: [ ] ]
+			ifAbsent: 
+				[ "Ignore if the task has already finished"
+				(remoteRunner critical:
+					[ (remoteRunner currentlyExecutingJobs anySatisfy:
+						[ :job | job results anySatisfy:
+							[ :task | task taskId = taskId ] ]) ]) ifFalse:
+								[ self error: 'task missing' ] ] ].
 ]
 
 { #category : #accessing }
@@ -30,4 +41,14 @@ GtRrWorkerTaskStartedMessage >> taskContextId [
 { #category : #accessing }
 GtRrWorkerTaskStartedMessage >> taskContextId: anObject [
 	taskContextId := anObject
+]
+
+{ #category : #accessing }
+GtRrWorkerTaskStartedMessage >> taskId [
+	^taskId
+]
+
+{ #category : #accessing }
+GtRrWorkerTaskStartedMessage >> taskId: anObject [
+	taskId := anObject
 ]

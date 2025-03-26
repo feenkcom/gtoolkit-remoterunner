@@ -15,7 +15,9 @@ Class {
 		'connectionStrategyId',
 		'workerClassName',
 		'currentSession',
-		'additionalArguments'
+		'additionalArguments',
+		'changesFile',
+		'pharoDebugLog'
 	],
 	#category : #'RemoteRunner-Runner-Workers'
 }
@@ -60,13 +62,25 @@ GtRrWorkerManager >> autoRestart: anObject [
 ]
 
 { #category : #accessing }
+GtRrWorkerManager >> changesFile [
+	^changesFile
+]
+
+{ #category : #accessing }
+GtRrWorkerManager >> changesFile: aString [
+
+	changesFile := aString
+]
+
+{ #category : #accessing }
 GtRrWorkerManager >> changesSync [
 	^ changesSync
 ]
 
 { #category : #accessing }
-GtRrWorkerManager >> changesSync: anObject [
-	changesSync := anObject
+GtRrWorkerManager >> changesSync: aBoolean [
+
+	changesSync := aBoolean
 ]
 
 { #category : #accessing }
@@ -180,13 +194,35 @@ GtRrWorkerManager >> newWorkerLocalProcessArgumentsFor: someSettings [
 			add: connectionStrategyId asString ].
 	changesSync ifTrue:
 		[ args add: '--changesSync' ].
+	changesFile ifNotNil:
+		[ args
+			add: '--changesFile';
+			add: changesFile ].
 	args addAll: additionalArguments.
 	args
 		add: '--detachChangesFromFileSystem';
 		add: '--epiceaMemoryStore';
 		add: '--noLepiterReload';
 		add: '--noGtImageUpdate'.
+	pharoDebugLog ifNotNil: [ | fileName |
+		fileName := pharoDebugLog format: { #workerIndex -> workerIndex asString } asDictionary.
+		args
+			add: '--pharoDebugLog';
+			add: fileName ].
 	^ args
+]
+
+{ #category : #accessing }
+GtRrWorkerManager >> pharoDebugLog [
+	^pharoDebugLog
+]
+
+{ #category : #accessing }
+GtRrWorkerManager >> pharoDebugLog: aString [
+	"Set the PharoDebug.log filename template.
+	The string is a format string with the #workerIndex as the argument."
+
+	pharoDebugLog := aString
 ]
 
 { #category : #accessing }
@@ -293,7 +329,7 @@ GtRrWorkerManager >> startLocalWorkers [
 
 	workerCountCalculator reset.
 	processCount := self poolSize.
-	isWindows := OSPlatform current isWin32.
+	isWindows := OSPlatform current isWindows.
 	processCount timesRepeat: 
 		[ processes add: self newWorkerLocalProcess.
 		"Pharo writes a number of files during startup.

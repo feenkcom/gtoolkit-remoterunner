@@ -153,20 +153,29 @@ GtRrStompMqProcessor >> commandChannelName: anObject [
 { #category : #private }
 GtRrStompMqProcessor >> connect [
 	"Connect to the Stomp MQ"
-
+	| retryCount maxRetries |
 	self assert: mqClient isNil.
 
 	"This signal should be more generic"
 	LlEsConnectStartingSignal new emit.
 
-	mqClient := StampClient new.
+	maxRetries := 2.
+	retryCount := 0.
+
+	[ mqClient := StampClient new.
 	mqClient optionAt: #gtRrOwner put: self.
 	self mqHostName ifNotNil: [ :hn | mqClient host: hn ].
 	self mqPort ifNotNil: [ :port | mqClient port: port ].
 	self mqUsername ifNotNil: [ :un | mqClient login: un ].
 	self mqPassword ifNotNil: [ :pwd | mqClient passcode: pwd ].
 	mqClient timeout: 60.
-	mqClient open.
+	mqClient open. ]
+		on: ConnectionTimedOut
+		do: [ :ex |
+			retryCount := retryCount + 1.
+			retryCount <= maxRetries
+				ifTrue: [ 5 seconds wait.  ex retry ]
+				ifFalse: [ ex pass ] ].
 	mqClient isConnected ifFalse:
 		[ self error: 'Unable to connect to MQ server' ].
 	self startMqHeartbeat.
@@ -319,6 +328,10 @@ GtRrStompMqProcessor >> processMqMessage: mqMessage [
 	| gtMessage |
 
 	gtMessage := (GtWireDecoder on: mqMessage body readStream) next.
+	GtRrMessageStatsSignal new
+		messageClassName: gtMessage class name;
+		encodedSize: mqMessage body size;
+		emit.
 	mqMessage destination = commandChannelName ifTrue:
 		[ ^ commandCallback value: mqMessage  value: gtMessage value: owner ].
 	mqMessage destination = messageChannelName ifTrue:
@@ -439,6 +452,10 @@ GtRrStompMqProcessor >> sendGtMessage: aGtRrMessage to: destination [
 	mqMessage bytes: (GtWireEncoder onByteArray
 		nextPut: aGtRrMessage;
 		contents).
+	GtRrMessageStatsSignal new
+		messageClassName: aGtRrMessage class name;
+		encodedSize: mqMessage body size;
+		emit.
 	self write: mqMessage.
 	GtRrStompMqSendMessageCompletedSignal new
 		gtMessagePrintString: aGtRrMessage printString;
