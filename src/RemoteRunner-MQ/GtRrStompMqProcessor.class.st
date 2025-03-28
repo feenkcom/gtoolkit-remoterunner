@@ -220,15 +220,15 @@ GtRrStompMqProcessor >> isRunning [
 ]
 
 { #category : #testing }
-GtRrStompMqProcessor >> isStopRequested [
-
-	^ state = #stopRequested
-]
-
-{ #category : #testing }
 GtRrStompMqProcessor >> isStopped [
 
 	^ state = #stopped
+]
+
+{ #category : #testing }
+GtRrStompMqProcessor >> isStopRequested [
+
+	^ state = #stopRequested
 ]
 
 { #category : #accessing }
@@ -449,9 +449,7 @@ GtRrStompMqProcessor >> sendGtMessage: aGtRrMessage to: destination [
 		gtMessagePrintString: aGtRrMessage printString;
 		emit.
 	mqMessage := mqClient newSendFrameTo: destination.
-	mqMessage bytes: (GtWireEncoder onByteArray
-		nextPut: aGtRrMessage;
-		contents).
+	mqMessage bytes: (self serializedGtMessage: aGtRrMessage).
 	GtRrMessageStatsSignal new
 		messageClassName: aGtRrMessage class name;
 		encodedSize: mqMessage body size;
@@ -468,6 +466,16 @@ GtRrStompMqProcessor >> sendRpcBlockClosure: aBlockClosure to: commandDestinatio
 	^ self sendRpcMessage: (GtRrBlockClosureMessage new
 			blockClosure: aBlockClosure)
 		to: commandDestination.
+]
+
+{ #category : #private }
+GtRrStompMqProcessor >> serializedGtMessage: aGtRrMessage [
+	"Answer the serialised message.
+	Subclasses may overwrite this to send the message via an external medium, e.g. s3"
+
+	^ GtWireEncoder onByteArray
+		nextPut: aGtRrMessage;
+		contents
 ]
 
 { #category : #'start - stop' }
