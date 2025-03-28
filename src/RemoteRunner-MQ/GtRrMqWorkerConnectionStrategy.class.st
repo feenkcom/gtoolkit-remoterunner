@@ -209,29 +209,29 @@ GtRrMqWorkerConnectionStrategy >> taskDone: aTaskContext with: anObject [
 		workerId: worker uid;
 		executionData: (self executionDataFromTaskContext:  aTaskContext);
 		result: anObject.
+	mqProcessor sendGtMessage: taskDoneMessage to: GtRrStompMqProcessor taskResultName.
 	currentAckFrame := ackFrame.
 	nextTask := ackFrame := nil.
 	currentAckFrame ifNotNil:
 		[ mqProcessor write: currentAckFrame ].
-	mqProcessor sendGtMessage: taskDoneMessage to: GtRrStompMqProcessor taskResultName.
 ]
 
 { #category : #private }
 GtRrMqWorkerConnectionStrategy >> taskFailed: aTaskContext with: anError [
-	| taskDoneMessage executionData |
+	| taskFailedMessage executionData |
 
 	executionData := self executionDataFromTaskContext:  aTaskContext.
 	executionData errorDetails: (GtRrErrorDetails new
 						errorMessage: (anError messageText ifEmpty:
 							[ anError printString ]);
 						trace: anError stackString).
-	taskDoneMessage := GtRrWorkerTaskFailedMessage new
+	taskFailedMessage := GtRrWorkerTaskFailedMessage new
 		taskContextId: aTaskContext taskContextId;
 		workerId: worker uid;
 		executionData: executionData.
+	mqProcessor sendGtMessage: taskFailedMessage to: GtRrStompMqProcessor taskResultName.
 	ackFrame ifNotNil:
 		[ mqProcessor write: ackFrame ].
-	mqProcessor sendGtMessage: taskDoneMessage to: GtRrStompMqProcessor taskResultName.
 	nextTask := ackFrame := nil.
 ]
 
