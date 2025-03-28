@@ -71,6 +71,18 @@ PlpoGtRemoteRunner >> managerStartupAndShutdown [
 	^ self proxyPerform: #managerStartupAndShutdown.
 ]
 
+{ #category : #'api - logging' }
+PlpoGtRemoteRunner >> moveLoggingTo: aFileReference [
+	| fileReferenceString |
+	
+	fileReferenceString := aFileReference isString
+		ifTrue: [ aFileReference ]
+		ifFalse: [ aFileReference fullName ].
+	self
+		proxyPerform: #moveLoggingTo:
+		withPrimitiveArguments: { fileReferenceString }
+]
+
 { #category : #accessing }
 PlpoGtRemoteRunner >> port [
 

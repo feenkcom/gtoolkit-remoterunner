@@ -842,15 +842,16 @@ GtRemoteRunner >> markTaskStarted: taskContextId [
 { #category : #'api - logger' }
 GtRemoteRunner >> moveLoggingTo: aFileReference [
 	"Replace the receiver's logger with one that logs to the supplied file"
-	| oldLogger newLogger |
+	| fileReference oldLogger newLogger |
 
+	fileReference := aFileReference asFileReference resolve.
 	(log isNil or:
 		[ log fileReference isNotNil
-			and: [ log fileReference resolve = aFileReference resolve ] ])
+			and: [ log fileReference resolve = fileReference resolve ] ])
 				ifTrue: [ ^ self ].
 
 	oldLogger := log.
-	newLogger := SessionFallbackFileLogger new filename: aFileReference.
+	newLogger := SessionFallbackFileLogger new filename: fileReference.
 	log := StreamLoggerFlusher new logger: newLogger.
 	self startLogger: log.
 	oldLogger stop; close.
