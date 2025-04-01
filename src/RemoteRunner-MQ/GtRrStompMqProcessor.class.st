@@ -103,6 +103,16 @@ GtRrStompMqProcessor class >> portFrom: aHostString [
 		port asInteger ]
 ]
 
+{ #category : #'queue management' }
+GtRrStompMqProcessor class >> purgeQueues [
+	"Purge the permanent queues"
+
+	GtRrStompMqProcessor new
+		purgeQueue: self taskQueueName;
+		purgeQueue: self runnerControlChannelName;
+		purgeQueue: self taskResultName.
+]
+
 { #category : #'queue names' }
 GtRrStompMqProcessor class >> runnerControlChannelName [
 	"The workers (producers) send control messages (such as register or unregister) to the runner (consumer) through this channel"
