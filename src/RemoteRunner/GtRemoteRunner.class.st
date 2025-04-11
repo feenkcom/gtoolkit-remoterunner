@@ -745,7 +745,8 @@ GtRemoteRunner >> initialize [
 			defaultTaskTimeout: self taskTimeout.	"currentlyExecutingJobs is a dictionary of GtRrJobContext keyed by job uid"
 	currentlyExecutingJobs := Dictionary new.	"currentlyExecutingTasks is a dictionary of GtRrTaskContext keyed by task context id"
 	currentlyExecutingTasks := Dictionary new.
-	sharedAccess := Mutex new.	"availableWorkers is a SortedCollection of GtRrFutureWorkerTask, sorted by #workerPriority.
+	sharedAccess := Monitor new.
+	"availableWorkers is a SortedCollection of GtRrFutureWorkerTask, sorted by #workerPriority.
 	The worker is represented by a GtRrWorkerConnection and is waiting on the semaphore held by the GtRrFutureWorkerTask.
 	Sort the collection ascending and remove the last item to minimise the need for repacking the collection."
 	availableWorkers := SortedCollection sortUsing: #workerPriority ascending.
