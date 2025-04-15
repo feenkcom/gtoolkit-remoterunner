@@ -2,6 +2,6 @@
 	"repositories" : {
 		"github://feenkcom/gtoolkit-notifications/src" : "v0.6.1220",
 		"github://feenkcom/stamp/repository" : "v0.6.0",
-		"github://feenkcom/PharoLink/src" : "v0.8.450"
+		"github://feenkcom/PharoLink/src" : "v0.8.451"
 	}
 }
