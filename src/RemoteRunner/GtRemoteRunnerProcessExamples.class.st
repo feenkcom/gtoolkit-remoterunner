@@ -22,6 +22,7 @@ GtRemoteRunnerProcessExamples >> changesSync [
 	<after: #stopRunnersAndWorkers>
 	| entry semaphore events job jobSemaphore |
 
+	self ignoreWorkerExamples ifTrue: [ ^ self ].
 	self purgeQueues.
 	self class removeSelector: #changesSyncTestMethod.
 	entry := OmEntry content: (EpMethodAddition method: 
@@ -62,6 +63,7 @@ GtRemoteRunnerProcessExamples >> changesSyncRetrieval [
 	<after: #stopRunnersAndWorkers>
 	| entry semaphore worker events receivedEvents |
 
+	self ignoreWorkerExamples ifTrue: [ ^ nil ].
 	self purgeQueues.
 	entry := OmEntry content: (EpExpressionEvaluation expression: '4+3').
 	entry tags at: #self put: (OmReference
@@ -131,7 +133,11 @@ GtRemoteRunnerProcessExamples >> ignoreWorkerExamples [
 	"Answer a boolean indicating whether examples that require a subprocess should be run.
 	Convenience in case the CI decides it doesn't want to be nice."
 
-	^ false
+	^ [ (NetNameResolver localHostName endsWith: 'hosting.net') and:
+		[ Smalltalk vm architectureName = 'x86_64' ] ]
+		on: Error
+		do: [ :ex | false ]
+
 ]
 
 { #category : #examples }
