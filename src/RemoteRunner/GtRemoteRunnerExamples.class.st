@@ -280,18 +280,17 @@ GtRemoteRunnerExamples >> registerObject [
 GtRemoteRunnerExamples >> simpleRunner [
 	"Answer a started RemoteRunner.
 	It is up to the caller to stop the runner (and thus the workers)."
-	| remoteRunner  |
+	| newRemoteRunner  |
 
-	self ignoreWorkerExamples ifTrue: [ ^ self ].
-	remoteRunner := GtRemoteRunner new.
-	remoteRunner managerStartupAndShutdown 
+	newRemoteRunner := GtRemoteRunner new.
+	newRemoteRunner managerStartupAndShutdown 
 		autoRestart: false;
 		poolSize: 1.
 
-	self assert: remoteRunner taskQueue size equals: 0.
-	self assert: remoteRunner currentlyExecutingJobs size equals: 0.
-	self assert: remoteRunner currentlyExecutingTasks size equals: 0.
-	^ remoteRunner
+	self assert: newRemoteRunner taskQueue size equals: 0.
+	self assert: newRemoteRunner currentlyExecutingJobs size equals: 0.
+	self assert: newRemoteRunner currentlyExecutingTasks size equals: 0.
+	^ newRemoteRunner
 ]
 
 { #category : #examples }

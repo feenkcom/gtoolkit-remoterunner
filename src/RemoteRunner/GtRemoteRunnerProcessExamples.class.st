@@ -22,6 +22,7 @@ GtRemoteRunnerProcessExamples >> changesSync [
 	<after: #stopRunnersAndWorkers>
 	| entry semaphore events job jobSemaphore |
 
+	self ignoreWorkerExamples ifTrue: [ ^ self ].
 	self purgeQueues.
 	self class removeSelector: #changesSyncTestMethod.
 	entry := OmEntry content: (EpMethodAddition method: 
@@ -62,6 +63,7 @@ GtRemoteRunnerProcessExamples >> changesSyncRetrieval [
 	<after: #stopRunnersAndWorkers>
 	| entry semaphore worker events receivedEvents |
 
+	self ignoreWorkerExamples ifTrue: [ ^ nil ].
 	self purgeQueues.
 	entry := OmEntry content: (EpExpressionEvaluation expression: '4+3').
 	entry tags at: #self put: (OmReference

@@ -9,9 +9,11 @@ Class {
 { #category : #examples }
 GtRemoteAnnouncementQueueExamples >> queueGetsAnnouncements [
 	<gtExample>
-	| job jobSemaphore queue polled runner |
+	| job jobSemaphore queue polled runnerExamples runner |
 
-	runner := GtRemoteRunnerExamples new simpleRunner.
+	runnerExamples := GtRemoteRunnerExamples new.
+	runnerExamples ignoreWorkerExamples ifTrue: [ ^ self ].
+	runner := runnerExamples simpleRunner.
 	queue := GtRemoteAnnouncementQueue onAnnouncingObject: runner.
 	jobSemaphore := Semaphore new.
 	self assert: queue poll size equals: 0.
