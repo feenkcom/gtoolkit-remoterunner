@@ -9,7 +9,8 @@ Class {
 		'subscription',
 		'flusher',
 		'remoteRunner',
-		'systemAnnouncements'
+		'systemAnnouncements',
+		'mutex'
 	],
 	#category : #'RemoteRunner-Runner-CodeSync'
 }
@@ -39,13 +40,14 @@ GtRrCodeSync >> finalize [
 
 { #category : #accessing }
 GtRrCodeSync >> flush [
-	| buffer |
-
-	buffer := OrderedCollection new.
-	events flush: [ :event | buffer add: event ].
-	buffer ifEmpty: [ "nothing to send, ignore" ^ self ].
-	remoteRunner submitJob: (GtRrCodeSyncJob serializedChanges:
-			 (LanguageLinkUtils base64Encode: buffer))
+	mutex critical:  [
+		| buffer |
+		buffer := OrderedCollection new.
+		events flush: [:event | buffer add: event].
+		buffer ifEmpty: [
+			"nothing to send, ignore" ^self].
+		remoteRunner submitJob: (GtRrCodeSyncJob
+					serializedChanges: (LanguageLinkUtils base64Encode: buffer))]
 ]
 
 { #category : #initialization }
@@ -53,13 +55,19 @@ GtRrCodeSync >> initialize [
 
 	super initialize.
 	events := WaitfreeQueue new.
-	flusher := TKTNewProcessTaskRunner new
+	flusher := TKTNewProcessTaskRunner new.
+	mutex := Semaphore forMutualExclusion.
 ]
 
 { #category : #testing }
 GtRrCodeSync >> isEmpty [
 
 	^ events isEmpty
+]
+
+{ #category : #'as yet unclassified' }
+GtRrCodeSync >> mutex [
+	^mutex
 ]
 
 { #category : #accessing }
@@ -74,7 +82,6 @@ GtRrCodeSync >> onEntryAdded: anEntryAddedEvent [
 
 { #category : #accessing }
 GtRrCodeSync >> onExpressionEvaluated: anExpressionEvaluated [
-
 	events nextPut: (self createOmbuEntryForEvent:(EpExpressionEvaluation 
 		expression: anExpressionEvaluated expressionEvaluated)).
 	flusher schedule: [ self flush ]
