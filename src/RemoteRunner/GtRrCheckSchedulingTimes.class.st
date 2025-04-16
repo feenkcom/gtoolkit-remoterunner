@@ -145,7 +145,7 @@ GtRrCheckSchedulingTimes >> initialize [
 
 	super initialize.
 	times := Dictionary new.
-	accessMutex := Monitor new.
+	accessMutex := Mutex new.
 	unknownDuration := GtRrUnknownDurationValue new.
 	timeStrategy := GtRrCheckSchedulingTimeMovingAverageStrategy new.
 ]
