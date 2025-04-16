@@ -131,7 +131,11 @@ GtRemoteRunnerProcessExamples >> ignoreWorkerExamples [
 	"Answer a boolean indicating whether examples that require a subprocess should be run.
 	Convenience in case the CI decides it doesn't want to be nice."
 
-	^ false
+	^ [ (NetNameResolver localHostName endsWith: 'hosting.net') and:
+		[ Smalltalk vm architectureName = 'x86_64' ] ]
+		on: Error
+		do: [ :ex | false ]
+
 ]
 
 { #category : #examples }
