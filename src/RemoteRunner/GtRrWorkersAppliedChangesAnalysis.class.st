@@ -48,6 +48,7 @@ GtRrWorkersAppliedChangesAnalysis >> gtWorkersAnalysesFor: aView [
 		column: 'Total Changes Count' text: [:each | each totalNumberOfChanges];
 		column: 'Initially Replayed' text: [:each | each numberOfInitiallyReplayedChanges];
 		column: 'Code Sync' text: [:each | each numberOfCodeSyncChanges];
+		column: 'Is Out of Order' text: [ :each | each hasOutOfOrderChanges ];
 		column: 'Total Duration' text: [:each | each totalDuration ];
 		column: 'Changes Hash' text: [:each | each changesHash base64Encoded ]
 		
@@ -57,7 +58,7 @@ GtRrWorkersAppliedChangesAnalysis >> gtWorkersAnalysesFor: aView [
 GtRrWorkersAppliedChangesAnalysis >> initializeForWorkerConnections: aCollection [
 	| logFiles |
 	logFiles := aCollection collect: [ :each | 
-		'workerLogs' asFileReference / ('gtrrworker-{1}.log' format:  {each pid asString}) ].
+		'workerLogs' asFileReference / ('{1}-gtrrworker.gt.log' format:  {each pid asString}) ].
 		
 	self initializeForWorkerLogFiles: (logFiles collect: [ :aWorkerFile |
 		LwGtRrLogFile for: aWorkerFile ])

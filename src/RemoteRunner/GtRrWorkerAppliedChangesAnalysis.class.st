@@ -48,6 +48,11 @@ GtRrWorkerAppliedChangesAnalysis >> gViewwChangesFor: aView [
 		view: #gtViewChangesFor:
 ]
 
+{ #category : #testing }
+GtRrWorkerAppliedChangesAnalysis >> hasOutOfOrderChanges [
+	^appliedChangesEvents hasOutOfOrderChanges
+]
+
 { #category : #initialization }
 GtRrWorkerAppliedChangesAnalysis >> initializeFromWorkerEvents: anEventsGroup labeled: aWorkerLabel [
 	appliedChangesEvents := GtRrWorkerAppliedChangesGroup 

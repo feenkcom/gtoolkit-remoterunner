@@ -30,6 +30,30 @@ GtRrWorkerAppliedChangesGroup >> gtViewChangesFor: aView [
 		column: 'Event Type' text: [ :anEvent | anEvent eventLabel ]
 ]
 
+{ #category : #testing }
+GtRrWorkerAppliedChangesGroup >> hasEventsSortedByLocalName [
+	| lastNumber |
+	lastNumber := (self first ombuEntryReferenceName splitOn: $:) second asNumber.
+	
+	items allButFirst do: [ :anEntry |
+		| currentNumber |
+		currentNumber := (anEntry ombuEntryReferenceName splitOn: $:) second asNumber.
+		
+		lastNumber >= currentNumber ifTrue: [ ^false ].
+		lastNumber := currentNumber ].
+	^true
+]
+
+{ #category : #testing }
+GtRrWorkerAppliedChangesGroup >> hasOutOfOrderChanges [
+	^((self 
+		reject: [ :each | 
+			each  ombuEntryReferenceName beginsWith: 'ExpressionEvaluation']) 
+		groupedBy: [ :each | 	
+			each  ombuEntryReferenceName copyUpTo: $: ])
+				anySatisfy: [ :aGroup | aGroup hasEventsSortedByLocalName not ]
+]
+
 { #category : #accessing }
 GtRrWorkerAppliedChangesGroup >> referencesHash [
 	^(SHA256 new hashMessage: (String 
