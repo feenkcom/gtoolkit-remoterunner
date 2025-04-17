@@ -69,6 +69,9 @@ GtRrCodeSyncExamples >> addRemoveMethod [
 GtRrCodeSyncExamples >> evaluateExpression [
 	<gtExample>
 	| runner codeSync semaphore timestamp task |
+
+	GtRemoteRunnerExamples new ignoreWorkerExamples ifTrue: [ ^ self ].
+
 	runner := GtRemoteRunner new
 		        port: 0;
 				startLogging;

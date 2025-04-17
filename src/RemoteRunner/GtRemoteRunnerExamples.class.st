@@ -847,6 +847,7 @@ GtRemoteRunnerExamples >> workerChangesFile [
 	<gtExample>
 	| settings semaphore args workerProcess changesFile logFile processBuilder task job rrIndex |
 
+	self ignoreWorkerExamples ifTrue: [ ^ self ].
 	remoteRunner := GtRemoteRunner new.
 	remoteRunner managerStartupAndShutdown 
 		autoRestart: false;
