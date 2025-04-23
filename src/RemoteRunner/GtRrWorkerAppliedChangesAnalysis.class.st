@@ -137,7 +137,7 @@ GtRrWorkerAppliedChangesAnalysis >> overviewData [
 		{'Initially Replayed Changes'. self numberOfInitiallyReplayedChanges. self initiallyReplayedChanges}.
 		{'Synchronized Changes'. self numberOfCodeSyncChanges. self codeSyncChanges}.
 		{'Total Duration'. self totalDuration. self totalDuration}.
-		{'Has Out-of-order changes'. self hasOutOfOrderChanges. self hasOutOfOrderChanges}.
+		{'Has out-of-order Changes'. self hasOutOfOrderChanges. self hasOutOfOrderChanges}.
 		{'Changes with Index Hash' . self changesWithIndexHash base64Encoded. self changesWithIndexHash}.
 		{'Changes Hash' . self changesHash base64Encoded. self changesHash}.
 	}
