@@ -65,3 +65,14 @@ GtRrWorkerAppliedChangesGroup >> referencesHash [
 GtRrWorkerAppliedChangesGroup >> referencesNames [
 	^self collect: [ :each | each ombuEntryReferenceName ]
 ]
+
+{ #category : #accessing }
+GtRrWorkerAppliedChangesGroup >> referencesWithIndexHash [
+	^(SHA256 new hashMessage: (String 
+		streamContents: [ :aStream | 
+			self referencesNames 
+				withIndexDo: [ :anItem :anIndex | 
+					aStream print: anIndex.
+					aStream space.
+					aStream nextPutAll: anItem asString ] ])) 
+]

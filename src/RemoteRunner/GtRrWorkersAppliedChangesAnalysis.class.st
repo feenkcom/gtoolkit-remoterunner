@@ -46,11 +46,13 @@ GtRrWorkersAppliedChangesAnalysis >> gtWorkersAnalysesFor: aView [
 		column: 'Worker'
 			text: [:each | each workerLabel ];
 		column: 'Total Changes Count' text: [:each | each totalNumberOfChanges];
-		column: 'Initially Replayed' text: [:each | each numberOfInitiallyReplayedChanges];
+		column: 'Initially Replayed'
+			text: [:each | each numberOfInitiallyReplayedChanges];
 		column: 'Code Sync' text: [:each | each numberOfCodeSyncChanges];
 		column: 'Is Out of Order' text: [ :each | each hasOutOfOrderChanges ];
 		column: 'Total Duration' text: [:each | each totalDuration ];
-		column: 'Changes Hash' text: [:each | each changesHash base64Encoded ]
+		column: 'Changes with Index Hash' 
+			text: [:each | each changesWithIndexHash base64Encoded ]
 		
 ]
 
