@@ -39,12 +39,57 @@ GtRrWorkerAppliedChangesAnalysis >> changesHash [
 	^ appliedChangesEvents referencesHash
 ]
 
+{ #category : #accessing }
+GtRrWorkerAppliedChangesAnalysis >> changesWithIndexHash [
+	^ appliedChangesEvents referencesWithIndexHash
+]
+
+{ #category : #accessing }
+GtRrWorkerAppliedChangesAnalysis >> codeSyncChanges [
+	^appliedChangesEvents select: [ :anEvent | 
+		anEvent class = GtRrCodeSyncApplyChangeLogEvent ]
+]
+
 { #category : #views }
-GtRrWorkerAppliedChangesAnalysis >> gViewwChangesFor: aView [
+GtRrWorkerAppliedChangesAnalysis >> gtOverviewFor: aView [
+	<gtView>
+
+	^ aView columnedList
+		title: 'Overview';
+		priority: 5;
+		items:  [ self overviewData ];
+		column: 'Name' text: [ :each | each first ];
+		column: 'Value' text: [ :each | each second ];
+		send: [ :each | each third ]
+]
+
+{ #category : #views }
+GtRrWorkerAppliedChangesAnalysis >> gViewChangesFor: aView [
 	<gtView>
 	^(aView forward)
-		title: 'Changes';
+		title: 'All Changes';
+		priority: 25;
 		object: [appliedChangesEvents];
+		view: #gtViewChangesFor:
+]
+
+{ #category : #views }
+GtRrWorkerAppliedChangesAnalysis >> gViewCodeSyncChangesFor: aView [
+	<gtView>
+	^(aView forward)
+		title: 'Code Sync Changes';
+		priority: 15;
+		object: [self codeSyncChanges];
+		view: #gtViewChangesFor:
+]
+
+{ #category : #views }
+GtRrWorkerAppliedChangesAnalysis >> gViewInitiallyReplayedChangesFor: aView [
+	<gtView>
+	^(aView forward)
+		title: 'Initial Changes';
+		priority: 10;
+		object: [self initiallyReplayedChanges];
 		view: #gtViewChangesFor:
 ]
 
@@ -68,6 +113,12 @@ GtRrWorkerAppliedChangesAnalysis >> initializeFromWorkerLogFile: aLogFile [
 ]
 
 { #category : #accessing }
+GtRrWorkerAppliedChangesAnalysis >> initiallyReplayedChanges [
+	^appliedChangesEvents select: [ :anEvent | 
+		anEvent class = GtRrWorkerApplyChangeLogEvent ]
+]
+
+{ #category : #accessing }
 GtRrWorkerAppliedChangesAnalysis >> numberOfCodeSyncChanges [
 	^appliedChangesEvents count: [ :anEvent | 
 		anEvent class = GtRrCodeSyncApplyChangeLogEvent ]
@@ -77,6 +128,19 @@ GtRrWorkerAppliedChangesAnalysis >> numberOfCodeSyncChanges [
 GtRrWorkerAppliedChangesAnalysis >> numberOfInitiallyReplayedChanges [
 	^appliedChangesEvents count: [ :anEvent | 
 		anEvent class = GtRrWorkerApplyChangeLogEvent ]
+]
+
+{ #category : #views }
+GtRrWorkerAppliedChangesAnalysis >> overviewData [
+	^{
+		{'Worker'. self workerLabel. self workerLabel}.
+		{'Initially Replayed Changes'. self numberOfInitiallyReplayedChanges. self initiallyReplayedChanges}.
+		{'Synchronized Changes'. self numberOfCodeSyncChanges. self codeSyncChanges}.
+		{'Total Duration'. self totalDuration. self totalDuration}.
+		{'Has Out-of-order changes'. self hasOutOfOrderChanges. self hasOutOfOrderChanges}.
+		{'Changes with Index Hash' . self changesWithIndexHash base64Encoded. self changesWithIndexHash}.
+		{'Changes Hash' . self changesHash base64Encoded. self changesHash}.
+	}
 ]
 
 { #category : #printing }
