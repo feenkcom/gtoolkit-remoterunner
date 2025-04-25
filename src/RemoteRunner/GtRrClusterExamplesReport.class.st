@@ -436,7 +436,7 @@ GtRrClusterExamplesReport >> numberOfIncrementalGCs [
 { #category : #accessing }
 GtRrClusterExamplesReport >> numberOfMachineCores [
 	^ self machineReports
-		sumNumbers: [ :aMachineReport | aMachineReport machineCores ]
+		sumNumbers: [ :aMachineReport | aMachineReport machineCores ifNil: [0] ]
 ]
 
 { #category : #accessing }
@@ -590,7 +590,7 @@ GtRrClusterExamplesReport >> timePercentageOf: aTime inDuration: aTotalDuration 
 { #category : #accessing }
 GtRrClusterExamplesReport >> totalAwsWeightedCapacity [
 	^ self machineReports
-		sumNumbers: [ :aMachineReport | aMachineReport awsWeightedCapacity ]
+		sumNumbers: [ :aMachineReport | aMachineReport awsWeightedCapacity ifNil: [0] ]
 ]
 
 { #category : #accessing }
