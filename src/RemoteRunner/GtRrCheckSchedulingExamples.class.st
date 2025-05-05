@@ -10,23 +10,25 @@ Class {
 GtRrCheckSchedulingExamples >> emptyTimes [
 	"Answer an empty {{gtClass:GtRrTestSchedulingTimes}} object, confirming that it falls back to the the unknownDurationValue.
 	This example assumes {{gtClass:GtRrSampleExample}} exists."
-	<gtExample>
-	| testSchedulingTimes |
 
+	<gtExample>
+	<return: #GtRrCheckSchedulingTimes>
+	| testSchedulingTimes |
 	testSchedulingTimes := GtRrCheckSchedulingTimes new.
 	testSchedulingTimes timeStrategy: GtRrCheckSchedulingTimeLatestStrategy new.
 	self assert: testSchedulingTimes times isEmpty.
-	self assert: testSchedulingTimes unknownDuration defaultValue 
+	self
+		assert: testSchedulingTimes unknownDuration defaultValue
 		equals: GtRrCheckScheduler defaultTaskDuration.
 
-	^ testSchedulingTimes.
+	^ testSchedulingTimes
 ]
 
 { #category : #examples }
 GtRrCheckSchedulingExamples >> scheduleSampleExamples [
 	<gtExample>
+	<return: #OrderedCollection>
 	| schedulingTimes scheduler tasks |
-
 	schedulingTimes := self emptyTimes.
 	schedulingTimes
 		atClassName: #GtRrSampleExample
@@ -44,54 +46,62 @@ GtRrCheckSchedulingExamples >> scheduleSampleExamples [
 
 	scheduler := GtRrCheckScheduler new schedulingTimes: schedulingTimes.
 
-	tasks := scheduler allocateTasks:
-		{ GtRrClassExampleTask exampleClassName: #GtRrSampleExample }.
+	tasks := scheduler
+			allocateTasks: {GtRrClassExampleTask exampleClassName: #GtRrSampleExample}.
 
 	self assert: tasks size equals: 4.
-	tasks do: [ :task |
-		self assert: task checkNames size equals: 1 ].
+	tasks do: [ :task | self assert: task checkNames size equals: 1 ].
 
-	^ tasks.
+	^ tasks
 ]
 
 { #category : #examples }
 GtRrCheckSchedulingExamples >> timesUpdatedFromExampleJob [
 	"Demonstrate updating the persistent times from a {{gtClass:GtRrTasksJob}}"
-	<gtExample>
-	| persistentTimes task job initialTime newTime testCaseAnnouncement |
 
+	<gtExample>
+	<return: #GtRrCheckSchedulingExamples>
+	| persistentTimes task job initialTime newTime testCaseAnnouncement |
 	persistentTimes := self emptyTimes.
-	initialTime := persistentTimes timeForClassName: #GtRrSampleExample selector: #passExample.
+	initialTime := persistentTimes
+			timeForClassName: #GtRrSampleExample
+			selector: #passExample.
 	self assert: initialTime equals: GtRrCheckScheduler defaultTaskDuration.
 
-	task := GtRrExplicitExampleTask exampleNames: { #GtRrSampleExample -> #passExample }.
-	job := GtRrChecksJob tasks: { task }.
+	task := GtRrExplicitExampleTask
+			exampleNames: {#GtRrSampleExample -> #passExample}.
+	job := GtRrChecksJob tasks: {task}.
 	persistentTimes onJobStarted: (GtRrJobStartedAnnouncement job: job).
 	job runInImage.
 	testCaseAnnouncement := job results first result first.
 	newTime := testCaseAnnouncement duration.
 	self deny: newTime equals: initialTime.
-	self assert: (persistentTimes timeForClassName: #GtRrSampleExample selector: #passExample)
-		equals: newTime.
+	self
+		assert: (persistentTimes timeForClassName: #GtRrSampleExample selector: #passExample)
+		equals: newTime
 ]
 
 { #category : #examples }
 GtRrCheckSchedulingExamples >> timesUpdatedFromSUnitJob [
 	"Demonstrate updating the persistent times from a {{gtClass:GtRrTasksJob}}"
-	<gtExample>
-	| persistentTimes task job initialTime newTime testCaseAnnouncement |
 
+	<gtExample>
+	<return: #GtRrCheckSchedulingExamples>
+	| persistentTimes task job initialTime newTime testCaseAnnouncement |
 	persistentTimes := self emptyTimes.
-	initialTime := persistentTimes timeForClassName: #GtRrSampleTest selector: #testPass.
+	initialTime := persistentTimes
+			timeForClassName: #GtRrSampleTest
+			selector: #testPass.
 	self assert: initialTime equals: GtRrCheckScheduler defaultTaskDuration.
 
-	task := GtRrExplicitSUnitTask sunitTestNames: { #GtRrSampleTest -> #testPass }.
-	job := GtRrChecksJob tasks: { task }.
+	task := GtRrExplicitSUnitTask sunitTestNames: {#GtRrSampleTest -> #testPass}.
+	job := GtRrChecksJob tasks: {task}.
 	persistentTimes onJobStarted: (GtRrJobStartedAnnouncement job: job).
 	job runInImage.
 	testCaseAnnouncement := job results first result first.
 	newTime := testCaseAnnouncement duration.
 	self deny: newTime equals: initialTime.
-	self assert: (persistentTimes timeForClassName: #GtRrSampleTest selector: #testPass)
-		equals: newTime.
+	self
+		assert: (persistentTimes timeForClassName: #GtRrSampleTest selector: #testPass)
+		equals: newTime
 ]

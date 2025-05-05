@@ -9,9 +9,10 @@ Class {
 { #category : #examples }
 GtRrWorkerManagerExamples >> stopOnSessionChange [
 	"Ensure that the worker manager stops the watchdog when the session changes"
-	<gtExample>
-	| workerManager semaphore process |
 
+	<gtExample>
+	<return: #GtRrWorkerManager>
+	| workerManager semaphore process |
 	workerManager := GtRrWorkerManager new.
 	semaphore := Semaphore new.
 	process := [ semaphore wait ] fork.

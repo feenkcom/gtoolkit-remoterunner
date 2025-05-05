@@ -9,8 +9,8 @@ Class {
 { #category : #examples }
 GtRemoteAnnouncementQueueExamples >> queueGetsAnnouncements [
 	<gtExample>
+	<return: #GtRemoteAnnouncementQueue>
 	| job jobSemaphore queue polled runnerExamples runner |
-
 	runnerExamples := GtRemoteRunnerExamples new.
 	runnerExamples ignoreWorkerExamples ifTrue: [ ^ self ].
 	runner := runnerExamples simpleRunner.
@@ -20,8 +20,7 @@ GtRemoteAnnouncementQueueExamples >> queueGetsAnnouncements [
 
 	[ runner start.
 	job := GtRemoteRunnerExamples new simpleJob.
-	job when: GtRrJobCompletedAnnouncement
-		do: [ :ann | jobSemaphore signal ].
+	job when: GtRrJobCompletedAnnouncement do: [ :ann | jobSemaphore signal ].
 	runner submitJob: job.
 
 	self
@@ -30,11 +29,14 @@ GtRemoteAnnouncementQueueExamples >> queueGetsAnnouncements [
 		description: 'Job didn''t complete in time'.
 	polled := queue poll.
 	self assert: polled size equals: 8.
-	self assert: ((polled at: 6) isKindOf: GtRrTaskCompletedAnnouncement) description: 'Task is finished and announcement is in queue'.
-	self assert: (polled last isKindOf: GtRrJobCompletedAnnouncement) description: 'Job is finished and announcement is in queue'.
+	self
+		assert: ((polled at: 6) isKindOf: GtRrTaskCompletedAnnouncement)
+		description: 'Task is finished and announcement is in queue'.
+	self
+		assert: (polled last isKindOf: GtRrJobCompletedAnnouncement)
+		description: 'Job is finished and announcement is in queue'.
 
-	self assert: queue poll size equals: 0 ]
-		ensure: [ runner stop ].
+	self assert: queue poll size equals: 0 ] ensure: [ runner stop ].
 
 	self assert: queue poll size equals: 1.
 

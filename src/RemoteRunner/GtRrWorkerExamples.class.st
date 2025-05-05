@@ -31,21 +31,23 @@ GtRrWorkerExamples >> cleanUp [
 { #category : #examples }
 GtRrWorkerExamples >> commandLineWithAttributes [
 	"Demonstrate parsing the Remote Runner Worker command line"
-	<gtExample>
-	| commandLine attributes |
 
-	commandLine := GtRrWorker commandLineCommand match:
-		#('remoteRunnerWorker' 
-		'--serverSocketAddress' '7084'
-		'--attribute' 'attr1' 'v1'
-		'--attribute' 'attr2' 'v2').
+	<gtExample>
+	<return: #ClapNamedMatch>
+	| commandLine attributes |
+	commandLine := GtRrWorker commandLineCommand
+			match: #('remoteRunnerWorker' '--serverSocketAddress' '7084' '--attribute' 'attr1' 'v1' '--attribute' 'attr2' 'v2').
 
 	self assert: (commandLine at: #log) value equals: false.
-	self assert: ((commandLine at: #serverSocketAddress) at: #address) value equals: '7084'.
-	attributes := commandLine occurrencesOf: #attribute collect:
-		[ :attr | { (attr at: #key) value. (attr at: #value) value. } ].
-	self assert: attributes asArray equals:
-		#(('attr1' 'v1') ('attr2' 'v2')).
+	self
+		assert: ((commandLine at: #serverSocketAddress) at: #address) value
+		equals: '7084'.
+	attributes := commandLine
+			occurrencesOf: #attribute
+			collect: [ :attr | 
+				{(attr at: #key) value.
+					(attr at: #value) value} ].
+	self assert: attributes asArray equals: #(#('attr1' 'v1') #('attr2' 'v2')).
 
 	^ commandLine
 ]
@@ -53,37 +55,26 @@ GtRrWorkerExamples >> commandLineWithAttributes [
 { #category : #examples }
 GtRrWorkerExamples >> commandLineWithChanges [
 	"Demonstrate parsing the Remote Runner Worker command line"
-	<gtExample>
-	| commandLine |
 
-	commandLine := GtRrWorker commandLineCommand match:
-		#('remoteRunnerWorker' 
-		'--serverSocketAddress' '7084'
-		'--changesSync'
-		'--changesFile' '/path/to/file').
+	<gtExample>
+	<return: #ClapNamedMatch>
+	| commandLine |
+	commandLine := GtRrWorker commandLineCommand
+			match: #('remoteRunnerWorker' '--serverSocketAddress' '7084' '--changesSync' '--changesFile' '/path/to/file').
 
 	self assert: (commandLine at: #log) value equals: false.
-	self assert: ((commandLine at: #serverSocketAddress) at: #address) value equals: '7084'.
-	self assert: (commandLine at: #changesSync ifPresent: [ true ] ifAbsent: [ false ]).
-	commandLine at: #changesFile
-		ifPresent: [ :arg | self assert: (arg at: #changesFilename) value
-			equals: '/path/to/file' ]
+	self
+		assert: ((commandLine at: #serverSocketAddress) at: #address) value
+		equals: '7084'.
+	self
+		assert: (commandLine
+				at: #changesSync
+				ifPresent: [ true ]
+				ifAbsent: [ false ]).
+	commandLine
+		at: #changesFile
+		ifPresent: [ :arg | self assert: (arg at: #changesFilename) value equals: '/path/to/file' ]
 		ifAbsent: [ AssertionFailure signal: '#changesFile not found' ].
-
-	^ commandLine
-]
-
-{ #category : #examples }
-GtRrWorkerExamples >> commandLineWithoutAttributes [
-	"Demonstrate parsing the Remote Runner Worker command line"
-	<gtExample>
-	| commandLine |
-
-	commandLine := GtRrWorker commandLineCommand match:
-		#('remoteRunnerWorker' '--log' '--serverSocketAddress' '7084').
-
-	self assert: (commandLine at: #log) value equals: true.
-	self assert: ((commandLine at: #serverSocketAddress) at: #address) value equals: '7084'.
 
 	^ commandLine
 ]
@@ -91,31 +82,48 @@ GtRrWorkerExamples >> commandLineWithoutAttributes [
 { #category : #examples }
 GtRrWorkerExamples >> commandLineWithStrategy [
 	"Demonstrate parsing the Remote Runner Worker command line"
+
 	<gtExample>
+	<return: #ClapNamedMatch>
 	| commandLine connectionStrategyId |
+	commandLine := GtRrWorker commandLineCommand match: #('remoteRunnerWorker').
 
-	commandLine := GtRrWorker commandLineCommand match:
-		#('remoteRunnerWorker').
-
-	connectionStrategyId := commandLine 
-		at: #connectionStrategy
-		ifPresent: [ :arg | (arg at: #strategyId) value ]
-		ifAbsent: [ #perMessage ].
+	connectionStrategyId := commandLine
+			at: #connectionStrategy
+			ifPresent: [ :arg | (arg at: #strategyId) value ]
+			ifAbsent: [ #perMessage ].
 
 	self assert: connectionStrategyId equals: #perMessage.
 
 
-	commandLine := GtRrWorker commandLineCommand match:
-		#('remoteRunnerWorker' 
-		'--connectionStrategy' 'single').
+	commandLine := GtRrWorker commandLineCommand
+			match: #('remoteRunnerWorker' '--connectionStrategy' 'single').
 
-	connectionStrategyId := commandLine 
-		at: #connectionStrategy
-		ifPresent: [ :arg | (arg at: #strategyId) value ]
-		ifAbsent: [ #perMessage ].
+	connectionStrategyId := commandLine
+			at: #connectionStrategy
+			ifPresent: [ :arg | (arg at: #strategyId) value ]
+			ifAbsent: [ #perMessage ].
 
 	self assert: connectionStrategyId equals: #single.
 
+
+	^ commandLine
+]
+
+{ #category : #examples }
+GtRrWorkerExamples >> commandLineWithoutAttributes [
+	"Demonstrate parsing the Remote Runner Worker command line"
+
+	<gtExample>
+	<return: #ClapNamedMatch>
+	| commandLine |
+	commandLine := GtRrWorker commandLineCommand
+			match: #('remoteRunnerWorker' '--log' '--serverSocketAddress' '7084').
+
+	self assert: (commandLine at: #log) value equals: true.
+	self
+		assert: ((commandLine at: #serverSocketAddress) at: #address) value
+		equals: '7084'.
 
 	^ commandLine
 ]
@@ -190,17 +198,17 @@ GtRrWorkerExamples >> workerControlChannelCommandTimeout [
 { #category : #examples }
 GtRrWorkerExamples >> workerInImage [
 	"Confirm that tasks with the {{gtClass:GtRrInImageConstraint}} are assigned to the in-image worker"
-	<gtExample>
-	| inImageWorker inImageTask semaphore remoteWorkerTask |
 
+	<gtExample>
+	<return: #GtRrWorkerExamples>
+	| inImageWorker inImageTask semaphore remoteWorkerTask |
 	runner := GtRemoteRunner new.
 	inImageWorker := GtRrInImageWorker new
-		remoteRunner: runner;
-		start.
+			remoteRunner: runner;
+			start.
 
 	semaphore := Semaphore new.
-	runner when: GtRrTaskCompletedAnnouncement do:
-		[ semaphore signal ].
+	runner when: GtRrTaskCompletedAnnouncement do: [ semaphore signal ].
 	inImageTask := GtRrScriptTask script: '#done'.
 	inImageTask constraint: GtRrInImageConstraint new.
 	runner submitJob: inImageTask asJob.
@@ -209,37 +217,40 @@ GtRrWorkerExamples >> workerInImage [
 
 	remoteWorkerTask := GtRrScriptTask script: '#done'.
 	remoteWorkerTask constraint: GtRrInImageConstraint new not.
-	runner submitJob: remoteWorkerTask asJob.
-	"Since the runner doesn't have a remote worker, the task will be stuck"
+	runner submitJob: remoteWorkerTask asJob.	"Since the runner doesn't have a remote worker, the task will be stuck"
 	self assert: remoteWorkerTask state equals: #notStarted.
-	self assert: runner taskQueue size equals: 1.
+	self assert: runner taskQueue size equals: 1
 ]
 
 { #category : #examples }
 GtRrWorkerExamples >> workerStartupScripts [
 	<gtExample>
-
-	EpMonitor disableDuring:
-		[ [ GtRrWorker compile:
-'gtRrWorkerExamplesStartupScript
+	<return: #GtRrWorkerExamples>
+	EpMonitor
+		disableDuring: [ [ GtRrWorker
+				compile: 'gtRrWorkerExamplesStartupScript
 	<gtWorkerStartupScript>
 
 	attributes at: #startupScriptExampleExecuted put: true.'
-			classified: 'examples'.
-		GtRrInImageWorker compile:
-'gtRrWorkerExamplesStartupScript
+				classified: 'examples'.
+			GtRrInImageWorker
+				compile: 'gtRrWorkerExamplesStartupScript
 	<gtWorkerStartupScript>
 
 	attributes at: #inImageStartupScriptExampleExecuted put: true.'
-			classified: 'examples'.
-		self assert: (GtRrWorker new runWorkerStartupScripts attributes
-			at: #startupScriptExampleExecuted).
-		self deny: (GtRrWorker new runWorkerStartupScripts attributes
-			includesKey: #inImageStartupScriptExampleExecuted).
-		self assert: (GtRrInImageWorker new runWorkerStartupScripts attributes
-			at: #inImageStartupScriptExampleExecuted).
-		self deny: (GtRrInImageWorker new runWorkerStartupScripts attributes
-			includesKey: #startupScriptExampleExecuted) ] ensure:
-				[ GtRrWorker removeSelector: #gtRrWorkerExamplesStartupScript.
-				GtRrInImageWorker removeSelector: #gtRrWorkerExamplesStartupScript ] ].
+				classified: 'examples'.
+			self
+				assert: (GtRrWorker new runWorkerStartupScripts attributes
+						at: #startupScriptExampleExecuted).
+			self
+				deny: (GtRrWorker new runWorkerStartupScripts attributes
+						includesKey: #inImageStartupScriptExampleExecuted).
+			self
+				assert: (GtRrInImageWorker new runWorkerStartupScripts attributes
+						at: #inImageStartupScriptExampleExecuted).
+			self
+				deny: (GtRrInImageWorker new runWorkerStartupScripts attributes
+						includesKey: #startupScriptExampleExecuted) ]
+				ensure: [ GtRrWorker removeSelector: #gtRrWorkerExamplesStartupScript.
+					GtRrInImageWorker removeSelector: #gtRrWorkerExamplesStartupScript ] ]
 ]

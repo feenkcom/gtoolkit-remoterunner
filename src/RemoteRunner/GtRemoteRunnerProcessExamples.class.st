@@ -18,28 +18,28 @@ GtRemoteRunnerProcessExamples class >> isAbstract [
 { #category : #examples }
 GtRemoteRunnerProcessExamples >> changesSync [
 	"Demonstrate getting changes to a worker from the server"
+
 	<gtExample>
 	<after: #stopRunnersAndWorkers>
+	<return: #SubclassResponsibility>
 	| entry semaphore events job jobSemaphore |
-
 	self ignoreWorkerExamples ifTrue: [ ^ self ].
 	self purgeQueues.
 	self class removeSelector: #changesSyncTestMethod.
-	entry := OmEntry content: (EpMethodAddition method: 
-		((RGMethodDefinition named: #changesSyncTestMethod)
-			parentName: self class name;
-			isMetaSide: true;
-			protocol: #toberemoved;
-			sourceCode: 'changesSyncTestMethod  ^ true';
-			stamp: 'StompExamples 2/19/2025 12:00';
-			package: #RemoteRunner;
-			yourself)).
-	entry tags at: #self put: (OmReference
-		globalName: 'test'
-		localName: '1').
+	entry := OmEntry
+			content: (EpMethodAddition
+					method: ((RGMethodDefinition named: #changesSyncTestMethod)
+							parentName: self class name;
+							isMetaSide: true;
+							protocol: #toberemoved;
+							sourceCode: 'changesSyncTestMethod  ^ true';
+							stamp: 'StompExamples 2/19/2025 12:00';
+							package: #RemoteRunner;
+							yourself)).
+	entry tags at: #self put: (OmReference globalName: 'test' localName: '1').
 	events := GtRrImageSyncEvents new
-		sessionHistory: GtRrChangesSync default sessionHistory;
-		events: { entry }.
+			sessionHistory: GtRrChangesSync default sessionHistory;
+			events: {entry}.
 	semaphore := GtMutualExclusionSemaphore new.
 	remoteRunner := self simpleRunner.
 	remoteRunner managerStartupAndShutdown workerManager
@@ -49,29 +49,33 @@ GtRemoteRunnerProcessExamples >> changesSync [
 		changesSyncEvents: events;
 		start.
 	jobSemaphore := Semaphore new.
-	job := (GtRrScriptTask script: self class name asString, ' includesSelector: #changesSyncTestMethod') asJob.
+	job := (GtRrScriptTask
+			script: self class name asString , ' includesSelector: #changesSyncTestMethod')
+			asJob.
 	job when: GtRrJobCompletedAnnouncement do: [ jobSemaphore signal ].
 	remoteRunner submitJob: job.
-	self waitOn: jobSemaphore for: 10 description: 'Job didn''t complete in time'.
-	self assert: job results first result.
+	self
+		waitOn: jobSemaphore
+		for: 10
+		description: 'Job didn''t complete in time'.
+	self assert: job results first result
 ]
 
 { #category : #examples }
 GtRemoteRunnerProcessExamples >> changesSyncRetrieval [
 	"Demonstrate getting changes to a worker from the server"
+
 	<gtExample>
 	<after: #stopRunnersAndWorkers>
+	<return: #SubclassResponsibility>
 	| entry semaphore worker events receivedEvents |
-
 	self ignoreWorkerExamples ifTrue: [ ^ nil ].
 	self purgeQueues.
 	entry := OmEntry content: (EpExpressionEvaluation expression: '4+3').
-	entry tags at: #self put: (OmReference
-		globalName: 'test'
-		localName: '1').
+	entry tags at: #self put: (OmReference globalName: 'test' localName: '1').
 	events := GtRrImageSyncEvents new
-		sessionHistory: GtRrChangesSync default sessionHistory;
-		events: { entry }.
+			sessionHistory: GtRrChangesSync default sessionHistory;
+			events: {entry}.
 	semaphore := GtMutualExclusionSemaphore new.
 	remoteRunner := self simpleRunner.
 	remoteRunner managerStartupAndShutdown workerManager poolSize: 0.
@@ -81,49 +85,53 @@ GtRemoteRunnerProcessExamples >> changesSyncRetrieval [
 
 	worker := self workerForRunner: remoteRunner.
 	worker start.
-	workers := { worker }.
+	workers := {worker}.
 	worker attributes at: #changesSync put: true.
-	worker connectionStrategy connectDuring: [ :application |
-		receivedEvents := worker syncChangesWith: application ].
-	self assert: receivedEvents equals: events events.
+	worker connectionStrategy
+		connectDuring: [ :application | receivedEvents := worker syncChangesWith: application ].
+	self assert: receivedEvents equals: events events
 ]
 
 { #category : #examples }
 GtRemoteRunnerProcessExamples >> commandLineRemoteRunnerServer [
 	<gtExample>
+	<return: #GtRemoteRunnerProcessExamples>
 	| commandLine |
-
-	commandLine := GtRemoteRunner commandLineCommand match:
-		{ 'remoteRunnerServer'.
-		'--listenOn'.
-		'7042'. }.
+	commandLine := GtRemoteRunner commandLineCommand
+			match: {'remoteRunnerServer'.
+					'--listenOn'.
+					'7042'}.
 
 	self assert: (commandLine at: #log) value equals: false.
-	self assert: ((commandLine at: #listenOn) at: #address) value isNotNil.
+	self assert: ((commandLine at: #listenOn) at: #address) value isNotNil
 ]
 
 { #category : #examples }
 GtRemoteRunnerProcessExamples >> controlChannelPing [
 	"Demonstrate the ping operation using the worker's control channel"
-	<gtExample>
-	| controlChannelSemaphore worker | 
 
+	<gtExample>
+	<return: #SubclassResponsibility>
+	| controlChannelSemaphore worker |
 	self ignoreWorkerExamples ifTrue: [ ^ self ].
 	self purgeQueues.
 	controlChannelSemaphore := GtMutualExclusionSemaphore new.
-	remoteRunner := self simpleRunner.
-	"Worker processes can be slow to start up if the machine is busy or the image is large (multi GB).
+	remoteRunner := self simpleRunner.	"Worker processes can be slow to start up if the machine is busy or the image is large (multi GB).
 	Wait for the worker to register before proceeding with tests."
-	remoteRunner when: GtRrWorkerControlChannelRegisteredAnnouncement do: [ :ann | 
-		worker := ann worker.
-		controlChannelSemaphore signal ].
+	remoteRunner
+		when: GtRrWorkerControlChannelRegisteredAnnouncement
+		do: [ :ann | 
+			worker := ann worker.
+			controlChannelSemaphore signal ].
 	remoteRunner start.
-	[ self waitOn: controlChannelSemaphore for: 20
+	[ self
+		waitOn: controlChannelSemaphore
+		for: 20
 		description: 'Control channel didn''t register in time'.
 	self assert: remoteRunner registeredWorkerCount equals: 1.
 	self assert: worker commandPing equals: #ping.
-	self assert: remoteRunner registeredWorkerCount equals: 1.
-	] ensure: [ remoteRunner stop ].
+	self assert: remoteRunner registeredWorkerCount equals: 1 ]
+		ensure: [ remoteRunner stop ].
 
 	^ worker
 ]
@@ -143,43 +151,51 @@ GtRemoteRunnerProcessExamples >> ignoreWorkerExamples [
 { #category : #examples }
 GtRemoteRunnerProcessExamples >> multipleJobs [
 	"Demonstrate executing a multiple jobs"
-	<gtExample>
-	| job jobs completingTask taskFailedCount taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount workerRegisteredSemaphore |
 
+	<gtExample>
+	<return: #SubclassResponsibility>
+	| job jobs completingTask taskFailedCount taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount workerRegisteredSemaphore |
 	self ignoreWorkerExamples ifTrue: [ ^ self ].
 	self purgeQueues.
 	jobStartedCount := jobCompletedCount := taskStartedCount := taskCompletedCount := taskFailedCount := 0.
 	jobSemaphore := GtMutualExclusionSemaphore new.
 	workerRegisteredSemaphore := Semaphore new.
 	remoteRunner := self simpleRunner.
-	remoteRunner managerStartupAndShutdown workerManager poolSize: 2.
-	"Worker processes can be slow to start up if the machine is busy or the image is large (multi GB).
+	remoteRunner managerStartupAndShutdown workerManager poolSize: 2.	"Worker processes can be slow to start up if the machine is busy or the image is large (multi GB).
 	Wait for the worker to register before proceeding with tests."
-	remoteRunner when: GtRrWorkerRegisteredAnnouncement do: [ :ann | 
-		workerRegisteredSemaphore signal ].
+	remoteRunner
+		when: GtRrWorkerRegisteredAnnouncement
+		do: [ :ann | workerRegisteredSemaphore signal ].
 	remoteRunner start.
-	[ self waitOn: workerRegisteredSemaphore for: 20
+	[ self
+		waitOn: workerRegisteredSemaphore
+		for: 20
 		description: 'Worker didn''t register in time'.
-	jobs := (1 to: 2) collect: [  :i |
-		completingTask := GtRrScriptTask script: '#done'.
-		job := GtRrTasksJob new tasks: { completingTask }.
-		job
-			when: GtRrJobStartedAnnouncement do: 
-				[ jobStartedCount := jobStartedCount + 1 ];
-			when: GtRrJobCompletedAnnouncement do: 
-				[ jobCompletedCount := jobCompletedCount + 1.
-				jobSemaphore signal ];
-			when: GtRrJobCancelledAnnouncement do: 
-				[ jobCompletedCount := jobCompletedCount + 1 ];
-			when: GtRrTaskStartedAnnouncement do: 
-				[ taskStartedCount := taskStartedCount + 1 ];
-			when: GtRrTaskCompletedAnnouncement do: 
-				[ taskCompletedCount := taskCompletedCount + 1 ];
-			when: GtRrTaskFailedAnnouncement do: 
-				[ taskFailedCount := taskFailedCount + 1 ].
-		job ].
+	jobs := (1 to: 2)
+			collect: [ :i | 
+				completingTask := GtRrScriptTask script: '#done'.
+				job := GtRrTasksJob new tasks: {completingTask}.
+				job
+					when: GtRrJobStartedAnnouncement
+						do: [ jobStartedCount := jobStartedCount + 1 ];
+					when: GtRrJobCompletedAnnouncement
+						do: [ jobCompletedCount := jobCompletedCount + 1.
+							jobSemaphore signal ];
+					when: GtRrJobCancelledAnnouncement
+						do: [ jobCompletedCount := jobCompletedCount + 1 ];
+					when: GtRrTaskStartedAnnouncement
+						do: [ taskStartedCount := taskStartedCount + 1 ];
+					when: GtRrTaskCompletedAnnouncement
+						do: [ taskCompletedCount := taskCompletedCount + 1 ];
+					when: GtRrTaskFailedAnnouncement
+						do: [ taskFailedCount := taskFailedCount + 1 ].
+				job ].
 	jobs do: [ :aJob | remoteRunner submitJob: aJob ].
-	2 timesRepeat: [ self waitOn: jobSemaphore for: 30 description: 'Job didn''t complete in time' ].
+	2
+		timesRepeat: [ self
+				waitOn: jobSemaphore
+				for: 30
+				description: 'Job didn''t complete in time' ].
 
 	self assert: remoteRunner currentlyExecutingJobs size equals: 0.
 	self assert: remoteRunner currentlyExecutingTasks size equals: 0.
@@ -188,8 +204,7 @@ GtRemoteRunnerProcessExamples >> multipleJobs [
 	self assert: jobStartedCount equals: 2.
 	self assert: taskCompletedCount equals: 2.
 	self assert: taskFailedCount equals: 0.
-	self assert: taskStartedCount equals: 2.
-	] ensure: [ remoteRunner stop ].
+	self assert: taskStartedCount equals: 2 ] ensure: [ remoteRunner stop ].
 
 	^ job
 ]
@@ -248,6 +263,7 @@ GtRemoteRunnerProcessExamples >> purgeQueues [
 { #category : #examples }
 GtRemoteRunnerProcessExamples >> simpleJob [
 	<gtExample>
+	<return: #GtRrTasksJob>
 	| completingTask |
 	completingTask := GtRrScriptTask script: '#done'.
 	^ GtRrTasksJob new tasks: {completingTask}
@@ -461,48 +477,54 @@ GtRemoteRunnerProcessExamples >> simpleTestRetryTask [
 { #category : #examples }
 GtRemoteRunnerProcessExamples >> simpleTestTask [
 	"Demonstrate executing a simple test task"
-	<gtExample>
-	| factory job taskFailedCount taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount times workerRegisteredSemaphore |
 
+	<gtExample>
+	<return: #SubclassResponsibility>
+	| factory job taskFailedCount taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount times workerRegisteredSemaphore |
 	self ignoreWorkerExamples ifTrue: [ ^ self ].
 	self purgeQueues.
 	jobStartedCount := jobCompletedCount := taskStartedCount := taskCompletedCount := taskFailedCount := 0.
 	jobSemaphore := GtMutualExclusionSemaphore new.
 	workerRegisteredSemaphore := Semaphore new.
 	times := OrderedCollection new.
-	remoteRunner := self simpleRunner.
-	"Worker processes can be slow to start up if the machine is busy or the image is large (multi GB).
+	remoteRunner := self simpleRunner.	"Worker processes can be slow to start up if the machine is busy or the image is large (multi GB).
 	Wait for the worker to register before proceeding with tests."
-	remoteRunner when: GtRrWorkerRegisteredAnnouncement do: [ :ann | 
-		workerRegisteredSemaphore signal ].
+	remoteRunner
+		when: GtRrWorkerRegisteredAnnouncement
+		do: [ :ann | workerRegisteredSemaphore signal ].
 	remoteRunner start.
-	[ self waitOn: workerRegisteredSemaphore for: 30
+	[ self
+		waitOn: workerRegisteredSemaphore
+		for: 30
 		description: 'Worker didn''t register in time'.
 	factory := GtRrChecksFactory new.
-	factory addSUnitTestNames: { #GtRrSampleTest -> #testPass }.
+	factory addSUnitTestNames: {#GtRrSampleTest -> #testPass}.
 	job := factory job.
 	job
-		when: GtRrJobStartedAnnouncement do: 
-			[ jobStartedCount := jobStartedCount + 1.
-			times add: 0 -> DateAndTime now. ];
-		when: GtRrJobCompletedAnnouncement do: 
-			[ jobCompletedCount := jobCompletedCount + 1.
-			times add: 4 -> DateAndTime now.
-			jobSemaphore signal ];
-		when: GtRrJobCancelledAnnouncement do: 
-			[ jobCompletedCount := jobCompletedCount + 1.
-			times add: 5 -> DateAndTime now ];
-		when: GtRrTaskStartedAnnouncement do: 
-			[ taskStartedCount := taskStartedCount + 1.
-			times add: 1 -> DateAndTime now ];
-		when: GtRrTaskCompletedAnnouncement do: 
-			[ taskCompletedCount := taskCompletedCount + 1.
-			times add: 3 -> DateAndTime now. ];
-		when: GtRrTaskFailedAnnouncement do: 
-			[ taskFailedCount := taskFailedCount + 1.
-			times add: 2 -> DateAndTime now. ].
+		when: GtRrJobStartedAnnouncement
+			do: [ jobStartedCount := jobStartedCount + 1.
+				times add: 0 -> DateAndTime now ];
+		when: GtRrJobCompletedAnnouncement
+			do: [ jobCompletedCount := jobCompletedCount + 1.
+				times add: 4 -> DateAndTime now.
+				jobSemaphore signal ];
+		when: GtRrJobCancelledAnnouncement
+			do: [ jobCompletedCount := jobCompletedCount + 1.
+				times add: 5 -> DateAndTime now ];
+		when: GtRrTaskStartedAnnouncement
+			do: [ taskStartedCount := taskStartedCount + 1.
+				times add: 1 -> DateAndTime now ];
+		when: GtRrTaskCompletedAnnouncement
+			do: [ taskCompletedCount := taskCompletedCount + 1.
+				times add: 3 -> DateAndTime now ];
+		when: GtRrTaskFailedAnnouncement
+			do: [ taskFailedCount := taskFailedCount + 1.
+				times add: 2 -> DateAndTime now ].
 	remoteRunner submitJob: job.
-	self waitOn: jobSemaphore for: 30 description: 'Job didn''t complete in time'.
+	self
+		waitOn: jobSemaphore
+		for: 30
+		description: 'Job didn''t complete in time'.
 
 	self assert: remoteRunner taskQueue size equals: 0.
 	self assert: remoteRunner currentlyExecutingJobs size equals: 0.
@@ -514,9 +536,8 @@ GtRemoteRunnerProcessExamples >> simpleTestTask [
 	self assert: taskFailedCount equals: 0.
 	self assert: job state equals: #completed.
 	self deny: job hasErrors.
-	self assert: (times collect: #key) asArray equals: #(0 1 3 4).
-	] ensure: 
-		[ remoteRunner stop ].
+	self assert: (times collect: #key) asArray equals: #(0 1 3 4) ]
+		ensure: [ remoteRunner stop ].
 
 	^ job
 ]
@@ -693,45 +714,51 @@ GtRemoteRunnerProcessExamples >> terminateStartedJobWithoutControlChannel [
 { #category : #examples }
 GtRemoteRunnerProcessExamples >> timeoutJob [
 	"Demonstrate terminating a job due to it timing out"
-	<gtExample>
-	| job tasks failedTasks taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount workerRegisteredSemaphore |
 
+	<gtExample>
+	<return: #SubclassResponsibility>
+	| job tasks failedTasks taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount workerRegisteredSemaphore |
 	self ignoreWorkerExamples ifTrue: [ ^ self ].
 	self purgeQueues.
 	jobStartedCount := jobCompletedCount := taskStartedCount := taskCompletedCount := 0.
 	failedTasks := OrderedCollection new.
 	jobSemaphore := GtMutualExclusionSemaphore new.
 	workerRegisteredSemaphore := Semaphore new.
-	remoteRunner := self simpleRunner.
-	"Worker processes can be slow to start up if the machine is busy or the image is large (multi GB).
+	remoteRunner := self simpleRunner.	"Worker processes can be slow to start up if the machine is busy or the image is large (multi GB).
 	Wait for the worker to register before proceeding with tests."
-	remoteRunner when: GtRrWorkerRegisteredAnnouncement do: [ :ann | 
-		workerRegisteredSemaphore signal ].
+	remoteRunner
+		when: GtRrWorkerRegisteredAnnouncement
+		do: [ :ann | workerRegisteredSemaphore signal ].
 	remoteRunner start.
-	[ self waitOn: workerRegisteredSemaphore for: 30
-		description: 'Worker didn''t register in time'.
-	"Create a set of tasks that never complete"
-	tasks := (1 to: 3) collect: [ :i |
-		GtRrScriptTask script: 'Semaphore new wait' ] as: OrderedCollection.
+	[ self
+		waitOn: workerRegisteredSemaphore
+		for: 30
+		description: 'Worker didn''t register in time'.	"Create a set of tasks that never complete"
+	tasks := (1 to: 3)
+			collect: [ :i | GtRrScriptTask script: 'Semaphore new wait' ]
+			as: OrderedCollection.
 	job := GtRrTasksJob new
-		tasks: tasks;
-		jobTimeout: 5 seconds.
+			tasks: tasks;
+			jobTimeout: 5 seconds.
 	job
-		when: GtRrJobStartedAnnouncement do: 
-			[ jobStartedCount := jobStartedCount + 1. ];
-		when: GtRrJobCompletedAnnouncement do: 
-			[ jobCompletedCount := jobCompletedCount + 1.
-			jobSemaphore signal ];
-		when: GtRrJobCancelledAnnouncement do: 
-			[ jobCompletedCount := jobCompletedCount + 1. ];
-		when: GtRrTaskStartedAnnouncement do: 
-			[ taskStartedCount := taskStartedCount + 1. ];
-		when: GtRrTaskCompletedAnnouncement do: 
-			[ taskCompletedCount := taskCompletedCount + 1. ];
-		when: GtRrTaskFailedAnnouncement do: 
-			[ :announcement | failedTasks add: announcement task. ].
+		when: GtRrJobStartedAnnouncement
+			do: [ jobStartedCount := jobStartedCount + 1 ];
+		when: GtRrJobCompletedAnnouncement
+			do: [ jobCompletedCount := jobCompletedCount + 1.
+				jobSemaphore signal ];
+		when: GtRrJobCancelledAnnouncement
+			do: [ jobCompletedCount := jobCompletedCount + 1 ];
+		when: GtRrTaskStartedAnnouncement
+			do: [ taskStartedCount := taskStartedCount + 1 ];
+		when: GtRrTaskCompletedAnnouncement
+			do: [ taskCompletedCount := taskCompletedCount + 1 ];
+		when: GtRrTaskFailedAnnouncement
+			do: [ :announcement | failedTasks add: announcement task ].
 	remoteRunner submitJob: job.
-	self waitOn: jobSemaphore for: 30 description: 'Job didn''t complete in time'.
+	self
+		waitOn: jobSemaphore
+		for: 30
+		description: 'Job didn''t complete in time'.
 
 	self assert: remoteRunner currentlyExecutingJobs size equals: 0.
 	self assert: remoteRunner currentlyExecutingTasks size equals: 0.
@@ -740,12 +767,13 @@ GtRemoteRunnerProcessExamples >> timeoutJob [
 	self assert: jobStartedCount equals: 1.
 	self assert: taskCompletedCount equals: 0.
 	self assert: failedTasks size equals: 3.
-	self assert: (taskStartedCount between: 1 and: 3)
-		description: [ 'Unexpected taskStartedCount: ', taskStartedCount asString ].
+	self
+		assert: (taskStartedCount between: 1 and: 3)
+		description: [ 'Unexpected taskStartedCount: ' , taskStartedCount asString ].
 	self assert: job state equals: #completed.
 	self assert: job hasErrors.
-	self assert: job errorDetails errorMessage equals: 'Job exceeded time limit'.
-	] ensure: [ remoteRunner stop ].
+	self assert: job errorDetails errorMessage equals: 'Job exceeded time limit' ]
+		ensure: [ remoteRunner stop ].
 
 	^ job
 ]
@@ -830,9 +858,10 @@ GtRemoteRunnerProcessExamples >> timeoutTask [
 { #category : #examples }
 GtRemoteRunnerProcessExamples >> timeoutWorker [
 	"Demonstrate terminating a worker due to it timing out"
-	<gtExample>
-	| job timeoutTask taskFailedCount taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount times taskFailedSemaphore workerRegisteredSemaphore |
 
+	<gtExample>
+	<return: #SubclassResponsibility>
+	| job timeoutTask taskFailedCount taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount times taskFailedSemaphore workerRegisteredSemaphore |
 	self ignoreWorkerExamples ifTrue: [ ^ self ].
 	self purgeQueues.
 	jobStartedCount := jobCompletedCount := taskStartedCount := taskCompletedCount := taskFailedCount := 0.
@@ -843,42 +872,49 @@ GtRemoteRunnerProcessExamples >> timeoutWorker [
 	remoteRunner := self simpleRunner.
 	remoteRunner managerStartupAndShutdown workerManager poolSize: 1.
 	remoteRunner workerTimeout: 3 seconds.
-	remoteRunner startLogging.
-	"Worker processes can be slow to start up if the machine is busy or the image is large (multi GB).
+	remoteRunner startLogging.	"Worker processes can be slow to start up if the machine is busy or the image is large (multi GB).
 	Wait for the worker to register before proceeding with tests."
-	remoteRunner when: GtRrWorkerRegisteredAnnouncement do: [ :ann | 
-		workerRegisteredSemaphore signal ].
+	remoteRunner
+		when: GtRrWorkerRegisteredAnnouncement
+		do: [ :ann | workerRegisteredSemaphore signal ].
 	remoteRunner start.
-	[ self waitOn: workerRegisteredSemaphore for: 30
-		description: 'Worker didn''t register in time'.
-	"Create a set of tasks that never complete"
+	[ self
+		waitOn: workerRegisteredSemaphore
+		for: 30
+		description: 'Worker didn''t register in time'.	"Create a set of tasks that never complete"
 	timeoutTask := GtRrScriptTask script: 'Semaphore new wait'.
 	timeoutTask taskTimeout: 1 minute.
-	job := GtRrTasksJob new tasks: { timeoutTask. }.
+	job := GtRrTasksJob new tasks: {timeoutTask}.
 	job
-		when: GtRrJobStartedAnnouncement do: 
-			[ jobStartedCount := jobStartedCount + 1.
-			times add: 0 -> DateAndTime now. ];
-		when: GtRrJobCompletedAnnouncement do: 
-			[ jobCompletedCount := jobCompletedCount + 1.
-			times add: 4 -> DateAndTime now.
-			jobSemaphore signal ];
-		when: GtRrJobCancelledAnnouncement do: 
-			[ jobCompletedCount := jobCompletedCount + 1.
-			times add: 5 -> DateAndTime now ];
-		when: GtRrTaskStartedAnnouncement do: 
-			[ taskStartedCount := taskStartedCount + 1.
-			times add: 1 -> DateAndTime now ];
-		when: GtRrTaskCompletedAnnouncement do: 
-			[ taskCompletedCount := taskCompletedCount + 1.
-			times add: 3 -> DateAndTime now. ];
-		when: GtRrTaskFailedAnnouncement do: 
-			[ taskFailedCount := taskFailedCount + 1.
-			times add: 2 -> DateAndTime now.
-			taskFailedSemaphore signal. ].
+		when: GtRrJobStartedAnnouncement
+			do: [ jobStartedCount := jobStartedCount + 1.
+				times add: 0 -> DateAndTime now ];
+		when: GtRrJobCompletedAnnouncement
+			do: [ jobCompletedCount := jobCompletedCount + 1.
+				times add: 4 -> DateAndTime now.
+				jobSemaphore signal ];
+		when: GtRrJobCancelledAnnouncement
+			do: [ jobCompletedCount := jobCompletedCount + 1.
+				times add: 5 -> DateAndTime now ];
+		when: GtRrTaskStartedAnnouncement
+			do: [ taskStartedCount := taskStartedCount + 1.
+				times add: 1 -> DateAndTime now ];
+		when: GtRrTaskCompletedAnnouncement
+			do: [ taskCompletedCount := taskCompletedCount + 1.
+				times add: 3 -> DateAndTime now ];
+		when: GtRrTaskFailedAnnouncement
+			do: [ taskFailedCount := taskFailedCount + 1.
+				times add: 2 -> DateAndTime now.
+				taskFailedSemaphore signal ].
 	remoteRunner submitJob: job.
-	self waitOn: taskFailedSemaphore for: 30 description: 'Task didn''t fail in time'.
-	self waitOn: jobSemaphore for: 40 description: 'Job didn''t complete in time'.
+	self
+		waitOn: taskFailedSemaphore
+		for: 30
+		description: 'Task didn''t fail in time'.
+	self
+		waitOn: jobSemaphore
+		for: 40
+		description: 'Job didn''t complete in time'.
 
 	self assert: remoteRunner currentlyExecutingJobs size equals: 0.
 	self assert: remoteRunner currentlyExecutingTasks size equals: 0.
@@ -890,8 +926,9 @@ GtRemoteRunnerProcessExamples >> timeoutWorker [
 	self assert: taskStartedCount equals: 1.
 	self assert: job state equals: #completed.
 	self assert: job hasErrors.
-	self assert: timeoutTask errorDetails errorMessage equals: 'Worker exceeded time limit'.
-	] ensure: [ remoteRunner stop ].
+	self
+		assert: timeoutTask errorDetails errorMessage
+		equals: 'Worker exceeded time limit' ] ensure: [ remoteRunner stop ].
 
 	^ job
 ]
@@ -899,57 +936,67 @@ GtRemoteRunnerProcessExamples >> timeoutWorker [
 { #category : #examples }
 GtRemoteRunnerProcessExamples >> workerChangesFile [
 	<gtExample>
+	<return: #SubclassResponsibility>
 	| semaphore changesFile task job |
-
 	self purgeQueues.
 	remoteRunner := self simpleRunner.
 	remoteRunner managerStartupAndShutdown poolSize: 1.
 	semaphore := Semaphore new.
 	remoteRunner when: GtRrWorkerRegisteredAnnouncement do: [ semaphore signal ].
 	remoteRunner when: GtRrJobCompletedAnnouncement do: [ semaphore signal ].
-	changesFile := FileReference newTempFilePrefix: 'workerChangesFile' suffix: '.ombu'.
+	changesFile := FileReference
+			newTempFilePrefix: 'workerChangesFile'
+			suffix: '.ombu'.
 	self writeChangesSyncFileTestMethodTo: changesFile.
-	remoteRunner managerStartupAndShutdown workerManager addArguments: {
-		'--changesFile'.
-		changesFile fullName. }.
+	remoteRunner managerStartupAndShutdown workerManager
+		addArguments: {'--changesFile'.
+				changesFile fullName}.
 	[ remoteRunner start.
-	self waitOn: semaphore for: 30
+	self
+		waitOn: semaphore
+		for: 30
 		description: 'Worker didn''t register in time'.
 	semaphore := Semaphore new.
-	task := GtRrScriptTask script: 'self assert: GtRemoteRunnerExamples new changesSyncFileTestMethod equals: 1. true'.
+	task := GtRrScriptTask
+			script: 'self assert: GtRemoteRunnerExamples new changesSyncFileTestMethod equals: 1. true'.
 	job := remoteRunner submitJob: task asJob.
-	self waitOn: semaphore for: 20
+	self
+		waitOn: semaphore
+		for: 20
 		description: 'Job didn''t complete in time'.
 	self deny: job hasErrors.
-	self assert: job results first result.
-	] ensure: 
-		[ remoteRunner ifNotNil: #stop.
-		changesFile ifNotNil: #ensureDelete. ].
+	self assert: job results first result ]
+		ensure: [ remoteRunner ifNotNil: #stop.
+			changesFile ifNotNil: #ensureDelete ]
 ]
 
 { #category : #examples }
 GtRemoteRunnerProcessExamples >> workerDetails [
 	"Demonstrate retrieving the remote worker's details"
-	<gtExample>
-	| registeredSemaphore worker |
 
+	<gtExample>
+	<return: #SubclassResponsibility>
+	| registeredSemaphore worker |
 	self purgeQueues.
 	self ignoreWorkerExamples ifTrue: [ ^ self ].
 	registeredSemaphore := GtMutualExclusionSemaphore new.
 	remoteRunner := self simpleRunner.
-	remoteRunner when: GtRrWorkerRegisteredAnnouncement do: [ :ann | 
-		worker := ann worker.
-		registeredSemaphore signal ].
+	remoteRunner
+		when: GtRrWorkerRegisteredAnnouncement
+		do: [ :ann | 
+			worker := ann worker.
+			registeredSemaphore signal ].
 	remoteRunner start.
-	[ self waitOn: registeredSemaphore for: 20 description: 'Worker didn''t register in time'.
+	[ self
+		waitOn: registeredSemaphore
+		for: 20
+		description: 'Worker didn''t register in time'.
 	self assert: remoteRunner registeredWorkerCount equals: 1.
 	self
 		assert: (worker attributes at: #workingDirectory)
 		equals: FileLocator workingDirectory resolve fullName.
-	self 
-		assert: (worker attributes at: #platform)
-		equals: OSPlatform current name.
-	] ensure: [ remoteRunner stop ].
+	self assert: (worker attributes at: #platform) equals: OSPlatform current name ]
+		ensure: [ remoteRunner stop ].
 
 	^ worker
 ]

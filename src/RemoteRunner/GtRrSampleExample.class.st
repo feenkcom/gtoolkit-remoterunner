@@ -37,9 +37,9 @@ GtRrSampleExample >> haltExample [
 
 { #category : #accessing }
 GtRrSampleExample >> passExample [
-	<gtExample>
 	"<noTest>"
 
-	self assert: true.
-
+	<gtExample>
+	<return: #GtRrSampleExample>
+	self assert: true
 ]
