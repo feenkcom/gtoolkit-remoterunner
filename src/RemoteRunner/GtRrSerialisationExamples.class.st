@@ -16,8 +16,9 @@ GtRrSerialisationExamples >> assert: actual equals: expected [
 { #category : #examples }
 GtRrSerialisationExamples >> gtRrClassExampleTask [
 	"Demonstrate (de)serialising a GtRrClassExampleTask and its result"
-	<gtExample>
 
+	<gtExample>
+	<return: #Array>
 	| task serializedTask deserializedTask result serializedResult deserializedResult example |
 	LeJsonV4 cleanUp.
 	task := GtRrClassExampleTask exampleClassName: #GtRrWorkerExamples.
@@ -75,15 +76,17 @@ GtRrSerialisationExamples >> gtRrClassExampleTask [
 
 { #category : #examples }
 GtRrSerialisationExamples >> gtRrClassSUnitTask [
-	<gtExample>
 	"Demonstrate (de)serialising a GtRrPackageExampleTask"
-	| task serializedTask deserializedTask |
 
+	<gtExample>
+	<return: #GtRrClassSUnitTask>
+	| task serializedTask deserializedTask |
 	LeJsonV4 cleanUp.
 	task := GtRrClassSUnitTask sunitClassName: #GtRrSampleTest.
 
 	serializedTask := LeJsonV4 uniqueInstance serialize: task.
-	deserializedTask := LeJsonV4 uniqueInstance deserialize: serializedTask readStream.
+	deserializedTask := LeJsonV4 uniqueInstance
+			deserialize: serializedTask readStream.
 	self assert: deserializedTask class equals: GtRrClassSUnitTask.
 	self assert: deserializedTask sunitClassName equals: #GtRrSampleTest.
 
@@ -92,15 +95,17 @@ GtRrSerialisationExamples >> gtRrClassSUnitTask [
 
 { #category : #examples }
 GtRrSerialisationExamples >> gtRrPackageExampleTask [
-	<gtExample>
 	"Demonstrate (de)serialising a GtRrPackageExampleTask"
-	| task serializedTask deserializedTask |
 
+	<gtExample>
+	<return: #GtRrPackageExampleTask>
+	| task serializedTask deserializedTask |
 	LeJsonV4 cleanUp.
 	task := GtRrPackageExampleTask examplePackageName: #RemoteRunner.
 
 	serializedTask := LeJsonV4 uniqueInstance serialize: task.
-	deserializedTask := LeJsonV4 uniqueInstance deserialize: serializedTask readStream.
+	deserializedTask := LeJsonV4 uniqueInstance
+			deserialize: serializedTask readStream.
 	self assert: deserializedTask class equals: GtRrPackageExampleTask.
 	self assert: deserializedTask examplePackageName equals: #RemoteRunner.
 
@@ -109,15 +114,17 @@ GtRrSerialisationExamples >> gtRrPackageExampleTask [
 
 { #category : #examples }
 GtRrSerialisationExamples >> gtRrPackageSUnitTask [
-	<gtExample>
 	"Demonstrate (de)serialising a GtRrPackageExampleTask"
-	| task serializedTask deserializedTask |
 
+	<gtExample>
+	<return: #GtRrPackageSUnitTask>
+	| task serializedTask deserializedTask |
 	LeJsonV4 cleanUp.
 	task := GtRrPackageSUnitTask sunitPackageName: #PharoLink.
 
 	serializedTask := LeJsonV4 uniqueInstance serialize: task.
-	deserializedTask := LeJsonV4 uniqueInstance deserialize: serializedTask readStream.
+	deserializedTask := LeJsonV4 uniqueInstance
+			deserialize: serializedTask readStream.
 	self assert: deserializedTask class equals: GtRrPackageSUnitTask.
 	self assert: deserializedTask sunitPackageName equals: #PharoLink.
 
@@ -127,14 +134,17 @@ GtRrSerialisationExamples >> gtRrPackageSUnitTask [
 { #category : #examples }
 GtRrSerialisationExamples >> nilSerialisation [
 	"Instance variables with nil value should not be sent across the wire."
-	<gtExample>
-	| job serializedJob |
 
+	<gtExample>
+	<return: #GtRrTasksJob>
+	| job serializedJob |
 	LeJsonV4 cleanUp.
 	job := (GtRrScriptTask script: '1+1') asJob.
 
 	serializedJob := LeJsonV4 uniqueInstance serializePretty: job.
-	self assert: (serializedJob indexOfSubCollection: 'exceptionHandlingStrategy') equals: 0.
+	self
+		assert: (serializedJob indexOfSubCollection: 'exceptionHandlingStrategy')
+		equals: 0.
 
 	^ job
 ]

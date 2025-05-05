@@ -20,18 +20,19 @@ GtRrJobExamples >> confirmAllTests: allTests [
 { #category : #examples }
 GtRrJobExamples >> defaultJobTimeout [
 	"Confirm that by default Jobs have no timeout (isNil)"
-	<gtExample>
-	| runner job task jobContext taskContext |
 
+	<gtExample>
+	<return: #GtRrTasksJob>
+	| runner job task jobContext taskContext |
 	runner := GtRemoteRunner new.
 	task := GtRrExampleValueTask new.
-	job := GtRrTasksJob new tasks: { task }.
-	jobContext := GtRrJobContext new 
-		job: job;
-		remoteRunner: runner.
+	job := GtRrTasksJob new tasks: {task}.
+	jobContext := GtRrJobContext new
+			job: job;
+			remoteRunner: runner.
 	taskContext := GtRrTaskContext new
-		jobContext: jobContext;
-		task: task.
+			jobContext: jobContext;
+			task: task.
 
 	self assert: jobContext jobTimeout isNil.
 	self assert: jobContext contextTimeoutTime isNil.
@@ -42,18 +43,19 @@ GtRrJobExamples >> defaultJobTimeout [
 { #category : #examples }
 GtRrJobExamples >> explicitJobTimeout [
 	"Demonstrate setting job timeouts"
-	<gtExample>
-	| runner job task jobContext taskContext |
 
+	<gtExample>
+	<return: #GtRrTasksJob>
+	| runner job task jobContext taskContext |
 	runner := GtRemoteRunner new.
 	task := GtRrExampleValueTask new.
-	job := GtRrTasksJob new tasks: { task }.
-	jobContext := GtRrJobContext new 
-		job: job;
-		remoteRunner: runner.
+	job := GtRrTasksJob new tasks: {task}.
+	jobContext := GtRrJobContext new
+			job: job;
+			remoteRunner: runner.
 	taskContext := GtRrTaskContext new
-		jobContext: jobContext;
-		task: task.
+			jobContext: jobContext;
+			task: task.
 
 	job jobTimeout: runner defaultTaskTimeout + 1 minute.
 
@@ -65,9 +67,10 @@ GtRrJobExamples >> explicitJobTimeout [
 { #category : #examples }
 GtRrJobExamples >> testJobClassNames [
 	"Confirm that GtRrTestsJob>>classNames: works as expected"
-	<gtExample>
-	| factory job task |
 
+	<gtExample>
+	<return: #GtRrChecksJob>
+	| factory job task |
 	factory := GtRrChecksFactory new.
 	factory addSUnitClass: GtRrSampleTest.
 	job := factory job.
@@ -81,9 +84,10 @@ GtRrJobExamples >> testJobClassNames [
 { #category : #examples }
 GtRrJobExamples >> testJobExamplesClassNames [
 	"Confirm that GtRrTestsJob>>classNames: works as expected"
-	<gtExample>
-	| factory job task |
 
+	<gtExample>
+	<return: #GtRrChecksJob>
+	| factory job task |
 	factory := GtRrChecksFactory new.
 	factory addExampleClass: GtRrSampleExample.
 	job := factory job.
@@ -91,18 +95,19 @@ GtRrJobExamples >> testJobExamplesClassNames [
 	self assert: job tasks size equals: 1.
 	task := job tasks first.
 	self assert: task exampleClassName equals: #GtRrSampleExample.
-	
+
 	^ job
 ]
 
 { #category : #examples }
 GtRrJobExamples >> testJobPackageNames [
 	"Confirm that packageNames supplied to the factory are enumerated in to the appropriate classes"
-	<gtExample>
-	| factory job task |
 
+	<gtExample>
+	<return: #GtRrChecksJob>
+	| factory job task |
 	factory := GtRrChecksFactory new.
-	factory addSUnitPackages: { #RemoteRunner asPackage }.
+	factory addSUnitPackages: {#RemoteRunner asPackage}.
 	job := factory job.
 
 	self assert: job tasks size equals: 1.
@@ -115,16 +120,15 @@ GtRrJobExamples >> testJobPackageNames [
 { #category : #examples }
 GtRrJobExamples >> testJobTestNames [
 	"Confirm that packageNames are included in allTests correctly"
-	<gtExample>
-	| factory testNames job task |
 
+	<gtExample>
+	<return: #GtRrChecksJob>
+	| factory testNames job task |
 	factory := GtRrChecksFactory new.
-	testNames := {
-			#GtRrSampleTest->#testPass.
-			#GtRrSampleTest->#testFail.
-			#GtRrSampleTest->#testLong.
-			#GtRrSampleTest->#testError
-			}.
+	testNames := {#GtRrSampleTest -> #testPass.
+			#GtRrSampleTest -> #testFail.
+			#GtRrSampleTest -> #testLong.
+			#GtRrSampleTest -> #testError}.
 	factory addSUnitTestNames: testNames.
 	job := factory job.
 

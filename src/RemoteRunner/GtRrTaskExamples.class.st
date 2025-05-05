@@ -13,22 +13,22 @@ Class {
 { #category : #examples }
 GtRrTaskExamples >> compoundTask [
 	"Demonstrate creating nested tasks and analysing the results"
-	<gtExample>
-	| tasks subTask compoundTask visitor results |
 
-	tasks := (1 to: 5) collect: [ :i |
-		GtRrScriptTask script: i printString ].
+	<gtExample>
+	<return: #GtRrCompoundTask>
+	| tasks subTask compoundTask visitor results |
+	tasks := (1 to: 5) collect: [ :i | GtRrScriptTask script: i printString ].
 	subTask := GtRrCompoundTask tasks: (tasks copyFrom: 1 to: 3).
-	compoundTask := GtRrCompoundTask tasks: { 
-		subTask.
-		tasks at: 4.
-		tasks at: 5. }.
+	compoundTask := GtRrCompoundTask
+			tasks: {subTask.
+					tasks at: 4.
+					tasks at: 5}.
 	compoundTask runInImage.
 	results := OrderedCollection new.
 	visitor := GtRrAllTasksVisitor visitBlock: [ :task | results add: task result ].
 	visitor visitNode: compoundTask.
 	self assert: results asArray equals: #(1 2 3 4 5).
-	^ compoundTask.
+	^ compoundTask
 ]
 
 { #category : #private }
@@ -43,18 +43,17 @@ GtRrTaskExamples >> stopRunner [
 { #category : #examples }
 GtRrTaskExamples >> sunitTask [
 	"Demonstrate running an SUnit test in a task"
-	<gtExample>
-	| task job semaphore |
 
+	<gtExample>
+	<return: #GtRrClassSUnitTask>
+	| task job semaphore |
 	remoteRunner := GtRemoteRunner new
-		port: #none;
-		start.
+			port: #none;
+			start.
 	worker := remoteRunner managerStartupAndShutdown startInImageWorker.
 	worker exceptionHandlingStrategy: GtRrTaskHeadlessExceptionStrategy new.
 	semaphore := Semaphore new.
-	remoteRunner
-		when: GtRrJobCompletedAnnouncement
-		do: [ :ann | semaphore signal ].
+	remoteRunner when: GtRrJobCompletedAnnouncement do: [ :ann | semaphore signal ].
 	task := GtRrClassSUnitTask sunitClassName: #GtRrSampleTest.
 	job := remoteRunner submitJob: task asJob.
 	self
@@ -62,27 +61,25 @@ GtRrTaskExamples >> sunitTask [
 		for: 30
 		description: 'Job didn''t complete in time'.
 	self assert: task executionData resourceReport isNotNil.
-	task result do: [ :each |
-		self assert: each resourceReport isNotNil ].
-	^ task.
+	task result do: [ :each | self assert: each resourceReport isNotNil ].
+	^ task
 ]
 
 { #category : #examples }
 GtRrTaskExamples >> taskResourceReport [
 	"Confirm that tasks collect GC data on the execution"
-	<gtExample>
-	| task job semaphore |
 
+	<gtExample>
+	<return: #GtRrScriptTask>
+	| task job semaphore |
 	remoteRunner := GtRemoteRunner new.
 	worker := GtRrInImageWorker new
-		remoteRunner: remoteRunner;
-		start.
+			remoteRunner: remoteRunner;
+			start.
 	semaphore := Semaphore new.
-	remoteRunner
-		when: GtRrJobCompletedAnnouncement
-		do: [ :ann | semaphore signal ].
-	task := GtRrScriptTask script: 
-'| times |
+	remoteRunner when: GtRrJobCompletedAnnouncement do: [ :ann | semaphore signal ].
+	task := GtRrScriptTask
+			script: '| times |
 times := OrderedCollection new.
 times add: GtVirtualMachine instance totalGCTimeMicroseconds.
 [ times add: GtVirtualMachine instance totalGCTimeMicroseconds.
@@ -94,24 +91,25 @@ times last = times first ] whileTrue.
 		for: 10
 		description: 'Job didn''t complete in time'.
 	self assert: task executionData resourceReport isNotNil.
-	^ task.
+	^ task
 ]
 
 { #category : #examples }
 GtRrTaskExamples >> taskTimeout [
 	"Demonstrate the use of task timeouts"
-	<gtExample>
-	| runner job task jobContext taskContext |
 
+	<gtExample>
+	<return: #GtRrTaskExamples>
+	| runner job task jobContext taskContext |
 	runner := GtRemoteRunner new.
 	task := GtRrExampleValueTask new.
-	job := GtRrTasksJob new tasks: { task }.
-	jobContext := GtRrJobContext new 
-		job: job;
-		remoteRunner: runner.
+	job := GtRrTasksJob new tasks: {task}.
+	jobContext := GtRrJobContext new
+			job: job;
+			remoteRunner: runner.
 	taskContext := GtRrTaskContext new
-		jobContext: jobContext;
-		task: task.
+			jobContext: jobContext;
+			task: task.
 
 	self assert: taskContext taskTimeout equals: runner defaultTaskTimeout.
 
@@ -122,5 +120,5 @@ GtRrTaskExamples >> taskTimeout [
 	self assert: taskContext taskTimeout equals: job taskTimeout.
 
 	task taskTimeout: job taskTimeout + 1 minute.
-	self assert: taskContext taskTimeout equals: task taskTimeout.
+	self assert: taskContext taskTimeout equals: task taskTimeout
 ]

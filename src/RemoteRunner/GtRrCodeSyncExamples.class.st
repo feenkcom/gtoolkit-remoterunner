@@ -68,48 +68,47 @@ GtRrCodeSyncExamples >> addRemoveMethod [
 { #category : #accessing }
 GtRrCodeSyncExamples >> evaluateExpression [
 	<gtExample>
+	<return: #Error>
 	| runner codeSync semaphore timestamp task |
-
 	GtRemoteRunnerExamples new ignoreWorkerExamples ifTrue: [ ^ self ].
 
 	runner := GtRemoteRunner new
-		        port: 0;
-				startLogging;
-		        yourself.
+			port: 0;
+			startLogging;
+			yourself.
 	codeSync := runner managerStartupAndShutdown codeSync.
 	runner managerStartupAndShutdown poolSize: 1.
 	[ semaphore := Semaphore new.
-	runner 
+	runner
 		when: GtRrWorkerRegisteredAnnouncement
 		doOnce: [ semaphore signal ]
 		for: self.
 	runner start.
 	semaphore
 		wait: 20 seconds
-		onCompletion: [ "noop" ] 
-		onTimeout: [ self error: 'Didn''t receive expected registration announcement' ].
-	"Signal the semaphore when a code sync task completes so we can wait for changes to be propagated"
+		onCompletion: [  "noop" ]
+		onTimeout: [ self error: 'Didn''t receive expected registration announcement' ].	"Signal the semaphore when a code sync task completes so we can wait for changes to be propagated"
 	runner
-		when: GtRrTaskCompletedAnnouncement 
-		do: [ :ann | semaphore signal ] 
+		when: GtRrTaskCompletedAnnouncement
+		do: [ :ann | semaphore signal ]
 		for: self.
 	timestamp := DateAndTime now printString.
 	semaphore consumeAllSignals.
-	SystemAnnouncer uniqueInstance announce: (ExpressionEvaluated expression: 
-		'GtRrCodeSyncExamples testValue: ''', timestamp, '''').
+	SystemAnnouncer uniqueInstance
+		announce: (ExpressionEvaluated
+				expression: 'GtRrCodeSyncExamples testValue: ''' , timestamp , '''').
 	semaphore
 		wait: 20 seconds
-		onCompletion: [ "noop" ] 
+		onCompletion: [  "noop" ]
 		onTimeout: [ self error: 'Didn''t receive expected code sync announcement 1' ].
 	semaphore consumeAllSignals.
 	task := GtRrScriptTask script: 'GtRrCodeSyncExamples testValue'.
 	runner submitJob: task asJob.
 	semaphore
 		wait: 20 seconds
-		onCompletion: [ "noop" ] 
+		onCompletion: [  "noop" ]
 		onTimeout: [ self error: 'Didn''t receive expected code sync announcement 2' ].
-	self assert: task result equals: timestamp ] ensure: 
-		[ runner stop ].
+	self assert: task result equals: timestamp ] ensure: [ runner stop ].
 	^ runner
 ]
 
