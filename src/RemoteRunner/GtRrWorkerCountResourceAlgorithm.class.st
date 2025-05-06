@@ -67,7 +67,7 @@ GtRrWorkerCountResourceAlgorithm >> initialize [
 
 	super initialize.
 	availableMemoryModel := GtRrWorkerCountFreeMemoryModel new.
-	requiredMemoryModel := GtRrWorkerCountCurrentMemoryModel new.
+	requiredMemoryModel := GtRrWorkerCountImageMemoryModel new.
 ]
 
 { #category : #accessing }
