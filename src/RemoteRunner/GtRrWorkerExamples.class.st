@@ -113,10 +113,10 @@ GtRrWorkerExamples >> commandLineWithStrategy [
 { #category : #examples }
 GtRrWorkerExamples >> commandLineWithoutAttributes [
 	"Demonstrate parsing the Remote Runner Worker command line"
-
 	<gtExample>
 	<return: #ClapNamedMatch>
 	| commandLine |
+
 	commandLine := GtRrWorker commandLineCommand
 			match: #('remoteRunnerWorker' '--log' '--serverSocketAddress' '7084').
 
