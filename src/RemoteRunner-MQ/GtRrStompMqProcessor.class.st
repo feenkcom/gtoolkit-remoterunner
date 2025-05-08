@@ -81,9 +81,7 @@ GtRrStompMqProcessor class >> hostNameFrom: aHostString [
 	segments := $: split: aHostString.
 	segments size > 2 ifTrue: [ 
 		self error: aHostString printString , ' must be formatted <host>[:<port>]' ].
-	^ segments size = 1
-		ifTrue: [ segments first ]
-		ifFalse: [ nil ].
+	^ segments first.
 ]
 
 { #category : #accessing }
@@ -101,37 +99,6 @@ GtRrStompMqProcessor class >> portFrom: aHostString [
 		(port allSatisfy: #isDigit) ifFalse: [ 
 			self error: aHostString printString , ' the port must be a number' ].
 		port asInteger ]
-]
-
-{ #category : #'queue management' }
-GtRrStompMqProcessor class >> purgeQueues [
-	"Purge the permanent queues"
-
-	GtRrStompMqProcessor new
-		purgeQueue: self taskQueueName;
-		purgeQueue: self runnerControlChannelName;
-		purgeQueue: self taskResultName.
-]
-
-{ #category : #'queue names' }
-GtRrStompMqProcessor class >> runnerControlChannelName [
-	"The workers (producers) send control messages (such as register or unregister) to the runner (consumer) through this channel"
-
-	^ '/queue/runner_control'
-]
-
-{ #category : #'queue names' }
-GtRrStompMqProcessor class >> taskQueueName [
-	"The runner (producer) sends tasks to the workers (consumers) through this queue"
-
-	^ '/queue/task_queue'
-]
-
-{ #category : #'queue names' }
-GtRrStompMqProcessor class >> taskResultName [
-	"The workers (producers) send task results to the runner (consumer) through this queue"
-
-	^ '/queue/task_result'
 ]
 
 { #category : #accessing }

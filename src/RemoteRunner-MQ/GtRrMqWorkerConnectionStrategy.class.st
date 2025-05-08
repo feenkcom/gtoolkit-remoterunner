@@ -6,7 +6,10 @@ Class {
 		'nextTask',
 		'nextTaskSemaphore',
 		'mqProcessor',
-		'ackFrame'
+		'ackFrame',
+		'runnerControlChannelName',
+		'taskQueueName',
+		'taskResultName'
 	],
 	#category : #'RemoteRunner-MQ-Worker'
 }
@@ -66,7 +69,7 @@ GtRrMqWorkerConnectionStrategy >> nextTask [
 			taskContextId: nextTask taskContextId;
 			taskId: nextTask taskId;
 			workerId: worker uid)
-		to: GtRrStompMqProcessor runnerControlChannelName.
+		to: self runnerControlChannelName.
 	^ nextTask.
 ]
 
@@ -79,7 +82,7 @@ GtRrMqWorkerConnectionStrategy >> registerWith: ignored [
 	registerMessage := GtRrWorkerRegisterMessage new 
 		attributes: worker attributes.
 	promise := mqProcessor sendCommandRpcMessage: registerMessage 
-		to: GtRrStompMqProcessor runnerControlChannelName 
+		to: self runnerControlChannelName 
 		response: self workerControlTopicName.
 	promise wait
 		then: [ :aResult | result := aResult ]
@@ -117,7 +120,7 @@ GtRrMqWorkerConnectionStrategy >> retrieveChangesFromServerWith: myself [
 		workerId: worker uid;
 		headReference: GtRrChangesSync headReference.
 	promise := mqProcessor sendCommandRpcMessage: encodedChangesMessage 
-		to: GtRrStompMqProcessor runnerControlChannelName 
+		to: self runnerControlChannelName 
 		response: self workerControlTopicName.
 	promise wait
 		then: [ :aResult | events := aResult ]
@@ -129,6 +132,13 @@ GtRrMqWorkerConnectionStrategy >> retrieveChangesFromServerWith: myself [
 	^ events
 ]
 
+{ #category : #accessing }
+GtRrMqWorkerConnectionStrategy >> runnerControlChannelName [
+
+	^ runnerControlChannelName ifNil: 
+		[ runnerControlChannelName := (':' split: (worker attributes at: 'stompMqQueueNames')) first ]
+]
+
 { #category : #private }
 GtRrMqWorkerConnectionStrategy >> sendHeartbeat [
 	| start end heartbeatMessage |
@@ -137,7 +147,7 @@ GtRrMqWorkerConnectionStrategy >> sendHeartbeat [
 	GtRrWorkerHeatbeatStartingSignal new emit.
 	worker lastHeartbeat: DateAndTime now.
 	heartbeatMessage := GtRrWorkerHeatbeatMessage new workerId: worker uid.
-	mqProcessor sendGtMessage: heartbeatMessage to: GtRrStompMqProcessor runnerControlChannelName.
+	mqProcessor sendGtMessage: heartbeatMessage to: self runnerControlChannelName.
 	end := Time microsecondClockValue.
 	GtRrWorkerHeartbeatCompletedSignal new
 		milliseconds: ((end - start) / 1000) rounded;
@@ -171,7 +181,7 @@ GtRrMqWorkerConnectionStrategy >> start [
 		mqHostName: self mqHostName;
 		mqPort: self mqPortNumber;
 		commandChannelName: self workerControlTopicName;
-		messageChannelName: GtRrStompMqProcessor taskQueueName.
+		messageChannelName: self taskQueueName.
 	mqProcessor start.
 	worker attributes
 		at: #workerIpAddress
@@ -209,7 +219,7 @@ GtRrMqWorkerConnectionStrategy >> taskDone: aTaskContext with: anObject [
 		workerId: worker uid;
 		executionData: (self executionDataFromTaskContext:  aTaskContext);
 		result: anObject.
-	mqProcessor sendGtMessage: taskDoneMessage to: GtRrStompMqProcessor taskResultName.
+	mqProcessor sendGtMessage: taskDoneMessage to: self taskResultName.
 	currentAckFrame := ackFrame.
 	nextTask := ackFrame := nil.
 	currentAckFrame ifNotNil:
@@ -229,10 +239,24 @@ GtRrMqWorkerConnectionStrategy >> taskFailed: aTaskContext with: anError [
 		taskContextId: aTaskContext taskContextId;
 		workerId: worker uid;
 		executionData: executionData.
-	mqProcessor sendGtMessage: taskFailedMessage to: GtRrStompMqProcessor taskResultName.
+	mqProcessor sendGtMessage: taskFailedMessage to: self taskResultName.
 	ackFrame ifNotNil:
 		[ mqProcessor write: ackFrame ].
 	nextTask := ackFrame := nil.
+]
+
+{ #category : #accessing }
+GtRrMqWorkerConnectionStrategy >> taskQueueName [
+
+	^ taskQueueName ifNil: 
+		[ taskQueueName := (':' split: (worker attributes at: 'stompMqQueueNames')) second ]
+]
+
+{ #category : #accessing }
+GtRrMqWorkerConnectionStrategy >> taskResultName [
+
+	^ taskResultName ifNil: 
+		[ taskResultName := (':' split: (worker attributes at: 'stompMqQueueNames')) third ]
 ]
 
 { #category : #'start-stop' }

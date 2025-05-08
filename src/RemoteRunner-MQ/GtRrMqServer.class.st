@@ -4,7 +4,10 @@ Class {
 	#instVars : [
 		'remoteRunner',
 		'mqHostName',
-		'mqProcessor'
+		'mqProcessor',
+		'runnerControlChannelName',
+		'taskQueueName',
+		'taskResultName'
 	],
 	#category : #'RemoteRunner-MQ-Runner'
 }
@@ -57,6 +60,16 @@ GtRrMqServer >> newWorkerConnection [
 	^ GtRrMqWorkerConnection new
 ]
 
+{ #category : #'start - stop' }
+GtRrMqServer >> purgeQueues [
+	"Purge the permanent queues"
+
+	GtRrStompMqProcessor new
+		purgeQueue: self taskQueueName;
+		purgeQueue: self runnerControlChannelName;
+		purgeQueue: self taskResultName.
+]
+
 { #category : #accessing }
 GtRrMqServer >> remoteRunner [
 	^ remoteRunner
@@ -65,6 +78,13 @@ GtRrMqServer >> remoteRunner [
 { #category : #accessing }
 GtRrMqServer >> remoteRunner: anObject [
 	remoteRunner := anObject
+]
+
+{ #category : #accessing }
+GtRrMqServer >> runnerControlChannelName [
+
+	^ runnerControlChannelName ifNil: 
+		[ runnerControlChannelName := '/queue/', NetNameResolver localHostName, '_runner_control' ]
 ]
 
 { #category : #'as yet unclassified' }
@@ -99,7 +119,7 @@ GtRrMqServer >> sendWorkerTaskContext: aWorkerTaskContext [
 		emit.
 	taskMessage := GtRrRunnerTaskMessage new
 		task: aWorkerTaskContext.
-	mqProcessor sendGtMessage: taskMessage to: GtRrStompMqProcessor taskQueueName.
+	mqProcessor sendGtMessage: taskMessage to: self taskQueueName.
 	GtRrMqQueueTaskCompletedSignal new
 		taskId: aWorkerTaskContext taskId;
 		emit.
@@ -112,10 +132,29 @@ GtRrMqServer >> start [
 
 	mqProcessor := GtRrStompMqProcessor new
 		owner: self;
-		commandChannelName: GtRrStompMqProcessor runnerControlChannelName;
-		messageChannelName: GtRrStompMqProcessor taskResultName.
+		commandChannelName: self runnerControlChannelName;
+		messageChannelName: self taskResultName.
 	mqProcessor start.
 	mqProcessor subscribeToMessages.
+]
+
+{ #category : #accessing }
+GtRrMqServer >> stompMqAdditonalOptions [
+	"Answer the addtional command line options for workers using RabbitMQ"
+	
+	^ Array streamContents: [ :aStream |
+		aStream
+			nextPut: '--connectionStrategy';
+			nextPut: 'stompMq';
+			nextPut: '--attribute';
+			nextPut: 'stompMqQueueNames';
+			nextPut: (String streamContents: [ :sStream |
+				sStream 
+					<< self runnerControlChannelName;
+					<< ':';
+					<< self taskQueueName;
+					<< ':';
+					<< self taskResultName ]) ]
 ]
 
 { #category : #'start - stop' }
@@ -136,4 +175,18 @@ GtRrMqServer >> stopWorker: workerId [
 	self isRunning ifFalse: [ ^ self ].
 	mqProcessor sendGtMessage: GtRrRunnerQuitMessage new 
 		to: (GtRrStompMqProcessor workerControlTopicNameFor: workerId).
+]
+
+{ #category : #accessing }
+GtRrMqServer >> taskQueueName [
+
+	^ taskQueueName ifNil: 
+		[ taskQueueName := '/queue/', NetNameResolver localHostName, '_task_queue' ]
+]
+
+{ #category : #accessing }
+GtRrMqServer >> taskResultName [
+
+	^ taskResultName ifNil: 
+		[ taskResultName := '/queue/', NetNameResolver localHostName, '_task_result' ]
 ]
