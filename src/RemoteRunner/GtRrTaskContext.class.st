@@ -417,12 +417,10 @@ GtRrTaskContext >> workerAttributes: anObject [
 { #category : #accessing }
 GtRrTaskContext >> workerConnection [
 	"Answer the receiver's worker connection.
-	For PharoLink runners this will be via the future.
 	For MQ runners this will be set directly."
 	<return: #GtRrWorkerConnection>
 
-	^ workerConnection ifNil: [ workerFuture ifNotNil:
-		[ workerFuture connection ] ]
+	^ workerConnection
 ]
 
 { #category : #accessing }
@@ -430,6 +428,7 @@ GtRrTaskContext >> workerConnection: aGrRrWorkerConnection [
 
 	workerConnection := aGrRrWorkerConnection.
 	aGrRrWorkerConnection taskContext: self.
+	self workerAttributes: aGrRrWorkerConnection attributes.
 ]
 
 { #category : #accessing }
@@ -443,7 +442,7 @@ GtRrTaskContext >> workerFuture [
 GtRrTaskContext >> workerFuture: aGtRrFutureWorkerTask [
 
 	workerFuture := aGtRrFutureWorkerTask.
-	task workerAttributes: workerFuture workerAttributes.
+	self workerConnection: workerFuture connection.
 ]
 
 { #category : #accessing }
