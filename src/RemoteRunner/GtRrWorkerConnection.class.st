@@ -336,6 +336,11 @@ GtRrWorkerConnection >> summaryAttributes [
 				stream nextPut: { assoc key. assoc value. self. } ] ] ].
 ]
 
+{ #category : #accessing }
+GtRrWorkerConnection >> taskContext: ignored [
+	"Ignored.  For PharoLink connections, the future holds on to the context"
+]
+
 { #category : #private }
 GtRrWorkerConnection >> timeoutManager [ 
 
