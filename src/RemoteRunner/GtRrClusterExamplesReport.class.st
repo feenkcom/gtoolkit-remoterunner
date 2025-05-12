@@ -463,7 +463,7 @@ GtRrClusterExamplesReport >> overviewData [
 		'Number of cores' -> self numberOfMachineCores.
 		'Number of workers' -> self numberOfWorkers.
 		'Total AWS weighted capacity - sum' -> self totalAwsWeightedCapacity.
-		'Total AWS weighted capacity - fulfilled percentage' -> self totalAwsWeightedCapacityEfficiency.
+		'Total AWS weighted capacity - fulfilled percentage' -> (self totalAwsWeightedCapacityEfficiency ifNil: [ '-']).
 		'Total cores - fulfilled percentage' -> self totalMachineCoresEfficiency.
 		'Number of tasks' -> self numberOfTasks.
 		'Number of task retries' -> self numberOfTaskRetries.
@@ -595,7 +595,12 @@ GtRrClusterExamplesReport >> totalAwsWeightedCapacity [
 
 { #category : #accessing }
 GtRrClusterExamplesReport >> totalAwsWeightedCapacityEfficiency [ 
-	^ ((self numberOfWorkers / self totalAwsWeightedCapacity) * 100) printShowingDecimalPlaces: 1
+	| totalAwsWeightedCapacity|
+	totalAwsWeightedCapacity := self totalAwsWeightedCapacity.
+	^ totalAwsWeightedCapacity isZero
+		ifTrue: [ nil ] 
+		ifFalse: [  ((self numberOfWorkers / totalAwsWeightedCapacity) * 100) printShowingDecimalPlaces: 1 ]
+
 ]
 
 { #category : #'accessing - gc details' }
