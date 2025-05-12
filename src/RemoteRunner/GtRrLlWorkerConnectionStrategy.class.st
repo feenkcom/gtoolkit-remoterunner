@@ -179,7 +179,7 @@ GtRrLlWorkerConnectionStrategy >> taskDone: aTaskContext with: anObject [
 	worker postTaskProcessing.
 	worker resultQueue
 		nextPut: (GtRrWorkerResultEntry
-				worker: self
+				worker: worker
 				task: aTaskContext
 				bindings: {#taskContextId -> aTaskContext taskContextId.
 						#executionData -> serializedExecutionData.
@@ -213,7 +213,7 @@ GtRrLlWorkerConnectionStrategy >> taskFailed: aTaskContext with: anError [
 	serializedExecutionData := LeJsonV4 uniqueInstance serialize: executionData.
 	worker  postTaskProcessing.
 	worker resultQueue nextPut: (GtRrWorkerResultEntry
-		worker: self
+		worker: worker
 		task: aTaskContext
 		bindings: { 
 			#taskContextId -> aTaskContext taskContextId.
