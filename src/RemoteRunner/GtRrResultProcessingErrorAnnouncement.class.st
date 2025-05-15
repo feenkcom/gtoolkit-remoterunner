@@ -2,7 +2,6 @@ Class {
 	#name : #GtRrResultProcessingErrorAnnouncement,
 	#superclass : #GtRrWorkerAnnouncement,
 	#instVars : [
-		'workerId',
 		'errorDetails'
 	],
 	#category : #'RemoteRunner-Announcements'
@@ -24,9 +23,7 @@ GtRrResultProcessingErrorAnnouncement >> errorDetails: anObject [
 GtRrResultProcessingErrorAnnouncement >> initializeFromTimestamp: aTimestamp andData: dataParts [
 
 	super initializeFromTimestamp: aTimestamp andData: dataParts.
-	self 	
-		workerId: dataParts seventh;
-		errorDetails: dataParts eighth.
+	self errorDetails: dataParts seventh.
 ]
 
 { #category : #printing }
@@ -35,19 +32,5 @@ GtRrResultProcessingErrorAnnouncement >> printOneLineContentsOn: aStream [
 	super printOneLineContentsOn: aStream.
 	aStream
 		<< ' | ';
-		<< workerId asString;
-		<< ' | ';
 		<< errorDetails asString.
-]
-
-{ #category : #accessing }
-GtRrResultProcessingErrorAnnouncement >> workerId [
-
-	^ workerId
-]
-
-{ #category : #accessing }
-GtRrResultProcessingErrorAnnouncement >> workerId: anObject [
-
-	workerId := anObject
 ]
