@@ -29,10 +29,26 @@ GtRemoteRunnerAnnouncement >> initializeFromSlotData: aDictionary [
 		basicProperties: (aDictionary at: #properties)
 ]
 
+{ #category : #'as yet unclassified' }
+GtRemoteRunnerAnnouncement >> printOneLineContentsOn: aStream [
+
+	aStream
+		<< '| ';
+		<< self signalTypeLabel;
+		<< ' | ';
+		<< processId asString
+]
+
 { #category : #serialization }
 GtRemoteRunnerAnnouncement >> serializeForRemoteDelivery [
 	^ {
 		'className' -> self className.
 		'data' -> self asDataForRemoteSerialize
 	} asDictionary
+]
+
+{ #category : #accessing }
+GtRemoteRunnerAnnouncement >> signalTypeLabel [
+
+	^ 'GtRemoteRunnerAnnouncement'
 ]

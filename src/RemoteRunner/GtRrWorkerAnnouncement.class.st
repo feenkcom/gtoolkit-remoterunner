@@ -67,18 +67,12 @@ GtRrWorkerAnnouncement >> isStartSignalType [
 { #category : #printing }
 GtRrWorkerAnnouncement >> printOneLineContentsOn: aStream [
 
-	(self worker isNil and: [
-		self remoteAddressString isNil ]) ifTrue: [ ^ self ].
-		
+	super printOneLineContentsOn: aStream.
 	aStream
-		<< '| ';
-		<< self signalTypeLabel;
-		<< ' | ';
-		<< self processId;
 		<< ' | ';
 		<< self workerId;
 		<< ' | ';
-		nextPutAll: self remoteAddressString;
+		nextPutAll: remoteAddressString asString;
 		<< ' | ';
 		nextPutAll: self workingDirectory;
 		<< ' | ';
@@ -98,7 +92,7 @@ GtRrWorkerAnnouncement >> remoteAddressString: anAddressString [
 { #category : #printing }
 GtRrWorkerAnnouncement >> signalTypeLabel [
 
-	^ 'Worker Signal'
+	^ 'GtRrWorkerAnnouncement'
 ]
 
 { #category : #accessing }

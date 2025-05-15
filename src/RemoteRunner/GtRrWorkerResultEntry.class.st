@@ -28,7 +28,13 @@ GtRrWorkerResultEntry >> checkPromise [
 	If that fails signal the error."
 
 	promise wait.
-	promise exception ifNil: [ ^ self ].
+	promise exception ifNil: 
+		[ GtRrWorkerResponseConfirmedSignal new 
+			taskId: task taskId;
+			result: self printString;
+			propertyAt: #result put: self;
+			emit.
+		^ self ].
 
 	Stdio stdout
 		<< 'checkPromise error: ';

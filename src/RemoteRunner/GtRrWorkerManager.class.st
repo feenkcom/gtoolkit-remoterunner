@@ -17,7 +17,8 @@ Class {
 		'currentSession',
 		'additionalArguments',
 		'changesFile',
-		'pharoDebugLog'
+		'pharoDebugLog',
+		'settings'
 	],
 	#category : #'RemoteRunner-Runner-Workers'
 }
@@ -120,11 +121,14 @@ GtRrWorkerManager >> gtSummaryFor: aView [
 
 { #category : #initialize }
 GtRrWorkerManager >> initialize [
+	"Initialize the receiver"
 
 	super initialize.
 	workerIndex := 0.
 	autoRestart := true.
 	changesSync := true.
+	"The LanguageLinkSettings are used to determine the executable, image and working directory"
+	settings := LanguageLinkSettings pharoDefaultSettings.
 	workerCountCalculator := GtRrWorkerCountCalculator new.
 	processes := OrderedCollection new.
 	watchdogSemaphore := Semaphore new.
@@ -140,9 +144,8 @@ GtRrWorkerManager >> isRunning [
 
 { #category : #private }
 GtRrWorkerManager >> newWorkerLocalProcess [
-	| settings builder process logFile pid |
+	| builder process logFile pid |
 
-	settings := LanguageLinkSettings pharoDefaultSettings.
 	workerIndex := workerIndex + 1.
 	'workerLogs' asFileReference ensureCreateDirectory.
 	pid := GtOsSystemInfo current currentProcessId.
@@ -294,6 +297,11 @@ GtRrWorkerManager >> removeWorkers: anInteger [
 	removeCount := anInteger min: remoteRunner availableWorkers size.
 	workers := remoteRunner availableWorkers asArray first: removeCount.
 	workers do: [ :worker | worker connection stop ].
+]
+
+{ #category : #accessing }
+GtRrWorkerManager >> settings [
+	^settings
 ]
 
 { #category : #'start-stop' }

@@ -19,6 +19,12 @@ Class {
 }
 
 { #category : #accessing }
+GtRrRunnerLogReader >> contents [
+
+	^ filename contents
+]
+
+{ #category : #accessing }
 GtRrRunnerLogReader >> filename [
 	^ filename
 ]
@@ -41,16 +47,17 @@ GtRrRunnerLogReader >> gtSignalsFor: aView [
 
 { #category : #initialization }
 GtRrRunnerLogReader >> initialize [
+
 	super initialize.
-	
+	signals := OrderedCollection new.
 	strictMode := true.
 ]
 
 { #category : #actions }
 GtRrRunnerLogReader >> load [
 
-	signals := OrderedCollection new.
 	filename asFileReference readStreamDo: [ :stream |
+		stream encoder: ZnLossyUTF8Encoder new.
 		[ stream atEnd ] whileFalse:
 			[ self processLine: stream nextLine ] ].
 	^ signals
@@ -67,7 +74,7 @@ GtRrRunnerLogReader >> memoryLogger [
 
 { #category : #private }
 GtRrRunnerLogReader >> processLine: aString [
-	| words date cls data |
+	| words date cls data signal |
 
 	words := aString splitOn: Character space.
 	"Minimum is date, class, signal type"
@@ -83,9 +90,10 @@ GtRrRunnerLogReader >> processLine: aString [
 	(self shouldLoad: words) ifFalse: [ ^ self ].
 
 	data := (aString splitOn: ' | ') allButFirst.
-	[ signals add: (cls new initializeFromTimestamp: date andData: data) ]
+	[ signals add: (signal := cls new initializeFromTimestamp: date andData: data) ]
 		on: Error
 		do: [ :ex | strictMode ifTrue: [ ex pass ] ].
+	^ signal
 ]
 
 { #category : #private }
