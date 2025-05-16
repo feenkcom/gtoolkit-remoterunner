@@ -70,7 +70,7 @@ GtRrWorkerAnnouncement >> printOneLineContentsOn: aStream [
 	super printOneLineContentsOn: aStream.
 	aStream
 		<< ' | ';
-		<< self workerId;
+		<< self workerId asString;
 		<< ' | ';
 		nextPutAll: remoteAddressString asString;
 		<< ' | ';
@@ -128,8 +128,11 @@ GtRrWorkerAnnouncement >> workerDetailsForLog [
 { #category : #accessing }
 GtRrWorkerAnnouncement >> workerId [
 	^ self workerAttributes
-		at: #id 
-		ifAbsent: [ '<unknown id>' ]
+		ifNil: [ '<unknown id>' ]
+		ifNotNil: [ :aDictionary |
+			aDictionary
+				at: #id 
+				ifAbsent: [ '<unknown id>' ] ]
 ]
 
 { #category : #serialization }
