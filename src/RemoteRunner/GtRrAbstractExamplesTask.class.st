@@ -169,6 +169,13 @@ GtRrAbstractExamplesTask >> numberOfSuccesses [
 		self isSuccessResult: pharoLinkTestCaseAnnouncement ]
 ]
 
+{ #category : #accessing }
+GtRrAbstractExamplesTask >> resultWithName: anAssociation [
+	"Answer the test result with the specified name (Class Name -> selector)"
+
+	^ result detect: [ :aTestResult | aTestResult checkName = anAssociation ]
+]
+
 { #category : #enumerating }
 GtRrAbstractExamplesTask >> select: aBlockClosure [
 
@@ -188,7 +195,7 @@ GtRrAbstractExamplesTask >> skippedExamples [
 ]
 
 { #category : #accessing }
-GtRrAbstractExamplesTask >> splitTests [
+GtRrAbstractExamplesTask >> splitTestsIn: aGtRrTaskContext [
 	"Answer a collection of tasks which need to be retried and in which each task has only 1 check from the receiver.
 	If the receiver has errors (the task overall failed), retry all unsuccessful checks.
 	Once a definition of flaky tests has been added: If the receiver succeeded, retry failing flaky checks."

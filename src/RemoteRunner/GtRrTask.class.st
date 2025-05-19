@@ -528,10 +528,10 @@ GtRrTask >> retryStrategy: anObject [
 ]
 
 { #category : #accessing }
-GtRrTask >> retryTasks [
+GtRrTask >> retryTasksIn: aGtRrTaskContext [
 	"Answer the collection of tasks to be retried"
 
-	^ retryStrategy retryTask: self.
+	^ retryStrategy retryTasks: self context: aGtRrTaskContext.
 ]
 
 { #category : #running }

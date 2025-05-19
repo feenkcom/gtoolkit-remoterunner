@@ -16,7 +16,7 @@ GtRrTaskNeverRetry class >> leJsonV4Name [
 ]
 
 { #category : #accessing }
-GtRrTaskNeverRetry >> retryTask: aGtRrTask [
+GtRrTaskNeverRetry >> retryTasks: aGtRrTask context: aGtRrContext [
 	"Answer the collection of tasks to be retried, in this case none."
 
 	^ #()
