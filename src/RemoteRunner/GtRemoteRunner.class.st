@@ -1039,8 +1039,7 @@ GtRemoteRunner >> privateTaskFailed: aTaskContextId workerId: workerId execution
 		ifAbsent: [ ^ self ].
 	runnerStats currentlyExecutingTaskCount: currentlyExecutingTasks size.
 	taskContext task executionData updateFromWorker: aGtRrWorkerExecutionData.
-	retryTasks := taskContext task retryTasks.
-	taskContext retryTasks: retryTasks.
+	retryTasks := taskContext retryTasks.
 	registeredAvailable := registeredWorkers isNotEmpty.
 	(retryTasks isEmpty or: [ registeredAvailable not ]) ifTrue:
 		[ taskContext markTaskCompleted ]
@@ -1499,8 +1498,7 @@ GtRemoteRunner >> taskDone: aTaskContextId workerId: workerId executionData: aGt
 			runnerStats currentlyExecutingTaskCount: currentlyExecutingTasks size.
 			taskContext task executionData updateFromWorker: aGtRrWorkerExecutionData.
 			taskContext result: aResult.
-			retryTasks := taskContext task retryTasks.
-			taskContext retryTasks: retryTasks.
+			retryTasks := taskContext retryTasks.
 			taskContext markTaskCompleted.
 			(retryTasks isNotEmpty and: [ registeredWorkers isNotEmpty ]) ifTrue:
 				[ self queueTasksFirst: retryTasks jobContext: taskContext jobContext ].

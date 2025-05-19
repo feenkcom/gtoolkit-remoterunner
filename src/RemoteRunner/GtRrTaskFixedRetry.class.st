@@ -50,7 +50,7 @@ GtRrTaskFixedRetry >> retryCount: anObject [
 ]
 
 { #category : #accessing }
-GtRrTaskFixedRetry >> retryTask: aGtRrTask [
+GtRrTaskFixedRetry >> retryTasks: aGtRrTask context: aGtRrTaskContext [
 	"Answer the collection of tasks to be retried.
 	If the task should just fail answer an empty collection."
 

@@ -50,7 +50,7 @@ GtRrTaskTestRetry >> retryCount: anObject [
 ]
 
 { #category : #accessing }
-GtRrTaskTestRetry >> retryTask: aGtRrTask [
+GtRrTaskTestRetry >> retryTasks: aGtRrTask context: aGtRrTaskContext [
 	"Test retry has a maximum number of retries, however if the task contains multiple tests we want to break out the tests in to individual tasks so that one test can't cause the failure of others"
 	| retryTasks |
 
@@ -58,7 +58,7 @@ GtRrTaskTestRetry >> retryTask: aGtRrTask [
 		[ aGtRrTask totalCount - aGtRrTask numberOfSuccesses = 0 ]) ifTrue: [ ^ #() ].
 	retryCount := retryCount + 1.
 	^ retryCount <= maxRetries ifTrue: 
-		[ retryTasks := aGtRrTask splitTests.
+		[ retryTasks := aGtRrTask splitTestsIn: aGtRrTaskContext.
 		retryTasks do: [ :retryTask |
 			retryTask retryStrategy failedTask: aGtRrTask.
 			retryTask executionData
@@ -67,6 +67,6 @@ GtRrTaskTestRetry >> retryTask: aGtRrTask [
 				additionalDataAt: #failedTaskId
 					put: aGtRrTask taskId ].
 			retryTasks ]
-	ifFalse: 
+	ifFalse:
 		[ #() ].
 ]

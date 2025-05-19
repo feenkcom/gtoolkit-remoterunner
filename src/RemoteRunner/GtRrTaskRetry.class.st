@@ -56,7 +56,7 @@ GtRrTaskRetry >> privateRetryTaskFor: aGtRrTask [
 ]
 
 { #category : #accessing }
-GtRrTaskRetry >> retryTask: aGtRrTask [
+GtRrTaskRetry >> retryTasks: aGtRrTask context: aGtRrTaskContext [
 	"Answer the collection of tasks to be retried.
 	If no further action should be taken, i.e. the task has passed or should just fail, answer an empty collection.
 	Note that the task is asked for retry tasks on both success and failure
