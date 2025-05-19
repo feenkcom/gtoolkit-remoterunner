@@ -7,8 +7,21 @@ Class {
 	#instVars : [
 		's3Bucket'
 	],
+	#classVars : [
+		'MaxMessageSize'
+	],
 	#category : #'RemoteRunner-MQ-Runner'
 }
+
+{ #category : #accessing }
+GtRrStompMqS3Processor class >> maxMessageSize [
+	^MaxMessageSize ifNil: [ 64000 ]
+]
+
+{ #category : #accessing }
+GtRrStompMqS3Processor class >> maxMessageSize: anObject [
+	MaxMessageSize := anObject
+]
 
 { #category : #accessing }
 GtRrStompMqS3Processor >> s3Bucket [
@@ -29,7 +42,7 @@ GtRrStompMqS3Processor >> serializedGtMessage: aGtRrMessage [
 	messageBuffer := GtWireEncoder onByteArray
 		nextPut: aGtRrMessage;
 		contents.
-	messageBuffer size < 64000 ifTrue: [ ^ messageBuffer ].
+	messageBuffer size < self class maxMessageSize ifTrue: [ ^ messageBuffer ].
 
 	s3Bucket ifNil: [ self error: 'MQ S3 bucket not configured' ].
 
