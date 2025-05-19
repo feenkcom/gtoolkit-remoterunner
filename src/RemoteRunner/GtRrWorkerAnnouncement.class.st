@@ -112,7 +112,7 @@ GtRrWorkerAnnouncement >> worker: anObject [
 
 { #category : #accessing }
 GtRrWorkerAnnouncement >> workerAttributes [
-	^ workerAttributes
+	^ workerAttributes ifNil: [ Dictionary new ]
 ]
 
 { #category : #accessing }
@@ -128,11 +128,8 @@ GtRrWorkerAnnouncement >> workerDetailsForLog [
 { #category : #accessing }
 GtRrWorkerAnnouncement >> workerId [
 	^ self workerAttributes
-		ifNil: [ '<unknown id>' ]
-		ifNotNil: [ :aDictionary |
-			aDictionary
-				at: #id 
-				ifAbsent: [ '<unknown id>' ] ]
+		at: #id 
+		ifAbsent: [ '<unknown id>' ]
 ]
 
 { #category : #serialization }
