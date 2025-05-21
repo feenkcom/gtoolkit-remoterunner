@@ -616,7 +616,12 @@ GtRrClusterExamplesReport >> totalGCTime [
 
 { #category : #accessing }
 GtRrClusterExamplesReport >> totalMachineCoresEfficiency [ 
-	^ ((self numberOfWorkers / self numberOfMachineCores) * 100) printShowingDecimalPlaces: 1
+	|numberOfMachineCores|
+	
+	numberOfMachineCores := self numberOfMachineCores.
+	(numberOfMachineCores isNil or: [numberOfMachineCores isZero]) ifTrue: [ ^nil].
+	
+ 	^ ((self numberOfWorkers / numberOfMachineCores) * 100) printShowingDecimalPlaces: 1
 ]
 
 { #category : #'accessing - resource report' }
