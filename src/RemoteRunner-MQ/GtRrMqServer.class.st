@@ -129,6 +129,7 @@ GtRrMqServer >> sendWorkerTaskContext: aWorkerTaskContext [
 GtRrMqServer >> start [
 
 	self assert: mqProcessor isNil.
+	self purgeQueues.
 
 	mqProcessor := GtRrStompMqProcessor new
 		owner: self;

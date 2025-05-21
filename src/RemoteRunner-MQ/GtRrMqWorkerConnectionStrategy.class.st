@@ -9,7 +9,8 @@ Class {
 		'ackFrame',
 		'runnerControlChannelName',
 		'taskQueueName',
-		'taskResultName'
+		'taskResultName',
+		'mqS3MessageBucket'
 	],
 	#category : #'RemoteRunner-MQ-Worker'
 }
@@ -58,6 +59,16 @@ GtRrMqWorkerConnectionStrategy >> mqHostName [
 GtRrMqWorkerConnectionStrategy >> mqPortNumber [
 
 	^ GtRrStompMqProcessor portFrom: mqHost
+]
+
+{ #category : #accessing }
+GtRrMqWorkerConnectionStrategy >> mqS3MessageBucket [
+	^mqS3MessageBucket
+]
+
+{ #category : #accessing }
+GtRrMqWorkerConnectionStrategy >> mqS3MessageBucket: aZnUrl [
+	mqS3MessageBucket := aZnUrl
 ]
 
 { #category : #'api - running' }
@@ -173,15 +184,20 @@ GtRrMqWorkerConnectionStrategy >> socketAddress: aString [
 
 { #category : #'start-stop' }
 GtRrMqWorkerConnectionStrategy >> start [
+	| mqProcessorClass |
 
 	self assert: mqProcessor isNil.
 
-	mqProcessor := GtRrStompMqProcessor new
+	mqProcessorClass := mqS3MessageBucket
+		ifNil: [ GtRrStompMqProcessor ]
+		ifNotNil: [ GtRrStompMqS3Processor ].
+	mqProcessor := mqProcessorClass new
 		owner: self;
 		mqHostName: self mqHostName;
 		mqPort: self mqPortNumber;
 		commandChannelName: self workerControlTopicName;
 		messageChannelName: self taskQueueName.
+	mqS3MessageBucket ifNotNil: [ mqProcessor s3Bucket: mqS3MessageBucket ].
 	mqProcessor start.
 	worker attributes
 		at: #workerIpAddress
