@@ -30,7 +30,10 @@ GtRrWorkerTaskStartedMessage >> processMq: mqMessage processor: aGtRrProcessor f
 					[ (remoteRunner currentlyExecutingJobs anySatisfy:
 						[ :job | job results anySatisfy:
 							[ :task | task taskId = taskId ] ]) ]) ifFalse:
-								[ self error: 'task missing' ] ] ].
+								[ GtRrMqTaskMissingSignal new
+									taskContextId: taskContextId;
+									taskId: taskId;
+									emit ] ] ].
 ]
 
 { #category : #accessing }
