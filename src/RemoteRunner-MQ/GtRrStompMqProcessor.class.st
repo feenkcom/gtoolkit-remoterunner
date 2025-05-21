@@ -197,15 +197,15 @@ GtRrStompMqProcessor >> isRunning [
 ]
 
 { #category : #testing }
-GtRrStompMqProcessor >> isStopRequested [
-
-	^ state = #stopRequested
-]
-
-{ #category : #testing }
 GtRrStompMqProcessor >> isStopped [
 
 	^ state = #stopped
+]
+
+{ #category : #testing }
+GtRrStompMqProcessor >> isStopRequested [
+
+	^ state = #stopRequested
 ]
 
 { #category : #accessing }
@@ -333,6 +333,14 @@ GtRrStompMqProcessor >> purgeQueue: queueName [
 
 	self assert: mqClient isNil
 		description: 'Purging is only supported while not connected'.
+	commandCallback := messageCallback :=
+		[ :mqMessage :gtMessage :anOwner |
+			GtRrStompMqCallbackStartingSignal new
+				gtMessagePrintString: gtMessage printString;
+				emit.
+			GtRrStompMqCallbackCompletedSignal new
+				gtMessagePrintString: gtMessage printString;
+				emit. ].
 
 	self connect.
 

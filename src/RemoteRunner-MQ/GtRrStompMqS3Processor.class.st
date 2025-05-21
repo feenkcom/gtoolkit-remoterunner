@@ -15,7 +15,7 @@ Class {
 
 { #category : #accessing }
 GtRrStompMqS3Processor class >> maxMessageSize [
-	^MaxMessageSize ifNil: [ 64000 ]
+	^MaxMessageSize ifNil: [ 4000000 ]
 ]
 
 { #category : #accessing }

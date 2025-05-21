@@ -75,6 +75,15 @@ GtRrWorker class >> commandLineName [
 	^ #remoteRunnerWorker
 ]
 
+{ #category : #clap }
+GtRrWorker class >> connectionStrategyLookup [
+
+	^ {#perMessage -> [GtRrWorkerConnectionPerMessageStrategy new].
+	#single -> [GtRrWorkerSingleConnectionStrategy new].
+	#stompMq -> [GtRrMqWorkerConnectionStrategy new]}
+			asDictionary
+]
+
 { #category : #accessing }
 GtRrWorker class >> heartbeatDelay [
 	"Answer the Duration between heartbeats"
@@ -132,7 +141,6 @@ GtRrWorker class >> processCommandLineArgs: args [
 	args occurrencesOf: #attribute
 		do: [:arg | worker attributes at: (arg at: #key) value put: (arg at: #value) value].
 	worker startLoggerFor: worker arguments: args.
-	
 	GtRrWorkerCliStartingSignal new emit.
 	serverSocketAddress := ((args at: #serverSocketAddress) at: #address)
 				value.
@@ -142,32 +150,31 @@ GtRrWorker class >> processCommandLineArgs: args [
 				at: #connectionStrategy
 				ifPresent: [:arg | (arg at: #strategyId) value]
 				ifAbsent: [].
-	StringSignal emit: 
-		'ConnectionStrategy: ' , (connectionStrategyId ifNil: ['<none>']).
+	StringSignal
+		emit: 'ConnectionStrategy: ' , (connectionStrategyId ifNil: ['<none>']).
 	connectionStrategyId ifNotNil: 
-		[connectionStrategy := (
-			{#perMessage -> [GtRrWorkerConnectionPerMessageStrategy new].
-			#single -> [GtRrWorkerSingleConnectionStrategy new].
-			#stompMq -> [ GtRrMqWorkerConnectionStrategy new ]}
-				asDictionary at: connectionStrategyId
-				ifAbsent: 
-					[self
-						error: 'Invalid connectionStrategy: ' , connectionStrategyId printString])
-							value.
+		[connectionStrategy := (workerClass connectionStrategyLookup
+			at: connectionStrategyId
+			ifAbsent: [self error: 
+				'Invalid connectionStrategy: ' , connectionStrategyId printString])
+					value.
 		worker connectionStrategy: connectionStrategy].
 	worker connectionStrategy socketAddress: serverSocketAddress.
-	args at: #changesSync ifPresent: 
-		[StringSignal emit: 'changesSync: true'.
-		worker attributes at: #changesSync put: true].
-	args at: #changesFile ifPresent: 
-		[ :arg | | filename |
-		filename := (arg at: #changesFilename) value.
-		worker attributes at: #changesFile put: filename.
-		StringSignal emit: 'changesFile: ', filename asString ].
+	args at: #changesSync
+		ifPresent: 
+			[StringSignal emit: 'changesSync: true'.
+			worker attributes at: #changesSync put: true].
+	args at: #changesFile
+		ifPresent: 
+			[:arg |
+			| filename |
+			filename := (arg at: #changesFilename) value.
+			worker attributes at: #changesFile put: filename.
+			StringSignal emit: 'changesFile: ' , filename asString].
 	StringSignal emit: 'Worker Attributes:'.
 	worker attributes keysAndValuesDo: 
-		[:key :value |
-		StringSignal emit: 'key: ' , key asString , ', value: ' , value asString].
+			[:key :value |
+			StringSignal emit: 'key: ' , key asString , ', value: ' , value asString].
 	StringSignal emit: 'Install UI manager...'.
 	UIManager default: GtRrUIManager new.
 	StringSignal emit: 'Starting worker...'.
