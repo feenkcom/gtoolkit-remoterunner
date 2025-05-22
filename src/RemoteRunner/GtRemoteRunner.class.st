@@ -1272,7 +1272,7 @@ GtRemoteRunner >> startJob: aGtRrJob [
 { #category : #'api - logger' }
 GtRemoteRunner >> startLogger: aLogger [
 
-	aLogger startFor: GtRemoteRunnerAnnouncement, GtRemoteRunnerSignal, PharoLinkServerSignal, StringSignal.
+	aLogger startFor: GtRemoteRunnerAnnouncement, GtRemoteRunnerSignal, PharoLinkServerSignal, GtAwsWebServiceCommandSignal, StringSignal.
 ]
 
 { #category : #'api - logger' }
