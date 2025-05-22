@@ -581,7 +581,8 @@ GtRrWorker >> startLoggerFor: worker arguments: args [
 	
 	announcements := AnnouncementSetWithExclusions withAll: 
 		{GtRemoteRunnerAnnouncement , GtRemoteRunnerSignal , PharoLinkSignal, 
-			LanguageLinkEventSignal , StringSignal}.
+		GtAwsWebServiceCommandSignal,
+		LanguageLinkEventSignal , StringSignal}.
 	announcements addExclusions: ContextStackSignal allSubclasses.
 	logger startFor: announcements.
 ]

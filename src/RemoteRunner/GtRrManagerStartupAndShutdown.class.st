@@ -68,6 +68,16 @@ GtRrManagerStartupAndShutdown >> startHeartbeatContext [
 ]
 
 { #category : #'startup - shutdown' }
+GtRrManagerStartupAndShutdown >> startInImageDebugWorker [
+	"Start a worker in the same image as the runner"
+
+	^ inImageWorker := GtRrInImageWorker new
+		remoteRunner: remoteRunner;
+		exceptionHandlingStrategy: GtRrTaskDebuggerExceptionStrategy new;
+		start.
+]
+
+{ #category : #'startup - shutdown' }
 GtRrManagerStartupAndShutdown >> startInImageWorker [
 	"Start a worker in the same image as the runner"
 
