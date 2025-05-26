@@ -543,6 +543,12 @@ GtRemoteRunner >> debugMode [
 	^ true.
 ]
 
+{ #category : #accessing }
+GtRemoteRunner >> defaultConnectionStrategy [
+
+	^ #single
+]
+
 { #category : #initialization }
 GtRemoteRunner >> defaultManagerStartupAndShutdown [
 	^ GtRrCodeSyncedLocalManagerStartupAndShutdown new

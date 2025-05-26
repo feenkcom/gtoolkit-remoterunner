@@ -20,6 +20,12 @@ GtRemoteRunnerMq >> addTaskContextFirst: taskContext [
 	self addTaskContext: taskContext
 ]
 
+{ #category : #accessing }
+GtRemoteRunnerMq >> defaultConnectionStrategy [
+
+	^ #stompMq
+]
+
 { #category : #initialization }
 GtRemoteRunnerMq >> defaultManagerStartupAndShutdown [
 	^ GtRrCodeSyncedLocalManagerStartupAndShutdown new
