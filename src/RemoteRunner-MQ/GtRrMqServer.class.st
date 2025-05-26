@@ -158,6 +158,19 @@ GtRrMqServer >> stompMqAdditonalOptions [
 					<< self taskResultName ]) ]
 ]
 
+{ #category : #accessing }
+GtRrMqServer >> stompMqQueueNames [
+	"Answer the control channel, task and result queue names, colon separated"
+	
+	^ String streamContents: [ :sStream |
+		sStream 
+			<< self runnerControlChannelName;
+			<< ':';
+			<< self taskQueueName;
+			<< ':';
+			<< self taskResultName ]
+]
+
 { #category : #'start - stop' }
 GtRrMqServer >> stop [
 
