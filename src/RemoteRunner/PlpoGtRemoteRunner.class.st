@@ -47,6 +47,12 @@ PlpoGtRemoteRunner >> configureAnnouncementsQueueListener: aListener [
 		terminationCondition: [ self isRunning not ]
 ]
 
+{ #category : #accessing }
+PlpoGtRemoteRunner >> defaultConnectionStrategy [
+
+	^ self proxyPerform: #defaultConnectionStrategy
+]
+
 { #category : #testing }
 PlpoGtRemoteRunner >> isIdle [
 
