@@ -194,15 +194,15 @@ GtRrStompMqProcessor >> isRunning [
 ]
 
 { #category : #testing }
-GtRrStompMqProcessor >> isStopRequested [
-
-	^ state = #stopRequested
-]
-
-{ #category : #testing }
 GtRrStompMqProcessor >> isStopped [
 
 	^ state = #stopped
+]
+
+{ #category : #testing }
+GtRrStompMqProcessor >> isStopRequested [
+
+	^ state = #stopRequested
 ]
 
 { #category : #accessing }
@@ -554,6 +554,13 @@ GtRrStompMqProcessor >> subscribeToCommandMessages [
 	commandSubscription clientIndividualAck.
 	commandSubscription prefetchCount: 1.
 	mqClient writeWithReceipt: commandSubscription subscribeFrame.
+]
+
+{ #category : #'start - stop' }
+GtRrStompMqProcessor >> subscribeToMessagesPrefetchCount: anInteger [
+	"29.05.25 temporary backward compatibility"
+
+	^ self subscribeToTaskMessages
 ]
 
 { #category : #'start - stop' }

@@ -185,6 +185,14 @@ GtRrMqServer >> stompMqAdditonalOptions [
 ]
 
 { #category : #accessing }
+GtRrMqServer >> stompMqQueueNames [
+	"Answer the queue names as passed to the worker on the command line.
+	29.05.25 temporary backward compatibility"
+	
+	^ self stompMqQueueNamesAttribute
+]
+
+{ #category : #accessing }
 GtRrMqServer >> stompMqQueueNamesAttribute [
 	"Answer the queue names as passed to the worker on the command line"
 	
