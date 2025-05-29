@@ -20,7 +20,9 @@ Class {
 		'socketAccess',
 		'state',
 		'listenerStopping',
-		'callbackProcess'
+		'callbackProcess',
+		'taskCallback',
+		'commandCallback'
 	],
 	#classVars : [
 		'DefaultHost',
@@ -107,6 +109,16 @@ GtRrStompMqProcessor class >> workerControlTopicNameFor: workerId [
 ]
 
 { #category : #accessing }
+GtRrStompMqProcessor >> commandCallback [
+	^ commandCallback
+]
+
+{ #category : #accessing }
+GtRrStompMqProcessor >> commandCallback: anObject [
+	commandCallback := anObject
+]
+
+{ #category : #accessing }
 GtRrStompMqProcessor >> commandChannelName [
 	^ commandChannelName
 ]
@@ -165,6 +177,11 @@ GtRrStompMqProcessor >> initialize [
 	rpcRegistry := Dictionary new.
 	state := #notStarted.
 	listenerStopping := false.
+	"Define callbacks as Blocks so they can be modified for testing"
+	taskCallback := [ :mqMessage :gtMessage :anOwner |
+		self processTaskMqMessage: mqMessage gtMessage: gtMessage owner: anOwner ].
+	commandCallback := [ :mqMessage :gtMessage :anOwner |
+		self processCommandMqMessage: mqMessage gtMessage: gtMessage owner: anOwner ].
 ]
 
 { #category : #testing }
@@ -295,9 +312,9 @@ GtRrStompMqProcessor >> processMqMessage: mqMessage [
 		encodedSize: mqMessage body size;
 		emit.
 	mqMessage destination = commandChannelName ifTrue:
-		[ ^ self processCommandMqMessage: mqMessage  gtMessage: gtMessage owner: owner ].
+		[ ^ commandCallback value: mqMessage  value: gtMessage value: owner ].
 	mqMessage destination = messageChannelName ifTrue:
-		[ ^ self processTaskMqMessage: mqMessage gtMessage: gtMessage owner: owner ].
+		[ ^ taskCallback value: mqMessage value: gtMessage value: owner ].
 	self error: 'Unrecognised message destination: ', mqMessage destination asString.
 ]
 
@@ -464,18 +481,9 @@ GtRrStompMqProcessor >> start [
 	state := #starting.
 	listenerStopping := false.
 	self connect.
-	self startCommandSubscription.
+	self subscribeToCommandMessages.
 	self startMqListener.
 	state := #running
-]
-
-{ #category : #'start - stop' }
-GtRrStompMqProcessor >> startCommandSubscription [
-
-	commandSubscription := mqClient newSubscriptionTo: commandChannelName.
-	commandSubscription clientIndividualAck.
-	commandSubscription prefetchCount: 1.
-	mqClient writeWithReceipt: commandSubscription subscribeFrame.
 ]
 
 { #category : #'start - stop' }
@@ -540,13 +548,12 @@ GtRrStompMqProcessor >> stopRequested [
 ]
 
 { #category : #'start - stop' }
-GtRrStompMqProcessor >> subscribeToMessagesPrefetchCount: prefetchCountInteger [
+GtRrStompMqProcessor >> subscribeToCommandMessages [
 
-	messageSubscription:= mqClient newSubscriptionTo: messageChannelName.
-	messageSubscription clientIndividualAck.
-	prefetchCountInteger ifNotNil:
-		[ messageSubscription prefetchCount: prefetchCountInteger ].
-	self write: messageSubscription subscribeFrame.
+	commandSubscription := mqClient newSubscriptionTo: commandChannelName.
+	commandSubscription clientIndividualAck.
+	commandSubscription prefetchCount: 1.
+	mqClient writeWithReceipt: commandSubscription subscribeFrame.
 ]
 
 { #category : #'start - stop' }
@@ -558,6 +565,16 @@ GtRrStompMqProcessor >> subscribeToTaskMessages [
 	messageSubscription clientIndividualAck.
 	messageSubscription prefetchCount: 1.
 	self write: messageSubscription subscribeFrame.
+]
+
+{ #category : #accessing }
+GtRrStompMqProcessor >> taskCallback [
+	^ taskCallback
+]
+
+{ #category : #accessing }
+GtRrStompMqProcessor >> taskCallback: anObject [
+	taskCallback := anObject
 ]
 
 { #category : #'primitive operations' }

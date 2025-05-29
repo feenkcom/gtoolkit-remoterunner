@@ -12,6 +12,37 @@ Class {
 	#category : #'RemoteRunner-MQ-Runner'
 }
 
+{ #category : #accessing }
+GtRrMqServer class >> runnerControlChannelName [
+
+	^ '/queue/', NetNameResolver localHostName, '_runner_control'
+]
+
+{ #category : #accessing }
+GtRrMqServer class >> stompMqQueueNamesAttribute [
+	"Answer the queue names as passed to the worker on the command line"
+	
+	^ String streamContents: [ :sStream |
+		sStream 
+			<< self runnerControlChannelName;
+			<< ':';
+			<< self taskQueueName;
+			<< ':';
+			<< self taskResultName ]
+]
+
+{ #category : #accessing }
+GtRrMqServer class >> taskQueueName [
+
+	^ '/queue/', NetNameResolver localHostName, '_task_queue'
+]
+
+{ #category : #accessing }
+GtRrMqServer class >> taskResultName [
+
+	^ '/queue/', NetNameResolver localHostName, '_task_result'
+]
+
 { #category : #'as yet unclassified' }
 GtRrMqServer >> gtRrStopOnWorker [
 
@@ -82,9 +113,10 @@ GtRrMqServer >> remoteRunner: anObject [
 
 { #category : #accessing }
 GtRrMqServer >> runnerControlChannelName [
+	"This is just caching the value, and should not be changed from what the class method returns."
 
 	^ runnerControlChannelName ifNil: 
-		[ runnerControlChannelName := '/queue/', NetNameResolver localHostName, '_runner_control' ]
+		[ runnerControlChannelName := self class runnerControlChannelName ]
 ]
 
 { #category : #'as yet unclassified' }
@@ -148,19 +180,13 @@ GtRrMqServer >> stompMqAdditonalOptions [
 			nextPut: '--connectionStrategy';
 			nextPut: 'stompMq';
 			nextPut: '--attribute';
-			nextPut: 'stompMqQueueNames';
-			nextPut: (String streamContents: [ :sStream |
-				sStream 
-					<< self runnerControlChannelName;
-					<< ':';
-					<< self taskQueueName;
-					<< ':';
-					<< self taskResultName ]) ]
+			nextPut: GtRrWorker stompMqQueueNames;
+			nextPut: self stompMqQueueNamesAttribute ]
 ]
 
 { #category : #accessing }
-GtRrMqServer >> stompMqQueueNames [
-	"Answer the control channel, task and result queue names, colon separated"
+GtRrMqServer >> stompMqQueueNamesAttribute [
+	"Answer the queue names as passed to the worker on the command line"
 	
 	^ String streamContents: [ :sStream |
 		sStream 
@@ -193,13 +219,15 @@ GtRrMqServer >> stopWorker: workerId [
 
 { #category : #accessing }
 GtRrMqServer >> taskQueueName [
+	"This is just caching the value, and should not be changed from what the class method returns."
 
 	^ taskQueueName ifNil: 
-		[ taskQueueName := '/queue/', NetNameResolver localHostName, '_task_queue' ]
+		[ taskQueueName := self class taskQueueName ]
 ]
 
 { #category : #accessing }
 GtRrMqServer >> taskResultName [
+	"This is just caching the value, and should not be changed from what the class method returns."
 
 	^ taskResultName ifNil: 
 		[ taskResultName := '/queue/', NetNameResolver localHostName, '_task_result' ]

@@ -193,6 +193,12 @@ GtRrWorker class >> serverSocketAddress: aString [
 	^ worker.
 ]
 
+{ #category : #'attribute names' }
+GtRrWorker class >> stompMqQueueNames [
+
+	^ 'stompMqQueueNames'
+]
+
 { #category : #observer }
 GtRrWorker >> addObserver [
 	^self connectDuring: [:application |

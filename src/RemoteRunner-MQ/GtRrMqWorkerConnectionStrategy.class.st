@@ -80,7 +80,7 @@ GtRrMqWorkerConnectionStrategy >> nextTask [
 			taskContextId: nextTask taskContextId;
 			taskId: nextTask taskId;
 			workerId: worker uid)
-		to: self runnerControlChannelName.
+		to: self taskResultName.
 	^ nextTask.
 ]
 
@@ -147,7 +147,7 @@ GtRrMqWorkerConnectionStrategy >> retrieveChangesFromServerWith: myself [
 GtRrMqWorkerConnectionStrategy >> runnerControlChannelName [
 
 	^ runnerControlChannelName ifNil: 
-		[ runnerControlChannelName := (':' split: (worker attributes at: 'stompMqQueueNames')) first ]
+		[ runnerControlChannelName := (':' split: (worker attributes at: GtRrWorker stompMqQueueNames)) first ]
 ]
 
 { #category : #private }
@@ -274,14 +274,14 @@ GtRrMqWorkerConnectionStrategy >> taskFailed: aTaskContext with: anError [
 GtRrMqWorkerConnectionStrategy >> taskQueueName [
 
 	^ taskQueueName ifNil: 
-		[ taskQueueName := (':' split: (worker attributes at: 'stompMqQueueNames')) second ]
+		[ taskQueueName := (':' split: (worker attributes at: GtRrWorker stompMqQueueNames)) second ]
 ]
 
 { #category : #accessing }
 GtRrMqWorkerConnectionStrategy >> taskResultName [
 
 	^ taskResultName ifNil: 
-		[ taskResultName := (':' split: (worker attributes at: 'stompMqQueueNames')) third ]
+		[ taskResultName := (':' split: (worker attributes at: GtRrWorker stompMqQueueNames)) third ]
 ]
 
 { #category : #'start-stop' }

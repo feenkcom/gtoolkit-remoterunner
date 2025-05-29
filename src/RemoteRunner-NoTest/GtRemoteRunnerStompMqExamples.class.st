@@ -10,7 +10,6 @@ GtRemoteRunnerStompMqExamples >> mqCommandMessage [
 	<gtExample>
 	| worker workerCommandChannel workerSemaphore runner runnerCommandChannel gtMessage |
 
-	self purgeQueues.
 	workerSemaphore := Semaphore new.
 	workerCommandChannel  := '/topic/gtrrWorkerControl.1'.
 	worker := GtRrStompMqProcessor new
@@ -37,7 +36,6 @@ GtRemoteRunnerStompMqExamples >> mqCommandRpcMessage [
 	<gtExample>
 	| worker workerCommandChannel runner runnerCommandChannel result promise |
 
-	self purgeQueues.
 	workerCommandChannel  := '/topic/gtrrWorkerControl.1'.
 	worker := GtRrStompMqProcessor new
 		commandChannelName: workerCommandChannel.
@@ -65,7 +63,6 @@ GtRemoteRunnerStompMqExamples >> mqTaskMessage [
 	<gtExample>
 	| worker workerCommandChannel workerSemaphore runner runnerCommandChannel times |
 
-	self purgeQueues.
 	times := OrderedCollection new: 5.
 	workerSemaphore := Semaphore new.
 	workerCommandChannel  := '/topic/gtrrWorkerControl.1'.
@@ -73,38 +70,27 @@ GtRemoteRunnerStompMqExamples >> mqTaskMessage [
 		commandChannelName: workerCommandChannel;
 		commandCallback: [ :mqMessage1 :gtMessage1 :owner1 |
 			self error: 'Shouldn''t be called' ];
-		messageChannelName: GtRrStompMqProcessor taskQueueName;
-		messageCallback: [ :mqMessage1 :gtMessage1 :owner1 |
+		messageChannelName: GtRrMqServer taskQueueName;
+		taskCallback: [ :mqMessage1 :gtMessage1 :owner1 |
 			gtMessage1 seconds seconds wait.
 			times add: Time microsecondClockValue.
 			times size = 5 ifTrue:
 				[ workerSemaphore signal ].
 			worker write: mqMessage1 ackFrame ].
-	runnerCommandChannel := '/queue/runner_control'.
+	runnerCommandChannel := GtRrMqServer runnerControlChannelName.
 	runner := GtRrStompMqProcessor new
 		commandChannelName: runnerCommandChannel.
 
-	worker start; subscribeToMessages.
+	[ worker start; subscribeToTaskMessages.
 	runner start.
-
-	[ 5 timesRepeat:
+	5 timesRepeat:
 		[ runner sendGtMessage: (GtRrWaitMessage new seconds: 1)
-			to: GtRrStompMqProcessor taskQueueName ].
+			to: GtRrMqServer taskQueueName ].
 	self waitOn: workerSemaphore for: 20 description: 'Command not received'.
 	self assert: times size equals: 5.
 	self assert: (times last - times first / 1000) > 4000
 		description: 'Message returned prematurely'. ]
-			ensure: [ worker stop. runner stop. ].
-]
-
-{ #category : #'private - helpers' }
-GtRemoteRunnerStompMqExamples >> purgeQueues [
-	"Purge the queues that require manual acknowledgement"
-
-	GtRrStompMqProcessor new
-		purgeQueue: GtRrStompMqProcessor taskQueueName;
-		purgeQueue: GtRrStompMqProcessor runnerControlChannelName;
-		purgeQueue: GtRrStompMqProcessor taskResultName.
+			ensure: [ worker ifNotNil: #stop. runner ifNotNil: #stop. ].
 ]
 
 { #category : #'private - helpers' }
@@ -121,11 +107,16 @@ GtRemoteRunnerStompMqExamples >> simpleRunner [
 		serverManager: GtRrMqServerManager new;
 		workerManager: (GtRrWorkerManager new
 			forStompMq;
+			addArguments: {
+				'--attribute'.
+				GtRrWorker stompMqQueueNames.
+				GtRrMqServer stompMqQueueNamesAttribute. };
 			autoRestart: false;
 			changesSync: false;
 			poolSize: 1).
 	remoteRunner := GtRemoteRunnerMq new.
 	remoteRunner managerStartupAndShutdown: manager.
+	remoteRunner startLogging.
 
 	self assert: remoteRunner taskQueue size equals: 0.
 	self assert: remoteRunner currentlyExecutingJobs size equals: 0.
@@ -135,7 +126,12 @@ GtRemoteRunnerStompMqExamples >> simpleRunner [
 
 { #category : #'as yet unclassified' }
 GtRemoteRunnerStompMqExamples >> workerForRunner: aGtRemoteRunner [
+	| newWorker |
 
-	^ GtRrWorker new
-		connectionStrategy: GtRrMqWorkerConnectionStrategy new
+	newWorker := GtRrWorker new connectionStrategy: GtRrMqWorkerConnectionStrategy new.
+	newWorker attributes
+		at: 'changesSync' put: false;
+		at: 'stompMqQueueNames' put: GtRrMqServer stompMqQueueNamesAttribute;
+		at: 'workerJobId' put: 'anyJob'.
+	^ newWorker
 ]

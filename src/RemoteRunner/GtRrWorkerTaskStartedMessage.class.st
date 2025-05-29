@@ -34,6 +34,7 @@ GtRrWorkerTaskStartedMessage >> processMq: mqMessage processor: aGtRrProcessor f
 									taskContextId: taskContextId;
 									taskId: taskId;
 									emit ] ] ].
+	aGtRrProcessor write: mqMessage ackFrame.
 ]
 
 { #category : #accessing }
