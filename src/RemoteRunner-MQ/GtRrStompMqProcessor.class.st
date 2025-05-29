@@ -6,8 +6,6 @@ Class {
 		'mqHostName',
 		'mqHeartbeatProcess',
 		'mqListener',
-		'messageCallback',
-		'commandCallback',
 		'commandSubscription',
 		'messageSubscription',
 		'commandChannelName',
@@ -21,7 +19,8 @@ Class {
 		'closingException',
 		'socketAccess',
 		'state',
-		'listenerStopping'
+		'listenerStopping',
+		'callbackProcess'
 	],
 	#classVars : [
 		'DefaultHost',
@@ -108,16 +107,6 @@ GtRrStompMqProcessor class >> workerControlTopicNameFor: workerId [
 ]
 
 { #category : #accessing }
-GtRrStompMqProcessor >> commandCallback [
-	^ commandCallback
-]
-
-{ #category : #accessing }
-GtRrStompMqProcessor >> commandCallback: anObject [
-	commandCallback := anObject
-]
-
-{ #category : #accessing }
 GtRrStompMqProcessor >> commandChannelName [
 	^ commandChannelName
 ]
@@ -176,15 +165,6 @@ GtRrStompMqProcessor >> initialize [
 	rpcRegistry := Dictionary new.
 	state := #notStarted.
 	listenerStopping := false.
-	commandCallback := messageCallback :=
-		[ :mqMessage :gtMessage :anOwner |
-			GtRrStompMqCallbackStartingSignal new
-				gtMessagePrintString: gtMessage printString;
-				emit.
-			gtMessage processMq: mqMessage processor: self for: anOwner.
-			GtRrStompMqCallbackCompletedSignal new
-				gtMessagePrintString: gtMessage printString;
-				emit. ].
 ]
 
 { #category : #testing }
@@ -197,31 +177,21 @@ GtRrStompMqProcessor >> isRunning [
 ]
 
 { #category : #testing }
-GtRrStompMqProcessor >> isStopped [
-
-	^ state = #stopped
-]
-
-{ #category : #testing }
 GtRrStompMqProcessor >> isStopRequested [
 
 	^ state = #stopRequested
+]
+
+{ #category : #testing }
+GtRrStompMqProcessor >> isStopped [
+
+	^ state = #stopped
 ]
 
 { #category : #accessing }
 GtRrStompMqProcessor >> localAddress [
 
 	^ mqClient medium socket localAddress
-]
-
-{ #category : #accessing }
-GtRrStompMqProcessor >> messageCallback [
-	^ messageCallback
-]
-
-{ #category : #accessing }
-GtRrStompMqProcessor >> messageCallback: anObject [
-	messageCallback := anObject
 ]
 
 { #category : #accessing }
@@ -300,6 +270,21 @@ GtRrStompMqProcessor >> privateStop [
 	state := #stopped.
 ]
 
+{ #category : #'as yet unclassified' }
+GtRrStompMqProcessor >> processCommandMqMessage: mqMessage gtMessage: gtMessage owner: anOwner [
+
+	GtRrStompMqTaskCallbackStartingSignal new
+		gtMessagePrintString: gtMessage printString;
+		emit.
+	"Save the process that runs the callback for debugging"
+	callbackProcess := [ [ gtMessage processMq: mqMessage processor: self for: anOwner ]
+		ensure: [ self write: mqMessage ackFrame ] ]
+			forkNamed: 'GtRrMq Callback Process'.
+	GtRrStompMqTaskCallbackCompletedSignal new
+		gtMessagePrintString: gtMessage printString;
+		emit.
+]
+
 { #category : #private }
 GtRrStompMqProcessor >> processMqMessage: mqMessage [ 
 	| gtMessage |
@@ -310,12 +295,22 @@ GtRrStompMqProcessor >> processMqMessage: mqMessage [
 		encodedSize: mqMessage body size;
 		emit.
 	mqMessage destination = commandChannelName ifTrue:
-		[ ^ commandCallback value: mqMessage  value: gtMessage value: owner ].
+		[ ^ self processCommandMqMessage: mqMessage  gtMessage: gtMessage owner: owner ].
 	mqMessage destination = messageChannelName ifTrue:
-		[ messageCallback value: mqMessage value: gtMessage value: owner.
-		"mqClient write: mqMessage ackFrame."
-		^ self ].
+		[ ^ self processTaskMqMessage: mqMessage gtMessage: gtMessage owner: owner ].
 	self error: 'Unrecognised message destination: ', mqMessage destination asString.
+]
+
+{ #category : #'as yet unclassified' }
+GtRrStompMqProcessor >> processTaskMqMessage: mqMessage gtMessage: gtMessage owner: anOwner [
+
+	GtRrStompMqTaskCallbackStartingSignal new
+		gtMessagePrintString: gtMessage printString;
+		emit.
+	gtMessage processMq: mqMessage processor: self for: anOwner.
+	GtRrStompMqTaskCallbackCompletedSignal new
+		gtMessagePrintString: gtMessage printString;
+		emit.
 ]
 
 { #category : #accessing }
@@ -333,15 +328,6 @@ GtRrStompMqProcessor >> purgeQueue: queueName [
 
 	self assert: mqClient isNil
 		description: 'Purging is only supported while not connected'.
-	commandCallback := messageCallback :=
-		[ :mqMessage :gtMessage :anOwner |
-			GtRrStompMqCallbackStartingSignal new
-				gtMessagePrintString: gtMessage printString;
-				emit.
-			GtRrStompMqCallbackCompletedSignal new
-				gtMessagePrintString: gtMessage printString;
-				emit. ].
-
 	self connect.
 
 	subscription := mqClient newSubscriptionTo: queueName.
@@ -472,19 +458,24 @@ GtRrStompMqProcessor >> setStopRequested [
 { #category : #'start - stop' }
 GtRrStompMqProcessor >> start [
 	"Start the receiver.
-	Message subscription must be started separately, to allow for handshaking over the command channel"
+	Task message subscription must be started separately, to allow for handshaking over the command channel"
 
+	"Subscribe to runner command messages"
 	state := #starting.
 	listenerStopping := false.
 	self connect.
-
-	"Subscribe to runner command messages"
-	commandSubscription := mqClient newSubscriptionTo: commandChannelName.
-	commandSubscription autoAck.
-	mqClient writeWithReceipt: commandSubscription subscribeFrame.
-
+	self startCommandSubscription.
 	self startMqListener.
-	state := #running.
+	state := #running
+]
+
+{ #category : #'start - stop' }
+GtRrStompMqProcessor >> startCommandSubscription [
+
+	commandSubscription := mqClient newSubscriptionTo: commandChannelName.
+	commandSubscription clientIndividualAck.
+	commandSubscription prefetchCount: 1.
+	mqClient writeWithReceipt: commandSubscription subscribeFrame.
 ]
 
 { #category : #'start - stop' }
@@ -549,18 +540,23 @@ GtRrStompMqProcessor >> stopRequested [
 ]
 
 { #category : #'start - stop' }
-GtRrStompMqProcessor >> subscribeToMessages [
-
-	self subscribeToMessagesPrefetchCount: nil
-]
-
-{ #category : #'start - stop' }
 GtRrStompMqProcessor >> subscribeToMessagesPrefetchCount: prefetchCountInteger [
 
 	messageSubscription:= mqClient newSubscriptionTo: messageChannelName.
 	messageSubscription clientIndividualAck.
 	prefetchCountInteger ifNotNil:
 		[ messageSubscription prefetchCount: prefetchCountInteger ].
+	self write: messageSubscription subscribeFrame.
+]
+
+{ #category : #'start - stop' }
+GtRrStompMqProcessor >> subscribeToTaskMessages [
+	"Subscribe to task messages.
+	This is left to the client application to allow for handshaking over the command channel."
+
+	messageSubscription:= mqClient newSubscriptionTo: messageChannelName.
+	messageSubscription clientIndividualAck.
+	messageSubscription prefetchCount: 1.
 	self write: messageSubscription subscribeFrame.
 ]
 

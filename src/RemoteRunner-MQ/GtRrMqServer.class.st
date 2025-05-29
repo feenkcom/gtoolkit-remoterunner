@@ -136,7 +136,7 @@ GtRrMqServer >> start [
 		commandChannelName: self runnerControlChannelName;
 		messageChannelName: self taskResultName.
 	mqProcessor start.
-	mqProcessor subscribeToMessages.
+	mqProcessor subscribeToTaskMessages.
 ]
 
 { #category : #accessing }

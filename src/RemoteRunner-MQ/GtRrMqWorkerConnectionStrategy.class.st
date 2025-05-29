@@ -170,10 +170,18 @@ GtRrMqWorkerConnectionStrategy >> setNextTask: aGtRrTask ackFrame: anAckFrame [
 	"Save the supplied task & ackFrame and notify the worker that the task is available.
 	The ackFrame will be sent back to the MQ to notify it that the task is complete and the next one can be delivered."
 
+Stdio stdout
+	<< Time now asString;
+	<< ': set next task start';
+	lf.
 	self assert: nextTask isNil.
 	nextTask := aGtRrTask.
 	ackFrame := anAckFrame.
 	nextTaskSemaphore signal.
+Stdio stdout
+	<< Time now asString;
+	<< ': set next task done';
+	lf.
 ]
 
 { #category : #accessing }
@@ -203,7 +211,7 @@ GtRrMqWorkerConnectionStrategy >> start [
 		at: #workerIpAddress
 		ifAbsentPut: [ mqProcessor localAddress ].
 	worker registerWith: self.
-	mqProcessor subscribeToMessagesPrefetchCount: 1.
+	mqProcessor subscribeToTaskMessages.
 ]
 
 { #category : #'start-stop' }
@@ -236,6 +244,7 @@ GtRrMqWorkerConnectionStrategy >> taskDone: aTaskContext with: anObject [
 		executionData: (self executionDataFromTaskContext:  aTaskContext);
 		result: anObject.
 	mqProcessor sendGtMessage: taskDoneMessage to: self taskResultName.
+	"Ensure that nextTask and ackFrame are nil'd before writing in case the next message starts before this one finishes"
 	currentAckFrame := ackFrame.
 	nextTask := ackFrame := nil.
 	currentAckFrame ifNotNil:

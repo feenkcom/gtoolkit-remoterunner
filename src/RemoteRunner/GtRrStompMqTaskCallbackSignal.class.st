@@ -1,5 +1,5 @@
 Class {
-	#name : #GtRrStompMqCallbackSignal,
+	#name : #GtRrStompMqTaskCallbackSignal,
 	#superclass : #GtRemoteRunnerSignal,
 	#instVars : [
 		'gtMessagePrintString'
@@ -8,17 +8,17 @@ Class {
 }
 
 { #category : #accessing }
-GtRrStompMqCallbackSignal >> gtMessagePrintString [
+GtRrStompMqTaskCallbackSignal >> gtMessagePrintString [
 	^ gtMessagePrintString
 ]
 
 { #category : #accessing }
-GtRrStompMqCallbackSignal >> gtMessagePrintString: anObject [
+GtRrStompMqTaskCallbackSignal >> gtMessagePrintString: anObject [
 	gtMessagePrintString := anObject
 ]
 
 { #category : #printing }
-GtRrStompMqCallbackSignal >> printOneLineContentsOn: aStream [
+GtRrStompMqTaskCallbackSignal >> printOneLineContentsOn: aStream [
 
 	super printOneLineContentsOn: aStream.
 	aStream
@@ -27,7 +27,7 @@ GtRrStompMqCallbackSignal >> printOneLineContentsOn: aStream [
 ]
 
 { #category : #accessing }
-GtRrStompMqCallbackSignal >> signalTypeLabel [
+GtRrStompMqTaskCallbackSignal >> signalTypeLabel [
 
 	^ 'GtRrStompMqCallbackSignal'
 ]
