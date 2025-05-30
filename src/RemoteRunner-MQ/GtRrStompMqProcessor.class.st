@@ -22,12 +22,14 @@ Class {
 		'listenerStopping',
 		'callbackProcess',
 		'taskCallback',
-		'commandCallback'
+		'commandCallback',
+		'largeMessageUrl'
 	],
 	#classVars : [
 		'DefaultHost',
 		'DefaultPassword',
-		'DefaultUsername'
+		'DefaultUsername',
+		'MaxMessageSize'
 	],
 	#category : #'RemoteRunner-MQ-Runner'
 }
@@ -83,6 +85,16 @@ GtRrStompMqProcessor class >> hostNameFrom: aHostString [
 	segments size > 2 ifTrue: [ 
 		self error: aHostString printString , ' must be formatted <host>[:<port>]' ].
 	^ segments first.
+]
+
+{ #category : #accessing }
+GtRrStompMqProcessor class >> maxMessageSize [
+	^MaxMessageSize ifNil: [ StampConstants maxBodySize]
+]
+
+{ #category : #accessing }
+GtRrStompMqProcessor class >> maxMessageSize: anObject [
+	MaxMessageSize := anObject
 ]
 
 { #category : #accessing }
@@ -194,15 +206,26 @@ GtRrStompMqProcessor >> isRunning [
 ]
 
 { #category : #testing }
+GtRrStompMqProcessor >> isStopRequested [
+
+	^ state = #stopRequested
+]
+
+{ #category : #testing }
 GtRrStompMqProcessor >> isStopped [
 
 	^ state = #stopped
 ]
 
-{ #category : #testing }
-GtRrStompMqProcessor >> isStopRequested [
+{ #category : #accessing }
+GtRrStompMqProcessor >> largeMessageUrl [
+	^ largeMessageUrl
+]
 
-	^ state = #stopRequested
+{ #category : #accessing }
+GtRrStompMqProcessor >> largeMessageUrl: aZnUrl [
+
+	largeMessageUrl := aZnUrl asZnUrl
 ]
 
 { #category : #accessing }
@@ -459,11 +482,20 @@ GtRrStompMqProcessor >> sendRpcBlockClosure: aBlockClosure to: commandDestinatio
 { #category : #private }
 GtRrStompMqProcessor >> serializedGtMessage: aGtRrMessage [
 	"Answer the serialised message.
-	Subclasses may overwrite this to send the message via an external medium, e.g. s3"
+	If the buffer is >= MaxMessageSize, send the message via the specified store Url."
+	| messageBuffer s3Message |
 
-	^ GtWireEncoder onByteArray
+	messageBuffer := GtWireEncoder onByteArray
 		nextPut: aGtRrMessage;
-		contents
+		contents.
+	messageBuffer size < self class maxMessageSize ifTrue: [ ^ messageBuffer ].
+
+	largeMessageUrl ifNil: [ self error: 'MQ large message store not configured' ].
+
+	s3Message := self storeLargeMessage: messageBuffer.
+	^ GtWireEncoder onByteArray
+		nextPut: s3Message;
+		contents.
 ]
 
 { #category : #'start - stop' }
@@ -545,6 +577,21 @@ GtRrStompMqProcessor >> stopRequested [
 	owner 
 		ifNil: [ self stop ]
 		ifNotNil: [ owner stopRequested ].
+]
+
+{ #category : #private }
+GtRrStompMqProcessor >> storeLargeMessage: messageBuffer [
+
+	largeMessageUrl scheme = #s3 ifTrue:
+		[ ^ self storeLargeS3Message: messageBuffer ].
+
+	self error: 'Unrecognized Scheme: ', largeMessageUrl scheme asString.
+]
+
+{ #category : #private }
+GtRrStompMqProcessor >> storeLargeS3Message: messageBuffer [
+
+	^ GtRrS3Message storeBuffer: messageBuffer in: largeMessageUrl.
 ]
 
 { #category : #'start - stop' }

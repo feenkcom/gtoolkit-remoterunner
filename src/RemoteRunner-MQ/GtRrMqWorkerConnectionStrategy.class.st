@@ -192,14 +192,10 @@ GtRrMqWorkerConnectionStrategy >> socketAddress: aString [
 
 { #category : #'start-stop' }
 GtRrMqWorkerConnectionStrategy >> start [
-	| mqProcessorClass |
 
 	self assert: mqProcessor isNil.
 
-	mqProcessorClass := mqS3MessageBucket
-		ifNil: [ GtRrStompMqProcessor ]
-		ifNotNil: [ GtRrStompMqS3Processor ].
-	mqProcessor := mqProcessorClass new
+	mqProcessor := GtRrStompMqProcessor new
 		owner: self;
 		mqHostName: self mqHostName;
 		mqPort: self mqPortNumber;
