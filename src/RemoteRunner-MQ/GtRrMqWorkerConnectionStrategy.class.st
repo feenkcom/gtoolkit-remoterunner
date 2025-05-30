@@ -47,18 +47,44 @@ GtRrMqWorkerConnectionStrategy >> initialize [
 
 	super initialize.
 	nextTaskSemaphore := Semaphore new.
+	mqProcessor := GtRrStompMqProcessor new
+		owner: self.
 ]
 
 { #category : #'start-stop' }
 GtRrMqWorkerConnectionStrategy >> mqHostName [
 
-	^ GtRrStompMqProcessor hostNameFrom: mqHost
+	^ mqProcessor mqHostName
 ]
 
 { #category : #'start-stop' }
-GtRrMqWorkerConnectionStrategy >> mqPortNumber [
+GtRrMqWorkerConnectionStrategy >> mqHostName: aString [
 
-	^ GtRrStompMqProcessor portFrom: mqHost
+	mqProcessor mqHostName: aString
+]
+
+{ #category : #'start-stop' }
+GtRrMqWorkerConnectionStrategy >> mqPassword [
+
+	^ mqProcessor mqPassword
+]
+
+{ #category : #'start-stop' }
+GtRrMqWorkerConnectionStrategy >> mqPassword: aString [
+
+	mqProcessor mqPassword: aString
+]
+
+{ #category : #'start-stop' }
+GtRrMqWorkerConnectionStrategy >> mqPort [
+
+	^ mqProcessor mqPort
+]
+
+{ #category : #'start-stop' }
+GtRrMqWorkerConnectionStrategy >> mqPort: anInteger [
+
+	mqProcessor mqPort: anInteger
 ]
 
 { #category : #accessing }
@@ -69,6 +95,18 @@ GtRrMqWorkerConnectionStrategy >> mqS3MessageBucket [
 { #category : #accessing }
 GtRrMqWorkerConnectionStrategy >> mqS3MessageBucket: aZnUrl [
 	mqS3MessageBucket := aZnUrl
+]
+
+{ #category : #'start-stop' }
+GtRrMqWorkerConnectionStrategy >> mqUsername [
+
+	^ mqProcessor mqUsername
+]
+
+{ #category : #'start-stop' }
+GtRrMqWorkerConnectionStrategy >> mqUsername: aString [
+
+	mqProcessor mqUsername: aString
 ]
 
 { #category : #'api - running' }
@@ -193,15 +231,10 @@ GtRrMqWorkerConnectionStrategy >> socketAddress: aString [
 { #category : #'start-stop' }
 GtRrMqWorkerConnectionStrategy >> start [
 
-	self assert: mqProcessor isNil.
-
-	mqProcessor := GtRrStompMqProcessor new
-		owner: self;
-		mqHostName: self mqHostName;
-		mqPort: self mqPortNumber;
+	mqProcessor
 		commandChannelName: self workerControlTopicName;
 		messageChannelName: self taskQueueName.
-	mqS3MessageBucket ifNotNil: [ mqProcessor s3Bucket: mqS3MessageBucket ].
+	mqS3MessageBucket ifNotNil: [ mqProcessor largeMessageUrl: mqS3MessageBucket ].
 	mqProcessor start.
 	worker attributes
 		at: #workerIpAddress

@@ -62,6 +62,14 @@ GtRrMqServer >> handleMqListenerException: closingException [
 			"mqProcessor reconnect" ].
 ]
 
+{ #category : #'as yet unclassified' }
+GtRrMqServer >> initialize [
+
+	super initialize.
+	mqProcessor := GtRrStompMqProcessor new
+		owner: self.
+]
+
 { #category : #testing }
 GtRrMqServer >> isRunning [
 
@@ -71,18 +79,54 @@ GtRrMqServer >> isRunning [
 
 { #category : #accessing }
 GtRrMqServer >> mqHostName [
-	^ mqHostName ifNil: [ 'localhost' ]
+	^ mqProcessor mqHostName
 ]
 
 { #category : #accessing }
-GtRrMqServer >> mqHostName: anObject [
-	mqHostName := anObject
+GtRrMqServer >> mqHostName: aString [
+
+	mqProcessor mqHostName: aString
+]
+
+{ #category : #accessing }
+GtRrMqServer >> mqPassword [
+
+	^ mqProcessor mqPassword
+]
+
+{ #category : #accessing }
+GtRrMqServer >> mqPassword: aString [
+
+	mqProcessor mqPassword: aString
+]
+
+{ #category : #accessing }
+GtRrMqServer >> mqPort [
+	^ mqProcessor mqPort
+]
+
+{ #category : #accessing }
+GtRrMqServer >> mqPort: anInteger [
+
+	mqProcessor mqPort: anInteger
 ]
 
 { #category : #private }
 GtRrMqServer >> mqProcessor [
 
 	^ [ :message | self processMqMessage: message ]
+]
+
+{ #category : #accessing }
+GtRrMqServer >> mqUsername [
+
+	^ mqProcessor mqUsername
+]
+
+{ #category : #accessing }
+GtRrMqServer >> mqUsername: aString [
+
+	mqProcessor mqUsername: aString
 ]
 
 { #category : #accessing }
@@ -96,6 +140,10 @@ GtRrMqServer >> purgeQueues [
 	"Purge the permanent queues"
 
 	GtRrStompMqProcessor new
+		mqUsername: self mqUsername;
+		mqPassword: self mqPassword;
+		mqHostName: self mqHostName;
+		mqPort: self mqPort;
 		purgeQueue: self taskQueueName;
 		purgeQueue: self runnerControlChannelName;
 		purgeQueue: self taskResultName.
@@ -160,11 +208,9 @@ GtRrMqServer >> sendWorkerTaskContext: aWorkerTaskContext [
 { #category : #'start - stop' }
 GtRrMqServer >> start [
 
-	self assert: mqProcessor isNil.
 	self purgeQueues.
 
-	mqProcessor := GtRrStompMqProcessor new
-		owner: self;
+	mqProcessor
 		commandChannelName: self runnerControlChannelName;
 		messageChannelName: self taskResultName.
 	mqProcessor start.
