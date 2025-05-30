@@ -13,9 +13,15 @@ Class {
 }
 
 { #category : #accessing }
-GtRrMqServer class >> runnerControlChannelName [
+GtRrMqServer class >> runnerControlChannelBaseName [
 
-	^ '/queue/', NetNameResolver localHostName, '_runner_control'
+	^ NetNameResolver localHostName, '_runner_control'
+]
+
+{ #category : #accessing }
+GtRrMqServer class >> runnerControlChannelStompName [
+
+	^ '/queue/', self runnerControlChannelBaseName
 ]
 
 { #category : #accessing }
@@ -24,23 +30,35 @@ GtRrMqServer class >> stompMqQueueNamesAttribute [
 	
 	^ String streamContents: [ :sStream |
 		sStream 
-			<< self runnerControlChannelName;
+			<< self runnerControlChannelStompName;
 			<< ':';
-			<< self taskQueueName;
+			<< self taskQueueStompName;
 			<< ':';
-			<< self taskResultName ]
+			<< self taskResultStompName ]
 ]
 
 { #category : #accessing }
-GtRrMqServer class >> taskQueueName [
+GtRrMqServer class >> taskQueueBaseName [
 
-	^ '/queue/', NetNameResolver localHostName, '_task_queue'
+	^ NetNameResolver localHostName, '_task_queue'
 ]
 
 { #category : #accessing }
-GtRrMqServer class >> taskResultName [
+GtRrMqServer class >> taskQueueStompName [
 
-	^ '/queue/', NetNameResolver localHostName, '_task_result'
+	^ '/queue/', self taskQueueBaseName
+]
+
+{ #category : #accessing }
+GtRrMqServer class >> taskResultBaseName [
+
+	^ NetNameResolver localHostName, '_task_result'
+]
+
+{ #category : #accessing }
+GtRrMqServer class >> taskResultStompName [
+
+	^ '/queue/', self taskResultBaseName
 ]
 
 { #category : #'as yet unclassified' }
@@ -86,6 +104,13 @@ GtRrMqServer >> mqHostName [
 GtRrMqServer >> mqHostName: aString [
 
 	mqProcessor mqHostName: aString
+]
+
+{ #category : #'as yet unclassified' }
+GtRrMqServer >> mqMonitor [
+
+	^ GtRrRabbitMqMonitor new
+		mqServer: self
 ]
 
 { #category : #accessing }
@@ -138,15 +163,15 @@ GtRrMqServer >> newWorkerConnection [
 { #category : #'start - stop' }
 GtRrMqServer >> purgeQueues [
 	"Purge the permanent queues"
+	| rabbitManager |
 
-	GtRrStompMqProcessor new
-		mqUsername: self mqUsername;
-		mqPassword: self mqPassword;
-		mqHostName: self mqHostName;
-		mqPort: self mqPort;
-		purgeQueue: self taskQueueName;
-		purgeQueue: self runnerControlChannelName;
-		purgeQueue: self taskResultName.
+	rabbitManager := GtRrRabbitMqManager new
+		username: self mqUsername;
+		password: self mqPassword;
+		host: self mqHostName, ':15672';
+		purgeQueue: self class taskQueueBaseName vhost: '/';
+		purgeQueue: self class runnerControlChannelBaseName vhost: '/';
+		purgeQueue: self class taskResultBaseName vhost: '/'.
 ]
 
 { #category : #accessing }
@@ -160,11 +185,11 @@ GtRrMqServer >> remoteRunner: anObject [
 ]
 
 { #category : #accessing }
-GtRrMqServer >> runnerControlChannelName [
+GtRrMqServer >> runnerControlChannelStompName [
 	"This is just caching the value, and should not be changed from what the class method returns."
 
 	^ runnerControlChannelName ifNil: 
-		[ runnerControlChannelName := self class runnerControlChannelName ]
+		[ runnerControlChannelName := self class runnerControlChannelStompName ]
 ]
 
 { #category : #'as yet unclassified' }
@@ -199,7 +224,7 @@ GtRrMqServer >> sendWorkerTaskContext: aWorkerTaskContext [
 		emit.
 	taskMessage := GtRrRunnerTaskMessage new
 		task: aWorkerTaskContext.
-	mqProcessor sendGtMessage: taskMessage to: self taskQueueName.
+	mqProcessor sendGtMessage: taskMessage to: self taskQueueStompName.
 	GtRrMqQueueTaskCompletedSignal new
 		taskId: aWorkerTaskContext taskId;
 		emit.
@@ -211,8 +236,8 @@ GtRrMqServer >> start [
 	self purgeQueues.
 
 	mqProcessor
-		commandChannelName: self runnerControlChannelName;
-		messageChannelName: self taskResultName.
+		commandChannelName: self runnerControlChannelStompName;
+		messageChannelName: self taskResultStompName.
 	mqProcessor start.
 	mqProcessor subscribeToTaskMessages.
 ]
@@ -244,11 +269,11 @@ GtRrMqServer >> stompMqQueueNamesAttribute [
 	
 	^ String streamContents: [ :sStream |
 		sStream 
-			<< self runnerControlChannelName;
+			<< self runnerControlChannelStompName;
 			<< ':';
-			<< self taskQueueName;
+			<< self taskQueueStompName;
 			<< ':';
-			<< self taskResultName ]
+			<< self taskResultStompName ]
 ]
 
 { #category : #'start - stop' }
@@ -272,15 +297,15 @@ GtRrMqServer >> stopWorker: workerId [
 ]
 
 { #category : #accessing }
-GtRrMqServer >> taskQueueName [
+GtRrMqServer >> taskQueueStompName [
 	"This is just caching the value, and should not be changed from what the class method returns."
 
 	^ taskQueueName ifNil: 
-		[ taskQueueName := self class taskQueueName ]
+		[ taskQueueName := self class taskQueueStompName ]
 ]
 
 { #category : #accessing }
-GtRrMqServer >> taskResultName [
+GtRrMqServer >> taskResultStompName [
 	"This is just caching the value, and should not be changed from what the class method returns."
 
 	^ taskResultName ifNil: 

@@ -118,7 +118,7 @@ GtRrMqWorkerConnectionStrategy >> nextTask [
 			taskContextId: nextTask taskContextId;
 			taskId: nextTask taskId;
 			workerId: worker uid)
-		to: self taskResultName.
+		to: self taskResultStompName.
 	^ nextTask.
 ]
 
@@ -131,7 +131,7 @@ GtRrMqWorkerConnectionStrategy >> registerWith: ignored [
 	registerMessage := GtRrWorkerRegisterMessage new 
 		attributes: worker attributes.
 	promise := mqProcessor sendCommandRpcMessage: registerMessage 
-		to: self runnerControlChannelName 
+		to: self runnerControlChannelStompName 
 		response: self workerControlTopicName.
 	promise wait
 		then: [ :aResult | result := aResult ]
@@ -169,7 +169,7 @@ GtRrMqWorkerConnectionStrategy >> retrieveChangesFromServerWith: myself [
 		workerId: worker uid;
 		headReference: GtRrChangesSync headReference.
 	promise := mqProcessor sendCommandRpcMessage: encodedChangesMessage 
-		to: self runnerControlChannelName 
+		to: self runnerControlChannelStompName 
 		response: self workerControlTopicName.
 	promise wait
 		then: [ :aResult | events := aResult ]
@@ -182,7 +182,7 @@ GtRrMqWorkerConnectionStrategy >> retrieveChangesFromServerWith: myself [
 ]
 
 { #category : #accessing }
-GtRrMqWorkerConnectionStrategy >> runnerControlChannelName [
+GtRrMqWorkerConnectionStrategy >> runnerControlChannelStompName [
 
 	^ runnerControlChannelName ifNil: 
 		[ runnerControlChannelName := (':' split: (worker attributes at: GtRrWorker stompMqQueueNames)) first ]
@@ -196,7 +196,7 @@ GtRrMqWorkerConnectionStrategy >> sendHeartbeat [
 	GtRrWorkerHeatbeatStartingSignal new emit.
 	worker lastHeartbeat: DateAndTime now.
 	heartbeatMessage := GtRrWorkerHeatbeatMessage new workerId: worker uid.
-	mqProcessor sendGtMessage: heartbeatMessage to: self runnerControlChannelName.
+	mqProcessor sendGtMessage: heartbeatMessage to: self runnerControlChannelStompName.
 	end := Time microsecondClockValue.
 	GtRrWorkerHeartbeatCompletedSignal new
 		milliseconds: ((end - start) / 1000) rounded;
@@ -233,7 +233,7 @@ GtRrMqWorkerConnectionStrategy >> start [
 
 	mqProcessor
 		commandChannelName: self workerControlTopicName;
-		messageChannelName: self taskQueueName.
+		messageChannelName: self taskQueueStompName.
 	mqS3MessageBucket ifNotNil: [ mqProcessor largeMessageUrl: mqS3MessageBucket ].
 	mqProcessor start.
 	worker attributes
@@ -272,7 +272,7 @@ GtRrMqWorkerConnectionStrategy >> taskDone: aTaskContext with: anObject [
 		workerId: worker uid;
 		executionData: (self executionDataFromTaskContext:  aTaskContext);
 		result: anObject.
-	mqProcessor sendGtMessage: taskDoneMessage to: self taskResultName.
+	mqProcessor sendGtMessage: taskDoneMessage to: self taskResultStompName.
 	"Ensure that nextTask and ackFrame are nil'd before writing in case the next message starts before this one finishes"
 	currentAckFrame := ackFrame.
 	nextTask := ackFrame := nil.
@@ -293,21 +293,21 @@ GtRrMqWorkerConnectionStrategy >> taskFailed: aTaskContext with: anError [
 		taskContextId: aTaskContext taskContextId;
 		workerId: worker uid;
 		executionData: executionData.
-	mqProcessor sendGtMessage: taskFailedMessage to: self taskResultName.
+	mqProcessor sendGtMessage: taskFailedMessage to: self taskResultStompName.
 	ackFrame ifNotNil:
 		[ mqProcessor write: ackFrame ].
 	nextTask := ackFrame := nil.
 ]
 
 { #category : #accessing }
-GtRrMqWorkerConnectionStrategy >> taskQueueName [
+GtRrMqWorkerConnectionStrategy >> taskQueueStompName [
 
 	^ taskQueueName ifNil: 
 		[ taskQueueName := (':' split: (worker attributes at: GtRrWorker stompMqQueueNames)) second ]
 ]
 
 { #category : #accessing }
-GtRrMqWorkerConnectionStrategy >> taskResultName [
+GtRrMqWorkerConnectionStrategy >> taskResultStompName [
 
 	^ taskResultName ifNil: 
 		[ taskResultName := (':' split: (worker attributes at: GtRrWorker stompMqQueueNames)) third ]

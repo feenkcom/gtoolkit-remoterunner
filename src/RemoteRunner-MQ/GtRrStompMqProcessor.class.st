@@ -361,9 +361,9 @@ GtRrStompMqProcessor >> promiseAt: rpcId [
 ]
 
 { #category : #housekeeping }
-GtRrStompMqProcessor >> purgeQueue: queueName [
+GtRrStompMqProcessor >> purgeQueueSlowly: queueName [
 	"Connect the mqClient and read messages until the processor has been idle for 2 seconds.
-	This is a hack until proper control of the server is possible."
+	This is a hack and should only be used if the management interface isn't available."
 	| listener count lastMessageTime subscription |
 
 	self assert: mqClient isNil

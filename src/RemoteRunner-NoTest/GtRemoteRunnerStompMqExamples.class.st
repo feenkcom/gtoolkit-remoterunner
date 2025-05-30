@@ -70,14 +70,14 @@ GtRemoteRunnerStompMqExamples >> mqTaskMessage [
 		commandChannelName: workerCommandChannel;
 		commandCallback: [ :mqMessage1 :gtMessage1 :owner1 |
 			self error: 'Shouldn''t be called' ];
-		messageChannelName: GtRrMqServer taskQueueName;
+		messageChannelName: GtRrMqServer taskQueueStompName;
 		taskCallback: [ :mqMessage1 :gtMessage1 :owner1 |
 			gtMessage1 seconds seconds wait.
 			times add: Time microsecondClockValue.
 			times size = 5 ifTrue:
 				[ workerSemaphore signal ].
 			worker write: mqMessage1 ackFrame ].
-	runnerCommandChannel := GtRrMqServer runnerControlChannelName.
+	runnerCommandChannel := GtRrMqServer runnerControlChannelStompName.
 	runner := GtRrStompMqProcessor new
 		commandChannelName: runnerCommandChannel.
 
@@ -85,7 +85,7 @@ GtRemoteRunnerStompMqExamples >> mqTaskMessage [
 	runner start.
 	5 timesRepeat:
 		[ runner sendGtMessage: (GtRrWaitMessage new seconds: 1)
-			to: GtRrMqServer taskQueueName ].
+			to: GtRrMqServer taskQueueStompName ].
 	self waitOn: workerSemaphore for: 20 description: 'Command not received'.
 	self assert: times size equals: 5.
 	self assert: (times last - times first / 1000) > 4000
