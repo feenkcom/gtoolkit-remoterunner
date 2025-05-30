@@ -31,6 +31,36 @@ GtRemoteRunnerMq >> defaultManagerStartupAndShutdown [
 	^ GtRrCodeSyncedLocalManagerStartupAndShutdown new
 ]
 
+{ #category : #'as yet unclassified' }
+GtRemoteRunnerMq >> gtResultQueueSummaryFor: aView [
+	<gtView>
+	^ aView forward
+		title: 'Result MQ';
+		priority: 54;
+		object: [ server mqMonitor ];
+		view: #gtResultQueueSummaryFor:
+]
+
+{ #category : #'as yet unclassified' }
+GtRemoteRunnerMq >> gtRunnerControlSummaryFor: aView [
+	<gtView>
+	^ aView forward
+		title: 'Runner Control MQ';
+		priority: 56;
+		object: [ server mqMonitor ];
+		view: #gtRunnerControlSummaryFor:
+]
+
+{ #category : #'as yet unclassified' }
+GtRemoteRunnerMq >> gtTaskQueueSummaryFor: aView [
+	<gtView>
+	^ aView forward
+		title: 'Task MQ';
+		priority: 52;
+		object: [ server mqMonitor ];
+		view: #gtTaskQueueSummaryFor:
+]
+
 { #category : #accessing }
 GtRemoteRunnerMq >> port: aString [
 	"For MessageQueue, this is the address of the MQ server."

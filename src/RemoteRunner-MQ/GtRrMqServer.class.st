@@ -62,9 +62,39 @@ GtRrMqServer class >> taskResultStompName [
 ]
 
 { #category : #'as yet unclassified' }
+GtRrMqServer >> gtResultQueueSummaryFor: aView [
+	<gtView>
+	^ aView forward
+		title: 'Result Queue';
+		priority: 10;
+		object: [ self mqMonitor ];
+		view: #gtResultQueueSummaryFor:
+]
+
+{ #category : #'as yet unclassified' }
 GtRrMqServer >> gtRrStopOnWorker [
 
 	self stop.
+]
+
+{ #category : #'as yet unclassified' }
+GtRrMqServer >> gtRunnerControlSummaryFor: aView [
+	<gtView>
+	^ aView forward
+		title: 'Runner Control';
+		priority: 10;
+		object: [ self mqMonitor ];
+		view: #gtRunnerControlSummaryFor:
+]
+
+{ #category : #'as yet unclassified' }
+GtRrMqServer >> gtTaskQueueSummaryFor: aView [
+	<gtView>
+	^ aView forward
+		title: 'Task Queue';
+		priority: 10;
+		object: [ self mqMonitor ];
+		view: #gtTaskQueueSummaryFor:
 ]
 
 { #category : #'as yet unclassified' }

@@ -4,7 +4,8 @@ Class {
 	#instVars : [
 		'taskQueueStatsCache',
 		'resultQueueStatsCache',
-		'mqServer'
+		'mqServer',
+		'runnerControlStatsCache'
 	],
 	#category : #'RemoteRunner-MQ'
 }
@@ -14,7 +15,7 @@ GtRrRabbitMqMonitor >> gtResultQueueSummaryFor: aView [
 	<gtView>
 	^ aView columnedList
 		title: 'Result Queue';
-		priority: 10;
+		priority: 20;
 		items: 
 			[ mqServer isRunning ifTrue:
 				[ self resultQueueStatsCache waitForAValue: 5.
@@ -24,7 +25,26 @@ GtRrRabbitMqMonitor >> gtResultQueueSummaryFor: aView [
 		column: #Value text: [ :item | item second ];
 		send: [ :item | item last ];
 		updateWhen: GtTimeCachedObjectAnnouncement
-			in: self taskQueueStatsCache announcer;
+			in: self resultQueueStatsCache announcer;
+		actionUpdateButton
+]
+
+{ #category : #ui }
+GtRrRabbitMqMonitor >> gtRunnerControlSummaryFor: aView [
+	<gtView>
+	^ aView columnedList
+		title: 'Runner Control';
+		priority: 30;
+		items: 
+			[ mqServer isRunning ifTrue:
+				[ self runnerControlStatsCache waitForAValue: 5.
+				self runnerControlStatsCache value summaryAttributes ]
+			ifFalse: [ self serverStoppedAttributes ] ];
+		column: #Attribute text: [ :item | item first ];
+		column: #Value text: [ :item | item second ];
+		send: [ :item | item last ];
+		updateWhen: GtTimeCachedObjectAnnouncement
+			in: self runnerControlStatsCache announcer;
 		actionUpdateButton
 ]
 
@@ -66,6 +86,19 @@ GtRrRabbitMqMonitor >> resultQueueStatsCache [
 			username: mqServer mqUsername;
 			password: mqServer mqPassword;
 			statisticsForQueue: mqServer class taskResultBaseName vhost: '/'. ]
+		timeout: 15 seconds
+		active: 5 minutes ]
+]
+
+{ #category : #accessing }
+GtRrRabbitMqMonitor >> runnerControlStatsCache [
+
+	^ runnerControlStatsCache ifNil: [ runnerControlStatsCache := GtUpdatingTimeCachedObject
+		get: [ GtRrRabbitMqManager new
+			host: mqServer mqHostName, ':15672';
+			username: mqServer mqUsername;
+			password: mqServer mqPassword;
+			statisticsForQueue: mqServer class runnerControlChannelBaseName vhost: '/'. ]
 		timeout: 15 seconds
 		active: 5 minutes ]
 ]

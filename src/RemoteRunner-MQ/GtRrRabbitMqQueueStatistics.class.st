@@ -19,6 +19,12 @@ GtRrRabbitMqQueueStatistics >> at: aString [
 	^ rawData at: aString
 ]
 
+{ #category : #accessing }
+GtRrRabbitMqQueueStatistics >> at: aString ifAbsent: absentBlock [
+
+	^ rawData at: aString ifAbsent: absentBlock
+]
+
 { #category : #ui }
 GtRrRabbitMqQueueStatistics >> gtRawInfoFor: aView [
 	<gtView>
@@ -86,6 +92,7 @@ GtRrRabbitMqQueueStatistics >> summaryAttributes [
 		{ 'Deliver (/s)'. deliver. }.
 		{ 'Ack (/s)'. ack. }.
 		{ 'Consumers'. self at: 'consumers'. }.
-		{ 'Idle since'. self at: 'idle_since' }.
+		{ 'Idle since'. self at: 'idle_since'
+					ifAbsent: [ '<active>' ] }.
 	}.
 ]
