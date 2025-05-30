@@ -269,7 +269,7 @@ GtRrMqServer >> start [
 		commandChannelName: self runnerControlChannelStompName;
 		messageChannelName: self taskResultStompName.
 	mqProcessor start.
-	mqProcessor subscribeToTaskMessages.
+	mqProcessor subscribeToTaskMessagesPrefetchCount: 10.
 ]
 
 { #category : #accessing }

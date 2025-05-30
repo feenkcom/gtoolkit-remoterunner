@@ -599,7 +599,7 @@ GtRrStompMqProcessor >> subscribeToCommandMessages [
 
 	commandSubscription := mqClient newSubscriptionTo: commandChannelName.
 	commandSubscription clientIndividualAck.
-	commandSubscription prefetchCount: 1.
+	commandSubscription prefetchCount: 100.
 	mqClient writeWithReceipt: commandSubscription subscribeFrame.
 ]
 
@@ -618,6 +618,17 @@ GtRrStompMqProcessor >> subscribeToTaskMessages [
 	messageSubscription:= mqClient newSubscriptionTo: messageChannelName.
 	messageSubscription clientIndividualAck.
 	messageSubscription prefetchCount: 1.
+	self write: messageSubscription subscribeFrame.
+]
+
+{ #category : #'start - stop' }
+GtRrStompMqProcessor >> subscribeToTaskMessagesPrefetchCount: anInteger [
+	"Subscribe to task messages.
+	This is left to the client application to allow for handshaking over the command channel."
+
+	messageSubscription:= mqClient newSubscriptionTo: messageChannelName.
+	messageSubscription clientIndividualAck.
+	messageSubscription prefetchCount: anInteger.
 	self write: messageSubscription subscribeFrame.
 ]
 
