@@ -12,10 +12,89 @@ Class {
 	#category : #'RemoteRunner-MQ-Runner'
 }
 
+{ #category : #accessing }
+GtRrMqServer class >> runnerControlChannelBaseName [
+
+	^ NetNameResolver localHostName, '_runner_control'
+]
+
+{ #category : #accessing }
+GtRrMqServer class >> runnerControlChannelStompName [
+
+	^ '/queue/', self runnerControlChannelBaseName
+]
+
+{ #category : #accessing }
+GtRrMqServer class >> stompMqQueueNamesAttribute [
+	"Answer the queue names as passed to the worker on the command line"
+	
+	^ String streamContents: [ :sStream |
+		sStream 
+			<< self runnerControlChannelStompName;
+			<< ':';
+			<< self taskQueueStompName;
+			<< ':';
+			<< self taskResultStompName ]
+]
+
+{ #category : #accessing }
+GtRrMqServer class >> taskQueueBaseName [
+
+	^ NetNameResolver localHostName, '_task_queue'
+]
+
+{ #category : #accessing }
+GtRrMqServer class >> taskQueueStompName [
+
+	^ '/queue/', self taskQueueBaseName
+]
+
+{ #category : #accessing }
+GtRrMqServer class >> taskResultBaseName [
+
+	^ NetNameResolver localHostName, '_task_result'
+]
+
+{ #category : #accessing }
+GtRrMqServer class >> taskResultStompName [
+
+	^ '/queue/', self taskResultBaseName
+]
+
+{ #category : #'as yet unclassified' }
+GtRrMqServer >> gtResultQueueSummaryFor: aView [
+	<gtView>
+	^ aView forward
+		title: 'Result Queue';
+		priority: 10;
+		object: [ self mqMonitor ];
+		view: #gtResultQueueSummaryFor:
+]
+
 { #category : #'as yet unclassified' }
 GtRrMqServer >> gtRrStopOnWorker [
 
 	self stop.
+]
+
+{ #category : #'as yet unclassified' }
+GtRrMqServer >> gtRunnerControlSummaryFor: aView [
+	<gtView>
+	^ aView forward
+		title: 'Runner Control';
+		priority: 10;
+		object: [ self mqMonitor ];
+		view: #gtRunnerControlSummaryFor:
+]
+
+{ #category : #'as yet unclassified' }
+GtRrMqServer >> gtTaskQueueSummaryFor: aView [
+	<gtView>
+	^ aView forward
+		title: 'Task Queue';
+		priority: 10;
+		object: [ self mqMonitor ];
+		view: #gtTaskQueueSummaryFor:
 ]
 
 { #category : #'as yet unclassified' }
@@ -31,6 +110,14 @@ GtRrMqServer >> handleMqListenerException: closingException [
 			"mqProcessor reconnect" ].
 ]
 
+{ #category : #'as yet unclassified' }
+GtRrMqServer >> initialize [
+
+	super initialize.
+	mqProcessor := GtRrStompMqProcessor new
+		owner: self.
+]
+
 { #category : #testing }
 GtRrMqServer >> isRunning [
 
@@ -40,18 +127,61 @@ GtRrMqServer >> isRunning [
 
 { #category : #accessing }
 GtRrMqServer >> mqHostName [
-	^ mqHostName ifNil: [ 'localhost' ]
+	^ mqProcessor mqHostName
 ]
 
 { #category : #accessing }
-GtRrMqServer >> mqHostName: anObject [
-	mqHostName := anObject
+GtRrMqServer >> mqHostName: aString [
+
+	mqProcessor mqHostName: aString
+]
+
+{ #category : #'as yet unclassified' }
+GtRrMqServer >> mqMonitor [
+
+	^ GtRrRabbitMqMonitor new
+		mqServer: self
+]
+
+{ #category : #accessing }
+GtRrMqServer >> mqPassword [
+
+	^ mqProcessor mqPassword
+]
+
+{ #category : #accessing }
+GtRrMqServer >> mqPassword: aString [
+
+	mqProcessor mqPassword: aString
+]
+
+{ #category : #accessing }
+GtRrMqServer >> mqPort [
+	^ mqProcessor mqPort
+]
+
+{ #category : #accessing }
+GtRrMqServer >> mqPort: anInteger [
+
+	mqProcessor mqPort: anInteger
 ]
 
 { #category : #private }
 GtRrMqServer >> mqProcessor [
 
 	^ [ :message | self processMqMessage: message ]
+]
+
+{ #category : #accessing }
+GtRrMqServer >> mqUsername [
+
+	^ mqProcessor mqUsername
+]
+
+{ #category : #accessing }
+GtRrMqServer >> mqUsername: aString [
+
+	mqProcessor mqUsername: aString
 ]
 
 { #category : #accessing }
@@ -63,11 +193,15 @@ GtRrMqServer >> newWorkerConnection [
 { #category : #'start - stop' }
 GtRrMqServer >> purgeQueues [
 	"Purge the permanent queues"
+	| rabbitManager |
 
-	GtRrStompMqProcessor new
-		purgeQueue: self taskQueueName;
-		purgeQueue: self runnerControlChannelName;
-		purgeQueue: self taskResultName.
+	rabbitManager := GtRrRabbitMqManager new
+		username: self mqUsername;
+		password: self mqPassword;
+		host: self mqHostName, ':15672';
+		purgeQueue: self class taskQueueBaseName vhost: '/';
+		purgeQueue: self class runnerControlChannelBaseName vhost: '/';
+		purgeQueue: self class taskResultBaseName vhost: '/'.
 ]
 
 { #category : #accessing }
@@ -81,10 +215,11 @@ GtRrMqServer >> remoteRunner: anObject [
 ]
 
 { #category : #accessing }
-GtRrMqServer >> runnerControlChannelName [
+GtRrMqServer >> runnerControlChannelStompName [
+	"This is just caching the value, and should not be changed from what the class method returns."
 
 	^ runnerControlChannelName ifNil: 
-		[ runnerControlChannelName := '/queue/', NetNameResolver localHostName, '_runner_control' ]
+		[ runnerControlChannelName := self class runnerControlChannelStompName ]
 ]
 
 { #category : #'as yet unclassified' }
@@ -119,7 +254,7 @@ GtRrMqServer >> sendWorkerTaskContext: aWorkerTaskContext [
 		emit.
 	taskMessage := GtRrRunnerTaskMessage new
 		task: aWorkerTaskContext.
-	mqProcessor sendGtMessage: taskMessage to: self taskQueueName.
+	mqProcessor sendGtMessage: taskMessage to: self taskQueueStompName.
 	GtRrMqQueueTaskCompletedSignal new
 		taskId: aWorkerTaskContext taskId;
 		emit.
@@ -128,15 +263,13 @@ GtRrMqServer >> sendWorkerTaskContext: aWorkerTaskContext [
 { #category : #'start - stop' }
 GtRrMqServer >> start [
 
-	self assert: mqProcessor isNil.
 	self purgeQueues.
 
-	mqProcessor := GtRrStompMqProcessor new
-		owner: self;
-		commandChannelName: self runnerControlChannelName;
-		messageChannelName: self taskResultName.
+	mqProcessor
+		commandChannelName: self runnerControlChannelStompName;
+		messageChannelName: self taskResultStompName.
 	mqProcessor start.
-	mqProcessor subscribeToMessages.
+	mqProcessor subscribeToTaskMessagesPrefetchCount: 10.
 ]
 
 { #category : #accessing }
@@ -148,27 +281,29 @@ GtRrMqServer >> stompMqAdditonalOptions [
 			nextPut: '--connectionStrategy';
 			nextPut: 'stompMq';
 			nextPut: '--attribute';
-			nextPut: 'stompMqQueueNames';
-			nextPut: (String streamContents: [ :sStream |
-				sStream 
-					<< self runnerControlChannelName;
-					<< ':';
-					<< self taskQueueName;
-					<< ':';
-					<< self taskResultName ]) ]
+			nextPut: GtRrWorker stompMqQueueNames;
+			nextPut: self stompMqQueueNamesAttribute ]
 ]
 
 { #category : #accessing }
 GtRrMqServer >> stompMqQueueNames [
-	"Answer the control channel, task and result queue names, colon separated"
+	"Answer the queue names as passed to the worker on the command line.
+	29.05.25 temporary backward compatibility"
+	
+	^ self stompMqQueueNamesAttribute
+]
+
+{ #category : #accessing }
+GtRrMqServer >> stompMqQueueNamesAttribute [
+	"Answer the queue names as passed to the worker on the command line"
 	
 	^ String streamContents: [ :sStream |
 		sStream 
-			<< self runnerControlChannelName;
+			<< self runnerControlChannelStompName;
 			<< ':';
-			<< self taskQueueName;
+			<< self taskQueueStompName;
 			<< ':';
-			<< self taskResultName ]
+			<< self taskResultStompName ]
 ]
 
 { #category : #'start - stop' }
@@ -192,14 +327,16 @@ GtRrMqServer >> stopWorker: workerId [
 ]
 
 { #category : #accessing }
-GtRrMqServer >> taskQueueName [
+GtRrMqServer >> taskQueueStompName [
+	"This is just caching the value, and should not be changed from what the class method returns."
 
 	^ taskQueueName ifNil: 
-		[ taskQueueName := '/queue/', NetNameResolver localHostName, '_task_queue' ]
+		[ taskQueueName := self class taskQueueStompName ]
 ]
 
 { #category : #accessing }
-GtRrMqServer >> taskResultName [
+GtRrMqServer >> taskResultStompName [
+	"This is just caching the value, and should not be changed from what the class method returns."
 
 	^ taskResultName ifNil: 
 		[ taskResultName := '/queue/', NetNameResolver localHostName, '_task_result' ]
