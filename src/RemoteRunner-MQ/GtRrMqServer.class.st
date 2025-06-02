@@ -273,16 +273,24 @@ GtRrMqServer >> start [
 ]
 
 { #category : #accessing }
-GtRrMqServer >> stompMqAdditonalOptions [
+GtRrMqServer >> stompMqAdditonalOptionsFor: aGtRrJobContext [
 	"Answer the addtional command line options for workers using RabbitMQ"
-	
+	| mqLargeMessageUrl |
+
+	mqLargeMessageUrl := aGtRrJobContext job propertyAt: 'mqLargeMessageDirectory'
+		ifPresent: [ :aUrl | aUrl ]
+		ifAbsent: [ (FileLocator imageDirectory resolve / 'MQ') asZnUrl ].
+	mqLargeMessageUrl asFileReference ensureCreateDirectory.
 	^ Array streamContents: [ :aStream |
 		aStream
 			nextPut: '--connectionStrategy';
 			nextPut: 'stompMq';
 			nextPut: '--attribute';
 			nextPut: GtRrWorker stompMqQueueNames;
-			nextPut: self stompMqQueueNamesAttribute ]
+			nextPut: self stompMqQueueNamesAttribute;
+			nextPut: '--attribute';
+			nextPut: 'mqLargeMessageUrl';
+			nextPut: mqLargeMessageUrl asString ]
 ]
 
 { #category : #accessing }

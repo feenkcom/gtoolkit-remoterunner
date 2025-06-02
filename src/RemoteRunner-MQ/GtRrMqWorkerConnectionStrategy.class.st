@@ -10,7 +10,7 @@ Class {
 		'runnerControlChannelName',
 		'taskQueueName',
 		'taskResultName',
-		'mqS3MessageBucket'
+		'largeMessageUrl'
 	],
 	#category : #'RemoteRunner-MQ-Worker'
 }
@@ -51,6 +51,16 @@ GtRrMqWorkerConnectionStrategy >> initialize [
 		owner: self.
 ]
 
+{ #category : #accessing }
+GtRrMqWorkerConnectionStrategy >> largeMessageUrl [
+	^largeMessageUrl
+]
+
+{ #category : #accessing }
+GtRrMqWorkerConnectionStrategy >> largeMessageUrl: aZnUrl [
+	largeMessageUrl := aZnUrl
+]
+
 { #category : #'start-stop' }
 GtRrMqWorkerConnectionStrategy >> mqHostName [
 
@@ -85,16 +95,6 @@ GtRrMqWorkerConnectionStrategy >> mqPort [
 GtRrMqWorkerConnectionStrategy >> mqPort: anInteger [
 
 	mqProcessor mqPort: anInteger
-]
-
-{ #category : #accessing }
-GtRrMqWorkerConnectionStrategy >> mqS3MessageBucket [
-	^mqS3MessageBucket
-]
-
-{ #category : #accessing }
-GtRrMqWorkerConnectionStrategy >> mqS3MessageBucket: aZnUrl [
-	mqS3MessageBucket := aZnUrl
 ]
 
 { #category : #'start-stop' }
@@ -234,7 +234,7 @@ GtRrMqWorkerConnectionStrategy >> start [
 	mqProcessor
 		commandChannelName: self workerControlTopicName;
 		messageChannelName: self taskQueueStompName.
-	mqS3MessageBucket ifNotNil: [ mqProcessor largeMessageUrl: mqS3MessageBucket ].
+	largeMessageUrl ifNotNil: [ mqProcessor largeMessageUrl: largeMessageUrl ].
 	mqProcessor start.
 	worker attributes
 		at: #workerIpAddress

@@ -582,16 +582,7 @@ GtRrStompMqProcessor >> stopRequested [
 { #category : #private }
 GtRrStompMqProcessor >> storeLargeMessage: messageBuffer [
 
-	largeMessageUrl scheme = #s3 ifTrue:
-		[ ^ self storeLargeS3Message: messageBuffer ].
-
-	self error: 'Unrecognized Scheme: ', largeMessageUrl scheme asString.
-]
-
-{ #category : #private }
-GtRrStompMqProcessor >> storeLargeS3Message: messageBuffer [
-
-	^ GtRrS3Message storeBuffer: messageBuffer in: largeMessageUrl.
+	^ GtRrUrlMessage storeBuffer: messageBuffer in: largeMessageUrl.
 ]
 
 { #category : #'start - stop' }

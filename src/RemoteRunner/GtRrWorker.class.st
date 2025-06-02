@@ -355,6 +355,14 @@ GtRrWorker >> commandTerminateTaskContextId: taskContextId [
 	^ canTerminate
 ]
 
+{ #category : #starting }
+GtRrWorker >> configureConnectionStrategy [
+
+	attributes at: 'mqLargeMessageUrl' ifPresent:
+		[ :mqLargeMessageUrl |
+			connectionStrategy largeMessageUrl: mqLargeMessageUrl asZnUrl ].
+]
+
 { #category : #private }
 GtRrWorker >> connectDuring: aBlock [
 	"Evaluate aBlock passing in a connected PharoLinkApplication"
@@ -536,6 +544,7 @@ GtRrWorker >> stackString [
 GtRrWorker >> start [
 
 	stopFlag := false.
+	self configureConnectionStrategy.
 	connectionStrategy start.
 	self runWorkerStartupScripts.
 	readProcess := self newTaskProcess.
