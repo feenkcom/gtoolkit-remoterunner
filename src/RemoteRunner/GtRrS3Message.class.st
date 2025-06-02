@@ -5,20 +5,14 @@ Note that the message is currently not deleted from the file system.
 "
 Class {
 	#name : #GtRrS3Message,
-	#superclass : #GtRrMessage,
-	#instVars : [
-		'url'
-	],
+	#superclass : #GtRrUrlMessage,
 	#category : #'RemoteRunner-Model'
 }
 
-{ #category : #storing }
-GtRrS3Message class >> store: aGtRrMessage in: s3BucketUrl [
-	"Store the supplied message in the given bucket.
-	Answer the s3Url of the file."
+{ #category : #accessing }
+GtRrS3Message class >> scheme [
 
-	^ self storeBuffer: (GtWireEncoder onByteArray nextPut: aGtRrMessage) contents
-		in: s3BucketUrl
+	^ #s3
 ]
 
 { #category : #storing }
@@ -27,7 +21,7 @@ GtRrS3Message class >> storeBuffer: aByteArray in: s3BucketUrl [
 	Answer the s3Url of the file."
 	| localFile s3Url |
 
-	localFile := FileReference newTempFilePrefix: 'GtRrS3Message-' suffix: '.dat'.
+	localFile := FileReference newTempFilePrefix: 'GtRrUrlMessage-' suffix: '.dat'.
 	localFile binaryWriteStreamDo: [ :stream |
 		stream nextPutAll: aByteArray ].
 	s3Url := (s3BucketUrl asZnUrl / localFile basename) asString.
@@ -37,17 +31,6 @@ GtRrS3Message class >> storeBuffer: aByteArray in: s3BucketUrl [
 		execute.
 	localFile ensureDelete.
 	^ self new url: s3Url.
-]
-
-{ #category : #processing }
-GtRrS3Message >> processMq: mqMessage processor: aGtRrProcessor for: anOwner [
-	"Process the supplied message for anObject.
-	anObject (outside of testing) will either be a GtRrWorker or GtRemoteRunner."
-
-	^ self retrieveMessage 
-		processMq: mqMessage 
-		processor: aGtRrProcessor 
-		for: anOwner
 ]
 
 { #category : #private }
@@ -65,14 +48,4 @@ GtRrS3Message >> retrieveMessage [
 		 (GtWireDecoder on: stream) next ].
 	localFile ensureDelete.
 	^ message
-]
-
-{ #category : #accessing }
-GtRrS3Message >> url [
-	^url
-]
-
-{ #category : #accessing }
-GtRrS3Message >> url: anObject [
-	url := anObject
 ]
