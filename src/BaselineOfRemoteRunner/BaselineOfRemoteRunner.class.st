@@ -16,6 +16,8 @@ BaselineOfRemoteRunner >> baseline: spec [
 					spec repository: 'github://feenkcom/gtoolkit-notifications:main/src' ];
 				baseline: 'Stamp' with: [
 					spec repository: 'github://feenkcom/stamp/repository' ];
+				baseline: 'Gt4RabbitMq' with: [
+					spec repository: 'github://feenkcom/gt4rabbitmq:main/src' ];
 				package: 'RemoteRunner'
 					with: [ spec requires: #('PharoLink' 'GToolkitNotifications') ];
 				package: 'RemoteRunner-MQ'
