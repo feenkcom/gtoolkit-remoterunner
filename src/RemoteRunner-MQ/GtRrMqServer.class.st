@@ -195,13 +195,24 @@ GtRrMqServer >> purgeQueues [
 	"Purge the permanent queues"
 	| rabbitManager |
 
-	rabbitManager := GtRrRabbitMqManager new
-		username: self mqUsername;
-		password: self mqPassword;
-		host: self mqHostName, ':15672';
+	rabbitManager := RabbitMqHttpClient 
+		host: self mqHostName
+		port: 15672
+		user: self mqUsername
+		password: self mqPassword.
+	"Queues are created the first time that STOMP accesses them, so may not exist yet.
+	Ignore Not Found errors here."
+	[ rabbitManager
 		purgeQueue: self class taskQueueBaseName vhost: '/';
 		purgeQueue: self class runnerControlChannelBaseName vhost: '/';
-		purgeQueue: self class taskResultBaseName vhost: '/'.
+		purgeQueue: self class taskResultBaseName vhost: '/' ]
+			on: RabbitMqClientError
+			do: [ :ex | | response |
+				response := ex client response.
+				(response code = 404 and: [ response statusLine reason = 'Not Found' ]) ifTrue:
+					[ ex resume ]
+				ifFalse:
+					[ ex pass ] ].
 ]
 
 { #category : #accessing }

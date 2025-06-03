@@ -1,6 +1,6 @@
 Class {
 	#name : #GtRrRabbitMqMonitor,
-	#superclass : #GtRrRabbitMqManager,
+	#superclass : #Object,
 	#instVars : [
 		'taskQueueStatsCache',
 		'resultQueueStatsCache',
@@ -81,11 +81,12 @@ GtRrRabbitMqMonitor >> mqServer: anObject [
 GtRrRabbitMqMonitor >> resultQueueStatsCache [
 
 	^ resultQueueStatsCache ifNil: [ resultQueueStatsCache := GtUpdatingTimeCachedObject
-		get: [ GtRrRabbitMqManager new
-			host: mqServer mqHostName, ':15672';
-			username: mqServer mqUsername;
-			password: mqServer mqPassword;
-			statisticsForQueue: mqServer class taskResultBaseName vhost: '/'. ]
+		get: [ (RabbitMqHttpClient
+			host: mqServer mqHostName
+			port: 15672
+			user: mqServer mqUsername
+			password: mqServer mqPassword)
+				statisticsForQueue: mqServer class taskResultBaseName vhost: '/'. ]
 		timeout: 15 seconds
 		active: 5 minutes ]
 ]
@@ -94,11 +95,12 @@ GtRrRabbitMqMonitor >> resultQueueStatsCache [
 GtRrRabbitMqMonitor >> runnerControlStatsCache [
 
 	^ runnerControlStatsCache ifNil: [ runnerControlStatsCache := GtUpdatingTimeCachedObject
-		get: [ GtRrRabbitMqManager new
-			host: mqServer mqHostName, ':15672';
-			username: mqServer mqUsername;
-			password: mqServer mqPassword;
-			statisticsForQueue: mqServer class runnerControlChannelBaseName vhost: '/'. ]
+		get: [ (RabbitMqHttpClient
+			host: mqServer mqHostName
+			port: 15672
+			user: mqServer mqUsername
+			password: mqServer mqPassword)
+				statisticsForQueue: mqServer class runnerControlChannelBaseName vhost: '/'. ]
 		timeout: 15 seconds
 		active: 5 minutes ]
 ]
@@ -115,11 +117,12 @@ GtRrRabbitMqMonitor >> serverStoppedAttributes [
 GtRrRabbitMqMonitor >> taskQueueStatsCache [
 
 	^ taskQueueStatsCache ifNil: [ taskQueueStatsCache := GtUpdatingTimeCachedObject
-		get: [ GtRrRabbitMqManager new
-			host: mqServer mqHostName, ':15672';
-			username: mqServer mqUsername;
-			password: mqServer mqPassword;
-			statisticsForQueue: mqServer class taskQueueBaseName vhost: '/'. ]
+		get: [ (RabbitMqHttpClient
+			host: mqServer mqHostName
+			port: 15672
+			user: mqServer mqUsername
+			password: mqServer mqPassword)
+				statisticsForQueue: mqServer class taskQueueBaseName vhost: '/'. ]
 		timeout: 15 seconds
 		active: 5 minutes ]
 ]
