@@ -16,7 +16,9 @@ Class {
 		'registeredWorkerCounts',
 		'availableWorkerCounts',
 		'jobStartupAndShutdown',
-		'managerStartupAndShutdown'
+		'managerStartupAndShutdown',
+		'registeredWorkerAttributes',
+		'availableWorkerAttributes'
 	],
 	#category : #'RemoteRunner-Runner'
 }
@@ -29,6 +31,16 @@ GtRemoteRunnerStats >> asDictionaryForExport [
 	self class instVarNames do: [ :aSymbol |
 		dict at: aSymbol put: (self perform: aSymbol) ].
 	^ dict
+]
+
+{ #category : #accessing }
+GtRemoteRunnerStats >> availableWorkerAttributes [
+	^availableWorkerAttributes
+]
+
+{ #category : #accessing }
+GtRemoteRunnerStats >> availableWorkerAttributes: anObject [
+	availableWorkerAttributes := anObject
 ]
 
 { #category : #accessing }
@@ -178,6 +190,16 @@ GtRemoteRunnerStats >> portNumber: anObject [
 ]
 
 { #category : #accessing }
+GtRemoteRunnerStats >> registeredWorkerAttributes [
+	^registeredWorkerAttributes
+]
+
+{ #category : #accessing }
+GtRemoteRunnerStats >> registeredWorkerAttributes: anObject [
+	registeredWorkerAttributes := anObject
+]
+
+{ #category : #accessing }
 GtRemoteRunnerStats >> registeredWorkerCount [
 	^ registeredWorkerCounts
 		inject: 0
@@ -264,6 +286,8 @@ GtRemoteRunnerStats >> updateAvailableWorkerCounts: aDictionary [
 			at: (GtRemoteRunner printIpAddress: ipAddress)
 			put: count ].
 	availableWorkerCounts := counts.
+	availableWorkerAttributes := aDictionary values collect: [ :worker |
+		worker attributes ].
 ]
 
 { #category : #accessing }
@@ -293,6 +317,8 @@ GtRemoteRunnerStats >> updateRegisteredWorkerCounts: aDictionary [
 			at: (GtRemoteRunner printIpAddress: ipAddress)
 			put: count ].
 	registeredWorkerCounts := counts.
+	registeredWorkerAttributes := aDictionary values collect: [ :worker |
+		worker attributes ].
 ]
 
 { #category : #accessing }
