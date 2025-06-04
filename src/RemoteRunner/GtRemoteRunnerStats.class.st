@@ -16,7 +16,9 @@ Class {
 		'registeredWorkerCounts',
 		'availableWorkerCounts',
 		'jobStartupAndShutdown',
-		'managerStartupAndShutdown'
+		'managerStartupAndShutdown',
+		'registeredWorkerAttributes',
+		'availableWorkerAttributes'
 	],
 	#category : #'RemoteRunner-Runner'
 }
@@ -29,6 +31,16 @@ GtRemoteRunnerStats >> asDictionaryForExport [
 	self class instVarNames do: [ :aSymbol |
 		dict at: aSymbol put: (self perform: aSymbol) ].
 	^ dict
+]
+
+{ #category : #accessing }
+GtRemoteRunnerStats >> availableWorkerAttributes [
+	^availableWorkerAttributes
+]
+
+{ #category : #accessing }
+GtRemoteRunnerStats >> availableWorkerAttributes: anObject [
+	availableWorkerAttributes := anObject
 ]
 
 { #category : #accessing }
@@ -178,6 +190,16 @@ GtRemoteRunnerStats >> portNumber: anObject [
 ]
 
 { #category : #accessing }
+GtRemoteRunnerStats >> registeredWorkerAttributes [
+	^registeredWorkerAttributes
+]
+
+{ #category : #accessing }
+GtRemoteRunnerStats >> registeredWorkerAttributes: anObject [
+	registeredWorkerAttributes := anObject
+]
+
+{ #category : #accessing }
 GtRemoteRunnerStats >> registeredWorkerCount [
 	^ registeredWorkerCounts
 		inject: 0
@@ -250,13 +272,13 @@ GtRemoteRunnerStats >> totalTaskCount: anObject [
 ]
 
 { #category : #accessing }
-GtRemoteRunnerStats >> updateAvailableWorkerCounts: aDictionary [
+GtRemoteRunnerStats >> updateAvailableWorkerCounts: aSequenceableCollection [
 	"Update the receiver's available worker counts from the runner's availableWorkers dictionary.
 	Must be called within the runners sharedAccess."
 	| bag counts |
 
 	bag := Bag new.
-	aDictionary do: [ :worker |
+	aSequenceableCollection do: [ :worker |
 		bag add: worker remoteAddress ].
 	counts := Dictionary new.
 	bag keysAndValuesDo: [ :ipAddress :count |
@@ -264,6 +286,9 @@ GtRemoteRunnerStats >> updateAvailableWorkerCounts: aDictionary [
 			at: (GtRemoteRunner printIpAddress: ipAddress)
 			put: count ].
 	availableWorkerCounts := counts.
+	availableWorkerAttributes := aSequenceableCollection collect: [ :worker |
+		worker attributes ]
+			as: Array.
 ]
 
 { #category : #accessing }
@@ -293,6 +318,9 @@ GtRemoteRunnerStats >> updateRegisteredWorkerCounts: aDictionary [
 			at: (GtRemoteRunner printIpAddress: ipAddress)
 			put: count ].
 	registeredWorkerCounts := counts.
+	registeredWorkerAttributes := aDictionary collect: [ :worker |
+		worker attributes ]
+			as: Array.
 ]
 
 { #category : #accessing }
