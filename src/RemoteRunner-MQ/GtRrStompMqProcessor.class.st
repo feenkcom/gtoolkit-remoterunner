@@ -116,6 +116,8 @@ GtRrStompMqProcessor class >> portFrom: aHostString [
 
 { #category : #accessing }
 GtRrStompMqProcessor class >> workerControlTopicNameFor: workerId [
+	"Workers use a transient topic for control channels.
+	The topic is automatically deleted after the worker disconnects."
 
 	^ '/topic/gtrrWorkerControl.', workerId
 ]
@@ -206,15 +208,15 @@ GtRrStompMqProcessor >> isRunning [
 ]
 
 { #category : #testing }
-GtRrStompMqProcessor >> isStopped [
-
-	^ state = #stopped
-]
-
-{ #category : #testing }
 GtRrStompMqProcessor >> isStopRequested [
 
 	^ state = #stopRequested
+]
+
+{ #category : #testing }
+GtRrStompMqProcessor >> isStopped [
+
+	^ state = #stopped
 ]
 
 { #category : #accessing }
@@ -438,7 +440,7 @@ GtRrStompMqProcessor >> sendCommandRpcMessage: aGtRrMessage to: commandDestinati
 
 { #category : #actions }
 GtRrStompMqProcessor >> sendCommandRpcMessage: aGtRrMessage to: commandChannel response: responseDestination [
-	| rpcMessage mqMessage rpcId promise |
+	| rpcMessage rpcId promise |
 
 	rpcId := UUID new.
 	rpcMessage := GtRrRpcRequestMessage new
@@ -483,7 +485,7 @@ GtRrStompMqProcessor >> sendRpcBlockClosure: aBlockClosure to: commandDestinatio
 GtRrStompMqProcessor >> serializedGtMessage: aGtRrMessage [
 	"Answer the serialised message.
 	If the buffer is >= MaxMessageSize, send the message via the specified store Url."
-	| messageBuffer s3Message |
+	| messageBuffer urlMessage |
 
 	messageBuffer := GtWireEncoder onByteArray
 		nextPut: aGtRrMessage;
@@ -492,9 +494,9 @@ GtRrStompMqProcessor >> serializedGtMessage: aGtRrMessage [
 
 	largeMessageUrl ifNil: [ self error: 'MQ large message store not configured' ].
 
-	s3Message := self storeLargeMessage: messageBuffer.
+	urlMessage := self storeLargeMessage: messageBuffer.
 	^ GtWireEncoder onByteArray
-		nextPut: s3Message;
+		nextPut: urlMessage;
 		contents.
 ]
 
