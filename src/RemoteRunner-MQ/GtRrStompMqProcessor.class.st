@@ -321,7 +321,7 @@ GtRrStompMqProcessor >> processCommandMqMessage: mqMessage gtMessage: gtMessage 
 	"Save the process that runs the callback for debugging"
 	callbackProcess := [ [ gtMessage processMq: mqMessage processor: self for: anOwner ]
 		ensure: [ self write: mqMessage ackFrame ] ]
-			forkNamed: 'GtRrMq Callback Process'.
+			forkNamed: 'GtRrMq Command Message Process'.
 	GtRrStompMqTaskCallbackCompletedSignal new
 		gtMessagePrintString: gtMessage printString;
 		emit.
@@ -551,7 +551,7 @@ GtRrStompMqProcessor >> startMqListener [
 		Either way, this process should terminate once the processing is complete, and not continue to be used."
 		owner ifNotNil: [ :anOwner |
 			anOwner handleMqListenerException: closingException ].
-		 ] fork.
+		 ] forkNamed: 'GtRrMq message listener'.
 ]
 
 { #category : #'start - stop' }
