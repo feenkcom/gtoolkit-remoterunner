@@ -27,6 +27,19 @@ GtRrExampleResultWithTasksGroup >> gtItemsFor: aView [
 ]
 
 { #category : #'gt - extensions' }
+GtRrExampleResultWithTasksGroup >> gtViewItemsByMachineRegionFor: aView [
+	<gtView>
+	^ aView columnedList
+		title: 'By machine region';
+		priority: 20;
+		items: [ (self groupedBy: [ :each | each task workerMachineRegion ]) associations
+				sorted: [ :assoc | assoc value size ] descending ];
+		column: 'Region' text: [ :assoc | assoc key ];
+		column: 'Checks Count' text: [ :assoc | assoc value size ];
+		send: [ :assoc | assoc value ]
+]
+
+{ #category : #'gt - extensions' }
 GtRrExampleResultWithTasksGroup >> gtViewItemsByMachinesFor: aView [
 	<gtView>
 
