@@ -220,7 +220,7 @@ GtRrRunnerMachineExamplesReport >> machineTotalConsumedMemoryPerWorker [
 	^ ((totalMemory - minimumAvailableMemory) / self numberOfWorkers) asInteger
 ]
 
-{ #category : #'*RemoteRunner' }
+{ #category : #'accessing - resource report' }
 GtRrRunnerMachineExamplesReport >> machineTotalDefinedMemory [
 	^ (GtAwsAmazonWebServices default ec2 instanceTypes 
 			at: (self machineType )

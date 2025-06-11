@@ -319,7 +319,7 @@ GtRrTask >> isNotStarted [
 	^ self state = #notStarted
 ]
 
-{ #category : #'*RemoteRunner' }
+{ #category : #testing }
 GtRrTask >> isRetry [
 	"Answer a boolean indicating whether the receiver was created as a result of retrying a earlier task"
 
@@ -592,7 +592,7 @@ GtRrTask >> stateDescription [
 		self printSupplementalOn: aStream ]
 ]
 
-{ #category : #'*RemoteRunner' }
+{ #category : #accessing }
 GtRrTask >> summaryAttributes [
 
 	"Answer a collection of key/value attributes that can simply be listed as a summary of the receiver"
