@@ -185,7 +185,7 @@ GtRrJobProgressNotification >> spawnState: aGroupState fromSource: anElement [
 { #category : #subscriptions }
 GtRrJobProgressNotification >> subscribeToJob [
 	self job
-		when: GtRrTaskCompletedAnnouncement
+		when: GtRrTaskCompletedAnnouncement, GtRrTaskFailedAnnouncement
 		send: #actOnTaskCompletedFor:
 		to: self
 ]

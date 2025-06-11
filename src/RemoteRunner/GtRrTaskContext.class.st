@@ -208,6 +208,15 @@ GtRrTaskContext >> markTaskCompleted [
 ]
 
 { #category : #running }
+GtRrTaskContext >> markTaskFailed [
+
+	(#(completed cancelled) includes: task state) ifTrue: [ ^ self ].
+	task markTaskFailed.
+	jobContext markTaskCompleted: self.
+	self job announce: self taskFailedAnnouncement
+]
+
+{ #category : #running }
 GtRrTaskContext >> markTaskStarted [ 
 
 	task markTaskStarted.
@@ -349,6 +358,12 @@ GtRrTaskContext >> taskFailedAnnouncement [
 GtRrTaskContext >> taskId [
 
 	^ task taskId
+]
+
+{ #category : #accessing }
+GtRrTaskContext >> taskResult [
+
+	^ task result
 ]
 
 { #category : #accessing }
