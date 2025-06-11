@@ -46,6 +46,12 @@ GtRrAbstractExamplesTask >> asJob [
 	^ GtRrChecksJob tasks: { self }
 ]
 
+{ #category : #private }
+GtRrAbstractExamplesTask >> checkNames [
+
+	^ self subclassResponsibility
+]
+
 { #category : #tests }
 GtRrAbstractExamplesTask >> checkNamesAndTimes [
 	
@@ -126,16 +132,16 @@ GtRrAbstractExamplesTask >> isExamplesTask [
 ]
 
 { #category : #testing }
+GtRrAbstractExamplesTask >> isSuccessResult: aPharoLinkTestCaseResult [
+	^ aPharoLinkTestCaseResult isSuccess "or: [ 
+		aPharoLinkTestCaseResult isSkipped ]"
+]
+
+{ #category : #testing }
 GtRrAbstractExamplesTask >> isSUnitTask [
 	"Answer a boolean indicating whether the receiver is for running SUnit tests"
 
 	^ false
-]
-
-{ #category : #testing }
-GtRrAbstractExamplesTask >> isSuccessResult: aPharoLinkTestCaseResult [
-	^ aPharoLinkTestCaseResult isSuccess "or: [ 
-		aPharoLinkTestCaseResult isSkipped ]"
 ]
 
 { #category : #'accessing - dynamic' }
@@ -209,6 +215,20 @@ GtRrAbstractExamplesTask >> successfulExamples [
 
 	^ self select: [ :pharoLinkTestCaseAnnouncement | 
 		self isSuccessResult: pharoLinkTestCaseAnnouncement ]
+]
+
+{ #category : #private }
+GtRrAbstractExamplesTask >> taskNotExecutedResult [
+	"Generate error results for each of the receiver's checks"
+
+	^ self checkNames collect: [ :assoc |
+		(PharoLinkTestCaseError
+		  testCase: (assoc key asSymbol asClass selector: assoc value asSymbol)
+		  startTimestamp: executionData startTime)
+		  	initializeExceptionClass: Error
+		  	messageText: 'No Result'
+		  	trace: ''
+		  	additionalData:  executionData additionalData ]
 ]
 
 { #category : #accessing }

@@ -375,6 +375,14 @@ GtRrTask >> markTaskCompleted [
 ]
 
 { #category : #running }
+GtRrTask >> markTaskFailed [
+
+	self resultReceivedTime: DateAndTime now.
+	result ifNil: [ result := self taskNotExecutedResult ].
+	self state: #completed.
+]
+
+{ #category : #running }
 GtRrTask >> markTaskStarted [
 
 	self handoverTime: DateAndTime now.
@@ -649,6 +657,14 @@ GtRrTask >> taskId [
 GtRrTask >> taskId: anObject [
 
 	taskId := anObject
+]
+
+{ #category : #'private - running' }
+GtRrTask >> taskNotExecutedResult [
+	"Set the result if the receiver wasn't executed.
+	This should be overwritten by subclasses."
+
+	^ nil
 ]
 
 { #category : #accessing }
