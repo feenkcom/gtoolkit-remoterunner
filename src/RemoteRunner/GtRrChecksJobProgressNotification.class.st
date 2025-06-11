@@ -233,15 +233,11 @@ GtRrChecksJobProgressNotification >> totalChecksCount: anInteger [
 
 { #category : #'updating - summary' }
 GtRrChecksJobProgressNotification >> updateSummaryWithAnnouncement: anAnnouncement [
-	| taskResult retryCount retryTaskInfo completedTests testNames |
+	| completedTests  |
 
-	taskResult := anAnnouncement taskResult.
-	retryTaskInfo := anAnnouncement retryTaskInfo.
-	retryCount := retryTaskInfo retryCount.
-	"Don't take retries in to account in the statistics"
-	testNames := retryTaskInfo taskIdChecks flatCollect: #value.
-	completedTests := taskResult reject: [ :each |
-		testNames includes: (each testName) ].
+	completedTests := anAnnouncement taskResult.
+	"If the task has no results it will be retried."
+	completedTests ifNil: [ ^ self ].
 	self incrementSuccessfulChecksCountWith: (completedTests count: [ :aResult | 
 		aResult isSuccess ]).
 	self incrementSkippedChecksCountWith: (completedTests count: [ :aResult | 
