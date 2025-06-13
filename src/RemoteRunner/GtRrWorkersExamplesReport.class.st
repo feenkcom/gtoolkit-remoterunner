@@ -88,7 +88,7 @@ GtRrWorkersExamplesReport >> gtViewWorkersFor: aView [
 		title: 'Workers stats';
 		items: [ self workers ];
 		priority: 10;
-		column: 'Id' text: [ :aWorker | aWorker workerId ];
+		column: 'Worker Id' text: [ :aWorker | aWorker workerId ];
 		column: 'Tasks' text: [ :aWorker | aWorker numberOfTasks ];
 		column: 'Checks' text: [ :aWorker | aWorker numberOfExamples ];
 		column: 'Tasks Duration' text: [ :aWorker | aWorker tasksDuration ]
