@@ -20,7 +20,7 @@ GtRrSplitTestExamples >> splitClassExamples [
 
 	compoundTask retryStrategy: GtRrTaskTestRetry new.
 	taskNames := compoundTask group examples
-			collect: [ :example | example methodClass name -> example selector ]
+			collect: [ :example | example providerClass name -> example selector ]
 			as: Set.	"Tasks without errors don't split"
 	"The presence of error details is enough to trigger the split"
 	compoundTask executionData: (GtRrTaskExecutionData new 
@@ -161,7 +161,7 @@ GtRrSplitTestExamples >> splitPackageExamples [
 	self assert: splitTasks size equals: compoundTask allExamples size.
 
 	taskNames := compoundTask group examples
-			collect: [ :example | example methodClass name -> example selector ]
+			collect: [ :example | example providerClass name -> example selector ]
 			as: Set.
 	compoundTask retryStrategy: GtRrTaskTestRetry new.
 	taskContext := GtRrTaskContext new task: compoundTask.

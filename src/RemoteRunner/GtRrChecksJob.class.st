@@ -40,6 +40,14 @@ GtRrChecksJob >> isChecksJob [
 ]
 
 { #category : #accessing }
+GtRrChecksJob >> numberOfChecks [
+
+	^ self tasks
+		inject: 0
+		into: [ :s :v | s + v numberOfChecks ]
+]
+
+{ #category : #accessing }
 GtRrChecksJob >> resultsGroupedByTestName [
 	| dictionary |
 

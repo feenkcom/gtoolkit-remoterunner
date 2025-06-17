@@ -39,8 +39,15 @@ GtRrPackageExampleTask >> examplePackageName: anObject [
 
 { #category : #'private - running' }
 GtRrPackageExampleTask >> group [
+	| exampleClasses allExamples |
 
-	^ GtPackageExampleGroup new examplePackage: examplePackageName asPackage.
+	exampleClasses := examplePackageName asPackage definedClasses reject: [ :aClass | 
+			aClass isAbstract or: [ aClass isTrait ] ].
+	allExamples := exampleClasses flatCollect: [ :cls |
+		GtExampleFactory new
+			sourceClass: cls;
+			gtExamplesAllContained ].
+	^ GtPackageExampleGroup new examples: allExamples.
 ]
 
 { #category : #printing }
