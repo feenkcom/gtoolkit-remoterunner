@@ -282,6 +282,12 @@ GtRrTask >> hasResourceReport [
 	^ self executionData resourceReport notNil
 ]
 
+{ #category : #testing }
+GtRrTask >> hasResult [
+
+	^ result isNotNil
+]
+
 { #category : #accessing }
 GtRrTask >> includesTaskId: aTaskId [
 	"Answer a boolean indicating if the supplied task id is the receiver's or one of its retried tasks"
@@ -550,8 +556,7 @@ GtRrTask >> run [
 
 { #category : #running }
 GtRrTask >> runInImage [
-	"Run the receiver in the current process.
-	For testing only - no error handling, etc."
+	"Run the receiver in the current process"
 
 	self asJob runInImage.
 ]

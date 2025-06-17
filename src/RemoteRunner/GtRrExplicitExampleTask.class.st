@@ -79,8 +79,20 @@ GtRrExplicitExampleTask >> examples: aCollection [
 { #category : #'private - running' }
 GtRrExplicitExampleTask >> group [
 
-	^ GtExplicitExampleGroup new examples: (checkNames collect: [ :each | 
-		((self classWithName: each key) >> each value asSymbol) gtExample asExampleWithResult ]).
+	^ GtExplicitExampleGroup new examples: (checkNames 
+		collect: [ :each | | providerClass method |
+			providerClass := self class environment classOrTraitNamed: each key asSymbol.
+			method := providerClass lookupSelector: each value asSymbol.
+			(GtExampleFactory new
+				createExampleForMethod: method
+				withProviderClass: providerClass) asExampleWithResult ]
+		thenSelect: #isNotNil).
+]
+
+{ #category : #accessing }
+GtRrExplicitExampleTask >> numberOfChecks [
+
+	^ checkNames size
 ]
 
 { #category : #accessing }

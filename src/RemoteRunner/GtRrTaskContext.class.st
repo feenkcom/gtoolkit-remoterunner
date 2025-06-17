@@ -291,8 +291,15 @@ GtRrTaskContext >> run [
 
 { #category : #accessing }
 GtRrTaskContext >> runInImage [
-
+	| running watchdog process |
 	self markTaskStarted.
+	running := true.
+	process := Processor activeProcess.
+	task taskTimeout ifNotNil:
+		[ watchdog := 
+			[ task taskTimeout wait.
+			running ifTrue: [ process signalException: GtRrTimeoutTaskError new. ]
+		] forkNamed: 'runInImage timeout' ].
 	task result: task timedRun.
 	self markTaskCompleted.
 ]

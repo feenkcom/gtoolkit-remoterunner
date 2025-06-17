@@ -20,7 +20,7 @@ GtRrWorkerCheckSignal >> checkName: anObject [
 { #category : #accessing }
 GtRrWorkerCheckSignal >> example: aGtExample [
 
-	self checkName: aGtExample methodClass name asString, '>>', aGtExample selector
+	self checkName: aGtExample providerClass name asString, '>>', aGtExample selector
 ]
 
 { #category : #printing }
