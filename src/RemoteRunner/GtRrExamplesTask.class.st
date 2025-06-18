@@ -29,7 +29,14 @@ GtRrExamplesTask >> asExplicitTask [
 
 	^ GtRrExplicitExampleTask examples: 
 		(self group examples collect: [ :each |
-			each methodClass name -> each selector ])
+			each providerClass name -> each selector ])
+]
+
+{ #category : #'as yet unclassified' }
+GtRrExamplesTask >> checkNames [
+
+	^ self group examples collect: [ :each | 
+		each providerClass name -> each selector ]
 ]
 
 { #category : #accessing }
@@ -38,9 +45,9 @@ GtRrExamplesTask >> checkNamesAndTimes [
 
 	times := OrderedCollection new.
 	self allExamples do: [ :example |
-		exampleClassName := example methodClass name.
+		exampleClassName := example providerClass name.
 		times add: {
-			(example methodClass name asString, '>>', example selector).
+			(example providerClass name asString, '>>', example selector).
 			(GtRrCheckSchedulingTimes hasUniqueInstance ifTrue:
 					[ GtRrCheckSchedulingTimes uniqueInstance
 						timeForClassName: exampleClassName
@@ -118,7 +125,7 @@ GtRrExamplesTask >> run [
 			ifNil: [ PharoLinkTestCaseSkip new ]
 			ifNotNil: [ exampleResult basicReturnValue gtRrResultHolderClass new ].
 		announcement
-			initializeTestCaseClassName: exampleWithResult methodClass name
+			initializeTestCaseClassName: exampleWithResult providerClass name
 				selector: exampleWithResult selector;
 			testCaseStartTimestamp: exampleStartTime;
 			testCaseEndTimestamp: exampleEndTime;
@@ -153,7 +160,7 @@ GtRrExamplesTask >> splitTestsIn: aGtRrTaskContext [
 	group size = 1 ifTrue: [ ^ { self copy } ].
 	^ group collect: [ :example |
 		(GtRrExplicitExampleTask examples: 
-			{ example methodClass name -> example selector })
+			{ example providerClass name -> example selector })
 				constraint: self constraint;
 				taskTimeout: self taskTimeout ].
 ]

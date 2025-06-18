@@ -56,8 +56,14 @@ GtRrCheckSchedulingTimes class >> load [
 { #category : #accessing }
 GtRrCheckSchedulingTimes class >> loadDefaultFromFile: aFileReference [
 
+	^ self loadDefaultFromFile: aFileReference runner: GtRemoteRunner default.
+]
+
+{ #category : #accessing }
+GtRrCheckSchedulingTimes class >> loadDefaultFromFile: aFileReference runner: aGtRemoteRunner [
+
 	uniqueInstance := self loadFromFile: aFileReference.
-	uniqueInstance remoteRunner: GtRemoteRunner default.
+	uniqueInstance remoteRunner: aGtRemoteRunner.
 	^ uniqueInstance.
 ]
 
@@ -181,20 +187,22 @@ GtRrCheckSchedulingTimes >> onTaskFinished: aGtRrTaskAnnouncement [
 	result := aGtRrTaskAnnouncement task result .
 	result isCollection ifFalse: [ ^ self ].
 	result do: [ :aPharoLinkTestCaseEndAnnouncement |
-		aPharoLinkTestCaseEndAnnouncement isSuccess
-			ifTrue: [ self
-				atClassName: aPharoLinkTestCaseEndAnnouncement testCaseClassName 
-				selector: aPharoLinkTestCaseEndAnnouncement testCaseSelector 
-				add: aPharoLinkTestCaseEndAnnouncement duration
-				endTime: aPharoLinkTestCaseEndAnnouncement testCaseEndTimestamp ]
-			ifFalse: [ aPharoLinkTestCaseEndAnnouncement isSkipped ifFalse: [ self
-				atClassName: aPharoLinkTestCaseEndAnnouncement testCaseClassName 
-				selector: aPharoLinkTestCaseEndAnnouncement testCaseSelector 
-				add: aPharoLinkTestCaseEndAnnouncement duration
-				errorDetails: (GtRrErrorDetails new
-					errorMessage: aPharoLinkTestCaseEndAnnouncement exceptionMessageText;
-					trace: aPharoLinkTestCaseEndAnnouncement exceptionTrace)
-				endTime: aPharoLinkTestCaseEndAnnouncement testCaseEndTimestamp ] ] ]
+		(aPharoLinkTestCaseEndAnnouncement testCaseStartTimestamp isNil or:
+			[ aPharoLinkTestCaseEndAnnouncement testCaseEndTimestamp isNil ]) ifFalse:
+				[ aPharoLinkTestCaseEndAnnouncement isSuccess
+					ifTrue: [ self
+						atClassName: aPharoLinkTestCaseEndAnnouncement testCaseClassName 
+						selector: aPharoLinkTestCaseEndAnnouncement testCaseSelector 
+						add: aPharoLinkTestCaseEndAnnouncement duration
+						endTime: aPharoLinkTestCaseEndAnnouncement testCaseEndTimestamp ]
+					ifFalse: [ aPharoLinkTestCaseEndAnnouncement isSkipped ifFalse: [ self
+						atClassName: aPharoLinkTestCaseEndAnnouncement testCaseClassName 
+						selector: aPharoLinkTestCaseEndAnnouncement testCaseSelector 
+						add: aPharoLinkTestCaseEndAnnouncement duration
+						errorDetails: (GtRrErrorDetails new
+							errorMessage: aPharoLinkTestCaseEndAnnouncement exceptionMessageText;
+							trace: aPharoLinkTestCaseEndAnnouncement exceptionTrace)
+						endTime: aPharoLinkTestCaseEndAnnouncement testCaseEndTimestamp ] ] ] ].
 ]
 
 { #category : #accessing }

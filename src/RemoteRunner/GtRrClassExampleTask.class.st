@@ -39,10 +39,13 @@ GtRrClassExampleTask >> exampleClassName: anObject [
 
 { #category : #'private - running' }
 GtRrClassExampleTask >> group [
-	| exampleClass |
-
+	| exampleClass allExamples |
+	
 	exampleClass := self classWithName: exampleClassName.
-	^ GtClassExampleGroup new exampleClass: exampleClass
+	allExamples := GtExampleFactory new
+			sourceClass: exampleClass;
+			gtExamplesAllContained.
+	^ GtClassExampleGroup new examples: (allExamples collect: #asExampleWithResult)
 ]
 
 { #category : #printing }

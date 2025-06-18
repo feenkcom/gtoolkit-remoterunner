@@ -306,11 +306,15 @@ GtRrJobContext >> results [
 
 { #category : #accessing }
 GtRrJobContext >> runInImage [
-	| taskContext |
+	| taskContext workerAttributes |
 
+	workerAttributes := {
+		#runInImage -> true.
+		} asDictionary.
 	self markJobStarted.
 	taskContexts := OrderedCollection new.
 	job tasks do: [ :task |
+		task workerAttributes: workerAttributes.
 		taskContext := GtRrTaskContext new
 			task: task;
 			jobContext: self.

@@ -223,8 +223,9 @@ GtRrAbstractExamplesTask >> taskNotExecutedResult [
 
 	^ self checkNames collect: [ :assoc |
 		(PharoLinkTestCaseError
-		  testCase: (assoc key asSymbol asClass selector: assoc value asSymbol)
-		  startTimestamp: executionData startTime)
+			className: assoc key asSymbol 
+			selector: assoc value asSymbol
+			startTimestamp: executionData startTime)
 		  	initializeExceptionClass: Error
 		  	messageText: 'No Result'
 		  	trace: ''
