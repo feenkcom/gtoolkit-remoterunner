@@ -47,6 +47,11 @@ GtRrTaskExamples >> sunitTask [
 	<gtExample>
 	<return: #GtRrClassSUnitTask>
 	| task job semaphore |
+	
+	self 
+		forPharo12: [Error signal:'Temporary fail in Pharo 12'] 
+		forPharo11AndPharo10: [].
+		
 	remoteRunner := GtRemoteRunner new
 			port: #none;
 			start.
