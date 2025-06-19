@@ -33,6 +33,12 @@ GtRrChecksJob class >> sunitTestNames: anArray [
 	^ self new tasks: { (GtRrExplicitSUnitTask sunitTestNames: anArray) }
 ]
 
+{ #category : #accessing }
+GtRrChecksJob >> checkNames [
+
+	^ self tasks flatCollect: #checkNames
+]
+
 { #category : #testing }
 GtRrChecksJob >> isChecksJob [
 
