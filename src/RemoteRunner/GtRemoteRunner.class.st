@@ -1739,7 +1739,7 @@ GtRemoteRunner >> when: anAnnouncementClass do: aValuable [
 GtRemoteRunner >> when: anAnnouncementClass do: aValuable for: aSubscriber [
 	"Declare that when anAnnouncementClass is raised, aValuable is executed and define the subscriber."
 
-	^ (self when: anAnnouncementClass do: aValuable) subscriber: aSubscriber; yourself.
+	^ self announcer when: anAnnouncementClass do: aValuable for: aSubscriber
 ]
 
 { #category : #'announcer - subscription' }
