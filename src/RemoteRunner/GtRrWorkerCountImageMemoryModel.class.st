@@ -68,14 +68,12 @@ GtRrWorkerCountImageMemoryModel >> additionalOldSpace [
 GtRrWorkerCountImageMemoryModel >> additionalOldSpace: anInteger [
 
 	additionalOldSpace := anInteger.
-	requiredMemory := Smalltalk imageFile size + additionalOldSpace.
 ]
 
 { #category : #accessing }
 GtRrWorkerCountImageMemoryModel >> additionalOldSpace: anInteger imageFileSize: anotherInteger [
 
 	additionalOldSpace := anInteger.
-	requiredMemory := anotherInteger + additionalOldSpace.
 ]
 
 { #category : #ui }
