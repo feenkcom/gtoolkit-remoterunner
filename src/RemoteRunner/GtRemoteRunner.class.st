@@ -1060,7 +1060,7 @@ GtRemoteRunner >> privateTaskFailed: aTaskContextId workerId: workerId execution
 { #category : #private }
 GtRemoteRunner >> queueTasks: retryTasks jobContext: aJobContext [ 
 
-	aJobContext isStarted ifFalse: [ ^ self ].
+	(self isRunning and: [ aJobContext isStarted ]) ifFalse: [ ^ self ].
 	retryTasks do: [ :task |
 		self addTaskContext: (GtRrTaskContext new 
 			task: task;
@@ -1071,7 +1071,7 @@ GtRemoteRunner >> queueTasks: retryTasks jobContext: aJobContext [
 { #category : #private }
 GtRemoteRunner >> queueTasksFirst: retryTasks jobContext: aJobContext [ 
 
-	aJobContext isStarted ifFalse: [ ^ self ].
+	(self isRunning and: [ aJobContext isStarted ]) ifFalse: [ ^ self ].
 	retryTasks do: [ :task |
 		self addTaskContextFirst: (GtRrTaskContext new 
 			task: task;
@@ -1354,7 +1354,10 @@ GtRemoteRunner >> stopRegisteredWorkers [
 	GtRrStopRegisteredWorkersStartingSignal new
 		registeredWorkerCount: registeredWorkers size;
 		emit.
-	self registeredWorkersDo: #stop.
+	self registeredWorkersDo: [ :worker |
+		[ worker stop ]
+			on: ConnectionClosed
+			do: [ :ex | "Nothing, the worker is gone anyway" ] ].
 	"The stats will be updated when the worker is unregistered, so this isn't strictly necessary."
 	runnerStats
 		updateRegisteredWorkerCounts: registeredWorkers;
