@@ -528,7 +528,8 @@ GtRrStompMqProcessor >> startMqHeartbeat [
 		30 seconds wait.
 		mqClient isConnected ifTrue:
 			[ socketAccess critical: 
-				[ mqClient writeHeartbeatIfNeeded ] ] ] ] fork.
+				[ mqClient writeHeartbeatIfNeeded ] ] ] ] 
+					forkNamed: self class name asString, ' MQ heartbeat'.
 ]
 
 { #category : #'start - stop' }
