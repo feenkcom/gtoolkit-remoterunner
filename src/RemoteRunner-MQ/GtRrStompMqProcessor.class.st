@@ -598,13 +598,6 @@ GtRrStompMqProcessor >> subscribeToCommandMessages [
 ]
 
 { #category : #'start - stop' }
-GtRrStompMqProcessor >> subscribeToMessagesPrefetchCount: anInteger [
-	"29.05.25 temporary backward compatibility"
-
-	^ self subscribeToTaskMessages
-]
-
-{ #category : #'start - stop' }
 GtRrStompMqProcessor >> subscribeToTaskMessages [
 	"Subscribe to task messages.
 	This is left to the client application to allow for handshaking over the command channel."

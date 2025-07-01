@@ -7,12 +7,13 @@ Class {
 { #category : #examples }
 GtRrSignalSerializationExamples >> gtRrResultProcessingErrorAnnouncement [
 	<gtExample>
-	| signal serialized deserialized reader |
+	| signal serialized deserialized reader errorInfo |
 
+	errorInfo := { 'a' -> 1. } asDictionary.
 	signal := GtRrResultProcessingErrorAnnouncement new
 		workerAttributes: Dictionary new;
 		workerId: 'a-b-c-d';
-		errorDetails: 'ed';
+		errorInfo: errorInfo;
 		remoteAddressString: '1.2.3.4';
 		workingDirectory: '/a/d';
 		yourself.
@@ -22,7 +23,7 @@ GtRrSignalSerializationExamples >> gtRrResultProcessingErrorAnnouncement [
 	deserialized := reader processLine: serialized.
 	self assert: deserialized class equals: GtRrResultProcessingErrorAnnouncement.
 	self assert: deserialized workerId equals: 'a-b-c-d'.
-	self assert: deserialized errorDetails equals: 'ed'.
+	self assert: deserialized errorInfo equals: errorInfo.
 	self assert: deserialized remoteAddressString equals: '1.2.3.4'.
 	self assert: deserialized workingDirectory equals: '/a/d'.
 ]

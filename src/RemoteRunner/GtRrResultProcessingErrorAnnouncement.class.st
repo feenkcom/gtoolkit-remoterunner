@@ -2,28 +2,26 @@ Class {
 	#name : #GtRrResultProcessingErrorAnnouncement,
 	#superclass : #GtRrWorkerAnnouncement,
 	#instVars : [
-		'errorDetails'
+		'errorInfo'
 	],
 	#category : #'RemoteRunner-Announcements'
 }
 
 { #category : #accessing }
-GtRrResultProcessingErrorAnnouncement >> errorDetails [
-
-	^ errorDetails
+GtRrResultProcessingErrorAnnouncement >> errorInfo [
+	^errorInfo
 ]
 
 { #category : #accessing }
-GtRrResultProcessingErrorAnnouncement >> errorDetails: anObject [
-
-	errorDetails := anObject
+GtRrResultProcessingErrorAnnouncement >> errorInfo: anObject [
+	errorInfo := anObject
 ]
 
 { #category : #printing }
 GtRrResultProcessingErrorAnnouncement >> initializeFromTimestamp: aTimestamp andData: dataParts [
 
 	super initializeFromTimestamp: aTimestamp andData: dataParts.
-	self errorDetails: dataParts seventh.
+	self errorInfo: (self class evaluate: dataParts seventh).
 ]
 
 { #category : #printing }
@@ -32,5 +30,5 @@ GtRrResultProcessingErrorAnnouncement >> printOneLineContentsOn: aStream [
 	super printOneLineContentsOn: aStream.
 	aStream
 		<< ' | ';
-		<< errorDetails asString.
+		<< errorInfo storeString.
 ]

@@ -717,6 +717,30 @@ GtRemoteRunner >> gtWorkersFor: aView [
 		actionUpdateButton
 ]
 
+{ #category : #private }
+GtRemoteRunner >> handleProcessingError: aDictionary [
+	"Store the supplied result processing error information in the job.
+	If the job can't be found, just log.
+	Must be called within sharedAccess."
+	| jobId jobContext |
+
+	jobId := aDictionary at: #jobId ifAbsent: [^self].
+	jobContext := currentlyExecutingJobs at: jobId ifAbsent: [nil].
+	jobContext ifNil:
+		[ | taskContextId taskContext |
+		taskContextId := aDictionary at: #taskContextId ifAbsent: [nil].
+		taskContext := currentlyExecutingTasks
+			at: taskContextId
+			ifAbsent: [nil].
+		taskContext ifNotNil: [ jobContext := taskContext jobContext ] ].
+	jobContext ifNil:
+		[ ^ self announceAndLog:
+			(GtRrResultProcessingErrorAnnouncement new
+				workerId: (aDictionary at: #workerId ifAbsent: [ nil ]);
+				errorInfo: aDictionary) ].
+	jobContext job addProcessingError: aDictionary.
+]
+
 { #category : #'api - logger' }
 GtRemoteRunner >> hasLog [
 	"Answer a boolean indicating if the receiver has an active log available"
@@ -1032,6 +1056,29 @@ GtRemoteRunner >> privateRegisterWorkerWithDetails: aDictionary controlChannelAv
 		emit.
 
 	^ true
+]
+
+{ #category : #'api - worker' }
+GtRemoteRunner >> privateTaskDone: aTaskContextId workerId: workerId jobId: jobId taskId: taskId executionData: aGtRrWorkerExecutionData result: aResult [
+	"Process the supplied task results.
+	Must be called within sharedAccess."
+	| taskContext |
+
+	taskContext := currentlyExecutingTasks removeKey: aTaskContextId ifAbsent: [].
+	"If the task hasn't been found, assumed that it was terminated and move on"
+	taskContext ifNotNil: [ | retryTasks |
+		registeredWorkers at: workerId
+			ifPresent: [ :worker | worker registerHeartbeat ].
+		runnerStats currentlyExecutingTaskCount: currentlyExecutingTasks size.
+		taskContext task executionData updateFromWorker: aGtRrWorkerExecutionData.
+		taskContext result: aResult.
+		retryTasks := taskContext retryTasks.
+		taskContext markTaskCompleted.
+		(retryTasks isNotEmpty and: [ registeredWorkers isNotEmpty ]) ifTrue:
+			[ self queueTasksFirst: retryTasks jobContext: taskContext jobContext ].
+		self announceAndLog: taskContext taskCompletedAnnouncement.
+		self checkJobCompleted: taskContext ].
+	self taskCompletedForWorkerId: workerId.
 ]
 
 { #category : #private }
@@ -1489,32 +1536,27 @@ GtRemoteRunner >> taskCompletedForWorkerId: workerId [
 ]
 
 { #category : #'api - worker' }
-GtRemoteRunner >> taskDone: aTaskContextId workerId: workerId executionData: aGtRrWorkerExecutionData result: aResult [
+GtRemoteRunner >> taskDone: aTaskContextId workerId: workerId jobId: jobId taskId: taskId executionData: aGtRrWorkerExecutionData result: aResult [
 	| mutexStart mutexEnd |
 
 	GtRrTaskDoneStartingSignal new 
 		taskId: aTaskContextId;
 		emit.
 	mutexStart := DateAndTime now.
-	self critical: 
-		[ | taskContext |
-		mutexEnd := DateAndTime now.
-		taskContext := currentlyExecutingTasks removeKey: aTaskContextId ifAbsent: [].
-		"If the task hasn't been found, assumed that it was terminated and move on"
-		taskContext ifNotNil: [ | retryTasks |
-			registeredWorkers at: workerId
-				ifPresent: [ :worker | worker registerHeartbeat ].
-			runnerStats currentlyExecutingTaskCount: currentlyExecutingTasks size.
-			taskContext task executionData updateFromWorker: aGtRrWorkerExecutionData.
-			taskContext result: aResult.
-			retryTasks := taskContext retryTasks.
-			taskContext markTaskCompleted.
-			(retryTasks isNotEmpty and: [ registeredWorkers isNotEmpty ]) ifTrue:
-				[ self queueTasksFirst: retryTasks jobContext: taskContext jobContext ].
-			self announceAndLog: taskContext taskCompletedAnnouncement.
-			self checkJobCompleted: taskContext ].
-		self taskCompletedForWorkerId: workerId. ].
-
+	[ self critical: 
+		[ mutexEnd := DateAndTime now.
+		self privateTaskDone: aTaskContextId workerId: workerId jobId: jobId taskId: taskId executionData: aGtRrWorkerExecutionData result: aResult ] ]
+			on: Error
+			do: [ :ex | | info |
+				info := {
+					#taskContextId -> aTaskContextId.
+					#jobId -> jobId.
+					#taskId -> taskId.
+					#workerId -> workerId.
+					#executionData -> aGtRrWorkerExecutionData.
+					#exception -> ex freeze. 
+					} asDictionary.
+				self critical: [ self handleProcessingError: info ] ].
 	GtRrTaskDoneCompletedSignal new
 		mutexWait: (mutexEnd - mutexStart) asMilliSeconds;
 		taskId: aTaskContextId;
@@ -1525,14 +1567,25 @@ GtRemoteRunner >> taskDone: aTaskContextId workerId: workerId executionData: aGt
 ]
 
 { #category : #'api - worker' }
-GtRemoteRunner >> taskFailed: aTaskContextId workerId: workerId executionData: aGtRrWorkerExecutionData [
+GtRemoteRunner >> taskFailed: aTaskContextId workerId: workerId jobId: jobId taskId: taskId executionData: aGtRrWorkerExecutionData [
 	"Mark the specified task as failed"
 
 	GtRrWorkerTraceAnnouncement new
 		message: 'taskFailed:with: pre ', aTaskContextId asString;
 		emit.
-	self critical: 
-		[ self privateTaskFailed: aTaskContextId workerId: workerId executionData: aGtRrWorkerExecutionData ].
+	[ self critical: 
+		[ self privateTaskFailed: aTaskContextId workerId: workerId executionData: aGtRrWorkerExecutionData ] ]
+			on: Error
+			do: [ :ex | | info |
+				info := {
+					#taskContextId -> aTaskContextId.
+					#jobId -> jobId.
+					#taskId -> taskId.
+					#workerId -> workerId.
+					#executionData -> aGtRrWorkerExecutionData.
+					#exception -> ex freeze. 
+					} asDictionary.
+				self critical: [ self handleProcessingError: info ] ].
 	GtRrWorkerTraceAnnouncement new
 		message: 'taskFailed:with: post ', aTaskContextId asString;
 		emit.
@@ -1781,21 +1834,6 @@ GtRemoteRunner >> workerConnectionStrategyId [
 	Use the default strategy."
 	
 	^ nil
-]
-
-{ #category : #accessing }
-GtRemoteRunner >> workerResultProcessingError: errorDetails workerId: workerId taskContextId: taskContextId [
-	"The worker received an error while the receiver was processing results.
-	Log the error."
-
-	self announceAndLog: (GtRrResultProcessingErrorAnnouncement new
-		workerId: workerId;
-		errorDetails: errorDetails).
-	currentlyExecutingTasks
-		at: taskContextId
-		ifPresent: [ :taskContext |
-			self taskFailed: taskContextId workerId: workerId executionData: (GtRrWorkerExecutionData new
-				errorDetails: errorDetails) ].
 ]
 
 { #category : #accessing }

@@ -4,7 +4,9 @@ Class {
 	#instVars : [
 		'taskContextId',
 		'executionData',
-		'result'
+		'result',
+		'jobId',
+		'taskId'
 	],
 	#category : #'RemoteRunner-Model'
 }
@@ -19,15 +21,26 @@ GtRrWorkerTaskDoneMessage >> executionData: anObject [
 	executionData := anObject
 ]
 
+{ #category : #accessing }
+GtRrWorkerTaskDoneMessage >> jobId [
+	^jobId
+]
+
+{ #category : #accessing }
+GtRrWorkerTaskDoneMessage >> jobId: anObject [
+	jobId := anObject
+]
+
 { #category : #processing }
 GtRrWorkerTaskDoneMessage >> processMq: mqMessage processor: aGtRrProcessor for: anOwner [
 
 	anOwner remoteRunner
 		taskDone: taskContextId
 		workerId: workerId
+		jobId: jobId
+		taskId: taskId
 		executionData: executionData
 		result: result.
-	aGtRrProcessor write: mqMessage ackFrame.
 ]
 
 { #category : #accessing }
@@ -48,4 +61,14 @@ GtRrWorkerTaskDoneMessage >> taskContextId [
 { #category : #accessing }
 GtRrWorkerTaskDoneMessage >> taskContextId: anObject [
 	taskContextId := anObject
+]
+
+{ #category : #accessing }
+GtRrWorkerTaskDoneMessage >> taskId [
+	^taskId
+]
+
+{ #category : #accessing }
+GtRrWorkerTaskDoneMessage >> taskId: anObject [
+	taskId := anObject
 ]

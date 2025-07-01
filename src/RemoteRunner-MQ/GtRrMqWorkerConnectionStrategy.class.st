@@ -270,6 +270,8 @@ GtRrMqWorkerConnectionStrategy >> taskDone: aTaskContext with: anObject [
 	taskDoneMessage := GtRrWorkerTaskDoneMessage new
 		taskContextId: aTaskContext taskContextId;
 		workerId: worker uid;
+		jobId: aTaskContext jobId;
+		taskId: aTaskContext taskId;
 		executionData: (self executionDataFromTaskContext:  aTaskContext);
 		result: anObject.
 	mqProcessor sendGtMessage: taskDoneMessage to: self taskResultStompName.
@@ -292,6 +294,8 @@ GtRrMqWorkerConnectionStrategy >> taskFailed: aTaskContext with: anError [
 	taskFailedMessage := GtRrWorkerTaskFailedMessage new
 		taskContextId: aTaskContext taskContextId;
 		workerId: worker uid;
+		jobId: aTaskContext jobId;
+		taskId: aTaskContext taskId;
 		executionData: executionData.
 	mqProcessor sendGtMessage: taskFailedMessage to: self taskResultStompName.
 	ackFrame ifNotNil:

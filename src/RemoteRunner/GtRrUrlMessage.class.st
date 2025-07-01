@@ -4,6 +4,9 @@ Class {
 	#instVars : [
 		'url'
 	],
+	#classVars : [
+		'WorkerConfiguration'
+	],
 	#category : #'RemoteRunner-Model'
 }
 
@@ -39,15 +42,32 @@ GtRrUrlMessage class >> storeBuffer: aByteArray in: aUrl [
 		storeBuffer: aByteArray in: aUrl
 ]
 
+{ #category : #private }
+GtRrUrlMessage >> asyncWorkerConfiguration [
+
+	^ WorkerConfiguration ifNil:
+		[ WorkerConfiguration := AsyncFutureExecutionConfiguration new
+			customGroup: #GtRrUrlMessageProcessor;
+			maxAmountOfWorkers: 10;
+			defaultPriority ].
+]
+
 { #category : #processing }
 GtRrUrlMessage >> processMq: mqMessage processor: aGtRrProcessor for: anOwner [
 	"Process the supplied message for anObject.
 	anObject (outside of testing) will either be a GtRrWorker or GtRemoteRunner."
 
-	^ self retrieveMessage 
+	([ self retrieveMessage 
 		processMq: mqMessage 
 		processor: aGtRrProcessor 
-		for: anOwner
+		for: anOwner ] asAsyncFuture
+			await: self asyncWorkerConfiguration)
+				then: [ :v | ]
+				otherwise: [ :ex |
+					ex freeze.
+					[ | theError |
+					theError := ex.
+					self error: 'Unexpected error while processing Url Message: ', theError messageText printString ] fork ].
 ]
 
 { #category : #private }

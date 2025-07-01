@@ -26,7 +26,8 @@ Class {
 		'name',
 		'creationTime',
 		'exceptionHandlingStrategy',
-		'properties'
+		'properties',
+		'processingErrors'
 	],
 	#category : #'RemoteRunner-Jobs'
 }
@@ -106,6 +107,15 @@ GtRrJob class >> sunitTestNames: anArray [
 	"Answer a job with the supplied test names"
 
 	^ GtRrChecksJob sunitTestNames: anArray
+]
+
+{ #category : #accessing }
+GtRrJob >> addProcessingError: aDictionary [
+	"Add the supplied error information to the receiver.
+	Should be called within the remote runner's sharedAccess."
+
+	processingErrors ifNil: [ processingErrors := OrderedCollection new ].
+	processingErrors add: aDictionary.
 ]
 
 { #category : #accessing }
@@ -264,6 +274,18 @@ GtRrJob >> gtErrorsFor: aView [
 ]
 
 { #category : #ui }
+GtRrJob >> gtProcessingErrorsFor: aView [
+	<gtView>
+
+	^ aView list
+		title: 'Processing Errors';
+		priority: 18;
+		items: [ self processingErrors ];
+		updateWhen: GtRemoteRunnerAnnouncement in: [ self announcer ];
+		actionUpdateButton
+]
+
+{ #category : #ui }
 GtRrJob >> gtPropertiesFor: aView [
 	<gtView>
 
@@ -323,7 +345,7 @@ GtRrJob >> gtTasksFor: aView [
 GtRrJob >> hasErrors [
 	"Answer a boolean indicating whether the receiver has tasks that failed"
 
-	^ errorCount > 0
+	^ errorCount > 0 or: [ processingErrors isNotNil and: [ processingErrors isNotEmpty ] ]
 ]
 
 { #category : #testing }
@@ -505,6 +527,12 @@ GtRrJob >> printOn: aStream [
 		[ aStream << ' with errors' ].
 	aStream
 		nextPut: $).
+]
+
+{ #category : #accessing }
+GtRrJob >> processingErrors [
+
+	^ processingErrors ifNil: [ #() ]
 ]
 
 { #category : #accessing }
