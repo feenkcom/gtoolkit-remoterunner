@@ -15,9 +15,11 @@ GtRemoteRunnerMq >> addTaskContext: taskContext [
 
 { #category : #adding }
 GtRemoteRunnerMq >> addTaskContextFirst: taskContext [
-	"Queue priorities aren't yet implemented, just add to the end of the queue"
+	"Add the supplied taskContext to the front of the queue."
 
-	self addTaskContext: taskContext
+	self critical:
+		[ server sendWorkerTaskContextFirst: taskContext asWorkerTaskContext.
+		self addCurrentlyExecutingTask: taskContext ]
 ]
 
 { #category : #accessing }
