@@ -36,26 +36,12 @@ GtRrWorkerResultEntry >> checkPromise [
 			emit.
 		^ self ].
 
-	Stdio stdout
-		<< 'checkPromise error: ';
-			<< promise exception errorMessage asString; lf;
-		<< 'trace:'; lf;
-		<< promise exception trace withUnixLineEndings; lf;
-		<< 'task id: ';
-			<< task taskContextId asString; lf.
-	worker connectDuring: [ :application | | errorDetails |
-		errorDetails := GtRrErrorDetails new
-			errorMessage: 'RemoteRunner result processing error: ', promise exception errorMessage asString;
-			trace: promise exception trace.
-		application newCommandFactory
-			bindingAt: #errorDetails put: (LeJsonV4 uniqueInstance serialize: errorDetails);
-			bindingAt: #workerId put: worker uid;
-			bindingAt: #taskContextId put: task taskContextId;
-			<< 'GtAssignedRemoteRunner 
-				workerResultProcessingError: (LeJsonV4 uniqueInstance deserialize: errorDetails readStream)
-				workerId: workerId
-				taskContextId: taskContextId';
-			sendAndWait ].
+	GtRrWorkerResponseErrorSignal new
+		taskId: task taskId;
+		taskContextId: task taskContextId;
+		workerId: worker uid;
+		errorMessage: promise exception errorMessage asString;
+		emit.
 ]
 
 { #category : #initialization }

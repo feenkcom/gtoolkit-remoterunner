@@ -8,7 +8,8 @@ Class {
 		'taskContextId',
 		'task',
 		'taskTimeout',
-		'exceptionHandlingStrategy'
+		'exceptionHandlingStrategy',
+		'jobId'
 	],
 	#category : #'RemoteRunner-Worker'
 }
@@ -52,6 +53,16 @@ GtRrWorkerTaskContext >> executionData [
 { #category : #executing }
 GtRrWorkerTaskContext >> futureTaskExecutionFor: aRunner [
 	^ self configureTaskExecution: GtRrFutureTimeoutableTaskExecution new with: aRunner
+]
+
+{ #category : #accessing }
+GtRrWorkerTaskContext >> jobId [
+	^jobId
+]
+
+{ #category : #accessing }
+GtRrWorkerTaskContext >> jobId: anObject [
+	jobId := anObject
 ]
 
 { #category : #accessing }

@@ -44,6 +44,7 @@ GtRrTaskContext >> asWorkerTaskContext [
 
 	^ GtRrWorkerTaskContext new
 		taskContextId: taskContextId;
+		jobId: jobContext jobId;
 		task: task;
 		taskTimeout: self taskTimeout;
 		exceptionHandlingStrategy: self jobContext exceptionHandlingStrategy.
@@ -416,6 +417,8 @@ GtRrTaskContext >> terminateTask [
 	self remoteRunner
 		taskFailed: self taskContextId
 		workerId: (self workerConnection ifNotNil: [ : connection | connection  workerId ])
+		jobId: jobContext jobId
+		taskId: self taskId
 		executionData: executionData.
 ]
 

@@ -182,12 +182,16 @@ GtRrLlWorkerConnectionStrategy >> taskDone: aTaskContext with: anObject [
 				worker: worker
 				task: aTaskContext
 				bindings: {#taskContextId -> aTaskContext taskContextId.
+						#jobId -> aTaskContext jobId.
+						#taskId -> aTaskContext taskId.
 						#executionData -> serializedExecutionData.
 						#result -> serializedResult.
 						#workerId -> worker uid.}
 				command: 'GtAssignedRemoteRunner 
 			taskDone: taskContextId 
 			workerId: workerId
+			jobId: jobId
+			taskId: taskId
 			executionData: (LeJsonV4 uniqueInstance deserialize: executionData readStream)
 			result: (LeJsonV4 uniqueInstance deserialize: result readStream). true')
 ]
@@ -218,10 +222,14 @@ GtRrLlWorkerConnectionStrategy >> taskFailed: aTaskContext with: anError [
 		bindings: { 
 			#taskContextId -> aTaskContext taskContextId.
 			#executionData -> serializedExecutionData.
-			#workerId -> worker uid }
+			#workerId -> worker uid.
+			#jobId -> aTaskContext jobId.
+			#taskId -> aTaskContext taskId. }
 		command: 'GtAssignedRemoteRunner 
 				taskFailed: taskContextId
 				workerId: workerId
+				jobId: jobId
+				taskId: taskId
 				executionData: (LeJsonV4 uniqueInstance deserialize: executionData readStream). true').
 ]
 

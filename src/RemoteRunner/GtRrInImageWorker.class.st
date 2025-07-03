@@ -90,6 +90,8 @@ GtRrInImageWorker >> taskDone: aTaskContext with: anObject [
 	remoteRunner
 		taskDone: aTaskContext taskContextId
 		workerId: self uid
+		jobId: aTaskContext jobId
+		taskId: aTaskContext taskId
 		executionData: executionData
 		result: anObject.
 ]
@@ -110,6 +112,8 @@ GtRrInImageWorker >> taskFailed: aTaskContext with: anError [
 	remoteRunner
 		taskFailed: aTaskContext taskContextId
 		workerId: self uid
+		jobId: aTaskContext jobId
+		taskId: aTaskContext taskId
 		executionData: executionData.
 ]
 

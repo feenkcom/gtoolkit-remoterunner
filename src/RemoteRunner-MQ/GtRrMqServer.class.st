@@ -7,7 +7,8 @@ Class {
 		'mqProcessor',
 		'runnerControlChannelName',
 		'taskQueueName',
-		'taskResultName'
+		'taskResultName',
+		'mqTaskProcessor'
 	],
 	#category : #'RemoteRunner-MQ-Runner'
 }
@@ -116,6 +117,9 @@ GtRrMqServer >> initialize [
 	super initialize.
 	mqProcessor := GtRrStompMqProcessor new
 		owner: self.
+	mqTaskProcessor := GtRrMqTaskProcessor new
+		gtRrMqServer: self;
+		gtRrMqProcessor: mqProcessor.
 ]
 
 { #category : #testing }
