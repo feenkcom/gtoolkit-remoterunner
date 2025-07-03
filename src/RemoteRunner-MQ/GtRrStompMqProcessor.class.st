@@ -8,8 +8,6 @@ Class {
 		'mqListener',
 		'commandSubscription',
 		'messageSubscription',
-		'commandChannelName',
-		'messageChannelName',
 		'owner',
 		'rpcRegistry',
 		'sharedAccess',
@@ -23,7 +21,9 @@ Class {
 		'callbackProcess',
 		'taskCallback',
 		'commandCallback',
-		'largeMessageUrl'
+		'largeMessageUrl',
+		'commandChannelDefinition',
+		'messageChannelDefinition'
 	],
 	#classVars : [
 		'DefaultHost',
@@ -115,6 +115,45 @@ GtRrStompMqProcessor class >> portFrom: aHostString [
 ]
 
 { #category : #accessing }
+GtRrStompMqProcessor class >> runnerControlChannelDefinitionFor: basename [
+
+	^ GtRrMqQueueDefinition new
+		basename: basename;
+		stompName: '/queue/', basename;
+		prefetchCount: 200.
+]
+
+{ #category : #accessing }
+GtRrStompMqProcessor class >> taskQueueDefinitionFor: basename [
+
+	^ GtRrMqQueueDefinition new
+		basename: basename;
+		stompName: '/queue/', basename;
+		headerAt: 'x-max-priority' put: '2';
+		prefetchCount: 1.
+]
+
+{ #category : #accessing }
+GtRrStompMqProcessor class >> taskResultDefinitionFor: basename [
+
+	^ GtRrMqQueueDefinition new
+		basename: basename;
+		stompName: '/queue/', basename;
+		prefetchCount: 200.
+]
+
+{ #category : #accessing }
+GtRrStompMqProcessor class >> workerControlDefinitionFor: workerId [
+	"Workers use a transient topic for control channels.
+	The topic is automatically deleted after the worker disconnects."
+
+	^ GtRrMqQueueDefinition new
+		basename: 'gtrrWorkerControl.', workerId;
+		stompName: (self workerControlTopicNameFor: workerId);
+		prefetchCount: 100.
+]
+
+{ #category : #accessing }
 GtRrStompMqProcessor class >> workerControlTopicNameFor: workerId [
 	"Workers use a transient topic for control channels.
 	The topic is automatically deleted after the worker disconnects."
@@ -133,13 +172,13 @@ GtRrStompMqProcessor >> commandCallback: anObject [
 ]
 
 { #category : #accessing }
-GtRrStompMqProcessor >> commandChannelName [
-	^ commandChannelName
+GtRrStompMqProcessor >> commandChannelDefinition [
+	^ commandChannelDefinition
 ]
 
 { #category : #accessing }
-GtRrStompMqProcessor >> commandChannelName: anObject [
-	commandChannelName := anObject
+GtRrStompMqProcessor >> commandChannelDefinition: anObject [
+	commandChannelDefinition := anObject
 ]
 
 { #category : #private }
@@ -237,13 +276,13 @@ GtRrStompMqProcessor >> localAddress [
 ]
 
 { #category : #accessing }
-GtRrStompMqProcessor >> messageChannelName [
-	^ messageChannelName
+GtRrStompMqProcessor >> messageChannelDefinition [
+	^ messageChannelDefinition
 ]
 
 { #category : #accessing }
-GtRrStompMqProcessor >> messageChannelName: anObject [
-	messageChannelName := anObject
+GtRrStompMqProcessor >> messageChannelDefinition: anObject [
+	messageChannelDefinition := anObject
 ]
 
 { #category : #accessing }
@@ -336,9 +375,9 @@ GtRrStompMqProcessor >> processMqMessage: mqMessage [
 		messageClassName: gtMessage class name;
 		encodedSize: mqMessage body size;
 		emit.
-	mqMessage destination = commandChannelName ifTrue:
+	mqMessage destination = commandChannelDefinition stompName ifTrue:
 		[ ^ commandCallback value: mqMessage  value: gtMessage value: owner ].
-	mqMessage destination = messageChannelName ifTrue:
+	mqMessage destination = messageChannelDefinition stompName ifTrue:
 		[ ^ taskCallback value: mqMessage value: gtMessage value: owner ].
 	self error: 'Unrecognised message destination: ', mqMessage destination asString.
 ]
@@ -360,34 +399,6 @@ GtRrStompMqProcessor >> promiseAt: rpcId [
 
 	^ self critical:
 		[ rpcRegistry at: rpcId ]
-]
-
-{ #category : #housekeeping }
-GtRrStompMqProcessor >> purgeQueueSlowly: queueName [
-	"Connect the mqClient and read messages until the processor has been idle for 2 seconds.
-	This is a hack and should only be used if the management interface isn't available."
-	| listener count lastMessageTime subscription |
-
-	self assert: mqClient isNil
-		description: 'Purging is only supported while not connected'.
-	self connect.
-
-	subscription := mqClient newSubscriptionTo: queueName.
-	subscription autoAck.
-	mqClient writeWithReceipt: subscription subscribeFrame.
-
-	lastMessageTime := DateAndTime now.
-	count := 0.
-	listener := [ mqClient runWith: [ :message |
-		count := count + 1.
-		lastMessageTime := DateAndTime now ] ] fork.
-	[ (DateAndTime now - lastMessageTime) < 2 seconds ] whileTrue:
-		[ 500 milliseconds wait ].
-	self stopMqHeartbeat.
-	listener terminate.
-	mqClient closeMedium.
-	mqClient := nil.
-	^ count.
 ]
 
 { #category : #'start - stop' }
@@ -416,11 +427,11 @@ GtRrStompMqProcessor >> removePromiseAt: rpcId [
 ]
 
 { #category : #actions }
-GtRrStompMqProcessor >> sendBlockClosure: aBlockClosure to: commandDestination [
+GtRrStompMqProcessor >> sendBlockClosure: aBlockClosure to: aGtRrMqQueueDefinition [
 
 	self sendGtMessage: (GtRrBlockClosureMessage new
 			blockClosure: aBlockClosure)
-		to: commandDestination.
+		to: aGtRrMqQueueDefinition.
 ]
 
 { #category : #actions }
@@ -429,40 +440,48 @@ GtRrStompMqProcessor >> sendCommandRpcBlockClosure: aBlockClosure to: commandDes
 	^ self sendCommandRpcMessage: (GtRrBlockClosureMessage new
 			blockClosure: aBlockClosure)
 		to: commandDestination
-		response: commandChannelName.
+		response: commandChannelDefinition stompName.
 ]
 
 { #category : #actions }
 GtRrStompMqProcessor >> sendCommandRpcMessage: aGtRrMessage to: commandDestination [
 
-	^ self sendCommandRpcMessage: aGtRrMessage to: commandDestination response: commandChannelName
+	^ self sendCommandRpcMessage: aGtRrMessage to: commandDestination response: commandChannelDefinition
 ]
 
 { #category : #actions }
-GtRrStompMqProcessor >> sendCommandRpcMessage: aGtRrMessage to: commandChannel response: responseDestination [
+GtRrStompMqProcessor >> sendCommandRpcMessage: aGtRrMessage to: commandGtRrMqQueueDefinition response: responseGtRrMqQueueDefinition [
 	| rpcMessage rpcId promise |
 
 	rpcId := UUID new.
 	rpcMessage := GtRrRpcRequestMessage new
 		rpcId: rpcId;
-		responseQueue: responseDestination;
+		responseQueue: responseGtRrMqQueueDefinition;
 		evaluationMessage: aGtRrMessage.
 	promise := GtRrMqPromise new
 		rpcId: rpcId.
 	self critical: [ rpcRegistry at: rpcId put: promise ].
-	self sendGtMessage: rpcMessage to: commandChannel.
+	self sendGtMessage: rpcMessage to: commandGtRrMqQueueDefinition.
 	^ promise
 ]
 
 { #category : #actions }
-GtRrStompMqProcessor >> sendGtMessage: aGtRrMessage to: destination [
+GtRrStompMqProcessor >> sendGtMessage: aGtRrMessage to: aGtRrMqQueueDefinition [
+
+	self sendGtMessage: aGtRrMessage to: aGtRrMqQueueDefinition headers: nil
+]
+
+{ #category : #actions }
+GtRrStompMqProcessor >> sendGtMessage: aGtRrMessage to: aGtRrMqQueueDefinition headers: aDictionary [
 	| mqMessage |
 
 	GtRrStompMqSendMessageStartingSignal new
 		gtMessagePrintString: aGtRrMessage printString;
 		emit.
-	mqMessage := mqClient newSendFrameTo: destination.
+	mqMessage := mqClient newSendFrameTo: aGtRrMqQueueDefinition stompName.
 	mqMessage bytes: (self serializedGtMessage: aGtRrMessage).
+	aGtRrMqQueueDefinition setHeadersIn: mqMessage.
+	self setHeaders: aDictionary in: mqMessage.
 	GtRrMessageStatsSignal new
 		messageClassName: aGtRrMessage class name;
 		encodedSize: mqMessage body size;
@@ -498,6 +517,14 @@ GtRrStompMqProcessor >> serializedGtMessage: aGtRrMessage [
 	^ GtWireEncoder onByteArray
 		nextPut: urlMessage;
 		contents.
+]
+
+{ #category : #private }
+GtRrStompMqProcessor >> setHeaders: aDictionary in: mqMessage [
+
+	aDictionary ifNil: [ ^ self ].
+	aDictionary keysAndValuesDo: [ :key :value |
+		mqMessage headerAt: key put: value ].
 ]
 
 { #category : #'start - stop' }
@@ -591,9 +618,10 @@ GtRrStompMqProcessor >> storeLargeMessage: messageBuffer [
 { #category : #'start - stop' }
 GtRrStompMqProcessor >> subscribeToCommandMessages [
 
-	commandSubscription := mqClient newSubscriptionTo: commandChannelName.
+	commandSubscription := mqClient newSubscriptionTo: commandChannelDefinition stompName.
 	commandSubscription clientIndividualAck.
-	commandSubscription prefetchCount: 100.
+	commandSubscription prefetchCount: commandChannelDefinition prefetchCount.
+	commandChannelDefinition setHeadersIn: commandSubscription subscribeFrame.
 	mqClient writeWithReceipt: commandSubscription subscribeFrame.
 ]
 
@@ -602,20 +630,10 @@ GtRrStompMqProcessor >> subscribeToTaskMessages [
 	"Subscribe to task messages.
 	This is left to the client application to allow for handshaking over the command channel."
 
-	messageSubscription:= mqClient newSubscriptionTo: messageChannelName.
+	messageSubscription:= mqClient newSubscriptionTo: messageChannelDefinition stompName.
 	messageSubscription clientIndividualAck.
-	messageSubscription prefetchCount: 1.
-	self write: messageSubscription subscribeFrame.
-]
-
-{ #category : #'start - stop' }
-GtRrStompMqProcessor >> subscribeToTaskMessagesPrefetchCount: anInteger [
-	"Subscribe to task messages.
-	This is left to the client application to allow for handshaking over the command channel."
-
-	messageSubscription:= mqClient newSubscriptionTo: messageChannelName.
-	messageSubscription clientIndividualAck.
-	messageSubscription prefetchCount: anInteger.
+	messageSubscription prefetchCount: messageChannelDefinition prefetchCount.
+	messageChannelDefinition setHeadersIn: messageSubscription subscribeFrame.
 	self write: messageSubscription subscribeFrame.
 ]
 

@@ -40,7 +40,7 @@ GtRrMqWorkerConnection >> commandCurrentTaskContextId [
 	| promise |
 	promise := remoteRunner server sendRpcBlockClosure: [ :mqMessage :gtProcessor :owner |
 		owner worker commandCurrentTaskContextId ]
-			to: (GtRrStompMqProcessor workerControlTopicNameFor: self workerId).
+			to: (GtRrStompMqProcessor workerControlDefinitionFor: self workerId).
 	promise wait
 		then: [ :aResult | ^ aResult ]
 		otherwise: [ :ex | self error: 'Unable to retrieve current task id: ', ex messageString ].
@@ -51,7 +51,7 @@ GtRrMqWorkerConnection >> commandCurrentTaskContextIdTimeout: secondsInteger [
 	| promise |
 	promise := remoteRunner server sendRpcBlockClosure: [ :mqMessage :gtProcessor :owner |
 		owner worker commandCurrentTaskContextId ]
-			to: (GtRrStompMqProcessor workerControlTopicNameFor: self workerId).
+			to: (GtRrStompMqProcessor workerControlDefinitionFor: self workerId).
 	(promise waitTimeoutSeconds: secondsInteger)
 		then: [ :aResult | ^ aResult ]
 		otherwise: [ :ex | self error: 'Unable to retrieve current task id: ', ex messageString ].
@@ -146,7 +146,7 @@ GtRrMqWorkerConnection >> remoteRunner: anObject [
 GtRrMqWorkerConnection >> sendRpcMessage: aGtRrMessage [
 
 	^ remoteRunner server sendRpcMessage: aGtRrMessage 
-		to: (GtRrStompMqProcessor workerControlTopicNameFor: self workerId)
+		to: (GtRrStompMqProcessor workerControlDefinitionFor: self workerId)
 ]
 
 { #category : #'start-stop' }

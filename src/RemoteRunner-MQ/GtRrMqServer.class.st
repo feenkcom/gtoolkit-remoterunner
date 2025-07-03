@@ -5,10 +5,10 @@ Class {
 		'remoteRunner',
 		'mqHostName',
 		'mqProcessor',
-		'runnerControlChannelName',
-		'taskQueueName',
-		'taskResultName',
-		'mqTaskProcessor'
+		'mqTaskProcessor',
+		'runnerControlChannelDefinition',
+		'taskResultDefinition',
+		'taskQueueDefinition'
 	],
 	#category : #'RemoteRunner-MQ-Runner'
 }
@@ -20,9 +20,16 @@ GtRrMqServer class >> runnerControlChannelBaseName [
 ]
 
 { #category : #accessing }
+GtRrMqServer class >> runnerControlChannelDefinition [
+
+	^ GtRrStompMqProcessor runnerControlChannelDefinitionFor: 
+		self runnerControlChannelBaseName
+]
+
+{ #category : #accessing }
 GtRrMqServer class >> runnerControlChannelStompName [
 
-	^ '/queue/', self runnerControlChannelBaseName
+	^ self runnerControlChannelDefinition stompName
 ]
 
 { #category : #accessing }
@@ -45,9 +52,16 @@ GtRrMqServer class >> taskQueueBaseName [
 ]
 
 { #category : #accessing }
+GtRrMqServer class >> taskQueueDefinition [
+
+	^ GtRrStompMqProcessor taskQueueDefinitionFor: 
+		self taskQueueBaseName
+]
+
+{ #category : #accessing }
 GtRrMqServer class >> taskQueueStompName [
 
-	^ '/queue/', self taskQueueBaseName
+	^ self taskQueueDefinition stompName
 ]
 
 { #category : #accessing }
@@ -57,9 +71,42 @@ GtRrMqServer class >> taskResultBaseName [
 ]
 
 { #category : #accessing }
+GtRrMqServer class >> taskResultDefinition [
+
+	^ GtRrStompMqProcessor taskResultDefinitionFor: 
+		self taskResultBaseName
+]
+
+{ #category : #accessing }
 GtRrMqServer class >> taskResultStompName [
 
-	^ '/queue/', self taskResultBaseName
+	^ self taskResultDefinition stompName
+]
+
+{ #category : #'start - stop' }
+GtRrMqServer >> deleteQueues [
+	"Delete the permanent queues.
+	This isn't as severe as it sounds - they will all be automatically created again on the next run."
+	| rabbitManager |
+
+	rabbitManager := RabbitMqHttpClient 
+		host: self mqHostName
+		port: 15672
+		user: self mqUsername
+		password: self mqPassword.
+	"Queues are created the first time that STOMP accesses them, so may not exist yet.
+	Ignore Not Found errors here."
+	[ rabbitManager
+		deleteQueue: self class taskQueueBaseName vhost: '/';
+		deleteQueue: self class runnerControlChannelBaseName vhost: '/';
+		deleteQueue: self class taskResultBaseName vhost: '/' ]
+			on: RabbitMqClientError
+			do: [ :ex | | response |
+				response := ex client response.
+				(response code = 404 and: [ response statusLine reason = 'Not Found' ]) ifTrue:
+					[ ex resume ]
+				ifFalse:
+					[ ex pass ] ].
 ]
 
 { #category : #'as yet unclassified' }
@@ -230,19 +277,19 @@ GtRrMqServer >> remoteRunner: anObject [
 ]
 
 { #category : #accessing }
-GtRrMqServer >> runnerControlChannelStompName [
+GtRrMqServer >> runnerControlChannelDefinition [
 	"This is just caching the value, and should not be changed from what the class method returns."
 
-	^ runnerControlChannelName ifNil: 
-		[ runnerControlChannelName := self class runnerControlChannelStompName ]
+	^ runnerControlChannelDefinition ifNil: 
+		[ runnerControlChannelDefinition := self class runnerControlChannelDefinition ]
 ]
 
 { #category : #'as yet unclassified' }
-GtRrMqServer >> sendBlockClosure: aBlockClosure to: workerCommandDestination [
+GtRrMqServer >> sendBlockClosure: aBlockClosure to: aGtRrMqQueueDefinition [
 
 	mqProcessor sendGtMessage: (GtRrBlockClosureMessage new
 			blockClosure: aBlockClosure)
-		to: workerCommandDestination.
+		to: aGtRrMqQueueDefinition.
 ]
 
 { #category : #'as yet unclassified' }
@@ -269,7 +316,25 @@ GtRrMqServer >> sendWorkerTaskContext: aWorkerTaskContext [
 		emit.
 	taskMessage := GtRrRunnerTaskMessage new
 		task: aWorkerTaskContext.
-	mqProcessor sendGtMessage: taskMessage to: self taskQueueStompName.
+	mqProcessor sendGtMessage: taskMessage to: self taskQueueDefinition.
+	GtRrMqQueueTaskCompletedSignal new
+		taskId: aWorkerTaskContext taskId;
+		emit.
+]
+
+{ #category : #private }
+GtRrMqServer >> sendWorkerTaskContextFirst: aWorkerTaskContext [
+	| taskMessage |
+
+	GtRrMqQueueTaskStartingSignal new
+		taskId: aWorkerTaskContext taskId;
+		emit.
+	taskMessage := GtRrRunnerTaskMessage new
+		task: aWorkerTaskContext.
+	mqProcessor 
+		sendGtMessage: taskMessage 
+		to: self taskQueueDefinition
+		headers: { 'priority' -> '2' } asDictionary.
 	GtRrMqQueueTaskCompletedSignal new
 		taskId: aWorkerTaskContext taskId;
 		emit.
@@ -277,14 +342,18 @@ GtRrMqServer >> sendWorkerTaskContext: aWorkerTaskContext [
 
 { #category : #'start - stop' }
 GtRrMqServer >> start [
+	"Connect to the MessageQueue and start listening for messages"
 
 	self purgeQueues.
+	"Temporary work-around...
+	Queue max priority can't be changed, so ensure the old queue isn't in the way."
+	self deleteQueues.
 
 	mqProcessor
-		commandChannelName: self runnerControlChannelStompName;
-		messageChannelName: self taskResultStompName.
+		commandChannelDefinition: self runnerControlChannelDefinition;
+		messageChannelDefinition: self taskResultDefinition.
 	mqProcessor start.
-	mqProcessor subscribeToTaskMessagesPrefetchCount: 100.
+	mqProcessor subscribeToTaskMessages.
 ]
 
 { #category : #accessing }
@@ -322,11 +391,11 @@ GtRrMqServer >> stompMqQueueNamesAttribute [
 	
 	^ String streamContents: [ :sStream |
 		sStream 
-			<< self runnerControlChannelStompName;
+			<< self runnerControlChannelDefinition stompName;
 			<< ':';
-			<< self taskQueueStompName;
+			<< self taskQueueDefinition stompName;
 			<< ':';
-			<< self taskResultStompName ]
+			<< self taskResultDefinition stompName ]
 ]
 
 { #category : #'start - stop' }
@@ -346,21 +415,21 @@ GtRrMqServer >> stopWorker: workerId [
 
 	self isRunning ifFalse: [ ^ self ].
 	mqProcessor sendGtMessage: GtRrRunnerQuitMessage new 
-		to: (GtRrStompMqProcessor workerControlTopicNameFor: workerId).
+		to: (GtRrStompMqProcessor workerControlDefinitionFor: workerId).
 ]
 
 { #category : #accessing }
-GtRrMqServer >> taskQueueStompName [
+GtRrMqServer >> taskQueueDefinition [
 	"This is just caching the value, and should not be changed from what the class method returns."
 
-	^ taskQueueName ifNil: 
-		[ taskQueueName := self class taskQueueStompName ]
+	^ taskQueueDefinition ifNil: 
+		[ taskQueueDefinition := self class taskQueueDefinition ]
 ]
 
 { #category : #accessing }
-GtRrMqServer >> taskResultStompName [
+GtRrMqServer >> taskResultDefinition [
 	"This is just caching the value, and should not be changed from what the class method returns."
 
-	^ taskResultName ifNil: 
-		[ taskResultName := '/queue/', NetNameResolver localHostName, '_task_result' ]
+	^ taskResultDefinition ifNil: 
+		[ taskResultDefinition := self class taskResultDefinition ]
 ]
