@@ -1067,8 +1067,9 @@ GtRemoteRunner >> privateTaskDone: aTaskContextId workerId: workerId jobId: jobI
 	taskContext := currentlyExecutingTasks removeKey: aTaskContextId ifAbsent: [].
 	"If the task hasn't been found, assumed that it was terminated and move on"
 	taskContext ifNotNil: [ | retryTasks |
-		registeredWorkers at: workerId
-			ifPresent: [ :worker | worker registerHeartbeat ].
+		registeredWorkers at: workerId ifPresent: [ :worker | 
+			worker registerHeartbeat.
+			taskContext task executionData workerAttributes: worker attributes ].
 		runnerStats currentlyExecutingTaskCount: currentlyExecutingTasks size.
 		taskContext task executionData updateFromWorker: aGtRrWorkerExecutionData.
 		taskContext result: aResult.
