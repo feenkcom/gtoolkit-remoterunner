@@ -661,7 +661,7 @@ GtRrClusterExamplesReport >> workersVsCoresData [
 
 	^ machineReports collect: [ :machine | 
 		| machineType cc |
-		machineType := GtAwsAmazonWebServices default instanceTypes 
+		machineType := GtAwsAmazonWebServices default ec2 instanceTypes 
 			at: machine machineType
 			ifAbsent: [].
 		cc := machineType ifNotNil: #coreCount.
