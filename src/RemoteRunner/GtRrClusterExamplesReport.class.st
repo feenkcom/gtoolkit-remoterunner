@@ -385,19 +385,19 @@ GtRrClusterExamplesReport >> machineReports: aCollectionOfReports [
 	machineReports := aCollectionOfReports
 ]
 
-{ #category : #accessing }
-GtRrClusterExamplesReport >> machineWithIpAddress: anIpAddress [
-	^ self machineReports 
-		detect: [ :aMachine |
-			aMachine ipAddress = anIpAddress ]
-]
-
 { #category : #'accessing - chart data' }
 GtRrClusterExamplesReport >> machinesExecutionChartItems [
 	^ self machineReports
 		collect: [ :aMachineReport |
 			GtRrExecutionChartDataItem fromMachine: aMachineReport ] 
 		as: Array
+]
+
+{ #category : #accessing }
+GtRrClusterExamplesReport >> machineWithIpAddress: anIpAddress [
+	^ self machineReports 
+		detect: [ :aMachine |
+			aMachine ipAddress = anIpAddress ]
 ]
 
 { #category : #accessing }
@@ -661,7 +661,7 @@ GtRrClusterExamplesReport >> workersVsCoresData [
 
 	^ machineReports collect: [ :machine | 
 		| machineType cc |
-		machineType := GtAwsAmazonWebServices default instanceTypes 
+		machineType := GtAwsAmazonWebServices default ec2 instanceTypes 
 			at: machine machineType
 			ifAbsent: [].
 		cc := machineType ifNotNil: #coreCount.
