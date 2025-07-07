@@ -104,7 +104,8 @@ GtRrSUnitTask >> runSuite: suite [
 		[ testResult setDebugMode ].
 	testResult announcer
 		when: PharoLinkTestCaseEndAnnouncement
-		do: [ :e | self addEndAnnouncement: e to: events ].
+		do: [ :e | self addEndAnnouncement: e to: events ]
+		for: self.
 	suite run: testResult.
 	^ events asArray
 ]
