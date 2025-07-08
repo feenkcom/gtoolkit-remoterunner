@@ -217,6 +217,7 @@ GtRemoteRunner class >> printIpAddress: aByteArray [
 	"Answer the usual dot notation of the supplied IPv4 address"
 
 	aByteArray ifNil: [ ^ '<none>' ].
+	aByteArray isString ifTrue: [ ^ aByteArray ].
 
 	self assert: aByteArray size equals: 4.
 
