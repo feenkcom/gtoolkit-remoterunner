@@ -605,6 +605,7 @@ GtRemoteRunner >> encodedChangesSyncEventsFrom: anOmReference workerId: workerId
 	GtRrChangesSyncRetrievalCompletedSignal new
 		omReference: anOmReference;
 		workerId: workerId;
+		resultSize: result size;
 		emit.
 	^ result.
 ]
