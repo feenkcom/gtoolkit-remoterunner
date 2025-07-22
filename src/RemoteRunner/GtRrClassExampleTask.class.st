@@ -45,7 +45,7 @@ GtRrClassExampleTask >> group [
 	allExamples := GtExampleFactory new
 			sourceClass: exampleClass;
 			gtExamplesAllContained.
-	^ GtClassExampleGroup new examples: (allExamples collect: #asExampleWithResult)
+	^ GtExplicitExampleGroup new examples: (allExamples collect: #asExampleWithResult)
 ]
 
 { #category : #printing }

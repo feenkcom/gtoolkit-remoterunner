@@ -36,7 +36,8 @@ GtRrChecksFactory >> addExampleClassNames: aCollectionOfClassNames [
 GtRrChecksFactory >> addExampleClasses: aCollectionOfClasses [
 
 	aCollectionOfClasses do: [ :cls |
-		self addExampleClass: cls ].
+		cls isMeta ifFalse: 
+			[ self addExampleClass: cls ] ].
 ]
 
 { #category : #adding }
