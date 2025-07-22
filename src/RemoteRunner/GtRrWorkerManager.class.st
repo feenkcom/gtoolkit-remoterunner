@@ -18,7 +18,8 @@ Class {
 		'additionalArguments',
 		'changesFile',
 		'pharoDebugLog',
-		'settings'
+		'settings',
+		'vmArguments'
 	],
 	#category : #'RemoteRunner-Runner-Workers'
 }
@@ -41,6 +42,12 @@ GtRrWorkerManager >> addOrRemoveWorkers [
 		poolSize > currentSize 
 			ifTrue: [ self addWorkers: poolSize - currentSize ]
 			ifFalse: [ self removeWorkers: currentSize - poolSize ] ].
+]
+
+{ #category : #accessing }
+GtRrWorkerManager >> addVmArguments: aCollection [
+
+	vmArguments addAll: aCollection
 ]
 
 { #category : #private }
@@ -134,6 +141,7 @@ GtRrWorkerManager >> initialize [
 	watchdogSemaphore := Semaphore new.
 	state := #notStarted.
 	additionalArguments := OrderedCollection new.
+	vmArguments := OrderedCollection new.
 ]
 
 { #category : #testing }
@@ -177,6 +185,7 @@ GtRrWorkerManager >> newWorkerLocalProcessArgumentsFor: someSettings [
 		[ self error: 'Attempt to start worker without server address' ].
 
 	args := OrderedCollection new.
+	args addAll: vmArguments.
 	args
 		add: someSettings serverImage fullName;
 		add: 'clap';
@@ -353,12 +362,6 @@ GtRrWorkerManager >> startLocalWorkersFor: aGtRrJobContext [
 	self startLocalWorkers.
 ]
 
-{ #category : #'start-stop' }
-GtRrWorkerManager >> startup [
-
-	self startLocalWorkers.
-]
-
 { #category : #private }
 GtRrWorkerManager >> startWatchdog [
 
@@ -368,6 +371,12 @@ GtRrWorkerManager >> startWatchdog [
 		[ watchdogSemaphore waitTimeoutSeconds: 30.
 		self watchDogCheck.
 		 ] ] forkNamed: 'GtRrWorkerManager local watch dog'.
+]
+
+{ #category : #'start-stop' }
+GtRrWorkerManager >> startup [
+
+	self startLocalWorkers.
 ]
 
 { #category : #accessing }
