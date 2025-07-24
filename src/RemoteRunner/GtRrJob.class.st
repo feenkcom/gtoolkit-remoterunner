@@ -535,6 +535,12 @@ GtRrJob >> processingErrors [
 	^ processingErrors ifNil: [ #() ]
 ]
 
+{ #category : #'private - serialization' }
+GtRrJob >> processingErrors: aCollection [
+
+	^ processingErrors := aCollection
+]
+
 { #category : #accessing }
 GtRrJob >> properties [
 	"Answer the job's properties.
