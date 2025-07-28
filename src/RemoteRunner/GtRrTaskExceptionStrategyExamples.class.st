@@ -254,7 +254,10 @@ GtRrTaskExceptionStrategyExamples >> taskWithDebuggerExceptionHandling [
 			start.
 	worker := remoteRunner managerStartupAndShutdown startInImageWorker.
 	semaphore := Semaphore new.
-	remoteRunner when: GtRrJobCompletedAnnouncement do: [ :ann | semaphore signal ].
+	remoteRunner 
+		when: GtRrJobCompletedAnnouncement 
+		do: [ :ann | semaphore signal ]
+		for: self.
 	task := GtRrScriptTask
 			script: '[ 1 / 0 ]
 	on: UnhandledException
@@ -286,7 +289,10 @@ GtRrTaskExceptionStrategyExamples >> taskWithHeadlessExceptionHandling [
 	worker := remoteRunner managerStartupAndShutdown startInImageWorker.
 	worker exceptionHandlingStrategy: GtRrTaskHeadlessExceptionStrategy new.
 	semaphore := Semaphore new.
-	remoteRunner when: GtRrJobCompletedAnnouncement do: [ :ann | semaphore signal ].
+	remoteRunner 
+		when: GtRrJobCompletedAnnouncement 
+		do: [ :ann | semaphore signal ]
+		for: self.
 	task := GtRrScriptTask
 			script: '[ 1 / 0 ]
 	on: UnhandledException

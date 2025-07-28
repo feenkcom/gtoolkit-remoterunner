@@ -21,7 +21,7 @@ GtRrResultProcessingErrorAnnouncement >> errorInfo: anObject [
 GtRrResultProcessingErrorAnnouncement >> initializeFromTimestamp: aTimestamp andData: dataParts [
 
 	super initializeFromTimestamp: aTimestamp andData: dataParts.
-	self errorInfo: (self class evaluate: dataParts seventh).
+	self errorInfo: (self class compiler evaluate: dataParts seventh).
 ]
 
 { #category : #printing }

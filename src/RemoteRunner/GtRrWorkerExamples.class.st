@@ -208,7 +208,10 @@ GtRrWorkerExamples >> workerInImage [
 			start.
 
 	semaphore := Semaphore new.
-	runner when: GtRrTaskCompletedAnnouncement do: [ semaphore signal ].
+	runner 
+		when: GtRrTaskCompletedAnnouncement 
+		do: [ semaphore signal ]
+		for: self.
 	inImageTask := GtRrScriptTask script: '#done'.
 	inImageTask constraint: GtRrInImageConstraint new.
 	runner submitJob: inImageTask asJob.
