@@ -49,7 +49,7 @@ GtRrWorkerAnnouncement >> initializeFromTimestamp: aTimestamp andData: dataParts
 	self 	
 		basicTimestamp: aTimestamp;
 		remoteAddressString: dataParts fourth;
-		workerAttributes: (self class evaluate: dataParts sixth).
+		workerAttributes: (self class compiler evaluate: dataParts sixth).
 ]
 
 { #category : #testing }
