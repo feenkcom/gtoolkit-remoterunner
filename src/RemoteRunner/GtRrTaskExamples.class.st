@@ -54,7 +54,10 @@ GtRrTaskExamples >> sunitTask [
 	worker := remoteRunner managerStartupAndShutdown startInImageWorker.
 	worker exceptionHandlingStrategy: GtRrTaskHeadlessExceptionStrategy new.
 	semaphore := Semaphore new.
-	remoteRunner when: GtRrJobCompletedAnnouncement do: [ :ann | semaphore signal ].
+	remoteRunner 
+		when: GtRrJobCompletedAnnouncement 
+		do: [ :ann | semaphore signal ]
+		for: self.
 	task := GtRrClassSUnitTask sunitClassName: #GtRrSampleTest.
 	job := remoteRunner submitJob: task asJob.
 	self
@@ -78,7 +81,10 @@ GtRrTaskExamples >> taskResourceReport [
 			remoteRunner: remoteRunner;
 			start.
 	semaphore := Semaphore new.
-	remoteRunner when: GtRrJobCompletedAnnouncement do: [ :ann | semaphore signal ].
+	remoteRunner 
+		when: GtRrJobCompletedAnnouncement 
+		do: [ :ann | semaphore signal ]
+		for: self.
 	task := GtRrScriptTask
 			script: '| times |
 times := OrderedCollection new.

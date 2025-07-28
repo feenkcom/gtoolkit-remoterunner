@@ -18,7 +18,10 @@ GtRrJobNotificationExamples >> completedNotificationForExamplesClassJob [
 
 	remoteRunner := self simpleInImageStartedRunner.
 	job := GtRrJobExamples new testJobExamplesClassNames.
-	job when: GtRrJobCompletedAnnouncement do: [ jobSemaphore signal ].
+	job 
+		when: GtRrJobCompletedAnnouncement 
+		do: [ jobSemaphore signal ]
+		for: self.
 
 	notification := GtRrExamplesProgressNotification new job: job.
 

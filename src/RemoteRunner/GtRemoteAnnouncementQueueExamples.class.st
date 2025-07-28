@@ -20,7 +20,10 @@ GtRemoteAnnouncementQueueExamples >> queueGetsAnnouncements [
 
 	[ runner start.
 	job := GtRemoteRunnerExamples new simpleJob.
-	job when: GtRrJobCompletedAnnouncement do: [ :ann | jobSemaphore signal ].
+	job 
+		when: GtRrJobCompletedAnnouncement 
+		do: [ :ann | jobSemaphore signal ]
+		for: self.
 	runner submitJob: job.
 
 	self

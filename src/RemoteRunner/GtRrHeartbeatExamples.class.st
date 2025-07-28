@@ -31,8 +31,11 @@ GtRrHeartbeatExamples >> inImageWorkerHeartbeatTimeout [
 	self assert: timeout equals: 20.
 	"Worker processes can be slow to start up if the machine is busy or the image is large (multi    GB).
 	Wait for the worker to register before proceeding with tests."
-	remoteRunner when: GtRrWorkerRegisteredAnnouncement do: [ :ann | 
-		workerRegisteredSemaphore signal ].
+	remoteRunner 
+		when: GtRrWorkerRegisteredAnnouncement 
+			do: [ :ann | 
+				workerRegisteredSemaphore signal ]
+			for: self.
 	remoteRunner start.
 	worker := GtRrInImageWorker new
 		remoteRunner: remoteRunner;
@@ -40,8 +43,9 @@ GtRrHeartbeatExamples >> inImageWorkerHeartbeatTimeout [
 	successTask := GtRrScriptTask script: (timeout * 2) asString, ' seconds wait. #success'.
 	job := GtRrTasksJob tasks: { successTask. }.
 	job
-		when: GtRrJobCompletedAnnouncement do: 
-			[ jobSemaphore signal ].
+		when: GtRrJobCompletedAnnouncement 
+			do: [ jobSemaphore signal ]
+			for: self.
 
 	[ self waitOn: workerRegisteredSemaphore for: 20
 			description: 'Worker didn''t register in time'.
@@ -104,15 +108,19 @@ GtRrHeartbeatExamples >> workerHeartbeatTimeout [
 	self assert: timeout equals: 20.
 	"Worker processes can be slow to start up if the machine is busy or the image is large (multi    GB).
 	Wait for the worker to register before proceeding with tests."
-	remoteRunner when: GtRrWorkerRegisteredAnnouncement do: [ :ann | 
-		workerRegisteredSemaphore signal ].
+	remoteRunner 
+		when: GtRrWorkerRegisteredAnnouncement 
+		do: [ :ann | 
+			workerRegisteredSemaphore signal ]
+		for: self.
 	remoteRunner start.
 	successTask := GtRrScriptTask script: (timeout * 3) asString, ' seconds wait'.
 	timeoutTask := GtRrScriptTask script: 'GtRrWorker allInstancesDo: #stopHeartbeat. ', (timeout * 10) asString, ' seconds wait'.
 	job := GtRrTasksJob tasks: { successTask. timeoutTask }.
 	job
-		when: GtRrJobCompletedAnnouncement do: 
-			[ jobSemaphore signal ].
+		when: GtRrJobCompletedAnnouncement 
+		do: [ jobSemaphore signal ]
+		for: self.
 
 	[ 2 timesRepeat:
 		[ self waitOn: workerRegisteredSemaphore for: 20

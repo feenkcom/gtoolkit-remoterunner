@@ -21,15 +21,18 @@ GtRrManagerExamples >> decreasePoolSize [
 	runner managerStartupAndShutdown poolSize: 2.
 	runner
 		when: GtRrWorkerReplacedAnnouncement
-			do: [ :ann | semaphore signal ];
+			do: [ :ann | semaphore signal ]
+			for: self;
 		when: GtRrWorkerRegisteredAnnouncement
 			do: [ :ann | 
 				workerCount := workerCount + 1.
-				semaphore signal ];
+				semaphore signal ]
+			for: self;
 		when: GtRrWorkerUnregisteredAnnouncement 
 			do: [ :ann | 
 				workerCount := workerCount - 1.
-				semaphore signal ].
+				semaphore signal ]
+			for: self.
 
 	"auto-restart should be disabled in the manager"
 	self deny: runner managerStartupAndShutdown autoRestart.
@@ -80,11 +83,13 @@ GtRrManagerExamples >> increasePoolSize [
 		when: GtRrWorkerRegisteredAnnouncement
 			do: [ :ann | 
 				workerCount := workerCount + 1.
-				semaphore signal ];
+				semaphore signal ]
+			for: self;
 		when: GtRrWorkerUnregisteredAnnouncement 
 			do: [ :ann | 
 				workerCount := workerCount - 1.
-				semaphore signal ].
+				semaphore signal ]
+			for: self.
 
 	[ runner start.
 
