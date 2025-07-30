@@ -411,10 +411,11 @@ GtRemoteRunnerExamples >> simpleTask [
 GtRemoteRunnerExamples >> simpleTestRetryTask [
 	"Demonstrate retrying a task that 'crashes' the worker.
 	This will take approximately 4 times the worker heartbeat timeout time to execute (3 or 4 minutes)."
-
 	<gtExample>
 	<return: #Error>
+	<shouldLogWithEpicea>
 	| factory job taskFailedCount taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount workerRegisteredSemaphore |
+
 	self ignoreWorkerExamples ifTrue: [ ^ self ].
 	jobStartedCount := jobCompletedCount := taskStartedCount := taskCompletedCount := taskFailedCount := 0.
 	jobSemaphore := GtMutualExclusionSemaphore new.

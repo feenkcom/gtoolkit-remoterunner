@@ -21,6 +21,7 @@ GtRemoteRunnerProcessExamples >> changesSync [
 	<gtExample>
 	<after: #stopRunnersAndWorkers>
 	<return: #SubclassResponsibility>
+	<shouldLogWithEpicea>
 	| entry semaphore events job jobSemaphore |
 	
 	self setUp.
