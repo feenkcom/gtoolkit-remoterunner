@@ -198,7 +198,11 @@ GtRrExecutionHorizontalChartStencil >> createRow [
 
 { #category : #initialization }
 GtRrExecutionHorizontalChartStencil >> defaultBarColor [
-	^ ((Color r: 92 g: 204 b: 231 range: 255) alpha: 0.2)
+	^ Color
+		r: 92
+		g: 204
+		b: 231
+		range: 255
 ]
 
 { #category : #initialization }
@@ -369,7 +373,7 @@ GtRrExecutionHorizontalChartStencil >> withColorBasedOnScheduling [
 	self colorComputation: [ :anItem |
 					(anItem propertyAt: #correctScheduling ifAbsent: [ false ])
 						ifFalse: [ Color red ] 
-						ifTrue: [ Color gray ] ]
+						ifTrue: [ Color veryLightGray ] ]
 ]
 
 { #category : #initialization }
