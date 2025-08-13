@@ -150,9 +150,10 @@ GtRrTask >> gapBetweenEndTimeAndReceivingResults [
 
 { #category : #accessing }
 GtRrTask >> gapBetweenHandoverAndStartTime [
-	^ self startTime 
-		ifNotNil: [ :aStartTime |
-			aStartTime - self handoverTime]
+	^ self startTime
+ 		ifNotNil: [ :aStartTime |
+  			self handoverTime ifNotNil: [ :aHandoverTime |
+					aStartTime - aHandoverTime] ]
 ]
 
 { #category : #'accessing - pharolink' }
