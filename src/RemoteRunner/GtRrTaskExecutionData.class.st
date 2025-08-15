@@ -115,9 +115,10 @@ GtRrTaskExecutionData >> gapBetweenEndTimeAndReceivingResults [
 
 { #category : #accessing }
 GtRrTaskExecutionData >> gapBetweenHandoverAndStartTime [
-	^ self startTime 
-		ifNotNil: [ :aStartTime |
-			aStartTime - self handoverTime]
+	^ self startTime
+ 		ifNotNil: [ :aStartTime |
+  			self handoverTime ifNotNil: [ :aHandoverTime |
+					aStartTime - aHandoverTime] ]
 ]
 
 { #category : #'memory usage' }
