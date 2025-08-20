@@ -39,7 +39,7 @@ GtRrManagerExamples >> decreasePoolSize [
 
 	[ runner start.
 	2 timesRepeat: [ semaphore
-		wait: 10 seconds 
+		waitTimeoutMilliseconds: 10 seconds 
 		onCompletion: [  ]
 		onTimeout: [ self error: 'Didn''t get initial workers registered' ] ].
 
@@ -48,13 +48,13 @@ GtRrManagerExamples >> decreasePoolSize [
 
 	runner managerStartupAndShutdown poolSize: 1.
 	semaphore
-		wait: 10 seconds 
+		waitTimeoutMilliseconds: 10 seconds 
 		onCompletion: [  ]
 		onTimeout: [ self error: 'Didn''t get worker unregistered' ].
 
 	runner managerStartupAndShutdown signalWatchdog.
 	semaphore
-		wait: 10 seconds 
+		waitTimeoutMilliseconds: 10 seconds 
 		onCompletion: [  ]
 		onTimeout: [ self error: 'Didn''t get worker replaced' ].
 
@@ -94,7 +94,7 @@ GtRrManagerExamples >> increasePoolSize [
 	[ runner start.
 
 	semaphore
-		wait: 10 seconds 
+		waitTimeoutMilliseconds: 10 seconds 
 		onCompletion: [  ]
 		onTimeout: [ self error: 'Didn''t get initial worker registered' ].
 
@@ -103,7 +103,7 @@ GtRrManagerExamples >> increasePoolSize [
 
 	runner managerStartupAndShutdown poolSize: 2.
 	semaphore
-		wait: 10 seconds 
+		waitTimeoutMilliseconds: 10 seconds 
 		onCompletion: [  ]
 		onTimeout: [ self error: 'Didn''t get additional worker registered' ].
 	self assert: workerCount equals: 2.
