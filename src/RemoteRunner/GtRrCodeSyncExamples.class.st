@@ -32,7 +32,7 @@ GtRrCodeSyncExamples >> addRemoveMethod [
 		for: self.
 	runner start.
 	semaphore
-		wait: 10 seconds
+		waitTimeoutMilliseconds: 10 seconds asMilliSeconds
 		onCompletion: [ "noop" ] 
 		onTimeout: [ self error: 'Didn''t receive expected registration announcement' ].
 	"Signal the semaphore when a code sync task completes so we can wait for changes to be propagated"
@@ -45,14 +45,14 @@ GtRrCodeSyncExamples >> addRemoveMethod [
 	semaphore consumeAllSignals.
 	self class compile: 'blub ^ 1'.
 	semaphore
-		wait: 5 seconds
+		waitTimeoutMilliseconds: 5 seconds asMilliSeconds
 		onCompletion: [ "noop" ] 
 		onTimeout: [ self error: 'Didn''t receive expected code sync announcement 1' ].
 	self assert: (self hasMethodIn: runner).
 	semaphore consumeAllSignals.
 	self class removeSelector: #blub.
 	semaphore
-		wait: 5 seconds
+		waitTimeoutMilliseconds: 5 seconds asMilliSeconds
 		onCompletion: [ "noop" ] 
 		onTimeout: [ self error: 'Didn''t receive expected code sync announcement 2' ].
 	self assert: (self hasMethodIn: runner) not.
@@ -85,7 +85,7 @@ GtRrCodeSyncExamples >> evaluateExpression [
 		for: self.
 	runner start.
 	semaphore
-		wait: 20 seconds
+		waitTimeoutMilliseconds: 20 seconds asMilliSeconds
 		onCompletion: [  "noop" ]
 		onTimeout: [ self error: 'Didn''t receive expected registration announcement' ].	"Signal the semaphore when a code sync task completes so we can wait for changes to be propagated"
 	runner
@@ -98,14 +98,14 @@ GtRrCodeSyncExamples >> evaluateExpression [
 		announce: (ExpressionEvaluated
 				expression: 'GtRrCodeSyncExamples testValue: ''' , timestamp , '''').
 	semaphore
-		wait: 20 seconds
+		waitTimeoutMilliseconds: 20 seconds asMilliSeconds
 		onCompletion: [  "noop" ]
 		onTimeout: [ self error: 'Didn''t receive expected code sync announcement 1' ].
 	semaphore consumeAllSignals.
 	task := GtRrScriptTask script: 'GtRrCodeSyncExamples testValue'.
 	runner submitJob: task asJob.
 	semaphore
-		wait: 20 seconds
+		waitTimeoutMilliseconds: 20 seconds asMilliSeconds
 		onCompletion: [  "noop" ]
 		onTimeout: [ self error: 'Didn''t receive expected code sync announcement 2' ].
 	self assert: task result equals: timestamp ] ensure: [ runner stop ].
@@ -124,7 +124,7 @@ GtRrCodeSyncExamples >> hasMethodIn: aRunner [
 		for: self.
 	aRunner submitJob: job.
 	semaphore 
-		wait: 5 seconds
+		waitTimeoutMilliseconds: 5 seconds asMilliSeconds
 		onCompletion: [ "noop" ] 
 		onTimeout: [ self error: 'Didn''t receive expected job completion announcement' ].
 	^ job tasks first result
