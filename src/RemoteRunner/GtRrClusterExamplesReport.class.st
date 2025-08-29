@@ -407,9 +407,11 @@ GtRrClusterExamplesReport >> maximumWorkersTasksStartIntervalPerMachine [
 		into: [ :maximumStartInterval  :aMachineReport | 
 			| currentStartInterval |
 			currentStartInterval := aMachineReport tasksStartInterval.
-			currentStartInterval > maximumStartInterval 
-				ifTrue: [ currentStartInterval ]
-				ifFalse: [ maximumStartInterval  ] ] 
+
+			(currentStartInterval notNil and: [
+				currentStartInterval > maximumStartInterval  ])
+					ifTrue: [ currentStartInterval ]
+					ifFalse: [ maximumStartInterval  ] ] 
 ]
 
 { #category : #accessing }
