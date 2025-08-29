@@ -329,7 +329,10 @@ GtRrWorkersExamplesReport >> tasksLastTimeFor: aBlock [
 
 { #category : #accessing }
 GtRrWorkersExamplesReport >> tasksStartInterval [
-	^ self tasksLastStartTime - self tasksFirstStartTime
+	^ self tasksLastStartTime
+		ifNotNil: [ :aLastStartTime |
+			 self tasksFirstStartTime ifNotNil: [ :aFirstStartTime |
+			 	aLastStartTime - aFirstStartTime ]]
 ]
 
 { #category : #accessing }
