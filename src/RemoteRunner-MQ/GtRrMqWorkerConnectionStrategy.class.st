@@ -2,7 +2,6 @@ Class {
 	#name : #GtRrMqWorkerConnectionStrategy,
 	#superclass : #GtRrWorkerConnectionStrategy,
 	#instVars : [
-		'mqHost',
 		'nextTask',
 		'nextTaskSemaphore',
 		'mqProcessor',
@@ -151,10 +150,10 @@ GtRrMqWorkerConnectionStrategy >> rejectRedeliveredTask: task ackFrame: anAckFra
 	self taskFailed: task with: (Error new messageText: 'Task redelivered').
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 GtRrMqWorkerConnectionStrategy >> remoteAddressString [
 
-	^ mqHost ifNil: [ mqProcessor remoteAddressString ].
+	^ mqProcessor remoteAddressString
 ]
 
 { #category : #private }
@@ -231,10 +230,12 @@ Stdio stdout
 	lf.
 ]
 
-{ #category : #accessing }
+{ #category : #Sysext }
 GtRrMqWorkerConnectionStrategy >> socketAddress: aString [
 
-	mqHost := aString
+	self 
+		mqHostName: (GtRrStompMqProcessor hostNameFrom: aString);
+		mqPort: (GtRrStompMqProcessor portFrom: aString).
 ]
 
 { #category : #'start-stop' }
