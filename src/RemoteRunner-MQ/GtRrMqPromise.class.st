@@ -128,7 +128,17 @@ GtRrMqPromise >> waitTimeoutMSecs: anInteger [
 
 	self critical:
 		[ state = #unfulfilled ifFalse: [ ^ self ] ].
-	(semaphore waitTimeoutMSecs: anInteger) ifTrue:
+	(semaphore waitTimeoutMilliseconds: anInteger) ifTrue:
+		[ result := GtRrMqPromiseTimeout new timeout: anInteger.
+		state := #exception ].
+]
+
+{ #category : #actions }
+GtRrMqPromise >> waitTimeoutMilliseconds: anInteger [
+
+	self critical:
+		[ state = #unfulfilled ifFalse: [ ^ self ] ].
+	(semaphore waitTimeoutMilliseconds: anInteger) ifTrue:
 		[ result := GtRrMqPromiseTimeout new timeout: anInteger.
 		state := #exception ].
 ]
