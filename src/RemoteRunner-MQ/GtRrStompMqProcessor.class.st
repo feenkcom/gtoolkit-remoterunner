@@ -29,7 +29,8 @@ Class {
 		'DefaultHost',
 		'DefaultPassword',
 		'DefaultUsername',
-		'MaxMessageSize'
+		'MaxMessageSize',
+		'MessageTtl'
 	],
 	#category : #'RemoteRunner-MQ-Runner'
 }
@@ -98,6 +99,19 @@ GtRrStompMqProcessor class >> maxMessageSize: anObject [
 ]
 
 { #category : #accessing }
+GtRrStompMqProcessor class >> messageTtl [
+	"Answer the time (ms) that messages can live on the MQ server"
+
+	^ MessageTtl ifNil: [ (3 * 60 * 60 * 1000) asString ]
+]
+
+{ #category : #accessing }
+GtRrStompMqProcessor class >> messageTtl: aStringMs [
+
+	MessageTtl := aStringMs
+]
+
+{ #category : #accessing }
 GtRrStompMqProcessor class >> portFrom: aHostString [
 	| segments |
 
@@ -120,17 +134,18 @@ GtRrStompMqProcessor class >> runnerControlChannelDefinitionFor: basename [
 	^ GtRrMqQueueDefinition new
 		basename: basename;
 		stompName: '/queue/', basename;
+		headerAt: 'x-message-ttl' put: self messageTtl;
 		prefetchCount: 200.
 ]
 
 { #category : #accessing }
 GtRrStompMqProcessor class >> taskQueueDefinitionFor: basename [
-
-	^ GtRrMqQueueDefinition new
+	^(GtRrMqQueueDefinition new)
 		basename: basename;
-		stompName: '/queue/', basename;
+		stompName: '/queue/' , basename;
 		headerAt: 'x-max-priority' put: '2';
-		prefetchCount: 1.
+		headerAt: 'x-message-ttl' put: self messageTtl;
+		prefetchCount: 1
 ]
 
 { #category : #accessing }
@@ -139,6 +154,7 @@ GtRrStompMqProcessor class >> taskResultDefinitionFor: basename [
 	^ GtRrMqQueueDefinition new
 		basename: basename;
 		stompName: '/queue/', basename;
+		headerAt: 'x-message-ttl' put: self messageTtl;
 		prefetchCount: 200.
 ]
 
