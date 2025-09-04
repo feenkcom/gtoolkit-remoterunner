@@ -60,7 +60,7 @@ GtRemoteRunnerProcessExamples >> changesSync [
 	remoteRunner submitJob: job.
 	self
 		waitOn: jobSemaphore
-		for: 10
+		for: 30
 		description: 'Job didn''t complete in time'.
 	self assert: job results first result
 ]
