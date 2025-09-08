@@ -30,7 +30,8 @@ Class {
 		'DefaultPassword',
 		'DefaultUsername',
 		'MaxMessageSize',
-		'MessageTtl'
+		'MessageTtl',
+		'QueueTtl'
 	],
 	#category : #'RemoteRunner-MQ-Runner'
 }
@@ -102,13 +103,13 @@ GtRrStompMqProcessor class >> maxMessageSize: anObject [
 GtRrStompMqProcessor class >> messageTtl [
 	"Answer the time (ms) that messages can live on the MQ server"
 
-	^ MessageTtl ifNil: [ (3 * 60 * 60 * 1000) asString ]
+	^ MessageTtl ifNil: [ 3 * 60 * 60 * 1000 ]
 ]
 
 { #category : #accessing }
-GtRrStompMqProcessor class >> messageTtl: aStringMs [
+GtRrStompMqProcessor class >> messageTtl: anIntegerMs [
 
-	MessageTtl := aStringMs
+	MessageTtl := anIntegerMs
 ]
 
 { #category : #accessing }
@@ -129,12 +130,26 @@ GtRrStompMqProcessor class >> portFrom: aHostString [
 ]
 
 { #category : #accessing }
+GtRrStompMqProcessor class >> queueTtl [
+	"Answer the time (ms) that messages can live on the MQ server"
+
+	^ QueueTtl ifNil: [ 12 * 60 * 60 * 1000 ]
+]
+
+{ #category : #accessing }
+GtRrStompMqProcessor class >> queueTtl: anIntegerMs [
+
+	QueueTtl := anIntegerMs
+]
+
+{ #category : #accessing }
 GtRrStompMqProcessor class >> runnerControlChannelDefinitionFor: basename [
 
 	^ GtRrMqQueueDefinition new
 		basename: basename;
 		stompName: '/queue/', basename;
-		headerAt: 'x-message-ttl' put: self messageTtl;
+		headerAt: 'x-message-ttl' put: self messageTtl asString;
+		headerAt: 'x-expires' put: self queueTtl asString;
 		prefetchCount: 200.
 ]
 
@@ -144,7 +159,8 @@ GtRrStompMqProcessor class >> taskQueueDefinitionFor: basename [
 		basename: basename;
 		stompName: '/queue/' , basename;
 		headerAt: 'x-max-priority' put: '2';
-		headerAt: 'x-message-ttl' put: self messageTtl;
+		headerAt: 'x-message-ttl' put: self messageTtl asString;
+		headerAt: 'x-expires' put: self queueTtl asString;
 		prefetchCount: 1
 ]
 
@@ -154,7 +170,8 @@ GtRrStompMqProcessor class >> taskResultDefinitionFor: basename [
 	^ GtRrMqQueueDefinition new
 		basename: basename;
 		stompName: '/queue/', basename;
-		headerAt: 'x-message-ttl' put: self messageTtl;
+		headerAt: 'x-message-ttl' put: self messageTtl asString;
+		headerAt: 'x-expires' put: self queueTtl asString;
 		prefetchCount: 200.
 ]
 
