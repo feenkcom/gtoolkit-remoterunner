@@ -300,8 +300,9 @@ GtRrTaskContext >> runInImage [
 		[ watchdog := 
 			[ task taskTimeout wait.
 			running ifTrue: [ process signalException: GtRrTimeoutTaskError new. ]
-		] forkNamed: 'runInImage timeout' ].
+		] forkAt: process priority + 1 named: 'runInImage timeout' ].
 	task result: task timedRun.
+	running := false.
 	self markTaskCompleted.
 ]
 
