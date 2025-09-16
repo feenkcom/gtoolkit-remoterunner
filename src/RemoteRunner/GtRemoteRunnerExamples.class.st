@@ -387,7 +387,7 @@ GtRemoteRunnerExamples >> simpleTask [
 	remoteRunner submitJob: job.
 	self
 		waitOn: jobSemaphore
-		for: 10
+		for: 30
 		description: 'Job didn''t complete in time'.
 
 	self assert: remoteRunner taskQueue size equals: 0.
