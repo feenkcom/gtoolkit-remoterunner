@@ -99,7 +99,8 @@ GtRrMqServer >> deleteQueues [
 	[ rabbitManager
 		deleteQueue: self class taskQueueBaseName vhost: '/';
 		deleteQueue: self class runnerControlChannelBaseName vhost: '/';
-		deleteQueue: self class taskResultBaseName vhost: '/' ]
+		deleteQueue: self class taskResultBaseName vhost: '/';
+		deleteQueue: 'runner_control' vhost: '/' ]
 			on: RabbitMqClientError
 			do: [ :ex | | response |
 				response := ex client response.
@@ -147,14 +148,16 @@ GtRrMqServer >> gtTaskQueueSummaryFor: aView [
 
 { #category : #'as yet unclassified' }
 GtRrMqServer >> handleMqListenerException: closingException [
+	| socketStatus |
 
 	GtRrWorker isCommandLineWorker ifTrue: [ ^ remoteRunner stop ].
 	(mqProcessor isNil or:
 		[ mqProcessor isStopRequested or: 
 		[ mqProcessor isStopped ] ]) ifTrue: [ ^ self ].
+	socketStatus := mqProcessor socketStatus.
 	closingException class = ConnectionClosed
-		ifTrue: [ self error: 'Unexpected close request' ]
-		ifFalse: [ self error: 'Unexpected loss of connection'
+		ifTrue: [ self error: 'Unexpected close request: ', socketStatus ]
+		ifFalse: [ self error: 'Unexpected loss of connection: ', socketStatus.
 			"mqProcessor reconnect" ].
 ]
 

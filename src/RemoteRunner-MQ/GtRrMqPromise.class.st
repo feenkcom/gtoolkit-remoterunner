@@ -124,7 +124,7 @@ GtRrMqPromise >> wait [
 ]
 
 { #category : #actions }
-GtRrMqPromise >> waitTimeoutMilliseconds: anInteger [
+GtRrMqPromise >> waitTimeoutMSecs: anInteger [
 
 	self critical:
 		[ state = #unfulfilled ifFalse: [ ^ self ] ].
@@ -134,7 +134,7 @@ GtRrMqPromise >> waitTimeoutMilliseconds: anInteger [
 ]
 
 { #category : #actions }
-GtRrMqPromise >> waitTimeoutMSecs: anInteger [
+GtRrMqPromise >> waitTimeoutMilliseconds: anInteger [
 
 	self critical:
 		[ state = #unfulfilled ifFalse: [ ^ self ] ].
