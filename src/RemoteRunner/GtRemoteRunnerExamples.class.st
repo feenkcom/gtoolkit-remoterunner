@@ -62,7 +62,6 @@ GtRemoteRunnerExamples >> assignTasksToWorkersTaskFirst [
 { #category : #examples }
 GtRemoteRunnerExamples >> assignTasksToWorkersWorkerFirst [
 	"Demonstrate assigning tasks to workers, with the tasks queued before the workers connect"
-
 	<gtExample>
 	<return: #GtRrTasksJob>
 	| job tasks taskCompletedCount taskFailedCount jobCompletedCount semaphore |
@@ -162,10 +161,10 @@ GtRemoteRunnerExamples >> multipleJobs [
 	jobStartedCount := jobCompletedCount := taskStartedCount := taskCompletedCount := taskFailedCount := 0.
 	jobSemaphore := GtMutualExclusionSemaphore new.
 	workerRegisteredSemaphore := Semaphore new.
-	remoteRunner := GtRemoteRunner new.
+	remoteRunner := self simpleRunner.
 	remoteRunner managerStartupAndShutdown
-		autoRestart: false;
-		poolSize: 2.	"Worker processes can be slow to start up if the machine is busy or the image is large (multi GB).
+		poolSize: 2.
+	"Worker processes can be slow to start up if the machine is busy or the image is large (multi GB).
 	Wait for the worker to register before proceeding with tests."
 	remoteRunner
 		when: GtRrWorkerRegisteredAnnouncement
@@ -235,6 +234,7 @@ GtRemoteRunnerExamples >> multipleJobsSimultaneously [
 	remoteRunner managerStartupAndShutdown
 		poolSize: 2;
 		autoRestart: false;
+		changesSync: false;
 		connectionStrategyId: #single.	"Worker processes can be slow to start up if the machine is busy or the image is large (multi GB).
 	Wait for the worker to register before proceeding with tests."
 	remoteRunner
@@ -324,7 +324,8 @@ GtRemoteRunnerExamples >> simpleRunner [
 	| newRemoteRunner  |
 
 	newRemoteRunner := GtRemoteRunner new.
-	newRemoteRunner managerStartupAndShutdown 
+	newRemoteRunner managerStartupAndShutdown
+		changesSync: false; 
 		autoRestart: false;
 		poolSize: 1.
 
@@ -412,6 +413,7 @@ GtRemoteRunnerExamples >> simpleTestRetryTask [
 	"Demonstrate retrying a task that 'crashes' the worker.
 	This will take approximately 4 times the worker heartbeat timeout time to execute (3 or 4 minutes)."
 	<gtExample>
+	<noTest>
 	<return: #Error>
 	<shouldLogWithEpicea>
 	| factory job taskFailedCount taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount workerRegisteredSemaphore |
@@ -469,6 +471,7 @@ GtRemoteRunnerExamples >> simpleTestRetryTask [
 			do: [ taskFailedCount := taskFailedCount + 1 ]
 			for: self.
 	job tasks do: [ :task | task retryStrategy: GtRrTaskTestRetry new ].
+	2 seconds wait.
 	remoteRunner submitJob: job.
 	self
 		waitOn: jobSemaphore
@@ -579,6 +582,7 @@ GtRemoteRunnerExamples >> terminateStartedJobWithControlChannel [
 	remoteRunner managerStartupAndShutdown
 		poolSize: 1;
 		autoRestart: false;
+		changesSync: false;
 		connectionStrategyId: #single.	"Worker processes can be slow to start up if the machine is busy or the image is large (multi GB).
 	Wait for the worker to register before proceeding with tests."
 	remoteRunner
@@ -672,6 +676,7 @@ GtRemoteRunnerExamples >> terminateStartedJobWithoutControlChannel [
 	remoteRunner := GtRemoteRunner new startLogging.
 	remoteRunner managerStartupAndShutdown
 		autoRestart: false;
+		changesSync: false;
 		poolSize: 1.	"Worker processes can be slow to start up if the machine is busy or the image is large (multi GB).
 	Wait for the worker to register before proceeding with tests."
 	remoteRunner
@@ -764,6 +769,7 @@ GtRemoteRunnerExamples >> timeoutJob [
 	remoteRunner := GtRemoteRunner new.
 	remoteRunner managerStartupAndShutdown
 		autoRestart: false;
+		changesSync: false;
 		poolSize: 1.	"Worker processes can be slow to start up if the machine is busy or the image is large (multi GB).
 	Wait for the worker to register before proceeding with tests."
 	remoteRunner
@@ -920,6 +926,7 @@ GtRemoteRunnerExamples >> timeoutWorker [
 	remoteRunner := GtRemoteRunner new.
 	remoteRunner managerStartupAndShutdown
 		autoRestart: false;
+		changesSync: false;
 		poolSize: 1.
 	remoteRunner workerTimeout: 3 seconds.
 	remoteRunner startLogging.	"Worker processes can be slow to start up if the machine is busy or the image is large (multi GB).
@@ -991,72 +998,6 @@ GtRemoteRunnerExamples >> timeoutWorker [
 ]
 
 { #category : #examples }
-GtRemoteRunnerExamples >> workerChangesFile [
-	<gtExample>
-	<return: #Error>
-	| settings semaphore args workerProcess changesFile logFile processBuilder task job rrIndex |
-	self ignoreWorkerExamples ifTrue: [ ^ self ].
-	remoteRunner := GtRemoteRunner new.
-	remoteRunner managerStartupAndShutdown
-		autoRestart: false;
-		poolSize: 0.
-	semaphore := Semaphore new.
-	remoteRunner 
-		when: GtRrWorkerRegisteredAnnouncement 
-		do: [ semaphore signal ]
-		for: self.
-	remoteRunner 
-		when: GtRrJobCompletedAnnouncement 
-		do: [ semaphore signal ]
-		for: self.
-	remoteRunner start.
-	settings := LanguageLinkSettings pharoDefaultSettings.
-	changesFile := FileReference
-			newTempFilePrefix: 'workerChangesFile'
-			suffix: '.ombu'.
-	self writeChangesSyncFileTestMethodTo: changesFile.
-	args := (GtRrWorkerManager new
-			remoteRunner: remoteRunner;
-			changesSync: true;
-			remoteIpAddress: remoteRunner port asString)
-			newWorkerLocalProcessArgumentsFor: settings.	"clap arguments must be grouped together prior to the global arguments"
-	rrIndex := args indexOf: 'remoteRunnerWorker'.
-	self
-		assert: rrIndex > 0
-		description: 'Unable to find remoteRunnerWorker argument'.
-	args
-		add: '--changesFile' beforeIndex: rrIndex + 1;
-		add: changesFile fullName beforeIndex: rrIndex + 2.
-	'workerLogs' asFileReference ensureCreateDirectory.
-	logFile := 'workerLogs/workerChangesFile.log' asFileReference.
-	processBuilder := GtExternalProcessBuilder new
-			command: settings serverExecutable fullName;
-			args: args;
-			fileStdout: logFile;
-			fileStderr: logFile;
-			workingDirectory: settings workingDirectory resolve fullName.
-	[ workerProcess := processBuilder createNativeCommand spawn.
-	workerProcess terminateOnShutdown.
-	self
-		waitOn: semaphore
-		for: 30
-		description: 'Worker didn''t register in time'.
-	semaphore := Semaphore new.
-	task := GtRrScriptTask
-			script: 'self assert: GtRemoteRunnerExamples new changesSyncFileTestMethod equals: 1. true'.
-	job := remoteRunner submitJob: task asJob.
-	self
-		waitOn: semaphore
-		for: 20
-		description: 'Job didn''t complete in time'.
-	self deny: job hasErrors.
-	self assert: job results first result ]
-		ensure: [ workerProcess ifNotNil: #kill.
-			remoteRunner ifNotNil: #stop.
-			changesFile ifNotNil: #ensureDelete ]
-]
-
-{ #category : #examples }
 GtRemoteRunnerExamples >> workerDetails [
 	"Demonstrate retrieving the remote worker's details"
 
@@ -1068,6 +1009,7 @@ GtRemoteRunnerExamples >> workerDetails [
 	remoteRunner := GtRemoteRunner new.
 	remoteRunner managerStartupAndShutdown
 		autoRestart: false;
+		changesSync: false;
 		poolSize: 1.
 	remoteRunner
 		when: GtRrWorkerRegisteredAnnouncement

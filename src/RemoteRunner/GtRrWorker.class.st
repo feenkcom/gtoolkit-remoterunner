@@ -128,11 +128,15 @@ GtRrWorker class >> newPharoLinkServer: aString [
 { #category : #clap }
 GtRrWorker class >> processCommandLineArgs: args [
 	| worker connectionStrategyId connectionStrategy serverSocketAddress workerClass |
+
 	args at: #help
 		ifPresent: 
 			[:help |
 			help value.
 			help context exitSuccess].
+	Stdio stdout
+		<< Smalltalk commandLineString;
+		lf.
 	workerClass := self environment at: (args
 						at: #workerClass
 						ifPresent: [:arg | (arg at: #workerClassName) value asSymbol]
@@ -142,6 +146,7 @@ GtRrWorker class >> processCommandLineArgs: args [
 		do: [:arg | worker attributes at: (arg at: #key) value put: (arg at: #value) value].
 	worker startLoggerFor: worker arguments: args.
 	GtRrWorkerCliStartingSignal new emit.
+	StringSignal emit: Smalltalk commandLineString.
 	serverSocketAddress := ((args at: #serverSocketAddress) at: #address)
 				value.
 	StringSignal emit: 'Server address: ' , serverSocketAddress.

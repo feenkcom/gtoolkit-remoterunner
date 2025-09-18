@@ -291,6 +291,12 @@ GtRrStompMqProcessor >> isStopped [
 	^ state = #stopped
 ]
 
+{ #category : #testing }
+GtRrStompMqProcessor >> isStopping [
+
+	^ self isStopped or: [ self isStopRequested ]
+]
+
 { #category : #accessing }
 GtRrStompMqProcessor >> largeMessageUrl [
 	^ largeMessageUrl
@@ -566,6 +572,12 @@ GtRrStompMqProcessor >> setStopRequested [
 	state := #stopRequested
 ]
 
+{ #category : #accessing }
+GtRrStompMqProcessor >> socketStatus [
+
+	^ mqClient medium socket statusString
+]
+
 { #category : #'start - stop' }
 GtRrStompMqProcessor >> start [
 	"Start the receiver.
@@ -588,8 +600,11 @@ GtRrStompMqProcessor >> startMqHeartbeat [
 		30 seconds wait.
 		mqClient isConnected ifTrue:
 			[ socketAccess critical: 
-				[ mqClient writeHeartbeatIfNeeded ] ] ] ] 
-					forkNamed: self class name asString, ' MQ heartbeat'.
+				[ [ mqClient writeHeartbeatIfNeeded ]
+					on: Error
+					do: [ :ex |
+						self isRunning ifTrue: [ ex pass ] ] ] ] ] ] 
+		forkNamed: self class name asString, ' MQ heartbeat'.
 ]
 
 { #category : #'start - stop' }
@@ -620,7 +635,8 @@ GtRrStompMqProcessor >> stop [
 
 	state := #stopRequested.
 	self stopMqHeartbeat.
-	listenerStopping ifFalse: [ mqListener signalException: ConnectionClosed new ].
+	(listenerStopping or: [ mqListener isNil ]) ifFalse: 
+		[ mqListener signalException: ConnectionClosed new ].
 	commandSubscription := messageSubscription := nil.
 	state := #stopped.
 ]

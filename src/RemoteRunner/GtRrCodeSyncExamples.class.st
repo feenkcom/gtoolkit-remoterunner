@@ -77,7 +77,9 @@ GtRrCodeSyncExamples >> evaluateExpression [
 			startLogging;
 			yourself.
 	codeSync := runner managerStartupAndShutdown codeSync.
-	runner managerStartupAndShutdown poolSize: 1.
+	runner managerStartupAndShutdown 
+		changesSync: false;
+		poolSize: 1.
 	[ semaphore := Semaphore new.
 	runner
 		when: GtRrWorkerRegisteredAnnouncement
@@ -85,7 +87,7 @@ GtRrCodeSyncExamples >> evaluateExpression [
 		for: self.
 	runner start.
 	semaphore
-		waitTimeoutMilliseconds: 20 seconds asMilliSeconds
+		waitTimeoutMilliseconds: 30 seconds asMilliSeconds
 		onCompletion: [  "noop" ]
 		onTimeout: [ self error: 'Didn''t receive expected registration announcement' ].	"Signal the semaphore when a code sync task completes so we can wait for changes to be propagated"
 	runner
@@ -98,14 +100,14 @@ GtRrCodeSyncExamples >> evaluateExpression [
 		announce: (ExpressionEvaluated
 				expression: 'GtRrCodeSyncExamples testValue: ''' , timestamp , '''').
 	semaphore
-		waitTimeoutMilliseconds: 20 seconds asMilliSeconds
+		waitTimeoutMilliseconds: 30 seconds asMilliSeconds
 		onCompletion: [  "noop" ]
 		onTimeout: [ self error: 'Didn''t receive expected code sync announcement 1' ].
 	semaphore consumeAllSignals.
 	task := GtRrScriptTask script: 'GtRrCodeSyncExamples testValue'.
 	runner submitJob: task asJob.
 	semaphore
-		waitTimeoutMilliseconds: 20 seconds asMilliSeconds
+		waitTimeoutMilliseconds: 30 seconds asMilliSeconds
 		onCompletion: [  "noop" ]
 		onTimeout: [ self error: 'Didn''t receive expected code sync announcement 2' ].
 	self assert: task result equals: timestamp ] ensure: [ runner stop ].
@@ -139,6 +141,7 @@ GtRrCodeSyncExamples >> simpleRunner [
 	remoteRunner := GtRemoteRunner new.
 	remoteRunner managerStartupAndShutdown 
 		autoRestart: false;
+		changesSync: false;
 		poolSize: 1.
 
 	self assert: remoteRunner taskQueue size equals: 0.

@@ -112,7 +112,7 @@ GtRemoteRunnerStompMqExamples >> mqTaskMessage [
 GtRemoteRunnerStompMqExamples >> setUp [
 
 	super setUp.
-	GtRrMqServer new purgeQueues.
+	GtRrMqServer new deleteQueues.
 ]
 
 { #category : #'private - helpers' }
