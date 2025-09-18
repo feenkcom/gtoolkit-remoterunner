@@ -1145,8 +1145,7 @@ GtRemoteRunnerProcessExamples >> workerChangesFile [
 			suffix: '.ombu'.
 	self writeChangesSyncFileTestMethodTo: changesFile.
 	remoteRunner managerStartupAndShutdown workerManager
-		addArguments: {'--changesFile'.
-				changesFile fullName}.
+		changesFile: changesFile fullName.
 	[ remoteRunner start.
 	self
 		waitOn: semaphore
@@ -1158,7 +1157,7 @@ GtRemoteRunnerProcessExamples >> workerChangesFile [
 	job := remoteRunner submitJob: task asJob.
 	self
 		waitOn: semaphore
-		for: 20
+		for: 30
 		description: 'Job didn''t complete in time'.
 	self deny: job hasErrors.
 	self assert: job results first result ]

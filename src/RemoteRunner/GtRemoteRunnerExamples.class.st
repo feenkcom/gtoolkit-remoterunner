@@ -998,67 +998,6 @@ GtRemoteRunnerExamples >> timeoutWorker [
 ]
 
 { #category : #examples }
-GtRemoteRunnerExamples >> workerChangesFile [
-	<gtExample>
-	<return: #Error>
-	| settings semaphore args workerProcess changesFile logFile processBuilder task job rrIndex |
-	self ignoreWorkerExamples ifTrue: [ ^ self ].
-	remoteRunner := GtRemoteRunner new.
-	remoteRunner managerStartupAndShutdown
-		autoRestart: false;
-		changesSync: false;
-		poolSize: 0.
-	semaphore := Semaphore new.
-	remoteRunner 
-		when: GtRrWorkerRegisteredAnnouncement 
-		do: [ semaphore signal ]
-		for: self.
-	remoteRunner 
-		when: GtRrJobCompletedAnnouncement 
-		do: [ semaphore signal ]
-		for: self.
-	remoteRunner start.
-	settings := LanguageLinkSettings pharoDefaultSettings.
-	changesFile := FileReference
-			newTempFilePrefix: 'workerChangesFile'
-			suffix: '.ombu'.
-	self writeChangesSyncFileTestMethodTo: changesFile.
-	args := (GtRrWorkerManager new
-			remoteRunner: remoteRunner;
-			changesSync: false;
-			changesFile: changesFile fullName;
-			remoteIpAddress: remoteRunner port asString)
-			newWorkerLocalProcessArgumentsFor: settings.	"clap arguments must be grouped together prior to the global arguments"
-	'workerLogs' asFileReference ensureCreateDirectory.
-	logFile := 'workerLogs/workerChangesFile.log' asFileReference.
-	processBuilder := GtExternalProcessBuilder new
-			command: settings serverExecutable fullName;
-			args: args;
-			fileStdout: logFile;
-			fileStderr: logFile;
-			workingDirectory: settings workingDirectory resolve fullName.
-	[ workerProcess := processBuilder createNativeCommand spawn.
-	workerProcess terminateOnShutdown.
-	self
-		waitOn: semaphore
-		for: 30
-		description: 'Worker didn''t register in time'.
-	semaphore := Semaphore new.
-	task := GtRrScriptTask
-			script: 'self assert: GtRemoteRunnerExamples new changesSyncFileTestMethod equals: 1. true'.
-	job := remoteRunner submitJob: task asJob.
-	self
-		waitOn: semaphore
-		for: 20
-		description: 'Job didn''t complete in time'.
-	self deny: job hasErrors.
-	self assert: job results first result ]
-		ensure: [ workerProcess ifNotNil: #kill.
-			remoteRunner ifNotNil: #stop.
-			changesFile ifNotNil: #ensureDelete ]
-]
-
-{ #category : #examples }
 GtRemoteRunnerExamples >> workerDetails [
 	"Demonstrate retrieving the remote worker's details"
 
