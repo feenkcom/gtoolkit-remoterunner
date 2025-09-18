@@ -139,6 +139,7 @@ GtRrCodeSyncExamples >> simpleRunner [
 	remoteRunner := GtRemoteRunner new.
 	remoteRunner managerStartupAndShutdown 
 		autoRestart: false;
+		changesSync: false;
 		poolSize: 1.
 
 	self assert: remoteRunner taskQueue size equals: 0.
