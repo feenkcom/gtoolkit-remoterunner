@@ -324,7 +324,8 @@ GtRemoteRunnerExamples >> simpleRunner [
 	| newRemoteRunner  |
 
 	newRemoteRunner := GtRemoteRunner new.
-	newRemoteRunner managerStartupAndShutdown 
+	newRemoteRunner managerStartupAndShutdown
+		changesSync: false; 
 		autoRestart: false;
 		poolSize: 1.
 
@@ -469,6 +470,7 @@ GtRemoteRunnerExamples >> simpleTestRetryTask [
 			do: [ taskFailedCount := taskFailedCount + 1 ]
 			for: self.
 	job tasks do: [ :task | task retryStrategy: GtRrTaskTestRetry new ].
+	2 seconds wait.
 	remoteRunner submitJob: job.
 	self
 		waitOn: jobSemaphore
