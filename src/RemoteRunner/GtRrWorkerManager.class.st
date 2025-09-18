@@ -19,7 +19,8 @@ Class {
 		'changesFile',
 		'pharoDebugLog',
 		'settings',
-		'vmArguments'
+		'vmArguments',
+		'logPrefix'
 	],
 	#category : #'RemoteRunner-Runner-Workers'
 }
@@ -134,6 +135,7 @@ GtRrWorkerManager >> initialize [
 	workerIndex := 0.
 	autoRestart := true.
 	changesSync := true.
+	pharoDebugLog := 'workerLogs/PharoDebug.{logPrefix}.{workerIndex}.log'.
 	"The LanguageLinkSettings are used to determine the executable, image and working directory"
 	settings := LanguageLinkSettings pharoDefaultSettings.
 	workerCountCalculator := GtRrWorkerCountCalculator new.
@@ -151,19 +153,32 @@ GtRrWorkerManager >> isRunning [
 ]
 
 { #category : #private }
+GtRrWorkerManager >> logPrefix [
+	"Answer the string to be used as a prefix for the worker logs"
+	| logFile pid index |
+
+	logPrefix ifNotNil: [ ^ logPrefix ].
+	pid := GtOsSystemInfo current currentProcessId.
+	index := 1.
+	[ logFile := String streamContents: [ :stream |
+		stream
+			<< 'workerLogs/worker.';
+			print: pid;
+			<< '.';
+			print: index ].
+	index := index + 1.
+	(logFile, '.1.log') asFileReference exists ] whileTrue.
+	^ logPrefix := logFile.
+]
+
+{ #category : #private }
 GtRrWorkerManager >> newWorkerLocalProcess [
 	| builder process logFile pid |
 
 	workerIndex := workerIndex + 1.
 	'workerLogs' asFileReference ensureCreateDirectory.
 	pid := GtOsSystemInfo current currentProcessId.
-	logFile := (String streamContents: [ :stream |
-		stream
-			<< 'workerLogs/worker.';
-			print: pid;
-			<< '.';
-			print: workerIndex;
-			<< '.log' ]) asFileReference.
+	logFile := (self logPrefix, '.', workerIndex asString, '.log') asFileReference.
 
 	builder := GtExternalProcessBuilder new
 		command: settings serverExecutable fullName;
@@ -217,7 +232,10 @@ GtRrWorkerManager >> newWorkerLocalProcessArgumentsFor: someSettings [
 		add: '--noLepiterReload';
 		add: '--noGtImageUpdate'.
 	pharoDebugLog ifNotNil: [ | fileName |
-		fileName := pharoDebugLog format: { #workerIndex -> workerIndex asString } asDictionary.
+		fileName := pharoDebugLog format: { 
+			#logPrefix -> self logPrefix.
+			#workerIndex -> workerIndex asString.
+			} asDictionary.
 		args
 			add: '--pharoDebugLog';
 			add: fileName ].
