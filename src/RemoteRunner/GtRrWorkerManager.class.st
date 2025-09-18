@@ -162,7 +162,7 @@ GtRrWorkerManager >> logPrefix [
 	index := 1.
 	[ logFile := String streamContents: [ :stream |
 		stream
-			<< 'workerLogs/worker.';
+			<< 'worker.';
 			print: pid;
 			<< '.';
 			print: index ].
@@ -178,7 +178,7 @@ GtRrWorkerManager >> newWorkerLocalProcess [
 	workerIndex := workerIndex + 1.
 	'workerLogs' asFileReference ensureCreateDirectory.
 	pid := GtOsSystemInfo current currentProcessId.
-	logFile := (self logPrefix, '.', workerIndex asString, '.log') asFileReference.
+	logFile := ('workerLogs/', self logPrefix, '.', workerIndex asString, '.log') asFileReference.
 
 	builder := GtExternalProcessBuilder new
 		command: settings serverExecutable fullName;

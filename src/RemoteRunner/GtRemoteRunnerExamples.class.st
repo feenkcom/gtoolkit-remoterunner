@@ -1025,16 +1025,10 @@ GtRemoteRunnerExamples >> workerChangesFile [
 	self writeChangesSyncFileTestMethodTo: changesFile.
 	args := (GtRrWorkerManager new
 			remoteRunner: remoteRunner;
-			changesSync: true;
+			changesSync: false;
+			changesFile: changesFile fullName;
 			remoteIpAddress: remoteRunner port asString)
 			newWorkerLocalProcessArgumentsFor: settings.	"clap arguments must be grouped together prior to the global arguments"
-	rrIndex := args indexOf: 'remoteRunnerWorker'.
-	self
-		assert: rrIndex > 0
-		description: 'Unable to find remoteRunnerWorker argument'.
-	args
-		add: '--changesFile' beforeIndex: rrIndex + 1;
-		add: changesFile fullName beforeIndex: rrIndex + 2.
 	'workerLogs' asFileReference ensureCreateDirectory.
 	logFile := 'workerLogs/workerChangesFile.log' asFileReference.
 	processBuilder := GtExternalProcessBuilder new
