@@ -148,12 +148,19 @@ GtRrMqServer >> gtTaskQueueSummaryFor: aView [
 
 { #category : #'as yet unclassified' }
 GtRrMqServer >> handleMqListenerException: closingException [
+	"Handle the processor loop exiting."
 	| socketStatus |
 
+	"If the image with the remote runner was saved and used for the workers,
+	this is where we find out and shut down the remote runner."
 	GtRrWorker isCommandLineWorker ifTrue: [ ^ remoteRunner stop ].
+	"If the server is manually stopped (i.e. no real error), closingException will be nil."
+	closingException ifNil: [ ^ self ].
+	"If this is part of a requested stop, do nothing"
 	(mqProcessor isNil or:
 		[ mqProcessor isStopRequested or: 
 		[ mqProcessor isStopped ] ]) ifTrue: [ ^ self ].
+	"Log the socket status for debugging"
 	socketStatus := mqProcessor socketStatus.
 	closingException class = ConnectionClosed
 		ifTrue: [ self error: 'Unexpected close request: ', socketStatus ]
