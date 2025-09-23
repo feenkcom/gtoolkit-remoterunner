@@ -604,7 +604,8 @@ GtRrStompMqProcessor >> startMqHeartbeat [
 					on: Error
 					do: [ :ex |
 						self isRunning ifTrue: [ ex pass ] ] ] ] ] ] 
-		forkNamed: self class name asString, ' MQ heartbeat'.
+		forkAt: Processor lowIOPriority
+			named: self class name asString, ' MQ heartbeat'.
 ]
 
 { #category : #'start - stop' }
