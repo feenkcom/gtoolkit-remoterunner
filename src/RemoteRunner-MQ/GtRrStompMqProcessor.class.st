@@ -604,7 +604,8 @@ GtRrStompMqProcessor >> startMqHeartbeat [
 					on: Error
 					do: [ :ex |
 						self isRunning ifTrue: [ ex pass ] ] ] ] ] ] 
-		forkNamed: self class name asString, ' MQ heartbeat'.
+		forkAt: Processor lowIOPriority
+			named: self class name asString, ' MQ heartbeat'.
 ]
 
 { #category : #'start - stop' }
@@ -634,11 +635,12 @@ GtRrStompMqProcessor >> startMqListener [
 GtRrStompMqProcessor >> stop [
 
 	state := #stopRequested.
-	self stopMqHeartbeat.
-	(listenerStopping or: [ mqListener isNil ]) ifFalse: 
-		[ mqListener signalException: ConnectionClosed new ].
-	commandSubscription := messageSubscription := nil.
-	state := #stopped.
+	socketAccess critical:
+		[ self stopMqHeartbeat.
+		(listenerStopping or: [ mqListener isNil ]) ifFalse: 
+			[ mqListener signalException: ConnectionClosed new ].
+		commandSubscription := messageSubscription := nil.
+		state := #stopped ].
 ]
 
 { #category : #'start - stop' }
