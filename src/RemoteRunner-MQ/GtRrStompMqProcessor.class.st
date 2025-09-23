@@ -634,11 +634,12 @@ GtRrStompMqProcessor >> startMqListener [
 GtRrStompMqProcessor >> stop [
 
 	state := #stopRequested.
-	self stopMqHeartbeat.
-	(listenerStopping or: [ mqListener isNil ]) ifFalse: 
-		[ mqListener signalException: ConnectionClosed new ].
-	commandSubscription := messageSubscription := nil.
-	state := #stopped.
+	socketAccess critical:
+		[ self stopMqHeartbeat.
+		(listenerStopping or: [ mqListener isNil ]) ifFalse: 
+			[ mqListener signalException: ConnectionClosed new ].
+		commandSubscription := messageSubscription := nil.
+		state := #stopped ].
 ]
 
 { #category : #'start - stop' }
