@@ -76,6 +76,27 @@ GtRrSyslogParser >> logger [
 	^ logger
 ]
 
+{ #category : #'private - parsing' }
+GtRrSyslogParser >> mmmDdTimestampFrom: line [
+	"Read the timestamp from the supplied line.
+	Currently assumes that all records are less than 12 months old."
+	| today month day time year dateAndTime |
+
+	today := Date today.
+	month := line copyFrom: 1 to: 3.
+	day := (line copyFrom: 5 to: 6) trimLeft asNumber.
+	year := today year.
+	time := Time fromString: (line copyFrom: 8 to: 15).
+	dateAndTime := DateAndTime
+		date: (Date year: year month: month day: day)
+		time: time.
+	dateAndTime monthIndex > today monthIndex ifTrue:
+		[ dateAndTime := DateAndTime 
+			date: (Date year: year-1 month: month day: day)
+			time: time ].
+	^ dateAndTime.
+]
+
 { #category : #parsing }
 GtRrSyslogParser >> parseFile: aFileReference [
 
@@ -132,21 +153,18 @@ GtRrSyslogParser >> signals [
 
 { #category : #'private - parsing' }
 GtRrSyslogParser >> timestampFrom: line [
-	"Read the timestamp from the supplied line.
-	Currently assumes that all records are less than 12 months old."
-	| today month day time year dateAndTime |
+	"Read the timestamp from the supplied line"
 
-	today := Date today.
-	month := line copyFrom: 1 to: 3.
-	day := (line copyFrom: 5 to: 6) trimLeft asNumber.
-	year := today year.
-	time := Time fromString: (line copyFrom: 8 to: 15).
-	dateAndTime := DateAndTime
-		date: (Date year: year month: month day: day)
-		time: time.
-	dateAndTime monthIndex > today monthIndex ifTrue:
-		[ dateAndTime := DateAndTime 
-			date: (Date year: year-1 month: month day: day)
-			time: time ].
-	^ dateAndTime.
+	^ line first isDigit
+		ifTrue: [ self yyyyMmDdTimestampFrom: line ]
+		ifFalse: [ self mmmDdTimestampFrom: line ]
+]
+
+{ #category : #'private - parsing' }
+GtRrSyslogParser >> yyyyMmDdTimestampFrom: line [
+	"Read the timestamp from the supplied line"
+	| timestampString |
+
+	timestampString := line readStream upTo: Character space.
+	^ DateAndTime readFrom: timestampString readStream.
 ]
