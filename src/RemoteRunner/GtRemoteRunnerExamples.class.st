@@ -422,14 +422,6 @@ GtRemoteRunnerExamples >> simpleTestRetryTask [
 	jobStartedCount := jobCompletedCount := taskStartedCount := taskCompletedCount := taskFailedCount := 0.
 	jobSemaphore := GtMutualExclusionSemaphore new.
 	workerRegisteredSemaphore := Semaphore new.
-	GtRrSampleTest
-		compile: 'testCrash
-	Stdio stdout
-		<< Time now printString;
-		<< '' testCrash quitting image'';
-		lf; flush.
-	Smalltalk snapshot: false andQuit: true.'
-		classified: #tests.
 	remoteRunner := self simpleRunner.	"At least 4 workers are needed, 3 will fail on the bad task, the last will run all remaining tests"
 	remoteRunner managerStartupAndShutdown poolSize: 4.	"Worker processes can be slow to start up if the machine is busy or the image is large (multi GB).
 	Wait for the worker to register before proceeding with tests."
@@ -445,6 +437,14 @@ GtRemoteRunnerExamples >> simpleTestRetryTask [
 				waitOn: workerRegisteredSemaphore
 				for: 20
 				description: 'Worker didn''t register in time' ].
+	GtRrSampleTest
+		compile: 'testCrash
+	Stdio stdout
+		<< Time now printString;
+		<< '' testCrash quitting image'';
+		lf; flush.
+	Smalltalk snapshot: false andQuit: true.'
+		classified: #tests.
 	factory := GtRrChecksFactory new.
 	factory
 		addSUnitTestNames: {#GtRrSampleTest -> #testPass.
