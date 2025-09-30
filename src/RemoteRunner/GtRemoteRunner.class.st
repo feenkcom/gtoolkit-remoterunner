@@ -1176,10 +1176,9 @@ GtRemoteRunner >> registeredWorkers [
 { #category : #enumerating }
 GtRemoteRunner >> registeredWorkersDo: aBlock [
 	"Evaluate aBlock for each of the receiver's registered workers.
-	Must be called within sharedAccess."
+	Iterate over a copy as aBlock is allowed to modify registeredWorkers"
 
-	"sharedAccess assertIsOwner."
-	registeredWorkers do: aBlock
+	(self critical: [ registeredWorkers values ]) do: aBlock
 ]
 
 { #category : #'private - accessing' }
