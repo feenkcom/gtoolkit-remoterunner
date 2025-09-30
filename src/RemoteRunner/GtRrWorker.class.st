@@ -40,6 +40,10 @@ GtRrWorker class >> commandLineCommand [
 				description: 'Directory to save logs in (./workerLogs)';
 				add: (ClapPositional id: #directory);
 				yourself);
+		add: ((ClapFlag id: #logPrefix) 
+				description: 'Prefix to use when creating beacon and PharoDebug.log files';
+				add: (ClapPositional id: #prefix);
+				yourself);
 		add: ((ClapFlag id: #serverSocketAddress)
 				   description:
 					   'The server socket address on which to connect for requests';
@@ -100,6 +104,8 @@ GtRrWorker class >> isCommandLineWorker [
 
 { #category : #clap }
 GtRrWorker class >> logFilenameFor: aGtRrWorker [
+	"Answer a beacon log file name for the worker.
+	This is now a fallback if `--logPrefix` is not supplied."
 	| pid |
 
 	pid := GtOsSystemInfo current currentProcessId.
@@ -574,31 +580,39 @@ GtRrWorker >> startHeartbeat [
 
 { #category : #logging }
 GtRrWorker >> startLoggerFor: worker arguments: args [
-	| announcements logDir filename pid pharoDebugLogFile |
+	| announcements logDir logPrefix beaconFile pid pharoDebugLogFile |
 
 	args at: #log ifAbsent: [^ self ].
 
 	logDir := (args at: #logDir
 		ifPresent: [:arg | (arg at: #directory) value]
 		ifAbsent: ['workerLogs']) asFileReference.
+	logPrefix := args at: #logPrefix 
+		ifPresent: [ :arg | (arg at: #prefix) value ]
+		ifAbsent: [].
 	SignalLogger resetAllInstances.
-	filename := logDir / (worker class logFilenameFor: worker).
+	beaconFile := logPrefix
+		ifNil: [ logDir / (worker class logFilenameFor: worker) ]
+		ifNotNil: [ :prefix | logDir / (prefix, '.beacon.log') ].
 	Stdio stdout
-		<< 'worker log filename set to: ';
-		<< filename asString;
+		<< 'worker beacon filename set to: ';
+		<< beaconFile asString;
 		lf.
-	pid := GtOsSystemInfo current currentProcessId.
-	pharoDebugLogFile := (logDir / ('worker.pharoDebug.', pid asString, '.log')) fullName.
-	Smalltalk logFileName: pharoDebugLogFile.
+	pharoDebugLogFile := logPrefix ifNil:
+		[ pid := GtOsSystemInfo current currentProcessId.
+		(logDir / ('worker.pharoDebug.', pid asString, '.log')) ]
+	ifNotNil: [ :prefix |
+		logDir / (prefix, '.PharoDebug.log') ].
+	
+	Smalltalk logFileName: pharoDebugLogFile fullName.
 	Stdio stdout
 		<< 'PharoDebug.log filename set to: ';
-		<< pharoDebugLogFile;
-		lf.
-		
-	"SessionFallbackFileLogger resetInstance."
+		<< pharoDebugLogFile fullName;
+		lf; flush.
+
 	logger := StreamLoggerFlusher new 
-		logger: (SessionFallbackFileLogger filename: filename).
-	
+		logger: (SessionFallbackFileLogger filename: beaconFile).
+
 	announcements := AnnouncementSetWithExclusions withAll: 
 		{GtRemoteRunnerAnnouncement , GtRemoteRunnerSignal , PharoLinkSignal, 
 		GtAwsWebServiceCommandSignal,
