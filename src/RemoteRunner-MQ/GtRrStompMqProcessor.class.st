@@ -575,7 +575,9 @@ GtRrStompMqProcessor >> setStopRequested [
 { #category : #accessing }
 GtRrStompMqProcessor >> socketStatus [
 
-	^ mqClient medium socket statusString
+	mqClient ifNotNil: [ :theMqClient | theMqClient medium ifNotNil: [ :theMedium |
+		^ theMedium socket statusString ] ].
+	^ 'Connection already closed'
 ]
 
 { #category : #'start - stop' }
