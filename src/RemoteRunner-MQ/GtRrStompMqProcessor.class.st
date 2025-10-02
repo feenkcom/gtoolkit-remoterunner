@@ -234,7 +234,7 @@ GtRrStompMqProcessor >> connect [
 	self mqPassword ifNotNil: [ :pwd | mqClient passcode: pwd ].
 	mqClient timeout: 60.
 	mqClient open. ]
-		on: ConnectionTimedOut
+		on: ConnectionTimedOut, ConnectionClosed
 		do: [ :ex |
 			retryCount := retryCount + 1.
 			retryCount <= maxRetries
