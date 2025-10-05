@@ -21,14 +21,6 @@ GtRrChecksFactory >> addExampleClass: aClass [
 ]
 
 { #category : #adding }
-GtRrChecksFactory >> addExampleClasses: aCollectionOfClasses [
-
-	aCollectionOfClasses do: [ :cls |
-		cls isMeta ifFalse: 
-			[ self addExampleClass: cls ] ].
-]
-
-{ #category : #adding }
 GtRrChecksFactory >> addExampleClassNames: aCollectionOfClassNames [
 	| cls task |
 
@@ -38,6 +30,14 @@ GtRrChecksFactory >> addExampleClassNames: aCollectionOfClassNames [
 			[ task := GtRrClassExampleTask exampleClassName: className.
 			ignoreNoTest ifTrue: [ task setIgnoreNoTest ].
 			self addTask: task ] ].
+]
+
+{ #category : #adding }
+GtRrChecksFactory >> addExampleClasses: aCollectionOfClasses [
+
+	aCollectionOfClasses do: [ :cls |
+		cls isMeta ifFalse: 
+			[ self addExampleClass: cls ] ].
 ]
 
 { #category : #adding }
@@ -66,17 +66,17 @@ GtRrChecksFactory >> addSUnitClass: aClass [
 ]
 
 { #category : #adding }
-GtRrChecksFactory >> addSUnitClasses: aCollectionOfClasses [
-
-	aCollectionOfClasses do: [ :cls |
-		self addSUnitClass: cls ].
-]
-
-{ #category : #adding }
 GtRrChecksFactory >> addSUnitClassNames: aCollectionOfClassNames [
 
 	aCollectionOfClassNames do: [ :className |
 		self addSUnitClass: (self classWithName: className) ].
+]
+
+{ #category : #adding }
+GtRrChecksFactory >> addSUnitClasses: aCollectionOfClasses [
+
+	aCollectionOfClasses do: [ :cls |
+		self addSUnitClass: cls ].
 ]
 
 { #category : #adding }

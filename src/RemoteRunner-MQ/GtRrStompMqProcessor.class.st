@@ -232,8 +232,10 @@ GtRrStompMqProcessor >> connect [
 	self mqPort ifNotNil: [ :port | mqClient port: port ].
 	self mqUsername ifNotNil: [ :un | mqClient login: un ].
 	self mqPassword ifNotNil: [ :pwd | mqClient passcode: pwd ].
-	mqClient timeout: 60.
-	mqClient open. ]
+	mqClient open.
+	"Set the timeout to a quarter of the heartbeat.
+	The timeout is in seconds, while the heartbeat is milliSeconds."
+	mqClient timeout: (mqClient heartbeat / 4000) rounded. ]
 		on: ConnectionTimedOut, ConnectionClosed
 		do: [ :ex |
 			retryCount := retryCount + 1.
@@ -599,7 +601,7 @@ GtRrStompMqProcessor >> startMqHeartbeat [
 
 	self assert: mqHeartbeatProcess isNil.
 	mqHeartbeatProcess := [ [ mqClient isConnected ] whileTrue: [
-		30 seconds wait.
+		mqClient timeout seconds wait.
 		mqClient isConnected ifTrue:
 			[ socketAccess critical: 
 				[ [ mqClient writeHeartbeatIfNeeded ]
@@ -618,12 +620,12 @@ GtRrStompMqProcessor >> startMqListener [
 		[ mqClient runWith: self mqProcessor ]
 			on: ZnIncomplete, SocketError
 			do: [ :ex | 
-			Stdio stdout
-				<< Time now asString;
-				<< (' AKG Received mqListener exception: ', ex messageText asString);
-				lf; flush.
-			"ex logStackToFile."
-			closingException := ex freeze ].
+				closingException := ex freeze.
+				StampHeartbeatSignal new
+					lastReadActivity: mqClient lastReadActivity;
+					lastWriteActivity: mqClient lastWriteActivity;
+					exception: closingException;
+					emit. ].
 		listenerStopping := true.
 		"Ask the owner to take over.
 		The receiver should either be shut down or reconnected.

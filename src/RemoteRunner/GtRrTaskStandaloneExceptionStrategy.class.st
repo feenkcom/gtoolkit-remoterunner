@@ -8,12 +8,6 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-GtRrTaskStandaloneExceptionStrategy >> handledExceptions [
-
-	^ Error
-]
-
-{ #category : #'as yet unclassified' }
 GtRrTaskStandaloneExceptionStrategy >> handleException: anError workerContext: aGtRrWorkerContext [
 	| infoException executionData taskContext |
 
@@ -29,6 +23,12 @@ GtRrTaskStandaloneExceptionStrategy >> handleException: anError workerContext: a
 				[ anError printString ]);
 			trace: anError stackString).
 	aGtRrWorkerContext signalTaskCompletion.
+]
+
+{ #category : #'as yet unclassified' }
+GtRrTaskStandaloneExceptionStrategy >> handledExceptions [
+
+	^ Error
 ]
 
 { #category : #'as yet unclassified' }

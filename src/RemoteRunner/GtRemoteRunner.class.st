@@ -349,12 +349,6 @@ GtRemoteRunner >> announceAndLog: aBeaconSignal [
 ]
 
 { #category : #announcer }
-GtRemoteRunner >> announcer [
-
-	^ announcer
-]
-
-{ #category : #announcer }
 GtRemoteRunner >> announceStatusMessage: aStatusMessage [
 	self announce: (GtRrStatusMessageChangedAnnouncement new
 			statusMessage: aStatusMessage)
@@ -374,6 +368,12 @@ GtRemoteRunner >> announceStatusMessageWithString: aMessageString andSourceLabel
 		sourceToolLabel: aSourceLabel)
 ]
 
+{ #category : #announcer }
+GtRemoteRunner >> announcer [
+
+	^ announcer
+]
+
 { #category : #private }
 GtRemoteRunner >> assignTasksToWorkers [
 	"Assign tasks to any available workers.
@@ -391,8 +391,7 @@ GtRemoteRunner >> assignTasksToWorkers [
 	availableWorkers reverseDo: [ :workerFuture |
 		taskContext := self getNextTaskFor: workerFuture.
 		taskContext ifNotNil:
-			[ runnerStats incrementTaskCount.
-			taskContext
+			[ taskContext
 				workerFuture: workerFuture;
 				markTaskStarted.
 			self addCurrentlyExecutingTask: taskContext.
@@ -631,7 +630,7 @@ GtRemoteRunner >> getNextTaskFor: aWorkerFuture [
 	<return: #GtRrTaskContext>
 	| attributes result |
 
-	attributes := aWorkerFuture connection details.
+	attributes := aWorkerFuture connection attributes.
 	result := taskQueue nextOrNilSuchThat: [ :taskContext | 
 		(aWorkerFuture workerJobIdMatches: taskContext) and:
 			[ taskContext constraint matches: attributes ] ].
@@ -1142,6 +1141,25 @@ GtRemoteRunner >> registerAnnouncementsQueueForHeadlessRunner [
 ]
 
 { #category : #accessing }
+GtRemoteRunner >> registerJob: aGtRrJob [
+	"Answer the proxy for the job when using a headless runner."
+
+	^ aGtRrJob
+]
+
+{ #category : #'api - worker' }
+GtRemoteRunner >> registerWorkerWithDetails: aDictionary controlChannelAvailable: aBoolean [
+	"Register the supplied worker and connection details.
+	Answer a boolean indicating whether the registration was accepted."
+
+	^ [ self privateRegisterWorkerWithDetails: aDictionary controlChannelAvailable: aBoolean ]
+		on: Error
+		do: [ :ex |
+			ex logStackToFile.
+			ex pass ].
+]
+
+{ #category : #accessing }
 GtRemoteRunner >> registeredWorkerCount [
 
 	^ runnerStats registeredWorkerCount
@@ -1160,25 +1178,6 @@ GtRemoteRunner >> registeredWorkersDo: aBlock [
 	Iterate over a copy as aBlock is allowed to modify registeredWorkers"
 
 	(self critical: [ registeredWorkers values ]) do: aBlock
-]
-
-{ #category : #accessing }
-GtRemoteRunner >> registerJob: aGtRrJob [
-	"Answer the proxy for the job when using a headless runner."
-
-	^ aGtRrJob
-]
-
-{ #category : #'api - worker' }
-GtRemoteRunner >> registerWorkerWithDetails: aDictionary controlChannelAvailable: aBoolean [
-	"Register the supplied worker and connection details.
-	Answer a boolean indicating whether the registration was accepted."
-
-	^ [ self privateRegisterWorkerWithDetails: aDictionary controlChannelAvailable: aBoolean ]
-		on: Error
-		do: [ :ex |
-			ex logStackToFile.
-			ex pass ].
 ]
 
 { #category : #'private - accessing' }
@@ -1327,7 +1326,7 @@ GtRemoteRunner >> startJob: aGtRrJob [
 { #category : #'api - logger' }
 GtRemoteRunner >> startLogger: aLogger [
 
-	aLogger startFor: GtRemoteRunnerAnnouncement, GtRemoteRunnerSignal, PharoLinkServerSignal, GtAwsWebServiceCommandSignal, StringSignal.
+	aLogger startFor: GtRemoteRunnerAnnouncement, GtRemoteRunnerSignal, PharoLinkServerSignal, GtAwsWebServiceCommandSignal, StringSignal, StampSignals.
 ]
 
 { #category : #'api - logger' }
@@ -1605,6 +1604,19 @@ GtRemoteRunner >> taskQueue [
 ]
 
 { #category : #accessing }
+GtRemoteRunner >> taskTimeout [
+
+	^ taskTimeout ifNil: [ taskTimeout := self defaultTaskTimeout ]
+]
+
+{ #category : #accessing }
+GtRemoteRunner >> taskTimeout: anObject [
+
+	taskTimeout := anObject.
+	runnerStats defaultTaskTimeout: taskTimeout.
+]
+
+{ #category : #accessing }
 GtRemoteRunner >> tasksRemainingCount [
 	"Answer the number of tasks yet to be run.
 	For a Message Queue based system this also includes tasks that are executing but not yet started.
@@ -1622,19 +1634,6 @@ GtRemoteRunner >> tasksStartedCount [
 
 	^ currentlyExecutingTasks count: [ :task |
 		task isStarted ]
-]
-
-{ #category : #accessing }
-GtRemoteRunner >> taskTimeout [
-
-	^ taskTimeout ifNil: [ taskTimeout := self defaultTaskTimeout ]
-]
-
-{ #category : #accessing }
-GtRemoteRunner >> taskTimeout: anObject [
-
-	taskTimeout := anObject.
-	runnerStats defaultTaskTimeout: taskTimeout.
 ]
 
 { #category : #accessing }

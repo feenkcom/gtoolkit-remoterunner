@@ -513,25 +513,17 @@ GtRemoteRunnerProcessExamples >> simpleTestRetryTask [
 	This will take approximately 4 times the worker heartbeat timeout time to execute (3 or 4 minutes)."
 	<gtExample>
 	<noTest>
-	| factory job taskFailedCount taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount workerRegisteredSemaphore |
+	<shouldLogWithEpicea>
+	| factory job taskFailedCount taskCompletedCount jobCompletedCount jobSemaphore jobStartedCount taskStartedCount workerRegisteredSemaphore cejs codeSync |
 
 	self ignoreWorkerExamples ifTrue: [ ^ self ].
 	self setUp.
 	jobStartedCount := jobCompletedCount := taskStartedCount := taskCompletedCount := taskFailedCount := 0.
 	jobSemaphore := GtMutualExclusionSemaphore new.
 	workerRegisteredSemaphore := Semaphore new.
-	GtRrSampleTest compile: 
-'testCrash
-	Stdio stdout
-		<< Time now printString;
-		<< '' testCrash quitting image'';
-		lf; flush.
-	Smalltalk snapshot: false andQuit: true.'
-			classified: #tests.
 	remoteRunner := self simpleRunner.
 	"At least 4 workers are needed, 3 will fail on the bad task, the last will run all remaining tests"
 	remoteRunner managerStartupAndShutdown poolSize: 4.
-	remoteRunner managerStartupAndShutdown workerManager changesSync: true.
 	"Worker processes can be slow to start up if the machine is busy or the image is large (multi GB).
 	Wait for the worker to register before proceeding with tests."
 	remoteRunner 
@@ -545,6 +537,11 @@ GtRemoteRunnerProcessExamples >> simpleTestRetryTask [
 	[ 4 timesRepeat:
 			[ self waitOn: workerRegisteredSemaphore for: 20
 				description: 'Worker didn''t register in time' ].
+	"Force a test method that exits the work to be compiled in each of the workers.
+	We don't want it in the main image as it may be run independently of this test."
+	codeSync := remoteRunner managerStartupAndShutdown codeSync.
+	codeSync onEntryAdded: self testCrashMethodEvent.
+
 	factory := GtRrChecksFactory new.
 	factory addSUnitTestNames: 
 		{ #GtRrSampleTest -> #testPass.
@@ -578,11 +575,11 @@ GtRemoteRunnerProcessExamples >> simpleTestRetryTask [
 			for: self.
 	job tasks do: [ :task |
 		task retryStrategy: GtRrTaskTestRetry new ].
+	"Ensure the code sync has had time to start"
+	codeSync flush.
+
 	remoteRunner submitJob: job.
 	self waitOn: jobSemaphore for: 240 description: 'Job didn''t complete in time'.
-	self assert: remoteRunner taskQueue size equals: 0.
-	self assert: remoteRunner currentlyExecutingJobs size equals: 0.
-	self assert: remoteRunner currentlyExecutingTasks size equals: 0.
 	self assert: jobStartedCount equals: 1.
 	self assert: jobCompletedCount equals: 1.
 	self assert: taskStartedCount equals: 4.
@@ -590,6 +587,10 @@ GtRemoteRunnerProcessExamples >> simpleTestRetryTask [
 	self assert: taskFailedCount equals: 1.
 	self assert: job state equals: #completed.
 	self assert: job hasErrors.
+	self assert: remoteRunner taskQueue size equals: 0.
+	cejs := remoteRunner currentlyExecutingJobs values.
+	self assert: remoteRunner currentlyExecutingJobs size equals: 0.
+	self assert: remoteRunner currentlyExecutingTasks size equals: 0.
 	] ensure: 
 		[ remoteRunner stop.
 		GtRrSampleTest removeSelector: #testCrash. ].
@@ -869,6 +870,32 @@ GtRemoteRunnerProcessExamples >> terminateStartedJobWithoutControlChannel [
 	] ensure: [ remoteRunner stop ].
 
 	^ job
+]
+
+{ #category : #'as yet unclassified' }
+GtRemoteRunnerProcessExamples >> testCrashMethodEvent [
+	| factory omEntry |
+
+	factory := GtEpiceaEventFactory new.
+	omEntry := factory
+		addMethod: (factory methodDefinitionSelector: #testCrash 
+						className: #GtRrSampleTest
+						meta: false
+						package: #RemoteRunner
+						protocol: #tests
+						sourceCode:
+	'testCrash
+		Stdio stdout
+			<< Time now printString;
+			<< '' testCrash quitting image'';
+			lf; flush.
+		Smalltalk snapshot: false andQuit: true.'
+						stamp: 'akg 10/04/2024 17:28')
+		tags: { #author -> 'akg'. 
+			#time -> '2023-01-13T18:10:49.354623+01:00'. 
+			#self -> (OmReference globalName: 'GtRemoteRunnerExamples' localName: '3'). 
+			#prior -> (OmReference globalName: 'GtRemoteRunnerExamples' localName: '2'). } asDictionary.
+	^ EpEntryAdded for: omEntry
 ]
 
 { #category : #examples }

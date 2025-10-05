@@ -7,6 +7,11 @@ Class {
 	#category : #'RemoteRunner-Runner-Manager'
 }
 
+{ #category : #'api - worker' }
+GtRrServerManager >> registerWorker: aWorkerConnection [
+	"Do nothing"
+]
+
 { #category : #accessing }
 GtRrServerManager >> remoteRunner [
 	^ remoteRunner
@@ -17,7 +22,7 @@ GtRrServerManager >> remoteRunner: anObject [
 	remoteRunner := anObject
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'api - worker' }
 GtRrServerManager >> startup [
 
 	self subclassResponsibility
