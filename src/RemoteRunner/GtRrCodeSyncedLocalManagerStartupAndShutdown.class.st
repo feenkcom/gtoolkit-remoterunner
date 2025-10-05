@@ -26,7 +26,7 @@ GtRrCodeSyncedLocalManagerStartupAndShutdown >> initialize [
 { #category : #'api - worker' }
 GtRrCodeSyncedLocalManagerStartupAndShutdown >> registerWorker: aWorkerConnection [
 
-	aWorkerConnection details at: #codeSynced put: true.
+	aWorkerConnection attributes at: #codeSynced put: true.
 ]
 
 { #category : #'startup - shutdown' }

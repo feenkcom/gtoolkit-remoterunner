@@ -24,6 +24,12 @@ GtRrPluggableManager >> asStatsDictionary [
 ]
 
 { #category : #accessing }
+GtRrPluggableManager >> codeSync [
+
+	^ codeSyncManager ifNotNil: #codeSync
+]
+
+{ #category : #accessing }
 GtRrPluggableManager >> codeSyncManager [
 	^ codeSyncManager
 ]

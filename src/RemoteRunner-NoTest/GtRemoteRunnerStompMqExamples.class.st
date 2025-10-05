@@ -135,7 +135,8 @@ GtRemoteRunnerStompMqExamples >> simpleRunner [
 				GtRrMqServer stompMqQueueNamesAttribute. };
 			autoRestart: false;
 			changesSync: false;
-			poolSize: 1).
+			poolSize: 1);
+		codeSyncManager: GtRrCodeSyncManager new.
 	remoteRunner := GtRemoteRunnerMq new.
 	remoteRunner managerStartupAndShutdown: manager.
 	remoteRunner startLogging.

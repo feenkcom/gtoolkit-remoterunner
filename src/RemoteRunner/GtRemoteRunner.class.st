@@ -391,8 +391,7 @@ GtRemoteRunner >> assignTasksToWorkers [
 	availableWorkers reverseDo: [ :workerFuture |
 		taskContext := self getNextTaskFor: workerFuture.
 		taskContext ifNotNil:
-			[ runnerStats incrementTaskCount.
-			taskContext
+			[ taskContext
 				workerFuture: workerFuture;
 				markTaskStarted.
 			self addCurrentlyExecutingTask: taskContext.
@@ -631,7 +630,7 @@ GtRemoteRunner >> getNextTaskFor: aWorkerFuture [
 	<return: #GtRrTaskContext>
 	| attributes result |
 
-	attributes := aWorkerFuture connection details.
+	attributes := aWorkerFuture connection attributes.
 	result := taskQueue nextOrNilSuchThat: [ :taskContext | 
 		(aWorkerFuture workerJobIdMatches: taskContext) and:
 			[ taskContext constraint matches: attributes ] ].
@@ -1327,7 +1326,7 @@ GtRemoteRunner >> startJob: aGtRrJob [
 { #category : #'api - logger' }
 GtRemoteRunner >> startLogger: aLogger [
 
-	aLogger startFor: GtRemoteRunnerAnnouncement, GtRemoteRunnerSignal, PharoLinkServerSignal, GtAwsWebServiceCommandSignal, StringSignal.
+	aLogger startFor: GtRemoteRunnerAnnouncement, GtRemoteRunnerSignal, PharoLinkServerSignal, GtAwsWebServiceCommandSignal, StringSignal, StampSignals.
 ]
 
 { #category : #'api - logger' }

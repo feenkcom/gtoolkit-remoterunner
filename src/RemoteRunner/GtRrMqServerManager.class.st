@@ -55,11 +55,6 @@ GtRrMqServerManager >> mqUsername: aString [
 	mqServer mqUsername: aString
 ]
 
-{ #category : #'api - worker' }
-GtRrMqServerManager >> registerWorker: aWorkerConnection [
-	"Do nothing"
-]
-
 { #category : #'as yet unclassified' }
 GtRrMqServerManager >> shutdown [
 

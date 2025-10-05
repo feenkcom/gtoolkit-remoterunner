@@ -36,7 +36,7 @@ GtRrFutureWorkerTask >> connection: aGtRrWorkerConnection [
 { #category : #accessing }
 GtRrFutureWorkerTask >> details [
 
-	^ connection details.
+	^ connection attributes.
 ]
 
 { #category : #initialization }
@@ -96,7 +96,7 @@ GtRrFutureWorkerTask >> wait [
 { #category : #accessing }
 GtRrFutureWorkerTask >> workerAttributes [
 
-	^ connection details
+	^ connection attributes
 ]
 
 { #category : #accessing }

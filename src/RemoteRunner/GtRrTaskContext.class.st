@@ -224,6 +224,7 @@ GtRrTaskContext >> markTaskStarted [
 	jobContext markTaskStarted: self.
 	taskTimeoutTime := task handoverTime + self taskTimeout.
 	workerTimeoutTime := task handoverTime + self workerTimeout.
+	self remoteRunner runnerStats incrementTaskCount.
 ]
 
 { #category : #printing }
