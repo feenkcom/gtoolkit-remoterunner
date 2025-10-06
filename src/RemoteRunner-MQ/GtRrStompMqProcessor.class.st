@@ -706,5 +706,11 @@ GtRrStompMqProcessor >> taskCallback: anObject [
 GtRrStompMqProcessor >> write: aStampFrame [
 
 	socketAccess critical:
-		[ mqClient write: aStampFrame ]
+		[ [ mqClient write: aStampFrame ]
+			on: Error
+			do: [ :ex |
+				mqClient imageSessionChanged ifTrue:
+					[ [ self stopRequested ] forkNamed: 'GtRrStompMqProcessor write: error stop request' ]
+				ifFalse:
+					[ ex pass ] ] ]
 ]

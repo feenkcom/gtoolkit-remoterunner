@@ -32,6 +32,8 @@ GtRrMqWorkerConnectionStrategy >> connectDuring: aBlock [
 GtRrMqWorkerConnectionStrategy >> handleMqListenerException: closingException [
 	"Shut down the worker (and potentially exit the image)"
 
+	"If the server is stopped cleanly closingException will be nil"
+	closingException ifNil: [ ^ self ].
 	mqProcessor ifNotNil: [ :anMqProcessor |
 		anMqProcessor isStopRequested ifTrue: [ ^ self ].
 		anMqProcessor setStopRequested.
