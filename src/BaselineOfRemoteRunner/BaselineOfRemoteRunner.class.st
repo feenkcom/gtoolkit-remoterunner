@@ -16,7 +16,7 @@ BaselineOfRemoteRunner >> baseline: spec [
 				spec repository: 'github://feenkcom/gtoolkit-notifications:v0.6.1425/src' ].
 		spec
 			baseline: 'Stamp' with: [
-				spec repository: 'github://feenkcom/stamp:v0.6.5/repository' ].
+				spec repository: 'github://feenkcom/stamp:v0.6.6/repository' ].
 		spec
 			baseline: 'Gt4RabbitMq' with: [
 				spec repository: 'github://feenkcom/gt4rabbitmq:v0.6.3/src' ].
