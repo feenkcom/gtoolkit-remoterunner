@@ -83,6 +83,9 @@ GtRrExplicitExampleTask >> group [
 		collect: [ :each | | providerClass method |
 			providerClass := self class environment classOrTraitNamed: each key asSymbol.
 			method := providerClass lookupSelector: each value asSymbol.
+			method ifNil: [ KeyNotFound
+				signalFor: each value asSymbol
+				in: providerClass ].
 			(GtExampleFactory new
 				createExampleForMethod: method
 				withProviderClass: providerClass) asExampleWithResult ]
