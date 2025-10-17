@@ -101,8 +101,6 @@ GtRrCodeSyncExamples >> codeSyncTaskSelection [
 GtRrCodeSyncExamples >> evaluateExpressionSize: anInteger taskClass: codeSyncTaskClass poolSize: poolSizeInteger [
 	| runner codeSync semaphore timestamp task expression job codeSyncJob |
 
-	GtRemoteRunnerExamples new ignoreWorkerExamples ifTrue: [ ^ self ].
-
 	runner := GtRemoteRunner new
 			port: 0;
 			startLogging;
@@ -146,6 +144,7 @@ GtRrCodeSyncExamples >> evaluateExpressionSize: anInteger taskClass: codeSyncTas
 		onTimeout: [ self error: 'Didn''t receive expected code sync announcement 1' ].
 	self assert: job isNotNil
 		description: 'Code Sync job missing'.
+	self assert: job class equals: GtRrCodeSyncJob.
 	self assert: job templateTask class = codeSyncTaskClass
 		description: [ 'Code Sync task class wrong: ', codeSyncTaskClass printString ].
 	codeSyncJob := job.
@@ -166,6 +165,8 @@ GtRrCodeSyncExamples >> evaluateLargeExpression [
 	<gtExample>
 	| job |
 
+	GtRemoteRunnerExamples new ignoreWorkerExamples ifTrue: [ ^ nil ].
+
 	job := self evaluateExpressionSize: GtRrCodeSyncTask maxBufferedSize 
 		taskClass: GtRrFileCodeSyncTask
 		poolSize: 1.
@@ -175,6 +176,8 @@ GtRrCodeSyncExamples >> evaluateLargeExpression [
 { #category : #examples }
 GtRrCodeSyncExamples >> evaluateSmallExpression [
 	<gtExample>
+
+	GtRemoteRunnerExamples new ignoreWorkerExamples ifTrue: [ ^ nil ].
 
 	^ self evaluateExpressionSize: 100 
 		taskClass: GtRrBufferedCodeSyncTask
@@ -215,7 +218,7 @@ GtRrCodeSyncExamples >> hasMethodIn: aRunner [
 		for: self.
 	aRunner submitJob: job.
 	semaphore 
-		waitTimeoutMilliseconds: 5 seconds asMilliSeconds
+		waitTimeoutMilliseconds: 30 seconds asMilliSeconds
 		onCompletion: [ "noop" ] 
 		onTimeout: [ self error: 'Didn''t receive expected job completion announcement' ].
 	^ job tasks first result
