@@ -7,3 +7,10 @@ EpMethodModification >> asGtRrCompactChange [
 
 	^ EpMethodAddition method: newMethod
 ]
+
+{ #category : #'*RemoteRunner' }
+EpMethodModification >> gtRrApproximateSize [
+	"Answer the approximate size of the receiver in memory."
+	
+	^ self methodAffected sourceCode sizeInMemory + self oldMethod sourceCode sizeInMemory
+]

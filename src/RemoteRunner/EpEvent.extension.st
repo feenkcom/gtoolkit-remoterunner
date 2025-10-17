@@ -7,3 +7,10 @@ EpEvent >> asGtRrCompactChange [
 
 	^ self
 ]
+
+{ #category : #'*RemoteRunner' }
+EpEvent >> gtRrApproximateSize [
+	"Answer the approximate size of the receiver in memory."
+	
+	^ 0
+]
