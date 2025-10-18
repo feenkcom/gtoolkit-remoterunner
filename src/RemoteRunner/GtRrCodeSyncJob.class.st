@@ -5,10 +5,19 @@ Class {
 	#name : #GtRrCodeSyncJob,
 	#superclass : #GtRrJob,
 	#instVars : [
-		'serializedChanges'
+		'serializedChanges',
+		'entries',
+		'templateTask'
 	],
 	#category : #'RemoteRunner-Runner-CodeSync'
 }
+
+{ #category : #'instance creation' }
+GtRrCodeSyncJob class >> entries: aCollection [
+	"aCollection of OmEntry"
+
+	^ self new entries: aCollection
+]
 
 { #category : #jsonV4 }
 GtRrCodeSyncJob class >> leJsonV4AttributeMapping [
@@ -16,7 +25,7 @@ GtRrCodeSyncJob class >> leJsonV4AttributeMapping [
 	Subclasses should override this with their attributes."
 
 	^ super leJsonV4AttributeMapping
-		add: #serializedChanges -> #serializedChanges;
+		add: #stonEntries -> #entries;
 		yourself
 ]
 
@@ -27,23 +36,35 @@ GtRrCodeSyncJob class >> leJsonV4Name [
 ]
 
 { #category : #accessing }
-GtRrCodeSyncJob class >> serializedChanges: aFuelStringOfCollection [
-
-	^ self new
-		  serializedChanges: aFuelStringOfCollection;
-		  yourself
+GtRrCodeSyncJob >> entries [
+	^ entries
 ]
 
 { #category : #accessing }
-GtRrCodeSyncJob >> serializedChanges [
-
-	^ serializedChanges
+GtRrCodeSyncJob >> entries: anObject [
+	entries := anObject
 ]
 
-{ #category : #accessing }
-GtRrCodeSyncJob >> serializedChanges: anObject [
+{ #category : #'private - running' }
+GtRrCodeSyncJob >> markJobCompleted [
 
-	serializedChanges := anObject
+	super markJobCompleted.
+	templateTask ifNotNil:
+		[ templateTask onJobCompleted ].
+]
+
+{ #category : #serialization }
+GtRrCodeSyncJob >> stonEntries [
+	"Answer the serialised entries."
+
+	^ STON toString: entries.
+]
+
+{ #category : #serialization }
+GtRrCodeSyncJob >> stonEntries: aString [
+	"Set the entries from the serialised string."
+
+	entries := STON fromString: aString.
 ]
 
 { #category : #accessing }
@@ -58,10 +79,14 @@ GtRrCodeSyncJob >> tasksFor: aRemoteRunner [
 	| tasks |
 
 	tasks := OrderedCollection new.
+	"Create a sync task and copy it for each worker.
+	This allows the task to serialise the changes once and re-use for each worker,
+	while allowing different serialisation approaches"
+	templateTask := (GtRrCodeSyncTask forChanges: entries)
+		entries: entries.
 	aRemoteRunner registeredWorkersDo: [ :aWorkerConnection |
 		(aWorkerConnection attributes at: #codeSynced ifAbsent: [ false ]) ifTrue:
-			[ tasks add: (GtRrCodeSyncTask
-				serializedChanges: serializedChanges
+			[ tasks add: (templateTask copy
 				workerId: (aWorkerConnection attributes at: #id)) ] ].
 	"If there were no tasks generated, there are no code-sync workers available, register the error.
 	The job will be marked completed at the end of job startup."
@@ -70,4 +95,9 @@ GtRrCodeSyncJob >> tasksFor: aRemoteRunner [
 			errorMessage: 'No code-sync workers available';
 			setTrace) ].
 	^ tasks
+]
+
+{ #category : #accessing }
+GtRrCodeSyncJob >> templateTask [
+	^ templateTask
 ]

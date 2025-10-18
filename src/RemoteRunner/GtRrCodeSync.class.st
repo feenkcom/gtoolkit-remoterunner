@@ -41,19 +41,23 @@ GtRrCodeSync >> finalize [
 { #category : #accessing }
 GtRrCodeSync >> flush [
 	mutex critical:  [
-		| buffer |
+		| buffer job |
 		buffer := OrderedCollection new.
 		events flush: [:event | buffer add: event].
 		buffer ifEmpty: [
 			"nothing to send, ignore" ^self].
-		remoteRunner submitJob: (GtRrCodeSyncJob
-					serializedChanges: (LanguageLinkUtils base64Encode: buffer))]
+		job := remoteRunner submitJob: 
+			(GtRrCodeSyncJob entries: buffer).
+		GtRrCodeSyncJobSignal new
+			job: job;
+			emit. ].
 ]
 
 { #category : #initialization }
 GtRrCodeSync >> initialize [
 
 	super initialize.
+	"events is a queue of OmEntries"
 	events := WaitfreeQueue new.
 	flusher := TKTNewProcessTaskRunner new.
 	mutex := Semaphore forMutualExclusion.
