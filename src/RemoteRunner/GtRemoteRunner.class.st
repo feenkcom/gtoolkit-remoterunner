@@ -450,7 +450,7 @@ GtRemoteRunner >> changesSyncEventsFrom: anOmReference workerId: workerId [
 	"Answer a collection of EpEvents that will take the worker from the supplied OmReference to the state ready for testing.
 	If a collection of events is supplied, use that, otherwise synchronise with the current image.
 	Ensure that the supplied OmReference is in the receiver's history"
-	<return: #SequencableCollection>
+	<return: #SequenceableCollection>
 	| result |
 
 	GtRrChangesSyncRetrievalStartingSignal new
