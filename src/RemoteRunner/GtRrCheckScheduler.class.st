@@ -5,7 +5,7 @@ Class {
 		'schedulingTimes',
 		'maxDuration'
 	],
-	#category : #'RemoteRunner-CheckScheduling'
+	#category : 'RemoteRunner-CheckScheduling'
 }
 
 { #category : #accessing }

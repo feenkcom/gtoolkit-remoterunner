@@ -1,7 +1,7 @@
 Class {
 	#name : #GtRrUIManager,
 	#superclass : #NonInteractiveUIManager,
-	#category : #'RemoteRunner-Worker'
+	#category : 'RemoteRunner-Worker'
 }
 
 { #category : #'ui requests' }

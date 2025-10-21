@@ -7,7 +7,7 @@ Class {
 	#instVars : [
 		'entriesCount'
 	],
-	#category : #'RemoteRunner-Runner-ImageSync'
+	#category : 'RemoteRunner-Runner-ImageSync'
 }
 
 { #category : #'instance creation' }
@@ -39,6 +39,13 @@ GtRrImageSync class >> leJsonV4Name [
 { #category : #accessing }
 GtRrImageSync class >> maxBufferedSize [
 	^ 256000
+]
+
+{ #category : #actions }
+GtRrImageSync >> copyToFile: aFileReference [
+	"Copy the receiver's serialised changes to the specified file"
+
+	self subclassResponsibility
 ]
 
 { #category : #accessing }

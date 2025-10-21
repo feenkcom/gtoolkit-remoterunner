@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'remoteRunner'
 	],
-	#category : #'RemoteRunner-Runner'
+	#category : 'RemoteRunner-Runner'
 }
 
 { #category : #serialisation }

@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'entriesFile'
 	],
-	#category : #'RemoteRunner-Runner-ImageSync'
+	#category : 'RemoteRunner-Runner-ImageSync'
 }
 
 { #category : #accessing }
@@ -24,6 +24,13 @@ GtRrFileImageSync class >> newEntriesFile [
 		tmpDir := 'temp' asFileReference ensureCreateDirectory.
 		tmpFile := tmpDir / tmpFile basename  ].
 	^ tmpFile
+]
+
+{ #category : #actions }
+GtRrFileImageSync >> copyToFile: aFileReference [
+	"Copy the receiver's serialised changes to the specified file"
+
+	self entriesFile copyTo: aFileReference.
 ]
 
 { #category : #accessing }

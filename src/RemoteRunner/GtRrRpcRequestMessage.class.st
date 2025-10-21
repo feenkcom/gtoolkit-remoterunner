@@ -5,7 +5,7 @@ Class {
 		'evaluationMessage',
 		'responseQueue'
 	],
-	#category : #'RemoteRunner-Model'
+	#category : 'RemoteRunner-Model'
 }
 
 { #category : #accessing }

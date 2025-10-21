@@ -1,7 +1,7 @@
 Class {
 	#name : #GtRrPingMessage,
 	#superclass : #GtRrMessage,
-	#category : #'RemoteRunner-Model'
+	#category : 'RemoteRunner-Model'
 }
 
 { #category : #'as yet unclassified' }

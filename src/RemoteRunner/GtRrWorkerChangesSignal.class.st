@@ -5,7 +5,7 @@ Class {
 		'remoteAddressString',
 		'workerId'
 	],
-	#category : #'RemoteRunner-Signals'
+	#category : 'RemoteRunner-Signals'
 }
 
 { #category : #initialization }

@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'taskIdChecks'
 	],
-	#category : #'RemoteRunner-Announcements'
+	#category : 'RemoteRunner-Announcements'
 }
 
 { #category : #'instance creation' }

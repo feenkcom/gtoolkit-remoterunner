@@ -1,5 +1,5 @@
 Class {
 	#name : #GtRrTimeoutCompletedAnnouncement,
 	#superclass : #GtRrTimeoutAnnouncement,
-	#category : #'RemoteRunner-Announcements'
+	#category : 'RemoteRunner-Announcements'
 }

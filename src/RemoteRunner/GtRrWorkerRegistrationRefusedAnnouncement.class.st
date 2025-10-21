@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'currentlyExecutingJobIds'
 	],
-	#category : #'RemoteRunner-Announcements'
+	#category : 'RemoteRunner-Announcements'
 }
 
 { #category : #'api - worker' }

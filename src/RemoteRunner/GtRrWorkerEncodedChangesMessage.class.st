@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'headReference'
 	],
-	#category : #'RemoteRunner-Model'
+	#category : 'RemoteRunner-Model'
 }
 
 { #category : #accessing }

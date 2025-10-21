@@ -4,13 +4,21 @@ Class {
 	#instVars : [
 		'serializedChanges'
 	],
-	#category : #'RemoteRunner-Runner-ImageSync'
+	#category : 'RemoteRunner-Runner-ImageSync'
 }
 
 { #category : #accessing }
 GtRrBufferedImageSync class >> leJsonV4Name [
 
 	^ #gtRrBufferedImageSync
+]
+
+{ #category : #actions }
+GtRrBufferedImageSync >> copyToFile: aFileReference [
+	"Copy the receiver's serialised changes to the specified file"
+
+	aFileReference writeStreamDo: [ :stream |
+		stream nextPutAll: self serializedChanges ].
 ]
 
 { #category : #accessing }

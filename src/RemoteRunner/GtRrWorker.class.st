@@ -18,7 +18,7 @@ Class {
 		'exceptionHandlingStrategy',
 		'logger'
 	],
-	#category : #'RemoteRunner-Worker'
+	#category : 'RemoteRunner-Worker'
 }
 
 { #category : #accessing }
@@ -730,7 +730,7 @@ GtRrWorker >> stopReadProcess [
 { #category : #private }
 GtRrWorker >> syncChangesFromFile: aFileReference [
 	"Load the changes from the specified file.
-	The changes are encoded as an array of OmEntries."
+	The changes are encoded as an sequence of OmEntries."
 	| imageSyncEntries eventsCount |
 
 	GtRrWorkerApplyChangesStartingSignal new
@@ -746,6 +746,7 @@ GtRrWorker >> syncChangesFromFile: aFileReference [
 		encodedEventsSize: aFileReference size;
 		eventsCount: eventsCount;
 		emit.
+	^ imageSyncEntries
 ]
 
 { #category : #private }
@@ -767,15 +768,18 @@ GtRrWorker >> syncChangesFromServerWith: aConnection [
 		encodedEventsSize: imageSyncEntries serializedSize;
 		eventsCount: eventsCount;
 		emit.
+	^ imageSyncEntries
 ]
 
 { #category : #private }
 GtRrWorker >> syncChangesWith: aConnection [
+	| changesSync changesFile |
 
 	(attributes at: #changesSync ifAbsent: [ false ])
-		ifTrue: [self syncChangesFromServerWith: aConnection ].
+		ifTrue: [ changesSync := self syncChangesFromServerWith: aConnection ].
 	attributes at: #changesFile
-		ifPresent: [ :filename | self syncChangesFromFile: filename asFileReference ].
+		ifPresent: [ :filename | changesFile := self syncChangesFromFile: filename asFileReference ].
+	^ { changesSync. changesFile. }
 ]
 
 { #category : #accessing }
