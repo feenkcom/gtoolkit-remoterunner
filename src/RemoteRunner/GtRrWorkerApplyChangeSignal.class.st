@@ -32,7 +32,7 @@ GtRrWorkerApplyChangeSignal >> ombuEntryReferenceName [
 	^ombuEntryReferenceName
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #printing }
 GtRrWorkerApplyChangeSignal >> printOneLineContentsOn: stream [
 
 	super printOneLineContentsOn: stream.

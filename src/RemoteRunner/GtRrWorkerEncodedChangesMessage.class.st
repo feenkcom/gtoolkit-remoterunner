@@ -19,8 +19,9 @@ GtRrWorkerEncodedChangesMessage >> headReference: anObject [
 
 { #category : #'as yet unclassified' }
 GtRrWorkerEncodedChangesMessage >> processMq: mqMessage processor: aGtRrProcessor for: anOwner [
-	"Process the supplied message for anObject.
-	anObject (outside of testing) will either be a GtRrWorker or GtRemoteRunner."
+	"Retrieve the changes from the runner and return to the worker.
+	This serialises the changes for every worker.
+	For large installations, transferring the changes to the worker is normally handled out-of-band."
 
-	^ anOwner remoteRunner changesSyncEventsFrom: headReference workerId: workerId
+	^ anOwner remoteRunner encodedChangesSyncEventsFrom: headReference workerId: workerId
 ]

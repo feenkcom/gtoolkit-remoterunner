@@ -432,16 +432,17 @@ GtRemoteRunner >> basicRegisteredWorkers [
 
 { #category : #accessing }
 GtRemoteRunner >> changesSyncEvents [
+	<return: #GtRrImageSyncEvents>
 
-	^ changesSyncEvents
+	^ changesSyncEvents ifNil: [ GtRrChangesSync uniqueInstance ]
 ]
 
 { #category : #accessing }
-GtRemoteRunner >> changesSyncEvents: anObject [
+GtRemoteRunner >> changesSyncEvents: aGtRrImageSyncEvents [
 	"Set the change events to be replayed by each worker.
 	Storing the change events in the runner is normally only done when workers will be used for multiple jobs.  If workers are restarted for each job the change events will normally be provided with the job using the 'changeEvents' property."
 
-	changesSyncEvents := anObject
+	changesSyncEvents := aGtRrImageSyncEvents
 ]
 
 { #category : #accessing }
@@ -449,15 +450,14 @@ GtRemoteRunner >> changesSyncEventsFrom: anOmReference workerId: workerId [
 	"Answer a collection of EpEvents that will take the worker from the supplied OmReference to the state ready for testing.
 	If a collection of events is supplied, use that, otherwise synchronise with the current image.
 	Ensure that the supplied OmReference is in the receiver's history"
+	<return: #SequencableCollection>
 	| result |
 
 	GtRrChangesSyncRetrievalStartingSignal new
 		omReference: anOmReference;
 		workerId: workerId;
 		emit.
-	result := [ changesSyncEvents
-		ifNil: [ GtRrChangesSync uniqueInstance changesFrom: anOmReference ]
-		ifNotNil: [ changesSyncEvents changesFrom: anOmReference ] ]
+	result := [ self changesSyncEvents changesFrom: anOmReference ]
 			on: Error
 			do: [ :ex |
 				self announceAndLog: (GtRrWorkerChangesSyncErrorAnnouncement new
@@ -473,7 +473,7 @@ GtRemoteRunner >> changesSyncEventsFrom: anOmReference workerId: workerId [
 
 { #category : #'api - jobs' }
 GtRemoteRunner >> changesSyncEventsSerialized: anEncodedGtRrChangesSyncEncodedEvents [
-	"Submit the supplied job after deserialising it, and enable a queue for it"
+	"Deserialise and store the supplied events"
 	| deserializedChangesSyncEvents |
 
 	deserializedChangesSyncEvents := LeJsonV4 uniqueInstance 
@@ -586,15 +586,14 @@ GtRemoteRunner >> encodedChangesSyncEventsFrom: anOmReference workerId: workerId
 	"Answer a collection of EpEvents that will take the worker from the supplied OmReference to the state ready for testing.
 	If a collection of events is supplied, use that, otherwise synchronise with the current image.
 	Ensure that the supplied OmReference is in the receiver's history"
+	<return: #GtRrImageSync>
 	| result |
 
 	GtRrChangesSyncRetrievalStartingSignal new
 		omReference: anOmReference;
 		workerId: workerId;
 		emit.
-	result := [ changesSyncEvents
-		ifNil: [ GtRrChangesSync uniqueInstance encodedChangesFrom: anOmReference ]
-		ifNotNil: [ changesSyncEvents encodedChangesFrom: anOmReference ] ]
+	result := [ self changesSyncEvents encodedChangesFrom: anOmReference ]
 			on: Error
 			do: [ :ex |
 				self announceAndLog: (GtRrWorkerChangesSyncErrorAnnouncement new
@@ -604,7 +603,7 @@ GtRemoteRunner >> encodedChangesSyncEventsFrom: anOmReference workerId: workerId
 	GtRrChangesSyncRetrievalCompletedSignal new
 		omReference: anOmReference;
 		workerId: workerId;
-		resultSize: result size;
+		resultSize: result serializedSize;
 		emit.
 	^ result.
 ]

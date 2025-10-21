@@ -97,29 +97,24 @@ GtRrLlWorkerConnectionStrategy >> registerWith: aPharoLinkApplication [
 
 { #category : #private }
 GtRrLlWorkerConnectionStrategy >> retrieveChangesFromServerWith: aPharoLinkApplication [
-
-	^ STON fromString: (self retrieveEncodedChangesFromServerWith:  aPharoLinkApplication)
-]
-
-{ #category : #private }
-GtRrLlWorkerConnectionStrategy >> retrieveEncodedChangesFromServerWith: aPharoLinkApplication [ 
-	| encodedEvents |
+	<return: #GtRrImageSync>
+	| encodedEntries |
 
 	GtRrWorkerRetrieveChangesStartingSignal new
 		workerId: worker uid;
 		emit.
-	encodedEvents := aPharoLinkApplication newCommandFactory
+	encodedEntries := aPharoLinkApplication newCommandFactory
 		setByValue;
 		bindingAt: #anOmReference put: 
 			(STON toString: GtRrChangesSync headReference);
 		bindingAt: #workerId put: worker uid;
-		<< 'GtAssignedRemoteRunner encodedChangesSyncEventsFrom: (STON fromString: anOmReference) workerId: workerId';
+		<< 'LeJsonV4 uniqueInstance serialize: (GtAssignedRemoteRunner encodedChangesSyncEventsFrom: (STON fromString: anOmReference) workerId: workerId)';
 		sendAndWait.
 	GtRrWorkerRetrieveChangesCompletedSignal new
 		workerId: worker uid;
 		emit.
 	
-	^ encodedEvents
+	^ LeJsonV4 uniqueInstance deserialize: encodedEntries readStream
 ]
 
 { #category : #private }

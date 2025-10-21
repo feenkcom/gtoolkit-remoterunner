@@ -14,7 +14,7 @@ GtRrImageSyncExamples >> entriesFromStartTo [
 	"Demonstrate retrieving all a subset of entries"
 	<gtExample>
 	<noTest>
-	| changesSync entries enumerator start decodedEntries |
+	| changesSync entries enumerator start |
 
 	enumerator := GtEpLogEnumerator fromFile: GtEpLogEnumeratorExamples testDataRoot / 'testClass01' / 'Pharo10-SNAPSHOT-64bit-fec28a6.em8gtmjvf6qouoyjm5tk4q4dm.ombu'.
 	self 
@@ -26,8 +26,7 @@ GtRrImageSyncExamples >> entriesFromStartTo [
 		epLog: enumerator latestLog;
 		sessionHistory: { start }.
 	
-	entries := changesSync encodedChangesFrom: start.
-	decodedEntries := (STON fromString: entries) collect: #content.
+	entries := (changesSync encodedChangesFrom: start) entries collect: #content.
 	self assert: decodedEntries size equals: 4.
 	self 
 		assert: (decodedEntries collect: #methodAffectedSelector) asArray
