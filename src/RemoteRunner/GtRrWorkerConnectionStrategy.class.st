@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'worker'
 	],
-	#category : 'RemoteRunner-Worker'
+	#category : #'RemoteRunner-Worker'
 }
 
 { #category : #private }

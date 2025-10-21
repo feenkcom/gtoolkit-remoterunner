@@ -8,7 +8,7 @@ Class {
 		'logEvent',
 		'eventLabel'
 	],
-	#category : 'RemoteRunner-Analysis'
+	#category : #'RemoteRunner-Analysis'
 }
 
 { #category : #accessing }

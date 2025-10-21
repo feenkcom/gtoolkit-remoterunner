@@ -1,7 +1,7 @@
 Class {
 	#name : #GtRrWorkerConnectionExceptionHandler,
 	#superclass : #PharoLinkConnectionExceptionHandler,
-	#category : 'RemoteRunner-Worker'
+	#category : #'RemoteRunner-Worker'
 }
 
 { #category : #accessing }

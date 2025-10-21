@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'remoteRunner'
 	],
-	#category : 'RemoteRunner-Runner-Manager'
+	#category : #'RemoteRunner-Runner-Manager'
 }
 
 { #category : #'api - worker' }

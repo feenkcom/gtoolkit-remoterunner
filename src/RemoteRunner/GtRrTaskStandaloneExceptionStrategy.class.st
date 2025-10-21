@@ -4,14 +4,8 @@ GtRrTaskStandaloneExceptionStrategy catches assertion failures and errors and po
 Class {
 	#name : #GtRrTaskStandaloneExceptionStrategy,
 	#superclass : #GtRrTaskExceptionStrategy,
-	#category : 'RemoteRunner-ExceptionHandling'
+	#category : #'RemoteRunner-ExceptionHandling'
 }
-
-{ #category : #'as yet unclassified' }
-GtRrTaskStandaloneExceptionStrategy >> handledExceptions [
-
-	^ Error
-]
 
 { #category : #'as yet unclassified' }
 GtRrTaskStandaloneExceptionStrategy >> handleException: anError workerContext: aGtRrWorkerContext [
@@ -29,6 +23,12 @@ GtRrTaskStandaloneExceptionStrategy >> handleException: anError workerContext: a
 				[ anError printString ]);
 			trace: anError stackString).
 	aGtRrWorkerContext signalTaskCompletion.
+]
+
+{ #category : #'as yet unclassified' }
+GtRrTaskStandaloneExceptionStrategy >> handledExceptions [
+
+	^ Error
 ]
 
 { #category : #'as yet unclassified' }

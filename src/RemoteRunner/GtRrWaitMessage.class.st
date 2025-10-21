@@ -8,7 +8,7 @@ Class {
 	#instVars : [
 		'seconds'
 	],
-	#category : 'RemoteRunner-Model'
+	#category : #'RemoteRunner-Model'
 }
 
 { #category : #processing }

@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'message'
 	],
-	#category : 'RemoteRunner-Announcements'
+	#category : #'RemoteRunner-Announcements'
 }
 
 { #category : #accessing }

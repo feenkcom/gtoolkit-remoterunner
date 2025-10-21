@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'exampleClassName'
 	],
-	#category : 'RemoteRunner-Tests'
+	#category : #'RemoteRunner-Tests'
 }
 
 { #category : #'instance creation' }

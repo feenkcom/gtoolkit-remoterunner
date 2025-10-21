@@ -1,7 +1,7 @@
 Class {
 	#name : #GtRrStompMqSendMessageCompletedSignal,
 	#superclass : #GtRrStompMqSendMessageSignal,
-	#category : 'RemoteRunner-Signals'
+	#category : #'RemoteRunner-Signals'
 }
 
 { #category : #testing }

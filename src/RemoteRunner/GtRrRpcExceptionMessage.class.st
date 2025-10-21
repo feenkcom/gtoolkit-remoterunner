@@ -6,7 +6,7 @@ Class {
 		'stackString',
 		'exceptionClassName'
 	],
-	#category : 'RemoteRunner-Model'
+	#category : #'RemoteRunner-Model'
 }
 
 { #category : #'instance creation' }

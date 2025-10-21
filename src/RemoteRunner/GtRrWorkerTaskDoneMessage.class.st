@@ -8,7 +8,7 @@ Class {
 		'jobId',
 		'taskId'
 	],
-	#category : 'RemoteRunner-Model'
+	#category : #'RemoteRunner-Model'
 }
 
 { #category : #accessing }

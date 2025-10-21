@@ -1,7 +1,7 @@
 Class {
 	#name : #GtRrTaskCompletedAnnouncement,
 	#superclass : #GtRrTaskFinishedAnnouncement,
-	#category : 'RemoteRunner-Announcements'
+	#category : #'RemoteRunner-Announcements'
 }
 
 { #category : #accessing }
