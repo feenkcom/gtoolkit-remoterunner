@@ -124,11 +124,11 @@ GtRrMqWorkerConnectionStrategy >> nextTask [
 ]
 
 { #category : #private }
-GtRrMqWorkerConnectionStrategy >> registerWith: ignored [
+GtRrMqWorkerConnectionStrategy >> registerWith: myself [
 	| registerMessage result promise |
 
 	GtRrWorkerRegisterStartingSignal new emit.
-	worker syncChangesWith: ignored.
+	worker syncChangesWith: myself.
 	registerMessage := GtRrWorkerRegisterMessage new 
 		attributes: worker attributes.
 	promise := mqProcessor sendCommandRpcMessage: registerMessage 

@@ -121,7 +121,7 @@ GtRrChangesSync >> encodedChangesFrom: anOmReference [
 		((encodedOmReference = headReference) and: [ workerOmReference = anOmReference ]) ifFalse:
 			[ self changesFrom: anOmReference.
 			encodedOmReference := headReference.
-			encodedEvents := STON toString: events ].
+			encodedEvents := (GtRrImageSync forChanges: events) entries: events ].
 		encodedEvents ]
 ]
 
