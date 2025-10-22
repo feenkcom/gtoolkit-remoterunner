@@ -9,6 +9,13 @@ Class {
 	#category : #'RemoteRunner-Runner-ImageSync'
 }
 
+{ #category : #serialization }
+GtRrImageSyncEvents class >> deSerializeAllImplementorsInstances [
+	"Answer a collection of instances to be tested for serialisation / deserialisation"
+
+	^ { self new events: #() }
+]
+
 { #category : #accessing }
 GtRrImageSyncEvents class >> leJsonV4Name [
 
@@ -33,14 +40,15 @@ GtRrImageSyncEvents >> encodedChangesFrom: anOmReference [
 
 { #category : #accessing }
 GtRrImageSyncEvents >> encodedEvents [
+	<return: #GtRrImageSync>
 
-	^ encodedEvents ifNil: [ encodedEvents := STON toString: events ]
+	^ encodedEvents ifNil: [ encodedEvents := (GtRrImageSync forChanges: events) entries: events ]
 ]
 
-{ #category : #accessing }
-GtRrImageSyncEvents >> encodedEvents: aCollection [
+{ #category : #'private - serialization' }
+GtRrImageSyncEvents >> encodedEvents: aGtRrImageSync [
 
-	encodedEvents := aCollection
+	encodedEvents := aGtRrImageSync
 ]
 
 { #category : #accessing }
@@ -49,11 +57,13 @@ GtRrImageSyncEvents >> events [
 ]
 
 { #category : #accessing }
-GtRrImageSyncEvents >> events: anObject [
-	events := anObject
+GtRrImageSyncEvents >> events: aCollection [
+	"The entries are a collection of {{gtClass:OmEntry}}"
+
+	events := aCollection
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #ui }
 GtRrImageSyncEvents >> gtEntriesFor: aView [
 	<gtView>
 

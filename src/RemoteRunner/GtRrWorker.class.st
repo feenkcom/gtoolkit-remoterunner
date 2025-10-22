@@ -226,20 +226,46 @@ GtRrWorker >> addObserver [
 ]
 
 { #category : #private }
-GtRrWorker >> applyOmbuEntry: anOmbuEntry remoteAddressString: aRemoteAddressString [
+GtRrWorker >> applyImageSyncEntries: imageSyncEntries addressString: aString [
+	"Apply the supplied OmEntries.
+	Answer the number of entries supplied
+	(entries in the receiver's session history are not applied)."
+	<return: #Integer>
+	| stonReader sessionIds count |
+
+	stonReader := STONReader on: (imageSyncEntries entriesReadStream
+		ifNil: [ ^ self ]).
+	sessionIds := GtRrChangesSync default sessionHistory.
+	count := 0.
+	[ [ stonReader atEnd ] whileFalse:
+		[ self applyOmbuEntry: stonReader next 
+			remoteAddressString: aString
+			sessionIds: sessionIds.
+		count := count + 1. ] ]
+				ensure: [ stonReader close ].
+	^ count
+]
+
+{ #category : #private }
+GtRrWorker >> applyOmbuEntry: anOmbuEntry remoteAddressString: aRemoteAddressString sessionIds: sessionIds [
+	"Apply the supplied OmEntry if it isn't in the supplied session history"
+	| shouldApply |
+
 	GtRrWorkerApplyChangeStartingSignal new
 		initializeFromOmbuEntry: anOmbuEntry;
 		remoteAddressString: aRemoteAddressString;
 		workerId: self uid;
 		emit.
-		
-	anOmbuEntry content 
-		accept: GtExportedEventApplyVisitor new.
+
+	shouldApply := self shouldApply: anOmbuEntry with: sessionIds.
+	shouldApply ifTrue:
+		[ anOmbuEntry content accept: GtExportedEventApplyVisitor new ].
 	      
 	GtRrWorkerApplyChangeCompletedSignal new
 		initializeFromOmbuEntry: anOmbuEntry;
 		remoteAddressString: aRemoteAddressString;
 		workerId: self uid;
+		applied: shouldApply;
 		emit.
 ]
 
@@ -544,6 +570,22 @@ GtRrWorker >> sendHeartbeat [
 ]
 
 { #category : #private }
+GtRrWorker >> shouldApply: anOmbuEntry with: sessionIds [
+	| omReference localNumber |
+	
+	omReference := anOmbuEntry tagAt: #self.
+	localNumber := [ omReference localName asNumber ]
+		on: Error
+		do: [ :ex | ^ true ].
+	^ sessionIds noneSatisfy: [ :sessionId | | idNumber |
+		idNumber := [ sessionId localName asNumber ]
+			on: Error
+			do: [ :ex | nil ].
+		omReference globalName = sessionId globalName and:
+		[ localNumber <= idNumber ] ]
+]
+
+{ #category : #private }
 GtRrWorker >> stackString [
 
 	^ String streamContents: [ :stream |
@@ -686,77 +728,58 @@ GtRrWorker >> stopReadProcess [
 ]
 
 { #category : #private }
-GtRrWorker >> syncChanges: aCollectionOfChanges remoteAddress: aRemoteAddressString eventsSize: eventsSize [
-	"Apply the given list of changes.
-	Changes are encoded as an array of OmEntries."
-
-	GtRrWorkerApplyChangesStartingSignal new
-		remoteAddressString: aRemoteAddressString;
-		workerId: self uid;
-		emit.
-		
-	aCollectionOfChanges do: [ :anOmbuEntry |
-		self 
-			applyOmbuEntry: anOmbuEntry
-			remoteAddressString: aRemoteAddressString  ].
-		
-	GtRrWorkerApplyChangesCompletedSignal new
-		remoteAddressString: aRemoteAddressString;
-		workerId: self uid;
-		encodedEventsSize: eventsSize;
-		eventsCount: aCollectionOfChanges size;
-		emit.
-]
-
-{ #category : #private }
 GtRrWorker >> syncChangesFromFile: aFileReference [
 	"Load the changes from the specified file.
-	The changes are encoded as an array of OmEntries."
-	| entries encodedEvents |
+	The changes are encoded as an sequence of OmEntries."
+	| imageSyncEntries eventsCount |
 
-	encodedEvents := aFileReference asFileReference contents.
-	entries  := self 
-		unplayedEventsIn: (STON fromString: encodedEvents)
-		remoteAddress: aFileReference fullName.
-		
-	self 
-		syncChanges: entries
-		remoteAddress: aFileReference fullName 
-		eventsSize: aFileReference asFileReference size.
-		
-	^ entries
+	GtRrWorkerApplyChangesStartingSignal new
+		remoteAddressString: aFileReference fullName;
+		workerId: self uid;
+		emit.
+	imageSyncEntries := GtRrFileImageSync new entriesFile: aFileReference.
+	eventsCount := self applyImageSyncEntries: imageSyncEntries 
+		addressString: aFileReference fullName.
+	GtRrWorkerApplyChangesCompletedSignal new
+		remoteAddressString: aFileReference fullName;
+		workerId: self uid;
+		encodedEventsSize: aFileReference size;
+		eventsCount: eventsCount;
+		emit.
+	^ imageSyncEntries
 ]
 
 { #category : #private }
-GtRrWorker >> syncChangesFromServerWith: aPharoLinkApplication [ 
-	| events remoteAddressString |
+GtRrWorker >> syncChangesFromServerWith: aConnection [ 
+	| imageSyncEntries eventsCount |
 
 	(attributes at: #changesSync ifAbsent: [ false ]) ifFalse: [ ^ #() ].
-	remoteAddressString := aPharoLinkApplication remoteAddressString.
 
-	events := self 
-		unplayedEventsIn: (self retrieveChangesFromServerWith:  aPharoLinkApplication)
-		remoteAddress: remoteAddressString.
-
-	self 
-		syncChanges: events
-		remoteAddress: remoteAddressString 
-		eventsSize: events size.
-		
-	^ events
+	GtRrWorkerApplyChangesStartingSignal new
+		remoteAddressString: aConnection remoteAddressString;
+		workerId: self uid;
+		emit.
+	imageSyncEntries := self retrieveChangesFromServerWith:  aConnection.
+	eventsCount := self applyImageSyncEntries: imageSyncEntries 
+		addressString: aConnection remoteAddressString.
+	GtRrWorkerApplyChangesCompletedSignal new
+		remoteAddressString: aConnection remoteAddressString;
+		workerId: self uid;
+		encodedEventsSize: imageSyncEntries serializedSize;
+		eventsCount: eventsCount;
+		emit.
+	^ imageSyncEntries
 ]
 
 { #category : #private }
-GtRrWorker >> syncChangesWith: aPharoLinkApplication [
-	| serverEvents fileEvents |
+GtRrWorker >> syncChangesWith: aConnection [
+	| changesSync changesFile |
 
-	serverEvents := fileEvents := #().
 	(attributes at: #changesSync ifAbsent: [ false ])
-		ifTrue: [ serverEvents := self syncChangesFromServerWith: aPharoLinkApplication ].
-	attributes
-		at: #changesFile
-		ifPresent: [ :filename | fileEvents := self syncChangesFromFile: filename asFileReference ].
-	^ serverEvents, fileEvents
+		ifTrue: [ changesSync := self syncChangesFromServerWith: aConnection ].
+	attributes at: #changesFile
+		ifPresent: [ :filename | changesFile := self syncChangesFromFile: filename asFileReference ].
+	^ { changesSync. changesFile. }
 ]
 
 { #category : #accessing }
@@ -780,27 +803,6 @@ GtRrWorker >> uid [
 { #category : #accessing }
 GtRrWorker >> uid: anObject [
 	uid := anObject
-]
-
-{ #category : #private }
-GtRrWorker >> unplayedEventsIn: events remoteAddress: remoteAddressString [
-	| ids index unplayed |
-
-	GtRrWorkerFilterChangesStartingSignal new
-		remoteAddressString: remoteAddressString;
-		workerId: self uid;
-		emit.
-	"Events are in chronological order"
-	ids := GtRrChangesSync default sessionHistory collect: #shortName as: Set.
-	index := events size.
-	[ index > 0 and: [ (ids includes: ((events at: index) tagAt: #self) shortName) not ] ]
-		whileTrue: [ index := index - 1 ].
-	unplayed := events copyFrom: index+1 to: events size.
-	GtRrWorkerFilterChangesCompletedSignal new
-		remoteAddressString: remoteAddressString;
-		workerId: self uid;
-		emit.
-	^ unplayed
 ]
 
 { #category : #private }

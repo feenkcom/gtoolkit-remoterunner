@@ -226,6 +226,37 @@ GtRrWorkerExamples >> workerInImage [
 ]
 
 { #category : #examples }
+GtRrWorkerExamples >> workerShouldApplyEntries [
+	"Check the behaviour of {{gtMethod:GtRrWorker>>#shouldApply:with:|}}"
+	<gtExample>
+	| sessionIds sessionId worker omEntry omReference |
+
+	sessionIds := GtRrChangesSync default sessionHistory.
+	sessionId := sessionIds detect: [ :anOmReference | | localNumber |
+			localNumber := [ anOmReference localName asNumber ]
+				on: Error
+				do: [ :ex | 0 ].
+			localNumber > 1 ]
+		ifFound: [ :anOmReference | anOmReference ]
+		ifNone: [ self error: 'Unexpected sessionIds' ].
+	worker := GtRrWorker new.
+	omEntry := OmEntry new initializeWithContent: nil.
+
+	omReference := sessionId copy.
+	omReference initializeWithLocalName: '1' globalName: omReference globalName.
+	omEntry tags at: #self put: omReference.
+	self deny: (worker shouldApply: omEntry with: sessionIds).
+	
+	omReference initializeWithLocalName: (sessionId localName asNumber + 1) asString globalName: omReference globalName.
+	omEntry tags at: #self put: omReference.
+	self assert: (worker shouldApply: omEntry with: sessionIds).
+
+	omReference initializeWithLocalName: sessionId localName globalName: UUID new asString.
+	omEntry tags at: #self put: omReference.
+	self assert: (worker shouldApply: omEntry with: sessionIds).
+]
+
+{ #category : #examples }
 GtRrWorkerExamples >> workerStartupScripts [
 	<gtExample>
 	<return: #GtRrWorkerExamples>

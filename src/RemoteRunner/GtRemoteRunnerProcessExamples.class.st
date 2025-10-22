@@ -70,12 +70,16 @@ GtRemoteRunnerProcessExamples >> changesSyncRetrieval [
 	"Demonstrate getting changes to a worker from the server"
 	<gtExample>
 	<after: #stopRunnersAndWorkers>
-	<return: #SubclassResponsibility>
-	| entry semaphore worker events receivedEvents |
+	| entry semaphore worker events testId logger |
 
 	self setUp.
 	self ignoreWorkerExamples ifTrue: [ ^ nil ].
-	entry := OmEntry content: (EpExpressionEvaluation expression: '4+3').
+	testId := UUID new asString36.
+	entry := OmEntry content: (EpExpressionEvaluation expression: 
+'| signal |
+signal := GtRrExampleStringSignal new.
+signal properties at: #testId put: ', testId printString, '.
+signal message: ''changesSyncRetrieval''; emit').
 	entry tags at: #self put: (OmReference globalName: 'test' localName: '1').
 	events := GtRrImageSyncEvents new
 			sessionHistory: GtRrChangesSync default sessionHistory;
@@ -87,13 +91,20 @@ GtRemoteRunnerProcessExamples >> changesSyncRetrieval [
 		changesSyncEvents: events;
 		start.
 
+	logger := MemoryLogger new.
+	logger startFor: GtRrExampleStringSignal.
 	worker := self workerForRunner: remoteRunner.
 	worker start.
 	workers := {worker}.
 	worker attributes at: #changesSync put: true.
 	worker connectionStrategy
-		connectDuring: [ :application | receivedEvents := worker syncChangesWith: application ].
-	self assert: receivedEvents equals: events events
+		connectDuring: [ :application | worker syncChangesWith: application ].
+	logger stop.
+	self assert: (logger recordings anySatisfy: [ :each |
+		each message = 'changesSyncRetrieval' and:
+		[ each properties at: #testId
+			ifPresent: [ :id | id = testId ]
+			ifAbsent: [ false ] ] ]).
 ]
 
 { #category : #examples }
@@ -1234,7 +1245,7 @@ GtRemoteRunnerProcessExamples >> workerForRunner: aGtRemoteRunner [
 GtRemoteRunnerProcessExamples >> writeChangesSyncFileTestMethodTo: changesFile [ 
 
 	changesFile writeStreamDo: [ :stream | stream <<
-'[OmEntry {
+'OmEntry {
 	#tags : {
 		#author : ''AlistairGrant'',
 		#time : DateAndTime [ ''2024-05-23T14:55:58.440449+02:00'' ],
@@ -1255,6 +1266,5 @@ GtRemoteRunnerProcessExamples >> writeChangesSyncFileTestMethodTo: changesFile [
 		}
 	}
 }
-]
 ' ]
 ]
