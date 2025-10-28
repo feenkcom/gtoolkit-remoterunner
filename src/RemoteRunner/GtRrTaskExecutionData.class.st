@@ -107,6 +107,14 @@ GtRrTaskExecutionData >> externalMemReport [
 ]
 
 { #category : #accessing }
+GtRrTaskExecutionData >> failedTaskExecutionData [
+	 self additionalData ifNil: [ ^ nil ].
+	 
+	^ self additionalData 
+		includesKey: #failedTaskExecutionData
+]
+
+{ #category : #accessing }
 GtRrTaskExecutionData >> gapBetweenEndTimeAndReceivingResults [
 	^ self endTime 
 		ifNotNil: [ :anEndTime |
@@ -127,6 +135,20 @@ GtRrTaskExecutionData >> gtSpecificSizeInMemory [
 			skipNil;
 			skipSymbols;
 			computeMemorySizeFor: self)
+]
+
+{ #category : #'gt - extensions' }
+GtRrTaskExecutionData >> gtViewAdditionalDataFor: aView [
+	<gtView>
+
+	self additionalData ifNil: [ ^ aView empty ].
+	self additionalData ifEmpty: [ ^ aView empty ].
+	
+	^ aView forward
+		title: 'Additional Data';
+		priority: 40;
+		object: [ self additionalData ];
+		view: #gtLiveFor:
 ]
 
 { #category : #'gt - extensions' }
@@ -176,6 +198,14 @@ GtRrTaskExecutionData >> hasErrors [
 	^ errorDetails isNotNil
 ]
 
+{ #category : #testing }
+GtRrTaskExecutionData >> hasFailedTaskData [
+	 self additionalData ifNil: [ ^ false ].
+	 
+	^ self additionalData 
+		includesKey: #failedTaskExecutionData
+]
+
 { #category : #initialization }
 GtRrTaskExecutionData >> initialize [
 
@@ -201,6 +231,24 @@ GtRrTaskExecutionData >> isLocalWorker [
 GtRrTaskExecutionData >> jobId [
 
 	^ workerAttributes at: #workerJobId
+]
+
+{ #category : #accessing }
+GtRrTaskExecutionData >> numberOfPreviousRetries [
+	^ additionalData 
+		at: #failedTaskExecutionData
+		ifPresent: [ :failedData |
+			1 + failedData numberOfPreviousRetries ]
+		ifAbsent: [ 0 ]
+]
+
+{ #category : #accessing }
+GtRrTaskExecutionData >> previousRetriesExecutionData [
+	^ additionalData 
+		at: #failedTaskExecutionData
+		ifPresent: [ :failedData |
+			{failedData} , failedData previousRetriesExecutionData ]
+		ifAbsent: [ #() ]
 ]
 
 { #category : #accessing }
