@@ -630,8 +630,10 @@ GtRrStompMqProcessor >> startMqListener [
 		"Ask the owner to take over.
 		The receiver should either be shut down or reconnected.
 		Either way, this process should terminate once the processing is complete, and not continue to be used."
-		owner ifNotNil: [ :anOwner |
-			anOwner handleMqListenerException: closingException ].
+		(closingException notNil and:
+		[ mqClient imageSessionChanged not ]) ifTrue:
+			[ owner ifNotNil: [ :anOwner |
+				anOwner handleMqListenerException: closingException ] ].
 		 ] forkNamed: 'GtRrMq message listener'.
 ]
 
