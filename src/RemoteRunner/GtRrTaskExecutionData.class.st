@@ -235,6 +235,7 @@ GtRrTaskExecutionData >> jobId [
 
 { #category : #accessing }
 GtRrTaskExecutionData >> numberOfPreviousRetries [
+	additionalData ifNil: [ ^ 0 ].
 	^ additionalData 
 		at: #failedTaskExecutionData
 		ifPresent: [ :failedData |
@@ -244,6 +245,7 @@ GtRrTaskExecutionData >> numberOfPreviousRetries [
 
 { #category : #accessing }
 GtRrTaskExecutionData >> previousRetriesExecutionData [
+	additionalData ifNil: [ ^ #() ].
 	^ additionalData 
 		at: #failedTaskExecutionData
 		ifPresent: [ :failedData |
