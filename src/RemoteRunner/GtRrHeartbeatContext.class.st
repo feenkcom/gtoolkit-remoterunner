@@ -54,13 +54,18 @@ GtRrHeartbeatContext >> remoteRunner: anObject [
 { #category : #private }
 GtRrHeartbeatContext >> scheduleTimeoutContext [
 	"Same as above, but we don't want every poll logged"
-	| future |
+	| promise |
 
-	future := [ self timeoutContext ] future.
-	future onFailureDo: [ :anError |
-		anError freeze.
-		[ self error: anError printString ] fork ]
-
+	promise := [ self timeoutContext ] asAsyncForkedFuture 
+		await: (AsyncFutureExecutionConfiguration new 
+			lowPriority;
+			customGroup: #RunnerTimeoutManager).
+		
+	promise 
+		then: [ ]
+		otherwise:  [ :anError |
+			anError freeze.
+			[ self error: anError printString ] fork ]
 ]
 
 { #category : #accessing }
