@@ -63,18 +63,23 @@ GtRrContext >> remoteRunner [
 
 { #category : #private }
 GtRrContext >> scheduleTimeoutContext [
-	| future |
+	| promise |
 
 	self remoteRunner announceAndLog: (GtRrTimeoutScheduledAnnouncement  new
 		context: self).
-	future := [ 
+	promise := [ 
 		self remoteRunner announceAndLog: (GtRrTimeoutStartedAnnouncement context: self).
 		self timeoutContext.
-		self remoteRunner announceAndLog: (GtRrTimeoutCompletedAnnouncement context: self) ] future.
-	future onFailureDo: [ :anError |
-		anError freeze.
-		[ self error: anError printString ] fork ]
-
+		self remoteRunner announceAndLog: (GtRrTimeoutCompletedAnnouncement context: self) ] asAsyncForkedFuture 
+		await: (AsyncFutureExecutionConfiguration new 
+			lowPriority;
+			customGroup: #RunnerTimeoutManager).
+			
+	promise 
+		then: [ ]
+		otherwise:  [ :anError |
+			anError freeze.
+			[ self error: anError printString ] fork ]
 ]
 
 { #category : #'ston persistence' }

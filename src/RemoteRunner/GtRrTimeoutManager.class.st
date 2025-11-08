@@ -88,13 +88,18 @@ GtRrTimeoutManager >> remoteRunner: anObject [
 { #category : #private }
 GtRrTimeoutManager >> scheduleCheckTimeouts [
 	"Schedule a timeout check to be run"
-	| future |
+	| promise |
 
 	remoteRunner isRunning ifFalse: [ ^ self ].
-	future := [ self checkTimeouts ] future.
-	future onFailureDo: [ :anError |
-		anError freeze.
-		[ self error: anError printString ] fork ]
+	promise := [ self checkTimeouts ] asAsyncForkedFuture 
+		await: (AsyncFutureExecutionConfiguration new 
+			lowPriority;
+			customGroup: #RunnerTimeoutManager).
+	promise 
+		then: [ ]
+		otherwise:  [ :anError |
+			anError freeze.
+			[ self error: anError printString ] fork ]
 ]
 
 { #category : #accessing }
