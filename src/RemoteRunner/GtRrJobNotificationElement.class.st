@@ -22,7 +22,7 @@ Class {
 
 { #category : #accessing }
 GtRrJobNotificationElement >> actOnElementDetached [
-	self clearNotification.
+	super actOnElementDetached.
 	self clearContent.
 ]
 
