@@ -15,7 +15,10 @@ GtRrRunnerQuitMessage >> processMq: mqMessage processor: aGtRrProcessor for: anO
 	GtRrWorkerOperationShutdownAnnouncement new 
 		reason: 'Quit received: quit message from runner';
 		emit.
-	ConnectionClosed signal.
+	Stdio stdout
+		<< 'Quit received: quit message from runner';
+		lf; flush.
+	Smalltalk snapshot: false andQuit: true.
 ]
 
 { #category : #accessing }
