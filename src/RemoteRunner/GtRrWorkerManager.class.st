@@ -101,6 +101,19 @@ GtRrWorkerManager >> changesSync: aBoolean [
 ]
 
 { #category : #accessing }
+GtRrWorkerManager >> commandLine [
+	"Answer a string representing the command line that will be used to start the workers"
+
+	^ String streamContents: [ :stream |
+		stream
+			<< settings serverExecutable fullName;
+			space.
+		(self newWorkerLocalProcessArgumentsFor: settings)
+			do: [ :arg | stream << arg ]
+			separatedBy: [ stream space ] ].
+]
+
+{ #category : #accessing }
 GtRrWorkerManager >> connectionStrategyId [
 	^ connectionStrategyId
 ]
@@ -108,6 +121,16 @@ GtRrWorkerManager >> connectionStrategyId [
 { #category : #accessing }
 GtRrWorkerManager >> connectionStrategyId: anObject [
 	connectionStrategyId := anObject
+]
+
+{ #category : #ui }
+GtRrWorkerManager >> gtCommandLineFor: aView [
+	<gtView>
+
+	^ aView text
+		title: 'Command Line';
+		priority: 20;
+		text: [ self humanReadableCommandLine ]
 ]
 
 { #category : #ui }
@@ -133,6 +156,21 @@ GtRrWorkerManager >> gtSummaryFor: aView [
 		  column: #Value text: [ :item | item second ];
 		  send: [ :item | item last ];
 		  actionUpdateButton
+]
+
+{ #category : #accessing }
+GtRrWorkerManager >> humanReadableCommandLine [
+	"Answer a string representing the command line that will be used to start the workers split over multiple lines.
+	No attempt is made to provide shell line continuation."
+
+	^ String streamContents: [ :stream |
+		stream
+			<< settings serverExecutable fullName.
+		(self newWorkerLocalProcessArgumentsFor: settings) do: [ :arg | 
+			(arg first = $-)
+				ifTrue: [ stream cr; tab ]
+				ifFalse: [ stream space ].
+			stream << arg ] ].
 ]
 
 { #category : #initialize }

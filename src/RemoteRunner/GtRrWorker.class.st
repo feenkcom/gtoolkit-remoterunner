@@ -112,6 +112,22 @@ GtRrWorker class >> logFilenameFor: aGtRrWorker [
 	^ 'gtrrworker-' , pid asString , '.log'.
 ]
 
+{ #category : #debugging }
+GtRrWorker class >> lslhImageDir [
+	"Answer a directory list of the image directory.
+	Typically used for debugging remote workers."
+	 | proc command |
+
+	 command := OSPlatform current isUnix ifTrue: 
+	 	[ 'ls -lh' ]
+	 ifFalse:
+	 	[ 'dir' ].
+	 proc := GtSubprocessWithInMemoryOutput new shellCommand: command.
+	 proc runAndWait.
+	 proc isSuccess ifFalse: [ ^ 'Failed to run command' ].
+	 ^ proc stdout
+]
+
 { #category : #private }
 GtRrWorker class >> newPharoApplication: aString [
 
