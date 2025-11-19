@@ -573,10 +573,7 @@ GtRrWorker >> runWorkerStartupScripts [
 	self class methods
 		select: [ :method | method hasPragmaNamed: #gtWorkerStartupScript ]
 		thenDo: [ :method | 
-			method
-				receiver: self
-				withArguments: #()
-				executeMethod: method ]
+			method valueWithReceiver: self ]
 ]
 
 { #category : #private }
