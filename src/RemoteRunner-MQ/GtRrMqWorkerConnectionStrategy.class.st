@@ -11,7 +11,7 @@ Class {
 		'runnerControlChannelDefinition',
 		'taskQueueDefinition'
 	],
-	#category : #'RemoteRunner-MQ-Worker'
+	#category : 'RemoteRunner-MQ-Worker'
 }
 
 { #category : #commands }
@@ -279,6 +279,11 @@ GtRrMqWorkerConnectionStrategy >> strategyName [
 GtRrMqWorkerConnectionStrategy >> taskDone: aTaskContext with: anObject [
 	| taskDoneMessage currentAckFrame |
 
+	GtRrWorkerTaskCompletedSignal new
+		taskId: aTaskContext taskId;
+		message: 'Success: ' , anObject printString;
+		emit.
+	
 	taskDoneMessage := GtRrWorkerTaskDoneMessage new
 		taskContextId: aTaskContext taskContextId;
 		workerId: worker uid;
@@ -297,7 +302,12 @@ GtRrMqWorkerConnectionStrategy >> taskDone: aTaskContext with: anObject [
 { #category : #private }
 GtRrMqWorkerConnectionStrategy >> taskFailed: aTaskContext with: anError [
 	| taskFailedMessage executionData |
-
+	
+	GtRrWorkerTaskCompletedSignal new
+		taskId: aTaskContext taskId;
+		message: 'ERROR: ' , anError printString;
+		emit.
+		
 	executionData := self executionDataFromTaskContext:  aTaskContext.
 	executionData errorDetails: (GtRrErrorDetails new
 						errorMessage: (anError messageText ifEmpty:

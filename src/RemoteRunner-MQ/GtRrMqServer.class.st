@@ -10,7 +10,7 @@ Class {
 		'taskResultDefinition',
 		'taskQueueDefinition'
 	],
-	#category : #'RemoteRunner-MQ-Runner'
+	#category : 'RemoteRunner-MQ-Runner'
 }
 
 { #category : #accessing }
