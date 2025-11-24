@@ -5,7 +5,7 @@ Class {
 		'totalGcTime',
 		'initialGcDuration'
 	],
-	#category : #'RemoteRunner-Tests'
+	#category : 'RemoteRunner-Tests'
 }
 
 { #category : #serialization }

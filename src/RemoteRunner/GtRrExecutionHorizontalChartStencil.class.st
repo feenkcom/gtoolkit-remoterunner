@@ -16,7 +16,7 @@ Class {
 		'leftPadding',
 		'selectionTransformation'
 	],
-	#category : #'RemoteRunner-UI'
+	#category : 'RemoteRunner-UI'
 }
 
 { #category : #accessing }

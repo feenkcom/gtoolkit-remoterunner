@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'gtMessagePrintString'
 	],
-	#category : #'RemoteRunner-Signals'
+	#category : 'RemoteRunner-Signals'
 }
 
 { #category : #accessing }

@@ -8,7 +8,7 @@ Class {
 		'totalChecksCount',
 		'erroredChecksCount'
 	],
-	#category : #'RemoteRunner-Jobs-Notifications'
+	#category : 'RemoteRunner-Jobs-Notifications'
 }
 
 { #category : #adding }

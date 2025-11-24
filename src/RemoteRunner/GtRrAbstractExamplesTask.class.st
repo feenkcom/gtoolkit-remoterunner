@@ -1,7 +1,7 @@
 Class {
 	#name : #GtRrAbstractExamplesTask,
 	#superclass : #GtRrTask,
-	#category : #'RemoteRunner-Tests'
+	#category : 'RemoteRunner-Tests'
 }
 
 { #category : #accessing }
@@ -132,16 +132,16 @@ GtRrAbstractExamplesTask >> isExamplesTask [
 ]
 
 { #category : #testing }
+GtRrAbstractExamplesTask >> isSuccessResult: aPharoLinkTestCaseResult [
+	^ aPharoLinkTestCaseResult isSuccess "or: [ 
+		aPharoLinkTestCaseResult isSkipped ]"
+]
+
+{ #category : #testing }
 GtRrAbstractExamplesTask >> isSUnitTask [
 	"Answer a boolean indicating whether the receiver is for running SUnit tests"
 
 	^ false
-]
-
-{ #category : #testing }
-GtRrAbstractExamplesTask >> isSuccessResult: aPharoLinkTestCaseResult [
-	^ aPharoLinkTestCaseResult isSuccess "or: [ 
-		aPharoLinkTestCaseResult isSkipped ]"
 ]
 
 { #category : #'accessing - dynamic' }
@@ -226,7 +226,7 @@ GtRrAbstractExamplesTask >> taskNotExecutedResult [
 			className: assoc key asSymbol 
 			selector: assoc value asSymbol
 			startTimestamp: executionData startTime)
-		  	initializeExceptionClass: Error
+		  	initializeExceptionClass: GtRrUnableToRunTestError
 		  	messageText: 'No Result'
 		  	trace: ''
 		  	additionalData:  executionData additionalData ]

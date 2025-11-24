@@ -7,7 +7,7 @@ Class {
 		'runner',
 		'process'
 	],
-	#category : #'RemoteRunner-Examples'
+	#category : 'RemoteRunner-Examples'
 }
 
 { #category : #asserting }
@@ -80,6 +80,24 @@ GtRrWorkerExamples >> commandLineWithChanges [
 ]
 
 { #category : #examples }
+GtRrWorkerExamples >> commandLineWithoutAttributes [
+	"Demonstrate parsing the Remote Runner Worker command line"
+	<gtExample>
+	<return: #ClapNamedMatch>
+	| commandLine |
+
+	commandLine := GtRrWorker commandLineCommand
+			match: #('remoteRunnerWorker' '--log' '--serverSocketAddress' '7084').
+
+	self assert: (commandLine at: #log) value equals: true.
+	self
+		assert: ((commandLine at: #serverSocketAddress) at: #address) value
+		equals: '7084'.
+
+	^ commandLine
+]
+
+{ #category : #examples }
 GtRrWorkerExamples >> commandLineWithStrategy [
 	"Demonstrate parsing the Remote Runner Worker command line"
 
@@ -106,24 +124,6 @@ GtRrWorkerExamples >> commandLineWithStrategy [
 
 	self assert: connectionStrategyId equals: #single.
 
-
-	^ commandLine
-]
-
-{ #category : #examples }
-GtRrWorkerExamples >> commandLineWithoutAttributes [
-	"Demonstrate parsing the Remote Runner Worker command line"
-	<gtExample>
-	<return: #ClapNamedMatch>
-	| commandLine |
-
-	commandLine := GtRrWorker commandLineCommand
-			match: #('remoteRunnerWorker' '--log' '--serverSocketAddress' '7084').
-
-	self assert: (commandLine at: #log) value equals: true.
-	self
-		assert: ((commandLine at: #serverSocketAddress) at: #address) value
-		equals: '7084'.
 
 	^ commandLine
 ]

@@ -11,7 +11,7 @@ Class {
 		'retryTasks',
 		'workerConnection'
 	],
-	#category : #'RemoteRunner-Runner-State'
+	#category : 'RemoteRunner-Runner-State'
 }
 
 { #category : #'instance creation' }
