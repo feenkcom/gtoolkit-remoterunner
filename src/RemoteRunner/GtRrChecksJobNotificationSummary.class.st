@@ -3,7 +3,7 @@ Class {
 	#superclass : #GtRrJobNotificationSummary,
 	#instVars : [
 		'failedLabel',
-		'unableToCompleteLabel'
+		'uncompletedLabel'
 	],
 	#category : 'RemoteRunner-Jobs-Notifications'
 }
@@ -24,7 +24,7 @@ GtRrChecksJobNotificationSummary >> createFailedLabel [
 ]
 
 { #category : #'building - widgets' }
-GtRrChecksJobNotificationSummary >> createUnableToCompleteLabel [
+GtRrChecksJobNotificationSummary >> createUncompletedLabel [
 	^(BrLabel new)
 		aptitude: BrGlamorousLabelAptitude;
 		beSmallSize;
@@ -44,19 +44,19 @@ GtRrChecksJobNotificationSummary >> initializeResultLabels [
 		addChild: (notStartedLabel := self createNotStartedLabel);
 		addChild: (erroredLabel := self createErrorLabel);
 		addChild: (failedLabel := self createFailedLabel);
-		addChild: (unableToCompleteLabel := self createUnableToCompleteLabel);
+		addChild: (uncompletedLabel := self createUncompletedLabel);
 		addChild: (successfulLabel := self createSuccessLabel)
 ]
 
 { #category : #updating }
 GtRrChecksJobNotificationSummary >> updateSummaryContent [
-	| successfulCounter notStartedCounter failedCounter erroredCounter unableToCompleteCounter |
+	| successfulCounter notStartedCounter failedCounter erroredCounter uncompletedCounter |
 	
 	successfulCounter := 0.
 	notStartedCounter := 0.
 	failedCounter := 0.
 	erroredCounter := 0.
-	unableToCompleteCounter := 0.
+	uncompletedCounter := 0.
 	
 	self notifications
 		do: [ :aNotification | 
@@ -68,12 +68,12 @@ GtRrChecksJobNotificationSummary >> updateSummaryContent [
 				+ aNotification failedChecksCount.
 			erroredCounter := erroredCounter 
 				+ aNotification erroredChecksCount.
-			unableToCompleteCounter := unableToCompleteCounter
-				+ aNotification unableToCompleteChecksCount ].
+			uncompletedCounter := uncompletedCounter
+				+ aNotification uncompletedChecksCount ].
 
 	self updateLabel: erroredLabel withCount: erroredCounter.
 	self updateLabel: failedLabel withCount: failedCounter.
 	self updateLabel: successfulLabel withCount: successfulCounter.
 	self updateLabel: notStartedLabel withCount: notStartedCounter.
-	self updateLabel: unableToCompleteLabel withCount: unableToCompleteCounter.
+	self updateLabel: uncompletedLabel withCount: uncompletedCounter.
 ]

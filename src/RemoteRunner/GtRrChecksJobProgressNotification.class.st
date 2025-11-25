@@ -7,7 +7,7 @@ Class {
 		'successfulChecksCount',
 		'totalChecksCount',
 		'erroredChecksCount',
-		'unableToRunChecksCount'
+		'uncompletedChecksCount'
 	],
 	#category : 'RemoteRunner-Jobs-Notifications'
 }
@@ -26,7 +26,7 @@ GtRrChecksJobProgressNotification >> clearSummaryDetails [
 	failedChecksCount := 0.
 	skippedChecksCount := 0.
 	successfulChecksCount := 0.
-	unableToRunChecksCount := 0.
+	uncompletedChecksCount := 0.
 ]
 
 { #category : #'accessing - results' }
@@ -62,15 +62,15 @@ GtRrChecksJobProgressNotification >> constructStates [
 			itemCount: self erroredChecksCount;
 			itemsComputation: [ self erroredChecks ].
 		(GtRrDataGroupState forNotification: self)
+			name: 'Uncompleted';
+			testCaseState: GtPharoMethodTestCaseUncompleteState;
+			itemCount: self uncompletedChecksCount;
+			itemsComputation: [ self unableToCompleteChecks ].
+		(GtRrDataGroupState forNotification: self)
 			name: 'Skipped';
 			testCaseState: GtPharoMethodTestCaseSkippedState;
 			itemCount: self skippedChecksCount;
 			itemsComputation: [ self job skippedExamples ].
-		(GtRrDataGroupState forNotification: self)
-			name: 'Uncompleted';
-			testCaseState: GtPharoMethodTestCaseUnableToCompleteState;
-			itemCount: self unableToCompleteChecksCount;
-			itemsComputation: [ self unableToCompleteChecks ].
 		(GtRrDataGroupState forNotification: self)
 			name: 'Executing';
 			testCaseState: GtPharoMethodExecutingState;
@@ -81,7 +81,7 @@ GtRrChecksJobProgressNotification >> constructStates [
 { #category : #'accessing - results' }
 GtRrChecksJobProgressNotification >> erroredChecks [
 	^ self collectChecksMatching: [ :aResult |
-			aResult isError or: [ aResult isWarning ] ]
+			aResult isErrorInCheckLogic or: [ aResult isWarning ] ]
 ]
 
 { #category : #accessing }
@@ -101,7 +101,7 @@ GtRrChecksJobProgressNotification >> executedChecksCount [
 	^ self successfulChecksCount 
 		+ self erroredChecksCount
 		+ self failedChecksCount
-		+ self unableToCompleteChecksCount
+		+ self uncompletedChecksCount
 ]
 
 { #category : #'accessing - results' }
@@ -142,8 +142,8 @@ GtRrChecksJobProgressNotification >> incrementSuccessfulChecksCountWith: anInteg
 ]
 
 { #category : #'updating - summary' }
-GtRrChecksJobProgressNotification >> incrementUnableToCompleteChecksCountWith: anInteger [ 
-	self unableToCompleteChecksCount: self unableToCompleteChecksCount + anInteger
+GtRrChecksJobProgressNotification >> incrementUncompletedChecksCountWith: anInteger [ 
+	self uncompletedChecksCount: self uncompletedChecksCount + anInteger
 ]
 
 { #category : #accessing }
@@ -162,7 +162,7 @@ GtRrChecksJobProgressNotification >> notExecutedChecksCount [
 			+ self erroredChecksCount
 			+ self failedChecksCount
 			+ self skippedChecksCount
-			+ self unableToCompleteChecksCount)
+			+ self uncompletedChecksCount)
 ]
 
 { #category : #accessing }
@@ -251,32 +251,32 @@ GtRrChecksJobProgressNotification >> unableToCompleteChecks [
 ]
 
 { #category : #accessing }
-GtRrChecksJobProgressNotification >> unableToCompleteChecksCount [
+GtRrChecksJobProgressNotification >> uncompletedChecksCount [
 
-	^ unableToRunChecksCount
+	^ uncompletedChecksCount
 ]
 
 { #category : #accessing }
-GtRrChecksJobProgressNotification >> unableToCompleteChecksCount: anInteger [
+GtRrChecksJobProgressNotification >> uncompletedChecksCount: anInteger [
 
-	unableToRunChecksCount := anInteger
+	uncompletedChecksCount := anInteger
 ]
 
 { #category : #'updating - summary' }
 GtRrChecksJobProgressNotification >> updateSummaryWithAnnouncement: anAnnouncement [
-	| completedTests  |
+	| executedTests  |
 
-	completedTests := anAnnouncement taskResult.
+	executedTests := anAnnouncement taskResult.
 	"If the task has no results it will be retried."
-	completedTests ifNil: [ ^ self ].
-	self incrementSuccessfulChecksCountWith: (completedTests count: [ :aResult | 
+	executedTests ifNil: [ ^ self ].
+	self incrementSuccessfulChecksCountWith: (executedTests count: [ :aResult | 
 		aResult isSuccess ]).
-	self incrementSkippedChecksCountWith: (completedTests count: [ :aResult | 
+	self incrementSkippedChecksCountWith: (executedTests count: [ :aResult | 
 		aResult isSkipped ]).
-	self incrementFailedChecksCountWith: (completedTests count: [ :aResult | 
+	self incrementFailedChecksCountWith: (executedTests count: [ :aResult | 
 		aResult isFailure ]).
-	self incrementErrorChecksCountWith: (completedTests count: [ :aResult | 
+	self incrementErrorChecksCountWith: (executedTests count: [ :aResult | 
 		aResult isErrorInCheckLogic or: [ aResult isWarning ] ]).
-	self incrementUnableToCompleteChecksCountWith:  (completedTests count: [ :aResult | 
+	self incrementUncompletedChecksCountWith:  (executedTests count: [ :aResult | 
 		aResult isUnableToCompleteCheckError ]).
 ]
