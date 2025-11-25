@@ -226,7 +226,7 @@ GtRrAbstractExamplesTask >> taskNotExecutedResult [
 			className: assoc key asSymbol 
 			selector: assoc value asSymbol
 			startTimestamp: executionData startTime)
-		  	initializeExceptionClass: GtRrUnableToRunTestError
+		  	initializeExceptionClass: GtRrUnableToCompleteTestError
 		  	messageText: 'No Result'
 		  	trace: ''
 		  	additionalData:  executionData additionalData ]

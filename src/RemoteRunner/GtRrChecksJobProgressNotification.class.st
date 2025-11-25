@@ -6,7 +6,8 @@ Class {
 		'skippedChecksCount',
 		'successfulChecksCount',
 		'totalChecksCount',
-		'erroredChecksCount'
+		'erroredChecksCount',
+		'unableToRunChecksCount'
 	],
 	#category : 'RemoteRunner-Jobs-Notifications'
 }
@@ -25,6 +26,7 @@ GtRrChecksJobProgressNotification >> clearSummaryDetails [
 	failedChecksCount := 0.
 	skippedChecksCount := 0.
 	successfulChecksCount := 0.
+	unableToRunChecksCount := 0.
 ]
 
 { #category : #'accessing - results' }
@@ -65,6 +67,11 @@ GtRrChecksJobProgressNotification >> constructStates [
 			itemCount: self skippedChecksCount;
 			itemsComputation: [ self job skippedExamples ].
 		(GtRrDataGroupState forNotification: self)
+			name: 'Unable to Run';
+			testCaseState: GtPharoMethodTestCaseUnableToCompleteState;
+			itemCount: self unableToCompleteChecksCount;
+			itemsComputation: [ self unableToCompleteChecks ].
+		(GtRrDataGroupState forNotification: self)
 			name: 'Executing';
 			testCaseState: GtPharoMethodExecutingState;
 			itemCount: self notExecutedChecksCount;
@@ -94,6 +101,7 @@ GtRrChecksJobProgressNotification >> executedChecksCount [
 	^ self successfulChecksCount 
 		+ self erroredChecksCount
 		+ self failedChecksCount
+		+ self unableToCompleteChecksCount
 ]
 
 { #category : #'accessing - results' }
@@ -133,6 +141,11 @@ GtRrChecksJobProgressNotification >> incrementSuccessfulChecksCountWith: anInteg
 	self successfulChecksCount: self successfulChecksCount + anInteger
 ]
 
+{ #category : #'updating - summary' }
+GtRrChecksJobProgressNotification >> incrementUnableToCompleteChecksCountWith: anInteger [ 
+	self unableToCompleteChecksCount: self unableToCompleteChecksCount + anInteger
+]
+
 { #category : #accessing }
 GtRrChecksJobProgressNotification >> job: aGtRrJob [
 	
@@ -148,7 +161,8 @@ GtRrChecksJobProgressNotification >> notExecutedChecksCount [
 		- (self successfulChecksCount 
 			+ self erroredChecksCount
 			+ self failedChecksCount
-			+ self skippedChecksCount)
+			+ self skippedChecksCount
+			+ self unableToCompleteChecksCount)
 ]
 
 { #category : #accessing }
@@ -231,6 +245,23 @@ GtRrChecksJobProgressNotification >> totalChecksCount: anInteger [
 	totalChecksCount := anInteger
 ]
 
+{ #category : #'accessing - results' }
+GtRrChecksJobProgressNotification >> unableToCompleteChecks [
+	^ self collectChecksMatching: [ :aResult | aResult isErrorInCheckLogic ]
+]
+
+{ #category : #accessing }
+GtRrChecksJobProgressNotification >> unableToCompleteChecksCount [
+
+	^ unableToRunChecksCount
+]
+
+{ #category : #accessing }
+GtRrChecksJobProgressNotification >> unableToCompleteChecksCount: anInteger [
+
+	unableToRunChecksCount := anInteger
+]
+
 { #category : #'updating - summary' }
 GtRrChecksJobProgressNotification >> updateSummaryWithAnnouncement: anAnnouncement [
 	| completedTests  |
@@ -245,5 +276,7 @@ GtRrChecksJobProgressNotification >> updateSummaryWithAnnouncement: anAnnounceme
 	self incrementFailedChecksCountWith: (completedTests count: [ :aResult | 
 		aResult isFailure ]).
 	self incrementErrorChecksCountWith: (completedTests count: [ :aResult | 
-		aResult isError or: [ aResult isWarning ] ]).
+		aResult isErrorInCheckLogic or: [ aResult isWarning ] ]).
+	self incrementUnableToCompleteChecksCountWith:  (completedTests count: [ :aResult | 
+		aResult isUnableToCompleteTestError ]).
 ]

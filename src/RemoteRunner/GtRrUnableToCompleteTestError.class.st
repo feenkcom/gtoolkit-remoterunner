@@ -1,5 +1,5 @@
 Class {
-	#name : #GtRrUnableToRunTestError,
+	#name : #GtRrUnableToCompleteTestError,
 	#superclass : #Error,
 	#category : 'RemoteRunner-Tests'
 }

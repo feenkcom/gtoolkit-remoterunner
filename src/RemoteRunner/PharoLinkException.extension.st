@@ -1,6 +1,6 @@
 Extension { #name : #PharoLinkException }
 
 { #category : #'*RemoteRunner' }
-PharoLinkException >> isUnableToRunTestError [
-	^exceptionClassName sameContentAs:  #GtRrUnableToRunTestError
+PharoLinkException >> isUnableToCompleteTestError [
+	^exceptionClassName sameContentAs:  #GtRrUnableToCompleteTestError
 ]
