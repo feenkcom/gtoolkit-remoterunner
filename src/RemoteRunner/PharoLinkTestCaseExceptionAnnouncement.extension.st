@@ -2,11 +2,11 @@ Extension { #name : #PharoLinkTestCaseExceptionAnnouncement }
 
 { #category : #'*RemoteRunner' }
 PharoLinkTestCaseExceptionAnnouncement >> isErrorInCheckLogic [
-	^ self isError and: [self isUnableToCompleteTestError not ]
+	^ self isError and: [self isUnableToCompleteCheckError not ]
 ]
 
 { #category : #'*RemoteRunner' }
-PharoLinkTestCaseExceptionAnnouncement >> isUnableToCompleteTestError [
+PharoLinkTestCaseExceptionAnnouncement >> isUnableToCompleteCheckError [
 	^ self primaryException notNil and: [
-		self primaryException isUnableToCompleteTestError ]
+		self primaryException isUnableToCompleteCheckError ]
 ]

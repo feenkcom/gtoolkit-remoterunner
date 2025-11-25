@@ -4,3 +4,8 @@ Extension { #name : #PharoLinkTestCaseEndAnnouncement }
 PharoLinkTestCaseEndAnnouncement >> isErrorInCheckLogic [
 	^ false
 ]
+
+{ #category : #'*RemoteRunner' }
+PharoLinkTestCaseEndAnnouncement >> isUnableToCompleteCheckError [
+	^ false
+]

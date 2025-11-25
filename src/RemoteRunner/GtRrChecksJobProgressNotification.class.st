@@ -67,7 +67,7 @@ GtRrChecksJobProgressNotification >> constructStates [
 			itemCount: self skippedChecksCount;
 			itemsComputation: [ self job skippedExamples ].
 		(GtRrDataGroupState forNotification: self)
-			name: 'Unable to Run';
+			name: 'Uncompleted';
 			testCaseState: GtPharoMethodTestCaseUnableToCompleteState;
 			itemCount: self unableToCompleteChecksCount;
 			itemsComputation: [ self unableToCompleteChecks ].
@@ -278,5 +278,5 @@ GtRrChecksJobProgressNotification >> updateSummaryWithAnnouncement: anAnnounceme
 	self incrementErrorChecksCountWith: (completedTests count: [ :aResult | 
 		aResult isErrorInCheckLogic or: [ aResult isWarning ] ]).
 	self incrementUnableToCompleteChecksCountWith:  (completedTests count: [ :aResult | 
-		aResult isUnableToCompleteTestError ]).
+		aResult isUnableToCompleteCheckError ]).
 ]
