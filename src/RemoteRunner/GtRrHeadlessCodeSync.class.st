@@ -1,5 +1,5 @@
 Class {
 	#name : #GtRrHeadlessCodeSync,
 	#superclass : #GtRrCodeSync,
-	#category : 'RemoteRunner-Runner-CodeSync'
+	#category : #'RemoteRunner-Runner-CodeSync'
 }

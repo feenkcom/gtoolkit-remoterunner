@@ -1,6 +1,6 @@
 Trait {
 	#name : #TGtRrExampleHelp,
-	#category : 'RemoteRunner-Examples'
+	#category : #'RemoteRunner-Examples'
 }
 
 { #category : #semaphores }

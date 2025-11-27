@@ -6,7 +6,7 @@ Note that the message is currently not deleted from the file system.
 Class {
 	#name : #GtRrS3Message,
 	#superclass : #GtRrUrlMessage,
-	#category : 'RemoteRunner-Model'
+	#category : #'RemoteRunner-Model'
 }
 
 { #category : #accessing }

@@ -6,7 +6,7 @@ Class {
 		'remoteAddressString',
 		'workerAttributes'
 	],
-	#category : 'RemoteRunner-Announcements'
+	#category : #'RemoteRunner-Announcements'
 }
 
 { #category : #accessing }

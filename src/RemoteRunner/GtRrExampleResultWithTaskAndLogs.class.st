@@ -5,7 +5,7 @@ Class {
 		'result',
 		'logs'
 	],
-	#category : 'RemoteRunner-Reports'
+	#category : #'RemoteRunner-Reports'
 }
 
 { #category : #accessing }

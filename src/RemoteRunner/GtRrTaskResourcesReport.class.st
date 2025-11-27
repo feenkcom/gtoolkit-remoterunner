@@ -5,7 +5,7 @@ Class {
 		'meminfoReport',
 		'externalMemReport'
 	],
-	#category : 'RemoteRunner-Tasks'
+	#category : #'RemoteRunner-Tasks'
 }
 
 { #category : #serialization }

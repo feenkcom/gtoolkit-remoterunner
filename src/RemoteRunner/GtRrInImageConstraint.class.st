@@ -8,7 +8,7 @@ Class {
 	#superclass : #GtRrConstraint,
 	#traits : 'TGtUniqueInstance',
 	#classTraits : 'TGtUniqueInstance classTrait',
-	#category : 'RemoteRunner-Constraints'
+	#category : #'RemoteRunner-Constraints'
 }
 
 { #category : #accessing }

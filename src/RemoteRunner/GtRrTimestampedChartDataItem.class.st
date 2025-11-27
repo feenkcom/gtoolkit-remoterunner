@@ -5,7 +5,7 @@ Class {
 		'timestamp',
 		'data'
 	],
-	#category : 'RemoteRunner-UI'
+	#category : #'RemoteRunner-UI'
 }
 
 { #category : #serialization }

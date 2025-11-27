@@ -9,7 +9,7 @@ Class {
 		'erroredChecksCount',
 		'uncompletedChecksCount'
 	],
-	#category : 'RemoteRunner-Jobs-Notifications'
+	#category : #'RemoteRunner-Jobs-Notifications'
 }
 
 { #category : #adding }
@@ -65,7 +65,7 @@ GtRrChecksJobProgressNotification >> constructStates [
 			name: 'Uncompleted';
 			testCaseState: GtPharoMethodTestCaseUncompleteState;
 			itemCount: self uncompletedChecksCount;
-			itemsComputation: [ self unableToCompleteChecks ].
+			itemsComputation: [ self uncompletedChecks ].
 		(GtRrDataGroupState forNotification: self)
 			name: 'Skipped';
 			testCaseState: GtPharoMethodTestCaseSkippedState;
@@ -247,6 +247,11 @@ GtRrChecksJobProgressNotification >> totalChecksCount: anInteger [
 
 { #category : #'accessing - results' }
 GtRrChecksJobProgressNotification >> unableToCompleteChecks [
+	^ self collectChecksMatching: [ :aResult | aResult isErrorInCheckLogic ]
+]
+
+{ #category : #'accessing - results' }
+GtRrChecksJobProgressNotification >> uncompletedChecks [
 	^ self collectChecksMatching: [ :aResult | aResult isErrorInCheckLogic ]
 ]
 

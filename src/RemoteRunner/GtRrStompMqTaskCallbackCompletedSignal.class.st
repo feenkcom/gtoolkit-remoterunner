@@ -1,7 +1,7 @@
 Class {
 	#name : #GtRrStompMqTaskCallbackCompletedSignal,
 	#superclass : #GtRrStompMqTaskCallbackSignal,
-	#category : 'RemoteRunner-Signals'
+	#category : #'RemoteRunner-Signals'
 }
 
 { #category : #testing }

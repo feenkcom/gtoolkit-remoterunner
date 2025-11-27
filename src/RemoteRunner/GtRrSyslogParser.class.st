@@ -9,7 +9,7 @@ Class {
 		'bootSignalIndex',
 		'logger'
 	],
-	#category : 'RemoteRunner-Syslog'
+	#category : #'RemoteRunner-Syslog'
 }
 
 { #category : #accessing }
