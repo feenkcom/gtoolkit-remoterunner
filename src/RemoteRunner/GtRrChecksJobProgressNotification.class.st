@@ -62,7 +62,7 @@ GtRrChecksJobProgressNotification >> constructStates [
 			itemCount: self erroredChecksCount;
 			itemsComputation: [ self erroredChecks ].
 		(GtRrDataGroupState forNotification: self)
-			name: 'Uncompleted';
+			name: 'Uncomplete';
 			testCaseState: GtPharoMethodTestCaseUncompleteState;
 			itemCount: self uncompletedChecksCount;
 			itemsComputation: [ self uncompletedChecks ].
