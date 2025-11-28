@@ -601,9 +601,7 @@ GtRrWorker >> shouldApply: anOmbuEntry with: sessionIds [
 { #category : #private }
 GtRrWorker >> stackString [
 
-	^ String streamContents: [ :stream |
-		thisContext stack do: [ :stackItem |
-			stream print: stackItem; cr ] ]
+	^ String streamContents: [ :stream | thisContext errorReportOn: stream ]
 ]
 
 { #category : #starting }

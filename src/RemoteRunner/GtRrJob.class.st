@@ -86,6 +86,24 @@ GtRrJob class >> leJsonV4Name [
 	^ #gtRrJob
 ]
 
+{ #category : #initialization }
+GtRrJob class >> newJobId [
+	"Answer a new job Id.
+	Ensure that it can be used as a filename on all platforms as logs are stored by JobId."
+	| counter id |
+
+	counter := (JobIdCounter ifNil: [ 0 ]) + 1.
+	JobIdCounter := counter.
+	id := String streamContents: [ :stream |
+		stream
+			<< (ZTimestampFormat isoCompact format: ZTimestamp now );
+			<< '-';
+			<< (GtOsSystemInfo current userName ifNil: [ 'unknown' ]);
+			<< '-';
+			print: counter ].
+	^ FileReference validBasenameFrom: id.
+]
+
 { #category : #accessing }
 GtRrJob class >> retryTasksInfoFrom: aCollectionOfTasks [
 	"Answer a GtRrAbstractRetryTasks populated with the receiver's information.
@@ -107,6 +125,15 @@ GtRrJob class >> sunitTestNames: anArray [
 	"Answer a job with the supplied test names"
 
 	^ GtRrChecksJob sunitTestNames: anArray
+]
+
+{ #category : #accessing }
+GtRrJob class >> timestampFromJobId: aJobId [
+
+	('\d\d\d\d\d\d\d\dT\d\d\d\d\d\d-.*' asRegex matches: aJobId) ifFalse:
+		[ ^ nil ].
+
+	^ ZTimestamp readFrom: (aJobId first: 15) readStream
 ]
 
 { #category : #accessing }
