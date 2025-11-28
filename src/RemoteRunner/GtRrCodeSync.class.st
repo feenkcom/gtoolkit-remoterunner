@@ -12,7 +12,7 @@ Class {
 		'systemAnnouncements',
 		'mutex'
 	],
-	#category : #'RemoteRunner-Runner-CodeSync'
+	#category : 'RemoteRunner-Runner-CodeSync'
 }
 
 { #category : #accessing }

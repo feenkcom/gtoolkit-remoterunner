@@ -29,7 +29,7 @@ Class {
 		'properties',
 		'processingErrors'
 	],
-	#category : #'RemoteRunner-Jobs'
+	#category : 'RemoteRunner-Jobs'
 }
 
 { #category : #'job submission' }
@@ -86,6 +86,24 @@ GtRrJob class >> leJsonV4Name [
 	^ #gtRrJob
 ]
 
+{ #category : #initialization }
+GtRrJob class >> newJobId [
+	"Answer a new job Id.
+	Ensure that it can be used as a filename on all platforms as logs are stored by JobId."
+	| counter id |
+
+	counter := (JobIdCounter ifNil: [ 0 ]) + 1.
+	JobIdCounter := counter.
+	id := String streamContents: [ :stream |
+		stream
+			<< (ZTimestampFormat isoCompact format: ZTimestamp now );
+			<< '-';
+			<< (GtOsSystemInfo current userName ifNil: [ 'unknown' ]);
+			<< '-';
+			print: counter ].
+	^ FileReference validBasenameFrom: id.
+]
+
 { #category : #accessing }
 GtRrJob class >> retryTasksInfoFrom: aCollectionOfTasks [
 	"Answer a GtRrAbstractRetryTasks populated with the receiver's information.
@@ -107,6 +125,15 @@ GtRrJob class >> sunitTestNames: anArray [
 	"Answer a job with the supplied test names"
 
 	^ GtRrChecksJob sunitTestNames: anArray
+]
+
+{ #category : #accessing }
+GtRrJob class >> timestampFromJobId: aJobId [
+
+	('\d\d\d\d\d\d\d\dT\d\d\d\d\d\d-.*' asRegex matches: aJobId) ifFalse:
+		[ ^ nil ].
+
+	^ ZTimestamp readFrom: (aJobId first: 15) readStream
 ]
 
 { #category : #accessing }
@@ -637,16 +664,6 @@ GtRrJob >> resultCount [
 ]
 
 { #category : #accessing }
-GtRrJob >> resultWithTaskid: aTaskId [
-	"Answer the result (GtRrTask) with the given id.
-	This may not be the same task as submitted due to task retry."
-
-	results ifNil: [ ^ nil ].
-	^ results detect: [ :task |
-		task includesTaskId: aTaskId ].
-]
-
-{ #category : #accessing }
 GtRrJob >> results [
 
 	^ results
@@ -664,6 +681,16 @@ GtRrJob >> resultsWithErrors [
 	"Answer the subset of results that have errors"
 
 	^ results select: #hasErrors
+]
+
+{ #category : #accessing }
+GtRrJob >> resultWithTaskid: aTaskId [
+	"Answer the result (GtRrTask) with the given id.
+	This may not be the same task as submitted due to task retry."
+
+	results ifNil: [ ^ nil ].
+	^ results detect: [ :task |
+		task includesTaskId: aTaskId ].
 ]
 
 { #category : #'private - running' }
@@ -798,6 +825,23 @@ GtRrJob >> taskExecutionTime [
 ]
 
 { #category : #accessing }
+GtRrJob >> tasks [
+	"Answer the collection of tasks to be executed"
+	<return: #SequenceableCollection>
+
+	^ self subclassResponsibility 
+]
+
+{ #category : #accessing }
+GtRrJob >> tasksFor: aGtRemoteRunner [
+	"Special jobs may depend on the remote runner to create the tasks,
+	e.g. the code sync wants a task per worker.
+	Such subclasses can override this method."
+
+	^ self tasks.
+]
+
+{ #category : #accessing }
 GtRrJob >> taskTimeout [
 	<return: #Duration>
 
@@ -817,23 +861,6 @@ GtRrJob >> taskTimeoutSeconds: aNumber [
 		description: 'Timeout must be a number'.
 
 	taskTimeout := aNumber seconds
-]
-
-{ #category : #accessing }
-GtRrJob >> tasks [
-	"Answer the collection of tasks to be executed"
-	<return: #SequenceableCollection>
-
-	^ self subclassResponsibility 
-]
-
-{ #category : #accessing }
-GtRrJob >> tasksFor: aGtRemoteRunner [
-	"Special jobs may depend on the remote runner to create the tasks,
-	e.g. the code sync wants a task per worker.
-	Such subclasses can override this method."
-
-	^ self tasks.
 ]
 
 { #category : #'announcer - subscription' }

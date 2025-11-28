@@ -6,7 +6,7 @@ Note: Pharo appears to have problems when listening on a socket for connections,
 Class {
 	#name : #GtRemoteRunnerExamples,
 	#superclass : #GtRemoteRunnerProcessExamples,
-	#category : #'RemoteRunner-Examples'
+	#category : 'RemoteRunner-Examples'
 }
 
 { #category : #examples }

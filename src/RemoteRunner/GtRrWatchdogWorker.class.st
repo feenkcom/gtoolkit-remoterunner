@@ -9,7 +9,7 @@ Class {
 		'process',
 		'application'
 	],
-	#category : #'RemoteRunner-Watchdog'
+	#category : 'RemoteRunner-Watchdog'
 }
 
 { #category : #accessing }

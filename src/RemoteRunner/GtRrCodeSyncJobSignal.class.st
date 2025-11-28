@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'job'
 	],
-	#category : #'RemoteRunner-Runner-CodeSync'
+	#category : 'RemoteRunner-Runner-CodeSync'
 }
 
 { #category : #accessing }
