@@ -5,7 +5,7 @@ Class {
 		'workerAttributes',
 		'mutexWait'
 	],
-	#category : 'RemoteRunner-Signals'
+	#category : #'RemoteRunner-Signals'
 }
 
 { #category : #initialization }

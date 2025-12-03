@@ -4,7 +4,7 @@ GtRrChecksJob expects to hold {{gtClass:GtRrAbstractExamplesTask}} subclasses as
 Class {
 	#name : #GtRrChecksJob,
 	#superclass : #GtRrTasksJob,
-	#category : 'RemoteRunner-Jobs'
+	#category : #'RemoteRunner-Jobs'
 }
 
 { #category : #accessing }

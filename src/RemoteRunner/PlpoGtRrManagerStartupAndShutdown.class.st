@@ -1,7 +1,7 @@
 Class {
 	#name : #PlpoGtRrManagerStartupAndShutdown,
 	#superclass : #PharoLinkProxyObject,
-	#category : 'RemoteRunner-Runner'
+	#category : #'RemoteRunner-Runner'
 }
 
 { #category : #accessing }

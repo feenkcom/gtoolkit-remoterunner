@@ -8,7 +8,7 @@ Class {
 		'remoteRunner',
 		'nextRunTime'
 	],
-	#category : 'RemoteRunner-Runner-State'
+	#category : #'RemoteRunner-Runner-State'
 }
 
 { #category : #'instance creation' }
