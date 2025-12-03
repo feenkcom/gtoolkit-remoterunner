@@ -191,8 +191,8 @@ GtRrJob >> cancelJob [
 GtRrJob >> changesSync [
 	"Answer a boolean indicating whether changes should be synced to the workers."
 
-	^ (properties includesKey: GtRrConstants changeEventsJobPropertyName) or:
-		[ properties includesKey: GtRrConstants runnerChangesFileJobPropertyName ]
+	^ (self properties includesKey: GtRrConstants changeEventsJobPropertyName) or:
+		[ self properties includesKey: GtRrConstants runnerChangesFileJobPropertyName ]
 ]
 
 { #category : #accessing }
