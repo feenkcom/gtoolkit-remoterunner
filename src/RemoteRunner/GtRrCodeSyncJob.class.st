@@ -9,7 +9,7 @@ Class {
 		'entries',
 		'templateTask'
 	],
-	#category : #'RemoteRunner-Runner-CodeSync'
+	#category : 'RemoteRunner-Runner-CodeSync'
 }
 
 { #category : #'instance creation' }

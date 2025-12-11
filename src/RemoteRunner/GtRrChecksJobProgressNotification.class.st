@@ -9,7 +9,7 @@ Class {
 		'erroredChecksCount',
 		'uncompletedChecksCount'
 	],
-	#category : #'RemoteRunner-Jobs-Notifications'
+	#category : 'RemoteRunner-Jobs-Notifications'
 }
 
 { #category : #adding }

@@ -5,7 +5,7 @@ Class {
 		'processesReport',
 		'additionalData'
 	],
-	#category : #'RemoteRunner-Worker'
+	#category : 'RemoteRunner-Worker'
 }
 
 { #category : #accessing }

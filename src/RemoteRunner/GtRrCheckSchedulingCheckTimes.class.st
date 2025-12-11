@@ -8,7 +8,7 @@ Class {
 		'selector',
 		'times'
 	],
-	#category : #'RemoteRunner-CheckScheduling'
+	#category : 'RemoteRunner-CheckScheduling'
 }
 
 { #category : #lejsonv4 }
@@ -84,13 +84,6 @@ GtRrCheckSchedulingCheckTimes >> selector: anObject [
 ]
 
 { #category : #accessing }
-GtRrCheckSchedulingCheckTimes >> timeWithStrategy: aTimeStrategy ifAbsent: absentBlock [
-
-	times ifEmpty: [ ^ absentBlock value ].
-	^ aTimeStrategy timeFor: self.
-]
-
-{ #category : #accessing }
 GtRrCheckSchedulingCheckTimes >> times [
 
 	^ times
@@ -100,4 +93,11 @@ GtRrCheckSchedulingCheckTimes >> times [
 GtRrCheckSchedulingCheckTimes >> times: aSequenceableCollection [
 
 	times := aSequenceableCollection asOrderedCollection
+]
+
+{ #category : #accessing }
+GtRrCheckSchedulingCheckTimes >> timeWithStrategy: aTimeStrategy ifAbsent: absentBlock [
+
+	times ifEmpty: [ ^ absentBlock value ].
+	^ aTimeStrategy timeFor: self.
 ]

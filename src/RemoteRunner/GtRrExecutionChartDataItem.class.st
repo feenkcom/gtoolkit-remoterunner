@@ -14,7 +14,7 @@ Class {
 		'properties',
 		'cachedDuration'
 	],
-	#category : #'RemoteRunner-UI'
+	#category : 'RemoteRunner-UI'
 }
 
 { #category : #'instance - creation' }

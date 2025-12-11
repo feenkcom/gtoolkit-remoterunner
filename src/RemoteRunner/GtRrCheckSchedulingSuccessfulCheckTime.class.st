@@ -1,7 +1,7 @@
 Class {
 	#name : #GtRrCheckSchedulingSuccessfulCheckTime,
 	#superclass : #GtRrCheckSchedulingCheckTime,
-	#category : #'RemoteRunner-CheckScheduling'
+	#category : 'RemoteRunner-CheckScheduling'
 }
 
 { #category : #lejsonv4 }

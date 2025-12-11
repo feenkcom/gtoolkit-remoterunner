@@ -5,7 +5,7 @@ Class {
 		'stream',
 		'taskTimeout'
 	],
-	#category : #'RemoteRunner-Tasks'
+	#category : 'RemoteRunner-Tasks'
 }
 
 { #category : #'private - utility' }
@@ -83,6 +83,12 @@ GtRrTaskFactory >> startedTasksGroupedByWorker [
 			aTask workerId ]
 ]
 
+{ #category : #'api - generation' }
+GtRrTaskFactory >> tasks [
+
+	^ stream contents
+]
+
 { #category : #accessing }
 GtRrTaskFactory >> taskTimeout [
 	<return: #Duration or: nil>
@@ -94,10 +100,4 @@ GtRrTaskFactory >> taskTimeout [
 GtRrTaskFactory >> taskTimeout: aDuration [
 
 	taskTimeout := aDuration
-]
-
-{ #category : #'api - generation' }
-GtRrTaskFactory >> tasks [
-
-	^ stream contents
 ]

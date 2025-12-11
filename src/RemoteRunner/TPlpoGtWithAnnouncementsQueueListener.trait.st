@@ -12,7 +12,7 @@ Trait {
 	#instVars : [
 		'announcementQueueListener'
 	],
-	#category : #'RemoteRunner-AnnouncementQueue'
+	#category : 'RemoteRunner-AnnouncementQueue'
 }
 
 { #category : #accessing }

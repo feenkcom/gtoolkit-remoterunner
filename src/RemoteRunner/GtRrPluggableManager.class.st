@@ -12,7 +12,7 @@ Class {
 		'workerManager',
 		'workerTerminationStrategy'
 	],
-	#category : #'RemoteRunner-Runner-Manager'
+	#category : 'RemoteRunner-Runner-Manager'
 }
 
 { #category : #accessing }

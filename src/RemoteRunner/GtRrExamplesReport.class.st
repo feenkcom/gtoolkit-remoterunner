@@ -8,7 +8,7 @@ Class {
 		'jobName',
 		'tasksOrResults'
 	],
-	#category : #'RemoteRunner-Reports'
+	#category : 'RemoteRunner-Reports'
 }
 
 { #category : #'instance creation' }
@@ -43,6 +43,13 @@ GtRrExamplesReport >> collectExecutedExamplesWithOriginFor: aBlock [
 ]
 
 { #category : #'accessing - dynamic' }
+GtRrExamplesReport >> erroredExamples [
+
+	^ self wrapPlainExamples: (self tasks flatCollect: [ :aTask |
+		aTask erroredExamples ])
+]
+
+{ #category : #'accessing - dynamic' }
 GtRrExamplesReport >> erroredExampleWithRunOrigin [
 
 	^ GtRrFailingExampleResultWithTasksGroup withAll: (
@@ -51,10 +58,10 @@ GtRrExamplesReport >> erroredExampleWithRunOrigin [
 ]
 
 { #category : #'accessing - dynamic' }
-GtRrExamplesReport >> erroredExamples [
+GtRrExamplesReport >> executedExamples [
 
-	^ self wrapPlainExamples: (self tasks flatCollect: [ :aTask |
-		aTask erroredExamples ])
+	^ self wrapPlainExamples: (self tasks flatCollect: [ :task |
+			task executedExamples ])
 ]
 
 { #category : #'accessing - dynamic' }
@@ -63,13 +70,6 @@ GtRrExamplesReport >> executedExampleWithOrigin [
 	^ GtRrExampleResultWithTasksGroup withAll: (
 		self collectExecutedExamplesWithOriginFor: [ :aTask |
 			aTask executedExamples ])
-]
-
-{ #category : #'accessing - dynamic' }
-GtRrExamplesReport >> executedExamples [
-
-	^ self wrapPlainExamples: (self tasks flatCollect: [ :task |
-			task executedExamples ])
 ]
 
 { #category : #'accessing - dynamic' }

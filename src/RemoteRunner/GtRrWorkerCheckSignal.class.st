@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'checkName'
 	],
-	#category : #'RemoteRunner-Signals'
+	#category : 'RemoteRunner-Signals'
 }
 
 { #category : #accessing }
