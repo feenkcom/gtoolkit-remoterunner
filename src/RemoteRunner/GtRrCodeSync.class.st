@@ -15,6 +15,12 @@ Class {
 	#category : 'RemoteRunner-Runner-CodeSync'
 }
 
+{ #category : #private }
+GtRrCodeSync >> addEntry: anOmEntry [
+
+	events nextPut: anOmEntry
+]
+
 { #category : #accessing }
 GtRrCodeSync >> createOmbuEntryForEvent: anEpiceaEvent [ 
 	| entry newReference |
@@ -31,6 +37,15 @@ GtRrCodeSync >> createOmbuEntryForEvent: anEpiceaEvent [
 	^entry
 ]
 
+{ #category : #'private - accessing' }
+GtRrCodeSync >> eventsBuffer [
+	| buffer |
+
+	buffer := OrderedCollection new.
+	events flush: [:event | buffer add: event ].
+	^ buffer.
+]
+
 { #category : #finalization }
 GtRrCodeSync >> finalize [
 
@@ -40,14 +55,19 @@ GtRrCodeSync >> finalize [
 
 { #category : #accessing }
 GtRrCodeSync >> flush [
+	<sys_ext>
+
 	mutex critical:  [
 		| buffer job |
-		buffer := OrderedCollection new.
-		events flush: [:event | buffer add: event].
+		buffer := self eventsBuffer.
 		buffer ifEmpty: [
 			"nothing to send, ignore" ^self].
 		job := remoteRunner submitJob: 
 			(GtRrCodeSyncJob entries: buffer).
+		job
+			when: GtRrJobCompletedAnnouncement
+			send: #onJobCompleted:
+			to: self.
 		GtRrCodeSyncJobSignal new
 			job: job;
 			emit. ].
@@ -80,7 +100,7 @@ GtRrCodeSync >> onEntryAdded: anEntryAddedEvent [
 	anEntryAddedEvent entry content isCodeChange ifFalse: 
 		[ "only capture code changes" 
 		^ self ].
-	events nextPut: anEntryAddedEvent entry.
+	self addEntry: anEntryAddedEvent entry.
 	flusher schedule: [ self flush ]
 ]
 
@@ -89,6 +109,17 @@ GtRrCodeSync >> onExpressionEvaluated: anExpressionEvaluated [
 	events nextPut: (self createOmbuEntryForEvent:(EpExpressionEvaluation 
 		expression: anExpressionEvaluated expressionEvaluated)).
 	flusher schedule: [ self flush ]
+]
+
+{ #category : #private }
+GtRrCodeSync >> onJobCompleted: anAnnouncement [
+	"Notify the user if a worker failed a code sync task (and is thus out of sync).
+	This method shouldn't raise any exceptions in the calling process as they will attempt to be passed back to the worker."
+	| job |
+
+	job := anAnnouncement job.
+	job hasErrors ifTrue: 
+		[ [ self error: 'Failed to code sync' ] fork ].
 ]
 
 { #category : #accessing }
