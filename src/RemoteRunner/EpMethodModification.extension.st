@@ -12,5 +12,5 @@ EpMethodModification >> asGtRrCompactChange [
 EpMethodModification >> gtRrApproximateSize [
 	"Answer the approximate size of the receiver in memory."
 	
-	^ self methodAffected sourceCode sizeInMemory + self oldMethod sourceCode sizeInMemory
+	^ self methodAffected gtRrApproximateSize + self oldMethod gtRrApproximateSize
 ]
