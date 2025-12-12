@@ -1,7 +1,7 @@
 Class {
 	#name : #GtRrWorkerRetrieveChangesSignal,
 	#superclass : #GtRrWorkerChangesSignal,
-	#category : 'RemoteRunner-Signals'
+	#category : #'RemoteRunner-Signals'
 }
 
 { #category : #accessing }

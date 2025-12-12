@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'state'
 	],
-	#category : 'RemoteRunner-UI'
+	#category : #'RemoteRunner-UI'
 }
 
 { #category : #'instance creation' }

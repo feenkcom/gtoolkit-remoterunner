@@ -15,7 +15,7 @@ Class {
 		'signals',
 		'strictMode'
 	],
-	#category : 'RemoteRunner-Analysis'
+	#category : #'RemoteRunner-Analysis'
 }
 
 { #category : #accessing }

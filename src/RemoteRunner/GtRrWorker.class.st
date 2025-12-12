@@ -18,7 +18,7 @@ Class {
 		'exceptionHandlingStrategy',
 		'logger'
 	],
-	#category : 'RemoteRunner-Worker'
+	#category : #'RemoteRunner-Worker'
 }
 
 { #category : #accessing }

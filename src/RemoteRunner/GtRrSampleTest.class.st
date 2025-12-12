@@ -1,7 +1,7 @@
 Class {
 	#name : #GtRrSampleTest,
 	#superclass : #TestCase,
-	#category : 'RemoteRunner-Tests'
+	#category : #'RemoteRunner-Tests'
 }
 
 { #category : #tests }

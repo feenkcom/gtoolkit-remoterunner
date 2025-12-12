@@ -6,7 +6,7 @@ Class {
 		'sessionHistory',
 		'events'
 	],
-	#category : 'RemoteRunner-Runner-ImageSync'
+	#category : #'RemoteRunner-Runner-ImageSync'
 }
 
 { #category : #serialization }

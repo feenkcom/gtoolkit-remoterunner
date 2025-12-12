@@ -5,7 +5,7 @@ Class {
 		'taskContext',
 		'exception'
 	],
-	#category : 'RemoteRunner-Announcements'
+	#category : #'RemoteRunner-Announcements'
 }
 
 { #category : #accessing }

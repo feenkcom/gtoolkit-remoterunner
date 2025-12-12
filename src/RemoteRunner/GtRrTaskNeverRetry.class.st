@@ -6,7 +6,7 @@ Class {
 	#superclass : #GtRrTaskRetry,
 	#traits : 'TGtUniqueInstance',
 	#classTraits : 'TGtUniqueInstance classTrait',
-	#category : 'RemoteRunner-TaskRetry'
+	#category : #'RemoteRunner-TaskRetry'
 }
 
 { #category : #accessing }

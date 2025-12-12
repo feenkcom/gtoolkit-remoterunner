@@ -4,7 +4,7 @@ GtRrTaskDebuggerExceptionStrategy simply passes any exception up the chain and a
 Class {
 	#name : #GtRrTaskDebuggerExceptionStrategy,
 	#superclass : #GtRrTaskExceptionStrategy,
-	#category : 'RemoteRunner-ExceptionHandling'
+	#category : #'RemoteRunner-ExceptionHandling'
 }
 
 { #category : #accessing }

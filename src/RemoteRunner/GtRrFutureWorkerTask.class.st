@@ -11,7 +11,7 @@ Class {
 		'connection',
 		'taskContext'
 	],
-	#category : 'RemoteRunner-Runner-State'
+	#category : #'RemoteRunner-Runner-State'
 }
 
 { #category : #accessing }
