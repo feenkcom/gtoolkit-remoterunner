@@ -17,7 +17,7 @@ GtRrFileCodeSyncTask class >> leJsonV4Name [
 GtRrFileCodeSyncTask class >> newEntriesFile [
 	| tmpFile |
 
-	tmpFile := FileReference newTempFilePrefix: self name asString suffix: '.ston'.
+	tmpFile := FileReference newTempFilePrefix: self name asString suffix: '.ombu'.
 	"Windows doesn't clean its temp dir, so make it local to the image"
 	OSPlatform current isWindows ifTrue:
 		[ | tmpDir |
@@ -47,7 +47,7 @@ GtRrFileCodeSyncTask >> entriesFile: anObject [
 { #category : #accessing }
 GtRrFileCodeSyncTask >> entriesReadStream [
 
-	self entriesFile exists ifFalse: [ ^ nil ].
+	self entriesFile exists ifFalse: [ self error: 'Entries file doesn''t exist: ', self entriesFile fullName].
 	^ self entriesFile readStream
 ]
 
