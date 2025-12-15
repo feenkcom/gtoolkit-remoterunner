@@ -29,6 +29,9 @@ Class {
 		'properties',
 		'processingErrors'
 	],
+	#classVars : [
+		'JobIdCounter'
+	],
 	#category : #'RemoteRunner-Jobs'
 }
 
