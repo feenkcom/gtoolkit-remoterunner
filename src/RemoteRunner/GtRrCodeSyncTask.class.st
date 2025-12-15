@@ -114,8 +114,7 @@ GtRrCodeSyncTask >> onJobCompleted [
 GtRrCodeSyncTask >> run [
 	| stonReader |
 
-	stonReader := STONReader on: (self entriesReadStream
-		ifNil: [ ^ self ]).
+	stonReader := STONReader on: self entriesReadStream.
 	[ [ stonReader atEnd ] whileFalse:
 		[ self applyOmbuEntry: stonReader next ] ]
 			ensure: [ stonReader close ].
