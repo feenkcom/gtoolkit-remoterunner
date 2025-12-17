@@ -532,14 +532,15 @@ GtRrTask >> resultReceivedTime: anObject [
 
 { #category : #accessing }
 GtRrTask >> retryStrategy [
+	<return: #GtRrTaskRetry>
 
 	^ retryStrategy
 ]
 
 { #category : #accessing }
-GtRrTask >> retryStrategy: anObject [
+GtRrTask >> retryStrategy: aGtRrTaskRetry [
 
-	retryStrategy := anObject
+	retryStrategy := aGtRrTaskRetry
 ]
 
 { #category : #accessing }

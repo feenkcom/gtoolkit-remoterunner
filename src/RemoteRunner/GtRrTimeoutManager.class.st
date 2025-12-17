@@ -36,14 +36,17 @@ GtRrTimeoutManager >> addContext: aGtRrContext [
 { #category : #private }
 GtRrTimeoutManager >> checkTimeouts [
 	"Check the queue and timeout contexts as required"
-	| now context |
+	| now toTimeout |
 
 	remoteRunner isRunning ifFalse: [ ^ self ].
 	contexts ifEmpty: [ ^ self ].
 	now := DateAndTime now.
-	[ contexts isNotEmpty and: 
-		[ (context := contexts first) contextTimeoutTime <= now ] ] whileTrue:
-			[ contexts removeFirst.
+	toTimeout := OrderedCollection new.
+	remoteRunner critical: [
+		[ contexts isNotEmpty and: 
+		[ contexts first contextTimeoutTime <= now ] ] whileTrue:
+			[ toTimeout add: contexts removeFirst ] ].
+	toTimeout do: [ :context |
 			context isFinished ifFalse:
 				[ context scheduleTimeoutContext ] ].
 	self updateScheduledTask.
