@@ -102,6 +102,18 @@ GtRrTaskContext >> gtResultFor: aView [
 ]
 
 { #category : #ui }
+GtRrTaskContext >> gtRrChecksFor: aView [
+	<gtView>
+
+	task ifNil: [ ^ aView empty ].
+	^ aView forward
+		title: 'Checks';
+		priority: 20;
+		object: [ task ];
+		view: #gtChecksFor:
+]
+
+{ #category : #ui }
 GtRrTaskContext >> gtSummaryFor: aView [
 
 	<gtView>
@@ -127,6 +139,18 @@ GtRrTaskContext >> gtTerminateActionFor: anAction [
 		icon: BrGlamorousVectorIcons close;
 		tooltip: 'Terminate task';
 		action: [ :aButton | self terminateTask ]
+]
+
+{ #category : #ui }
+GtRrTaskContext >> gtWorkerAttributesFor: aView [
+	<gtView>
+
+	workerConnection ifNil: [ ^ aView empty ].
+	^ aView forward
+		title: 'Worker Attributes';
+		priority: 30;
+		object: [ workerConnection ];
+		view: #gtSummaryFor:
 ]
 
 { #category : #initialization }

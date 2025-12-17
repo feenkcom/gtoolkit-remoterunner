@@ -3,7 +3,8 @@ Class {
 	#superclass : #GtRrTaskFactory,
 	#instVars : [
 		'ignoreNoTest',
-		'inImageOnly'
+		'inImageOnly',
+		'retryStrategy'
 	],
 	#category : #'RemoteRunner-Tasks'
 }
@@ -128,6 +129,16 @@ GtRrChecksFactory >> job [
 	^ GtRrChecksJob new tasks: self tasks.
 ]
 
+{ #category : #accessing }
+GtRrChecksFactory >> retryStrategy [
+	^ retryStrategy
+]
+
+{ #category : #accessing }
+GtRrChecksFactory >> retryStrategy: anObject [
+	retryStrategy := anObject
+]
+
 { #category : #initialization }
 GtRrChecksFactory >> setIgnoreNoTest [ 
 
@@ -160,6 +171,8 @@ GtRrChecksFactory >> tasks [
 			[ task constraint: (inImageOnly
 				ifTrue: [ GtRrInImageConstraint default ]
 				ifFalse: [ GtRrInImageConstraint default not ]) ].
+		retryStrategy ifNotNil:
+			[ task retryStrategy: retryStrategy copy ].
 		 ].
 	^ tasks
 ]
