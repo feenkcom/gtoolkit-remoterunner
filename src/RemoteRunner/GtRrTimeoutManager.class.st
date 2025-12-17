@@ -36,20 +36,45 @@ GtRrTimeoutManager >> addContext: aGtRrContext [
 { #category : #private }
 GtRrTimeoutManager >> checkTimeouts [
 	"Check the queue and timeout contexts as required"
-	| now toTimeout |
+	| forProcessing |
 
 	remoteRunner isRunning ifFalse: [ ^ self ].
 	contexts ifEmpty: [ ^ self ].
-	now := DateAndTime now.
-	toTimeout := OrderedCollection new.
-	remoteRunner critical: [
-		[ contexts isNotEmpty and: 
-		[ contexts first contextTimeoutTime <= now ] ] whileTrue:
-			[ toTimeout add: contexts removeFirst ] ].
-	toTimeout do: [ :context |
-			context isFinished ifFalse:
-				[ context scheduleTimeoutContext ] ].
+	forProcessing := self contextsForProcessing.
+	forProcessing do: [ :context |
+			context scheduleTimeoutContext ].
 	self updateScheduledTask.
+]
+
+{ #category : #'private - accessing' }
+GtRrTimeoutManager >> contexts [
+
+	^ contexts
+]
+
+{ #category : #private }
+GtRrTimeoutManager >> contextsForProcessing [
+	"Remove and answer the collection of contexts that have either:
+	- expired, or
+	- finished"
+	| now index readyContexts |
+
+	now := DateAndTime now.
+	readyContexts := OrderedCollection new.
+	remoteRunner critical: [
+		"Iterate over the collection in reverse order
+		as removing items near the end is cheaper."
+		index := contexts size.
+		[ index >= 1 ] whileTrue:
+			[ | context |
+			context := contexts at: index.
+			context isFinished ifTrue:
+				[ contexts removeAt: index ].
+			context contextTimeoutTime <= now ifTrue:
+				[ readyContexts add: context.
+				contexts removeAt: index ].
+			index := index - 1. ] ].
+	^ readyContexts
 ]
 
 { #category : #ui }
