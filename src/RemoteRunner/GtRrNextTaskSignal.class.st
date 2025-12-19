@@ -3,7 +3,8 @@ Class {
 	#superclass : #GtRemoteRunnerSignal,
 	#instVars : [
 		'taskId',
-		'mutexWait'
+		'mutexWait',
+		'workerId'
 	],
 	#category : #'RemoteRunner-Signals'
 }
@@ -14,7 +15,7 @@ GtRrNextTaskSignal >> initializeFromTimestamp: aDateAndTime andData: aCollection
 	super initializeFromTimestamp: aDateAndTime andData: aCollection.
 	taskId := aCollection at: 3.
 	mutexWait := aCollection at: 4.
-	
+	workerId := aCollection at: 5.
 ]
 
 { #category : #accessing }
@@ -37,7 +38,9 @@ GtRrNextTaskSignal >> printOneLineContentsOn: aStream [
 		<< ' | ';
 		<< taskId asString;
 		<< ' | ';
-		<< mutexWait asString
+		<< mutexWait asString;
+		<< ' | ';
+		<< workerId asString
 ]
 
 { #category : #accessing }
@@ -56,4 +59,14 @@ GtRrNextTaskSignal >> taskId [
 GtRrNextTaskSignal >> taskId: anObject [
 
 	taskId := anObject
+]
+
+{ #category : #accessing }
+GtRrNextTaskSignal >> workerId [
+	^ workerId
+]
+
+{ #category : #accessing }
+GtRrNextTaskSignal >> workerId: anObject [
+	workerId := anObject
 ]

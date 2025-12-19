@@ -254,26 +254,30 @@ GtRrWorkerManager >> newWorkerLocalProcessArgumentsFor: someSettings [
 	workerClassName ifNotNil:
 		[ args
 			add: '--workerClass';
-			add: workerClassName ].
+				add: workerClassName ].
 	args
 		add: '--log';
 		add: '--logDir';
-		add: 'workerLogs';
+			add: 'workerLogs';
 		add: '--logPrefix';
-		add: (self logPrefix, '.', workerIndex asString);
+			add: (self logPrefix, '.', workerIndex asString);
 		add: '--serverSocketAddress';
-		add: remoteIpAddress asString.
+			add: remoteIpAddress asString.
 	connectionStrategyId ifNotNil:
 		[ args
 			add: '--connectionStrategy';
-			add: connectionStrategyId asString ].
+				add: connectionStrategyId asString ].
 	changesSync ifTrue:
 		[ args add: '--changesSync' ].
 	changesFile ifNotNil:
 		[ args
 			add: '--changesFile';
-			add: changesFile ].
+				add: changesFile ].
 	args addAll: additionalArguments.
+	args
+		add: '--attribute';
+			add: 'gtRrWorkerIndex';
+			add: workerIndex asString.
 	args
 		add: '--detachChangesFromFileSystem';
 		add: '--epiceaMemoryStore';
