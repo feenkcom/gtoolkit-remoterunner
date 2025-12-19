@@ -714,6 +714,7 @@ GtRemoteRunner >> gtWorkersFor: aView [
 		column: 'IP Address' text: [ :item | GtRemoteRunner printIpAddress: item remoteAddress ];
 		column: 'Working Directory' text: [ :item | item attributes at: #workingDirectory ifAbsent: [ '' ] ];
 		column: 'PID' text: [ :item | item pid ];
+		column: 'Index' text: [ :item | item attributes at: #gtRrWorkerIndex ifAbsent: [ '' ] ];
 		actionUpdateButton
 ]
 
@@ -974,12 +975,15 @@ GtRemoteRunner >> privateNextTaskForWorkerId: aUidString [
 	The task is assigned in a separate process."
 	| taskFuture workerConnection mutexStart mutexEnd |
 
-	GtRrNextTaskStartingSignal new emit.
+	GtRrNextTaskStartingSignal new 
+		workerId: aUidString;
+		emit.
 	mutexStart := DateAndTime now.
 	self critical:
 		[ mutexEnd := DateAndTime now.
 		workerConnection := registeredWorkers at: aUidString ifAbsent:
 			[ GtRrNextTaskWorkerNotRegisteredSignal new
+				workerId: aUidString;
 				mutexWait: (mutexEnd - mutexStart) asMilliSeconds;
 				emit.
 			^ 'quit' ].
@@ -989,6 +993,7 @@ GtRemoteRunner >> privateNextTaskForWorkerId: aUidString [
 		(jobStartupAndShutdown finishedWithWorkerId: taskFuture workerId) ifTrue:
 			[ runnerStats updateAvailableWorkerCounts: availableWorkers.
 			GtRrNextTaskFinishedWithWorkerSignal new
+				workerId: aUidString;
 				mutexWait: (mutexEnd - mutexStart) asMilliSeconds;
 				emit.
 			^ 'quit' ].
@@ -997,6 +1002,7 @@ GtRemoteRunner >> privateNextTaskForWorkerId: aUidString [
 		self assignTasksToWorkers ].
 	taskFuture wait.
 	GtRrNextTaskCompletedSignal new
+				workerId: aUidString;
 		mutexWait: (mutexEnd - mutexStart) asMilliSeconds;
 		taskId: taskFuture taskContext taskId;
 		emit.
