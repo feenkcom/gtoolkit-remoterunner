@@ -128,6 +128,26 @@ GtRrWorkerExamples >> commandLineWithoutAttributes [
 	^ commandLine
 ]
 
+{ #category : #examples }
+GtRrWorkerExamples >> pharoDebugLog [
+	<gtExample>
+	"Check that workers aren't writing to the standard PharoDebug.log file.
+	This test is only valid when run in the context of a headless worker."
+	| pharoDebugLogDir |
+
+	pharoDebugLogDir := Smalltalk logFileName asFileReference parent asAbsolute.
+	GtRrWorker isCommandLineWorker ifTrue: [ 
+		self
+				assert: Smalltalk logFileName ~= 'PharoDebug.log'
+				description: 'Smalltalk log file is named PharoDebug.log'.
+		{FileLocator imageDirectory asAbsolute.
+		FileLocator workingDirectory asAbsolute}
+			do: [ :dir | 
+				self
+					assert: pharoDebugLogDir ~= dir
+					description: [ 'PharoDebug.log is in ' , dir fullName ] ] ]
+]
+
 { #category : #private }
 GtRrWorkerExamples >> waitOn: aSemaphore description: descriptionString [
 
