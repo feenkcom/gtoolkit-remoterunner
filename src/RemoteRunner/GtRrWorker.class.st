@@ -291,6 +291,19 @@ GtRrWorker >> attributes [
 	^ attributes
 ]
 
+{ #category : #logging }
+GtRrWorker >> beaconAnnouncements [
+	| announcements |
+
+	announcements := AnnouncementSetWithExclusions withAll: 
+		{GtRemoteRunnerAnnouncement , GtRemoteRunnerSignal , PharoLinkSignal, 
+		GtAwsWebServiceCommandSignal,
+		LanguageLinkEventSignal , StringSignal,
+		StampSignals}.
+	announcements addExclusions: ContextStackSignal allSubclasses.
+	^ announcements.
+]
+
 { #category : #observer }
 GtRrWorker >> command: anArray [
 	"Execute the command sent from the remote runner.
@@ -442,6 +455,14 @@ GtRrWorker >> currentProcessId [
 	"Answer the PID of this OS process"
 
 	^ GtOsSystemInfo current currentProcessId
+]
+
+{ #category : #logging }
+GtRrWorker >> defaultLogDir [
+	<return: #String>
+	"Answer the default location of worker logs"
+
+	^ 'workerLogs'
 ]
 
 { #category : #'as yet unclassified' }
@@ -633,46 +654,42 @@ GtRrWorker >> startHeartbeat [
 
 { #category : #logging }
 GtRrWorker >> startLoggerFor: worker arguments: args [
-	| announcements logDir logPrefix beaconFile pid pharoDebugLogFile |
-
-	args at: #log ifAbsent: [^ self ].
-
-	logDir := (args at: #logDir
-		ifPresent: [:arg | (arg at: #directory) value]
-		ifAbsent: ['workerLogs']) asFileReference.
-	logPrefix := args at: #logPrefix 
-		ifPresent: [ :arg | (arg at: #prefix) value ]
-		ifAbsent: [].
+	| logDir logPrefix beaconFile pid pharoDebugLogFile |
+	args at: #log ifAbsent: [^self].
+	logDir := (args
+				at: #logDir
+				ifPresent: [:arg | (arg at: #directory) value]
+				ifAbsent: [self defaultLogDir]) asFileReference.
+	logPrefix := args
+				at: #logPrefix
+				ifPresent: [:arg | (arg at: #prefix) value]
+				ifAbsent: [].
 	SignalLogger resetAllInstances.
 	beaconFile := logPrefix
-		ifNil: [ logDir / (worker class logFilenameFor: worker) ]
-		ifNotNil: [ :prefix | logDir / (prefix, '.beacon.log') ].
+				ifNil: [logDir / (worker class logFilenameFor: worker)]
+				ifNotNil: [:prefix | logDir / (prefix , '.beacon.log')].
 	Stdio stdout
 		<< 'worker beacon filename set to: ';
 		<< beaconFile asString;
 		lf.
-	pharoDebugLogFile := logPrefix ifNil:
-		[ pid := GtOsSystemInfo current currentProcessId.
-		(logDir / ('worker.pharoDebug.', pid asString, '.log')) ]
-	ifNotNil: [ :prefix |
-		logDir / (prefix, '.PharoDebug.log') ].
-	
-	Smalltalk logFileName: pharoDebugLogFile fullName.
-	Stdio stdout
-		<< 'PharoDebug.log filename set to: ';
-		<< pharoDebugLogFile fullName;
-		lf; flush.
 
-	logger := StreamLoggerFlusher new 
-		logger: (SessionFallbackFileLogger filename: beaconFile).
-
-	announcements := AnnouncementSetWithExclusions withAll: 
-		{GtRemoteRunnerAnnouncement , GtRemoteRunnerSignal , PharoLinkSignal, 
-		GtAwsWebServiceCommandSignal,
-		LanguageLinkEventSignal , StringSignal,
-		StampSignals}.
-	announcements addExclusions: ContextStackSignal allSubclasses.
-	logger startFor: announcements.
+	"Explicitly specifying PharoDebug.log on the command line has higher precedence"
+	GtPharoDebugLogCli pharoDebugLogPresent
+		ifFalse: 
+			[pharoDebugLogFile := logPrefix
+						ifNil: 
+							[pid := GtOsSystemInfo current currentProcessId.
+							logDir / ('worker.pharoDebug.' , pid asString , '.log')]
+						ifNotNil: [:prefix | logDir / (prefix , '.PharoDebug.log')].
+			Smalltalk logFileName: pharoDebugLogFile fullName.
+			Stdio stdout
+				<< 'PharoDebug.log filename set to: ';
+				<< pharoDebugLogFile fullName;
+				lf;
+				flush].
+	logger := StreamLoggerFlusher new
+				logger: (SessionFallbackFileLogger filename: beaconFile).
+	logger startFor: self beaconAnnouncements.
 ]
 
 { #category : #stepping }
