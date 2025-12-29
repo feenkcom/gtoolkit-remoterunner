@@ -69,10 +69,10 @@ GtRrTimeoutManager >> contextsForProcessing [
 			[ | context |
 			context := contexts at: index.
 			context isFinished ifTrue:
-				[ contexts removeAt: index ].
-			context contextTimeoutTime <= now ifTrue:
+				[ contexts removeAt: index ]
+			ifFalse: [ context contextTimeoutTime <= now ifTrue:
 				[ readyContexts add: context.
-				contexts removeAt: index ].
+				contexts removeAt: index ] ].
 			index := index - 1. ] ].
 	^ readyContexts
 ]
