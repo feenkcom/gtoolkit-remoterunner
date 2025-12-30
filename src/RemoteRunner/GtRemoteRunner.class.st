@@ -1353,10 +1353,10 @@ GtRemoteRunner >> state [
 { #category : #'api - runner' }
 GtRemoteRunner >> stop [
 
-	self runJobShutdown.
-	self runManagerShutdown.
 	self stopTimeoutManager.
+	self runJobShutdown.
 	self stopRegisteredWorkers.
+	self runManagerShutdown.
 	self stopLogging.
 	self stopAnnouncementNotifier.
 	runnerStats isRunning: self isRunning.
