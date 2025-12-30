@@ -59,7 +59,8 @@ GtRrLlWorkerConnectionStrategy >> newApplication [
 		  (PharoLinkApplication defaultSettings
 			   serverProcessClass: LanguageLinkManualProcess;
 			   serverSocketAddress: llSocketAddress;
-			   connectionExceptionHandler: GtRrWorkerConnectionExceptionHandler new;
+			   connectionExceptionHandler: (GtRrWorkerConnectionExceptionHandler new
+			   	worker: worker);
 			   debugMode: true;
 			   yourself)
 ]

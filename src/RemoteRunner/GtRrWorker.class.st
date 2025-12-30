@@ -530,8 +530,13 @@ GtRrWorker >> logAndQuit: reasonString [
 	GtRrWorkerOperationShutdownAnnouncement new 
 		reason: 'Quit received: ', reasonString asString;
 		emit.
+	Stdio stdout
+		<< 'Quit received: ';
+		<< reasonString asString;
+		lf; flush.
 	"Give other processes time to finish"
 	Processor activeProcess priority: 15.
+	logger ifNotNil: [ logger flushLog ].
 	Smalltalk image isInteractiveGraphic 
 		ifTrue: [ UIManager notify: 'GtRrWorker>>logAndQuit: ', reasonString asString ]
 		ifFalse: [ Smalltalk snapshot: false andQuit: true ].
@@ -724,6 +729,8 @@ GtRrWorker >> stop [
 	self stopReadProcess.
 	connectionStrategy stop.
 	self stopExecutionContext.
+	logger ifNotNil:
+		[ logger flushLog ].
 ]
 
 { #category : #stopping }
