@@ -19,5 +19,5 @@ GtRrMemoryLoggerPrePostTaskAction >> postTaskAction: aGtRrTask [
 { #category : #actions }
 GtRrMemoryLoggerPrePostTaskAction >> preTaskAction: aGtRrTask [
 
-	logger := MemoryLogger new startFor: StringSignal, GtJustContextStackSignal
+	logger := MemoryLogger new startFor: StringSignal, MethodStackSignal
 ]
