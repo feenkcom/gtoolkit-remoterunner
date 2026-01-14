@@ -316,6 +316,12 @@ GtRrStompMqProcessor >> localAddress [
 	^ mqClient medium socket localAddress
 ]
 
+{ #category : #'as yet unclassified' }
+GtRrStompMqProcessor >> localAddressString [
+
+	^ GtRemoteRunner printIpAddress: self localAddress
+]
+
 { #category : #accessing }
 GtRrStompMqProcessor >> messageChannelDefinition [
 	^ messageChannelDefinition
@@ -465,6 +471,15 @@ GtRrStompMqProcessor >> removePromiseAt: rpcId [
 
 	^ self critical:
 		[ rpcRegistry removeKey: rpcId ]
+]
+
+{ #category : #actions }
+GtRrStompMqProcessor >> sendBlockClosure: aBlockClosure arguments: arguments to: aGtRrMqQueueDefinition [
+
+	self sendGtMessage: (GtRrBlockClosureWithArgsMessage new
+			blockClosure: aBlockClosure;
+			arguments: arguments)
+		to: aGtRrMqQueueDefinition.
 ]
 
 { #category : #actions }

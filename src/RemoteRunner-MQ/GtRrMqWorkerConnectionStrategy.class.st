@@ -28,6 +28,20 @@ GtRrMqWorkerConnectionStrategy >> connectDuring: aBlock [
 	^ aBlock value: self
 ]
 
+{ #category : #actions }
+GtRrMqWorkerConnectionStrategy >> evaluateOnRunner: aCleanBlock arguments: args [
+	"Pass the supplied block to the RemoteRunner for evaluation.
+	The block format is: [ :remoteRunner :args | ... ].
+	No response is received."
+
+	mqProcessor
+		sendBlockClosure: [ :mqMessage :aGtRrProcessor :anOwner :arguments |
+			arguments first valueWithArguments:
+				{ anOwner. arguments allButFirst } ]
+		arguments: { aCleanBlock }, args
+		to: runnerControlChannelDefinition.
+]
+
 { #category : #'as yet unclassified' }
 GtRrMqWorkerConnectionStrategy >> handleMqListenerException: closingException [
 	"Shut down the worker (and potentially exit the image)"
@@ -60,6 +74,12 @@ GtRrMqWorkerConnectionStrategy >> largeMessageUrl [
 { #category : #accessing }
 GtRrMqWorkerConnectionStrategy >> largeMessageUrl: aZnUrl [
 	largeMessageUrl := aZnUrl
+]
+
+{ #category : #accessing }
+GtRrMqWorkerConnectionStrategy >> localAddressString [
+
+	^ mqProcessor localAddressString
 ]
 
 { #category : #'start-stop' }

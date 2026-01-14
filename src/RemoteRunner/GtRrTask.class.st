@@ -227,6 +227,17 @@ GtRrTask >> gtSummaryFor: aView [
 ]
 
 { #category : #ui }
+GtRrTask >> gtTaskActionsFor: aView [
+	<gtView>
+
+	^ aView list
+		title: 'Actions';
+		priority: 50;
+		items: [ self prePostTaskActions ];
+		send: [ :item | item asClass ]
+]
+
+{ #category : #ui }
 GtRrTask >> gtTraceFor: aView [
 	<gtView>
 
@@ -425,6 +436,28 @@ GtRrTask >> postCopy [
 	retryStrategy := retryStrategy copy.
 ]
 
+{ #category : #accessing }
+GtRrTask >> prePostTaskActions [
+	"Answer the collection of GtRrTaskPrePostAction names to be executed"
+
+	properties ifNil: [ ^ #() ].
+	^ properties
+		at: #prePostTaskActions
+		ifAbsent: [ #() ].
+]
+
+{ #category : #accessing }
+GtRrTask >> prePostTaskActions: aCollection [
+	"Set the collection of GtRrTaskPrePostAction names to be executed"
+
+	aCollection ifNil:
+		[ properties ifNotNil:
+			[ properties removeKey: #prePostTaskActions ifAbsent: [] ] ].
+	self properties
+		at: #prePostTaskActions
+		put: aCollection asArray
+]
+
 { #category : #printing }
 GtRrTask >> printOn: aStream [
 
@@ -469,6 +502,7 @@ GtRrTask >> propertyAt: aString [
 { #category : #'accessing - properties' }
 GtRrTask >> propertyAt: aString ifAbsent: absentBlock [
 
+	properties ifNil: [ ^ absentBlock value ].
 	^ self properties 
 		at: aString
 		ifAbsent: absentBlock
@@ -477,6 +511,7 @@ GtRrTask >> propertyAt: aString ifAbsent: absentBlock [
 { #category : #'accessing - properties' }
 GtRrTask >> propertyAt: aString ifPresent: presentBlock ifAbsent: absentBlock [
 
+	properties ifNil: [ ^ absentBlock value ].
 	^ self properties 
 		at: aString
 		ifPresent: presentBlock
@@ -552,6 +587,8 @@ GtRrTask >> retryTasksIn: aGtRrTaskContext [
 
 { #category : #running }
 GtRrTask >> run [
+	"Run the receiver.
+	Note that the main entry point is #timedRun."
 
 	self subclassResponsibility
 ]
@@ -689,15 +726,21 @@ GtRrTask >> taskTimeout: aDuration [
 
 { #category : #running }
 GtRrTask >> timedRun [
-	| runResult resourceReport |
+	| runResult resourceReport prePostActions |
 
 	resourceReport := self createResourceReportForTask.
+	prePostActions := self prePostTaskActions collect: [ :clsName |
+		clsName asClass new ].
+	prePostActions do: [ :action |
+		action preTaskAction: self ].
 	resourceReport recordSourceReport.
 	self startTime: DateAndTime now.
 	runResult := [ self run ] ensure:
 		[ self endTime: DateAndTime now.
 		resourceReport recordTargetReport.
 		self executionData resourceReport: resourceReport ].
+	prePostActions do: [ :action |
+		action postTaskAction: self ].
 	^ runResult.
 ]
 

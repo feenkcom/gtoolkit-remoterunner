@@ -43,7 +43,10 @@ GtRrErrorDetails >> gtTraceFor: aView [
 	^ aView textEditor
 		title: 'Trace';
 		priority: 10;
-		text: [ trace ]
+		text: [ trace ];
+		actionButtonLabel: 'Inspect' tooltip: 'Open the PharoDebugLog inspector' action:
+			[ :aButton |
+				aButton phlow spawnObject: (GtPharoDebugLogInspector new string: trace) parseLogEntries first ].
 ]
 
 { #category : #printing }

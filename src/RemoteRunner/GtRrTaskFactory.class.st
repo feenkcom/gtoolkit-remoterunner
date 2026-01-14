@@ -3,7 +3,8 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'stream',
-		'taskTimeout'
+		'taskTimeout',
+		'prePostTaskActions'
 	],
 	#category : #'RemoteRunner-Tasks'
 }
@@ -68,6 +69,16 @@ GtRrTaskFactory >> job [
 	^ GtRrTasksJob new tasks: self tasks.
 ]
 
+{ #category : #accessing }
+GtRrTaskFactory >> prePostTaskActions [
+	^ prePostTaskActions
+]
+
+{ #category : #accessing }
+GtRrTaskFactory >> prePostTaskActions: anObject [
+	prePostTaskActions := anObject
+]
+
 { #category : #initialization }
 GtRrTaskFactory >> reset [
 
@@ -98,6 +109,11 @@ GtRrTaskFactory >> taskTimeout: aDuration [
 
 { #category : #'api - generation' }
 GtRrTaskFactory >> tasks [
+	| tasks |
 
-	^ stream contents
+	tasks := stream contents.
+	tasks do: [ :task |
+		prePostTaskActions ifNotNil:
+			[ task prePostTaskActions: prePostTaskActions ] ].
+	^ tasks
 ]
