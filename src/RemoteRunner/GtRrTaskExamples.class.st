@@ -31,6 +31,38 @@ GtRrTaskExamples >> compoundTask [
 	^ compoundTask
 ]
 
+{ #category : #examples }
+GtRrTaskExamples >> pharoDebugLogInspector [
+	"Answer a GtPharoDebugLogInspector for a task with errors"
+	<gtExample>
+
+	^ (GtPharoDebugLogInspector new string: 
+		self taskWithErrorTrace executionData errorDetails trace) 
+			parseLogEntries first.
+]
+
+{ #category : #examples }
+GtRrTaskExamples >> runInImageTask: aGrRrTask [
+	"Run the supplied task and answer it"
+	<gtExample>
+	| runner semaphore |
+
+	runner := GtRemoteRunner new.
+	semaphore := Semaphore new.
+	runner managerStartupAndShutdown: GtRrManualManagerStartupAndShutdown new.
+	runner start.
+	runner managerStartupAndShutdown startInImageWorker.
+	runner when: GtRrJobCompletedAnnouncement
+		do: [ :ann | semaphore signal ]
+		for: self.
+	runner submitJob: aGrRrTask asJob.
+	(semaphore waitTimeoutSeconds: 30) ifTrue:
+		[ self error: 'Job failed to complete in time' ].
+	runner stop.
+
+	^ aGrRrTask.
+]
+
 { #category : #private }
 GtRrTaskExamples >> stopRunner [
 
@@ -128,4 +160,46 @@ GtRrTaskExamples >> taskTimeout [
 
 	task taskTimeout: job taskTimeout + 1 minute.
 	self assert: taskContext taskTimeout equals: task taskTimeout
+]
+
+{ #category : #examples }
+GtRrTaskExamples >> taskWithCustomMemoryLogger [
+	"Answer the MemoryLogger collected as part of a task prePostAction"
+	<gtExample>
+	| task logger |
+
+	task := self taskWithPrePostAction.
+	self runInImageTask: task.
+
+	logger := STON fromString: (task executionData additionalData at: #logger).
+	self assert: logger recordings size equals: 1.
+	^ logger.
+]
+
+{ #category : #examples }
+GtRrTaskExamples >> taskWithErrorTrace [
+	"Answer a task that raised an error during execution"
+	<gtExample>
+	| errorMessage task |
+
+	errorMessage := 'error during task execution'.
+	task := GtRrScriptTask script: 'self error: ', errorMessage printString.
+	self runInImageTask: task.
+
+	self assert: task result isNil
+		description: 'Task has unexpected result'.
+	self assert: task executionData errorDetails errorMessage
+		equals: errorMessage.
+	^ task.
+]
+
+{ #category : #examples }
+GtRrTaskExamples >> taskWithPrePostAction [
+	"Answer a task that has a pre- and post- action set"
+	<gtExample>
+	| task |
+
+	task := GtRrScriptTask script: 'MethodStackSignal emit'.
+	task prePostTaskActions: #(GtRrMemoryLoggerPrePostTaskAction).
+	^ task.
 ]

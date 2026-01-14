@@ -227,6 +227,17 @@ GtRrTask >> gtSummaryFor: aView [
 ]
 
 { #category : #ui }
+GtRrTask >> gtTaskActionsFor: aView [
+	<gtView>
+
+	^ aView list
+		title: 'Actions';
+		priority: 50;
+		items: [ self prePostTaskActions ];
+		send: [ :item | item asClass ]
+]
+
+{ #category : #ui }
 GtRrTask >> gtTraceFor: aView [
 	<gtView>
 
