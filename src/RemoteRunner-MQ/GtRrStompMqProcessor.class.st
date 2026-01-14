@@ -33,7 +33,7 @@ Class {
 		'MessageTtl',
 		'QueueTtl'
 	],
-	#category : 'RemoteRunner-MQ-Runner'
+	#category : #'RemoteRunner-MQ-Runner'
 }
 
 { #category : #accessing }
@@ -282,6 +282,12 @@ GtRrStompMqProcessor >> isRunning [
 ]
 
 { #category : #testing }
+GtRrStompMqProcessor >> isStopRequested [
+
+	^ state = #stopRequested
+]
+
+{ #category : #testing }
 GtRrStompMqProcessor >> isStopped [
 
 	^ state = #stopped
@@ -291,12 +297,6 @@ GtRrStompMqProcessor >> isStopped [
 GtRrStompMqProcessor >> isStopping [
 
 	^ self isStopped or: [ self isStopRequested ]
-]
-
-{ #category : #testing }
-GtRrStompMqProcessor >> isStopRequested [
-
-	^ state = #stopRequested
 ]
 
 { #category : #accessing }
@@ -314,6 +314,12 @@ GtRrStompMqProcessor >> largeMessageUrl: aZnUrl [
 GtRrStompMqProcessor >> localAddress [
 
 	^ mqClient medium socket localAddress
+]
+
+{ #category : #'as yet unclassified' }
+GtRrStompMqProcessor >> localAddressString [
+
+	^ GtRemoteRunner printIpAddress: self localAddress
 ]
 
 { #category : #accessing }
@@ -465,6 +471,15 @@ GtRrStompMqProcessor >> removePromiseAt: rpcId [
 
 	^ self critical:
 		[ rpcRegistry removeKey: rpcId ]
+]
+
+{ #category : #actions }
+GtRrStompMqProcessor >> sendBlockClosure: aBlockClosure arguments: arguments to: aGtRrMqQueueDefinition [
+
+	self sendGtMessage: (GtRrBlockClosureWithArgsMessage new
+			blockClosure: aBlockClosure;
+			arguments: arguments)
+		to: aGtRrMqQueueDefinition.
 ]
 
 { #category : #actions }

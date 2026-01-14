@@ -37,6 +37,23 @@ GtRrLlWorkerConnectionStrategy >> connectDuring: aBlock [
 	^ self subclassResponsibility 
 ]
 
+{ #category : #actions }
+GtRrLlWorkerConnectionStrategy >> evaluateOnRunner: aCleanBlock arguments: args [
+	"Pass the supplied block to the RemoteRunner for evaluation.
+	The block format is: [ :remoteRunner :args | ... ].
+	No response is received."
+
+	aCleanBlock isClean ifFalse: [self error: 'the block must be clean'].
+	aCleanBlock numArgs = 2
+		ifFalse: [self error: 'expected 2 argument block'].
+
+	self connectDuring: [ :aPharoLinkApplication |
+		aPharoLinkApplication newCommandFactory 
+			bindingAt: #arguments put: args;
+			send: aCleanBlock printString, ' valueWithArguments:
+				{ GtAssignedRemoteRunner. arguments. }' ].
+]
+
 { #category : #accessing }
 GtRrLlWorkerConnectionStrategy >> llSocketAddress [
 	<return: #LanguageLinkSocketAddress>
@@ -48,6 +65,14 @@ GtRrLlWorkerConnectionStrategy >> llSocketAddress [
 GtRrLlWorkerConnectionStrategy >> llSocketAddress: anObject [
 
 	llSocketAddress := anObject
+]
+
+{ #category : #accessing }
+GtRrLlWorkerConnectionStrategy >> localAddressString [
+	"Answer the address of the local socket"
+
+	^ self connectDuring: [ :aPharoLinkApplication |
+		aPharoLinkApplication communicationHandler localAddressString ]
 ]
 
 { #category : #private }
@@ -94,6 +119,12 @@ GtRrLlWorkerConnectionStrategy >> registerWith: aPharoLinkApplication [
 			sendAndWait: 'GtAssignedRemoteRunner registerWorkerWithDetails: attributes controlChannelAvailable: false'.
 	GtRrWorkerRegisterCompletedSignal new emit.
 	^ result
+]
+
+{ #category : #accessing }
+GtRrLlWorkerConnectionStrategy >> remoteAddressString [
+
+	^ llSocketAddress printAddress.
 ]
 
 { #category : #private }

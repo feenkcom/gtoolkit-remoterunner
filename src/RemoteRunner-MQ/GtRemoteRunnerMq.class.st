@@ -1,7 +1,7 @@
 Class {
 	#name : #GtRemoteRunnerMq,
 	#superclass : #GtRemoteRunner,
-	#category : 'RemoteRunner-MQ-Runner'
+	#category : #'RemoteRunner-MQ-Runner'
 }
 
 { #category : #adding }
