@@ -649,7 +649,7 @@ GtRrJob >> removeSubscription: subscription [
 { #category : #initialization }
 GtRrJob >> reset [
 
-	id := UUID new asString.
+	id := self class newJobId.
 	results := OrderedCollection new.
 	errorCount := 0.
 	state := #notStarted.
