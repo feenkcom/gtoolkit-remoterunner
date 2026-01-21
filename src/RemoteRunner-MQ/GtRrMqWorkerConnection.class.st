@@ -23,6 +23,30 @@ GtRrMqWorkerConnection class >> connectionLostMessage [
 	^ 'Worker connection lost'
 ]
 
+{ #category : #lepiter }
+GtRrMqWorkerConnection class >> deSerializeAllImplementorsInstances [
+
+	^ { self new
+		attributes: { #workerIpAddress -> '1.2.3.4' } asDictionary;
+		lastHeartbeat: DateAndTime now }
+]
+
+{ #category : #lepiter }
+GtRrMqWorkerConnection class >> leJsonV4AttributeMapping [
+
+	^ {
+		#attributes -> #attributes.
+		#remoteAddress -> #remoteAddress.
+		#lastHeartbeat -> #lastHeartbeat.
+	}
+]
+
+{ #category : #lepiter }
+GtRrMqWorkerConnection class >> leJsonV4Name [
+
+	^ #gtRrMqWorkerConnection
+]
+
 { #category : #accessing }
 GtRrMqWorkerConnection >> attributes [
 
@@ -102,6 +126,11 @@ GtRrMqWorkerConnection >> lastHeartbeat [
 ]
 
 { #category : #accessing }
+GtRrMqWorkerConnection >> lastHeartbeat: anObject [
+	lastHeartbeat := anObject
+]
+
+{ #category : #accessing }
 GtRrMqWorkerConnection >> pid [
 
 	^ attributes at: #pid ifAbsent: []
@@ -120,6 +149,12 @@ GtRrMqWorkerConnection >> registerHeartbeat [
 GtRrMqWorkerConnection >> remoteAddress [
 
 	^ attributes at: #workerIpAddress
+]
+
+{ #category : #accessing }
+GtRrMqWorkerConnection >> remoteAddress: anObject [
+
+	self attributes at: #workerIpAddress put: anObject
 ]
 
 { #category : #accessing }

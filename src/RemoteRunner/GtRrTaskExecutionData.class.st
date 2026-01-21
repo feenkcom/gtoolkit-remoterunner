@@ -101,6 +101,16 @@ GtRrTaskExecutionData >> errorDetails: aGtErrorDetails [
 ]
 
 { #category : #accessing }
+GtRrTaskExecutionData >> executionDate [
+	"Answer the date on which the receiver was executed.
+	Strictly speaking this is based on the endTime, however if it is absent, use the startTime or handoverTime."
+	
+	^ (endTime ifNil:
+		[ startTime ifNil:
+			[ handoverTime ] ] ) asDate.
+]
+
+{ #category : #accessing }
 GtRrTaskExecutionData >> externalMemReport [
 
 	^ resourceReport externalMemReport

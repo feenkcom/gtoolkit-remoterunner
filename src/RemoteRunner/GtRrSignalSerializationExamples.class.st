@@ -7,7 +7,7 @@ Class {
 { #category : #examples }
 GtRrSignalSerializationExamples >> gtRrResultProcessingErrorAnnouncement [
 	<gtExample>
-	| signal serialized deserialized reader errorInfo |
+	| signal serialized deserialized reader errorInfo signals |
 
 	errorInfo := { 'a' -> 1. } asDictionary.
 	signal := GtRrResultProcessingErrorAnnouncement new
@@ -20,7 +20,8 @@ GtRrSignalSerializationExamples >> gtRrResultProcessingErrorAnnouncement [
 	serialized := String streamContents: [ :stream |
 		signal printOneLineOn: stream ].
 	reader := GtRrRunnerLogReader new.
-	deserialized := reader processLine: serialized.
+	signals := OrderedCollection new.
+	deserialized := reader processLine: serialized into: signals.
 	self assert: deserialized class equals: GtRrResultProcessingErrorAnnouncement.
 	self assert: deserialized workerId equals: 'a-b-c-d'.
 	self assert: deserialized errorInfo equals: errorInfo.

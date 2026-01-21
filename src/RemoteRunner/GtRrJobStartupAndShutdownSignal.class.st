@@ -29,6 +29,16 @@ GtRrJobStartupAndShutdownSignal class >> forJobContext: aJobContext [
 ]
 
 { #category : #accessing }
+GtRrJobStartupAndShutdownSignal >> eventType [
+	^ eventType
+]
+
+{ #category : #accessing }
+GtRrJobStartupAndShutdownSignal >> eventType: anObject [
+	eventType := anObject
+]
+
+{ #category : #accessing }
 GtRrJobStartupAndShutdownSignal >> initializeFromTimestamp: aDateAndTime andData: aCollection [
 
 	super initializeFromTimestamp: aDateAndTime andData: aCollection.

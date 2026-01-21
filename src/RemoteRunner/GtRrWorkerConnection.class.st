@@ -35,6 +35,16 @@ GtRrWorkerConnection class >> connectionLostMessage [
 ]
 
 { #category : #accessing }
+GtRrWorkerConnection class >> leJsonV4AttributeMapping [
+
+	^ {
+		#attributes -> #attributes.
+		#remoteAddress -> #remoteAddress.
+		#lastHeartbeat -> #lastHeartbeat.
+	}
+]
+
+{ #category : #accessing }
 GtRrWorkerConnection >> addObserver: aBlock [
 
 	"Waits until semaphore of observer is signalled to keep request alive, as observers live in the request-response life-cycle."
@@ -192,6 +202,12 @@ GtRrWorkerConnection >> lastHeartbeat [
 	^ lastHeartbeat
 ]
 
+{ #category : #accessing }
+GtRrWorkerConnection >> lastHeartbeat: aDateAndTime [
+
+	lastHeartbeat := aDateAndTime
+]
+
 { #category : #private }
 GtRrWorkerConnection >> observerWait [
 	"Wait on the observer semaphore.
@@ -270,6 +286,12 @@ GtRrWorkerConnection >> registerHeartbeat [
 GtRrWorkerConnection >> remoteAddress [
 
 	^ remoteAddress
+]
+
+{ #category : #accessing }
+GtRrWorkerConnection >> remoteAddress: anObject [
+
+	remoteAddress := anObject
 ]
 
 { #category : #accessing }
