@@ -49,7 +49,6 @@ GtRrRunnerLogReader >> gtSignalsFor: aView [
 GtRrRunnerLogReader >> initialize [
 
 	super initialize.
-	signals := OrderedCollection new.
 	strictMode := true.
 ]
 
@@ -58,6 +57,7 @@ GtRrRunnerLogReader >> load [
 
 	filename asFileReference readStreamDo: [ :stream |
 		stream encoder: ZnLossyUTF8Encoder new.
+		signals := OrderedCollection new.
 		[ stream atEnd ] whileFalse:
 			[ self processLine: stream nextLine ] ].
 	^ signals
@@ -73,7 +73,24 @@ GtRrRunnerLogReader >> memoryLogger [
 ]
 
 { #category : #private }
+GtRrRunnerLogReader >> processLeJsonLine: aString [
+	| signal |
+
+	signal := LeJsonV4 uniqueInstance deserialize: aString readStream.
+	signals add: signal.
+	^ signal.
+]
+
+{ #category : #private }
 GtRrRunnerLogReader >> processLine: aString [
+
+	^ (aString trimLeft first = ${)
+		ifTrue: [ self processLeJsonLine: aString ]
+		ifFalse: [ self processPipeSeparatedLine: aString ]
+]
+
+{ #category : #private }
+GtRrRunnerLogReader >> processPipeSeparatedLine: aString [
 	| words date cls data signal |
 
 	words := aString splitOn: Character space.
