@@ -3,7 +3,7 @@ Class {
 	#superclass : #PharoLinkProxyObject,
 	#traits : 'TGtRrWorkerExamplesReportViews',
 	#classTraits : 'TGtRrWorkerExamplesReportViews classTrait',
-	#category : #'RemoteRunner-Reports'
+	#category : 'RemoteRunner-Reports'
 }
 
 { #category : #accessing }
@@ -169,13 +169,6 @@ PlpoGtRrWorkerExamplesReport >> gtViewVmMemoryEvolutionFor: aView [
 				ticksY: 10. ]
 ]
 
-{ #category : #accessing }
-PlpoGtRrWorkerExamplesReport >> taskWithId: aTaskId [ 
-	^ self 
-		proxyPerform:  #taskWithId: 
-		withPrimitiveArguments: {aTaskId}
-]
-
 { #category : #'accessing - chart data' }
 PlpoGtRrWorkerExamplesReport >> tasksExecutionChartItems [
 	^ self proxyPerformSerialized: #tasksExecutionChartItems
@@ -199,4 +192,11 @@ PlpoGtRrWorkerExamplesReport >> tasksMachineFreeMemoryChartItems [
 { #category : #'accessing - chart data' }
 PlpoGtRrWorkerExamplesReport >> tasksVmMemoryChartItems [
 	^ self proxyPerformSerialized: #tasksVmMemoryChartItems
+]
+
+{ #category : #accessing }
+PlpoGtRrWorkerExamplesReport >> taskWithId: aTaskId [ 
+	^ self 
+		proxyPerform:  #taskWithId: 
+		withPrimitiveArguments: {aTaskId}
 ]

@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'taskId'
 	],
-	#category : #'RemoteRunner-Signals'
+	#category : 'RemoteRunner-Signals'
 }
 
 { #category : #initialization }

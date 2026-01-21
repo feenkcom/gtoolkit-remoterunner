@@ -20,7 +20,7 @@ Class {
 		'registeredWorkerAttributes',
 		'availableWorkerAttributes'
 	],
-	#category : #'RemoteRunner-Runner'
+	#category : 'RemoteRunner-Runner'
 }
 
 { #category : #accessing }

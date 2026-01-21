@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'workerCount'
 	],
-	#category : #'RemoteRunner-Announcements'
+	#category : 'RemoteRunner-Announcements'
 }
 
 { #category : #accessing }

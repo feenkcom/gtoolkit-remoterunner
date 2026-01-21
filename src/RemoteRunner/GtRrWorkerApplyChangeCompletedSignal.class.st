@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'applied'
 	],
-	#category : #'RemoteRunner-Signals'
+	#category : 'RemoteRunner-Signals'
 }
 
 { #category : #accessing }

@@ -1,7 +1,7 @@
 Class {
 	#name : #GtRrWorkerApplyChangeLogEvent,
 	#superclass : #GtRrWorkerChangesLogEvent,
-	#category : #'RemoteRunner-Logging-Events'
+	#category : 'RemoteRunner-Logging-Events'
 }
 
 { #category : #accessing }

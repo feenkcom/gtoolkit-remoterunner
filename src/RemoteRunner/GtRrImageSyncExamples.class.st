@@ -6,7 +6,7 @@ Class {
 	#superclass : #Object,
 	#traits : 'TAssertable',
 	#classTraits : 'TAssertable classTrait',
-	#category : #'RemoteRunner-Examples'
+	#category : 'RemoteRunner-Examples'
 }
 
 { #category : #examples }

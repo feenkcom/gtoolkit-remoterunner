@@ -6,7 +6,7 @@ Class {
 		'entries',
 		'paired'
 	],
-	#category : #'RemoteRunner-Analysis'
+	#category : 'RemoteRunner-Analysis'
 }
 
 { #category : #accessing }

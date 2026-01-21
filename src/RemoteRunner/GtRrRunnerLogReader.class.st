@@ -15,7 +15,7 @@ Class {
 		'signals',
 		'strictMode'
 	],
-	#category : #'RemoteRunner-Analysis'
+	#category : 'RemoteRunner-Analysis'
 }
 
 { #category : #accessing }
@@ -54,13 +54,14 @@ GtRrRunnerLogReader >> initialize [
 
 { #category : #actions }
 GtRrRunnerLogReader >> load [
+	| newSignals |
 
 	filename asFileReference readStreamDo: [ :stream |
 		stream encoder: ZnLossyUTF8Encoder new.
-		signals := OrderedCollection new.
+		newSignals := OrderedCollection new.
 		[ stream atEnd ] whileFalse:
-			[ self processLine: stream nextLine ] ].
-	^ signals
+			[ self processLine: stream nextLine into: newSignals ] ].
+	^ newSignals
 ]
 
 { #category : #accessing }
@@ -73,20 +74,24 @@ GtRrRunnerLogReader >> memoryLogger [
 ]
 
 { #category : #private }
-GtRrRunnerLogReader >> processLeJsonLine: aString [
+GtRrRunnerLogReader >> processLeJsonLine: aString into: aCollection [
 	| signal |
 
 	signal := LeJsonV4 uniqueInstance deserialize: aString readStream.
-	signals add: signal.
+	aCollection add: signal.
 	^ signal.
 ]
 
 { #category : #private }
-GtRrRunnerLogReader >> processLine: aString [
+GtRrRunnerLogReader >> processLine: aString into: aCollection [
+	| trimmedString |
 
-	^ (aString trimLeft first = ${)
-		ifTrue: [ self processLeJsonLine: aString ]
-		ifFalse: [ self processPipeSeparatedLine: aString ]
+	aString ifNil: [ ^ self ].
+	trimmedString := aString trimLeft.
+	trimmedString ifEmpty: [ ^ self ].
+	^ (trimmedString first = ${)
+		ifTrue: [ self processLeJsonLine: aString into: aCollection ]
+		ifFalse: [ self processPipeSeparatedLine: aString into: aCollection ]
 ]
 
 { #category : #private }
@@ -108,6 +113,30 @@ GtRrRunnerLogReader >> processPipeSeparatedLine: aString [
 
 	data := (aString splitOn: ' | ') allButFirst.
 	[ signals add: (signal := cls new initializeFromTimestamp: date andData: data) ]
+		on: Error
+		do: [ :ex | strictMode ifTrue: [ ex pass ] ].
+	^ signal
+]
+
+{ #category : #private }
+GtRrRunnerLogReader >> processPipeSeparatedLine: aString into: aCollection [
+	| words date cls data signal |
+
+	words := aString splitOn: Character space.
+	"Minimum is date, class, signal type"
+	words size < 3 ifTrue: [ ^ self ].
+	(self shouldLoad: words) ifFalse: [ ^ self ].
+
+	[ date := DateAndTime readFrom: words first readStream ]
+		on: Error
+		do: [ :ex | ^ self ].
+	cls := Smalltalk classOrTraitNamed: words second asSymbol.
+	cls ifNil: [ ^ self ].
+	(cls canUnderstand: #initializeFromTimestamp:andData:) ifFalse: [ ^ self ].
+	(self shouldLoad: words) ifFalse: [ ^ self ].
+
+	data := (aString splitOn: ' | ') allButFirst.
+	[ aCollection add: (signal := cls new initializeFromTimestamp: date andData: data) ]
 		on: Error
 		do: [ :ex | strictMode ifTrue: [ ex pass ] ].
 	^ signal

@@ -1,7 +1,7 @@
 Class {
 	#name : #GtRemoteRunnerExecutionLogEvent,
 	#superclass : #GtBeaconLogEvent,
-	#category : #'RemoteRunner-Logging-Events'
+	#category : 'RemoteRunner-Logging-Events'
 }
 
 { #category : #printing }

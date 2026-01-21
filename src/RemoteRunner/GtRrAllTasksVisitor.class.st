@@ -6,7 +6,7 @@ Class {
 	#instVars : [
 		'visitBlock'
 	],
-	#category : #'RemoteRunner-Tasks'
+	#category : 'RemoteRunner-Tasks'
 }
 
 { #category : #'instance creation' }

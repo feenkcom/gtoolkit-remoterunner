@@ -4,5 +4,5 @@ GtRrManualManagerStartupAndShutdown controls the manager and assumes that all wo
 Class {
 	#name : #GtRrManualManagerStartupAndShutdown,
 	#superclass : #GtRrManagerStartupAndShutdown,
-	#category : #'RemoteRunner-Runner'
+	#category : 'RemoteRunner-Runner'
 }

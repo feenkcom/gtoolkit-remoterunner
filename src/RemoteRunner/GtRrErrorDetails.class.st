@@ -5,7 +5,7 @@ Class {
 		'errorMessage',
 		'trace'
 	],
-	#category : #'RemoteRunner-Runner'
+	#category : 'RemoteRunner-Runner'
 }
 
 { #category : #'instance creation' }

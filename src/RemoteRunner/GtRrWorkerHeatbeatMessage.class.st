@@ -1,7 +1,7 @@
 Class {
 	#name : #GtRrWorkerHeatbeatMessage,
 	#superclass : #GtRrWorkerMessage,
-	#category : #'RemoteRunner-Model'
+	#category : 'RemoteRunner-Model'
 }
 
 { #category : #processing }

@@ -9,7 +9,7 @@ Class {
 		'extent',
 		'workerConnection'
 	],
-	#category : #'RemoteRunner-UI'
+	#category : 'RemoteRunner-UI'
 }
 
 { #category : #'api - instantiation' }

@@ -9,7 +9,7 @@ Class {
 		'cachedItems',
 		'testCaseState'
 	],
-	#category : #'RemoteRunner-UI'
+	#category : 'RemoteRunner-UI'
 }
 
 { #category : #accessing }

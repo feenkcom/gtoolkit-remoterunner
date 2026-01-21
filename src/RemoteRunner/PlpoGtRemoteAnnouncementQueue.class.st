@@ -1,7 +1,7 @@
 Class {
 	#name : #PlpoGtRemoteAnnouncementQueue,
 	#superclass : #PharoLinkProxyObject,
-	#category : #'RemoteRunner-AnnouncementQueue'
+	#category : 'RemoteRunner-AnnouncementQueue'
 }
 
 { #category : #accessing }

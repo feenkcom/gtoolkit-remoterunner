@@ -1,7 +1,7 @@
 Class {
 	#name : #GtRrWorkerApplyChangesStartingSignal,
 	#superclass : #GtRrWorkerApplyChangesSignal,
-	#category : #'RemoteRunner-Signals'
+	#category : 'RemoteRunner-Signals'
 }
 
 { #category : #testing }

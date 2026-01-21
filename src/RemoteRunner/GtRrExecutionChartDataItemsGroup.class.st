@@ -7,7 +7,7 @@ Class {
 		'identifier',
 		'label'
 	],
-	#category : #'RemoteRunner-UI'
+	#category : 'RemoteRunner-UI'
 }
 
 { #category : #serialization }

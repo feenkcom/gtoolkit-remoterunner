@@ -7,7 +7,7 @@ Class {
 		'watching',
 		'announcers'
 	],
-	#category : #'RemoteRunner-Jobs-Notifications'
+	#category : 'RemoteRunner-Jobs-Notifications'
 }
 
 { #category : #accessing }

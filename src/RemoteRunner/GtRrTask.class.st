@@ -30,7 +30,7 @@ Class {
 		'executionData',
 		'properties'
 	],
-	#category : #'RemoteRunner-Tasks'
+	#category : 'RemoteRunner-Tasks'
 }
 
 { #category : #accessing }

@@ -8,7 +8,7 @@ Class {
 		'slowest',
 		'name'
 	],
-	#category : #'RemoteRunner-Analysis'
+	#category : 'RemoteRunner-Analysis'
 }
 
 { #category : #'instance creation' }

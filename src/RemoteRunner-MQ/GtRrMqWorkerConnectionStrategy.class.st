@@ -11,7 +11,7 @@ Class {
 		'runnerControlChannelDefinition',
 		'taskQueueDefinition'
 	],
-	#category : #'RemoteRunner-MQ-Worker'
+	#category : 'RemoteRunner-MQ-Worker'
 }
 
 { #category : #commands }

@@ -6,7 +6,7 @@ Class {
 		'gtRrMqProcessor',
 		'asyncWorkerConfiguration'
 	],
-	#category : #'RemoteRunner-MQ-Runner'
+	#category : 'RemoteRunner-MQ-Runner'
 }
 
 { #category : #accessing }

@@ -14,7 +14,7 @@ Class {
 		'queue',
 		'announcingObject'
 	],
-	#category : #'RemoteRunner-AnnouncementQueue'
+	#category : 'RemoteRunner-AnnouncementQueue'
 }
 
 { #category : #accessing }

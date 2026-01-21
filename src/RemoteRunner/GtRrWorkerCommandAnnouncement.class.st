@@ -5,7 +5,7 @@ Class {
 		'command',
 		'message'
 	],
-	#category : #'RemoteRunner-Announcements'
+	#category : 'RemoteRunner-Announcements'
 }
 
 { #category : #accessing }

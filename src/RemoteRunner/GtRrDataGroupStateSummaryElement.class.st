@@ -1,7 +1,7 @@
 Class {
 	#name : #GtRrDataGroupStateSummaryElement,
 	#superclass : #GtRrDataGroupStateElement,
-	#category : #'RemoteRunner-UI'
+	#category : 'RemoteRunner-UI'
 }
 
 { #category : #accessing }

@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'script'
 	],
-	#category : #'RemoteRunner-Tasks'
+	#category : 'RemoteRunner-Tasks'
 }
 
 { #category : #accessing }

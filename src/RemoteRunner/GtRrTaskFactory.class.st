@@ -6,7 +6,7 @@ Class {
 		'taskTimeout',
 		'prePostTaskActions'
 	],
-	#category : #'RemoteRunner-Tasks'
+	#category : 'RemoteRunner-Tasks'
 }
 
 { #category : #'private - utility' }
@@ -94,6 +94,17 @@ GtRrTaskFactory >> startedTasksGroupedByWorker [
 			aTask workerId ]
 ]
 
+{ #category : #'api - generation' }
+GtRrTaskFactory >> tasks [
+	| tasks |
+
+	tasks := stream contents.
+	tasks do: [ :task |
+		prePostTaskActions ifNotNil:
+			[ task prePostTaskActions: prePostTaskActions ] ].
+	^ tasks
+]
+
 { #category : #accessing }
 GtRrTaskFactory >> taskTimeout [
 	<return: #Duration or: nil>
@@ -105,15 +116,4 @@ GtRrTaskFactory >> taskTimeout [
 GtRrTaskFactory >> taskTimeout: aDuration [
 
 	taskTimeout := aDuration
-]
-
-{ #category : #'api - generation' }
-GtRrTaskFactory >> tasks [
-	| tasks |
-
-	tasks := stream contents.
-	tasks do: [ :task |
-		prePostTaskActions ifNotNil:
-			[ task prePostTaskActions: prePostTaskActions ] ].
-	^ tasks
 ]

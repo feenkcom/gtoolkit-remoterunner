@@ -13,7 +13,7 @@ Class {
 		'changesSync',
 		'workerManager'
 	],
-	#category : #'RemoteRunner-Runner'
+	#category : 'RemoteRunner-Runner'
 }
 
 { #category : #accessing }

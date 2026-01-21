@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'task'
 	],
-	#category : #'RemoteRunner-Model'
+	#category : 'RemoteRunner-Model'
 }
 
 { #category : #'as yet unclassified' }

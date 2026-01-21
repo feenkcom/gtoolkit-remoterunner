@@ -5,7 +5,7 @@ Class {
 		'taskContextId',
 		'taskId'
 	],
-	#category : #'RemoteRunner-Model'
+	#category : 'RemoteRunner-Model'
 }
 
 { #category : #'as yet unclassified' }

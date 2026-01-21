@@ -6,7 +6,7 @@ Trait {
 	#instVars : [
 		'announcementQueue'
 	],
-	#category : #'RemoteRunner-AnnouncementQueue'
+	#category : 'RemoteRunner-AnnouncementQueue'
 }
 
 { #category : #'announcements - queue' }
