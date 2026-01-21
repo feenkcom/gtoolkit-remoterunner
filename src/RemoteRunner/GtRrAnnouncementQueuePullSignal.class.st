@@ -1,7 +1,7 @@
 Class {
 	#name : #GtRrAnnouncementQueuePullSignal,
 	#superclass : #GtRrAnnouncementQueueSignal,
-	#category : 'RemoteRunner-Logging-Signals'
+	#category : #'RemoteRunner-Logging-Signals'
 }
 
 { #category : #accessing }

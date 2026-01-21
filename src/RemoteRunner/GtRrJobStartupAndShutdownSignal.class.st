@@ -5,7 +5,7 @@ Class {
 		'jobId',
 		'eventType'
 	],
-	#category : 'RemoteRunner-Signals'
+	#category : #'RemoteRunner-Signals'
 }
 
 { #category : #logging }

@@ -12,7 +12,7 @@ Class {
 		'checkProcess',
 		'promise'
 	],
-	#category : 'RemoteRunner-Worker'
+	#category : #'RemoteRunner-Worker'
 }
 
 { #category : #'instance creation' }

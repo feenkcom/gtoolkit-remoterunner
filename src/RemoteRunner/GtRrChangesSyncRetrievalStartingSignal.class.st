@@ -1,7 +1,7 @@
 Class {
 	#name : #GtRrChangesSyncRetrievalStartingSignal,
 	#superclass : #GtRrChangesSyncRetrievalSignal,
-	#category : 'RemoteRunner-Signals'
+	#category : #'RemoteRunner-Signals'
 }
 
 { #category : #testing }

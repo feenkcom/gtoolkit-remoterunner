@@ -6,7 +6,7 @@ Class {
 	#instVars : [
 		'theRunner'
 	],
-	#category : 'RemoteRunner-Examples'
+	#category : #'RemoteRunner-Examples'
 }
 
 { #category : #accessing }

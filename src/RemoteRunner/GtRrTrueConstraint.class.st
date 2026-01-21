@@ -6,7 +6,7 @@ Class {
 	#classInstVars : [
 		'instance'
 	],
-	#category : 'RemoteRunner-Constraints'
+	#category : #'RemoteRunner-Constraints'
 }
 
 { #category : #accessing }

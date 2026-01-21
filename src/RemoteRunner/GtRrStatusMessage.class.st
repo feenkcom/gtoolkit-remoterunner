@@ -6,7 +6,7 @@ Class {
 		'messageString',
 		'sourceToolLabel'
 	],
-	#category : 'RemoteRunner-Status'
+	#category : #'RemoteRunner-Status'
 }
 
 { #category : #'instance creation' }

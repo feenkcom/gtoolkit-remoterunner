@@ -1,7 +1,7 @@
 Class {
 	#name : #GtRrResourceWorkerCountCalculator,
 	#superclass : #GtRrWorkerCountCalculator,
-	#category : 'RemoteRunner-WorkerCount'
+	#category : #'RemoteRunner-WorkerCount'
 }
 
 { #category : #testing }

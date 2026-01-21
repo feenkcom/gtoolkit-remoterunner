@@ -1,7 +1,7 @@
 Class {
 	#name : #GtRrWorkerChangesLogEvent,
 	#superclass : #GtRrWorkerOperationLogEvent,
-	#category : 'RemoteRunner-Logging-Events'
+	#category : #'RemoteRunner-Logging-Events'
 }
 
 { #category : #'as yet unclassified' }

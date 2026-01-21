@@ -8,7 +8,7 @@ Class {
 		'maxRetries',
 		'retryCount'
 	],
-	#category : 'RemoteRunner-TaskRetry'
+	#category : #'RemoteRunner-TaskRetry'
 }
 
 { #category : #accessing }

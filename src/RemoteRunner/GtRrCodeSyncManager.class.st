@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'codeSync'
 	],
-	#category : 'RemoteRunner-Runner-Manager'
+	#category : #'RemoteRunner-Runner-Manager'
 }
 
 { #category : #accessing }

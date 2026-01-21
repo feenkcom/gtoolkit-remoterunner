@@ -18,7 +18,7 @@ Class {
 	#instVars : [
 		'failedTask'
 	],
-	#category : 'RemoteRunner-TaskRetry'
+	#category : #'RemoteRunner-TaskRetry'
 }
 
 { #category : #accessing }

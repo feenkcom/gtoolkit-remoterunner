@@ -1,7 +1,7 @@
 Class {
 	#name : #GtRrAnnouncementQueuePullEvent,
 	#superclass : #GtRrAnnouncementQueueEvent,
-	#category : 'RemoteRunner-Logging-Events'
+	#category : #'RemoteRunner-Logging-Events'
 }
 
 { #category : #accessing }

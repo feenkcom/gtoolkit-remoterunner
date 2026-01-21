@@ -5,7 +5,7 @@ Class {
 		'attribute',
 		'value'
 	],
-	#category : 'RemoteRunner-Constraints'
+	#category : #'RemoteRunner-Constraints'
 }
 
 { #category : #'instance creation' }

@@ -14,13 +14,21 @@ Class {
 		'attributes',
 		'taskContext'
 	],
-	#category : 'RemoteRunner-MQ-Runner'
+	#category : #'RemoteRunner-MQ-Runner'
 }
 
 { #category : #accessing }
 GtRrMqWorkerConnection class >> connectionLostMessage [
 
 	^ 'Worker connection lost'
+]
+
+{ #category : #lepiter }
+GtRrMqWorkerConnection class >> deSerializeAllImplementorsInstances [
+
+	^ { self new
+		attributes: { #workerIpAddress -> '1.2.3.4' } asDictionary;
+		lastHeartbeat: DateAndTime now }
 ]
 
 { #category : #lepiter }

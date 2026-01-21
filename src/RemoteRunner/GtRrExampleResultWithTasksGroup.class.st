@@ -3,7 +3,7 @@ Class {
 	#superclass : #Object,
 	#traits : 'TGtGroupWithItems',
 	#classTraits : 'TGtGroupWithItems classTrait',
-	#category : 'RemoteRunner-Reports'
+	#category : #'RemoteRunner-Reports'
 }
 
 { #category : #'accessing - grouping' }

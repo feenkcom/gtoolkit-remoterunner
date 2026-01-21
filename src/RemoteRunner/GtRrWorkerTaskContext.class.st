@@ -11,7 +11,7 @@ Class {
 		'exceptionHandlingStrategy',
 		'jobId'
 	],
-	#category : 'RemoteRunner-Worker'
+	#category : #'RemoteRunner-Worker'
 }
 
 { #category : #accessing }

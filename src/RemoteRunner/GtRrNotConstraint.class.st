@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'constraint'
 	],
-	#category : 'RemoteRunner-Constraints'
+	#category : #'RemoteRunner-Constraints'
 }
 
 { #category : #accessing }

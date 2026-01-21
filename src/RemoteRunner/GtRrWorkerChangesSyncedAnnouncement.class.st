@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'events'
 	],
-	#category : 'RemoteRunner-Announcements'
+	#category : #'RemoteRunner-Announcements'
 }
 
 { #category : #accessing }

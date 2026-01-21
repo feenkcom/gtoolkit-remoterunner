@@ -9,7 +9,7 @@ Class {
 	#instVars : [
 		'application'
 	],
-	#category : 'RemoteRunner-Worker'
+	#category : #'RemoteRunner-Worker'
 }
 
 { #category : #naming }

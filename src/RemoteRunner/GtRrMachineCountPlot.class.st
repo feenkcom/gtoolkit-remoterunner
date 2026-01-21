@@ -8,7 +8,7 @@ Class {
 		'minY',
 		'maxY'
 	],
-	#category : 'RemoteRunner-Analysis'
+	#category : #'RemoteRunner-Analysis'
 }
 
 { #category : #'example - axis' }
@@ -23,11 +23,6 @@ GtRrMachineCountPlot >> axisX [
 			self axisXLabels.
 			self axisXName.
 		}
-]
-
-{ #category : #accessing }
-GtRrMachineCountPlot >> axisXkey [
-	^'Minutes'
 ]
 
 { #category : #accessing }
@@ -98,6 +93,11 @@ GtRrMachineCountPlot >> axisXTicks [
 		ticks: 10
 ]
 
+{ #category : #accessing }
+GtRrMachineCountPlot >> axisXkey [
+	^'Minutes'
+]
+
 { #category : #'example - axis' }
 GtRrMachineCountPlot >> axisY [
 
@@ -109,11 +109,6 @@ GtRrMachineCountPlot >> axisY [
 			self axisYName.
 			self axisYLabels.
 			self axisYTicks width: 10. }
-]
-
-{ #category : #accessing }
-GtRrMachineCountPlot >> axisYkey [
-	^'Number of Worker Machines'
 ]
 
 { #category : #'example - axis' }
@@ -177,6 +172,11 @@ GtRrMachineCountPlot >> axisYTicks [
 			height: 2;
 			background: (Color gray alpha: 0.8) ];
 		ticks: 7
+]
+
+{ #category : #accessing }
+GtRrMachineCountPlot >> axisYkey [
+	^'Number of Worker Machines'
 ]
 
 { #category : #accessing }

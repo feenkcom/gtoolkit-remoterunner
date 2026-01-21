@@ -1,5 +1,5 @@
 Class {
 	#name : #GtRrExamplesProgressNotification,
 	#superclass : #GtRrChecksJobProgressNotification,
-	#category : 'RemoteRunner-Jobs-Notifications'
+	#category : #'RemoteRunner-Jobs-Notifications'
 }

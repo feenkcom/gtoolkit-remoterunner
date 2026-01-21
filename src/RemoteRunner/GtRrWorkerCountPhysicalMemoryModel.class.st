@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'availableMemory'
 	],
-	#category : 'RemoteRunner-WorkerCount'
+	#category : #'RemoteRunner-WorkerCount'
 }
 
 { #category : #serialization }

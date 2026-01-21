@@ -5,7 +5,7 @@ Class {
 		'taskId',
 		'taskContextId'
 	],
-	#category : 'RemoteRunner-Signals'
+	#category : #'RemoteRunner-Signals'
 }
 
 { #category : #initialization }

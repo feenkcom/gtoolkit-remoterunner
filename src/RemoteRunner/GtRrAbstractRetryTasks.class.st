@@ -4,7 +4,7 @@ Subclasses hold information about which tasks / checks were retried in task comp
 Class {
 	#name : #GtRrAbstractRetryTasks,
 	#superclass : #Object,
-	#category : 'RemoteRunner-Announcements'
+	#category : #'RemoteRunner-Announcements'
 }
 
 { #category : #'instance creation' }

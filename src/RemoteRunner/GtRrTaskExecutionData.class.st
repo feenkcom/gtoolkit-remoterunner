@@ -15,7 +15,7 @@ Class {
 		'additionalData',
 		'resourceReport'
 	],
-	#category : 'RemoteRunner-Tasks'
+	#category : #'RemoteRunner-Tasks'
 }
 
 { #category : #lejsonv4 }

@@ -5,7 +5,7 @@ Class {
 		'oldProcess',
 		'newProcess'
 	],
-	#category : 'RemoteRunner-Announcements'
+	#category : #'RemoteRunner-Announcements'
 }
 
 { #category : #printing }

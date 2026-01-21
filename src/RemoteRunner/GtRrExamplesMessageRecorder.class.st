@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'messages'
 	],
-	#category : 'RemoteRunner-Examples'
+	#category : #'RemoteRunner-Examples'
 }
 
 { #category : #accessing }

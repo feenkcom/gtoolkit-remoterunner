@@ -6,7 +6,7 @@ Class {
 		'announcer',
 		'shouldNotifyUpdates'
 	],
-	#category : 'RemoteRunner-Logging-Events'
+	#category : #'RemoteRunner-Logging-Events'
 }
 
 { #category : #callbacks }

@@ -1,7 +1,7 @@
 Class {
 	#name : #GtRrAnnouncementQueueDeliveryInitiatedSignal,
 	#superclass : #GtRrAnnouncementQueueDeliveryAnnouncement,
-	#category : 'RemoteRunner-Logging-Signals'
+	#category : #'RemoteRunner-Logging-Signals'
 }
 
 { #category : #testing }

@@ -6,7 +6,7 @@ Class {
 		'attributes',
 		'registeredWorkerCount'
 	],
-	#category : 'RemoteRunner-Signals'
+	#category : #'RemoteRunner-Signals'
 }
 
 { #category : #accessing }

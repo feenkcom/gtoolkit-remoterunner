@@ -5,7 +5,7 @@ Class {
 		'failedLabel',
 		'uncompletedLabel'
 	],
-	#category : 'RemoteRunner-Jobs-Notifications'
+	#category : #'RemoteRunner-Jobs-Notifications'
 }
 
 { #category : #'building - widgets' }

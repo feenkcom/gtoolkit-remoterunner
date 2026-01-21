@@ -9,7 +9,7 @@ Class {
 		'remoteRunner',
 		'connection'
 	],
-	#category : 'RemoteRunner-Worker'
+	#category : #'RemoteRunner-Worker'
 }
 
 { #category : #accessing }

@@ -1,7 +1,7 @@
 Class {
 	#name : #GtRrCodeSyncApplyChangeCompletedSignal,
 	#superclass : #GtRrCodeSyncApplyChangeSignal,
-	#category : 'RemoteRunner-Signals'
+	#category : #'RemoteRunner-Signals'
 }
 
 { #category : #testing }

@@ -1,7 +1,7 @@
 Class {
 	#name : #GtRrPrePostTaskAction,
 	#superclass : #Object,
-	#category : 'RemoteRunner-PrePostTaskActions'
+	#category : #'RemoteRunner-PrePostTaskActions'
 }
 
 { #category : #actions }

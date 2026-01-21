@@ -1,7 +1,7 @@
 Class {
 	#name : #GtRemoteRunnerSignal,
 	#superclass : #BeaconSignal,
-	#category : 'RemoteRunner-Signals'
+	#category : #'RemoteRunner-Signals'
 }
 
 { #category : #accessing }

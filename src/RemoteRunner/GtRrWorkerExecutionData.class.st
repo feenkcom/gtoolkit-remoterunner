@@ -8,7 +8,7 @@ Class {
 		'additionalData',
 		'resourceReport'
 	],
-	#category : 'RemoteRunner-Worker'
+	#category : #'RemoteRunner-Worker'
 }
 
 { #category : #lejsonv4 }

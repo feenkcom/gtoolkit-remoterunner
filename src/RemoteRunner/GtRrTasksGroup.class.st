@@ -3,7 +3,7 @@ Class {
 	#superclass : #Object,
 	#traits : 'TGtGroupWithItems',
 	#classTraits : 'TGtGroupWithItems classTrait',
-	#category : 'RemoteRunner-Tasks'
+	#category : #'RemoteRunner-Tasks'
 }
 
 { #category : #'math functions' }

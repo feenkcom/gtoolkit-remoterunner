@@ -5,7 +5,7 @@ Class {
 		'workerLabel',
 		'appliedChangesEvents'
 	],
-	#category : 'RemoteRunner-Analysis'
+	#category : #'RemoteRunner-Analysis'
 }
 
 { #category : #'instance creation' }
@@ -51,19 +51,6 @@ GtRrWorkerAppliedChangesAnalysis >> codeSyncChanges [
 ]
 
 { #category : #views }
-GtRrWorkerAppliedChangesAnalysis >> gtOverviewFor: aView [
-	<gtView>
-
-	^ aView columnedList
-		title: 'Overview';
-		priority: 5;
-		items:  [ self overviewData ];
-		column: 'Name' text: [ :each | each first ];
-		column: 'Value' text: [ :each | each second ];
-		send: [ :each | each third ]
-]
-
-{ #category : #views }
 GtRrWorkerAppliedChangesAnalysis >> gViewChangesFor: aView [
 	<gtView>
 	^(aView forward)
@@ -91,6 +78,19 @@ GtRrWorkerAppliedChangesAnalysis >> gViewInitiallyReplayedChangesFor: aView [
 		priority: 10;
 		object: [self initiallyReplayedChanges];
 		view: #gtViewChangesFor:
+]
+
+{ #category : #views }
+GtRrWorkerAppliedChangesAnalysis >> gtOverviewFor: aView [
+	<gtView>
+
+	^ aView columnedList
+		title: 'Overview';
+		priority: 5;
+		items:  [ self overviewData ];
+		column: 'Name' text: [ :each | each first ];
+		column: 'Value' text: [ :each | each second ];
+		send: [ :each | each third ]
 ]
 
 { #category : #testing }

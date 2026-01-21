@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'workersAnalyses'
 	],
-	#category : 'RemoteRunner-Analysis'
+	#category : #'RemoteRunner-Analysis'
 }
 
 { #category : #'instance creation' }

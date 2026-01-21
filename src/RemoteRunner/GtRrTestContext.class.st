@@ -8,7 +8,7 @@ Class {
 		'isFinished',
 		'contextTimeoutTime'
 	],
-	#category : 'RemoteRunner-Runner-State'
+	#category : #'RemoteRunner-Runner-State'
 }
 
 { #category : #'instance creation' }

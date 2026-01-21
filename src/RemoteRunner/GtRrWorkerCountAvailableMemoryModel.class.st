@@ -7,7 +7,7 @@ Class {
 	#instVars : [
 		'workerCountCalculator'
 	],
-	#category : 'RemoteRunner-WorkerCount'
+	#category : #'RemoteRunner-WorkerCount'
 }
 
 { #category : #serialization }

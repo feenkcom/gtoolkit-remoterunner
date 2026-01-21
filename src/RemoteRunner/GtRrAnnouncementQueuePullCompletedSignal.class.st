@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'retrivedAnnouncementCount'
 	],
-	#category : 'RemoteRunner-Logging-Signals'
+	#category : #'RemoteRunner-Logging-Signals'
 }
 
 { #category : #accessing }

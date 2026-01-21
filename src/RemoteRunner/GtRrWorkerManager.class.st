@@ -24,7 +24,7 @@ Class {
 	#classVars : [
 		'SharedAccess'
 	],
-	#category : 'RemoteRunner-Runner-Workers'
+	#category : #'RemoteRunner-Runner-Workers'
 }
 
 { #category : #accessing }
@@ -424,12 +424,6 @@ GtRrWorkerManager >> startLocalWorkersFor: aGtRrJobContext [
 	self startLocalWorkers.
 ]
 
-{ #category : #'start-stop' }
-GtRrWorkerManager >> startup [
-
-	self startLocalWorkers.
-]
-
 { #category : #private }
 GtRrWorkerManager >> startWatchdog [
 
@@ -439,6 +433,12 @@ GtRrWorkerManager >> startWatchdog [
 		[ watchdogSemaphore waitTimeoutSeconds: 30.
 		self watchDogCheck.
 		 ] ] forkNamed: 'GtRrWorkerManager local watch dog'.
+]
+
+{ #category : #'start-stop' }
+GtRrWorkerManager >> startup [
+
+	self startLocalWorkers.
 ]
 
 { #category : #accessing }

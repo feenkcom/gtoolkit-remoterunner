@@ -4,7 +4,7 @@ A GtRrCodeSyncTask is sent to each code synced remote runner worker every time a
 Class {
 	#name : #GtRrCodeSyncTask,
 	#superclass : #GtRrTask,
-	#category : 'RemoteRunner-Runner-CodeSync'
+	#category : #'RemoteRunner-Runner-CodeSync'
 }
 
 { #category : #'instance creation' }

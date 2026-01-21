@@ -33,7 +33,7 @@ Class {
 		'MessageTtl',
 		'QueueTtl'
 	],
-	#category : 'RemoteRunner-MQ-Runner'
+	#category : #'RemoteRunner-MQ-Runner'
 }
 
 { #category : #accessing }
@@ -282,6 +282,12 @@ GtRrStompMqProcessor >> isRunning [
 ]
 
 { #category : #testing }
+GtRrStompMqProcessor >> isStopRequested [
+
+	^ state = #stopRequested
+]
+
+{ #category : #testing }
 GtRrStompMqProcessor >> isStopped [
 
 	^ state = #stopped
@@ -291,12 +297,6 @@ GtRrStompMqProcessor >> isStopped [
 GtRrStompMqProcessor >> isStopping [
 
 	^ self isStopped or: [ self isStopRequested ]
-]
-
-{ #category : #testing }
-GtRrStompMqProcessor >> isStopRequested [
-
-	^ state = #stopRequested
 ]
 
 { #category : #accessing }

@@ -1,7 +1,7 @@
 Class {
 	#name : #PlpoGtRrManualManagerStartupAndShutdown,
 	#superclass : #PlpoGtRrManagerStartupAndShutdown,
-	#category : 'RemoteRunner-Runner'
+	#category : #'RemoteRunner-Runner'
 }
 
 { #category : #accessing }

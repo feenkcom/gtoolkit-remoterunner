@@ -5,7 +5,7 @@ Class {
 		'omReference',
 		'source'
 	],
-	#category : 'RemoteRunner-Exceptions'
+	#category : #'RemoteRunner-Exceptions'
 }
 
 { #category : #'instance creation' }

@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'logger'
 	],
-	#category : 'RemoteRunner-PrePostTaskActions'
+	#category : #'RemoteRunner-PrePostTaskActions'
 }
 
 { #category : #actions }
