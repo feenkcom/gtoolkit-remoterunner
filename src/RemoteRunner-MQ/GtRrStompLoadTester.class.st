@@ -16,7 +16,10 @@ Class {
 		'flushBufferDelay',
 		'startReceive',
 		'startSend',
-		'runProcess'
+		'runProcess',
+		'username',
+		'password',
+		'hostname'
 	],
 	#category : #'RemoteRunner-MQ-Runner'
 }
@@ -26,8 +29,9 @@ GtRrStompLoadTester >> connect [
 
 	mqProcessor := GtRrStompMqProcessor new
 		owner: self;
-		mqUsername: 'alistair';
-		mqPassword: 'stomping';
+		mqUsername: username;
+		mqPassword: password;
+		mqHostName: hostname;
 		commandChannelDefinition: commandQueue;
 		messageChannelDefinition: queue;
 		taskCallback:  [ :mqMessage :gtMessage :anOwner |
@@ -48,6 +52,16 @@ GtRrStompLoadTester >> gtSummaryFor: aView [
 		  column: #Value text: [ :item | item second ];
 		  send: #last;
 		  actionUpdateButton.
+]
+
+{ #category : #accessing }
+GtRrStompLoadTester >> hostname [
+	^ hostname
+]
+
+{ #category : #accessing }
+GtRrStompLoadTester >> hostname: anObject [
+	hostname := anObject
 ]
 
 { #category : #'as yet unclassified' }
@@ -74,6 +88,16 @@ GtRrStompLoadTester >> messageWithSeqId: seq payload: aString [
 			<< 'seq=';
 				print: seq; lf;
 			<< aString ].
+]
+
+{ #category : #accessing }
+GtRrStompLoadTester >> password [
+	^ password
+]
+
+{ #category : #accessing }
+GtRrStompLoadTester >> password: anObject [
+	password := anObject
 ]
 
 { #category : #'as yet unclassified' }
@@ -162,4 +186,14 @@ GtRrStompLoadTester >> summaryAttributes [
 		{ 'Last Receive'. lastMessageReceivedTime. }.
 		{ 'Receive Time'. receiveTime. }.
 		}.
+]
+
+{ #category : #accessing }
+GtRrStompLoadTester >> username [
+	^ username
+]
+
+{ #category : #accessing }
+GtRrStompLoadTester >> username: anObject [
+	username := anObject
 ]
