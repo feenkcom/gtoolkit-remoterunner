@@ -884,7 +884,7 @@ GtRemoteRunner >> moveLoggingTo: aFileReference [
 
 	oldLogger := log.
 	newLogger := SessionFallbackFileLogger new
-		serializer: GtLeJsonSignalSerializer new;
+		serializer: GtBeaconJsonSignalSerializer new;
 		filename: fileReference.
 	log := StreamLoggerFlusher new logger: newLogger.
 	self startLogger: log.
