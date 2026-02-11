@@ -694,7 +694,7 @@ GtRrWorker >> startLoggerFor: worker arguments: args [
 				flush].
 	logger := StreamLoggerFlusher new
 				logger: (SessionFallbackFileLogger new
-					serializer: GtLeJsonSignalSerializer new;
+					serializer: GtBeaconJsonSignalSerializer new;
 					filename: beaconFile).
 	logger startFor: self beaconAnnouncements.
 ]
