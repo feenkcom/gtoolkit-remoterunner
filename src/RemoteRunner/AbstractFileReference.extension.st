@@ -12,7 +12,7 @@ AbstractFileReference >> gtRemoteRunnerLogFor: aView [
 		priority: 10;
 		object: 
 			[ | reader |
-			reader := GtRrRunnerLogReader new 
+			reader := GtBeaconJsonLogReader new 
 				filename: self;
 				strictMode: false.
 			reader load.
