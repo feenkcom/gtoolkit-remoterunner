@@ -136,7 +136,8 @@ GtRrExamplesTask >> run [
 			exception := exampleResult basicReturnValue value.
 			announcement 
 				initializeExceptionClass: exception class
-				messageText: (exception messageText ifEmpty: [ exception class name ])
+				messageText: ((exception messageText ifNil: [ '' ])
+					ifEmpty: [ exception class name ])
 				trace: exception stackString
 				additionalData: exception pharoLinkAdditionalData ].
 		announcement ] as: Array.
