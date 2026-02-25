@@ -17,6 +17,13 @@ GtRrStompMqTaskCallbackSignal >> gtMessagePrintString: anObject [
 	gtMessagePrintString := anObject
 ]
 
+{ #category : #initialization }
+GtRrStompMqTaskCallbackSignal >> initializeFromTimestamp: aDateAndTime andData: aCollection [ 
+
+	super initializeFromTimestamp: aDateAndTime andData: aCollection.
+	gtMessagePrintString := aCollection third.
+]
+
 { #category : #printing }
 GtRrStompMqTaskCallbackSignal >> printOneLineContentsOn: aStream [
 

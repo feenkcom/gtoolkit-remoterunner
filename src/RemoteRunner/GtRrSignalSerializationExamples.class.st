@@ -19,7 +19,7 @@ GtRrSignalSerializationExamples >> gtRrResultProcessingErrorAnnouncement [
 		yourself.
 	serialized := String streamContents: [ :stream |
 		signal printOneLineOn: stream ].
-	reader := GtRrRunnerLogReader new.
+	reader := GtBeaconJsonLogReader new.
 	signals := OrderedCollection new.
 	deserialized := reader processLine: serialized into: signals.
 	self assert: deserialized class equals: GtRrResultProcessingErrorAnnouncement.
