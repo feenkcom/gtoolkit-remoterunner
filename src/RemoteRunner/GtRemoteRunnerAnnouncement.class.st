@@ -29,6 +29,18 @@ GtRemoteRunnerAnnouncement >> initializeFromSlotData: aDictionary [
 		basicProperties: (aDictionary at: #properties)
 ]
 
+{ #category : #testing }
+GtRemoteRunnerAnnouncement >> isEndSignalType [
+
+	^ false
+]
+
+{ #category : #testing }
+GtRemoteRunnerAnnouncement >> isStartSignalType [
+
+	^ false
+]
+
 { #category : #'as yet unclassified' }
 GtRemoteRunnerAnnouncement >> printOneLineContentsOn: aStream [
 
