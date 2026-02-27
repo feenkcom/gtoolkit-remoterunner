@@ -2,7 +2,8 @@ Class {
 	#name : #GtRrMqQueueTaskSignal,
 	#superclass : #GtRemoteRunnerSignal,
 	#instVars : [
-		'taskId'
+		'taskId',
+		'isRetry'
 	],
 	#category : #'RemoteRunner-Signals'
 }
@@ -12,6 +13,16 @@ GtRrMqQueueTaskSignal >> initializeFromTimestamp: aDateAndTime andData: aCollect
 
 	super initializeFromTimestamp: aDateAndTime andData: aCollection.
 	taskId := aCollection at: 3.
+]
+
+{ #category : #accessing }
+GtRrMqQueueTaskSignal >> isRetry [
+	^isRetry
+]
+
+{ #category : #accessing }
+GtRrMqQueueTaskSignal >> isRetry: anObject [
+	isRetry := anObject
 ]
 
 { #category : #printing }
