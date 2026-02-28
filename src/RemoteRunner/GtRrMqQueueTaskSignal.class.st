@@ -2,16 +2,43 @@ Class {
 	#name : #GtRrMqQueueTaskSignal,
 	#superclass : #GtRemoteRunnerSignal,
 	#instVars : [
-		'taskId'
+		'taskId',
+		'isRetry'
 	],
 	#category : #'RemoteRunner-Signals'
 }
+
+{ #category : #serialization }
+GtRrMqQueueTaskSignal class >> fromGtJsonDictionary: aDictionary [
+
+	^ (super fromGtJsonDictionary: aDictionary)
+		isRetry: (aDictionary at: 'isRetry');
+		yourself
+]
+
+{ #category : #serialization }
+GtRrMqQueueTaskSignal >> asGtJsonLogDictionary [
+
+	^ super asGtJsonLogDictionary
+		at: 'isRetry' put: isRetry;
+		yourself
+]
 
 { #category : #initialization }
 GtRrMqQueueTaskSignal >> initializeFromTimestamp: aDateAndTime andData: aCollection [
 
 	super initializeFromTimestamp: aDateAndTime andData: aCollection.
 	taskId := aCollection at: 3.
+]
+
+{ #category : #accessing }
+GtRrMqQueueTaskSignal >> isRetry [
+	^isRetry
+]
+
+{ #category : #accessing }
+GtRrMqQueueTaskSignal >> isRetry: anObject [
+	isRetry := anObject
 ]
 
 { #category : #printing }

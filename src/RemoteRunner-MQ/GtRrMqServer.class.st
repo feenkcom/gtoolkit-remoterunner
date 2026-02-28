@@ -326,12 +326,14 @@ GtRrMqServer >> sendWorkerTaskContext: aWorkerTaskContext [
 
 	GtRrMqQueueTaskStartingSignal new
 		taskId: aWorkerTaskContext taskId;
+		isRetry: false;
 		emit.
 	taskMessage := GtRrRunnerTaskMessage new
 		task: aWorkerTaskContext.
 	mqProcessor sendGtMessage: taskMessage to: self taskQueueDefinition.
 	GtRrMqQueueTaskCompletedSignal new
 		taskId: aWorkerTaskContext taskId;
+		isRetry: false;
 		emit.
 ]
 
@@ -341,6 +343,7 @@ GtRrMqServer >> sendWorkerTaskContextFirst: aWorkerTaskContext [
 
 	GtRrMqQueueTaskStartingSignal new
 		taskId: aWorkerTaskContext taskId;
+		isRetry: true;
 		emit.
 	taskMessage := GtRrRunnerTaskMessage new
 		task: aWorkerTaskContext.
@@ -350,6 +353,7 @@ GtRrMqServer >> sendWorkerTaskContextFirst: aWorkerTaskContext [
 		headers: { 'priority' -> '2' } asDictionary.
 	GtRrMqQueueTaskCompletedSignal new
 		taskId: aWorkerTaskContext taskId;
+		isRetry: true;
 		emit.
 ]
 

@@ -1332,8 +1332,11 @@ GtRemoteRunner >> startJob: aGtRrJob [
 
 { #category : #'api - logger' }
 GtRemoteRunner >> startLogger: aLogger [
+	| set |
 
-	aLogger startFor: GtRemoteRunnerAnnouncement, GtRemoteRunnerSignal, PharoLinkServerSignal, GtAwsWebServiceCommandSignal, StringSignal, StampSignals.
+	set := AnnouncementSetWithExclusions withAll: GtRemoteRunnerAnnouncement, GtRemoteRunnerSignal, PharoLinkServerSignal, GtAwsWebServiceCommandSignal, StringSignal, StampSignals.
+	set addExclusions: GtRrStompMqSendMessageSignal, GtRrStompMqTaskCallbackSignal.
+	aLogger startFor: set.
 ]
 
 { #category : #'api - logger' }
