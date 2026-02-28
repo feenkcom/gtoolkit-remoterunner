@@ -8,6 +8,22 @@ Class {
 	#category : #'RemoteRunner-Signals'
 }
 
+{ #category : #serialization }
+GtRrMqQueueTaskSignal class >> fromGtJsonDictionary: aDictionary [
+
+	^ (super fromGtJsonDictionary: aDictionary)
+		isRetry: (aDictionary at: 'isRetry');
+		yourself
+]
+
+{ #category : #serialization }
+GtRrMqQueueTaskSignal >> asGtJsonLogDictionary [
+
+	^ super asGtJsonLogDictionary
+		at: 'isRetry' put: isRetry;
+		yourself
+]
+
 { #category : #initialization }
 GtRrMqQueueTaskSignal >> initializeFromTimestamp: aDateAndTime andData: aCollection [
 
