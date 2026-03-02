@@ -3,9 +3,9 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'baselineStats',
-		'testStats',
 		'testLogFile',
-		'comparisonResults'
+		'comparisonResults',
+		'analyzer'
 	],
 	#category : #'RemoteRunner-JobStats'
 }
@@ -33,10 +33,9 @@ GtRrRunnerLogTimingStatsComparator >> baselineStats: aGtRrTimingStats [
 GtRrRunnerLogTimingStatsComparator >> compare [
 	"Load the test log file, analyze it, and compare against baseline.
 	Answer self with populated comparisonResults."
-	| analyzer |
+
 	analyzer := GtRrRunnerLogTimingAnalyzer forFile: testLogFile.
-	testStats := analyzer analyze.
-	testStats computeAll.
+	self testStats computeAll.
 	comparisonResults := OrderedCollection new.
 	self statisticNames do: [ :statName |
 		self compareStatisticNamed: statName ].
@@ -48,7 +47,7 @@ GtRrRunnerLogTimingStatsComparator >> compareStatisticNamed: aStatName [
 	"Compare a single statistic and add result to comparisonResults"
 	| baselineStat testStat result |
 	baselineStat := baselineStats statAt: aStatName.
-	testStat := testStats statAt: aStatName.
+	testStat := self testStats statAt: aStatName.
 	result := GtRrRunnerLogTimingComparisonResult new
 		statisticName: aStatName;
 		baselineStat: baselineStat;
@@ -147,5 +146,6 @@ GtRrRunnerLogTimingStatsComparator >> testLogFile: aFileReference [
 
 { #category : #accessing }
 GtRrRunnerLogTimingStatsComparator >> testStats [
-	^ testStats
+
+	^ analyzer timingStats
 ]

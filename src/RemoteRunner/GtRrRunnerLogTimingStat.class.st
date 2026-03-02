@@ -3,12 +3,13 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'name',
-		'dataPoints',
 		'average',
 		'standardDeviation',
 		'coefficientOfVariation',
 		'minimum',
-		'maximum'
+		'maximum',
+		'dataPointCount',
+		'varianceSum'
 	],
 	#category : #'RemoteRunner-JobStats'
 }
@@ -18,18 +19,6 @@ GtRrRunnerLogTimingStat class >> named: aString [
 	^ self new
 		name: aString;
 		yourself
-]
-
-{ #category : #adding }
-GtRrRunnerLogTimingStat >> addAllDataPoints: aCollection [
-	"Add multiple data points to the collection"
-	dataPoints addAll: aCollection
-]
-
-{ #category : #adding }
-GtRrRunnerLogTimingStat >> addDataPoint: aNumber [
-	"Add a data point to the collection"
-	dataPoints add: aNumber
 ]
 
 { #category : #accessing }
@@ -59,45 +48,51 @@ GtRrRunnerLogTimingStat >> coefficientOfVariation: aNumber [
 	coefficientOfVariation := aNumber
 ]
 
-{ #category : #computing }
-GtRrRunnerLogTimingStat >> computeStatistics [
-	"Compute average, standard deviation, coefficient of variation, minimum, and maximum from the data points"
-	dataPoints ifEmpty: [ ^ self ].
-	average := dataPoints average.
-	standardDeviation := dataPoints standardDeviation.
+{ #category : #statistics }
+GtRrRunnerLogTimingStat >> computeFromValues: aCollection [
+	"Compute statistics from the given values without storing them."
+	| values |
+	values := aCollection asOrderedCollection.
+	values ifEmpty: [
+		dataPointCount := 0.
+		average := nil.
+		standardDeviation := nil.
+		coefficientOfVariation := nil.
+		minimum := nil.
+		maximum := nil.
+		^ self ].
+	dataPointCount := values size.
+	average := values average.
+	standardDeviation := values standardDeviation.
 	coefficientOfVariation := average isZero
 		ifTrue: [ 0 ]
 		ifFalse: [ (standardDeviation / average) * 100 ].
-	minimum := dataPoints min.
-	maximum := dataPoints max
+	minimum := values min.
+	maximum := values max
+]
+
+{ #category : #statistics }
+GtRrRunnerLogTimingStat >> computeStatistics [
+	"Compute statistics based on existing dataset-backed values."
+	^ self
 ]
 
 { #category : #accessing }
 GtRrRunnerLogTimingStat >> dataPointCount [
 	"Answer the number of data points recorded"
-	^ dataPoints size
-]
-
-{ #category : #accessing }
-GtRrRunnerLogTimingStat >> dataPoints [
-	^ dataPoints
-]
-
-{ #category : #accessing }
-GtRrRunnerLogTimingStat >> dataPoints: aCollection [
-	dataPoints := aCollection
+	^ dataPointCount
 ]
 
 { #category : #testing }
 GtRrRunnerLogTimingStat >> hasDataPoints [
 	"Answer whether any data points have been recorded"
-	^ dataPoints notEmpty
+	^ dataPointCount > 0
 ]
 
 { #category : #initialization }
 GtRrRunnerLogTimingStat >> initialize [
 	super initialize.
-	dataPoints := OrderedCollection new
+	dataPointCount := 0
 ]
 
 { #category : #accessing }
