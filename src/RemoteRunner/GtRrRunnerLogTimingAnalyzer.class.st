@@ -155,8 +155,8 @@ GtRrRunnerLogTimingAnalyzer >> firstTaskStartedSignal [
 
 { #category : #'private - signals' }
 GtRrRunnerLogTimingAnalyzer >> firstWorkerRegistrationSignal [
-	"Find the first non-local worker registration signal in the log.
-	A non-local worker is one where lwLocalWorker attribute is not true."
+	"Find the first worker registration signal in the log."
+
 	^ self signals 
 		detect: [ :each | each isKindOf: GtRrWorkerRegisteredAnnouncement ]
 		ifNone: [ nil ]
@@ -187,7 +187,10 @@ GtRrRunnerLogTimingAnalyzer >> lastTaskQueuedSignal [
 { #category : #accessing }
 GtRrRunnerLogTimingAnalyzer >> numberOfCompletedTasks [
 	"Count the number of completed tasks (task completed signals)"
-	^ self signals count: [ :each | each isKindOf: GtRrTaskCompletedAnnouncement ]
+	^ self signals count: [ :each | 
+		{ GtRrTaskCompletedAnnouncement. GtRrNextTaskCompletedSignal } 
+			anySatisfy: [ :signalClass |
+				each isKindOf: signalClass ] ]
 ]
 
 { #category : #accessing }
