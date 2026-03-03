@@ -44,7 +44,7 @@ GtRrRunnerLogTimingAnalyzerExamples class >> sampleLogsInMemoryFileSystem [
 { #category : #examples }
 GtRrRunnerLogTimingAnalyzerExamples >> analyzeAllSampleLogs [
 	<gtExample>
-	| memoryRoot logFiles analyzer timingStats firstTaskQueuedStat |
+	| memoryRoot logFiles analyzer timingStats |
 	
 	"Get the memory file system with extracted log files"
 	memoryRoot := self class sampleLogsInMemoryFileSystem.
@@ -59,33 +59,33 @@ GtRrRunnerLogTimingAnalyzerExamples >> analyzeAllSampleLogs [
 	
 	"Verify other statistics exist and have data points"
 	self verifyStatistic: 'First task queued time' in: timingStats expected: { 3. 37.0. 0.0. 59.0. 26.3. }.
-	self verifyStatistic: 'First non-local worker registration' in: timingStats expected: { 3. 62748.0. 61297.0. 64472.0. 1310.5. }.
+	self verifyStatistic: 'First worker registration' in: timingStats expected: { 3. 62748.0. 61297.0. 64472.0. 1310.5. }.
 	self verifyStatistic: 'Average message queue time' in: timingStats expected: { 3. 10613.0. 63.0. 16367.0. 7470.2. }.
 	self verifyStatistic: 'Average task time' in: timingStats expected: { 3. 626463.3. 137193.0. 975752.0. 356362.6. }.
 	
 	^ analyzer
 ]
 
-{ #category : #private }
+{ #category : #examples }
 GtRrRunnerLogTimingAnalyzerExamples >> verifyStatistic: aStatName in: timingStats [
 	"Verify that a statistic exists and has 3 data points."
 	| stat |
 	stat := timingStats statAt: aStatName.
 	self assert: stat notNil description: aStatName , ' statistic should exist'.
-	self assert: stat dataPoints size equals: 3.  "One per log file"
+	self assert: stat dataPointCount equals: 3.  "One per log file"
 	self assert: stat average isNumber description: aStatName , ' average should be a number'.
 	self assert: stat minimum isNumber description: aStatName , ' minimum should be a number'.
 	self assert: stat maximum isNumber description: aStatName , ' maximum should be a number'.
 	self assert: stat standardDeviation isNumber description: aStatName , ' standardDeviation should be a number'.
 ]
 
-{ #category : #private }
+{ #category : #examples }
 GtRrRunnerLogTimingAnalyzerExamples >> verifyStatistic: aStatName in: timingStats expected: anArray [
 	| stat |
-
+	
 	stat := timingStats statAt: aStatName.
 	self assert: stat notNil description: aStatName , ' statistic should exist'.
-	self assert: stat dataPoints size equals: anArray first.  "One per log file"
+	self assert: stat dataPointCount equals: anArray first.  "One per log file"
 	self assert: (stat average closeTo: anArray second precision: 0.1).
 	self assert: (stat minimum closeTo: anArray third precision: 0.1).
 	self assert: (stat maximum closeTo: anArray fourth precision: 0.1).

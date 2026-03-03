@@ -4,12 +4,13 @@ Class {
 	#instVars : [
 		'filename',
 		'signals',
-		'timingStats'
+		'timingStats',
+		'currentRun'
 	],
 	#category : #'RemoteRunner-JobStats'
 }
 
-{ #category : #'instance creation' }
+{ #category : #api }
 GtRrRunnerLogTimingAnalyzer class >> analyzeFiles: aCollection [
 	"Create a new instance and analyze the supplied log files"
 	| analyzer |
@@ -17,9 +18,9 @@ GtRrRunnerLogTimingAnalyzer class >> analyzeFiles: aCollection [
 	aCollection do: [ :rrLog |
 		analyzer
 			filename: rrLog;
-			analyze. ].
+			analyze ].
 	analyzer timingStats computeAll.
-	^ analyzer.
+	^ analyzer
 ]
 
 { #category : #'instance creation' }
@@ -32,31 +33,27 @@ GtRrRunnerLogTimingAnalyzer class >> forFile: aFileReference [
 
 { #category : #api }
 GtRrRunnerLogTimingAnalyzer >> analyze [
-	"Run all timing analysis and update the timing stats.
+	"Run all timing analysis and update the timing dataset.
 	Answer the timing stats."
+	self currentRun: (GtRrRunnerLogTimingRun forFile: self filename).
 	self updateFirstTaskQueuedTimeStat.
 	self updateAverageMessageQueueTimeStat.
 	self updateAverageTaskTimeStat.
 	self updateFirstWorkerRegistrationTimeStat.
+	self currentRun collectedAt: self firstJobStartupSignal timestamp.
+	self timingStats addRun: self currentRun.
+	self timingStats computeAll.
 	^ self timingStats
 ]
 
 { #category : #updating }
 GtRrRunnerLogTimingAnalyzer >> appendStatsTo: baselineStats [
-	"Append all data points from the receiver's timing stats to the supplied baseline stats.
+	"Append all data points from the receiver's timing dataset to the supplied baseline stats.
 	For each stat in the receiver, add its data points to the corresponding stat in baselineStats.
 	If a stat doesn't exist in baselineStats, create it.
 	Finally, recalculate all statistics in the baseline.
 	Answer the baselineStats."
-	
-	self timingStats stats keysAndValuesDo: [ :statName :stat |
-		| baselineStat |
-		baselineStat := baselineStats statAt: statName.
-		baselineStat ifNil: [ 
-			baselineStat := GtRrRunnerLogTimingStat named: statName.
-			baselineStats statAt: statName put: baselineStat ].
-		baselineStat addAllDataPoints: stat dataPoints ].
-	baselineStats computeAll.
+	self timingStats appendStatsTo: baselineStats.
 	^ baselineStats
 ]
 
@@ -114,6 +111,16 @@ GtRrRunnerLogTimingAnalyzer >> calculateFirstWorkerRegistrationTime [
 	(startSignal isNil or: [ registrationSignal isNil ]) ifTrue: [ ^ nil ].
 	duration := (registrationSignal timestamp - startSignal timestamp) asNanoSeconds / 1000000.0.
 	^ duration
+]
+
+{ #category : #accessing }
+GtRrRunnerLogTimingAnalyzer >> currentRun [
+	^ currentRun
+]
+
+{ #category : #accessing }
+GtRrRunnerLogTimingAnalyzer >> currentRun: aRun [
+	currentRun := aRun
 ]
 
 { #category : #accessing }
@@ -199,6 +206,12 @@ GtRrRunnerLogTimingAnalyzer >> numberOfQueuedMessages [
 	^ self signals count: [ :each | each isKindOf: GtRrMqQueueTaskStartingSignal ]
 ]
 
+{ #category : #'private - statistics' }
+GtRrRunnerLogTimingAnalyzer >> recordPoint: aNumber named: aStatName [
+	self currentRun ifNil: [ ^ self ].
+	self currentRun addPoint: aNumber forStatisticNamed: aStatName
+]
+
 { #category : #accessing }
 GtRrRunnerLogTimingAnalyzer >> signals [
 	"Lazily load signals from the log file"
@@ -208,8 +221,9 @@ GtRrRunnerLogTimingAnalyzer >> signals [
 
 { #category : #accessing }
 GtRrRunnerLogTimingAnalyzer >> timingStats [
-	"Answer the timing stats, creating if necessary"
-	^ timingStats ifNil: [ timingStats := GtRrRunnerLogTimingStats new ]
+	"Answer the timing stats, creating if necessary."
+	timingStats ifNil: [ timingStats := GtRrRunnerLogTimingStats new ].
+	^ timingStats
 ]
 
 { #category : #accessing }
@@ -218,58 +232,42 @@ GtRrRunnerLogTimingAnalyzer >> timingStats: aGtRrTimingStats [
 	timingStats := aGtRrTimingStats
 ]
 
-{ #category : #updating }
+{ #category : #statistics }
 GtRrRunnerLogTimingAnalyzer >> updateAverageMessageQueueTimeStat [
 	"Calculate and add the average message queue time statistic"
-	| statName stat value |
+	| statName value |
 	statName := 'Average message queue time'.
 	value := self calculateAverageMessageQueueTime.
 	value ifNil: [ ^ self ].
-	stat := self timingStats statAt: statName.
-	stat ifNil: [ 
-		stat := GtRrRunnerLogTimingStat named: statName.
-		self timingStats statAt: statName put: stat ].
-	stat addDataPoint: value
+	self recordPoint: value named: statName
 ]
 
-{ #category : #updating }
+{ #category : #statistics }
 GtRrRunnerLogTimingAnalyzer >> updateAverageTaskTimeStat [
 	"Calculate and add the average task time statistic"
-	| statName stat value |
+	| statName value |
 	statName := 'Average task time'.
 	value := self calculateAverageTaskTime.
 	value ifNil: [ ^ self ].
-	stat := self timingStats statAt: statName.
-	stat ifNil: [ 
-		stat := GtRrRunnerLogTimingStat named: statName.
-		self timingStats statAt: statName put: stat ].
-	stat addDataPoint: value
+	self recordPoint: value named: statName
 ]
 
 { #category : #statistics }
 GtRrRunnerLogTimingAnalyzer >> updateFirstTaskQueuedTimeStat [
 	"Calculate and add the first task queued time statistic"
-	| statName stat value |
+	| statName value |
 	statName := 'First task queued time'.
 	value := self calculateFirstTaskQueuedTime.
 	value ifNil: [ ^ self ].
-	stat := self timingStats statAt: statName.
-	stat ifNil: [ 
-		stat := GtRrRunnerLogTimingStat named: statName.
-		self timingStats statAt: statName put: stat ].
-	stat addDataPoint: value
+	self recordPoint: value named: statName
 ]
 
 { #category : #statistics }
 GtRrRunnerLogTimingAnalyzer >> updateFirstWorkerRegistrationTimeStat [
 	"Calculate and add the first non-local worker registration time statistic"
-	| statName stat value |
-	statName := 'First non-local worker registration'.
+	| statName value |
+	statName := 'First worker registration'.
 	value := self calculateFirstWorkerRegistrationTime.
 	value ifNil: [ ^ self ].
-	stat := self timingStats statAt: statName.
-	stat ifNil: [ 
-		stat := GtRrRunnerLogTimingStat named: statName.
-		self timingStats statAt: statName put: stat ].
-	stat addDataPoint: value
+	self recordPoint: value named: statName
 ]

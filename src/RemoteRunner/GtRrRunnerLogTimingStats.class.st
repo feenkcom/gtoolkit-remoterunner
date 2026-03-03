@@ -31,7 +31,8 @@ Class {
 	#name : #GtRrRunnerLogTimingStats,
 	#superclass : #Object,
 	#instVars : [
-		'stats'
+		'stats',
+		'timingDataset'
 	],
 	#category : #'RemoteRunner-JobStats'
 }
@@ -43,12 +44,21 @@ GtRrRunnerLogTimingStats class >> loadFromFile: aFileReference [
 		STON fromStream: stream ]
 ]
 
-{ #category : #'as yet unclassified' }
-GtRrRunnerLogTimingStats >> computeAll [
-	"Force recalculation of all stats"
+{ #category : #updating }
+GtRrRunnerLogTimingStats >> addRun: aRun [
+	self timingDataset addRun: aRun
+]
 
-	stats do: [ :stat |
-		stat computeStatistics ].
+{ #category : #updating }
+GtRrRunnerLogTimingStats >> appendStatsTo: baselineStats [
+	^ self timingDataset appendStatsTo: baselineStats
+]
+
+{ #category : #statistics }
+GtRrRunnerLogTimingStats >> computeAll [
+	"Recalculate all statistics from the timing dataset."
+	timingDataset ifNil: [ ^ self ].
+	timingDataset computeStatsOn: self
 ]
 
 { #category : #'gt-extensions' }
@@ -69,13 +79,21 @@ GtRrRunnerLogTimingStats >> gtViewStatsOn: aView [
 { #category : #initialization }
 GtRrRunnerLogTimingStats >> initialize [
 	super initialize.
-	stats := Dictionary new
+	stats := Dictionary new.
+	timingDataset := GtRrRunnerLogTimingDataset new
 ]
 
 { #category : #persistence }
 GtRrRunnerLogTimingStats >> saveToFile: aFileReference [
 	"Save the receiver to the given file in STON format."
-	aFileReference asFileReference writeStreamDo: [ :stream |
+	| fileReference bakFile |
+
+	fileReference := aFileReference asFileReference.
+	fileReference exists ifTrue:
+		[ bakFile := fileReference withExtension: 'bak'.
+		bakFile exists ifTrue: [ bakFile ensureDelete ].
+		fileReference copy renameTo: bakFile. ].
+	fileReference writeStreamDo: [ :stream |
 		STON put: self onStreamPretty: stream ]
 ]
 
@@ -101,4 +119,14 @@ GtRrRunnerLogTimingStats >> stats [
 GtRrRunnerLogTimingStats >> stats: aDictionary [
 	"Set the dictionary of timing statistics."
 	stats := aDictionary
+]
+
+{ #category : #accessing }
+GtRrRunnerLogTimingStats >> timingDataset [
+	^ timingDataset ifNil: [ timingDataset := GtRrRunnerLogTimingDataset new ]
+]
+
+{ #category : #accessing }
+GtRrRunnerLogTimingStats >> timingDataset: aDataset [
+	timingDataset := aDataset
 ]
