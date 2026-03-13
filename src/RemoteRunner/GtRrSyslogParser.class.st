@@ -54,7 +54,7 @@ GtRrSyslogParser >> gtSignalsFor: aView [
 GtRrSyslogParser >> initialize [
 
 	super initialize.
-	linuxVersion := '] Linux version'.
+	linuxVersion := 'Linux version'.
 	gtRr := '[GtRr] '
 ]
 
@@ -109,7 +109,7 @@ GtRrSyslogParser >> parseLine: line [
 	| index |
 
 	(index := line indexOfSubCollection: linuxVersion) > 0 ifTrue:
-		[ ^ self signalFromLine: line index: index+2 ]
+		[ ^ self signalFromLine: line index: index ]
 	ifFalse: [ (index := line indexOfSubCollection: gtRr) > 0 ifTrue:
 		[ ^ self signalFromLine: line index: index+7 ] ].
 	^ nil
