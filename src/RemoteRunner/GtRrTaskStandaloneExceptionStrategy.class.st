@@ -38,9 +38,9 @@ GtRrTaskStandaloneExceptionStrategy >> runTask: taskContext inContext: aGtRrWork
 	If the task execution doesn't complete, fork a process to notify of failure.  The fork is required to work around a bug in unwinding the stack and evaluating ensure: & ifCurtailed: blocks."
 	| result |
 
-	[ result := taskContext task timedRun ]
+	[ result := taskContext task timedRun.
+	aGtRrWorkerExecutionContext signalTaskCompletion. ]
 		on: self handledExceptions
 		do: [ :ex |
 			self handleException: ex workerContext: aGtRrWorkerExecutionContext ].
-	aGtRrWorkerExecutionContext signalTaskCompletion
 ]
