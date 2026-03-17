@@ -92,7 +92,7 @@ GtRrRunnerLogTimingStats >> saveToFile: aFileReference [
 	fileReference exists ifTrue:
 		[ bakFile := fileReference withExtension: 'bak'.
 		bakFile exists ifTrue: [ bakFile ensureDelete ].
-		fileReference copy renameTo: bakFile. ].
+		fileReference copy renameTo: bakFile basename. ].
 	fileReference writeStreamDo: [ :stream |
 		STON put: self onStreamPretty: stream ]
 ]
