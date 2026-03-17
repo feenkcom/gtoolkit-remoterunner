@@ -714,12 +714,15 @@ GtRrWorker >> stepService [
 		taskId: taskContext taskId;
 		emit.
 	self preTaskConfiguration.
+	executionContext isNil ifFalse:
+		[ self error: 'Attempt to start worker execution with existing context' ].
 	executionContext := GtRrWorkerExecutionContext new
 		taskContext: taskContext;
 		timeout: taskContext taskTimeout;
 		worker: self.
 	executionContext forkAndRun.
 	executionContext waitForTaskCompletion.
+	executionContext stop.
 	executionContext := nil.
 ]
 

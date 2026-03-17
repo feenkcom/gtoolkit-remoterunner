@@ -76,6 +76,8 @@ GtRrWorkerExecutionContext >> signalTaskCompletion [
 { #category : #'start-stop' }
 GtRrWorkerExecutionContext >> stop [
 
+	( timeoutProcess isTerminating or: [ timeoutProcess isTerminated ]) ifFalse:
+		[ timeoutProcess terminate ].
 	( executionProcess isTerminating or: [ executionProcess isTerminated ]) ifFalse:
 		[ executionProcess signalException:
 			GtRrWorkerTerminationNotification new ]
@@ -88,9 +90,12 @@ GtRrWorkerExecutionContext >> taskContext [
 ]
 
 { #category : #accessing }
-GtRrWorkerExecutionContext >> taskContext: anObject [
+GtRrWorkerExecutionContext >> taskContext: aTaskContext [
 
-	taskContext := anObject
+	self assert: taskContext isNil
+		description: 'Attempt to replace the taskContext'.
+
+	taskContext := aTaskContext
 ]
 
 { #category : #accessing }
