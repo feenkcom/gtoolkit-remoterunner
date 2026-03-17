@@ -90,9 +90,12 @@ GtRrWorkerExecutionContext >> taskContext [
 ]
 
 { #category : #accessing }
-GtRrWorkerExecutionContext >> taskContext: anObject [
+GtRrWorkerExecutionContext >> taskContext: aTaskContext [
 
-	taskContext := anObject
+	self assert: taskContext isNil
+		description: 'Attempt to replace the taskContext'.
+
+	taskContext := aTaskContext
 ]
 
 { #category : #accessing }
