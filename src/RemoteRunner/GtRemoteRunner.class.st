@@ -1053,7 +1053,7 @@ GtRemoteRunner >> privateRegisterWorkerWithDetails: aDictionary controlChannelAv
 			updateRegisteredWorkerCounts: registeredWorkers;
 			isRunning: self isRunning.
 		managerStartupAndShutdown registerWorker: workerConnection ].
-	self announceAndLog: (GtRrWorkerRegisteredAnnouncement new
+	self announce: (GtRrWorkerRegisteredAnnouncement new
 				worker: workerConnection).
 	aBoolean ifTrue:
 		[ self announceAndLog: (GtRrWorkerControlChannelRegisteredAnnouncement worker: workerConnection). ].
@@ -1085,7 +1085,7 @@ GtRemoteRunner >> privateTaskDone: aTaskContextId workerId: workerId jobId: jobI
 		taskContext markTaskCompleted.
 		(retryTasks isNotEmpty and: [ registeredWorkers isNotEmpty ]) ifTrue:
 			[ self queueTasksFirst: retryTasks jobContext: taskContext jobContext ].
-		self announceAndLog: taskContext taskCompletedAnnouncement.
+		self announce: taskContext taskCompletedAnnouncement.
 		self checkJobCompleted: taskContext ].
 	self taskCompletedForWorkerId: workerId.
 ]
@@ -1105,7 +1105,7 @@ GtRemoteRunner >> privateTaskFailed: aTaskContextId workerId: workerId execution
 	registeredAvailable := registeredWorkers isNotEmpty.
 	(retryTasks isEmpty or: [ registeredAvailable not ]) ifTrue:
 		[ taskContext markTaskFailed.
-		self announceAndLog: taskContext taskFailedAnnouncement. ]
+		self announce: taskContext taskFailedAnnouncement. ]
 	ifFalse:
 		[ self queueTasksFirst: retryTasks jobContext: taskContext jobContext.
 		taskContext quietlyCancelTask. ].
