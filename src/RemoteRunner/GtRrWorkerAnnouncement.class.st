@@ -128,10 +128,17 @@ GtRrWorkerAnnouncement >> workerId: anId [
 ]
 
 { #category : #accessing }
+GtRrWorkerAnnouncement >> workerIpAddress [
+	^ self workerAttributes
+		at: #awsInstanceIp
+		ifAbsent: [ ]
+]
+
+{ #category : #accessing }
 GtRrWorkerAnnouncement >> workingDirectory [
 	^ self workerAttributes
 		at: #workingDirectory 
-		ifAbsent: [ '<unknown directory>' ]
+		ifAbsent: [ ]
 ]
 
 { #category : #serialization }
