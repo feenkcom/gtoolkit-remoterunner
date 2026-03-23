@@ -322,6 +322,18 @@ GtRrStompMqProcessor >> localAddressString [
 	^ GtRemoteRunner printIpAddress: self localAddress
 ]
 
+{ #category : #private }
+GtRrStompMqProcessor >> logClosingException: anException [
+
+	StampHeartbeatSignal new
+		lastReadActivity: mqClient lastReadActivity;
+		lastWriteActivity: mqClient lastWriteActivity;
+		exception: anException;
+		emit.
+	anException class = StampError ifTrue:
+		[ (GtRrStampErrorSignal fromStampError: anException) emit ].
+]
+
 { #category : #accessing }
 GtRrStompMqProcessor >> messageChannelDefinition [
 	^ messageChannelDefinition
@@ -633,22 +645,17 @@ GtRrStompMqProcessor >> startMqListener [
 	mqListener := 
 		[ "Process messages until ConnectionClosed is signalled"
 		[ mqClient runWith: self mqProcessor ]
-			on: ZnIncomplete, SocketError
-			do: [ :ex | 
-				closingException := ex freeze.
-				StampHeartbeatSignal new
-					lastReadActivity: mqClient lastReadActivity;
-					lastWriteActivity: mqClient lastWriteActivity;
-					exception: closingException;
-					emit. ].
+			on: ZnIncomplete, SocketError, StampError
+			do: [ :ex | closingException := ex freeze ].
 		listenerStopping := true.
-		"Ask the owner to take over.
+		"Log the exception and ask the owner to take over.
 		The receiver should either be shut down or reconnected.
 		Either way, this process should terminate once the processing is complete, and not continue to be used."
-		(closingException notNil and:
-		[ mqClient imageSessionChanged not ]) ifTrue:
-			[ owner ifNotNil: [ :anOwner |
-				anOwner handleMqListenerException: closingException ] ].
+		closingException ifNotNil:
+			[ self logClosingException: closingException.
+			mqClient imageSessionChanged ifFalse:
+				[ owner ifNotNil: [ :anOwner |
+					anOwner handleMqListenerException: closingException ] ] ].
 		 ] forkNamed: 'GtRrMq message listener'.
 ]
 
