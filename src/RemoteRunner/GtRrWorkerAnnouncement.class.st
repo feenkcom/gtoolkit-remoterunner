@@ -62,7 +62,7 @@ GtRrWorkerAnnouncement >> printOneLineContentsOn: aStream [
 		<< ' | ';
 		nextPutAll: remoteAddressString asString;
 		<< ' | ';
-		nextPutAll: self workingDirectory;
+		nextPutAll: self workingDirectory asString;
 		<< ' | ';
 		nextPutAll: (workerAttributes storeString)
 ]

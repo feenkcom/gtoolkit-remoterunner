@@ -815,10 +815,10 @@ GtRrWorker >> syncChangesFromServerWith: aConnection [
 GtRrWorker >> syncChangesWith: aConnection [
 	| changesSync changesFile |
 
-	(attributes at: #changesSync ifAbsent: [ false ])
-		ifTrue: [ changesSync := self syncChangesFromServerWith: aConnection ].
 	attributes at: #changesFile
 		ifPresent: [ :filename | changesFile := self syncChangesFromFile: filename asFileReference ].
+	(attributes at: #changesSync ifAbsent: [ false ])
+		ifTrue: [ changesSync := self syncChangesFromServerWith: aConnection ].
 	^ { changesSync. changesFile. }
 ]
 
