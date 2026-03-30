@@ -119,7 +119,7 @@ GtRrCodeSync >> onJobCompleted: anAnnouncement [
 
 	job := anAnnouncement job.
 	job hasErrors ifTrue: 
-		[ [ self error: 'Failed to code sync' ] fork ].
+		[ [ GtRrCodeSyncFailed signalJob: job codeSync: self ] fork ].
 ]
 
 { #category : #accessing }

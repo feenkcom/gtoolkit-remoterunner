@@ -195,7 +195,7 @@ GtRemoteRunner class >> newHeadlessRunnerProcess [
 			'--listenOn'.
 			'7042'.
 			'--log'.
-			'--detachChangesFromFileSystem'.
+			'--detachChanges'.
 			'--noLepiterReload'.
 			'--noGtImageUpdate'. }.
 	proc
