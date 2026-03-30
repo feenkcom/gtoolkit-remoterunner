@@ -240,11 +240,12 @@ GtRrWorkerManager >> newWorkerLocalProcess [
 
 { #category : #private }
 GtRrWorkerManager >> newWorkerLocalProcessArgumentsFor: someSettings [
-	| args |
+	| args logDir |
 
 	remoteIpAddress ifNil:
 		[ self error: 'Attempt to start worker without server address' ].
 
+	logDir := 'workerLogs'.
 	args := OrderedCollection new.
 	args addAll: vmArguments.
 	args
@@ -258,7 +259,7 @@ GtRrWorkerManager >> newWorkerLocalProcessArgumentsFor: someSettings [
 	args
 		add: '--log';
 		add: '--logDir';
-			add: 'workerLogs';
+			add: logDir;
 		add: '--logPrefix';
 			add: (self logPrefix, '.', workerIndex asString);
 		add: '--serverSocketAddress';
@@ -279,7 +280,8 @@ GtRrWorkerManager >> newWorkerLocalProcessArgumentsFor: someSettings [
 			add: 'gtRrWorkerIndex';
 			add: workerIndex asString.
 	args
-		add: '--detachChangesFromFileSystem';
+		add: '--detachChangesDir';
+			add: logDir;
 		add: '--epiceaMemoryStore';
 		add: '--noLepiterReload';
 		add: '--noGtImageUpdate'.
