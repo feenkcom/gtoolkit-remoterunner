@@ -104,7 +104,7 @@ GtRrRemoteRunnerWorkerMachineSequenceAnalysis >> readFrom: aStream [
 				[ | newSignal |
 				[ newSignal := self readSignalFromLine: aLine.
 				signals add: newSignal ]
-					on: Error, SyntaxErrorNotification
+					on: Error
 					do: [ :ex | corruptEntries add: aLine -> ex freeze ] ] ].
 ]
 
