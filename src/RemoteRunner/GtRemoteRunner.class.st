@@ -104,7 +104,7 @@ GtRemoteRunner class >> commandLine [
 { #category : #clap }
 GtRemoteRunner class >> commandLineCommand [
 
-	^ (ClapCommand id: #remoteRunnerServer)
+	^ (ClapCommandSpec id: #remoteRunnerServer)
 		  description: 'Run the RemoteRunner server';
 		  add: ClapFlag forHelp;
 		  add: ((ClapFlag id: #log) description: 'Enable logging to stdout');
