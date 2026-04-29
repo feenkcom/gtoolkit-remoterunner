@@ -32,7 +32,7 @@ GtRrWorker class >> commandLine [
 { #category : #accessing }
 GtRrWorker class >> commandLineCommand [
 
-	^ (ClapCommand id: self commandLineName)
+	^ (ClapCommandSpec id: self commandLineName)
 		description: 'Run the RemoteRunner worker';
 		add: ClapFlag forHelp;
 		add: ((ClapFlag id: #log) description: 'Enable logging');
