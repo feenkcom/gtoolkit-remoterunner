@@ -21,62 +21,12 @@ Class {
 	#category : #'RemoteRunner-Worker'
 }
 
-{ #category : #accessing }
+{ #category : #'command line' }
 GtRrWorker class >> commandLine [
 	<commandline>
 
-	^ self commandLineCommand meaning: [ :args | 
-		self processCommandLineArgs: args ].
-]
-
-{ #category : #accessing }
-GtRrWorker class >> commandLineCommand [
-
-	^ (ClapCommandSpec id: self commandLineName)
-		description: 'Run the RemoteRunner worker';
-		add: ClapFlag forHelp;
-		add: ((ClapFlag id: #log) description: 'Enable logging');
-		add: ((ClapFlag id: #logDir) 
-				description: 'Directory to save logs in (./workerLogs)';
-				add: (ClapPositional id: #directory);
-				yourself);
-		add: ((ClapFlag id: #logPrefix) 
-				description: 'Prefix to use when creating beacon and PharoDebug.log files';
-				add: (ClapPositional id: #prefix);
-				yourself);
-		add: ((ClapFlag id: #serverSocketAddress)
-				   description:
-					   'The server socket address on which to connect for requests';
-				   add: (ClapPositional id: #address);
-				   yourself);
-		add: ((ClapFlag id: #connectionStrategy)
-				   description:
-					   'The connection strategy, e.g. #perMessage, #single';
-				   add: (ClapPositional id: #strategyId);
-				   yourself);
-		add: ((ClapFlag id: #changesSync) description:
-			'Synchronise the changes with the remote runner on startup');
-		add: ((ClapFlag id: #changesFile) 
-			description: 'Load the specified changes file on startup';
-			add: (ClapPositional id: #changesFilename);
-			yourself);
-		add: ((ClapFlag id: #attribute)
-				   description: 'add key/value pairs to attributes';
-				   multiple: true;
-				   add: (ClapPositional id: #key);
-				   add: (ClapPositional id: #value);
-				   yourself);
-		add: ((ClapFlag id: #workerClass) 
-				description: 'Specify the class of the worker (GtRrWorker)';
-				add: (ClapPositional id: #workerClassName);
-				yourself);
-		yourself
-]
-
-{ #category : #clap }
-GtRrWorker class >> commandLineName [
-
-	^ #remoteRunnerWorker
+	^ GtRrWorkerClapCommand commandLineCommand meaning: [ :args | 
+		GtRrWorkerClapCommand new executeWithArgs: args ].
 ]
 
 { #category : #clap }
@@ -99,7 +49,7 @@ GtRrWorker class >> heartbeatDelay [
 GtRrWorker class >> isCommandLineWorker [
 	"Answer a boolean indicating whether a GtRrWorker was started from the command line"
 
-	^ Smalltalk commandLine argumentsInclude: self commandLineName
+	^ Smalltalk commandLine argumentsInclude: GtRrWorkerClapCommand commandLineName
 ]
 
 { #category : #clap }
@@ -145,70 +95,6 @@ GtRrWorker class >> newPharoLinkServer: aString [
 	^ PharoLinkServer new
 		  listenPort: aString;
 		  yourself
-]
-
-{ #category : #clap }
-GtRrWorker class >> processCommandLineArgs: args [
-	| worker connectionStrategyId connectionStrategy serverSocketAddress workerClass |
-
-	args at: #help
-		ifPresent: 
-			[:help |
-			help value.
-			help context exitSuccess].
-	Stdio stdout
-		<< Smalltalk commandLineString;
-		lf.
-	workerClass := self environment at: (args
-						at: #workerClass
-						ifPresent: [:arg | (arg at: #workerClassName) value asSymbol]
-						ifAbsent: [#GtRrWorker]).
-	worker := workerClass new.
-	args occurrencesOf: #attribute
-		do: [:arg | worker attributes at: (arg at: #key) value put: (arg at: #value) value].
-	worker startLoggerFor: worker arguments: args.
-	GtRrWorkerCliStartingSignal new emit.
-	StringSignal emit: Smalltalk commandLineString.
-	serverSocketAddress := ((args at: #serverSocketAddress) at: #address)
-				value.
-	StringSignal emit: 'Server address: ' , serverSocketAddress.
-	StringSignal emit: 'WorkerClass: ' , workerClass name.
-	connectionStrategyId := args
-				at: #connectionStrategy
-				ifPresent: [:arg | (arg at: #strategyId) value]
-				ifAbsent: [].
-	StringSignal
-		emit: 'ConnectionStrategy: ' , (connectionStrategyId ifNil: ['<none>']).
-	connectionStrategyId ifNotNil: 
-		[connectionStrategy := (workerClass connectionStrategyLookup
-			at: connectionStrategyId
-			ifAbsent: [self error: 
-				'Invalid connectionStrategy: ' , connectionStrategyId printString])
-					value.
-		worker connectionStrategy: connectionStrategy].
-	worker connectionStrategy socketAddress: serverSocketAddress.
-	args at: #changesSync
-		ifPresent: 
-			[StringSignal emit: 'changesSync: true'.
-			worker attributes at: #changesSync put: true].
-	args at: #changesFile
-		ifPresent: 
-			[:arg |
-			| filename |
-			filename := (arg at: #changesFilename) value.
-			worker attributes at: #changesFile put: filename.
-			StringSignal emit: 'changesFile: ' , filename asString].
-	StringSignal emit: 'Worker Attributes:'.
-	worker attributes keysAndValuesDo: 
-			[:key :value |
-			StringSignal emit: 'key: ' , key asString , ', value: ' , value asString].
-	StringSignal emit: 'Install UI manager...'.
-	UIManager default: GtRrUIManager new.
-	StringSignal emit: 'Starting worker...'.
-	worker start.
-	GtRrWorkerCliCompletedSignal new emit.
-	"Hibernate until the process exits"
-	Semaphore new wait
 ]
 
 { #category : #'instance creation' }
@@ -692,6 +578,7 @@ GtRrWorker >> startLoggerFor: worker arguments: args [
 				<< pharoDebugLogFile fullName;
 				lf;
 				flush].
+	beaconFile parent ensureCreateDirectory.
 	logger := StreamLoggerFlusher new
 				logger: (SessionFallbackFileLogger new
 					serializer: GtBeaconJsonSignalSerializer new;

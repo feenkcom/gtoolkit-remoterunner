@@ -93,29 +93,6 @@ GtRemoteRunner class >> cleanUp [
 	self cleanUniqueInstance
 ]
 
-{ #category : #clap }
-GtRemoteRunner class >> commandLine [
-	<commandline>
-
-	^ self commandLineCommand meaning: [ :args | 
-		self processCommandLineArgs: args ].
-]
-
-{ #category : #clap }
-GtRemoteRunner class >> commandLineCommand [
-
-	^ (ClapCommandSpec id: #remoteRunnerServer)
-		  description: 'Run the RemoteRunner server';
-		  add: ClapFlag forHelp;
-		  add: ((ClapFlag id: #log) description: 'Enable logging to stdout');
-		  add: ((ClapFlag id: #listenOn)
-				   description:
-					   'The port number to listen on.  Should also be able to specify an interface (TDB)';
-				   add: (ClapPositional id: #address);
-				   yourself);
-		  yourself
-]
-
 { #category : #accessing }
 GtRemoteRunner class >> connectionOnPort: aNumberOrString [
 	"Answer a PharoLink connection to the supplied address"
@@ -223,37 +200,6 @@ GtRemoteRunner class >> printIpAddress: aByteArray [
 
 	^ String streamContents: [ :stream |
 		aByteArray printOn: stream delimiter: '.' ]
-]
-
-{ #category : #clap }
-GtRemoteRunner class >> processCommandLineArgs: args [
-	| runner logger address announcements |
-
-	args
-		at: #help ifPresent: [ :help | 
-			help value.
-			help context exitSuccess ];
-		at: #log ifPresent: [ 
-			SignalLogger resetAllInstances.
-			logger := RestartingStreamLogger stdout.
-			announcements := AnnouncementSetWithExclusions withAll:
-				{ GtRemoteRunnerAnnouncement, 
-				PharoLinkSignal,
-				StringSignal }.
-			announcements 
-				addExclusions: ContextStackSignal allSubclasses;
-				addExclusion: PharoLinkEvalSignal.
-			logger startFor: announcements ].
-	address := ((args at: #listenOn) at: #address) value.
-	runner := self new.
-	runner 
-		port: address asNumber;
-		managerStartupAndShutdown: GtRrManualManagerStartupAndShutdown new.
-	StringSignal emit: 'Server address: ' , runner port asString.
-	runner start.
-	StringSignal emit: 'Running'.
-	"Hibernate until the process exits"
-	Semaphore new wait.
 ]
 
 { #category : #'headless remote runner' }

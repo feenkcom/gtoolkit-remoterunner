@@ -35,7 +35,7 @@ GtRrWorkerExamples >> commandLineWithAttributes [
 	<gtExample>
 	<return: #ClapNamedMatch>
 	| commandLine attributes |
-	commandLine := GtRrWorker commandLineCommand
+	commandLine := GtRrWorkerClapCommand commandLineCommand
 			match: #('remoteRunnerWorker' '--serverSocketAddress' '7084' '--attribute' 'attr1' 'v1' '--attribute' 'attr2' 'v2').
 
 	self assert: (commandLine at: #log) value equals: false.
@@ -59,7 +59,7 @@ GtRrWorkerExamples >> commandLineWithChanges [
 	<gtExample>
 	<return: #ClapNamedMatch>
 	| commandLine |
-	commandLine := GtRrWorker commandLineCommand
+	commandLine := GtRrWorkerClapCommand commandLineCommand
 			match: #('remoteRunnerWorker' '--serverSocketAddress' '7084' '--changesSync' '--changesFile' '/path/to/file').
 
 	self assert: (commandLine at: #log) value equals: false.
@@ -86,7 +86,7 @@ GtRrWorkerExamples >> commandLineWithStrategy [
 	<gtExample>
 	<return: #ClapNamedMatch>
 	| commandLine connectionStrategyId |
-	commandLine := GtRrWorker commandLineCommand match: #('remoteRunnerWorker').
+	commandLine := GtRrWorkerClapCommand commandLineCommand match: #('remoteRunnerWorker').
 
 	connectionStrategyId := commandLine
 			at: #connectionStrategy
@@ -96,7 +96,7 @@ GtRrWorkerExamples >> commandLineWithStrategy [
 	self assert: connectionStrategyId equals: #perMessage.
 
 
-	commandLine := GtRrWorker commandLineCommand
+	commandLine := GtRrWorkerClapCommand commandLineCommand
 			match: #('remoteRunnerWorker' '--connectionStrategy' 'single').
 
 	connectionStrategyId := commandLine
@@ -117,7 +117,7 @@ GtRrWorkerExamples >> commandLineWithoutAttributes [
 	<return: #ClapNamedMatch>
 	| commandLine |
 
-	commandLine := GtRrWorker commandLineCommand
+	commandLine := GtRrWorkerClapCommand commandLineCommand
 			match: #('remoteRunnerWorker' '--log' '--serverSocketAddress' '7084').
 
 	self assert: (commandLine at: #log) value equals: true.
