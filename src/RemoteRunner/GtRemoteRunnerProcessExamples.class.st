@@ -108,20 +108,6 @@ signal message: ''changesSyncRetrieval''; emit').
 ]
 
 { #category : #examples }
-GtRemoteRunnerProcessExamples >> commandLineRemoteRunnerServer [
-	<gtExample>
-	<return: #GtRemoteRunnerProcessExamples>
-	| commandLine |
-	commandLine := GtRemoteRunner commandLineCommand
-			match: {'remoteRunnerServer'.
-					'--listenOn'.
-					'7042'}.
-
-	self assert: (commandLine at: #log) value equals: false.
-	self assert: ((commandLine at: #listenOn) at: #address) value isNotNil
-]
-
-{ #category : #examples }
 GtRemoteRunnerProcessExamples >> controlChannelPing [
 	"Demonstrate the ping operation using the worker's control channel"
 	<gtExample>

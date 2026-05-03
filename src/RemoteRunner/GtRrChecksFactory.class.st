@@ -129,6 +129,21 @@ GtRrChecksFactory >> job [
 	^ GtRrChecksJob new tasks: self tasks.
 ]
 
+{ #category : #adding }
+GtRrChecksFactory >> rejectExampleClasses: aCollection [
+	| tasks newStream classNames |
+
+	classNames := aCollection collect: #name.
+	tasks := stream contents.
+	newStream := (Array new: 10) writeStream.
+	tasks do: [ :task | | newTask |
+		newTask := task asExplicitTask.
+		newTask checkNames: (newTask checkNames reject:
+			[ :assoc | classNames includes: assoc key]).
+		newStream nextPut: newTask ].
+	stream := newStream.
+]
+
 { #category : #accessing }
 GtRrChecksFactory >> retryStrategy [
 	^ retryStrategy

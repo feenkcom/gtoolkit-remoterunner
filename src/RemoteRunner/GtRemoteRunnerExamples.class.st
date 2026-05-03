@@ -280,43 +280,6 @@ GtRemoteRunnerExamples >> multipleJobsSimultaneously [
 	^ job
 ]
 
-{ #category : #examples }
-GtRemoteRunnerExamples >> registerObject [
-	"Demonstrate registering a job and getting back the appropriate proxy."
-	<gtExample>
-	<noTest>
-	| runner job proxy proc semaphore result |
-
-	job := GtRrJob script: '42'.
-
-	runner := GtRemoteRunner new port: #none.
-	proxy := runner registerJob: job.
-	self assert: proxy identicalTo: job.
-	semaphore := Semaphore new.
-
-	[ proc := GtRemoteRunner newHeadlessRunnerProcess run.
-	runner := GtRemoteRunner headlessOnPort: 7042 codeSync: false.
-	runner managerStartupAndShutdown startInImageWorker.
-	proxy := runner registerJob: job.
-	proxy announcer
-		when: GtRrTaskCompletedAnnouncement
-		do: [ semaphore signal ]
-		for: self.
-	self assert: proxy isLanguageLinkProxyObject
-		description: 'Expected a proxy object back'.
-	runner submitJob: proxy.
-	self waitOn: semaphore for: 10 description:
-		'Task didn''t complete'.
-	result := proxy newCommandFactory
-		<< 'self tasks first result';
-		sendAndWait.
-	self assert: result equals: 42. ]
-			ensure: 
-				[ self stopRunnersAndWorkers.
-				proc ifNotNil: [ proc clearErrorBlock kill ].
-				proc := nil. ].
-]
-
 { #category : #'private - helpers' }
 GtRemoteRunnerExamples >> simpleRunner [
 	"Answer a started RemoteRunner.

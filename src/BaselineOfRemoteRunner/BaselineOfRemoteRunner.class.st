@@ -27,3 +27,27 @@ BaselineOfRemoteRunner >> baseline: spec [
 			spec requires: #(#RemoteRunner #Stamp) ].
 	]
 ]
+
+{ #category : #postload }
+BaselineOfRemoteRunner >> postLoadRemoteRunner: spec [
+
+	self forPharo13AndNewer: 
+		[ GtRrWorkerClapCommand class compile:
+'commandLine
+	<commandline>
+
+	^ self commandLineCommand
+		commandClass: GtRrWorkerClapCommand;
+		yourself'
+			classified: #'command line'.
+		GtRrWorker class removeSelector: #commandLine ]
+	forOlder:
+		[ GtRrWorker class compile:
+'commandLine
+	<commandline>
+
+	^ GtRrWorkerClapCommand commandLineCommand meaning: [ :args | 
+		GtRrWorkerClapCommand new executeWithArgs: args ].'
+			classified:  #'command line'.
+		GtRrWorkerClapCommand class removeSelector: #commandLine ].
+]

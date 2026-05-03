@@ -9,6 +9,13 @@ Class {
 	#category : #'RemoteRunner-Tasks'
 }
 
+{ #category : #accessing }
+GtRrTaskFactory >> checkNames [
+
+	^ self tasks flatCollect: [ :task |
+		task asExplicitTask checkNames ]
+]
+
 { #category : #'private - utility' }
 GtRrTaskFactory >> classWithName: aString [
 
