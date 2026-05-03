@@ -8,6 +8,7 @@ Class {
 BaselineOfRemoteRunner >> baseline: spec [
 	<baseline>
 	spec for: #'common' do: [
+		spec postLoadDoIt: #'postLoadRemoteRunner:'.
 		spec
 			baseline: 'PharoLink' with: [
 				spec repository: 'github://feenkcom/PharoLink:v0.8.520/src' ].
