@@ -38,7 +38,10 @@ GtRrWorkerExamples >> commandLineWithAttributes [
 	commandLine := GtRrWorkerClapCommand commandLineCommand
 			match: #('remoteRunnerWorker' '--serverSocketAddress' '7084' '--attribute' 'attr1' 'v1' '--attribute' 'attr2' 'v2').
 
-	self assert: (commandLine at: #log) value equals: false.
+	self assert: (commandLine at: #log
+				ifPresent: [ true ]
+				ifAbsent: [ false ]) 
+			equals: false.
 	self
 		assert: ((commandLine at: #serverSocketAddress) at: #address) value
 		equals: '7084'.
@@ -62,7 +65,10 @@ GtRrWorkerExamples >> commandLineWithChanges [
 	commandLine := GtRrWorkerClapCommand commandLineCommand
 			match: #('remoteRunnerWorker' '--serverSocketAddress' '7084' '--changesSync' '--changesFile' '/path/to/file').
 
-	self assert: (commandLine at: #log) value equals: false.
+	self assert: (commandLine at: #log
+				ifPresent: [ true ]
+				ifAbsent: [ false ]) value 
+			equals: false.
 	self
 		assert: ((commandLine at: #serverSocketAddress) at: #address) value
 		equals: '7084'.
@@ -120,7 +126,10 @@ GtRrWorkerExamples >> commandLineWithoutAttributes [
 	commandLine := GtRrWorkerClapCommand commandLineCommand
 			match: #('remoteRunnerWorker' '--log' '--serverSocketAddress' '7084').
 
-	self assert: (commandLine at: #log) value equals: true.
+	self assert: (commandLine at: #log
+				ifPresent: [ true ]
+				ifAbsent: [ false ]) value 
+			equals: true.
 	self
 		assert: ((commandLine at: #serverSocketAddress) at: #address) value
 		equals: '7084'.
