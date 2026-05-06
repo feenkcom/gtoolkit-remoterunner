@@ -36,7 +36,7 @@ BaselineOfRemoteRunner >> postLoadRemoteRunner: spec [
 	^ self commandLineCommand
 		commandClass: GtRrWorkerClapCommand;
 		yourself'
-			classified: #'command line'. ]
+			classified: #'*Pharo-Compatibility'. ]
 	forOlder:
 		[ GtRrWorker class compile:
 'commandLine
@@ -44,5 +44,5 @@ BaselineOfRemoteRunner >> postLoadRemoteRunner: spec [
 
 	^ GtRrWorkerClapCommand commandLineCommand meaning: [ :args | 
 		GtRrWorkerClapCommand new executeWithArgs: args ].'
-			classified:  #'command line'. ].
+			classified:  #'*Pharo-Compatibility'. ].
 ]
