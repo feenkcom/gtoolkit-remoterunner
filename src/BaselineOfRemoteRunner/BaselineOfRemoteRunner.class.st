@@ -36,8 +36,7 @@ BaselineOfRemoteRunner >> postLoadRemoteRunner: spec [
 	^ self commandLineCommand
 		commandClass: GtRrWorkerClapCommand;
 		yourself'
-			classified: #'command line'.
-		GtRrWorker class removeSelector: #commandLine ]
+			classified: #'command line'. ]
 	forOlder:
 		[ GtRrWorker class compile:
 'commandLine
@@ -45,6 +44,5 @@ BaselineOfRemoteRunner >> postLoadRemoteRunner: spec [
 
 	^ GtRrWorkerClapCommand commandLineCommand meaning: [ :args | 
 		GtRrWorkerClapCommand new executeWithArgs: args ].'
-			classified:  #'command line'.
-		GtRrWorkerClapCommand class removeSelector: #commandLine ].
+			classified:  #'command line'. ].
 ]

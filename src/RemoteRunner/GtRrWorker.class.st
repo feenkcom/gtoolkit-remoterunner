@@ -21,14 +21,6 @@ Class {
 	#category : #'RemoteRunner-Worker'
 }
 
-{ #category : #'command line' }
-GtRrWorker class >> commandLine [
-	<commandline>
-
-	^ GtRrWorkerClapCommand commandLineCommand meaning: [ :args | 
-		GtRrWorkerClapCommand new executeWithArgs: args ].
-]
-
 { #category : #clap }
 GtRrWorker class >> connectionStrategyLookup [
 
