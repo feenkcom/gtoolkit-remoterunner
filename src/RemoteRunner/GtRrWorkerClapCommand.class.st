@@ -68,7 +68,7 @@ GtRrWorkerClapCommand >> executeWithArgs: args [
 	After Pharo 12 compatibility is dropped it should be converted to use the inherited API."
 	| worker connectionStrategyId connectionStrategy serverSocketAddress workerClass |
 
-	args at: #help
+	args at: #helpFlag
 		ifPresent: 
 			[:help |
 			help value.
