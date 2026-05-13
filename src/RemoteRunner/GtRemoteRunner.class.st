@@ -461,9 +461,9 @@ GtRemoteRunner >> critical: aBlock [
 
 	^ sharedAccess critical: 
 		[ | result |
-		runnerStats sharedAccessCount: sharedAccess size.
+		runnerStats sharedAccessWaiting: sharedAccess isNotEmpty.
 		result := aBlock value.
-		runnerStats sharedAccessCount: sharedAccess size.
+		runnerStats sharedAccessWaiting: sharedAccess isNotEmpty.
 		result ].
 ]
 
@@ -1463,7 +1463,7 @@ GtRemoteRunner >> summaryAttributes [
 			nextPut: { 'Default Task Timeout'. runnerStats defaultTaskTimeout. self. };
 			nextPut: { #Port. port. server. };
 			nextPut: { #Logging. log isNotNil. log. };
-			nextPut: { 'Shared Access Waiting'. runnerStats sharedAccessCount. sharedAccess. } ]
+			nextPut: { 'Shared Access Waiting'. runnerStats sharedAccessWaiting. sharedAccess. } ]
 ]
 
 { #category : #printing }
@@ -1718,7 +1718,7 @@ GtRemoteRunner >> updateStats [
 			currentlyExecutingTaskCount: currentlyExecutingTasks size;
 			taskQueueSize: self tasksRemainingCount;
 			updateAvailableWorkerCounts: availableWorkers;
-			sharedAccessCount: sharedAccess size;
+			sharedAccessWaiting: sharedAccess isNotEmpty;
 			portNumber: port;
 			isRunning: self isRunning;
 			defaultTaskTimeout: taskTimeout;

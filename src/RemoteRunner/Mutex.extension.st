@@ -10,6 +10,13 @@ Mutex >> assertIsOwner [
 ]
 
 { #category : #'*RemoteRunner' }
+Mutex >> isNotEmpty [
+	<gtPharoPatch: #Pharo>
+	
+	^ semaphore isNotEmpty
+]
+
+{ #category : #'*RemoteRunner' }
 Mutex >> size [
 	<gtPharoPatch: #Pharo>
 	
