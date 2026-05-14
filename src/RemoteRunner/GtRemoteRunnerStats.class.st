@@ -11,14 +11,14 @@ Class {
 		'defaultWorkerTimeout',
 		'defaultTaskTimeout',
 		'portNumber',
-		'sharedAccessCount',
 		'isRunning',
 		'registeredWorkerCounts',
 		'availableWorkerCounts',
 		'jobStartupAndShutdown',
 		'managerStartupAndShutdown',
 		'registeredWorkerAttributes',
-		'availableWorkerAttributes'
+		'availableWorkerAttributes',
+		'sharedAccessWaiting'
 	],
 	#category : #'RemoteRunner-Runner'
 }
@@ -133,9 +133,9 @@ GtRemoteRunnerStats >> initialize [
 		totalTaskCount :=
 		taskQueueSize :=
 		currentlyExecutingJobCount :=
-		currentlyExecutingTaskCount :=
-		sharedAccessCount := 0.
+		currentlyExecutingTaskCount := 0.
 	isRunning := false.
+	sharedAccessWaiting := false.
 	registeredWorkerCounts :=
 		availableWorkerCounts := Dictionary new.
 ]
@@ -218,13 +218,13 @@ GtRemoteRunnerStats >> registeredWorkerCounts: anObject [
 ]
 
 { #category : #accessing }
-GtRemoteRunnerStats >> sharedAccessCount [
-	^ sharedAccessCount
+GtRemoteRunnerStats >> sharedAccessWaiting [
+	^sharedAccessWaiting
 ]
 
 { #category : #accessing }
-GtRemoteRunnerStats >> sharedAccessCount: anObject [
-	sharedAccessCount := anObject
+GtRemoteRunnerStats >> sharedAccessWaiting: anObject [
+	sharedAccessWaiting := anObject
 ]
 
 { #category : #accessing }
