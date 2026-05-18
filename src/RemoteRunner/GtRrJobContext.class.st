@@ -334,6 +334,7 @@ GtRrJobContext >> submitTasks [
 	"Submit the tasks to the receiver's runner"
 
 	self taskContexts do: [ :taskContext |
+		(remoteRunner isRunning and: [ self isStarted ]) ifFalse: [ ^ self ].
 		remoteRunner addTaskContext: taskContext ].
 	remoteRunner assignTasksToWorkers.
 ]
@@ -376,7 +377,7 @@ GtRrJobContext >> taskTimeout [
 GtRrJobContext >> terminate [
 	"Terminate the receiver's job."
 
-	remoteRunner terminateJobId: job jobId.
+	remoteRunner terminateJob: job.
 ]
 
 { #category : #private }
@@ -385,11 +386,9 @@ GtRrJobContext >> terminateJob [
 	This may be completed at a later time, after all the workers have terminated their tasks.
 	This is normally called by the remoteRunner.  To terminate the job from the job context use #terminate."
 
-	job isFinished ifFalse:
-		[ job markJobTerminating.
-		self taskContexts do: [ :taskContext |
-			taskContext terminateTask ] ].
-	remoteRunner checkJobCompleted: self.
+	job markJobTerminating.
+	self taskContexts do: [ :taskContext |
+			taskContext terminateTask ].
 ]
 
 { #category : #private }
@@ -399,5 +398,5 @@ GtRrJobContext >> timeoutContext [
 	job errorDetails: (GtRrErrorDetails new
 		errorMessage: 'Job exceeded time limit';
 		setTrace).
-	remoteRunner terminateJobId: self jobId
+	remoteRunner terminateJob: job
 ]

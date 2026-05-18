@@ -267,6 +267,7 @@ GtRemoteRunner >> addTaskContext: taskContext [
 	"Add the supplied taskContext to the task queue.
 	Can be called from anywhere since a SharedQueue is used."
 
+	taskContext job isStarted ifFalse: [ ^ self ].
 	taskQueue nextPut: taskContext.
 	runnerStats taskQueueSize: taskQueue size.
 ]
@@ -336,7 +337,7 @@ GtRemoteRunner >> assignTasksToWorkers [
 	"availableWorkers reverseSelect: #notNil thenDo: [ :workerFuture |"
 	availableWorkers reverseDo: [ :workerFuture |
 		taskContext := self getNextTaskFor: workerFuture.
-		taskContext ifNotNil:
+		(taskContext isNotNil and: [ taskContext job isStarted ]) ifTrue:
 			[ taskContext
 				workerFuture: workerFuture;
 				markTaskStarted.
@@ -746,10 +747,12 @@ GtRemoteRunner >> isIdle [
 GtRemoteRunner >> isRunning [
 	"Answer a boolean indicating whether the receiver is considered to be running, i.e.:
 	There is a server listening for workers, or
-	The port is set to #none and there is at least one worker connected"
+	The port is set to #none and there is at least one worker connected or job executing"
 
 	^ (server isNotNil and: [ server isRunning ]) or:
-		[ port = #none and: [ registeredWorkers isNotEmpty ] ]
+		[ port = #none and: 
+			[ registeredWorkers isNotEmpty or:
+			[ currentlyExecutingJobs isNotEmpty ] ] ]
 ]
 
 { #category : #accessing }
@@ -1238,7 +1241,7 @@ GtRemoteRunner >> start [
 
 	self runManagerStartup.
 	self runJobStartup.
-	runnerStats isRunning: self isRunning.
+	runnerStats isRunning: true.
 ]
 
 { #category : #'api - logger' }
@@ -1592,14 +1595,21 @@ GtRemoteRunner >> tasksStartedCount [
 		task isStarted ]
 ]
 
-{ #category : #accessing }
+{ #category : #'api - jobs' }
 GtRemoteRunner >> terminateAllJobs [
 	"Terminate all the currently executing jobs"
-	| jobIds |
+	| jobs |
 
-	jobIds := self critical:
-		[currentlyExecutingJobs values collect: #jobId ].
-	jobIds do: [ :id | self terminateJobId: id ].
+	jobs := self critical:
+		[ currentlyExecutingJobs values ].
+	jobs do: [ :job | self terminateJob: job ].
+]
+
+{ #category : #'api - jobs' }
+GtRemoteRunner >> terminateJob: aGtRrJob [
+
+	aGtRrJob job markJobTerminating.
+	self terminateJobId: aGtRrJob jobId.
 ]
 
 { #category : #'api - jobs' }
@@ -1617,9 +1627,10 @@ GtRemoteRunner >> terminateJobId: aJobId [
 				aJobContext ]
 			ifAbsent: [ ].
 		runnerStats currentlyExecutingJobCount: currentlyExecutingJobs size.
-		jobContext ifNil: [ ^ nil ].
+		jobContext ifNotNil: [ jobContext terminateJob ].
 		self emptyQueuesFor: aJobId.
-		jobContext terminateJob ].
+		jobStartupAndShutdown shutdownJob: jobContext.
+		 ].
 
 	self announceAndLog: (GtRrJobTerminatedAnnouncement job: jobContext job).
 	^ jobContext job
@@ -1637,7 +1648,7 @@ GtRemoteRunner >> terminateJobsOnNoWorkers [
 	self critical:
 		[ registeredWorkers ifEmpty:
 			[ currentlyExecutingJobs do: [ :each |
-				self terminateJobId: each jobId ] ] ].
+				self terminateJob: each ] ] ].
 ]
 
 { #category : #private }
