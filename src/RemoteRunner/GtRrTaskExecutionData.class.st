@@ -309,9 +309,23 @@ GtRrTaskExecutionData >> state [
 ]
 
 { #category : #accessing }
-GtRrTaskExecutionData >> state: anObject [
+GtRrTaskExecutionData >> state: aSymbol [
+	| index currentIndex |
 
-	state := anObject
+	index := self states indexOf: aSymbol.
+	index = 0 ifTrue:
+		[ self error: 'Invalid job state: ', aSymbol printString ].
+	currentIndex := self states indexOf: state.
+	index <= currentIndex ifTrue: [ ^ self ].
+
+	state := aSymbol.
+]
+
+{ #category : #accessing }
+GtRrTaskExecutionData >> states [
+	"Answer the valid states for the receiver"
+
+	^ #(#notStarted #started #terminating #cancelled #terminated #completed)
 ]
 
 { #category : #accessing }

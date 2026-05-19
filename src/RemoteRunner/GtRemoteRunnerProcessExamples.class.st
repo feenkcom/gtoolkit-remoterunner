@@ -755,7 +755,7 @@ GtRemoteRunnerProcessExamples >> terminateStartedJobWithControlChannel [
 		[ self error: 'Task never started on worker' ].
 	self assert: remoteRunner currentlyExecutingJobs size equals: 1.
 	self assert: remoteRunner tasksRemainingCount equals: 2.
-	remoteRunner terminateJobId: job jobId.
+	remoteRunner terminateJob: job.
 	self waitOn: semaphore for: 10 description: 'Job didn''t terminate in time'.
 
 	self assert: remoteRunner currentlyExecutingJobs size equals: 0.
@@ -766,7 +766,7 @@ GtRemoteRunnerProcessExamples >> terminateStartedJobWithControlChannel [
 	self assert: taskCompletedCount equals: 0.
 	self assert: taskFailedCount equals: 3.
 	self assert: taskStartedCount equals: 1.
-	self assert: job state equals: #completed.
+	self assert: job state equals: #cancelled.
 	self assert: job hasErrors.
 	self assert: (job results allSatisfy: [ :task | task hasErrors ]).
 	self assert: (times collect: #key) asArray equals: #(0 1 2 2 2 4).
@@ -844,7 +844,7 @@ GtRemoteRunnerProcessExamples >> terminateStartedJobWithoutControlChannel [
 	self assert: remoteRunner tasksStartedCount equals: 1.
 	self assert: remoteRunner tasksRemainingCount equals: 2.
 
-	remoteRunner terminateJobId: job jobId.
+	remoteRunner terminateJob: job.
 	self waitOn: semaphore for: 10 description: 'Job didn''t terminate in time'.
 
 	waitForTaskCompletion ifTrue:
@@ -861,7 +861,7 @@ GtRemoteRunnerProcessExamples >> terminateStartedJobWithoutControlChannel [
 	self assert: taskCompletedCount equals: 0.
 	self assert: taskFailedCount equals: 3.
 	self assert: taskStartedCount equals: 1.
-	self assert: job state equals: #completed.
+	self assert: job state equals: #cancelled.
 	self assert: job hasErrors.
 	self assert: (job results allSatisfy: [ :task | task hasErrors ]).
 	] ensure: [ remoteRunner stop ].
@@ -961,7 +961,7 @@ GtRemoteRunnerProcessExamples >> timeoutJob [
 	self
 		assert: (taskStartedCount between: 1 and: 3)
 		description: [ 'Unexpected taskStartedCount: ' , taskStartedCount asString ].
-	self assert: job state equals: #completed.
+	self assert: job state equals: #cancelled.
 	self assert: job hasErrors.
 	self assert: job errorDetails errorMessage equals: 'Job exceeded time limit' ]
 		ensure: [ remoteRunner stop ].

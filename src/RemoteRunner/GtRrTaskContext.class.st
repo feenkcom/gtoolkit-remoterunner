@@ -444,6 +444,7 @@ GtRrTaskContext >> terminateTask [
 	Despite being in the GtRrTaskContext, this represents a worker timeout"
 	| executionData |
 
+	task state: #terminating.
 	"If the worker has timed out its state is unknown,
 	simply close the connection."
 	self workerConnection ifNotNil:
@@ -463,6 +464,7 @@ GtRrTaskContext >> terminateTask [
 		jobId: jobContext jobId
 		taskId: self taskId
 		executionData: executionData.
+	task state: #terminated.
 ]
 
 { #category : #private }

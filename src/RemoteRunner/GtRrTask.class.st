@@ -351,6 +351,12 @@ GtRrTask >> isStarted [
 	^ self state = #started
 ]
 
+{ #category : #testing }
+GtRrTask >> isTerminated [
+
+	^ self state = #terminated
+]
+
 { #category : #'accessing - resource report' }
 GtRrTask >> machineAvailableMemory [  
 	^ self

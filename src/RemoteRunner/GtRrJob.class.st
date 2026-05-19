@@ -515,8 +515,7 @@ GtRrJob >> markJobStarted [
 { #category : #'private - running' }
 GtRrJob >> markJobTerminating [
 
-	state := #terminating.
-
+	self state: #terminating.
 ]
 
 { #category : #accessing }
@@ -739,9 +738,20 @@ GtRrJob >> state [
 ]
 
 { #category : #'private - serialization' }
-GtRrJob >> state: anObject [
+GtRrJob >> state: aSymbol [
+	"Set the receiver's state.
+	Must be one of the known #states.
+	Attempts to move the state back will be silently ignored,
+	e.g. there's no point marking the job terminating when it is already cancelled."
+	| index currentIndex |
 
-	state := anObject
+	index := self states indexOf: aSymbol.
+	index = 0 ifTrue:
+		[ self error: 'Invalid job state: ', aSymbol printString ].
+	currentIndex := self states indexOf: state.
+	index <= currentIndex ifTrue: [ ^ self ].
+
+	state := aSymbol
 ]
 
 { #category : #printing }
@@ -754,6 +764,14 @@ GtRrJob >> stateDescription [
 		
 		self hasErrors ifTrue: [
 			aStream << ' with errors' ] ]
+]
+
+{ #category : #accessing }
+GtRrJob >> states [
+	"Answer the valid states for the receiver"
+
+	^ #(#notStarted #started #terminating #cancelled #completed)
+
 ]
 
 { #category : #'ston persistence' }

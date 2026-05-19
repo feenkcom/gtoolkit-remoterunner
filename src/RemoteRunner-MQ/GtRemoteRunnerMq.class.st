@@ -9,7 +9,8 @@ GtRemoteRunnerMq >> addTaskContext: taskContext [
 	"Submit the supplied task for processing."
 
 	self critical:
-		[ server sendWorkerTaskContext: taskContext asWorkerTaskContext.
+		[ (self isRunning and: [ taskContext jobContext isStarted ]) ifFalse: [ ^ self ].
+		server sendWorkerTaskContext: taskContext asWorkerTaskContext.
 		self addCurrentlyExecutingTask: taskContext ]
 ]
 
@@ -18,7 +19,8 @@ GtRemoteRunnerMq >> addTaskContextFirst: taskContext [
 	"Add the supplied taskContext to the front of the queue."
 
 	self critical:
-		[ server sendWorkerTaskContextFirst: taskContext asWorkerTaskContext.
+		[ (self isRunning and: [ taskContext jobContext isStarted ]) ifFalse: [ ^ self ].
+		server sendWorkerTaskContextFirst: taskContext asWorkerTaskContext.
 		self addCurrentlyExecutingTask: taskContext ]
 ]
 

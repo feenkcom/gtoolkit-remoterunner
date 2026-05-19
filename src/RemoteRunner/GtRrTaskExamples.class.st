@@ -109,6 +109,8 @@ GtRrTaskExamples >> taskResourceReport [
 	<return: #GtRrScriptTask>
 	| task job semaphore |
 	remoteRunner := GtRemoteRunner new.
+	remoteRunner port: #none.
+	remoteRunner start.
 	worker := GtRrInImageWorker new
 			remoteRunner: remoteRunner;
 			start.
