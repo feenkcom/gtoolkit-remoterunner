@@ -227,14 +227,16 @@ GtRrWorkerExamples >> workerControlChannelCommandTimeout [
 { #category : #examples }
 GtRrWorkerExamples >> workerInImage [
 	"Confirm that tasks with the {{gtClass:GtRrInImageConstraint}} are assigned to the in-image worker"
-
 	<gtExample>
 	<return: #GtRrWorkerExamples>
 	| inImageWorker inImageTask semaphore remoteWorkerTask |
+	
 	runner := GtRemoteRunner new.
+	runner port: #none.
 	inImageWorker := GtRrInImageWorker new
 			remoteRunner: runner;
 			start.
+	runner start.
 
 	semaphore := Semaphore new.
 	runner 
@@ -244,7 +246,9 @@ GtRrWorkerExamples >> workerInImage [
 	inImageTask := GtRrScriptTask script: '#done'.
 	inImageTask constraint: GtRrInImageConstraint new.
 	runner submitJob: inImageTask asJob.
-	semaphore wait.
+	self
+		waitOn: semaphore
+		description: 'Task didn''t complete in time'.
 	self assert: inImageTask isFinished.
 
 	remoteWorkerTask := GtRrScriptTask script: '#done'.
