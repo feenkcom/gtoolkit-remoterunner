@@ -3,7 +3,8 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'schedulingTimes',
-		'maxDuration'
+		'maxDuration',
+		'maxChecksPerTask'
 	],
 	#category : #'RemoteRunner-CheckScheduling'
 }
@@ -48,7 +49,7 @@ GtRrCheckScheduler >> allocateEntries: entries to: taskAssociations [
 			ifFalse: [ faster next ].
 		next ifNotNil:
 			[ nextTime := next expectedTime.
-			(groupTime + nextTime) < maxDuration ifFalse:
+			((groupTime + nextTime) > maxDuration or: [ checkGroup size >= maxChecksPerTask ]) ifTrue:
 				[ taskAssociations add: groupTime -> (self taskFrom: checkGroup).
 				groupTime := Duration zero.
 				checkGroup := OrderedCollection new ].
@@ -89,8 +90,19 @@ GtRrCheckScheduler >> allocateTasks: aCollectionOfTasks [
 GtRrCheckScheduler >> initialize [
 
 	super initialize.
+	maxChecksPerTask := 100.
 	"Don't use the default scheduling times yet so it doesn't subscribe to the default runner"
 	"schedulingTimes := GtRrCheckSchedulingTimes default."
+]
+
+{ #category : #accessing }
+GtRrCheckScheduler >> maxChecksPerTask [
+	^ maxChecksPerTask
+]
+
+{ #category : #accessing }
+GtRrCheckScheduler >> maxChecksPerTask: anObject [
+	maxChecksPerTask := anObject
 ]
 
 { #category : #accessing }
