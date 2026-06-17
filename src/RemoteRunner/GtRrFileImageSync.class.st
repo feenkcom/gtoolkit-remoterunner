@@ -17,13 +17,13 @@ GtRrFileImageSync class >> leJsonV4Name [
 GtRrFileImageSync class >> newEntriesFile [
 	| tmpFile |
 
-	tmpFile := FileReference newTempFilePrefix: self name asString suffix: '.ston'.
+	tmpFile := FileReference newTempFilePrefix: self name asString suffix: '.ombu'.
 	"Windows doesn't clean its temp dir, so make it local to the image"
 	OSPlatform current isWindows ifTrue:
 		[ | tmpDir |
 		tmpDir := 'temp' asFileReference ensureCreateDirectory.
 		tmpFile := tmpDir / tmpFile basename  ].
-	^ tmpFile
+	^ tmpFile.
 ]
 
 { #category : #actions }
@@ -36,9 +36,14 @@ GtRrFileImageSync >> copyToFile: aFileReference [
 { #category : #accessing }
 GtRrFileImageSync >> entries: aCollection [
 	"Write the omEntries to the file as individual entries, not a single collection"
-
-	self entriesFile writeStreamDo: [ :fileStream |
-		self writeEntries: aCollection on: fileStream ].
+	| omFileStore |
+	
+	omFileStore := OmFileStore
+			named: self entriesFile basenameWithoutExtension
+			inDirectory: self entriesFile parent.
+	aCollection do: [ :entry |
+		omFileStore newEntry: entry ].
+	omFileStore flush.
 	entriesCount := aCollection size.
 ]
 
@@ -48,8 +53,12 @@ GtRrFileImageSync >> entriesFile [
 ]
 
 { #category : #accessing }
-GtRrFileImageSync >> entriesFile: anObject [
-	entriesFile := anObject
+GtRrFileImageSync >> entriesFile: aFileReference [
+
+	aFileReference extension = 'ombu' ifFalse:
+		[ self error: 'File must be of type `ombu`' ].
+
+	entriesFile := aFileReference.
 ]
 
 { #category : #accessing }
