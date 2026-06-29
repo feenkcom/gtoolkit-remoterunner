@@ -325,11 +325,12 @@ GtRrStompMqProcessor >> localAddressString [
 { #category : #private }
 GtRrStompMqProcessor >> logClosingException: anException [
 
+	mqClient ifNotNil: [ :aMqClient |
 	StampHeartbeatSignal new
-		lastReadActivity: mqClient lastReadActivity;
-		lastWriteActivity: mqClient lastWriteActivity;
+		lastReadActivity: aMqClient lastReadActivity;
+		lastWriteActivity: aMqClient lastWriteActivity;
 		exception: anException;
-		emit.
+		emit ].
 	anException class = StampError ifTrue:
 		[ (GtRrStampErrorSignal fromStampError: anException) emit ].
 ]
@@ -458,12 +459,6 @@ GtRrStompMqProcessor >> promiseAt: rpcId [
 
 	^ self critical:
 		[ rpcRegistry at: rpcId ]
-]
-
-{ #category : #'start - stop' }
-GtRrStompMqProcessor >> reconnect [
-
-	self notYetImplemented.
 ]
 
 { #category : #'as yet unclassified' }
@@ -653,10 +648,17 @@ GtRrStompMqProcessor >> startMqListener [
 		Either way, this process should terminate once the processing is complete, and not continue to be used."
 		closingException ifNotNil:
 			[ self logClosingException: closingException.
-			mqClient imageSessionChanged ifFalse:
-				[ owner ifNotNil: [ :anOwner |
-					anOwner handleMqListenerException: closingException ] ] ].
+			mqClient ifNotNil: [ :aMqClient |
+				aMqClient imageSessionChanged ifFalse:
+					[ owner ifNotNil: [ :anOwner |
+						anOwner handleMqListenerException: closingException ] ] ] ].
 		 ] forkNamed: 'GtRrMq message listener'.
+]
+
+{ #category : #accessing }
+GtRrStompMqProcessor >> state [
+
+	^ state
 ]
 
 { #category : #'start - stop' }
@@ -667,6 +669,10 @@ GtRrStompMqProcessor >> stop [
 		[ self stopMqHeartbeat.
 		(listenerStopping or: [ mqListener isNil ]) ifFalse: 
 			[ mqListener signalException: ConnectionClosed new ].
+		[ mqClient close ]
+			on: ZnIncomplete
+			do: [ :ex | "nothing" ].
+		mqClient := nil.
 		commandSubscription := messageSubscription := nil.
 		state := #stopped ].
 ]

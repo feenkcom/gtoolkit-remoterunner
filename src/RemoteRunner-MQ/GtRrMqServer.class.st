@@ -171,15 +171,11 @@ GtRrMqServer >> handleMqListenerException: closingException [
 			"mqProcessor reconnect" ].
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #initialization }
 GtRrMqServer >> initialize [
 
 	super initialize.
-	mqProcessor := GtRrStompMqProcessor new
-		owner: self.
-	mqTaskProcessor := GtRrMqTaskProcessor new
-		gtRrMqServer: self;
-		gtRrMqProcessor: mqProcessor.
+	self reset.
 ]
 
 { #category : #testing }
@@ -279,6 +275,14 @@ GtRrMqServer >> purgeQueues [
 					[ ex pass ] ].
 ]
 
+{ #category : #'start - stop' }
+GtRrMqServer >> reconnect [
+
+	mqProcessor stop.
+	self reset.
+	self startMqProcessor.
+]
+
 { #category : #accessing }
 GtRrMqServer >> remoteRunner [
 	^ remoteRunner
@@ -287,6 +291,16 @@ GtRrMqServer >> remoteRunner [
 { #category : #accessing }
 GtRrMqServer >> remoteRunner: anObject [
 	remoteRunner := anObject
+]
+
+{ #category : #initialization }
+GtRrMqServer >> reset [
+	
+	mqProcessor := GtRrStompMqProcessor new
+		owner: self.
+	mqTaskProcessor := GtRrMqTaskProcessor new
+		gtRrMqServer: self;
+		gtRrMqProcessor: mqProcessor.
 ]
 
 { #category : #accessing }
@@ -361,10 +375,18 @@ GtRrMqServer >> sendWorkerTaskContextFirst: aWorkerTaskContext [
 GtRrMqServer >> start [
 	"Connect to the MessageQueue and start listening for messages"
 
-	self purgeQueues.
+	self isRunning ifTrue: [ ^ self ].
+
 	"Temporary work-around...
-	Queue max priority can't be changed, so ensure the old queue isn't in the way."
+	Several Queue parameters can't be changed, so ensure the old queue isn't in the way.
+	self purgeQueues."
 	self deleteQueues.
+
+	self startMqProcessor.
+]
+
+{ #category : #'start - stop' }
+GtRrMqServer >> startMqProcessor [
 
 	mqProcessor
 		commandChannelDefinition: self runnerControlChannelDefinition;
@@ -418,8 +440,9 @@ GtRrMqServer >> stompMqQueueNamesAttribute [
 { #category : #'start - stop' }
 GtRrMqServer >> stop [
 
+	self isRunning ifFalse: [ ^ self ].
 	mqProcessor ifNotNil: [ mqProcessor stop ].
-	mqProcessor := nil.
+	self reset.
 ]
 
 { #category : #'start - stop' }
