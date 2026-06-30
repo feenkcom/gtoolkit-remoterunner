@@ -131,9 +131,10 @@ GtRrStompMqProcessor class >> portFrom: aHostString [
 
 { #category : #accessing }
 GtRrStompMqProcessor class >> queueTtl [
-	"Answer the time (ms) that messages can live on the MQ server"
+	"Answer the time (ms) that messages can live on the MQ server.
+	Default: 4 days"
 
-	^ QueueTtl ifNil: [ 12 * 60 * 60 * 1000 ]
+	^ QueueTtl ifNil: [ 4 * 24 * 60 * 60 * 1000 ]
 ]
 
 { #category : #accessing }
