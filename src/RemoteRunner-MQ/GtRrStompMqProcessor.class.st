@@ -10,7 +10,6 @@ Class {
 		'messageSubscription',
 		'owner',
 		'rpcRegistry',
-		'sharedAccess',
 		'mqPort',
 		'mqUsername',
 		'mqPassword',
@@ -23,7 +22,9 @@ Class {
 		'commandCallback',
 		'largeMessageUrl',
 		'commandChannelDefinition',
-		'messageChannelDefinition'
+		'messageChannelDefinition',
+		'announcer',
+		'stopGate'
 	],
 	#classVars : [
 		'DefaultHost',
@@ -196,6 +197,13 @@ GtRrStompMqProcessor class >> workerControlTopicNameFor: workerId [
 ]
 
 { #category : #accessing }
+GtRrStompMqProcessor >> announcer [
+
+	^ announcer ifNil:
+		[ announcer := Announcer new ]
+]
+
+{ #category : #accessing }
 GtRrStompMqProcessor >> commandCallback [
 	^ commandCallback
 ]
@@ -254,7 +262,7 @@ GtRrStompMqProcessor >> connect [
 { #category : #private }
 GtRrStompMqProcessor >> critical: aBlock [
 
-	^ sharedAccess critical: aBlock
+	^ socketAccess critical: aBlock
 ]
 
 { #category : #initialization }
@@ -262,7 +270,6 @@ GtRrStompMqProcessor >> initialize [
 
 	super initialize.
 	socketAccess := Mutex new.
-	sharedAccess := Mutex new.
 	rpcRegistry := Dictionary new.
 	state := #notStarted.
 	listenerStopping := false.
@@ -271,6 +278,7 @@ GtRrStompMqProcessor >> initialize [
 		self processTaskMqMessage: mqMessage gtMessage: gtMessage owner: anOwner ].
 	commandCallback := [ :mqMessage :gtMessage :anOwner |
 		self processCommandMqMessage: mqMessage gtMessage: gtMessage owner: anOwner ].
+	stopGate := GtReleaseLatch new.
 ]
 
 { #category : #testing }
@@ -407,9 +415,12 @@ GtRrStompMqProcessor >> owner: anObject [
 GtRrStompMqProcessor >> privateStop [
 
 	self stopMqHeartbeat.
-	mqClient ifNotNil: [ mqClient closeMedium ].
 	mqClient := messageSubscription := commandSubscription := owner := nil.
+	self announcer announce:
+		(GtRrStompMqProcessorStoppedAnnouncement new
+			mqProcessor: self).
 	state := #stopped.
+	stopGate signal.
 ]
 
 { #category : #'as yet unclassified' }
@@ -642,17 +653,19 @@ GtRrStompMqProcessor >> startMqListener [
 		[ "Process messages until ConnectionClosed is signalled"
 		[ mqClient runWith: self mqProcessor ]
 			on: ZnIncomplete, SocketError, StampError
-			do: [ :ex | closingException := ex freeze ].
-		listenerStopping := true.
-		"Log the exception and ask the owner to take over.
-		The receiver should either be shut down or reconnected.
-		Either way, this process should terminate once the processing is complete, and not continue to be used."
-		closingException ifNotNil:
-			[ self logClosingException: closingException.
-			mqClient ifNotNil: [ :aMqClient |
-				aMqClient imageSessionChanged ifFalse:
-					[ owner ifNotNil: [ :anOwner |
-						anOwner handleMqListenerException: closingException ] ] ] ].
+			do: [ :ex | 
+				listenerStopping := true.
+				closingException := ex freeze.
+				"Log the exception and ask the owner to take over.
+				The receiver should either be shut down or reconnected.
+				Either way, this process should terminate once the processing is complete, and not continue to be used."
+				self logClosingException: closingException.
+				mqClient ifNotNil: [ :aMqClient |
+					aMqClient imageSessionChanged ifFalse:
+						[ owner ifNotNil: [ :anOwner |
+							anOwner handleMqListenerException: closingException source: self ] ] ] ].
+		"The STAMP client has closed the socket by the time we get here"
+		self privateStop.
 		 ] forkNamed: 'GtRrMq message listener'.
 ]
 
@@ -664,18 +677,17 @@ GtRrStompMqProcessor >> state [
 
 { #category : #'start - stop' }
 GtRrStompMqProcessor >> stop [
+	"Stop the receiver.
+	Note that stopping is asynchronous, use #waitForStop to synchronise."
 
+	self isStopping ifTrue: [ ^ self ].
 	state := #stopRequested.
 	socketAccess critical:
-		[ self stopMqHeartbeat.
-		(listenerStopping or: [ mqListener isNil ]) ifFalse: 
-			[ mqListener signalException: ConnectionClosed new ].
-		[ mqClient close ]
-			on: ZnIncomplete
-			do: [ :ex | "nothing" ].
-		mqClient := nil.
-		commandSubscription := messageSubscription := nil.
-		state := #stopped ].
+		[ listenerStopping ifFalse: [ mqListener ifNotNil: 
+			[ :aMqListener |
+				aMqListener signalException: ConnectionClosed new ] ] ].
+	self announcer announce: (GtRrStompMqProcessorStoppedAnnouncement new
+		mqProcessor: self)
 ]
 
 { #category : #'start - stop' }
@@ -731,6 +743,14 @@ GtRrStompMqProcessor >> taskCallback [
 { #category : #accessing }
 GtRrStompMqProcessor >> taskCallback: anObject [
 	taskCallback := anObject
+]
+
+{ #category : #'start - stop' }
+GtRrStompMqProcessor >> waitForStop [
+	"Wait for the receiver to stop.
+	Note that the receiver is stopped any time the connection is lost or if ConnectionClosed is signalled."
+
+	stopGate wait.
 ]
 
 { #category : #'primitive operations' }

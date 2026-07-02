@@ -76,16 +76,6 @@ GtRemoteRunnerMq >> port: aString [
 		isRunning: self isRunning.
 ]
 
-{ #category : #'api - jobs' }
-GtRemoteRunnerMq >> submitJob: aGtRrJob [
-	"Submit the supplied job.
-	The RabbitMQ STOMP server doesn't seem to handle queue expiration during a connection.  To minimise the chance of a server state change happening during a connection, restart the MQ connection if the receiver is currently idle."
-
-	self isIdle ifTrue:
-		[ server reconnect ].
-	^ super submitJob: aGtRrJob
-]
-
 { #category : #private }
 GtRemoteRunnerMq >> taskCompletedForWorkerId: workerId [
 

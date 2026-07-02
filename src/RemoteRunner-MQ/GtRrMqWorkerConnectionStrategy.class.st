@@ -43,18 +43,15 @@ GtRrMqWorkerConnectionStrategy >> evaluateOnRunner: aCleanBlock arguments: args 
 ]
 
 { #category : #'as yet unclassified' }
-GtRrMqWorkerConnectionStrategy >> handleMqListenerException: closingException [
+GtRrMqWorkerConnectionStrategy >> handleMqListenerException: closingException source: aMqProcessor [
 	"Shut down the worker (and potentially exit the image)"
 
-	"If the server is stopped cleanly closingException will be nil"
-	closingException ifNil: [ ^ self ].
-	mqProcessor ifNotNil: [ :anMqProcessor |
-		anMqProcessor isStopRequested ifTrue: [ ^ self ].
-		anMqProcessor setStopRequested.
-		closingException class = ConnectionClosed
-			ifTrue: [ self stopRequested ]
-			ifFalse: [ self error: 'Unexpected loss of connection: ',
-				closingException printString ] ].
+	"If the mqProcessor has changed it has been manually reset,
+	do nothing."
+	mqProcessor == aMqProcessor ifFalse: [ ^ self ].
+	aMqProcessor isStopping ifTrue: [ ^ self ].
+	self error: 'Unexpected loss of connection: ',
+				closingException printString.
 ]
 
 { #category : #'as yet unclassified' }
