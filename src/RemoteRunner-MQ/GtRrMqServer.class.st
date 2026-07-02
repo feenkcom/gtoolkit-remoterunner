@@ -147,39 +147,29 @@ GtRrMqServer >> gtTaskQueueSummaryFor: aView [
 ]
 
 { #category : #'as yet unclassified' }
-GtRrMqServer >> handleMqListenerException: closingException [
+GtRrMqServer >> handleMqListenerException: closingException source: aMqProcessor [
 	"Handle the processor loop exiting."
-	| socketStatus ceCopy mqpCopy|
-
-	mqpCopy := mqProcessor.
+	| socketStatus |	
+	
+	"If the mqProcessor has changed it has been manually reset,
+	do nothing."
+	mqProcessor == aMqProcessor ifFalse: [ ^ self ].
 	"If the image with the remote runner was saved and used for the workers,
 	this is where we find out and shut down the remote runner."
-	GtRrWorker isCommandLineWorker ifTrue: [ ^ remoteRunner stop ].
-	mqpCopy := mqpCopy copy.
-	ceCopy := closingException.
-	"If the server is manually stopped (i.e. no real error), closingException will be nil."
-	closingException ifNil: [ ^ self ].
+	GtRrWorker isCommandLineWorker ifTrue: 
+		[ ^ remoteRunner stop ].
 	"If this is part of a requested stop, do nothing"
-	(mqProcessor isNil or:
-		[ mqProcessor isStopRequested or: 
-		[ mqProcessor isStopped ] ]) ifTrue: [ ^ self ].
+	aMqProcessor isStopping ifTrue: [ ^ self ].
 	"Log the socket status for debugging"
-	socketStatus := mqProcessor socketStatus.
-	closingException class = ConnectionClosed
-		ifTrue: [ self error: 'Unexpected close request: ', socketStatus ]
-		ifFalse: [ self error: 'Unexpected loss of connection: ', socketStatus.
-			"mqProcessor reconnect" ].
+	socketStatus := aMqProcessor socketStatus.
+	self error: 'Unexpected loss of connection: ', socketStatus.
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #initialization }
 GtRrMqServer >> initialize [
 
 	super initialize.
-	mqProcessor := GtRrStompMqProcessor new
-		owner: self.
-	mqTaskProcessor := GtRrMqTaskProcessor new
-		gtRrMqServer: self;
-		gtRrMqProcessor: mqProcessor.
+	self reset.
 ]
 
 { #category : #testing }
@@ -279,6 +269,18 @@ GtRrMqServer >> purgeQueues [
 					[ ex pass ] ].
 ]
 
+{ #category : #'start - stop' }
+GtRrMqServer >> reconnect [
+	"The RabbitMQ STOMP server doesn't seem to handle queue expiration during a connection.  To minimise the chance of a server state change happening during a connection the server may be reconnected when it may have been idle for some time.
+	Note that the mqProcessor is stopped by injecting a ConnectionClosed exception in to the lsitener process.  The scheduling of this activity is non-determinstic, so a new mqProcessor is created and the existing one left to exit in its own time."
+
+	mqProcessor critical:	
+		[ mqProcessor stop.
+		mqProcessor waitForStop.
+		self reset.
+		self startMqProcessor. ].
+]
+
 { #category : #accessing }
 GtRrMqServer >> remoteRunner [
 	^ remoteRunner
@@ -287,6 +289,24 @@ GtRrMqServer >> remoteRunner [
 { #category : #accessing }
 GtRrMqServer >> remoteRunner: anObject [
 	remoteRunner := anObject
+]
+
+{ #category : #initialization }
+GtRrMqServer >> reset [
+	| newProcessor |
+
+	newProcessor := GtRrStompMqProcessor new
+		owner: self.
+	mqProcessor ifNotNil: [ :aMqProcessor |
+		newProcessor 
+			mqHostName: aMqProcessor  mqHostName;
+			mqPort: aMqProcessor mqPort;
+			mqUsername: aMqProcessor mqUsername;
+			mqPassword: aMqProcessor mqPassword ].
+	mqTaskProcessor := GtRrMqTaskProcessor new
+		gtRrMqServer: self;
+		gtRrMqProcessor: newProcessor.
+	mqProcessor := newProcessor.
 ]
 
 { #category : #accessing }
@@ -361,10 +381,18 @@ GtRrMqServer >> sendWorkerTaskContextFirst: aWorkerTaskContext [
 GtRrMqServer >> start [
 	"Connect to the MessageQueue and start listening for messages"
 
-	self purgeQueues.
+	self isRunning ifTrue: [ ^ self ].
+
 	"Temporary work-around...
-	Queue max priority can't be changed, so ensure the old queue isn't in the way."
+	Several Queue parameters can't be changed, so ensure the old queue isn't in the way.
+	self purgeQueues."
 	self deleteQueues.
+
+	self startMqProcessor.
+]
+
+{ #category : #'start - stop' }
+GtRrMqServer >> startMqProcessor [
 
 	mqProcessor
 		commandChannelDefinition: self runnerControlChannelDefinition;
@@ -418,8 +446,9 @@ GtRrMqServer >> stompMqQueueNamesAttribute [
 { #category : #'start - stop' }
 GtRrMqServer >> stop [
 
+	self isRunning ifFalse: [ ^ self ].
 	mqProcessor ifNotNil: [ mqProcessor stop ].
-	mqProcessor := nil.
+	self reset.
 ]
 
 { #category : #'start - stop' }
