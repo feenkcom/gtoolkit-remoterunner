@@ -144,6 +144,22 @@ GtRrChecksFactory >> rejectExampleClasses: aCollection [
 	stream := newStream.
 ]
 
+{ #category : #adding }
+GtRrChecksFactory >> rejectExampleMethods: aCollection [
+	| tasks newStream checkNames |
+
+	checkNames := aCollection collect: [ :method |
+		method methodClass name -> method selector ].
+	tasks := stream contents.
+	newStream := (Array new: 10) writeStream.
+	tasks do: [ :task | | newTask |
+		newTask := task asExplicitTask.
+		newTask checkNames: (newTask checkNames reject:
+			[ :assoc | checkNames includes: assoc]).
+		newStream nextPut: newTask ].
+	stream := newStream.
+]
+
 { #category : #accessing }
 GtRrChecksFactory >> retryStrategy [
 	^ retryStrategy
