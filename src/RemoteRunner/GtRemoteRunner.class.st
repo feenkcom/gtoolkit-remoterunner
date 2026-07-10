@@ -672,7 +672,8 @@ GtRemoteRunner >> handleProcessingError: aDictionary [
 	Must be called within sharedAccess."
 	| jobId jobContext |
 
-	jobId := aDictionary at: #jobId ifAbsent: [^self].
+	jobId := aDictionary at: #jobId ifAbsent: 
+		[ self error: 'Missing required #jobId' ].
 	jobContext := currentlyExecutingJobs at: jobId ifAbsent: [nil].
 	jobContext ifNil:
 		[ | taskContextId taskContext |
