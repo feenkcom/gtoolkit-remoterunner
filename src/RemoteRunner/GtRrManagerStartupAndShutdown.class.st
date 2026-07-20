@@ -12,7 +12,7 @@ Class {
 		'remoteRunner',
 		'inImageWorker'
 	],
-	#category : 'RemoteRunner-Runner'
+	#category : #'RemoteRunner-Runner'
 }
 
 { #category : #accessing }

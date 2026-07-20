@@ -1,7 +1,7 @@
 Class {
 	#name : #PlpoGtRrLocalJobStartupAndShutdown,
 	#superclass : #PlpoGtRrJobStartupAndShutdown,
-	#category : 'RemoteRunner-Runner'
+	#category : #'RemoteRunner-Runner'
 }
 
 { #category : #accessing }

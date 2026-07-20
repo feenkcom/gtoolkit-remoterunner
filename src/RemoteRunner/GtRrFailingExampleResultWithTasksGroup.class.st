@@ -1,7 +1,7 @@
 Class {
 	#name : #GtRrFailingExampleResultWithTasksGroup,
 	#superclass : #GtRrExampleResultWithTasksGroup,
-	#category : 'RemoteRunner-Reports'
+	#category : #'RemoteRunner-Reports'
 }
 
 { #category : #accessing }

@@ -8,7 +8,7 @@ Class {
 		'value',
 		'errorFlag'
 	],
-	#category : 'RemoteRunner-Examples'
+	#category : #'RemoteRunner-Examples'
 }
 
 { #category : #accessing }

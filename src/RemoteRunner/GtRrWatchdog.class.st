@@ -6,7 +6,7 @@ Class {
 		'serverSocketAddress',
 		'future'
 	],
-	#category : 'RemoteRunner-Watchdog'
+	#category : #'RemoteRunner-Watchdog'
 }
 
 { #category : #'instance creation' }

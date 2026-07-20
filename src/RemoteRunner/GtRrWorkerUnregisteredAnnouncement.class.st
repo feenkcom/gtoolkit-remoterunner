@@ -5,7 +5,7 @@ Class {
 		'reason',
 		'workerCount'
 	],
-	#category : 'RemoteRunner-Announcements'
+	#category : #'RemoteRunner-Announcements'
 }
 
 { #category : #accessing }

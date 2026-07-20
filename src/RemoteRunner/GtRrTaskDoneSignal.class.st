@@ -5,7 +5,7 @@ Class {
 		'taskId',
 		'mutexWait'
 	],
-	#category : 'RemoteRunner-Signals'
+	#category : #'RemoteRunner-Signals'
 }
 
 { #category : #initialization }

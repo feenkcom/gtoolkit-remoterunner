@@ -10,7 +10,7 @@ Class {
 		'announcer',
 		'worker'
 	],
-	#category : 'RemoteRunner-Examples'
+	#category : #'RemoteRunner-Examples'
 }
 
 { #category : #announcer }

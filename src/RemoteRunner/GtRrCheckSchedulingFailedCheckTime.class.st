@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'errorDetails'
 	],
-	#category : 'RemoteRunner-CheckScheduling'
+	#category : #'RemoteRunner-CheckScheduling'
 }
 
 { #category : #lejsonv4 }

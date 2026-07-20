@@ -4,5 +4,5 @@ GtRrCurrentWorkerExecutionContext holds an instance of {{gtClass:GtRrWorkerExecu
 Class {
 	#name : #GtRrCurrentWorkerExecutionContext,
 	#superclass : #ProcessLocalVariable,
-	#category : 'RemoteRunner-Worker'
+	#category : #'RemoteRunner-Worker'
 }

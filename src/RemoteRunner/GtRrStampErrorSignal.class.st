@@ -5,7 +5,7 @@ Class {
 		'headers',
 		'body'
 	],
-	#category : 'RemoteRunner-Signals'
+	#category : #'RemoteRunner-Signals'
 }
 
 { #category : #serialization }

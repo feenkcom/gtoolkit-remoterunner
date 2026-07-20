@@ -1,7 +1,7 @@
 Class {
 	#name : #GtRrExecutionChartDataExamples,
 	#superclass : #Object,
-	#category : 'RemoteRunner-Examples'
+	#category : #'RemoteRunner-Examples'
 }
 
 { #category : #accessing }

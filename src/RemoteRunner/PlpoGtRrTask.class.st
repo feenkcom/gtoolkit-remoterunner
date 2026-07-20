@@ -5,7 +5,7 @@ Class {
 		'finished',
 		'a'
 	],
-	#category : 'RemoteRunner-Tasks'
+	#category : #'RemoteRunner-Tasks'
 }
 
 { #category : #accessing }

@@ -1,7 +1,7 @@
 Class {
 	#name : #GtRrWorkerClapCommand,
 	#superclass : #ClapApplication,
-	#category : 'RemoteRunner-Worker'
+	#category : #'RemoteRunner-Worker'
 }
 
 { #category : #'command line' }

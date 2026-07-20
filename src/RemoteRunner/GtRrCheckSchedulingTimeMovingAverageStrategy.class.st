@@ -1,7 +1,7 @@
 Class {
 	#name : #GtRrCheckSchedulingTimeMovingAverageStrategy,
 	#superclass : #GtRrCheckSchedulingTimeStrategy,
-	#category : 'RemoteRunner-CheckScheduling'
+	#category : #'RemoteRunner-CheckScheduling'
 }
 
 { #category : #accessing }

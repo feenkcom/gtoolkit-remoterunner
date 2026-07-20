@@ -1,7 +1,7 @@
 Class {
 	#name : #GtRrAnnouncementQueueEvent,
 	#superclass : #GtBeaconLogEvent,
-	#category : 'RemoteRunner-Logging-Events'
+	#category : #'RemoteRunner-Logging-Events'
 }
 
 { #category : #accessing }

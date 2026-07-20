@@ -1,5 +1,5 @@
 Class {
 	#name : #GtRrWorkerTerminationNotification,
 	#superclass : #Notification,
-	#category : 'RemoteRunner-Worker'
+	#category : #'RemoteRunner-Worker'
 }

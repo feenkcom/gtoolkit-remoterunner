@@ -1,7 +1,7 @@
 Class {
 	#name : #PlpoGtRrContext,
 	#superclass : #PharoLinkProxyObject,
-	#category : 'RemoteRunner-Runner-State'
+	#category : #'RemoteRunner-Runner-State'
 }
 
 { #category : #accessing }

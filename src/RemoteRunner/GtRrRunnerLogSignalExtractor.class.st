@@ -5,7 +5,7 @@ Class {
 		'inputFiles',
 		'targetClass'
 	],
-	#category : 'RemoteRunner-JobStats'
+	#category : #'RemoteRunner-JobStats'
 }
 
 { #category : #'as yet unclassified' }

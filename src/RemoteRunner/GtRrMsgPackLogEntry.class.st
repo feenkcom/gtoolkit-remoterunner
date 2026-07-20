@@ -6,7 +6,7 @@ Class {
 		'message',
 		'time'
 	],
-	#category : 'RemoteRunner-Analysis'
+	#category : #'RemoteRunner-Analysis'
 }
 
 { #category : #accessing }

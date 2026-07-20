@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'rootEventsStack'
 	],
-	#category : 'RemoteRunner-Logging-Events'
+	#category : #'RemoteRunner-Logging-Events'
 }
 
 { #category : #initialization }

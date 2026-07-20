@@ -1,7 +1,7 @@
 Class {
 	#name : #GtRrExampleTestFactory,
 	#superclass : #GtRrChecksFactory,
-	#category : 'RemoteRunner-Tasks'
+	#category : #'RemoteRunner-Tasks'
 }
 
 { #category : #testing }

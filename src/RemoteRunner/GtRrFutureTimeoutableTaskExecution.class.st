@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'timeout'
 	],
-	#category : 'RemoteRunner-Runner-State'
+	#category : #'RemoteRunner-Runner-State'
 }
 
 { #category : #evaluating }

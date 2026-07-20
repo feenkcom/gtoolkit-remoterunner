@@ -29,7 +29,7 @@ Class {
 		'DefaultMemorySizeMultiplier',
 		'DefaultMinWorkers'
 	],
-	#category : 'RemoteRunner-WorkerCount'
+	#category : #'RemoteRunner-WorkerCount'
 }
 
 { #category : #accessing }

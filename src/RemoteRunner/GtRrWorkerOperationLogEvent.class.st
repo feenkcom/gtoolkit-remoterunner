@@ -1,5 +1,5 @@
 Class {
 	#name : #GtRrWorkerOperationLogEvent,
 	#superclass : #GtRemoteRunnerExecutionLogEvent,
-	#category : 'RemoteRunner-Logging-Events'
+	#category : #'RemoteRunner-Logging-Events'
 }

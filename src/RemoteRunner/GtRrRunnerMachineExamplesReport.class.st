@@ -12,7 +12,7 @@ Class {
 		'machineRegion',
 		'awsWeightedCapacity'
 	],
-	#category : 'RemoteRunner-Reports'
+	#category : #'RemoteRunner-Reports'
 }
 
 { #category : #'accessing - gc details' }

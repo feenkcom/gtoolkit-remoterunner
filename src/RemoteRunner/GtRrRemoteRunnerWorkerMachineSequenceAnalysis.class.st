@@ -16,7 +16,7 @@ Class {
 		'corruptEntries',
 		'signals'
 	],
-	#category : 'RemoteRunner-Analysis'
+	#category : #'RemoteRunner-Analysis'
 }
 
 { #category : #api }

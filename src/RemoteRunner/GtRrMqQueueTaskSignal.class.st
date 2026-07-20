@@ -5,7 +5,7 @@ Class {
 		'taskId',
 		'isRetry'
 	],
-	#category : 'RemoteRunner-Signals'
+	#category : #'RemoteRunner-Signals'
 }
 
 { #category : #serialization }

@@ -9,7 +9,7 @@ Strategies include:
 Class {
 	#name : #GtRrCheckSchedulingTimeStrategy,
 	#superclass : #Object,
-	#category : 'RemoteRunner-CheckScheduling'
+	#category : #'RemoteRunner-CheckScheduling'
 }
 
 { #category : #method }

@@ -6,10 +6,3 @@ EpMethodAddition >> gtRrApproximateSize [
 	
 	^ self methodAffected gtRrApproximateSize
 ]
-
-{ #category : #'*RemoteRunner' }
-EpMethodAddition >> gtRrApproximateSizeWithData [
-	"Answer the approximate size of the receiver in memory."
-	
-	^ self methodAffected gtRrApproximateSizeWithData
-]

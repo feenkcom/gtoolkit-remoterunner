@@ -3,7 +3,7 @@ Class {
 	#superclass : #PharoLinkProxyObject,
 	#traits : 'TGtRrRunnerMachineExamplesReportViews',
 	#classTraits : 'TGtRrRunnerMachineExamplesReportViews classTrait',
-	#category : 'RemoteRunner-Reports'
+	#category : #'RemoteRunner-Reports'
 }
 
 { #category : #accessing }

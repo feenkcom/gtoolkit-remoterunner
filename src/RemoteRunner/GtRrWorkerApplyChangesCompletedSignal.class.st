@@ -5,7 +5,7 @@ Class {
 		'encodedEventsSize',
 		'eventsCount'
 	],
-	#category : 'RemoteRunner-Signals'
+	#category : #'RemoteRunner-Signals'
 }
 
 { #category : #accessing }

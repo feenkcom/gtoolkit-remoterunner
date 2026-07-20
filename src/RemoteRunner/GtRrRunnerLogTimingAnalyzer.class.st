@@ -7,7 +7,7 @@ Class {
 		'timingStats',
 		'currentRun'
 	],
-	#category : 'RemoteRunner-JobStats'
+	#category : #'RemoteRunner-JobStats'
 }
 
 { #category : #api }

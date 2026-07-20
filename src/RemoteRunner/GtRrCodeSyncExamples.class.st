@@ -4,7 +4,7 @@ Class {
 	#classVars : [
 		'TestValue'
 	],
-	#category : 'RemoteRunner-Examples'
+	#category : #'RemoteRunner-Examples'
 }
 
 { #category : #accessing }

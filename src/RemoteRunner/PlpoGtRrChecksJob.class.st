@@ -1,7 +1,7 @@
 Class {
 	#name : #PlpoGtRrChecksJob,
 	#superclass : #PlpoGtRrTasksJob,
-	#category : 'RemoteRunner-Jobs'
+	#category : #'RemoteRunner-Jobs'
 }
 
 { #category : #accessing }

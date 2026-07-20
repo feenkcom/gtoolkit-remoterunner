@@ -1,7 +1,7 @@
 Class {
 	#name : #GtRrWorkerHeatbeatStartingSignal,
 	#superclass : #GtRrWorkerHeartbeatSignal,
-	#category : 'RemoteRunner-Signals'
+	#category : #'RemoteRunner-Signals'
 }
 
 { #category : #'as yet unclassified' }

@@ -6,7 +6,7 @@ Currently only used by MessageQueue.  PharoLink to-be-implemented.
 Class {
 	#name : #GtRrMessage,
 	#superclass : #Object,
-	#category : 'RemoteRunner-Model'
+	#category : #'RemoteRunner-Model'
 }
 
 { #category : #processing }

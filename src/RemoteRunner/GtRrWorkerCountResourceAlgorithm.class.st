@@ -6,7 +6,7 @@ Class {
 		'requiredMemoryModel',
 		'coreCount'
 	],
-	#category : 'RemoteRunner-WorkerCount'
+	#category : #'RemoteRunner-WorkerCount'
 }
 
 { #category : #seralization }

@@ -1,5 +1,5 @@
 Class {
 	#name : #GtRrJobStartedAnnouncement,
 	#superclass : #GtRrJobAnnouncement,
-	#category : 'RemoteRunner-Announcements'
+	#category : #'RemoteRunner-Announcements'
 }

@@ -5,7 +5,7 @@ Class {
 		'testsExecution',
 		'allEvents'
 	],
-	#category : 'RemoteRunner-Analysis'
+	#category : #'RemoteRunner-Analysis'
 }
 
 { #category : #accessing }

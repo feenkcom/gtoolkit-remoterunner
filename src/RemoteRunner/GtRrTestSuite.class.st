@@ -6,7 +6,7 @@ GtRrTestSuite currently must not add any instance variables as {{gtClass:GtRrCla
 Class {
 	#name : #GtRrTestSuite,
 	#superclass : #TestSuite,
-	#category : 'RemoteRunner-Tests'
+	#category : #'RemoteRunner-Tests'
 }
 
 { #category : #composing }

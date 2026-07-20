@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'statusMessage'
 	],
-	#category : 'RemoteRunner-Announcements'
+	#category : #'RemoteRunner-Announcements'
 }
 
 { #category : #converting }

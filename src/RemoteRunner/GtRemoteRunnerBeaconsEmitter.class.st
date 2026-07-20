@@ -1,7 +1,7 @@
 Class {
 	#name : #GtRemoteRunnerBeaconsEmitter,
 	#superclass : #GtBeaconSignalsEmitter,
-	#category : 'RemoteRunner-Signals'
+	#category : #'RemoteRunner-Signals'
 }
 
 { #category : #logging }

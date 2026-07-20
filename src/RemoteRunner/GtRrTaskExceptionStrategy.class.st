@@ -4,7 +4,7 @@ GtRrTaskExceptionStrategys define how exceptions, including halt, are handled by
 Class {
 	#name : #GtRrTaskExceptionStrategy,
 	#superclass : #Object,
-	#category : 'RemoteRunner-ExceptionHandling'
+	#category : #'RemoteRunner-ExceptionHandling'
 }
 
 { #category : #testing }

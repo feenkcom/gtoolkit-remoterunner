@@ -7,7 +7,7 @@ Class {
 	#instVars : [
 		'runs'
 	],
-	#category : 'RemoteRunner-JobStats'
+	#category : #'RemoteRunner-JobStats'
 }
 
 { #category : #accessing }

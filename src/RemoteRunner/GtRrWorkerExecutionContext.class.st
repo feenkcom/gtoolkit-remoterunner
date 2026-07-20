@@ -13,7 +13,7 @@ Class {
 		'timeoutProcess',
 		'exceptionHandlingStrategy'
 	],
-	#category : 'RemoteRunner-Worker'
+	#category : #'RemoteRunner-Worker'
 }
 
 { #category : #testing }

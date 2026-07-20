@@ -4,19 +4,13 @@ GtRrTaskHeadlessExceptionStrategy is the normal strategy, which is to fail the t
 Class {
 	#name : #GtRrTaskHeadlessExceptionStrategy,
 	#superclass : #GtRrTaskExceptionStrategy,
-	#category : 'RemoteRunner-ExceptionHandling'
+	#category : #'RemoteRunner-ExceptionHandling'
 }
 
 { #category : #accessing }
 GtRrTaskHeadlessExceptionStrategy class >> leJsonV4Name [
 
 	^ #gtRrTaskHeadlessExceptionStrategy
-]
-
-{ #category : #accessing }
-GtRrTaskHeadlessExceptionStrategy >> handledExceptions [
-
-	^ Error, UnhandledException
 ]
 
 { #category : #accessing }
@@ -31,6 +25,12 @@ GtRrTaskHeadlessExceptionStrategy >> handleException: anException workerContext:
 		taskFailed: aGtRrWorkerContext taskContext
 		with: infoException.
 	aGtRrWorkerContext signalTaskCompletion.
+]
+
+{ #category : #accessing }
+GtRrTaskHeadlessExceptionStrategy >> handledExceptions [
+
+	^ Error, UnhandledException
 ]
 
 { #category : #accessing }

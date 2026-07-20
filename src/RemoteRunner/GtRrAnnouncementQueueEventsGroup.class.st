@@ -1,7 +1,7 @@
 Class {
 	#name : #GtRrAnnouncementQueueEventsGroup,
 	#superclass : #GtBeaconLogEventsGroup,
-	#category : 'RemoteRunner-Logging-Events'
+	#category : #'RemoteRunner-Logging-Events'
 }
 
 { #category : #'gt - extensions' }

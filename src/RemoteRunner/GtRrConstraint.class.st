@@ -1,7 +1,7 @@
 Class {
 	#name : #GtRrConstraint,
 	#superclass : #Object,
-	#category : 'RemoteRunner-Constraints'
+	#category : #'RemoteRunner-Constraints'
 }
 
 { #category : #'logical operations' }

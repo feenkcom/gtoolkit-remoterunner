@@ -10,7 +10,7 @@ Class {
 		'memAvailable',
 		'memTotal'
 	],
-	#category : 'RemoteRunner-Worker'
+	#category : #'RemoteRunner-Worker'
 }
 
 { #category : #serialization }

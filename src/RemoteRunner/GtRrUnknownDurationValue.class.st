@@ -8,7 +8,7 @@ Subclasses can implement different strategies.
 Class {
 	#name : #GtRrUnknownDurationValue,
 	#superclass : #Object,
-	#category : 'RemoteRunner-CheckScheduling'
+	#category : #'RemoteRunner-CheckScheduling'
 }
 
 { #category : #accessing }

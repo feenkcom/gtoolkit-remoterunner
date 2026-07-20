@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'errorInfo'
 	],
-	#category : 'RemoteRunner-Announcements'
+	#category : #'RemoteRunner-Announcements'
 }
 
 { #category : #accessing }

@@ -8,7 +8,7 @@ Class {
 		'job',
 		'codeSync'
 	],
-	#category : 'RemoteRunner-Exceptions'
+	#category : #'RemoteRunner-Exceptions'
 }
 
 { #category : #signaling }

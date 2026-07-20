@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'rpcId'
 	],
-	#category : 'RemoteRunner-Model'
+	#category : #'RemoteRunner-Model'
 }
 
 { #category : #printing }

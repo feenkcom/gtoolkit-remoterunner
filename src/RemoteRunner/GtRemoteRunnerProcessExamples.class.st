@@ -7,7 +7,7 @@ Class {
 		'remoteRunner',
 		'workers'
 	],
-	#category : 'RemoteRunner-Examples'
+	#category : #'RemoteRunner-Examples'
 }
 
 { #category : #testing }
