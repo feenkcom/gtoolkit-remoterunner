@@ -5,8 +5,3 @@ RGMethodDefinition >> gtRrApproximateSize [
 
 	^ sourceCode size
 ]
-
-{ #category : #'*RemoteRunner' }
-RGMethodDefinition >> gtRrApproximateSizeWithData [
-	^self gtRrApproximateSize
-]
