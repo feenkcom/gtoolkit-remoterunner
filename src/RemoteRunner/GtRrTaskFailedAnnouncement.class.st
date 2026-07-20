@@ -1,7 +1,7 @@
 Class {
 	#name : #GtRrTaskFailedAnnouncement,
 	#superclass : #GtRrTaskFinishedAnnouncement,
-	#category : #'RemoteRunner-Announcements'
+	#category : 'RemoteRunner-Announcements'
 }
 
 { #category : #'as yet unclassified' }

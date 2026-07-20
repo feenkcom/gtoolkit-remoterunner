@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'blockClosure'
 	],
-	#category : #'RemoteRunner-Model'
+	#category : 'RemoteRunner-Model'
 }
 
 { #category : #accessing }

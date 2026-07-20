@@ -1,7 +1,7 @@
 Class {
 	#name : #GtRrWorkerAppliedChangesGroup,
 	#superclass : #GtBeaconLogEventsGroup,
-	#category : #'RemoteRunner-Analysis'
+	#category : 'RemoteRunner-Analysis'
 }
 
 { #category : #accessing }

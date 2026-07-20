@@ -1,7 +1,7 @@
 Class {
 	#name : #PlpoGtRrJobContext,
 	#superclass : #PlpoGtRrContext,
-	#category : #'RemoteRunner-Runner-State'
+	#category : 'RemoteRunner-Runner-State'
 }
 
 { #category : #accessing }

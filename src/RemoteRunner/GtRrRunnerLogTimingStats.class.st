@@ -34,7 +34,7 @@ Class {
 		'stats',
 		'timingDataset'
 	],
-	#category : #'RemoteRunner-JobStats'
+	#category : 'RemoteRunner-JobStats'
 }
 
 { #category : #persistence }

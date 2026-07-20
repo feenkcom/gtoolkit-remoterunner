@@ -1,7 +1,7 @@
 Class {
 	#name : #GtRrRunnerLogTimingAnalyzerExamples,
 	#superclass : #Object,
-	#category : #'RemoteRunner-JobStats'
+	#category : 'RemoteRunner-JobStats'
 }
 
 { #category : #'sample logs' }

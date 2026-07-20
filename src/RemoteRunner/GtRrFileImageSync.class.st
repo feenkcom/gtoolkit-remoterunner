@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'entriesFile'
 	],
-	#category : #'RemoteRunner-Runner-ImageSync'
+	#category : 'RemoteRunner-Runner-ImageSync'
 }
 
 { #category : #accessing }

@@ -1,7 +1,7 @@
 Class {
 	#name : #GtRrCodeSyncLogEvent,
 	#superclass : #GtRemoteRunnerExecutionLogEvent,
-	#category : #'RemoteRunner-Logging-Events'
+	#category : 'RemoteRunner-Logging-Events'
 }
 
 { #category : #accessing }

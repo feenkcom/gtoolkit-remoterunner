@@ -5,7 +5,7 @@ Class {
 		'additionalOldSpace',
 		'onDiskSize'
 	],
-	#category : #'RemoteRunner-WorkerCount'
+	#category : 'RemoteRunner-WorkerCount'
 }
 
 { #category : #accessing }

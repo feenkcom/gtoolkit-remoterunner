@@ -4,7 +4,7 @@ GtRrSampleExample contains a few examples that are used for testing example exec
 Class {
 	#name : #GtRrSampleExample,
 	#superclass : #Object,
-	#category : #'RemoteRunner-Tests'
+	#category : 'RemoteRunner-Tests'
 }
 
 { #category : #accessing }

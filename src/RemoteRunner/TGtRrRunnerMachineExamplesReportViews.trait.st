@@ -1,6 +1,6 @@
 Trait {
 	#name : #TGtRrRunnerMachineExamplesReportViews,
-	#category : #'RemoteRunner-Reports'
+	#category : 'RemoteRunner-Reports'
 }
 
 { #category : #'gt - extensions' }

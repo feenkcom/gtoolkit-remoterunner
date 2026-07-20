@@ -10,7 +10,7 @@ Class {
 		'remoteRunner',
 		'worker'
 	],
-	#category : #'RemoteRunner-Examples'
+	#category : 'RemoteRunner-Examples'
 }
 
 { #category : #examples }

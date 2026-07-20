@@ -11,7 +11,7 @@ Class {
 		'workerConnection',
 		'spawnButton'
 	],
-	#category : #'RemoteRunner-UI'
+	#category : 'RemoteRunner-UI'
 }
 
 { #category : #private }

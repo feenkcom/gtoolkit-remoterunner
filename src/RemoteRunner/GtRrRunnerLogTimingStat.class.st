@@ -11,7 +11,7 @@ Class {
 		'dataPointCount',
 		'varianceSum'
 	],
-	#category : #'RemoteRunner-JobStats'
+	#category : 'RemoteRunner-JobStats'
 }
 
 { #category : #'instance creation' }

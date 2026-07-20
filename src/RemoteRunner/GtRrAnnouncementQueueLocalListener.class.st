@@ -23,7 +23,7 @@ Class {
 		'requestTermination',
 		'poolingProcess'
 	],
-	#category : #'RemoteRunner-AnnouncementQueue'
+	#category : 'RemoteRunner-AnnouncementQueue'
 }
 
 { #category : #'instance - creation' }

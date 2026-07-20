@@ -1,7 +1,7 @@
 Class {
 	#name : #GtRrSignalSerializationExamples,
 	#superclass : #Object,
-	#category : #'RemoteRunner-Examples'
+	#category : 'RemoteRunner-Examples'
 }
 
 { #category : #examples }

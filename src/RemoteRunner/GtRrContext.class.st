@@ -1,7 +1,7 @@
 Class {
 	#name : #GtRrContext,
 	#superclass : #Object,
-	#category : #'RemoteRunner-Runner-State'
+	#category : 'RemoteRunner-Runner-State'
 }
 
 { #category : #'instance creation' }

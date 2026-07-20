@@ -1,7 +1,7 @@
 Class {
 	#name : #GtRrMsgPackReceiveLogEntry,
 	#superclass : #GtRrMsgPackLogEntry,
-	#category : #'RemoteRunner-Analysis'
+	#category : 'RemoteRunner-Analysis'
 }
 
 { #category : #accessing }

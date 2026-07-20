@@ -1,7 +1,7 @@
 Class {
 	#name : #GtRrAnnouncementQueueEventsCollector,
 	#superclass : #GtBeaconEventsCollector,
-	#category : #'RemoteRunner-Logging-Events'
+	#category : 'RemoteRunner-Logging-Events'
 }
 
 { #category : #initialization }

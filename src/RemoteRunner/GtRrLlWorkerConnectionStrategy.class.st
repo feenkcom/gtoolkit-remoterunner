@@ -13,7 +13,7 @@ Class {
 	#instVars : [
 		'llSocketAddress'
 	],
-	#category : #'RemoteRunner-Worker'
+	#category : 'RemoteRunner-Worker'
 }
 
 { #category : #'instance creation' }

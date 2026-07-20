@@ -6,7 +6,7 @@ Class {
 		'workerId',
 		'taskContextId'
 	],
-	#category : #'RemoteRunner-Signals'
+	#category : 'RemoteRunner-Signals'
 }
 
 { #category : #accessing }

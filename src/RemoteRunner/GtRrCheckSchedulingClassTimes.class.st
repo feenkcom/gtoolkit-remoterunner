@@ -8,7 +8,7 @@ Class {
 		'times',
 		'className'
 	],
-	#category : #'RemoteRunner-CheckScheduling'
+	#category : 'RemoteRunner-CheckScheduling'
 }
 
 { #category : #'instance creation' }

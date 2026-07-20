@@ -1,6 +1,6 @@
 Trait {
 	#name : #TGtRrTaskVisitor,
-	#category : #'RemoteRunner-Tasks'
+	#category : 'RemoteRunner-Tasks'
 }
 
 { #category : #visiting }
@@ -71,13 +71,13 @@ TGtRrTaskVisitor >> visitPackageSUnitTask: aGtRrTask [
 ]
 
 { #category : #visiting }
-TGtRrTaskVisitor >> visitSUnitTask: aGtRrTask [
+TGtRrTaskVisitor >> visitScriptTask: aGtRrTask [
 
 	self visitTask: aGtRrTask
 ]
 
 { #category : #visiting }
-TGtRrTaskVisitor >> visitScriptTask: aGtRrTask [
+TGtRrTaskVisitor >> visitSUnitTask: aGtRrTask [
 
 	self visitTask: aGtRrTask
 ]

@@ -7,7 +7,7 @@ Class {
 	#instVars : [
 		'tasks'
 	],
-	#category : #'RemoteRunner-Jobs'
+	#category : 'RemoteRunner-Jobs'
 }
 
 { #category : #jsonV4 }

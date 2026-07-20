@@ -10,7 +10,7 @@ Class {
 		'collectedAt',
 		'pointsByName'
 	],
-	#category : #'RemoteRunner-JobStats'
+	#category : 'RemoteRunner-JobStats'
 }
 
 { #category : #'instance creation' }

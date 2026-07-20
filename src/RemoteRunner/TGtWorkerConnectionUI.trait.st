@@ -1,6 +1,6 @@
 Trait {
 	#name : #TGtWorkerConnectionUI,
-	#category : #'RemoteRunner-UI'
+	#category : 'RemoteRunner-UI'
 }
 
 { #category : #ui }

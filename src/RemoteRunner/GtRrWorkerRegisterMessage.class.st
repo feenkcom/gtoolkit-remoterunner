@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'attributes'
 	],
-	#category : #'RemoteRunner-Model'
+	#category : 'RemoteRunner-Model'
 }
 
 { #category : #accessing }

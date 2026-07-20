@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'ignoreNoTest'
 	],
-	#category : #'RemoteRunner-Tests'
+	#category : 'RemoteRunner-Tests'
 }
 
 { #category : #visiting }

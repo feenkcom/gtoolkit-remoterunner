@@ -6,7 +6,7 @@ Class {
 		'value',
 		'send'
 	],
-	#category : #'RemoteRunner-UI'
+	#category : 'RemoteRunner-UI'
 }
 
 { #category : #'instance creation' }

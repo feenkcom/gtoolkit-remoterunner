@@ -5,7 +5,7 @@ Class {
 		'exception',
 		'workerId'
 	],
-	#category : #'RemoteRunner-Announcements'
+	#category : 'RemoteRunner-Announcements'
 }
 
 { #category : #accessing }

@@ -14,3 +14,10 @@ EpEvent >> gtRrApproximateSize [
 	
 	^ 0
 ]
+
+{ #category : #'*RemoteRunner' }
+EpEvent >> gtRrApproximateSizeWithData [
+	"Answer the approximate size of the receiver in memory."
+	
+	^ self gtRrApproximateSize
+]

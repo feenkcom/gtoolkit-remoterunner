@@ -7,7 +7,7 @@ Class {
 	#instVars : [
 		'entriesCount'
 	],
-	#category : #'RemoteRunner-Runner-ImageSync'
+	#category : 'RemoteRunner-Runner-ImageSync'
 }
 
 { #category : #'instance creation' }

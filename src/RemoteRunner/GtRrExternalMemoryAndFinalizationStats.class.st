@@ -14,7 +14,7 @@ Class {
 	#classInstVars : [
 		'uniqueInstance'
 	],
-	#category : #'RemoteRunner-Analysis'
+	#category : 'RemoteRunner-Analysis'
 }
 
 { #category : #'class initialization' }

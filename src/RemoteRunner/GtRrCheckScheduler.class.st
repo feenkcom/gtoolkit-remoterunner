@@ -6,7 +6,7 @@ Class {
 		'maxDuration',
 		'maxChecksPerTask'
 	],
-	#category : #'RemoteRunner-CheckScheduling'
+	#category : 'RemoteRunner-CheckScheduling'
 }
 
 { #category : #accessing }

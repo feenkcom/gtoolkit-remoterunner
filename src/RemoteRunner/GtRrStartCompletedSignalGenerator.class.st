@@ -10,7 +10,7 @@ Class {
 		'superclass',
 		'packageName'
 	],
-	#category : #'RemoteRunner-Signals'
+	#category : 'RemoteRunner-Signals'
 }
 
 { #category : #private }

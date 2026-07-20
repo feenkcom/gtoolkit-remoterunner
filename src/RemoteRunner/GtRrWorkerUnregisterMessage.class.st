@@ -1,5 +1,5 @@
 Class {
 	#name : #GtRrWorkerUnregisterMessage,
 	#superclass : #GtRrWorkerMessage,
-	#category : #'RemoteRunner-Model'
+	#category : 'RemoteRunner-Model'
 }

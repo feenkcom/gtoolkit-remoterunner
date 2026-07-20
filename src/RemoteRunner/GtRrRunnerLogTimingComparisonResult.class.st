@@ -10,7 +10,7 @@ Class {
 		'deviationsFromMean',
 		'isOutlier'
 	],
-	#category : #'RemoteRunner-JobStats'
+	#category : 'RemoteRunner-JobStats'
 }
 
 { #category : #accessing }
@@ -51,6 +51,11 @@ GtRrRunnerLogTimingComparisonResult >> compute [
 ]
 
 { #category : #accessing }
+GtRrRunnerLogTimingComparisonResult >> deviationsFromMean [
+	^ deviationsFromMean
+]
+
+{ #category : #accessing }
 GtRrRunnerLogTimingComparisonResult >> deviationThreshold [
 	^ deviationThreshold
 ]
@@ -58,11 +63,6 @@ GtRrRunnerLogTimingComparisonResult >> deviationThreshold [
 { #category : #accessing }
 GtRrRunnerLogTimingComparisonResult >> deviationThreshold: aNumber [
 	deviationThreshold := aNumber
-]
-
-{ #category : #accessing }
-GtRrRunnerLogTimingComparisonResult >> deviationsFromMean [
-	^ deviationsFromMean
 ]
 
 { #category : #accessing }

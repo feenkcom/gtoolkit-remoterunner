@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'sunitPackageName'
 	],
-	#category : #'RemoteRunner-Tests'
+	#category : 'RemoteRunner-Tests'
 }
 
 { #category : #accessing }

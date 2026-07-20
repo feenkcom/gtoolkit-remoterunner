@@ -5,7 +5,7 @@ Class {
 		'messageClassName',
 		'encodedSize'
 	],
-	#category : #'RemoteRunner-Signals'
+	#category : 'RemoteRunner-Signals'
 }
 
 { #category : #accessing }

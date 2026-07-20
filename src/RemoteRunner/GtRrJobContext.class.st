@@ -12,7 +12,7 @@ Class {
 		'taskCompletedCount',
 		'jobTimeout'
 	],
-	#category : #'RemoteRunner-Runner-State'
+	#category : 'RemoteRunner-Runner-State'
 }
 
 { #category : #'instance creation' }

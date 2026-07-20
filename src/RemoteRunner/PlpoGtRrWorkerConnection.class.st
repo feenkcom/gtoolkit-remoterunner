@@ -3,7 +3,7 @@ Class {
 	#superclass : #PharoLinkProxyObject,
 	#traits : 'TGtWorkerConnectionUI',
 	#classTraits : 'TGtWorkerConnectionUI classTrait',
-	#category : #'RemoteRunner-Runner'
+	#category : 'RemoteRunner-Runner'
 }
 
 { #category : #accessing }

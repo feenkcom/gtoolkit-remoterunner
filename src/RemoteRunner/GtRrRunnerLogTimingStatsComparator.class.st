@@ -7,7 +7,7 @@ Class {
 		'comparisonResults',
 		'analyzer'
 	],
-	#category : #'RemoteRunner-JobStats'
+	#category : 'RemoteRunner-JobStats'
 }
 
 { #category : #'instance creation' }

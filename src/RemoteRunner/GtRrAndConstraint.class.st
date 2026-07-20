@@ -5,14 +5,8 @@ Class {
 		'left',
 		'right'
 	],
-	#category : #'RemoteRunner-Constraints'
+	#category : 'RemoteRunner-Constraints'
 }
-
-{ #category : #accessing }
-GtRrAndConstraint class >> leJsonV4Name [
-
-	^ #gtRrAndConstraint
-]
 
 { #category : #'instance creation' }
 GtRrAndConstraint class >> left: aConstraint right: anotherConstraint [
@@ -21,6 +15,12 @@ GtRrAndConstraint class >> left: aConstraint right: anotherConstraint [
 		  left: aConstraint;
 		  right: anotherConstraint;
 		  yourself
+]
+
+{ #category : #accessing }
+GtRrAndConstraint class >> leJsonV4Name [
+
+	^ #gtRrAndConstraint
 ]
 
 { #category : #accessing }

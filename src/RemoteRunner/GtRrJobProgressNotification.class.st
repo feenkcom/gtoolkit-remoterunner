@@ -28,7 +28,7 @@ Class {
 		'erroredCount',
 		'taskExecutionResults'
 	],
-	#category : #'RemoteRunner-Jobs-Notifications'
+	#category : 'RemoteRunner-Jobs-Notifications'
 }
 
 { #category : #'instance creation' }

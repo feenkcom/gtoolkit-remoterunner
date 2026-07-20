@@ -3,7 +3,7 @@ Class {
 	#superclass : #Object,
 	#traits : 'TAssertable + TGtRrExampleHelp',
 	#classTraits : 'TAssertable classTrait + TGtRrExampleHelp classTrait',
-	#category : #'RemoteRunner-Examples'
+	#category : 'RemoteRunner-Examples'
 }
 
 { #category : #examples }

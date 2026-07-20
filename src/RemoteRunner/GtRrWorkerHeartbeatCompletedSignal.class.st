@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'milliseconds'
 	],
-	#category : #'RemoteRunner-Signals'
+	#category : 'RemoteRunner-Signals'
 }
 
 { #category : #'as yet unclassified' }

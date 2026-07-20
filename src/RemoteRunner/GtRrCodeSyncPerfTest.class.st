@@ -15,7 +15,7 @@ Class {
 		'messageTally',
 		'memoryLogger'
 	],
-	#category : #'RemoteRunner-Runner-CodeSync'
+	#category : 'RemoteRunner-Runner-CodeSync'
 }
 
 { #category : #private }

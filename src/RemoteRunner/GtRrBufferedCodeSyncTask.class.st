@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'serializedChanges'
 	],
-	#category : #'RemoteRunner-Runner-CodeSync'
+	#category : 'RemoteRunner-Runner-CodeSync'
 }
 
 { #category : #accessing }

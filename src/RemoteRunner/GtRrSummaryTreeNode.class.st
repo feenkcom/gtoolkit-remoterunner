@@ -5,7 +5,7 @@ Class {
 		'node',
 		'children'
 	],
-	#category : #'RemoteRunner-UI'
+	#category : 'RemoteRunner-UI'
 }
 
 { #category : #'instance creation' }

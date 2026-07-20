@@ -17,7 +17,7 @@ Class {
 		'lastHeartbeat',
 		'attributes'
 	],
-	#category : #'RemoteRunner-Runner'
+	#category : 'RemoteRunner-Runner'
 }
 
 { #category : #'instance creation' }

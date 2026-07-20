@@ -1,5 +1,5 @@
 Class {
 	#name : #GtRrPharoLinkServerManager,
 	#superclass : #GtRrServerManager,
-	#category : #'RemoteRunner-Runner-Manager'
+	#category : 'RemoteRunner-Runner-Manager'
 }

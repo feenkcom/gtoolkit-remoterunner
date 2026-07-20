@@ -5,7 +5,7 @@ Class {
 		'endTime',
 		'duration'
 	],
-	#category : #'RemoteRunner-CheckScheduling'
+	#category : 'RemoteRunner-CheckScheduling'
 }
 
 { #category : #accessing }

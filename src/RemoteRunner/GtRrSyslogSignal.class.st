@@ -8,7 +8,7 @@ Class {
 		'ipAddress',
 		'messageText'
 	],
-	#category : #'RemoteRunner-Announcements'
+	#category : 'RemoteRunner-Announcements'
 }
 
 { #category : #accessing }
