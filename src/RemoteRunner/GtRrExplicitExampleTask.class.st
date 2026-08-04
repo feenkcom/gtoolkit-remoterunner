@@ -88,7 +88,7 @@ GtRrExplicitExampleTask >> group [
 				in: providerClass ].
 			(GtExampleFactory new
 				createExampleForMethod: method
-				withProviderClass: providerClass) asExampleWithResult ]
+				withReceiverClass: providerClass) asExampleWithResult ]
 		thenSelect: #isNotNil).
 ]
 

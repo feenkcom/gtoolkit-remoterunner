@@ -9,10 +9,10 @@ Class {
 { #category : #examples }
 GtRrSplitTestExamples >> splitClassExamples [
 	"Demonstrate splitting examples out of a {{gtClass::GtRrClassExampleTask}}"
+
 	<gtExample>
 	<return: #GtRrSplitTestExamples>
 	| compoundTask splitTasks taskNames taskContext |
-
 	compoundTask := GtRrClassExampleTask exampleClassName: #GtRrSampleExample.
 	taskContext := GtRrTaskContext new task: compoundTask.
 	splitTasks := taskContext retryTasks.
@@ -20,11 +20,10 @@ GtRrSplitTestExamples >> splitClassExamples [
 
 	compoundTask retryStrategy: GtRrTaskTestRetry new.
 	taskNames := compoundTask group examples
-			collect: [ :example | example providerClass name -> example selector ]
-			as: Set.	"Tasks without errors don't split"
-	"The presence of error details is enough to trigger the split"
-	compoundTask executionData: (GtRrTaskExecutionData new 
-		errorDetails: GtRrErrorDetails new).
+			collect: [ :example | example receiverClass name -> example selector ]
+			as: Set.	"Tasks without errors don't split"	"The presence of error details is enough to trigger the split"
+	compoundTask
+		executionData: (GtRrTaskExecutionData new errorDetails: GtRrErrorDetails new).
 	taskContext := GtRrTaskContext new task: compoundTask.
 	splitTasks := taskContext retryTasks.
 	self assert: splitTasks size equals: 4.
@@ -148,10 +147,10 @@ GtRrSplitTestExamples >> splitExplicitTests [
 { #category : #examples }
 GtRrSplitTestExamples >> splitPackageExamples [
 	"Demonstrate splitting examples out of a {{gtClass::GtRrPackageExampleTask}}"
+
 	<gtExample>
 	<return: #GtRrSplitTestExamples>
 	| compoundTask splitTasks taskNames taskContext |
-
 	compoundTask := GtRrPackageExampleTask examplePackageName: 'RemoteRunner'.
 	compoundTask
 		executionData: (GtRrTaskExecutionData new errorDetails: GtRrErrorDetails new).
@@ -161,16 +160,17 @@ GtRrSplitTestExamples >> splitPackageExamples [
 	self assert: splitTasks size equals: compoundTask allExamples size.
 
 	taskNames := compoundTask group examples
-			collect: [ :example | example providerClass name -> example selector ]
+			collect: [ :example | example receiverClass name -> example selector ]
 			as: Set.
 	compoundTask retryStrategy: GtRrTaskTestRetry new.
 	taskContext := GtRrTaskContext new task: compoundTask.
 	splitTasks := taskContext retryTasks.
-	splitTasks do: [ :splitTask | 
-		self assert: splitTask constraint identicalTo: compoundTask constraint.
-		self assert: splitTask taskTimeout identicalTo: compoundTask taskTimeout.
-		self assert: (taskNames includes: splitTask examples first).
-		taskNames remove: splitTask examples first ].
+	splitTasks
+		do: [ :splitTask | 
+			self assert: splitTask constraint identicalTo: compoundTask constraint.
+			self assert: splitTask taskTimeout identicalTo: compoundTask taskTimeout.
+			self assert: (taskNames includes: splitTask examples first).
+			taskNames remove: splitTask examples first ].
 	self assert: taskNames isEmpty
 ]
 

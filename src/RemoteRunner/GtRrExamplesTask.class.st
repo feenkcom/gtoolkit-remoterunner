@@ -154,16 +154,17 @@ GtRrExamplesTask >> splitTestsIn: aGtRrTaskContext [
 	"Answer a collection of tasks which need to be retried and in which each task has only 1 check from the receiver.
 	If the receiver has errors (the task overall failed), retry all unsuccessful checks.
 	Once a definition of flaky tests has been added: If the receiver succeeded, retry failing flaky checks."
-	| group |
 
+	| group |
 	self hasErrors ifFalse: [ ^ #() ].
 	group := self group.
-	group size = 1 ifTrue: [ ^ { self copy } ].
-	^ group collect: [ :example |
-		(GtRrExplicitExampleTask examples: 
-			{ example providerClass name -> example selector })
+	group size = 1 ifTrue: [ ^ {self copy} ].
+	^ group
+		collect: [ :example | 
+			(GtRrExplicitExampleTask
+				examples: {example receiverClass name -> example selector})
 				constraint: self constraint;
-				taskTimeout: self taskTimeout ].
+				taskTimeout: self taskTimeout ]
 ]
 
 { #category : #ui }
