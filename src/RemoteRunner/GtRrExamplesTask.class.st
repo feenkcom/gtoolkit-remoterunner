@@ -100,47 +100,48 @@ GtRrExamplesTask >> isExamplesTask [
 { #category : #running }
 GtRrExamplesTask >> run [
 	| group exampleStartTime exampleEndTime announcement resourceReport exception exampleResult |
-
 	group := self group.
-	^ group examples collect: [ :exampleWithResult |
-		resourceReport := nil.
-		(ignoreNoTest or: [ exampleWithResult ignoreTest not ]) ifTrue: [ 
-			GtRrWorkerCheckStartingSignal new
-				example: exampleWithResult example;
-				emit.
-			resourceReport := GtRrCheckResourcesReport new.
-			exampleStartTime := DateAndTime now.
-			resourceReport recordSourceReport.
-			self allowDebugger
-				ifTrue: [ exampleWithResult debug ]
-				ifFalse: [ exampleWithResult run ].
-			resourceReport recordTargetReport.
-			exampleEndTime := DateAndTime now ].
+	^ group examples
+		collect: [ :exampleWithResult | 
+			resourceReport := nil.
+			(ignoreNoTest or: [ exampleWithResult ignoreTest not ])
+				ifTrue: [ GtRrWorkerCheckStartingSignal new
+						example: exampleWithResult example;
+						emit.
+					resourceReport := GtRrCheckResourcesReport new.
+					exampleStartTime := DateAndTime now.
+					resourceReport recordSourceReport.
+					self allowDebugger
+						ifTrue: [ exampleWithResult debug ]
+						ifFalse: [ exampleWithResult run ].
+					resourceReport recordTargetReport.
+					exampleEndTime := DateAndTime now ].
 			GtRrWorkerCheckCompletedSignal new
 				example: exampleWithResult example;
 				emit.
 
-		exampleResult := exampleWithResult result.
-		announcement := exampleResult
-			ifNil: [ PharoLinkTestCaseSkip new ]
-			ifNotNil: [ exampleResult basicReturnValue gtRrResultHolderClass new ].
-		announcement
-			initializeTestCaseClassName: exampleWithResult providerClass name
-				selector: exampleWithResult selector;
-			testCaseStartTimestamp: exampleStartTime;
-			testCaseEndTimestamp: exampleEndTime;
-			shouldPass: true.
-		announcement resourceReport: resourceReport.
-		
-		(exampleWithResult isSuccess or: [ exampleResult isNil ]) ifFalse: [ 
-			exception := exampleResult basicReturnValue value.
-			announcement 
-				initializeExceptionClass: exception class
-				messageText: ((exception messageText ifNil: [ '' ])
-					ifEmpty: [ exception class name ])
-				trace: exception stackString
-				additionalData: exception pharoLinkAdditionalData ].
-		announcement ] as: Array.
+			exampleResult := exampleWithResult result.
+			announcement := exampleResult
+					ifNil: [ PharoLinkTestCaseSkip new ]
+					ifNotNil: [ exampleResult basicReturnValue gtRrResultHolderClass new ].
+			announcement
+				initializeTestCaseClassName: exampleWithResult receiverClass name
+					selector: exampleWithResult selector;
+				testCaseStartTimestamp: exampleStartTime;
+				testCaseEndTimestamp: exampleEndTime;
+				shouldPass: true.
+			announcement resourceReport: resourceReport.
+
+			(exampleWithResult isSuccess or: [ exampleResult isNil ])
+				ifFalse: [ exception := exampleResult basicReturnValue value.
+					announcement
+						initializeExceptionClass: exception class
+						messageText: ((exception messageText ifNil: [ '' ])
+								ifEmpty: [ exception class name ])
+						trace: exception stackString
+						additionalData: exception pharoLinkAdditionalData ].
+			announcement ]
+		as: Array
 ]
 
 { #category : #initialization }

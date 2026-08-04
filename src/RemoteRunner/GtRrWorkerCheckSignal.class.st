@@ -19,8 +19,8 @@ GtRrWorkerCheckSignal >> checkName: anObject [
 
 { #category : #accessing }
 GtRrWorkerCheckSignal >> example: aGtExample [
-
-	self checkName: aGtExample providerClass name asString, '>>', aGtExample selector
+	self
+		checkName: aGtExample receiverClass name asString , '>>' , aGtExample selector
 ]
 
 { #category : #printing }
