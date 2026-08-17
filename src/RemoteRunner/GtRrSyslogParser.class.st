@@ -122,7 +122,7 @@ GtRrSyslogParser >> parseStream: stream [
 		[ stream atEnd ] whileFalse:
 			 [ (self parseLine: stream nextLine) ifNotNil:
 				[ :signal | resultStream nextPut: signal ] ] ].
-	logger := MemoryLogger new basicRecordings: signals.
+	logger := MemoryLogger new initializeWithRecordings: signals.
 ]
 
 { #category : #filtering }
