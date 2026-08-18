@@ -23,6 +23,13 @@ GtRrWorkerCheckSignal >> example: aGtExample [
 		checkName: aGtExample receiverClass name asString , '>>' , aGtExample selector
 ]
 
+{ #category : #initialization }
+GtRrWorkerCheckSignal >> initializeFromTimestamp: aDateAndTime andData: aCollection [ 
+
+	super initializeFromTimestamp: aDateAndTime andData: aCollection.
+	checkName := aCollection at: 3.
+]
+
 { #category : #printing }
 GtRrWorkerCheckSignal >> printOneLineContentsOn: stream [
 
