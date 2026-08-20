@@ -8,6 +8,12 @@ Class {
 }
 
 { #category : #accessing }
+GtRrTallyingTask class >> leJsonV4Name [
+
+	^ #remoteRunnerTallyingTask
+]
+
+{ #category : #accessing }
 GtRrTallyingTask >> innerTask [
 	^ innerTask
 ]
