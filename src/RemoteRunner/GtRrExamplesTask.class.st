@@ -27,9 +27,9 @@ GtRrExamplesTask >> allMethods [
 GtRrExamplesTask >> asExplicitTask [
 	"Answer the receiver as a list of explicit examples / tasks"
 
-	^ GtRrExplicitExampleTask examples: 
-		(self group examples collect: [ :each |
-			each providerClass name -> each selector ])
+	^ GtRrExplicitExampleTask
+		examples: (self group examples
+				collect: [ :each | each receiverClass name -> each selector ])
 ]
 
 { #category : #'as yet unclassified' }

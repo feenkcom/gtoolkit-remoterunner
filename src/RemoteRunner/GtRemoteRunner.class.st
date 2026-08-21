@@ -1628,10 +1628,10 @@ GtRemoteRunner >> terminateJobId: aJobId [
 				aJobContext ]
 			ifAbsent: [ ].
 		runnerStats currentlyExecutingJobCount: currentlyExecutingJobs size.
-		jobContext ifNotNil: [ jobContext terminateJob ].
 		self emptyQueuesFor: aJobId.
-		jobStartupAndShutdown shutdownJob: jobContext.
-		 ].
+		jobContext ifNotNil: 
+			[ jobContext terminateJob.
+			jobStartupAndShutdown shutdownJob: jobContext ] ].
 
 	self announceAndLog: (GtRrJobTerminatedAnnouncement job: jobContext job).
 	^ jobContext job
