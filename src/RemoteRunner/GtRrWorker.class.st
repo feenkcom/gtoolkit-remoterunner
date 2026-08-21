@@ -514,9 +514,11 @@ GtRrWorker >> start [
 	stopFlag := false.
 	self configureConnectionStrategy.
 	connectionStrategy start.
+	"The server starts checking heartbeats after the worker registers.
+	Start the heartbeat prior to running worker startup scripts as they can potentially take longer than the heartbeat timeout."
+	self startHeartbeat.
 	self runWorkerStartupScripts.
 	readProcess := self newTaskProcess.
-	self startHeartbeat.
 ]
 
 { #category : #starting }
