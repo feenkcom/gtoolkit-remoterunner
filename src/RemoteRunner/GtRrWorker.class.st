@@ -343,6 +343,13 @@ GtRrWorker >> defaultLogDir [
 	^ 'workerLogs'
 ]
 
+{ #category : #starting }
+GtRrWorker >> enableMcpServerOnError [
+	<gtWorkerStartupScript>
+
+	GtRrTaskHeadlessExceptionStrategy startMcpServer: true.
+]
+
 { #category : #'as yet unclassified' }
 GtRrWorker >> enableStrictSymbolComparison [
 	<gtWorkerStartupScript>
