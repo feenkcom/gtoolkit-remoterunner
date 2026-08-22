@@ -550,7 +550,7 @@ GtRemoteRunner >> encodedChangesSyncEventsFrom: anOmReference workerId: workerId
 	GtRrChangesSyncRetrievalCompletedSignal new
 		omReference: anOmReference;
 		workerId: workerId;
-		resultSize: result serializedSize;
+		resultSize: (result ifNil: [ 0 ] ifNotNil: [ result  serializedSize ]);
 		emit.
 	^ result.
 ]

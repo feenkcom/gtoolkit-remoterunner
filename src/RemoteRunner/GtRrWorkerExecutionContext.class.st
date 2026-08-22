@@ -76,11 +76,23 @@ GtRrWorkerExecutionContext >> signalTaskCompletion [
 { #category : #'start-stop' }
 GtRrWorkerExecutionContext >> stop [
 
-	( timeoutProcess isTerminating or: [ timeoutProcess isTerminated ]) ifFalse:
-		[ timeoutProcess terminate ].
+	self stopTimeout.
+	self stopExecution.
+]
+
+{ #category : #'start-stop' }
+GtRrWorkerExecutionContext >> stopExecution [
+
 	( executionProcess isTerminating or: [ executionProcess isTerminated ]) ifFalse:
 		[ executionProcess signalException:
 			GtRrWorkerTerminationNotification new ]
+]
+
+{ #category : #'start-stop' }
+GtRrWorkerExecutionContext >> stopTimeout [
+
+	( timeoutProcess isTerminating or: [ timeoutProcess isTerminated ]) ifFalse:
+		[ timeoutProcess terminate ].
 ]
 
 { #category : #accessing }
