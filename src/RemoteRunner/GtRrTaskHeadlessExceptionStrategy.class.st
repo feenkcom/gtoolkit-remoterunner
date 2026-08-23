@@ -25,11 +25,11 @@ GtRrTaskHeadlessExceptionStrategy class >> startMcpServer [
 ]
 
 { #category : #accessing }
-GtRrTaskHeadlessExceptionStrategy class >> startMcpServer: aBoolean [
+GtRrTaskHeadlessExceptionStrategy class >> startMcpServer: aValueable [
 
-	StartMcpServer := aBoolean.
+	StartMcpServer := aValueable.
 	StringSignal emit: 'Started MCP server on error: ',
-			aBoolean printString.
+			aValueable printString.
 ]
 
 { #category : #accessing }
