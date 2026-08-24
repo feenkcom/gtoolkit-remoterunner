@@ -470,9 +470,21 @@ GtRrWorker >> retrieveChangesFromServerWith: aPharoLinkApplication [
 	^ connectionStrategy  retrieveChangesFromServerWith: aPharoLinkApplication
 ]
 
+{ #category : #startup }
+GtRrWorker >> runWorkerStartupActions [
+	"Run the worker startup actions defined in the receiver's class, in priority order."
+	| actions |
+	actions := self class methods
+		select: [ :method | method hasPragmaNamed: #gtWorkerStartupAction ]
+		thenCollect: [ :method | method valueWithReceiver: self ].
+	(actions sorted: [ :first :second | first priority < second priority ])
+		do: [ :action | action run ]
+]
+
 { #category : #starting }
 GtRrWorker >> runWorkerStartupScripts [
-	"Run any worker startup scripts in the receiver's class"
+	"Run any worker startup scripts in the receiver's class.
+	Deprecated... use #gtWorkerStartupAction instead."
 
 	self class methods
 		select: [ :method | method hasPragmaNamed: #gtWorkerStartupScript ]
@@ -508,16 +520,18 @@ GtRrWorker >> stackString [
 	^ String streamContents: [ :stream | thisContext errorReportOn: stream ]
 ]
 
-{ #category : #starting }
+{ #category : #running }
 GtRrWorker >> start [
 
 	stopFlag := false.
 	self configureConnectionStrategy.
 	connectionStrategy start.
 	"The server starts checking heartbeats after the worker registers.
-	Start the heartbeat prior to running worker startup scripts as they can potentially take longer than the heartbeat timeout."
+	Start the heartbeat prior to running worker startup actions as they can potentially take longer than the heartbeat timeout."
 	self startHeartbeat.
+	"Run startup scripts during deprecation phase."
 	self runWorkerStartupScripts.
+	self runWorkerStartupActions.
 	readProcess := self newTaskProcess.
 ]
 
