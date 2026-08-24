@@ -334,6 +334,23 @@ GtRrWorkerExamples >> workerStartupActions [
 ]
 
 { #category : #examples }
+GtRrWorkerExamples >> workerStartupBlockAction [
+	<gtExample>
+	<return: #GtRrWorkerStartupBlockAction>
+	| action result |
+	action := GtRrWorkerStartupBlockAction block: [ 40 + 2 ].
+	action
+		title: 'Answer the ultimate question';
+		priority: 17.
+	result := action run.
+	self assert: action title equals: 'Answer the ultimate question'.
+	self assert: action priority equals: 17.
+	self assert: action block value equals: 42.
+	self assert: result equals: 42.
+	^ action
+]
+
+{ #category : #examples }
 GtRrWorkerExamples >> workerStartupScriptAction [
 	<gtExample>
 	<return: #GtRrWorkerStartupScriptAction>
