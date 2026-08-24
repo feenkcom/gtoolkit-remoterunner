@@ -290,6 +290,67 @@ GtRrWorkerExamples >> workerShouldApplyEntries [
 ]
 
 { #category : #examples }
+GtRrWorkerExamples >> workerStartupActions [
+	<gtExample>
+	<return: #GtRrWorker>
+	| worker orderKey |
+	orderKey := #GtRrWorkerExamplesStartupActionOrder.
+	EpMonitor disableDuring: [
+		[ Smalltalk globals at: orderKey put: OrderedCollection new.
+		GtRrWorker
+			compile: 'gtRrWorkerExamplesSecondStartupAction
+	<gtWorkerStartupAction>
+	^ (GtRrWorkerStartupScriptAction script: ''(Smalltalk globals at: #GtRrWorkerExamplesStartupActionOrder) add: #second'')
+		title: ''Second action'';
+		priority: 20;
+		yourself'
+			classified: 'examples'.
+		GtRrWorker
+			compile: 'gtRrWorkerExamplesFirstStartupAction
+	<gtWorkerStartupAction>
+	^ (GtRrWorkerStartupScriptAction script: ''(Smalltalk globals at: #GtRrWorkerExamplesStartupActionOrder) add: #first'')
+		title: ''First action'';
+		priority: 10;
+		yourself'
+			classified: 'examples'.
+		GtRrInImageWorker
+			compile: 'gtRrWorkerExamplesSubclassStartupAction
+	<gtWorkerStartupAction>
+	^ (GtRrWorkerStartupScriptAction script: ''(Smalltalk globals at: #GtRrWorkerExamplesStartupActionOrder) add: #subclass'')
+		title: ''Subclass action'';
+		priority: 5;
+		yourself'
+			classified: 'examples'.
+		worker := GtRrWorker new runWorkerStartupActions.
+		self
+			assert: (Smalltalk globals at: orderKey) asArray
+			equals: #(first second) ]
+			ensure: [
+				GtRrWorker removeSelector: #gtRrWorkerExamplesFirstStartupAction.
+				GtRrWorker removeSelector: #gtRrWorkerExamplesSecondStartupAction.
+				GtRrInImageWorker removeSelector: #gtRrWorkerExamplesSubclassStartupAction.
+				Smalltalk globals removeKey: orderKey ifAbsent: [ ] ] ].
+	^ worker
+]
+
+{ #category : #examples }
+GtRrWorkerExamples >> workerStartupScriptAction [
+	<gtExample>
+	<return: #GtRrWorkerStartupScriptAction>
+	| action result |
+	action := GtRrWorkerStartupScriptAction script: '40 + 2'.
+	action
+		title: 'Answer the ultimate question';
+		priority: 17.
+	result := action run.
+	self assert: action title equals: 'Answer the ultimate question'.
+	self assert: action priority equals: 17.
+	self assert: action script equals: '40 + 2'.
+	self assert: result equals: 42.
+	^ action
+]
+
+{ #category : #examples }
 GtRrWorkerExamples >> workerStartupScripts [
 	<gtExample>
 	<return: #GtRrWorkerExamples>
