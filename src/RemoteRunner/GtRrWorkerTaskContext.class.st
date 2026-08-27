@@ -82,6 +82,8 @@ GtRrWorkerTaskContext >> printOn: aStream [
 		[ aStream
 			nextPut: $(;
 			print: taskContextId;
+			nextPutAll: ', ';
+			print: (task ifNil: [ 'no task' ] ifNotNil: [ self taskId ]);
 			nextPut: $) ].
 ]
 

@@ -8,6 +8,14 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+GtRrRunnerTaskMessage >> printOn: aStream [
+
+	super printOn: aStream.
+	aStream parenthesize: [
+		aStream print: task ]
+]
+
+{ #category : #'as yet unclassified' }
 GtRrRunnerTaskMessage >> processMq: mqMessage processor: aGtRrProcessor for: anOwner [
 
 	(mqMessage headerAt: #redelivered ifAbsent: [ false ]) = 'true'

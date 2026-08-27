@@ -238,7 +238,8 @@ GtRrMqWorkerConnectionStrategy >> setNextTask: aGtRrTask ackFrame: anAckFrame [
 Stdio stdout
 	<< Time now asString;
 	<< ': set next task start';
-	lf.
+	lf;
+	flush.
 	self assert: nextTask isNil.
 	nextTask := aGtRrTask.
 	ackFrame := anAckFrame.
@@ -246,7 +247,8 @@ Stdio stdout
 Stdio stdout
 	<< Time now asString;
 	<< ': set next task done';
-	lf.
+	lf;
+	flush.
 ]
 
 { #category : #Sysext }
