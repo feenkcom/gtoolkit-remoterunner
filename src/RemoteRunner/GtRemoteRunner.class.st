@@ -586,14 +586,17 @@ GtRemoteRunner >> getNextTaskFor: aWorkerFuture [
 
 { #category : #ui }
 GtRemoteRunner >> gtExecutingJobsFor: aView [
-
 	<gtView>
+	
 	^ aView list
 		  title: 'Executing jobs';
 		  priority: 20;
 		  items: [ self critical: [ currentlyExecutingJobs values ] ];
 		  send: [ :item | item ];
 		  updateWhen: GtRemoteRunnerAnnouncement in: [ self announcer ];
+		  actionButtonIcon: BrGlamorousVectorIcons cancel 
+		  	tooltip: 'Cancel all executing jobs'
+		  	action: [ self terminateAllJobs ];
 		  actionUpdateButton
 ]
 
