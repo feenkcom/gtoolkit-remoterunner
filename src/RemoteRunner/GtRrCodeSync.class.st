@@ -55,8 +55,6 @@ GtRrCodeSync >> finalize [
 
 { #category : #accessing }
 GtRrCodeSync >> flush [
-	<sys_ext>
-
 	mutex critical:  [
 		| buffer job |
 		buffer := self eventsBuffer.
