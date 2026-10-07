@@ -11,10 +11,10 @@ BaselineOfRemoteRunner >> baseline: spec [
 		spec postLoadDoIt: #'postLoadRemoteRunner:'.
 		spec
 			baseline: 'PharoLink' with: [
-				spec repository: 'github://feenkcom/PharoLink:v0.8.536/src' ].
+				spec repository: 'github://feenkcom/PharoLink:v0.8.537/src' ].
 		spec
 			baseline: 'GToolkitNotifications' with: [
-				spec repository: 'github://feenkcom/gtoolkit-notifications:v0.7.155/src' ].
+				spec repository: 'github://feenkcom/gtoolkit-notifications:v0.7.156/src' ].
 		spec
 			baseline: 'Stamp' with: [
 				spec repository: 'github://feenkcom/stamp:v0.6.6/repository' ].
