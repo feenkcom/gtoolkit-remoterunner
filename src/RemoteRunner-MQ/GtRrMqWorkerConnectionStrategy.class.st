@@ -135,6 +135,7 @@ GtRrMqWorkerConnectionStrategy >> nextTask [
 	mqProcessor sendGtMessage: (GtRrWorkerTaskStartedMessage new
 			taskContextId: nextTask taskContextId;
 			taskId: nextTask taskId;
+			jobId: nextTask jobId;
 			workerId: worker uid)
 		to: self taskResultDefinition.
 	^ nextTask.

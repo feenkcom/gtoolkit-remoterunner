@@ -3,7 +3,8 @@ Class {
 	#superclass : #GtRemoteRunnerSignal,
 	#instVars : [
 		'taskId',
-		'taskContextId'
+		'taskContextId',
+		'jobId'
 	],
 	#category : #'RemoteRunner-Signals'
 }
@@ -14,7 +15,17 @@ GtRrMqTaskMissingSignal >> initializeFromTimestamp: aDateAndTime andData: aColle
 	super initializeFromTimestamp: aDateAndTime andData: aCollection.
 	taskId := aCollection at: 3.
 	taskContextId := aCollection at: 4.
-	
+	jobId := aCollection at: 5.
+]
+
+{ #category : #accessing }
+GtRrMqTaskMissingSignal >> jobId [
+	^jobId
+]
+
+{ #category : #accessing }
+GtRrMqTaskMissingSignal >> jobId: anObject [
+	jobId := anObject
 ]
 
 { #category : #printing }
@@ -25,7 +36,9 @@ GtRrMqTaskMissingSignal >> printOneLineContentsOn: aStream [
 		<< ' | ';
 		<< taskId asString;
 		<< ' | ';
-		<< taskContextId asString
+		<< taskContextId asString;
+		<< ' | ';
+		<< jobId asString.
 ]
 
 { #category : #accessing }
