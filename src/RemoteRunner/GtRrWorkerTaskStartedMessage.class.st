@@ -3,10 +3,21 @@ Class {
 	#superclass : #GtRrWorkerMessage,
 	#instVars : [
 		'taskContextId',
-		'taskId'
+		'taskId',
+		'jobId'
 	],
 	#category : #'RemoteRunner-Model'
 }
+
+{ #category : #accessing }
+GtRrWorkerTaskStartedMessage >> jobId [
+	^jobId
+]
+
+{ #category : #accessing }
+GtRrWorkerTaskStartedMessage >> jobId: anObject [
+	jobId := anObject
+]
 
 { #category : #'as yet unclassified' }
 GtRrWorkerTaskStartedMessage >> processMq: mqMessage processor: aGtRrProcessor for: anOwner [
@@ -33,6 +44,7 @@ GtRrWorkerTaskStartedMessage >> processMq: mqMessage processor: aGtRrProcessor f
 								[ GtRrMqTaskMissingSignal new
 									taskContextId: taskContextId;
 									taskId: taskId;
+									jobId: jobId;
 									emit ] ] ].
 ]
 

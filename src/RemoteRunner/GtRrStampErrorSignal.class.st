@@ -54,12 +54,3 @@ GtRrStampErrorSignal >> headers [
 GtRrStampErrorSignal >> headers: aDictionary [
 	headers := aDictionary
 ]
-
-{ #category : #printing }
-GtRrStampErrorSignal >> printOneLineContentsOn: aStream [
-
-	super printOneLineContentsOn: aStream.
-	aStream
-		<< ' | ';
-		<< self message asString
-]
