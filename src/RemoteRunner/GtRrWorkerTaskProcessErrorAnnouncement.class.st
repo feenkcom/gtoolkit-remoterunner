@@ -22,8 +22,13 @@ GtRrWorkerTaskProcessErrorAnnouncement >> exception: anObject [
 
 { #category : #accessing }
 GtRrWorkerTaskProcessErrorAnnouncement >> printOneLineContentsOn: stream [
-
-	exception printOn: stream.
+	taskContext
+		ifNotNil: 
+			[stream
+				nextPutAll: 'Task ';
+				print: taskContext taskId;
+				nextPutAll: ': '].
+	exception printOn: stream
 ]
 
 { #category : #accessing }

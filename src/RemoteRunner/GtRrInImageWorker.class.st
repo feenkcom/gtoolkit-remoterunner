@@ -49,6 +49,11 @@ GtRrInImageWorker >> nextTask [
 	^ nextTask
 ]
 
+{ #category : #private }
+GtRrInImageWorker >> onStepServiceError: anException [
+	anException pass
+]
+
 { #category : #running }
 GtRrInImageWorker >> registerWith: ignored [
 	"Register the receiver with the remote runner associated with the supplied PharoLinkApplication"

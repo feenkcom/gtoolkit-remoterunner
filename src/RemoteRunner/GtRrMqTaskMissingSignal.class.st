@@ -6,10 +6,10 @@ Class {
 		'taskContextId',
 		'jobId'
 	],
-	#category : #'RemoteRunner-Signals'
+	#category : #RemoteRunner
 }
 
-{ #category : #initialization }
+{ #category : #'as yet unclassified' }
 GtRrMqTaskMissingSignal >> initializeFromTimestamp: aDateAndTime andData: aCollection [
 
 	super initializeFromTimestamp: aDateAndTime andData: aCollection.
@@ -18,17 +18,17 @@ GtRrMqTaskMissingSignal >> initializeFromTimestamp: aDateAndTime andData: aColle
 	jobId := aCollection at: 5.
 ]
 
-{ #category : #accessing }
+{ #category : #'as yet unclassified' }
 GtRrMqTaskMissingSignal >> jobId [
 	^jobId
 ]
 
-{ #category : #accessing }
+{ #category : #'as yet unclassified' }
 GtRrMqTaskMissingSignal >> jobId: anObject [
 	jobId := anObject
 ]
 
-{ #category : #printing }
+{ #category : #'as yet unclassified' }
 GtRrMqTaskMissingSignal >> printOneLineContentsOn: aStream [
 
 	super printOneLineContentsOn: aStream.

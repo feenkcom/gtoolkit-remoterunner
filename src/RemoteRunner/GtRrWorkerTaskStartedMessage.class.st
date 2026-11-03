@@ -6,15 +6,15 @@ Class {
 		'taskId',
 		'jobId'
 	],
-	#category : #'RemoteRunner-Model'
+	#category : #RemoteRunner
 }
 
-{ #category : #accessing }
+{ #category : #'as yet unclassified' }
 GtRrWorkerTaskStartedMessage >> jobId [
 	^jobId
 ]
 
-{ #category : #accessing }
+{ #category : #'as yet unclassified' }
 GtRrWorkerTaskStartedMessage >> jobId: anObject [
 	jobId := anObject
 ]
