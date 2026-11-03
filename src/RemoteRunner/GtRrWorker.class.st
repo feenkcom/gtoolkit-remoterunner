@@ -335,6 +335,13 @@ GtRrWorker >> currentProcessId [
 	^ GtOsSystemInfo current currentProcessId
 ]
 
+{ #category : #accessing }
+GtRrWorker >> currentTaskContext [
+	^executionContext
+		ifNil: [connectionStrategy currentTaskContext]
+		ifNotNil: [:context | context taskContext]
+]
+
 { #category : #logging }
 GtRrWorker >> defaultLogDir [
 	<return: #String>
@@ -422,17 +429,17 @@ GtRrWorker >> logAndQuit: reasonString [
 
 { #category : #accessing }
 GtRrWorker >> newTaskProcess [
-
-	^ [ [ stopFlag ] whileFalse:
-		[ [ [ self stepService ] repeat ]
-			on: Error
-			do: [ :ex |
-				GtRrWorkerTaskProcessErrorAnnouncement new
-					taskContext: executionContext;
-					exception: ex;
-					emit.
-				5 seconds wait ] ].
-	] forkNamed: 'Worker Process: ', uid.
+	^
+	[[stopFlag] whileFalse: 
+			[[[self stepService] repeat] on: Error
+				do: 
+					[:ex |
+					(GtRrWorkerTaskProcessErrorAnnouncement new)
+						taskContext: self currentTaskContext;
+						exception: ex;
+						emit.
+					self onStepServiceError: ex]]]
+			forkNamed: 'Worker Process: ' , uid
 ]
 
 { #category : #private }
@@ -440,6 +447,19 @@ GtRrWorker >> nextTask [
 	"Send any queued results and get the next task"
 
 	^ connectionStrategy nextTask
+]
+
+{ #category : #private }
+GtRrWorker >> onStepServiceError: anException [
+	| message |
+	
+	message := String streamContents: [ :stream |
+		stream
+			<< 'Task process error: ';
+			<< anException description asString;
+			lf;
+			<< anException stackString ].
+	self logAndQuit: message.
 ]
 
 { #category : #accessing }

@@ -7,6 +7,11 @@ Class {
 	#category : #'RemoteRunner-Worker'
 }
 
+{ #category : #accessing }
+GtRrWorkerConnectionStrategy >> currentTaskContext [
+	^nil
+]
+
 { #category : #actions }
 GtRrWorkerConnectionStrategy >> evaluateOnRunner: aBlock arguments: args [
 	"Pass the supplied message to the RemoteRunner for evaluation.

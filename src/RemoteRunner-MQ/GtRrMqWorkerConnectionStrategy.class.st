@@ -28,6 +28,11 @@ GtRrMqWorkerConnectionStrategy >> connectDuring: aBlock [
 	^ aBlock value: self
 ]
 
+{ #category : #accessing }
+GtRrMqWorkerConnectionStrategy >> currentTaskContext [
+	^nextTask
+]
+
 { #category : #actions }
 GtRrMqWorkerConnectionStrategy >> evaluateOnRunner: aCleanBlock arguments: args [
 	"Pass the supplied block to the RemoteRunner for evaluation.
@@ -127,7 +132,7 @@ GtRrMqWorkerConnectionStrategy >> mqUsername: aString [
 	mqProcessor mqUsername: aString
 ]
 
-{ #category : #'api - running' }
+{ #category : #'as yet unclassified' }
 GtRrMqWorkerConnectionStrategy >> nextTask [
 
 	GtRrWorkerWaitForTaskAnnouncement new emit.
