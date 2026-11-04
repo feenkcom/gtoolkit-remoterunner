@@ -265,6 +265,27 @@ GtRrStompMqProcessor >> critical: aBlock [
 	^ socketAccess critical: aBlock
 ]
 
+{ #category : #accessing }
+GtRrStompMqProcessor >> defaultListenerExceptionMessage [
+	^ String streamContents: [ :stream |
+		stream
+			<< 'Unexpected loss of connection'; cr;
+			<< 'at: ';
+				print: DateAndTime now; cr;
+			<< 'Socket status: ';
+				<< self socketStatus asString; cr;
+			<< 'Last read time: ';
+				<< ([ mqClient lastReadTime asString ] on: Error do: [ :ex | '<unavailable>' ]); cr;
+			<< 'Last write time: ';
+				<< ([ mqClient lastWriteTime asString ] on: Error do: [ :ex | '<unavailable>' ]); cr;
+			<< 'Closing Exception: ';
+				<< closingException description; cr.
+		closingException messageText asString ifNotEmpty: [ :msgText |
+			stream
+				<< 'Message Text: ';
+					<< msgText; cr ] ].
+]
+
 { #category : #initialization }
 GtRrStompMqProcessor >> initialize [
 
@@ -355,6 +376,12 @@ GtRrStompMqProcessor >> messageChannelDefinition: anObject [
 ]
 
 { #category : #accessing }
+GtRrStompMqProcessor >> mqClient [
+
+	^ mqClient
+]
+
+{ #category : #accessing }
 GtRrStompMqProcessor >> mqHostName [
 	^ mqHostName ifNil: [ self class defaultHostName ]
 ]
@@ -416,10 +443,10 @@ GtRrStompMqProcessor >> privateStop [
 
 	self stopMqHeartbeat.
 	mqClient := messageSubscription := commandSubscription := owner := nil.
+	state := #stopped.
 	self announcer announce:
 		(GtRrStompMqProcessorStoppedAnnouncement new
 			mqProcessor: self).
-	state := #stopped.
 	stopGate signal.
 ]
 
@@ -686,8 +713,6 @@ GtRrStompMqProcessor >> stop [
 		[ listenerStopping ifFalse: [ mqListener ifNotNil: 
 			[ :aMqListener |
 				aMqListener signalException: ConnectionClosed new ] ] ].
-	self announcer announce: (GtRrStompMqProcessorStoppedAnnouncement new
-		mqProcessor: self)
 ]
 
 { #category : #'start - stop' }

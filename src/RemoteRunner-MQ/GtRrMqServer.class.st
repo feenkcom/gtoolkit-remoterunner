@@ -148,8 +148,9 @@ GtRrMqServer >> gtTaskQueueSummaryFor: aView [
 
 { #category : #'as yet unclassified' }
 GtRrMqServer >> handleMqListenerException: closingException source: aMqProcessor [
-	"Handle the processor loop exiting."
-	| socketStatus |	
+	"Handle the processor loop exiting.
+	The MqProcessor must be stopped as part of this handling."
+	| msg |
 	
 	"If the mqProcessor has changed it has been manually reset,
 	do nothing."
@@ -157,12 +158,20 @@ GtRrMqServer >> handleMqListenerException: closingException source: aMqProcessor
 	"If the image with the remote runner was saved and used for the workers,
 	this is where we find out and shut down the remote runner."
 	GtRrWorker isCommandLineWorker ifTrue: 
-		[ ^ remoteRunner stop ].
+		[ aMqProcessor privateStop.
+		remoteRunner stop.
+		^ self ].
 	"If this is part of a requested stop, do nothing"
 	aMqProcessor isStopping ifTrue: [ ^ self ].
-	"Log the socket status for debugging"
-	socketStatus := aMqProcessor socketStatus.
-	self error: 'Unexpected loss of connection: ', socketStatus.
+
+	msg := String streamContents: [ :stream |
+		stream 
+			<< aMqProcessor defaultListenerExceptionMessage;
+			cr; cr;
+			<< 'The Remote Runner will now be stopped.'; cr ].
+	aMqProcessor privateStop.
+	remoteRunner stop.
+	self error: msg.
 ]
 
 { #category : #initialization }
