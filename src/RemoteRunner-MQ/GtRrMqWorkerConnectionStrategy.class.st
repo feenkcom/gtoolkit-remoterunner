@@ -55,8 +55,8 @@ GtRrMqWorkerConnectionStrategy >> handleMqListenerException: closingException so
 	do nothing."
 	mqProcessor == aMqProcessor ifFalse: [ ^ self ].
 	aMqProcessor isStopping ifTrue: [ ^ self ].
-	self error: 'Unexpected loss of connection: ',
-				closingException printString.
+	aMqProcessor privateStop.
+	self error: aMqProcessor defaultListenerExceptionMessage.
 ]
 
 { #category : #'as yet unclassified' }
