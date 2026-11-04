@@ -14,10 +14,10 @@ BaselineOfRemoteRunner >> baseline: spec [
 				spec repository: 'github://feenkcom/PharoLink:v0.8.542/src' ].
 		spec
 			baseline: 'GToolkitNotifications' with: [
-				spec repository: 'github://feenkcom/gtoolkit-notifications:v0.7.169/src' ].
+				spec repository: 'github://feenkcom/gtoolkit-notifications:v0.7.170/src' ].
 		spec
 			baseline: 'Stamp' with: [
-				spec repository: 'github://feenkcom/stamp:v0.6.6/repository' ].
+				spec repository: 'github://feenkcom/stamp:v0.6.7/repository' ].
 		spec
 			baseline: 'Gt4RabbitMq' with: [
 				spec repository: 'github://feenkcom/gt4rabbitmq:v0.6.4/src' ].
