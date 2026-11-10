@@ -42,22 +42,20 @@ GtRrExamplesTask >> checkNames [
 { #category : #accessing }
 GtRrExamplesTask >> checkNamesAndTimes [
 	| times exampleClassName |
-
 	times := OrderedCollection new.
-	self allExamples do: [ :example |
-		exampleClassName := example providerClass name.
-		times add: {
-			(example providerClass name asString, '>>', example selector).
-			(GtRrCheckSchedulingTimes hasUniqueInstance ifTrue:
-					[ GtRrCheckSchedulingTimes uniqueInstance
-						timeForClassName: exampleClassName
-						selector: example selector
-						ifAbsent: [ '<none>' ]]
-				ifFalse:
-					[ '<no times>' ]).
-			example } ].
-	^ times sorted: #first descending.
-
+	self allExamples
+		do: [ :example | 
+			exampleClassName := example receiverClass name.
+			times
+				add: {example providerClass name asString , '>>' , example selector.
+						GtRrCheckSchedulingTimes hasUniqueInstance
+							ifTrue: [ GtRrCheckSchedulingTimes uniqueInstance
+									timeForClassName: exampleClassName
+									selector: example selector
+									ifAbsent: [ '<none>' ] ]
+							ifFalse: [ '<no times>' ].
+						example} ].
+	^ times sorted: #first descending
 ]
 
 { #category : #accessing }
