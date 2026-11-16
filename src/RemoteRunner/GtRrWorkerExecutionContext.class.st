@@ -24,6 +24,21 @@ GtRrWorkerExecutionContext >> allowDebugger [
 ]
 
 { #category : #accessing }
+GtRrWorkerExecutionContext >> cancelWithReason: aString [
+	"Cancel the running task by signalling an error in its process, like #timeoutTask does.
+	The task fails with aString as its error message; the worker keeps running.
+	Answer a boolean indicating whether a running task was signalled.
+	
+	Warning: the error is signalled wherever the task is, so it can leave the image in an unknown state. Depending on exactly what the task was doing (e.g. holding a lock, compiling or loading code, writing a file), it can break the worker. If the worker misbehaves afterwards, stop it and start a new one."
+
+	executionProcess ifNil: [ ^ false ].
+	(executionProcess isTerminated or: [ executionProcess isTerminating ])
+		ifTrue: [ ^ false ].
+	executionProcess signalException: (Error new messageText: aString).
+	^ true
+]
+
+{ #category : #accessing }
 GtRrWorkerExecutionContext >> exceptionHandlingStrategy [
 
 	^ exceptionHandlingStrategy ifNil:

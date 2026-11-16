@@ -271,31 +271,36 @@ GtRrWorker >> commandQuitSmalltalk [
 
 { #category : #commands }
 GtRrWorker >> commandTerminateTaskContextId: taskContextId [
-	"Terminate the current task, confirming the context id"
-	| priority canTerminate |
+	"Terminate the current task, confirming the context id.
+	The task fails with a cancellation error; the worker keeps running.
+	Answer a boolean indicating whether the task was cancelled.
+	
+	Warning: this interrupts the task wherever it is, so it can leave the worker image in an unknown state. Depending on exactly what the task was doing (e.g. holding a lock, compiling or loading code, writing a file), it can break the worker. If the worker misbehaves afterwards, stop it and start a new one."
 
+	| priority canTerminate |
 	"Once we start we don't want to be interrupted by the task, since it may change"
 	priority := Processor activeProcess priority.
 	[ Processor activeProcess priority: priority + 1.
 	canTerminate := true.
-	executionContext ifNil:
-		[ GtRrWorkerCommandAnnouncement new
-			message: taskContextId printString, ': can''t terminate: currentTaskExecution isNil';
-			emit.
-		canTerminate := false. ]
-	ifNotNil:
-		[ executionContext task taskContextId = taskContextId ifFalse:
-			[ GtRrWorkerCommandAnnouncement new
-				message: (String streamContents: [ :stream |
-					stream
-						print: taskContextId;
-						<< ': can''t terminate: current taskContextId = ';
-						print: executionContext task taskContextId ]);
+	executionContext
+		ifNil: [ GtRrWorkerCommandAnnouncement new
+				message: taskContextId printString , ': can''t terminate: currentTaskExecution isNil';
 				emit.
-			canTerminate := false. ] ].
-	canTerminate ifTrue: 
-		[ executionContext cancelWithReason: 'received TerminateCurrentTask from RemoteRunner' ] ]
-			ensure: [ Processor activeProcess priority: priority ].
+			canTerminate := false ]
+		ifNotNil: [ executionContext taskContext taskContextId = taskContextId
+				ifFalse: [ GtRrWorkerCommandAnnouncement new
+						message: (String
+								streamContents: [ :stream | 
+									stream
+										print: taskContextId;
+										<< ': can''t terminate: current taskContextId = ';
+										print: executionContext taskContext taskContextId ]);
+						emit.
+					canTerminate := false ] ].
+	canTerminate
+		ifTrue: [ canTerminate := executionContext
+					cancelWithReason: 'received TerminateCurrentTask from RemoteRunner' ] ]
+		ensure: [ Processor activeProcess priority: priority ].
 	^ canTerminate
 ]
 
