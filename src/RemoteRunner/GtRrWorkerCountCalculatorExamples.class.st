@@ -40,7 +40,7 @@ GtRrWorkerCountCalculatorExamples >> availableMemory [
 	self assert: fixedAvailable equals: 123456.
 	self
 		assert: freeAvailable
-		equals: GtOsSystemInfo current freeMemory
+		equals: GtOsSystemInfo current availableMemory
 		within: 0.2.
 	self
 		assert: physicalAvailable
@@ -123,7 +123,7 @@ GtRrWorkerCountCalculatorExamples >> modelDefaults [
 	| calculator |
 	self
 		assert: GtRrWorkerCountFreeMemoryModel new availableMemory
-		equals: GtOsSystemInfo current freeMemory
+		equals: GtOsSystemInfo current availableMemory
 		within: 0.2.
 	self
 		assert: GtRrWorkerCountPhysicalMemoryModel new availableMemory
