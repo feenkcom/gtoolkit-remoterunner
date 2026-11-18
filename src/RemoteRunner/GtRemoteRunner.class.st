@@ -969,47 +969,43 @@ GtRemoteRunner >> privateRegisterWorkerWithDetails: aDictionary controlChannelAv
 	"Register the supplied worker and connection details.
 	Answer a boolean indicating whether the registration was accepted.
 	aBoolean indicates whether the control channel is automatically available.  If so, announce it."
-	| pharoLinkServerConnection workerConnection workerId mutexStart mutexEnd |
 
+	| pharoLinkServerConnection workerConnection workerId mutexStart mutexEnd |
 	GtRrRegisterWorkerStartingSignal new
 		workerAttributes: aDictionary;
-		emit.
-	"For MQ comms pharoLinkServer will be nil"
+		emit.	"For MQ comms pharoLinkServer will be nil"
 	pharoLinkServerConnection := PharoLinkServerCurrentConnection value.
-	pharoLinkServerConnection ifNotNil:
-		[ pharoLinkServerConnection closeOnExec: true ].
+	pharoLinkServerConnection
+		ifNotNil: [ pharoLinkServerConnection closeOnExec: true ].
 	mutexStart := DateAndTime now.
-	self critical:
-		[ mutexEnd := DateAndTime now.
-		"If the worker specifies that it is for a particular job only accept the connection if that job is currently running"
-		workerConnection := (server 
-						ifNil: [ GtRrWorkerConnection new ]
-						ifNotNil: #newWorkerConnection)
-				connection: pharoLinkServerConnection;
-				remoteRunner: self.
-		aDictionary at: #workerJobId
-			ifPresent: 
-				[:workerJobId |
-				(workerJobId = 'anyJob'
-					or: [currentlyExecutingJobs includesKey: workerJobId])
-						ifFalse: 
-							[ GtRrRegisterWorkerRejectedSignal new
+	self
+		critical: [ mutexEnd := DateAndTime now.	"If the worker specifies that it is for a particular job only accept the connection if that job is currently running"
+			workerConnection := (server
+					ifNil: [ GtRrWorkerConnection new ]
+					ifNotNil: [ :v | v newWorkerConnection ])
+					connection: pharoLinkServerConnection;
+					remoteRunner: self.
+			aDictionary
+				at: #workerJobId
+				ifPresent: [ :workerJobId | 
+					(workerJobId = 'anyJob' or: [ currentlyExecutingJobs includesKey: workerJobId ])
+						ifFalse: [ GtRrRegisterWorkerRejectedSignal new
 								ipAddress: workerConnection remoteAddressString;
 								workerAttributes: aDictionary;
 								mutexWait: (mutexEnd - mutexStart) asMilliSeconds;
 								emit.
 							^ false ] ].
-		workerConnection attributes: aDictionary.
-		workerId := aDictionary at: #id.
-		registeredWorkers at: workerId put: workerConnection.
-		runnerStats 
-			updateRegisteredWorkerCounts: registeredWorkers;
-			isRunning: self isRunning.
-		managerStartupAndShutdown registerWorker: workerConnection ].
-	self announce: (GtRrWorkerRegisteredAnnouncement new
-				worker: workerConnection).
-	aBoolean ifTrue:
-		[ self announceAndLog: (GtRrWorkerControlChannelRegisteredAnnouncement worker: workerConnection). ].
+			workerConnection attributes: aDictionary.
+			workerId := aDictionary at: #id.
+			registeredWorkers at: workerId put: workerConnection.
+			runnerStats
+				updateRegisteredWorkerCounts: registeredWorkers;
+				isRunning: self isRunning.
+			managerStartupAndShutdown registerWorker: workerConnection ].
+	self announce: (GtRrWorkerRegisteredAnnouncement new worker: workerConnection).
+	aBoolean
+		ifTrue: [ self
+				announceAndLog: (GtRrWorkerControlChannelRegisteredAnnouncement worker: workerConnection) ].
 	GtRrRegisterWorkerCompletedSignal new
 		workerAttributes: aDictionary;
 		ipAddress: workerConnection remoteAddressString;
