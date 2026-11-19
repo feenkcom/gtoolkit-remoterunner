@@ -310,15 +310,16 @@ GtRrTaskExecutionData >> state [
 
 { #category : #accessing }
 GtRrTaskExecutionData >> state: aSymbol [
-	| index currentIndex |
+	| index currentIndex aState |
 
-	index := self states indexOf: aSymbol.
+	aState := aSymbol asSymbol.
+	index := self states indexOf: aState.
 	index = 0 ifTrue:
 		[ self error: 'Invalid job state: ', aSymbol printString ].
 	currentIndex := self states indexOf: state.
 	index <= currentIndex ifTrue: [ ^ self ].
 
-	state := aSymbol.
+	state := aState.
 ]
 
 { #category : #accessing }

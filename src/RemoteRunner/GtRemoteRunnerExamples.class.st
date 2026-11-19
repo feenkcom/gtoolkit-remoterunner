@@ -368,7 +368,7 @@ GtRemoteRunnerExamples >> simpleTask [
 	self assert: job state equals: #completed.
 	self deny: job hasErrors.
 	self assert: (times collect: #key) asArray equals: #(0 1 3 4).
-	self assert: job results first result equals: #done ]
+	self assert: (job results first result sameContentAs: #done) ]
 		ensure: [ remoteRunner stop ].
 
 	^ job

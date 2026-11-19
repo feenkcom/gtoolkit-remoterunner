@@ -743,15 +743,16 @@ GtRrJob >> state: aSymbol [
 	Must be one of the known #states.
 	Attempts to move the state back will be silently ignored,
 	e.g. there's no point marking the job terminating when it is already cancelled."
-	| index currentIndex |
+	| index currentIndex aState |
 
-	index := self states indexOf: aSymbol.
+	aState := aSymbol asSymbol.
+	index := self states indexOf: aState.
 	index = 0 ifTrue:
 		[ self error: 'Invalid job state: ', aSymbol printString ].
 	currentIndex := self states indexOf: state.
 	index <= currentIndex ifTrue: [ ^ self ].
 
-	state := aSymbol
+	state := aState
 ]
 
 { #category : #printing }
