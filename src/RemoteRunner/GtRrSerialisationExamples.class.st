@@ -30,7 +30,7 @@ GtRrSerialisationExamples >> gtRrClassExampleTask [
 		assert: deserializedTask class = GtRrClassExampleTask
 		description: 'deserializedTask class incorrect: ' , deserializedTask class name.
 	self
-		assert: deserializedTask exampleClassName = #GtRrWorkerExamples
+		assert: deserializedTask exampleClassName = 'GtRrWorkerExamples'
 		description: 'deserializedTask exampleClassName incorrect: '
 				, deserializedTask exampleClassName printString.
 
