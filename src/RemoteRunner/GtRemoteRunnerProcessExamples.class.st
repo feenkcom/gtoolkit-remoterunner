@@ -1151,17 +1151,16 @@ GtRemoteRunnerProcessExamples >> workerChangesFile [
 	<gtExample>
 	<return: #SubclassResponsibility>
 	| semaphore changesFile task job |
-
 	self setUp.
 	remoteRunner := self simpleRunner.
 	remoteRunner managerStartupAndShutdown poolSize: 1.
 	semaphore := Semaphore new.
-	remoteRunner 
-		when: GtRrWorkerRegisteredAnnouncement 
+	remoteRunner
+		when: GtRrWorkerRegisteredAnnouncement
 		do: [ semaphore signal ]
 		for: self.
-	remoteRunner 
-		when: GtRrJobCompletedAnnouncement 
+	remoteRunner
+		when: GtRrJobCompletedAnnouncement
 		do: [ semaphore signal ]
 		for: self.
 	changesFile := FileReference
@@ -1185,8 +1184,8 @@ GtRemoteRunnerProcessExamples >> workerChangesFile [
 		description: 'Job didn''t complete in time'.
 	self deny: job hasErrors.
 	self assert: job results first result ]
-		ensure: [ remoteRunner ifNotNil: #stop.
-			changesFile ifNotNil: #ensureDelete ]
+		ensure: [ remoteRunner ifNotNil: [ :v | v stop ].
+			changesFile ifNotNil: [ :v | v ensureDelete ] ]
 ]
 
 { #category : #examples }

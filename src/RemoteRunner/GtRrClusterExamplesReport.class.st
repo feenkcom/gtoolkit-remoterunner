@@ -660,18 +660,19 @@ GtRrClusterExamplesReport >> workersTasksStartMaximumDelay [
 
 { #category : #'gt - extensions' }
 GtRrClusterExamplesReport >> workersVsCoresData [
-
-	^ machineReports collect: [ :machine | 
-		| machineType cc |
-		machineType := GtAwsAmazonWebServices default ec2 instanceTypes 
-			at: machine machineType
-			ifAbsent: [].
-		cc := machineType ifNotNil: #coreCount.
-		Dictionary new
-			at: #machineType put: (machineType ifNil: [ '-' ]);
-			at: #workersCount put: machine numberOfWorkers;
-			at: #coreCount put: (machineType ifNil: [ '-' ] ifNotNil: #coreCount);
-			yourself ].
+	^ machineReports
+		collect: [ :machine | 
+			| machineType cc |
+			machineType := GtAwsAmazonWebServices default ec2 instanceTypes
+					at: machine machineType
+					ifAbsent: [  ].
+			cc := machineType ifNotNil: [ :v | v coreCount ].
+			Dictionary new
+				at: #machineType put: (machineType ifNil: [ '-' ]);
+				at: #workersCount put: machine numberOfWorkers;
+				at: #coreCount
+					put: (machineType ifNil: [ '-' ] ifNotNil: [ :v | v coreCount ]);
+				yourself ]
 ]
 
 { #category : #'as yet unclassified' }

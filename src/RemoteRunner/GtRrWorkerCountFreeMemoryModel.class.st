@@ -16,7 +16,7 @@ GtRrWorkerCountFreeMemoryModel class >> leJsonV4Name [
 { #category : #initialize }
 GtRrWorkerCountFreeMemoryModel >> availableMemory [
 
-	^ availableMemory ifNil: [ availableMemory := GtOsSystemInfo current freeMemory ]
+	^ availableMemory ifNil: [ availableMemory := GtOsSystemInfo current availableMemory ]
 ]
 
 { #category : #ui }
