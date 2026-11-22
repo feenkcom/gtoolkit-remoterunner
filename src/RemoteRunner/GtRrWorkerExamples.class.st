@@ -29,6 +29,31 @@ GtRrWorkerExamples >> cleanUp [
 ]
 
 { #category : #examples }
+GtRrWorkerExamples >> commandLineConnectionStrategyIsFound [
+	"Each connection strategy id, passed on the worker command line as GtRrWorkerManager>>#newWorkerLocalProcessArgumentsFor: passes it (a String), is found in the worker's connection strategy lookup"
+
+	<gtExample>
+	<return: #Array>
+	| strategyIds |
+	strategyIds := GtRrWorker connectionStrategyLookup keys asArray
+			collect: [ :aStrategyId | 
+				| commandLine strategyId |
+				commandLine := GtRrWorkerClapCommand commandLineCommand
+						match: {'remoteRunnerWorker'.
+								'--connectionStrategy'.
+								aStrategyId asString}.
+				strategyId := GtRrWorkerClapCommand new connectionStrategyIdIn: commandLine.
+				self assert: (GtRrWorker connectionStrategyLookup includesKey: strategyId).
+				strategyId ].
+
+	self
+		assert: (GtRrWorkerClapCommand new
+				connectionStrategyIdIn: (GtRrWorkerClapCommand commandLineCommand match: #('remoteRunnerWorker'))) isNil.
+
+	^ strategyIds
+]
+
+{ #category : #examples }
 GtRrWorkerExamples >> commandLineWithAttributes [
 	"Demonstrate parsing the Remote Runner Worker command line"
 
