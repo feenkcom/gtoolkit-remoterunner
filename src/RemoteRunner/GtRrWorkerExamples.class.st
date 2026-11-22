@@ -10,13 +10,6 @@ Class {
 	#category : #'RemoteRunner-Examples'
 }
 
-{ #category : #asserting }
-GtRrWorkerExamples >> assert: actual equals: expected [
-	^ self
-		assert: (actual sameContentAs: expected)
-		description: [ self comparingStringBetween: actual and: expected ]
-]
-
 { #category : #private }
 GtRrWorkerExamples >> cleanUp [
 
@@ -119,10 +112,8 @@ GtRrWorkerExamples >> commandLineWithStrategy [
 	| commandLine connectionStrategyId |
 	commandLine := GtRrWorkerClapCommand commandLineCommand match: #('remoteRunnerWorker').
 
-	connectionStrategyId := commandLine
-			at: #connectionStrategy
-			ifPresent: [ :arg | (arg at: #strategyId) value ]
-			ifAbsent: [ #perMessage ].
+	connectionStrategyId := (GtRrWorkerClapCommand new connectionStrategyIdIn: commandLine)
+			ifNil: [ #perMessage ].
 
 	self assert: connectionStrategyId equals: #perMessage.
 
@@ -130,10 +121,8 @@ GtRrWorkerExamples >> commandLineWithStrategy [
 	commandLine := GtRrWorkerClapCommand commandLineCommand
 			match: #('remoteRunnerWorker' '--connectionStrategy' 'single').
 
-	connectionStrategyId := commandLine
-			at: #connectionStrategy
-			ifPresent: [ :arg | (arg at: #strategyId) value ]
-			ifAbsent: [ #perMessage ].
+	connectionStrategyId := (GtRrWorkerClapCommand new connectionStrategyIdIn: commandLine)
+			ifNil: [ #perMessage ].
 
 	self assert: connectionStrategyId equals: #single.
 
