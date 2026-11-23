@@ -7,14 +7,14 @@ Class {
 { #category : #accessing }
 GtRrMsgPackSendLogEntry >> commandId [
 
-	^ message at: #id ifAbsent: []
+	^ message at: 'id' ifAbsent: []
 ]
 
 { #category : #accessing }
 GtRrMsgPackSendLogEntry >> gtPayloadValueFor: aView [
 	<gtView>
 	
-	(message includesKey: #value) ifFalse:
+	(message includesKey: 'value') ifFalse:
 		[ ^ aView empty ].
 	^ aView forward
 		title: 'Payload Value';
@@ -33,7 +33,7 @@ GtRrMsgPackSendLogEntry >> isSend [
 GtRrMsgPackSendLogEntry >> payloadSize [
 
 	^ message
-		at: #value
+		at: 'value'
 		ifPresent: #size
 		ifAbsent: [ 0 ]
 ]
@@ -41,7 +41,7 @@ GtRrMsgPackSendLogEntry >> payloadSize [
 { #category : #accessing }
 GtRrMsgPackSendLogEntry >> payloadValue [
 
-	^ MpDecoder new decode: (message at: #value)
+	^ MpDecoder new decode: (message at: 'value')
 ]
 
 { #category : #accessing }
