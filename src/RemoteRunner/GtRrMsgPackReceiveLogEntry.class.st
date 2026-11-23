@@ -8,7 +8,7 @@ Class {
 GtRrMsgPackReceiveLogEntry >> bindings [
 	| src bindings |
 
-	src := message at: #bindings ifAbsent: [ ^ nil ].
+	src := message at: 'bindings' ifAbsent: [ ^ nil ].
 	bindings := Dictionary new.
 	src keysAndValuesDo: [ :key :value |
 		bindings
@@ -20,7 +20,7 @@ GtRrMsgPackReceiveLogEntry >> bindings [
 { #category : #accessing }
 GtRrMsgPackReceiveLogEntry >> commandId [
 
-	^ message at: #commandId ifAbsent: []
+	^ message at: 'commandId' ifAbsent: []
 ]
 
 { #category : #accessing }
@@ -64,5 +64,5 @@ GtRrMsgPackReceiveLogEntry >> printOn: aStream [
 { #category : #accessing }
 GtRrMsgPackReceiveLogEntry >> statements [
 
-	^ message at: #statements ifAbsent: []
+	^ message at: 'statements' ifAbsent: []
 ]
