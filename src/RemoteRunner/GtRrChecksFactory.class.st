@@ -125,9 +125,10 @@ GtRrChecksFactory >> clearInImage [
 
 { #category : #accessing }
 GtRrChecksFactory >> groupTasksByTime [
-	tasks := OrderedCollection withAll: ((GtRrCheckScheduler new)
-						schedulingTimes: GtRrCheckSchedulingTimes default;
-						allocateTasks: tasks)
+	tasks := OrderedCollection
+			withAll: (GtRrCheckScheduler new
+					schedulingTimes: self schedulingTimes;
+					allocateTasks: tasks)
 ]
 
 { #category : #initialization }
