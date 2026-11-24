@@ -10,13 +10,6 @@ Class {
 	#category : #'RemoteRunner-Examples'
 }
 
-{ #category : #asserting }
-GtRrWorkerExamples >> assert: actual equals: expected [
-	^ self
-		assert: (actual sameContentAs: expected)
-		description: [ self comparingStringBetween: actual and: expected ]
-]
-
 { #category : #private }
 GtRrWorkerExamples >> cleanUp [
 
@@ -26,6 +19,31 @@ GtRrWorkerExamples >> cleanUp [
 	process ifNotNil:
 		[ process isTerminated ifFalse: [ process terminate ].
 		process := nil ]
+]
+
+{ #category : #examples }
+GtRrWorkerExamples >> commandLineConnectionStrategyIsFound [
+	"Each connection strategy id, passed on the worker command line as GtRrWorkerManager>>#newWorkerLocalProcessArgumentsFor: passes it (a String), is found in the worker's connection strategy lookup"
+
+	<gtExample>
+	<return: #Array>
+	| strategyIds |
+	strategyIds := GtRrWorker connectionStrategyLookup keys asArray
+			collect: [ :aStrategyId | 
+				| commandLine strategyId |
+				commandLine := GtRrWorkerClapCommand commandLineCommand
+						match: {'remoteRunnerWorker'.
+								'--connectionStrategy'.
+								aStrategyId asString}.
+				strategyId := GtRrWorkerClapCommand new connectionStrategyIdIn: commandLine.
+				self assert: (GtRrWorker connectionStrategyLookup includesKey: strategyId).
+				strategyId ].
+
+	self
+		assert: (GtRrWorkerClapCommand new
+				connectionStrategyIdIn: (GtRrWorkerClapCommand commandLineCommand match: #('remoteRunnerWorker'))) isNil.
+
+	^ strategyIds
 ]
 
 { #category : #examples }
@@ -94,10 +112,8 @@ GtRrWorkerExamples >> commandLineWithStrategy [
 	| commandLine connectionStrategyId |
 	commandLine := GtRrWorkerClapCommand commandLineCommand match: #('remoteRunnerWorker').
 
-	connectionStrategyId := commandLine
-			at: #connectionStrategy
-			ifPresent: [ :arg | (arg at: #strategyId) value ]
-			ifAbsent: [ #perMessage ].
+	connectionStrategyId := (GtRrWorkerClapCommand new connectionStrategyIdIn: commandLine)
+			ifNil: [ #perMessage ].
 
 	self assert: connectionStrategyId equals: #perMessage.
 
@@ -105,10 +121,8 @@ GtRrWorkerExamples >> commandLineWithStrategy [
 	commandLine := GtRrWorkerClapCommand commandLineCommand
 			match: #('remoteRunnerWorker' '--connectionStrategy' 'single').
 
-	connectionStrategyId := commandLine
-			at: #connectionStrategy
-			ifPresent: [ :arg | (arg at: #strategyId) value ]
-			ifAbsent: [ #perMessage ].
+	connectionStrategyId := (GtRrWorkerClapCommand new connectionStrategyIdIn: commandLine)
+			ifNil: [ #perMessage ].
 
 	self assert: connectionStrategyId equals: #single.
 

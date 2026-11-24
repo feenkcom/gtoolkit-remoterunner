@@ -110,19 +110,24 @@ GtRrChangesSync >> changesFrom: anOmReference [
 GtRrChangesSync >> encodedChangesFrom: anOmReference [
 	"Answer the encoded collection of EpEvents from anOmReference up to the image's current state.
 	Cache the latest request on the assumption that all workers will start from the same image."
-
-	((encodedOmReference = self epLog headReference) and: [ workerOmReference = anOmReference ]) ifTrue: [ ^ encodedEvents ].
-	(self includesReference: anOmReference) ifFalse:
-		[ (GtRrUnknownOmReference omReference: anOmReference source: self) signal ].
-
-	^ mutex critical: 
-		[ | headReference |
-		headReference := self epLog headReference.
-		((encodedOmReference = headReference) and: [ workerOmReference = anOmReference ]) ifFalse:
-			[ self changesFrom: anOmReference.
-			encodedOmReference := headReference.
-			encodedEvents := (GtRrImageSync forChanges: events) entries: events ].
-		encodedEvents ]
+	
+	(self includesReference: anOmReference)
+		ifFalse: 
+			[(GtRrUnknownOmReference omReference: anOmReference source: self) signal].
+	^mutex critical: 
+			[| headReference |
+			headReference := self epLog headReference.
+			(encodedEvents notNil and: 
+					[encodedOmReference = headReference
+						and: [workerOmReference = anOmReference]])
+				ifFalse: 
+					[| newEncodedEvents |
+					encodedOmReference := nil.
+					self changesFrom: anOmReference.
+					newEncodedEvents := (GtRrImageSync forChanges: events) entries: events.
+					encodedEvents := newEncodedEvents.
+					encodedOmReference := headReference].
+			encodedEvents]
 ]
 
 { #category : #accessing }

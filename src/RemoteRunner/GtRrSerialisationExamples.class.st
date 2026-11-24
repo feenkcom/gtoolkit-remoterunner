@@ -6,13 +6,6 @@ Class {
 	#category : #'RemoteRunner-Examples'
 }
 
-{ #category : #asserting }
-GtRrSerialisationExamples >> assert: actual equals: expected [
-	^ self
-		assert: (actual sameContentAs: expected)
-		description: [ self comparingStringBetween: actual and: expected ]
-]
-
 { #category : #examples }
 GtRrSerialisationExamples >> gtRrClassExampleTask [
 	"Demonstrate (de)serialising a GtRrClassExampleTask and its result"
@@ -88,7 +81,7 @@ GtRrSerialisationExamples >> gtRrClassSUnitTask [
 	deserializedTask := LeJsonV4 uniqueInstance
 			deserialize: serializedTask readStream.
 	self assert: deserializedTask class equals: GtRrClassSUnitTask.
-	self assert: deserializedTask sunitClassName equals: #GtRrSampleTest.
+	self assert: deserializedTask sunitClassName equals: 'GtRrSampleTest'.
 
 	^ task
 ]
@@ -107,7 +100,7 @@ GtRrSerialisationExamples >> gtRrPackageExampleTask [
 	deserializedTask := LeJsonV4 uniqueInstance
 			deserialize: serializedTask readStream.
 	self assert: deserializedTask class equals: GtRrPackageExampleTask.
-	self assert: deserializedTask examplePackageName equals: #RemoteRunner.
+	self assert: deserializedTask examplePackageName equals: 'RemoteRunner'.
 
 	^ task
 ]
@@ -126,7 +119,7 @@ GtRrSerialisationExamples >> gtRrPackageSUnitTask [
 	deserializedTask := LeJsonV4 uniqueInstance
 			deserialize: serializedTask readStream.
 	self assert: deserializedTask class equals: GtRrPackageSUnitTask.
-	self assert: deserializedTask sunitPackageName equals: #PharoLink.
+	self assert: deserializedTask sunitPackageName equals: 'PharoLink'.
 
 	^ task
 ]

@@ -55,9 +55,7 @@ GtRrTask >> asJob [
 { #category : #'private - utility' }
 GtRrTask >> classWithName: aString [
 
-	^ (aString endsWith: ' class')
-		ifTrue: [ (self class environment at: (aString copyFrom: 1 to: aString size - 6) asSymbol) class ]
-		ifFalse: [ self class environment at: aString asSymbol ].
+	^ self class environment classOrTraitNamed: aString.
 ]
 
 { #category : #accessing }

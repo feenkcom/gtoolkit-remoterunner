@@ -56,6 +56,16 @@ GtRrWorkerClapCommand class >> commandLineName [
 ]
 
 { #category : #execution }
+GtRrWorkerClapCommand >> connectionStrategyIdIn: args [
+	"Answer the --connectionStrategy argument as a Symbol, the kind of the keys of GtRrWorker class>>#connectionStrategyLookup, or nil"
+
+	^ args
+		at: #connectionStrategy
+		ifPresent: [ :arg | (arg at: #strategyId) value asSymbol ]
+		ifAbsent: [ nil ]
+]
+
+{ #category : #execution }
 GtRrWorkerClapCommand >> execute [
 
 	self executeWithArgs: (self context match at: self class commandLineName)
@@ -90,10 +100,7 @@ GtRrWorkerClapCommand >> executeWithArgs: args [
 				value.
 	StringSignal emit: 'Server address: ' , serverSocketAddress.
 	StringSignal emit: 'WorkerClass: ' , workerClass name.
-	connectionStrategyId := args
-				at: #connectionStrategy
-				ifPresent: [:arg | (arg at: #strategyId) value]
-				ifAbsent: [].
+	connectionStrategyId := self connectionStrategyIdIn: args.
 	StringSignal
 		emit: 'ConnectionStrategy: ' , (connectionStrategyId ifNil: ['<none>']).
 	connectionStrategyId ifNotNil: 
@@ -126,4 +133,5 @@ GtRrWorkerClapCommand >> executeWithArgs: args [
 	GtRrWorkerCliCompletedSignal new emit.
 	"Hibernate until the process exits"
 	Semaphore new wait
+
 ]
