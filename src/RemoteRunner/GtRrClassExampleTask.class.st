@@ -48,6 +48,12 @@ GtRrClassExampleTask >> group [
 	^ GtExplicitExampleGroup new examples: (allExamples collect: #asExampleWithResult)
 ]
 
+{ #category : #accessing }
+GtRrClassExampleTask >> numberOfChecks [
+
+	^ self group size
+]
+
 { #category : #printing }
 GtRrClassExampleTask >> printSupplementalOn: aStream [
 

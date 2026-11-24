@@ -4,7 +4,8 @@ Class {
 	#instVars : [
 		'ignoreNoTest',
 		'inImageOnly',
-		'retryStrategy'
+		'retryStrategy',
+		'schedulingTimes'
 	],
 	#category : #'RemoteRunner-Tasks'
 }
@@ -97,8 +98,22 @@ GtRrChecksFactory >> addSUnitTestNames: aCollection [
 
 { #category : #adding }
 GtRrChecksFactory >> addTask: aTask [
+	tasks add: aTask
+]
 
-	stream nextPut: aTask
+{ #category : #adding }
+GtRrChecksFactory >> addTaskFirst: aTask [
+	tasks addFirst: aTask
+]
+
+{ #category : #adding }
+GtRrChecksFactory >> addTasks: aCollectionOfTasks [
+	tasks addAll: aCollectionOfTasks
+]
+
+{ #category : #adding }
+GtRrChecksFactory >> addTasksFirst: aCollectionOfTasks [
+	tasks addAllFirst: aCollectionOfTasks
 ]
 
 { #category : #initialization }
@@ -110,10 +125,9 @@ GtRrChecksFactory >> clearInImage [
 
 { #category : #accessing }
 GtRrChecksFactory >> groupTasksByTime [
-
-	stream := (GtRrCheckScheduler new 
-		schedulingTimes: GtRrCheckSchedulingTimes default;
-		allocateTasks: stream contents) readStream.
+	tasks := OrderedCollection withAll: ((GtRrCheckScheduler new)
+						schedulingTimes: GtRrCheckSchedulingTimes default;
+						allocateTasks: tasks)
 ]
 
 { #category : #initialization }
@@ -131,33 +145,34 @@ GtRrChecksFactory >> job [
 
 { #category : #adding }
 GtRrChecksFactory >> rejectExampleClasses: aCollection [
-	| tasks newStream classNames |
-
-	classNames := aCollection collect: #name.
-	tasks := stream contents.
-	newStream := (Array new: 10) writeStream.
-	tasks do: [ :task | | newTask |
-		newTask := task asExplicitTask.
-		newTask checkNames: (newTask checkNames reject:
-			[ :assoc | classNames includes: assoc key]).
-		newStream nextPut: newTask ].
-	stream := newStream.
+	| classNames newTasks |
+	classNames := aCollection collect: #name as: Set.
+	newTasks := OrderedCollection new.
+	tasks do: 
+			[:task |
+			| newTask |
+			newTask := task asExplicitTask.
+			newTask checkNames: (newTask checkNames
+						reject: [:assoc | classNames includes: assoc key]).
+			newTask checkNames isEmpty ifFalse: [newTasks add: newTask]].
+	tasks := newTasks
 ]
 
 { #category : #adding }
 GtRrChecksFactory >> rejectExampleMethods: aCollection [
-	| tasks newStream checkNames |
-
-	checkNames := aCollection collect: [ :method |
-		method methodClass name -> method selector ].
-	tasks := stream contents.
-	newStream := (Array new: 10) writeStream.
-	tasks do: [ :task | | newTask |
-		newTask := task asExplicitTask.
-		newTask checkNames: (newTask checkNames reject:
-			[ :assoc | checkNames includes: assoc]).
-		newStream nextPut: newTask ].
-	stream := newStream.
+	| checkNames newTasks |
+	checkNames := aCollection
+				collect: [:method | method methodClass name -> method selector]
+				as: Set.
+	newTasks := OrderedCollection new.
+	tasks do: 
+			[:task |
+			| newTask |
+			newTask := task asExplicitTask.
+			newTask checkNames: (newTask checkNames
+						reject: [:assoc | checkNames includes: assoc]).
+			newTask checkNames isEmpty ifFalse: [newTasks add: newTask]].
+	tasks := newTasks
 ]
 
 { #category : #accessing }
@@ -168,6 +183,19 @@ GtRrChecksFactory >> retryStrategy [
 { #category : #accessing }
 GtRrChecksFactory >> retryStrategy: anObject [
 	retryStrategy := anObject
+]
+
+{ #category : #accessing }
+GtRrChecksFactory >> schedulingTimes [
+
+	^ schedulingTimes ifNil:
+		[ schedulingTimes := GtRrCheckSchedulingTimes default ]
+]
+
+{ #category : #accessing }
+GtRrChecksFactory >> schedulingTimes: aGtRrCheckSchedulingTimes [
+
+	schedulingTimes := aGtRrCheckSchedulingTimes
 ]
 
 { #category : #initialization }
@@ -192,18 +220,17 @@ GtRrChecksFactory >> setNotInImage [
 
 { #category : #accessing }
 GtRrChecksFactory >> tasks [
-	| tasks |
-
-	tasks := super tasks.
-	tasks do: [ :task |
-		task taskTimeout: taskTimeout.
-		ignoreNoTest ifTrue: [ task setIgnoreNoTest ].
-		inImageOnly ifNotNil:
-			[ task constraint: (inImageOnly
-				ifTrue: [ GtRrInImageConstraint default ]
-				ifFalse: [ GtRrInImageConstraint default not ]) ].
-		retryStrategy ifNotNil:
-			[ task retryStrategy: retryStrategy copy ].
-		 ].
-	^ tasks
+	| allTasks |
+	allTasks := super tasks.
+	allTasks do: 
+			[:task |
+			task taskTimeout: taskTimeout.
+			ignoreNoTest ifTrue: [task setIgnoreNoTest].
+			inImageOnly
+				ifNotNil: 
+					[task constraint: (inImageOnly
+								ifTrue: [GtRrInImageConstraint default]
+								ifFalse: [GtRrInImageConstraint default not])].
+			retryStrategy ifNotNil: [task retryStrategy: retryStrategy copy]].
+	^allTasks
 ]

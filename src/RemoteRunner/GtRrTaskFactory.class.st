@@ -2,7 +2,7 @@ Class {
 	#name : #GtRrTaskFactory,
 	#superclass : #Object,
 	#instVars : [
-		'stream',
+		'tasks',
 		'taskTimeout',
 		'prePostTaskActions'
 	],
@@ -26,9 +26,8 @@ GtRrTaskFactory >> classWithName: aString [
 
 { #category : #'as yet unclassified' }
 GtRrTaskFactory >> groupTasksByAverageTime [
-
-	stream := (GtRrAverageTimeExampleAllocator new
-		allocateTasks: stream contents) readStream.
+	tasks := OrderedCollection
+				withAll: (GtRrAverageTimeExampleAllocator new allocateTasks: tasks)
 ]
 
 { #category : #'gt - extensions' }
@@ -86,10 +85,15 @@ GtRrTaskFactory >> prePostTaskActions: anObject [
 	prePostTaskActions := anObject
 ]
 
+{ #category : #accessing }
+GtRrTaskFactory >> rawTasks [
+
+	^ tasks
+]
+
 { #category : #initialization }
 GtRrTaskFactory >> reset [
-
-	stream := Array new writeStream.
+	tasks := OrderedCollection new
 ]
 
 { #category : #'accessing - grouping' }
@@ -116,11 +120,8 @@ GtRrTaskFactory >> taskTimeout: aDuration [
 
 { #category : #'api - generation' }
 GtRrTaskFactory >> tasks [
-	| tasks |
-
-	tasks := stream contents.
-	tasks do: [ :task |
-		prePostTaskActions ifNotNil:
-			[ task prePostTaskActions: prePostTaskActions ] ].
-	^ tasks
+	tasks do: 
+			[:task |
+			prePostTaskActions ifNotNil: [task prePostTaskActions: prePostTaskActions]].
+	^tasks copy
 ]
