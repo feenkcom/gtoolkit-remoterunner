@@ -104,8 +104,12 @@ GtRrCodeSync >> onEntryAdded: anEntryAddedEvent [
 
 { #category : #accessing }
 GtRrCodeSync >> onExpressionEvaluated: anExpressionEvaluated [
-	events nextPut: (self createOmbuEntryForEvent:(EpExpressionEvaluation 
-		expression: anExpressionEvaluated expressionEvaluated)).
+	(CurrentExecutionEnvironment value isTest
+		and: [ CurrentExecutionEnvironment value testCase shouldLogWithEpicea not ])
+		ifTrue: [ ^ self ].
+	events
+		nextPut: (self
+				createOmbuEntryForEvent: (EpExpressionEvaluation expression: anExpressionEvaluated expressionEvaluated)).
 	flusher schedule: [ self flush ]
 ]
 
