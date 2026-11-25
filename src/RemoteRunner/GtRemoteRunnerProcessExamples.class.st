@@ -131,7 +131,8 @@ GtRemoteRunnerProcessExamples >> controlChannelPing [
 		for: 20
 		description: 'Control channel didn''t register in time'.
 	self assert: remoteRunner registeredWorkerCount equals: 1.
-	self assert: worker commandPing equals: #ping.
+	"The worker answers #ping; it arrives through the control channel as a String"
+	self assert: (worker commandPing sameContentAs: #ping).
 	self assert: remoteRunner registeredWorkerCount equals: 1 ]
 		ensure: [ remoteRunner stop ].
 
