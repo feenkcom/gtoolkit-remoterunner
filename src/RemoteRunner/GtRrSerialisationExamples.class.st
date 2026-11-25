@@ -38,7 +38,7 @@ GtRrSerialisationExamples >> gtRrClassExampleTask [
 				, (deserializedResult collect: [ :each | each class name ]) printString ].
 	self
 		assert: (deserializedResult
-				allSatisfy: [ :each | each testCaseClassName = 'GtRrWorkerExamples' ])
+				allSatisfy: [ :each | each testCaseClassName = #GtRrWorkerExamples ])
 		description: [ 'deserializedResult exampleClass incorrect: '
 				, (deserializedResult collect: [ :each | each testCaseClassName ] as: Set)
 						printString ].
@@ -140,6 +140,31 @@ GtRrSerialisationExamples >> nilSerialisation [
 		equals: 0.
 
 	^ job
+]
+
+{ #category : #examples }
+GtRrSerialisationExamples >> testCaseResultCheckName [
+	"Demonstrate (de)serialising a test case result as a worker sends it back (LeJsonV4):
+	the class name and the selector stay Symbols, so the result has the check name of the local check"
+
+	<gtExample>
+	<return: #PharoLinkTestCasePass>
+	| result deserialized results |
+	result := PharoLinkTestCasePass
+			className: #GtRrWorkerExamples
+			selector: #commandLineWithAttributes
+			startTimestamp: DateAndTime now.
+	deserialized := LeJsonV4 uniqueInstance
+			deserialize: (LeJsonV4 uniqueInstance serialize: result) readStream.
+	self assert: deserialized class equals: PharoLinkTestCasePass.
+	self assert: deserialized testCaseClassName equals: #GtRrWorkerExamples.
+	self assert: deserialized testCaseSelector equals: #commandLineWithAttributes.
+	self assert: deserialized checkName equals: #GtRrWorkerExamples -> #commandLineWithAttributes.
+	self assert: deserialized equals: result.
+	results := Dictionary new.
+	results at: #GtRrWorkerExamples -> #commandLineWithAttributes put: nil.
+	self assert: (results includesKey: deserialized checkName).
+	^ deserialized
 ]
 
 { #category : #examples }
