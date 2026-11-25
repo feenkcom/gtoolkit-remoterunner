@@ -141,3 +141,22 @@ GtRrSerialisationExamples >> nilSerialisation [
 
 	^ job
 ]
+
+{ #category : #examples }
+GtRrSerialisationExamples >> workerOperationShutdownAnnouncement [
+	"Demonstrate (de)serialising a GtRrWorkerOperationShutdownAnnouncement as the announcement queue
+	sends it to a listener in another image (MessagePack, through PharoLink)"
+
+	<gtExample>
+	<return: #GtRrWorkerOperationShutdownAnnouncement>
+	| announcement data deserialized |
+	announcement := GtRrWorkerOperationShutdownAnnouncement new
+			reason: 'Connection Closed';
+			yourself.
+	data := MpDecoder decode: (MpEncoder encode: announcement serializeForRemoteDelivery).
+	deserialized := GtRemoteRunnerAnnouncement fromSerializedData: data.
+	self assert: deserialized class equals: GtRrWorkerOperationShutdownAnnouncement.
+	self assert: deserialized reason equals: 'Connection Closed'.
+	self assert: deserialized processId equals: announcement processId.
+	^ deserialized
+]
