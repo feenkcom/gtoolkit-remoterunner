@@ -357,9 +357,12 @@ GtRrWorker >> defaultLogDir [
 
 { #category : #'as yet unclassified' }
 GtRrWorker >> enableStrictSymbolComparison [
+	"Disabled for now: workers should not switch the image they run in to strict String/Symbol comparison.
+	To enable it again, uncomment the pragma and the statement:
+
 	<gtWorkerStartupScript>
 
-	GtStrictSymbolComparisonFlag setStrictComparison
+	GtStrictSymbolComparisonFlag setStrictComparison"
 ]
 
 { #category : #accessing }
