@@ -53,3 +53,47 @@ GtRrSignalSerializationExamples >> gtRrStampErrorSignal [
 	self assert: deserialized body equals: 'stamp error body'.
 	^ deserialized
 ]
+
+{ #category : #examples }
+GtRrSignalSerializationExamples >> jobShutdownSignalReadFromJsonLog [
+	"A job shutdown signal written to a Beacon JSON log is read back as an end signal"
+
+	<gtExample>
+	<return: #GtRrJobShutdownSignal>
+	| signal signals |
+	signal := GtRrJobShutdownSignal new
+			jobId: 'example-job';
+			markAsEndSignal;
+			yourself.
+	signals := OrderedCollection new.
+	GtBeaconJsonLogReader new
+		processJsonLine: (GtBeaconJsonSignalSerializer new serializeSignal: signal logger: nil)
+		into: signals.
+	self assert: signals size equals: 1.
+	self assert: signals first isEndSignalType.
+	self assert: signals first isStartSignalType not.
+	^ signals first
+]
+
+{ #category : #examples }
+GtRrSignalSerializationExamples >> jobStartupSignalReadFromJsonLog [
+	"A job startup signal written to a Beacon JSON log is read back as a start signal"
+
+	<gtExample>
+	<return: #GtRrJobStartupSignal>
+	| signal signals |
+	signal := GtRrJobStartupSignal new
+			jobId: 'example-job';
+			markAsStartSignal;
+			yourself.
+	signals := OrderedCollection new.
+	GtBeaconJsonLogReader new
+		processJsonLine: (GtBeaconJsonSignalSerializer new serializeSignal: signal logger: nil)
+		into: signals.
+	self assert: signals size equals: 1.
+	self assert: signals first class equals: GtRrJobStartupSignal.
+	self assert: signals first isStartSignalType.
+	self assert: signals first isEndSignalType not.
+	self assert: signals first jobId equals: 'example-job'.
+	^ signals first
+]

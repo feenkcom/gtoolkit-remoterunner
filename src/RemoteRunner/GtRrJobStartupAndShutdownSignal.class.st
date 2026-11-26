@@ -40,9 +40,10 @@ GtRrJobStartupAndShutdownSignal >> eventType: anObject [
 
 { #category : #accessing }
 GtRrJobStartupAndShutdownSignal >> initializeFromTimestamp: aDateAndTime andData: aCollection [
+	"The event type is read from the text of a log line"
 
 	super initializeFromTimestamp: aDateAndTime andData: aCollection.
-	eventType := aCollection at: 3.
+	eventType := (aCollection at: 3) asSymbol.
 	jobId := aCollection at: 4.
 ]
 
