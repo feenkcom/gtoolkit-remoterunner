@@ -30,7 +30,7 @@ GtRrUserNotificationExamples >> notifyOnChangesSyncError [
 
 { #category : #examples }
 GtRrUserNotificationExamples >> notifyOnChangesSyncSuccess [
-	"Check that the notification is opened when an error occurs during a changes sync request."
+	"Check that a successful changes sync request does not open a notification."
 
 	<gtExample>
 	<after: #stopLogging>
@@ -38,10 +38,12 @@ GtRrUserNotificationExamples >> notifyOnChangesSyncSuccess [
 	| omReference |
 	runner := GtRemoteRunner new.
 	runner startAnnouncementsNotifier.
-	omReference := GtRrChangesSync headReference.	"If this is the null reference and we've been started with detachChangesFromFileSystem use the latest recorded session"
-	(omReference isNull and: [ Smalltalk argumentsInclude: '--epiceaMemoryStore' ])
-		ifTrue: [ omReference := GtRrChangesSync uniqueInstance sessionHistory last ].
-	self deny: omReference isNull description: 'Should not have a null omReference'.
+	omReference := OmReference globalName: 'notification-test' localName: '1'.
+	runner
+		changesSyncEvents: (GtRrImageSyncEvents new
+				sessionHistory: {omReference};
+				events: #();
+				yourself).
 	PharoLinkServerCurrentConnection
 		value: GtRrPseudoPharoLinkServerConnection new
 		during: [ runner changesSyncEventsFrom: omReference workerId: nil ].
