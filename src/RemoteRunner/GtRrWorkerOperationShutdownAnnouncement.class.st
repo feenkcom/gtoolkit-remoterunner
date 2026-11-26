@@ -11,7 +11,7 @@ Class {
 GtRrWorkerOperationShutdownAnnouncement >> asDataForRemoteSerialize [
 
 	^ super asDataForRemoteSerialize
-		at: #reson put: reason;
+		at: #reason put: reason;
 		yourself.
 ]
 

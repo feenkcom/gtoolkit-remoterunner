@@ -163,25 +163,27 @@ GtRrCodeSyncExamples >> evaluateExpressionSize: anInteger taskClass: codeSyncTas
 { #category : #examples }
 GtRrCodeSyncExamples >> evaluateLargeExpression [
 	<gtExample>
+	<shouldLogWithEpicea>
 	| job |
-
 	GtRemoteRunnerExamples new ignoreWorkerExamples ifTrue: [ ^ nil ].
 
-	job := self evaluateExpressionSize: GtRrCodeSyncTask maxBufferedSize 
-		taskClass: GtRrFileCodeSyncTask
-		poolSize: 1.
-	self assert: job templateTask entriesFile exists not.
+	job := self
+			evaluateExpressionSize: GtRrCodeSyncTask maxBufferedSize
+			taskClass: GtRrFileCodeSyncTask
+			poolSize: 1.
+	self assert: job templateTask entriesFile exists not
 ]
 
 { #category : #examples }
 GtRrCodeSyncExamples >> evaluateSmallExpression [
 	<gtExample>
-
+	<shouldLogWithEpicea>
 	GtRemoteRunnerExamples new ignoreWorkerExamples ifTrue: [ ^ nil ].
 
-	^ self evaluateExpressionSize: 100 
+	^ self
+		evaluateExpressionSize: 100
 		taskClass: GtRrBufferedCodeSyncTask
-		poolSize: 1.
+		poolSize: 1
 ]
 
 { #category : #examples }

@@ -47,7 +47,7 @@ GtRrExamplesTask >> checkNamesAndTimes [
 		do: [ :example | 
 			exampleClassName := example receiverClass name.
 			times
-				add: {example providerClass name asString , '>>' , example selector.
+				add: {example receiverClass name asString , '>>' , example selector.
 						GtRrCheckSchedulingTimes hasUniqueInstance
 							ifTrue: [ GtRrCheckSchedulingTimes uniqueInstance
 									timeForClassName: exampleClassName
