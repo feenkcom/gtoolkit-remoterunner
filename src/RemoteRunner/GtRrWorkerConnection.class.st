@@ -340,10 +340,10 @@ GtRrWorkerConnection >> stop [
 { #category : #'start-stop' }
 GtRrWorkerConnection >> stopWithReason: aString [
 
+	self remoteRunner noteWorkerStopped: self.
 	self hasObserver ifTrue: [ self removeObserver ].
 	connection stop.
 	self remoteRunner unregisterWorkerId: self workerId reason: aString
-
 ]
 
 { #category : #ui }

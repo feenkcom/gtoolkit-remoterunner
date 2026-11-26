@@ -91,6 +91,12 @@ GtRrLocalManagerStartupAndShutdown >> isRunning [
 	^ self workerManager isRunning
 ]
 
+{ #category : #'api - worker' }
+GtRrLocalManagerStartupAndShutdown >> noWorkersExpectedReason [
+
+	^ self workerManager noWorkersExpectedReason
+]
+
 { #category : #accessing }
 GtRrLocalManagerStartupAndShutdown >> poolSize [
 
@@ -107,6 +113,12 @@ GtRrLocalManagerStartupAndShutdown >> poolSize: anInteger [
 GtRrLocalManagerStartupAndShutdown >> processCount [
 
 	^ self workerManager processCount
+]
+
+{ #category : #'startup - shutdown' }
+GtRrLocalManagerStartupAndShutdown >> retryWorkerStartup [
+
+	self workerManager retryWorkerStartup
 ]
 
 { #category : #'startup - shutdown' }
@@ -164,4 +176,16 @@ GtRrLocalManagerStartupAndShutdown >> workerManager [
  		workerCountCalculator ifNotNil:
  			[ workerManager workerCountCalculator: workerCountCalculator ].
  		workerManager ].
+]
+
+{ #category : #'api - worker' }
+GtRrLocalManagerStartupAndShutdown >> workerRestartsStopped [
+
+	^ self workerManager restartsStopped
+]
+
+{ #category : #'api - worker' }
+GtRrLocalManagerStartupAndShutdown >> workerStopped: aWorkerConnection [
+
+	self workerManager workerStopped: aWorkerConnection
 ]

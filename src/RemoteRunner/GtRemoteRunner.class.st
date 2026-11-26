@@ -865,6 +865,13 @@ GtRemoteRunner >> nextTaskSerializedForWorkerId: aUidString [
 ]
 
 { #category : #'api - worker' }
+GtRemoteRunner >> noteWorkerStopped: aWorkerConnection [
+	"The receiver is stopping the supplied worker on purpose"
+
+	managerStartupAndShutdown workerStopped: aWorkerConnection
+]
+
+{ #category : #'api - worker' }
 GtRemoteRunner >> pingAllWorkers [
 	"Ping each of the registered workers.
 	Answer a collection of those that failed"
@@ -1183,6 +1190,13 @@ GtRemoteRunner >> replaceLogger [
 	^ oldLogger.
 ]
 
+{ #category : #'api - runner' }
+GtRemoteRunner >> retryWorkerStartup [
+	"Start workers again after their restarts were stopped because too many failed"
+
+	managerStartupAndShutdown retryWorkerStartup
+]
+
 { #category : #phases }
 GtRemoteRunner >> runJobShutdown [
 	"Perform any actions associated with stopping the job manager"
@@ -1277,6 +1291,7 @@ GtRemoteRunner >> startJob: aGtRrJob [
 	
 	"If there are problems during submission the job will be marked with an error and the context should show isFinished."
 	self checkJobCompleted: context.
+	self terminateJobsOnNoWorkers.
 ]
 
 { #category : #'api - logger' }
@@ -1639,16 +1654,19 @@ GtRemoteRunner >> terminateJobId: aJobId [
 
 { #category : #private }
 GtRemoteRunner >> terminateJobsOnNoWorkers [
-	"If managerStartupAndShutdown and jobStartupAndShutdown allow, and there are no workers,
-	terminate any jobs that are running (as no workers are expected in future)"
+	"Terminate the running jobs if no worker will be able to run them,
+	see GtRrManagerStartupAndShutdown>>noWorkersExpectedReason.
+	The jobs are selected and terminated within sharedAccess, so that a job isn't terminated twice"
 
-	(managerStartupAndShutdown shouldTerminateJobsOnNoWorkers and:
-		[ jobStartupAndShutdown shouldTerminateJobsOnNoWorkers ]) ifFalse:
-			[ ^ self ].
-	self critical:
-		[ registeredWorkers ifEmpty:
-			[ currentlyExecutingJobs do: [ :each |
-				self terminateJob: each ] ] ].
+	self critical: [ 
+		managerStartupAndShutdown noWorkersExpectedReason ifNotNil: [ :reason | 
+			(currentlyExecutingJobs values reject: [ :each | 
+				each job isFinished or: [ each job isTerminating ] ]) do: [ :each | 
+					each job errorDetails: (GtRrErrorDetails new
+						errorMessage: reason;
+						setTrace;
+						yourself).
+					self terminateJob: each ] ] ]
 ]
 
 { #category : #private }
@@ -1698,13 +1716,14 @@ GtRemoteRunner >> unregisterWorkerId: aUidString reason: aString [
 			self privateTaskFailed: taskContext taskContextId
 				workerId: aUidString
 				executionData: (GtRrWorkerExecutionData new errorDetails: errorDetails)].
-		self removeQueuedTasksForWorkerId: aUidString. 
-		"self terminateJobsOnNoWorkers" ].
+		self removeQueuedTasksForWorkerId: aUidString ].
 	workerConnection
 		ifNotNil: 
 			[self announceAndLog: ((GtRrWorkerUnregisteredAnnouncement new)
 						worker: workerConnection;
-						reason: aString)]
+						reason: aString)].
+	"Without automatic restart, the watchdog may have stopped before the last worker unregisters"
+	self terminateJobsOnNoWorkers
 ]
 
 { #category : #'announcer - subscription' }
@@ -1802,6 +1821,13 @@ GtRemoteRunner >> workerConnectionStrategyId [
 	Use the default strategy."
 	
 	^ nil
+]
+
+{ #category : #'api - runner' }
+GtRemoteRunner >> workerRestartsStopped [
+	"Answer a boolean indicating whether the receiver's manager stopped restarting workers that kept failing, see #retryWorkerStartup"
+
+	^ managerStartupAndShutdown workerRestartsStopped
 ]
 
 { #category : #accessing }

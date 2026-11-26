@@ -38,6 +38,14 @@ GtRrPluggableManager >> codeSyncManager: anObject [
 	codeSyncManager := anObject
 ]
 
+{ #category : #'api - worker' }
+GtRrPluggableManager >> noWorkersExpectedReason [
+	"Answer a description of why no worker will be able to run a job, or nil if workers may still come.
+	Workers may connect from other machines, so jobs keep waiting"
+
+	^ nil
+]
+
 { #category : #'as yet unclassified' }
 GtRrPluggableManager >> poolSize [
 
@@ -73,6 +81,11 @@ GtRrPluggableManager >> remoteRunner: aGtRemoteRunner [
 	codeSyncManager ifNotNil: [ codeSyncManager remoteRunner: remoteRunner ].
 ]
 
+{ #category : #'startup - shutdown' }
+GtRrPluggableManager >> retryWorkerStartup [
+	"Workers are not restarted by the receiver"
+]
+
 { #category : #accessing }
 GtRrPluggableManager >> serverManager [
 	^ serverManager
@@ -81,12 +94,6 @@ GtRrPluggableManager >> serverManager [
 { #category : #accessing }
 GtRrPluggableManager >> serverManager: anObject [
 	serverManager := anObject
-]
-
-{ #category : #'as yet unclassified' }
-GtRrPluggableManager >> shouldTerminateJobsOnNoWorkers [
-	"Answer a boolean indicating whether jobs should be terminated if the last worker unregisters."
-	^ false
 ]
 
 { #category : #'startup - shutdown' }
@@ -138,6 +145,18 @@ GtRrPluggableManager >> workerManager [
 { #category : #accessing }
 GtRrPluggableManager >> workerManager: anObject [
 	workerManager := anObject
+]
+
+{ #category : #'api - worker' }
+GtRrPluggableManager >> workerRestartsStopped [
+	"The workers of a pluggable manager are not restarted by the runner"
+
+	^ false
+]
+
+{ #category : #'api - worker' }
+GtRrPluggableManager >> workerStopped: aWorkerConnection [
+	"The runner is stopping the supplied worker on purpose"
 ]
 
 { #category : #accessing }

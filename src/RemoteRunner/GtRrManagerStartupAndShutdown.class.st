@@ -24,6 +24,14 @@ GtRrManagerStartupAndShutdown >> asStatsDictionary [
 ]
 
 { #category : #'api - worker' }
+GtRrManagerStartupAndShutdown >> noWorkersExpectedReason [
+	"Answer a description of why no worker will be able to run a job, or nil if workers may still come.
+	By default workers may always connect, so jobs keep waiting"
+
+	^ nil
+]
+
+{ #category : #'api - worker' }
 GtRrManagerStartupAndShutdown >> registerWorker: aWorkerConnection [
 	"Subclasses can provide additional actions to perform when a worker is registered"
 
@@ -41,11 +49,10 @@ GtRrManagerStartupAndShutdown >> remoteRunner: anObject [
 	remoteRunner := anObject
 ]
 
-{ #category : #testing }
-GtRrManagerStartupAndShutdown >> shouldTerminateJobsOnNoWorkers [
-	"Answer a boolean indicating whether jobs should be terminated if the last worker unregisters."
-	
-	^ false
+{ #category : #'startup - shutdown' }
+GtRrManagerStartupAndShutdown >> retryWorkerStartup [
+	"Start workers again after their restarts were stopped.
+	Subclasses that start workers override this"
 ]
 
 { #category : #'startup - shutdown' }
@@ -111,4 +118,18 @@ GtRrManagerStartupAndShutdown >> stopInImageWorker [
 
 	inImageWorker ifNotNil: [ inImageWorker stop ].
 	inImageWorker := nil.
+]
+
+{ #category : #'api - worker' }
+GtRrManagerStartupAndShutdown >> workerRestartsStopped [
+	"Answer a boolean indicating whether the receiver stopped restarting workers that kept failing.
+	Subclasses that start workers answer their state"
+
+	^ false
+]
+
+{ #category : #'api - worker' }
+GtRrManagerStartupAndShutdown >> workerStopped: aWorkerConnection [
+	"The runner is stopping the supplied worker on purpose.
+	Subclasses that start workers can use this to tell a stopped worker from a failed one"
 ]
